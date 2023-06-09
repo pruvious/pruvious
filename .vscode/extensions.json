@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "angular.ng-template",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "vue.vscode-typescript-vue-plugin",
+    "vue.volar"
+  ]
+}

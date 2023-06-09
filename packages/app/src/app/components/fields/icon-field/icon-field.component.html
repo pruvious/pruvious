@@ -1,0 +1,91 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || description" class="flex w-full items-end justify-between gap-4">
+    <span *ngIf="label" class="text-vs flex gap-1 font-medium text-gray-900">
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label }}
+      </span>
+    </span>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div *ngIf="icons" #container class="relative flex w-full gap-1.5">
+    <button
+      [disabled]="disabled"
+      [tooltip]="value ? 'Change' : ''"
+      (click)="openPopup()"
+      class="button button-white"
+      [ngClass]="{
+        'button-square after:absolute after:inset-0 after:bg-gray-900 after:opacity-0 after:transition hover:after:opacity-50':
+          value
+      }"
+      [ngStyle]="{
+        backgroundImage: value ? 'url(assets/images/image-background.png)' : null
+      }"
+      type="button"
+    >
+      <span *ngIf="!value">Select icon</span>
+      <span
+        *ngIf="value"
+        [innerHTML]="icons[value] || '' | safe : 'html'"
+        class="relative z-10 h-4 w-4"
+      ></span>
+    </button>
+
+    <button
+      *ngIf="value"
+      [disabled]="disabled"
+      [tooltip]="'Remove'"
+      (click)="clear()"
+      class="button button-white-red button-square"
+      type="button"
+    >
+      <app-icon [name]="'x'"></app-icon>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>
+
+<app-popup [(visible)]="popupVisible" [width]="'64rem'">
+  <app-popup-header [size]="'sm'" (close)="closePopup()">
+    <h2 class="truncate text-sm">{{ value ? 'Change icon' : 'Select icon' }}</h2>
+  </app-popup-header>
+
+  <div *ngIf="icons && (icons | keyvalue).length" class="p-4 pb-0">
+    <app-text-input
+      [(value)]="search"
+      [clearable]="true"
+      [placeholder]="'Search icons...'"
+      (valueChange)="onSearch()"
+      class="w-full"
+    ></app-text-input>
+  </div>
+
+  <div
+    *ngIf="icons"
+    class="text-vs grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-4 p-4"
+    [ngClass]="{
+      filtered: search
+    }"
+  >
+    <button
+      *ngFor="let icon of filteredIcons | keyvalue"
+      [style.backgroundImage]="'url(assets/images/image-background.png)'"
+      [tooltip]="icon.key"
+      (click)="select(icon.key); closePopup()"
+      class="hocus:border-primary-700 relative flex aspect-square items-center justify-center overflow-hidden rounded-md border p-2 transition before:absolute before:inset-0 before:bg-gray-900 before:opacity-0 before:transition hover:before:opacity-50"
+    >
+      <span [innerHTML]="icon.value | safe : 'html'" class="relative h-4/5 w-4/5 shrink-0"></span>
+    </button>
+  </div>
+</app-popup>

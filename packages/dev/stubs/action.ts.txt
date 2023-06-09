@@ -1,0 +1,8 @@
+import { Action } from '@pruvious-test/cms'
+
+export default {
+  name: 'action-name',
+  callback: async ({ auth, request, response }) => {
+    return {}
+  },
+} satisfies Action

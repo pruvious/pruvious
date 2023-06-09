@@ -1,0 +1,30 @@
+{
+  "extends": ["@nuxtjs/eslint-config-typescript"],
+  "rules": {
+    "@typescript-eslint/no-extra-semi": "off",
+    "@typescript-eslint/no-inferrable-types": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "arrow-parens": "off",
+    "comma-dangle": "off",
+    "import/default": "off",
+    "import/named": "off",
+    "import/no-named-as-default-member": "off",
+    "import/order": "off",
+    "indent": "off",
+    "no-case-declarations": "off",
+    "no-console": "off",
+    "no-new-func": "off",
+    "no-new": "off",
+    "no-useless-escape": "off",
+    "quote-props": "off",
+    "quotes": "off",
+    "require-await": "off",
+    "space-before-function-paren": "off",
+    "vue/attributes-order": "off",
+    "vue/html-self-closing": "off",
+    "vue/multi-word-component-names": "off",
+    "vue/no-v-html": "off",
+    "vue/require-valid-default-prop": "off",
+    "vue/valid-v-for": "off"
+  }
+}

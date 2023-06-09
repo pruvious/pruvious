@@ -1,0 +1,16 @@
+node_modules
+/.types
+/actions
+/blocks
+/collections
+/icons
+/settings
+/uploads
+/validators
+build
+coverage
+.vscode
+.DS_STORE
+.env
+tmp
+database.sqlite3

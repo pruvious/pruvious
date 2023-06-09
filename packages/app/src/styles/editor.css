@@ -1,0 +1,77 @@
+.ProseMirror {
+  @apply space-y-2 px-2.5 py-[0.4375rem] outline-none;
+}
+
+.ProseMirror[contenteditable='false'] {
+  @apply opacity-50;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply pointer-events-none float-left h-0 text-gray-300;
+}
+
+.ProseMirror a {
+  @apply underline;
+}
+
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h1,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h2,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h3,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h4,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h5,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h6 {
+  @apply pt-4;
+}
+
+.ProseMirror h1 {
+  @apply text-2xl;
+}
+
+.ProseMirror h2 {
+  @apply text-xl;
+}
+
+.ProseMirror h3 {
+  @apply text-lg;
+}
+
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  @apply text-base;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 pl-2;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+  @apply pl-4;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  @apply pl-4;
+}
+
+.ProseMirror pre {
+  @apply rounded bg-gray-50 px-2 py-1;
+}
+
+.ProseMirror hr {
+  @apply border-gray-200;
+}
+
+.ProseMirror mark {
+  @apply bg-yellow-200;
+}
+
+.ProseMirror :where(:not(pre)) code {
+  @apply inline-block rounded bg-gray-50 px-1;
+}
+
+.ProseMirror span[_fr--] {
+  @apply text-primary-700;
+}

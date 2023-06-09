@@ -1,0 +1,49 @@
+<div *ngIf="ready" class="scrollbar-thin flex h-full overflow-y-auto p-8">
+  <div class="m-auto w-full max-w-sm">
+    <img [src]="logoPath" class="mx-auto mb-5 h-8 w-auto" alt="Logo" />
+
+    <form class="flex flex-col items-start gap-4 border bg-white p-6">
+      <div
+        *ngIf="validator.generalError"
+        class="flex w-full gap-2 rounded-md border border-red-500 p-2 text-sm text-red-500"
+      >
+        <app-icon [name]="'alert-triangle'" class="h-5 w-5 shrink-0"></app-icon>
+        <div>
+          <p>{{ validator.generalError }}</p>
+        </div>
+      </div>
+
+      <p class="text-sm text-gray-400">
+        Welcome to the Pruvious installation process!
+        <br />
+        Please fill in the information below to get started.
+      </p>
+
+      <app-text-input
+        [(value)]="email"
+        [autocomplete]="'email'"
+        [autofocus]="true"
+        [error]="validator.errors['email']"
+        [label]="'Email'"
+        [maxLength]="255"
+        class="w-full"
+      ></app-text-input>
+
+      <app-text-input
+        [(value)]="password"
+        [autocomplete]="'new-password'"
+        [error]="validator.errors['password']"
+        [label]="'Password'"
+        [maxLength]="255"
+        [type]="'password'"
+        class="w-full"
+      >
+        <app-password-strength [password]="password" class="mt-2 block"></app-password-strength>
+      </app-text-input>
+
+      <button (click)="onSubmit()" class="button w-full" type="submit">
+        <span>Create account</span>
+      </button>
+    </form>
+  </div>
+</div>

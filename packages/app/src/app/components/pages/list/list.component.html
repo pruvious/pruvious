@@ -1,0 +1,324 @@
+<div class="p-8">
+  <div class="flex items-center justify-between gap-8">
+    <div class="flex items-center gap-2 truncate">
+      <h1 [title]="description" class="truncate text-xl">{{ title }}</h1>
+
+      <button
+        *ngIf="filter.isActive"
+        [tooltip]="'Clear filters'"
+        (click)="clearFilters()"
+        class="button button-white button-square-xs"
+        type="button"
+      >
+        <app-icon [name]="'filter-off'"></app-icon>
+      </button>
+    </div>
+
+    <div class="flex gap-2">
+      <button
+        *ngIf="canDelete && rows?.data?.length"
+        [tooltip]="selecting ? 'Disable selection' : 'Enable selection'"
+        (click)="selecting = !selecting"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': selecting
+        }"
+        type="button"
+      >
+        <app-icon [name]="'checkbox'"></app-icon>
+      </button>
+
+      <button
+        [tooltip]="'Edit columns'"
+        (click)="showColumnsPopup()"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': columnsChanged
+        }"
+        type="button"
+      >
+        <app-icon [name]="'layout-columns'"></app-icon>
+      </button>
+
+      <button
+        [tooltip]="filter.isActive ? 'Edit filters' : 'Filter ' + itemLabelPluralLowerCase"
+        (click)="filter.start(); filterPopupVisible = true"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': filter.isActive
+        }"
+        type="button"
+      >
+        <app-icon [name]="'filter'"></app-icon>
+      </button>
+
+      <!-- <button
+        *ngIf="canCreate && canUpdate"
+        [tooltip]="'Import ' + itemLabelPluralLowerCase"
+        (click)="importPopupVisible = true"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': filter.isActive
+        }"
+        type="button"
+      >
+        <app-icon [name]="'database-import'"></app-icon>
+      </button> -->
+
+      <!-- <button
+        *ngIf="selectedCount"
+        [tooltip]="
+          'Export ' +
+          selectedCount +
+          ' ' +
+          (selectedCount === 1 ? itemLabelSingularLowerCase : itemLabelPluralLowerCase)
+        "
+        (click)="exportPopupVisible = true"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': filter.isActive
+        }"
+        type="button"
+      >
+        <app-icon [name]="'database-export'"></app-icon>
+      </button> -->
+
+      <button
+        *ngIf="selectedCount"
+        [tooltip]="confirm === 'delete-selection' ? 'Confirm to !!delete!!' : ''"
+        [tooltipShowOnUpdate]="confirm === 'delete-selection'"
+        (click)="onDeleteSelection($event)"
+        class="button"
+        [ngClass]="{
+          'button-red border border-red-700': confirm === 'delete-selection',
+          'button-white-red': confirm !== 'delete-selection'
+        }"
+        type="button"
+      >
+        <span>
+          Delete {{ selectedCount }}
+          {{ selectedCount === 1 ? itemLabelSingularLowerCase : itemLabelPluralLowerCase }}
+        </span>
+      </button>
+
+      <a *ngIf="canCreate" [routerLink]="['create']" class="button">
+        <span>Add {{ itemLabelSingularLowerCase }}</span>
+      </a>
+    </div>
+  </div>
+
+  <table *ngIf="rows?.data?.length" class="mt-8 w-full table-fixed">
+    <thead>
+      <tr>
+        <th *ngIf="selecting" class="z-20 w-0">
+          <app-checkbox
+            [(value)]="selectAllValue"
+            [indeterminate]="selectedCount > 0 && !allRowsSelected"
+            (valueChange)="onAllSelectChange()"
+          ></app-checkbox>
+        </th>
+
+        <th
+          *ngFor="let field of fields; let i = index"
+          [style.width.%]="columnWidths[field.name]"
+          class="truncate"
+          scope="col"
+        >
+          <div class="flex items-center pt-px">
+            <span [tooltip]="field.description" class="truncate">
+              {{ field.label || (field.name | camelToLabel) }}
+            </span>
+
+            <app-table-sorter
+              [(params)]="params"
+              [field]="field"
+              (paramsChange)="updateUrl()"
+            ></app-table-sorter>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of rows?.data">
+        <td *ngIf="selecting" class="z-20 w-0">
+          <app-checkbox
+            [(value)]="selectionValues[row['id']]"
+            (valueChange)="onRowSelectChange()"
+          ></app-checkbox>
+        </td>
+
+        <td *ngFor="let field of fields; let i = index">
+          <app-table-cell
+            [cache]="cache"
+            [canDelete]="canDelete"
+            [canDuplicate]="canDuplicate"
+            [canPreview]="canPreview"
+            [canUpdate]="canUpdate"
+            [data]="row"
+            [field]="field"
+            [fieldCount]="rows!.data.length"
+            [id]="row['id']"
+            [index]="i"
+            [value]="row[field.name]"
+            (delete)="onDelete(row)"
+            (duplicate)="duplicate.emit($event)"
+            (preview)="preview.emit($event)"
+          ></app-table-cell>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <app-pagination
+    *ngIf="rows"
+    [itemLabelPluralLowerCase]="itemLabelPluralLowerCase"
+    [itemLabelSingularLowerCase]="itemLabelSingularLowerCase"
+    [items]="rows"
+    (changePage)="params.page = $event; updateUrl()"
+  ></app-pagination>
+
+  <div
+    *ngIf="!rows?.data?.length && initialized"
+    class="mt-8 border p-8 text-center text-sm text-gray-500"
+  >
+    <p>No {{ itemLabelPluralLowerCase }} found</p>
+  </div>
+</div>
+
+<app-popup [(visible)]="columnsPopupVisible" [autofocus]="false" [width]="'24rem'">
+  <app-popup-header [size]="'sm'" (close)="columnsPopupVisible = false">
+    <h2 class="truncate text-sm">Edit columns</h2>
+  </app-popup-header>
+
+  <form class="flex flex-col gap-4 p-4">
+    <app-checkboxes
+      [(value)]="columns"
+      [choices]="columnChoices"
+      [isSortable]="true"
+      class="w-full"
+    ></app-checkboxes>
+  </form>
+
+  <div class="flex justify-between gap-2 border-t p-4">
+    <button
+      *ngIf="columnsChanged"
+      (click)="restoreColumns()"
+      class="button button-white"
+      type="button"
+    >
+      <span>Restore defaults</span>
+    </button>
+
+    <button (click)="columnsPopupVisible = false" class="button button-white ml-auto" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="columnsPopupVisible || null"
+      (click)="applyColumns()"
+      class="button"
+      type="submit"
+    >
+      <span>Apply</span>
+    </button>
+  </div>
+</app-popup>
+
+<app-popup [(visible)]="filterPopupVisible" [autofocus]="false" [width]="'48rem'">
+  <app-popup-header [size]="'sm'" (close)="filterPopupVisible = false">
+    <h2 class="truncate text-sm">Filter {{ itemLabelPluralLowerCase }}</h2>
+  </app-popup-header>
+
+  <form class="flex flex-col gap-4 p-4">
+    <app-filters [collection]="collection" [filter]="filter" [subject]="table"></app-filters>
+  </form>
+
+  <div class="flex justify-between gap-2 border-t p-4">
+    <button
+      *ngIf="filter.isActive"
+      (click)="clearFilters()"
+      class="button button-white"
+      type="button"
+    >
+      <span>Clear all</span>
+    </button>
+
+    <button (click)="filterPopupVisible = false" class="button button-white ml-auto" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="filterPopupVisible || null"
+      (click)="applyFilters()"
+      class="button"
+      type="submit"
+    >
+      <span>Apply</span>
+    </button>
+  </div>
+</app-popup>
+
+<app-popup [(visible)]="importPopupVisible" [autofocus]="false" [width]="'48rem'">
+  <app-popup-header [size]="'sm'" (close)="importPopupVisible = false">
+    <h2 class="truncate text-sm">Import {{ itemLabelPluralLowerCase }}</h2>
+  </app-popup-header>
+
+  <div class="flex flex-col gap-4 p-4">@todo import</div>
+
+  <div class="flex justify-between gap-2 border-t p-4">
+    <button (click)="importPopupVisible = false" class="button button-white ml-auto" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="importPopupVisible || null"
+      (click)="onExport()"
+      class="button"
+      type="submit"
+    >
+      <span>Import</span>
+    </button>
+  </div>
+</app-popup>
+
+<app-popup [(visible)]="exportPopupVisible" [autofocus]="false" [width]="'20rem'">
+  <app-popup-header [size]="'sm'" (close)="exportPopupVisible = false">
+    <h2 class="truncate text-sm">Export {{ itemLabelPluralLowerCase }}</h2>
+  </app-popup-header>
+
+  <div class="flex flex-col gap-4 p-4">
+    <app-button-group
+      [(value)]="exportRelations"
+      [choices]="[
+        { label: 'No', value: false },
+        { label: 'Yes', value: true }
+      ]"
+      [description]="
+        selectedCount === 1
+          ? 'Whether to export other models on which the selected ' +
+            itemLabelSingularLowerCase +
+            ' depends on'
+          : 'Whether to export other models on which the selected ' +
+            itemLabelPluralLowerCase +
+            ' depend on'
+      "
+      [label]="'Include relations'"
+    ></app-button-group>
+  </div>
+
+  <div class="flex justify-between gap-2 border-t p-4">
+    <button (click)="exportPopupVisible = false" class="button button-white ml-auto" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="exportPopupVisible || null"
+      (click)="onExport()"
+      class="button"
+      type="submit"
+    >
+      <span>Export</span>
+    </button>
+  </div>
+</app-popup>

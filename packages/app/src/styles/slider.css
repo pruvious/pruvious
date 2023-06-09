@@ -1,0 +1,27 @@
+.ngx-slider .ngx-slider-pointer {
+  @apply !bg-primary-500 hocus:!scale-125 !-top-[0.4375rem] !h-4 !w-4 !transition-transform;
+}
+
+.ngx-slider .ngx-slider-bar-wrapper {
+  @apply !visible !transition-none;
+}
+
+.ngx-slider .ngx-slider-pointer:after {
+  @apply !hidden;
+}
+
+.ngx-slider .ngx-slider-bubble {
+  @apply !transform-none !text-sm !text-gray-700 !transition-none;
+}
+
+.ngx-slider .ngx-slider-bar {
+  @apply !bg-primary-200;
+}
+
+.ngx-slider .ngx-slider-selection {
+  @apply !bg-primary-500;
+}
+
+.ngx-slider .ngx-slider-bubble.ngx-slider-limit {
+  @apply !text-gray-400;
+}

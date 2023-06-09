@@ -1,0 +1,111 @@
+<div class="flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || name || description" class="flex w-full items-end justify-between gap-4">
+    <label
+      *ngIf="label || name"
+      [for]="id"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex cursor-default gap-1 font-medium text-gray-900"
+    >
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </label>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div
+    #container
+    (keydown.arrowdown)="highlightNext()"
+    (keydown.arrowup)="highlightPrev()"
+    (keydown.enter)="$event.stopPropagation(); pick(); input.blur()"
+    class="relative h-9 w-full rounded-md text-sm"
+  >
+    <div
+      class="absolute inset-x-0 top-0 overflow-hidden rounded-md border bg-white transition"
+      [ngClass]="{
+        'z-30': focused,
+        'z-20': !focused && animatingHeight,
+        'border-primary-700': (labelHovered || focused) && !disabled,
+        'ring': focused,
+        'hover:border-primary-700': !disabled
+      }"
+    >
+      <div class="relative h-[2.125rem] w-full">
+        <input
+          #input
+          [(ngModel)]="inputText"
+          [attr.name]="name || id"
+          [attr.placeholder]="placeholder"
+          [disabled]="disabled"
+          [id]="id"
+          (blur)="onBlurInput()"
+          (focus)="onFocusInput()"
+          (keydown.arrowdown)="$event.preventDefault()"
+          (keydown.arrowup)="$event.preventDefault()"
+          (keydown.escape)="input.blur()"
+          (keydown.tab)="input.blur()"
+          (ngModelChange)="onInputTextChange()"
+          class="h-full w-full cursor-default truncate rounded-md pl-2.5 pr-9 outline-none placeholder:text-gray-300 focus:cursor-text"
+          [ngClass]="{
+            '!pr-14': nullable && !required && value && !disabled && !focused,
+            'pointer-events-none text-gray-400': disabled
+          }"
+          autocomplete="off"
+          spellcheck="false"
+        />
+
+        <button
+          *ngIf="nullable && !required && value && !disabled && !focused"
+          [tooltip]="'Clear'"
+          [tooltipOffset]="[0, 8]"
+          (click)="value = null; valueChange.emit(value)"
+          class="hocus:text-primary-700 absolute right-8 top-1/2 -mt-2 h-4 w-4 text-gray-400 transition"
+          type="button"
+        >
+          <app-icon [name]="'x'"></app-icon>
+        </button>
+
+        <app-icon
+          [name]="'chevron-down'"
+          class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2"
+        ></app-icon>
+      </div>
+
+      <div
+        [style.height.rem]="height"
+        class="scrollbar-thin mt-0 transition-all"
+        [ngClass]="{
+          'overflow-hidden': animatingHeight,
+          'overflow-y-auto': !animatingHeight
+        }"
+      >
+        <button
+          *ngFor="let choice of filtered"
+          [attr.data-highlighted]="choice === highlighted ? '' : null"
+          [tabindex]="focused ? 0 : -1"
+          [title]="choice.label"
+          (mousedown)="pick(choice)"
+          class="hover:text-primary-700 flex h-9 w-full items-center px-2.5 outline-none transition"
+          [ngClass]="{
+            'bg-primary-50': choice === highlighted
+          }"
+        >
+          <span class="truncate">{{ choice.label }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>

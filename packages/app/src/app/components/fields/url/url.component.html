@@ -1,0 +1,166 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div
+    *ngIf="label || name || description || linked || hasMoreLanguages"
+    class="flex w-full items-end justify-between gap-4"
+  >
+    <label
+      *ngIf="label || name"
+      [for]="id"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex gap-1 font-medium text-gray-900"
+    >
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </label>
+
+    <div class="mb-0.5 flex shrink-0 gap-1.5 text-gray-400">
+      <button
+        *ngIf="linkable && hasMoreLanguages && !disabled"
+        [tooltip]="
+          showAllLanguages
+            ? 'Only show results for the current language'
+            : 'Show results for all languages'
+        "
+        (click)="toggleAllLanguages()"
+        class="h-4 w-4 transition"
+        [ngClass]="{
+          'text-primary-700': showAllLanguages
+        }"
+        data-autofocus-ignore
+        type="button"
+      >
+        <app-icon [name]="'language'"></app-icon>
+      </button>
+
+      <a
+        *ngIf="linkable && linked && config.can['readPages']"
+        [routerLink]="['/pages', linkedPageId]"
+        [tooltip]="config.can['updatePages'] ? 'Edit linked page' : 'View linked page'"
+        class="hocus:text-primary-700 h-4 w-4 transition"
+        data-autofocus-ignore
+      >
+        <app-icon *ngIf="!config.can['updatePages']" [name]="'eye'"></app-icon>
+        <app-icon *ngIf="config.can['updatePages']" [name]="'pencil'"></app-icon>
+      </a>
+
+      <app-icon
+        *ngIf="description"
+        [name]="'help'"
+        [tooltip]="description"
+        class="h-4 w-4"
+      ></app-icon>
+    </div>
+  </div>
+
+  <div
+    #container
+    (keydown.arrowdown)="highlightNext()"
+    (keydown.arrowup)="highlightPrev()"
+    (keydown.enter)="$event.stopPropagation(); pick(); input.blur()"
+    class="relative h-9 w-full rounded-md text-sm"
+  >
+    <div
+      class="absolute inset-x-0 top-0 overflow-hidden rounded-md border bg-white transition"
+      [ngClass]="{
+        'z-30': focused,
+        'z-20': !focused && animatingHeight,
+        'border-primary-700': (labelHovered || focused) && !disabled,
+        'ring': focused,
+        'hover:border-primary-700': !disabled
+      }"
+    >
+      <div class="relative h-[2.125rem] w-full">
+        <input
+          #input
+          [(ngModel)]="tempValue"
+          [attr.name]="name || id"
+          [attr.placeholder]="placeholder"
+          [disabled]="linked || disabled"
+          [id]="id"
+          (blur)="onBlurInput()"
+          (change)="onInputChange()"
+          (focus)="onFocusInput()"
+          (keydown.arrowdown)="$event.preventDefault()"
+          (keydown.arrowup)="$event.preventDefault()"
+          (keydown.escape)="input.blur()"
+          (keydown.tab)="input.blur()"
+          (ngModelChange)="onTempValueChange()"
+          class="h-full w-full truncate rounded-md bg-transparent px-2.5 outline-none placeholder:text-gray-300 focus:cursor-text"
+          [ngClass]="{
+            'cursor-default': linkable,
+            'pr-9': spinner || (linked && !disabled),
+            'disabled:text-gray-400': disabled
+          }"
+          autocomplete="off"
+          spellcheck="false"
+        />
+
+        <div
+          *ngIf="spinner && (!linked || disabled)"
+          class="text-primary-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2"
+        >
+          <app-icon [name]="'loader-2'" class="block h-4 w-4 animate-spin"></app-icon>
+        </div>
+
+        <button
+          *ngIf="linked && !disabled"
+          [disabled]="disabled"
+          [tooltip]="'Unlink page'"
+          (click)="unlink()"
+          class="hocus:text-primary-700 absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 transition"
+          data-autofocus-ignore
+          type="button"
+        >
+          <app-icon [name]="'unlink'"></app-icon>
+        </button>
+      </div>
+
+      <div
+        #scroller
+        [style.height.rem]="height"
+        (scroll)="onScroll()"
+        class="scrollbar-thin mt-0 transition-all"
+        [ngClass]="{
+          'overflow-hidden': animatingHeight,
+          'overflow-y-auto': !animatingHeight
+        }"
+      >
+        <button
+          *ngFor="let choice of choices"
+          [attr.data-highlighted]="choice === highlighted ? '' : null"
+          [tabindex]="focused ? 0 : -1"
+          (mousedown)="pick(choice)"
+          class="hover:text-primary-700 flex h-9 w-full items-center justify-between gap-4 rounded px-2.5 outline-none transition"
+          [ngClass]="{
+            'bg-primary-50': choice === highlighted,
+            'text-gray-400': !choice.label
+          }"
+        >
+          <app-field-value
+            *ngIf="choiceLabelFields[0]"
+            [field]="choiceLabelFields[0]"
+            [simplified]="true"
+            [value]="choice.label"
+            class="truncate text-left"
+          ></app-field-value>
+
+          <app-field-value
+            *ngIf="choice.info && choiceLabelFields[1]"
+            [field]="choiceLabelFields[1]"
+            [simplified]="true"
+            [value]="choice.info"
+            class="truncate text-right text-xs text-gray-400"
+          ></app-field-value>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>

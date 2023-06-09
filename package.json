@@ -1,0 +1,46 @@
+{
+  "name": "pruvious-test",
+  "version": "1.0.0",
+  "description": "A reliable CMS for your Nuxt app",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run prepare && node scripts/build.js",
+    "dev": "npm run prepare && node scripts/dev.js",
+    "prepare": "npm run build -w @pruvious-test/utils && npm run build -w @pruvious-test/build && node scripts/prepare.js",
+    "format": "prettier --write .",
+    "test": "npm test -w api",
+    "playground": "node scripts/playground.js",
+    "fresh": "npm run fresh -w api",
+    "publish": "node scripts/publish.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/pruvious/pruvious/issues"
+  },
+  "homepage": "https://pruvious.com",
+  "engines": {
+    "node": ">=16.10.0"
+  },
+  "devDependencies": {
+    "@parcel/watcher": "^2.1.0",
+    "@pruvious-test/build": "^1.0.0",
+    "@pruvious-test/utils": "^1.0.0",
+    "@tabler/icons": "^1.119.0",
+    "@types/inquirer": "^9.0.3",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^9.1.5",
+    "prettier": "^2.8.3",
+    "prettier-plugin-organize-attributes": "^0.0.5",
+    "prettier-plugin-tailwindcss": "^0.2.1",
+    "pretty-ms": "^8.0.0",
+    "semver": "^7.3.8"
+  }
+}

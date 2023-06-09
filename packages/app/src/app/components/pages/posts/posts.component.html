@@ -1,0 +1,16 @@
+<app-list
+  [canCreate]="config.can['createPosts:' + collection.name]"
+  [canDelete]="config.can['deletePosts:' + collection.name]"
+  [canDuplicate]="config.can['createPosts:' + collection.name]"
+  [canUpdate]="config.can['updatePosts:' + collection.name]"
+  [collection]="collection.name"
+  [description]="collection.labels!.description || ''"
+  [itemLabelPlural]="collection.labels!.item!.plural"
+  [itemLabelSingular]="collection.labels!.item!.singular"
+  [model]="'Collection'"
+  [resetNavItemPath]="'posts'"
+  [table]="'collections'"
+  [title]="collection.labels!.title!.plural"
+  [translatable]="true"
+  (duplicate)="onDuplicate($event)"
+></app-list>

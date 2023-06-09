@@ -1,0 +1,10 @@
+.output/
+.types/
+node_modules/
+uploads/
+
+.DS_Store
+.env
+
+database.sqlite3
+database.sqlite3-journal

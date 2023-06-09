@@ -1,0 +1,31 @@
+<div class="flex gap-2">
+  <button
+    [disabled]="stateIndex <= 0"
+    [tooltip]="stateIndex <= 0 ? undefined : 'Undo (' + stateIndex + ')'"
+    [tooltipShowOnUpdate]="undoFocused"
+    (blur)="undoFocused = false"
+    (click)="action.emit('undo')"
+    (focus)="undoFocused = true"
+    class="button button-white button-square"
+    type="button"
+  >
+    <app-icon [name]="'arrow-back-up'"></app-icon>
+  </button>
+
+  <button
+    [disabled]="historyLength - stateIndex - 1 <= 0"
+    [tooltip]="
+      historyLength - stateIndex - 1 <= 0
+        ? undefined
+        : 'Redo (' + (historyLength - stateIndex - 1) + ')'
+    "
+    [tooltipShowOnUpdate]="redoFocused"
+    (blur)="redoFocused = false"
+    (click)="action.emit('redo')"
+    (focus)="redoFocused = true"
+    class="button button-white button-square"
+    type="button"
+  >
+    <app-icon [name]="'arrow-forward-up'"></app-icon>
+  </button>
+</div>

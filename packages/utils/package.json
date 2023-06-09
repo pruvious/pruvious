@@ -1,0 +1,39 @@
+{
+  "name": "@pruvious-test/utils",
+  "version": "1.0.0",
+  "description": "Opinionated collection of JavaScript utility functions.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/build.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/pruvious/pruvious/issues"
+  },
+  "homepage": "https://pruvious.com",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/pluralize": "^0.0.29",
+    "esbuild": "^0.16.4",
+    "fs-extra": "^11.1.1",
+    "pluralize": "^8.0.0",
+    "ts-debounce": "^4.0.0",
+    "typescript": "^4.9.4"
+  }
+}

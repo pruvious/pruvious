@@ -1,0 +1,13 @@
+<app-list
+  [canCreate]="config.can['createUsers']"
+  [canDelete]="config.can['deleteUsers']"
+  [canUpdate]="config.can['updateUsers']"
+  [description]="config.users.labels!.description || ''"
+  [itemLabelPlural]="config.users.labels!.item!.plural"
+  [itemLabelSingular]="config.users.labels!.item!.singular"
+  [model]="'User'"
+  [resetNavItemPath]="'users'"
+  [table]="'users'"
+  [title]="config.users.labels!.title!.plural"
+  [translatable]="false"
+></app-list>

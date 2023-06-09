@@ -1,0 +1,40 @@
+{
+  "name": "@pruvious-test/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/build.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/pruvious/pruvious/issues"
+  },
+  "homepage": "https://pruvious.com",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@pruvious-test/utils": "^1.0.0",
+    "dayjs": "^1.11.7",
+    "nanoid": "^4.0.0",
+    "qs": "^6.11.0",
+    "string-strip-html": "^13.2.1"
+  },
+  "devDependencies": {
+    "@pruvious-test/build": "^1.0.0"
+  }
+}

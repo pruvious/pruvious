@@ -1,0 +1,119 @@
+<form>
+  <div
+    class="sticky top-0 z-[31] flex min-h-[6.25rem] items-center justify-between gap-8 bg-gray-50/75 p-8 backdrop-blur backdrop-filter"
+  >
+    <h1 class="truncate text-xl">My profile</h1>
+
+    <div *ngIf="config.can['updateProfile']" class="flex gap-2">
+      <app-history-buttons
+        [historyLength]="history.length"
+        [stateIndex]="stateIndex"
+        (action)="$event === 'undo' ? undo() : redo()"
+      ></app-history-buttons>
+
+      <button
+        [tooltip]="'Log out from all other sessions'"
+        (click)="logout()"
+        class="button button-white button-square"
+        type="button"
+      >
+        <app-icon [name]="'shield-lock'"></app-icon>
+      </button>
+
+      <button *ngIf="config.can['updateProfile']" (click)="onSubmit()" class="button" type="button">
+        <span
+          *ngIf="stateIndex && initialState !== history[stateIndex]"
+          class="!absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white"
+        ></span>
+        <span>Update</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="m-8 mt-0">
+    <app-fields
+      [conditionalLogic]="conditionalLogic"
+      [disabled]="!config.can['updateProfile']"
+      [fields]="[]"
+      [records]="user"
+      [stickyTopBorder]="true"
+      [validator]="validator"
+      (edited)="pushHistoryState()"
+    >
+      <app-text-input
+        [(value)]="user.email!"
+        [autocomplete]="'pruvious'"
+        [disabled]="true"
+        [error]="validator.errors['email']"
+        [label]="'Email'"
+        [maxLength]="255"
+        (edited)="pushHistoryState()"
+        class="w-full p-4"
+      ></app-text-input>
+
+      <app-button-group
+        [(value)]="changePassword"
+        [choices]="[
+          { label: 'No', value: false },
+          { label: 'Yes', value: true }
+        ]"
+        [disabled]="!config.can['updateProfile']"
+        [label]="'Change password'"
+        (valueChange)="pushHistoryState()"
+        class="w-full p-4"
+      ></app-button-group>
+
+      <app-text-input
+        *ngIf="changePassword"
+        [(value)]="password"
+        [autocomplete]="'new-password'"
+        [disabled]="!config.can['updateProfile']"
+        [error]="validator.errors['password']"
+        [label]="'New password'"
+        [maxLength]="255"
+        [required]="true"
+        [type]="'password'"
+        (edited)="pushHistoryState()"
+        class="w-full p-4"
+      >
+        <app-password-strength [password]="password" class="mt-2 block"></app-password-strength>
+      </app-text-input>
+
+      <app-text-input
+        [(value)]="user.dateFormat!"
+        [autocomplete]="'pruvious'"
+        [description]="dateFormatDescription"
+        [disabled]="!config.can['updateProfile']"
+        [error]="validator.errors['dateFormat']"
+        [label]="'Date format'"
+        (edited)="pushHistoryState()"
+        (valueChange)="updateDateFormatPreview()"
+        class="w-full p-4"
+      >
+        <p class="trunate text-vs flex gap-1 pt-1.5">
+          <strong class="text-gray-500">Preview:</strong>
+
+          <span class="truncate text-gray-400">{{ dateFormatPreview }}</span>
+        </p>
+      </app-text-input>
+
+      <app-text-input
+        [(value)]="user.timeFormat!"
+        [autocomplete]="'pruvious'"
+        [description]="timeFormatDescription"
+        [disabled]="!config.can['updateProfile']"
+        [error]="validator.errors['timeFormat']"
+        [label]="'Time format'"
+        (edited)="pushHistoryState()"
+        (valueChange)="updateTimeFormatPreview()"
+        class="w-full p-4"
+      >
+        <p class="trunate text-vs flex gap-1 pt-1.5">
+          <strong class="text-gray-500">Preview:</strong>
+
+          <span class="truncate text-gray-400">{{ timeFormatPreview }}</span>
+        </p>
+      </app-text-input>
+    </app-fields>
+  </div>
+</form>

@@ -1,0 +1,141 @@
+<div class="flex min-h-full flex-col gap-8 p-8">
+  <div class="flex items-center justify-between gap-8">
+    <div class="flex flex-col gap-1 overflow-hidden">
+      <h1 class="text-xl">{{ config.uploads.labels!.title!.plural }}</h1>
+
+      <div *ngIf="filter.isActive" class="flex gap-2 overflow-hidden text-sm">
+        <span class="truncate">Filtered results</span>
+
+        <button
+          [tooltip]="'Clear filters'"
+          (click)="clearFilters()"
+          class="button button-white button-square-xs"
+          type="button"
+        >
+          <app-icon [name]="'filter-off'"></app-icon>
+        </button>
+      </div>
+
+      <app-media-breadcrumbs
+        *ngIf="!filter.isActive"
+        [directory]="directory"
+        (openDirectory)="router.navigate(['/media', 'directories', $event.id])"
+        (openRoot)="router.navigate(['/media'])"
+      ></app-media-breadcrumbs>
+    </div>
+
+    <div *ngIf="!selectionCount" class="flex gap-2">
+      <button
+        [tooltip]="filter.isActive ? 'Edit filters' : 'Filter items'"
+        (click)="filter.start(); filterPopupVisible = true"
+        class="button button-white button-square"
+        [ngClass]="{
+          '!border-primary-700 !text-primary-700': filter.isActive
+        }"
+        type="button"
+      >
+        <app-icon [name]="'filter'"></app-icon>
+      </button>
+
+      <button
+        *ngIf="!filter.isActive && config.can['createMedia']"
+        (click)="media.createDirectory$.next()"
+        class="button button-white"
+        type="button"
+      >
+        <span>Add new folder</span>
+      </button>
+
+      <button
+        *ngIf="!filter.isActive && config.can['createMedia']"
+        [tooltip]="'Upload limit is ' + config.uploadLimitHuman"
+        (click)="media.upload$.next()"
+        class="button"
+        type="button"
+      >
+        <span>Upload</span>
+      </button>
+    </div>
+
+    <div *ngIf="selectionCount" class="flex gap-2">
+      <button
+        [tooltip]="'Clear selection'"
+        (click)="media.clearSelection$.next()"
+        class="button button-white button-square"
+        type="button"
+      >
+        <app-icon [name]="'square-off'"></app-icon>
+      </button>
+
+      <button
+        *ngIf="!filter.isActive && config.can['updateMedia']"
+        (click)="media.moveSelection$.next()"
+        class="button button-white"
+        type="button"
+      >
+        <span>Move</span>
+      </button>
+
+      <button
+        *ngIf="config.can['deleteMedia']"
+        #el
+        [tooltip]="confirm === 'delete-media-items' ? 'Confirm to !!delete!!' : undefined"
+        [tooltipShowOnUpdate]="confirm === 'delete-media-items'"
+        (click)="onDeleteItems($event, el)"
+        class="button"
+        [ngClass]="{
+          'button-red border border-red-700': confirm === 'delete-media-items',
+          'button-white-red': confirm !== 'delete-media-items'
+        }"
+        type="button"
+      >
+        <span>Delete {{ selectionCount }} {{ selectionType }}</span>
+      </button>
+    </div>
+  </div>
+
+  <app-media-library
+    [(selection)]="selection"
+    [(selectionCount)]="selectionCount"
+    [(selectionType)]="selectionType"
+    [directories]="directories"
+    [directory]="directory"
+    [filter]="filter"
+    [uploads]="uploads"
+    (openDirectory)="router.navigate(['/media', 'directories', $event.id])"
+  ></app-media-library>
+</div>
+
+<app-popup [(visible)]="filterPopupVisible" [autofocus]="false" [width]="'48rem'">
+  <app-popup-header [size]="'sm'" (close)="filterPopupVisible = false">
+    <h2 class="truncate text-sm">Filter items</h2>
+  </app-popup-header>
+
+  <form class="flex flex-col gap-4 p-4">
+    <app-filters [filter]="filter" [subject]="'uploads'"></app-filters>
+  </form>
+
+  <div class="flex justify-between gap-2 border-t p-4">
+    <button
+      *ngIf="filter.isActive"
+      (click)="clearFilters()"
+      class="button button-white"
+      type="button"
+    >
+      <span>Clear all</span>
+    </button>
+
+    <button (click)="filterPopupVisible = false" class="button button-white ml-auto" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="filterPopupVisible || null"
+      (click)="applyFilters()"
+      class="button"
+      type="submit"
+    >
+      <span>Apply</span>
+    </button>
+  </div>
+</app-popup>

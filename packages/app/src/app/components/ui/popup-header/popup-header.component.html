@@ -1,0 +1,27 @@
+<div
+  class="sticky -top-8 z-20 flex items-center justify-between border-b bg-white/75 backdrop-blur backdrop-filter"
+>
+  <div
+    class="flex flex-1 items-center gap-4 overflow-hidden"
+    [ngClass]="{
+      'h-11 px-4': size === 'sm',
+      'h-14 px-8': size === 'md'
+    }"
+  >
+    <ng-content></ng-content>
+  </div>
+
+  <button
+    (click)="close.emit($event)"
+    class="hocus:text-primary-700 flex shrink-0 border-l outline-none transition"
+    [ngClass]="{
+      'h-11 w-11': size === 'sm',
+      'h-14 w-14': size === 'md'
+    }"
+    data-autofocus-ignore
+    title="Close popup"
+    type="button"
+  >
+    <app-icon [name]="'x'" class="m-auto h-4 w-4"></app-icon>
+  </button>
+</div>

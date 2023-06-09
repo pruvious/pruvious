@@ -1,0 +1,86 @@
+<div class="flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || name || description" class="flex w-full items-end justify-between gap-4">
+    <label
+      *ngIf="label || name"
+      [for]="id"
+      (click)="onClickLabel()"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex gap-1 font-medium text-gray-900"
+    >
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </label>
+
+    <div class="mb-0.5 flex shrink-0 gap-1.5 text-gray-400">
+      <app-icon
+        *ngIf="mode === 'dateTime' && utc"
+        [name]="'world'"
+        [tooltip]="'Universal Coordinated Time (UTC)'"
+        class="h-4 w-4"
+      ></app-icon>
+
+      <app-icon
+        *ngIf="mode === 'dateTime' && !utc"
+        [name]="'current-location'"
+        [tooltip]="timezone + ' Time'"
+        class="h-4 w-4"
+      ></app-icon>
+
+      <app-icon
+        *ngIf="description"
+        [name]="'help'"
+        [tooltip]="description"
+        class="h-4 w-4"
+      ></app-icon>
+    </div>
+  </div>
+
+  <div
+    #container
+    class="focus-within:border-primary-700 min-h-9 w-full rounded-md border bg-white text-sm transition focus-within:ring"
+    [ngClass]="{
+      'hover:border-primary-700': !disabled,
+      'border-primary-700': labelHovered && !disabled
+    }"
+  >
+    <div class="relative h-[2.125rem] w-full">
+      <input
+        #input
+        [(ngModel)]="value"
+        [attr.name]="name || id"
+        [attr.placeholder]="placeholder"
+        [disabled]="disabled"
+        [id]="id"
+        [required]="required"
+        (ngModelChange)="onChange()"
+        class="h-full w-full truncate rounded-md bg-white px-2.5 text-sm outline-none transition placeholder:text-gray-300"
+        [ngClass]="{
+          'pr-9': !required && (value || timestamp) && !disabled,
+          'pointer-events-none text-gray-400': disabled
+        }"
+        autocomplete="off"
+        spellcheck="false"
+        type="text"
+      />
+
+      <button
+        *ngIf="!required && (value || timestamp) && !disabled"
+        [tooltip]="'Clear'"
+        [tooltipOffset]="[0, 8]"
+        (click)="flatpickr?.clear()"
+        class="hocus:text-primary-700 absolute right-2.5 top-1/2 -mt-2 h-4 w-4 text-gray-400 transition"
+        type="button"
+      >
+        <app-icon [name]="'x'"></app-icon>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>

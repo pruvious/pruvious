@@ -1,0 +1,45 @@
+<app-popup *ngIf="initialized" [(visible)]="visible" [width]="'64rem'">
+  <app-popup-header [size]="'sm'" (close)="visible = false">
+    <h2 class="truncate text-sm">Add block</h2>
+  </app-popup-header>
+
+  <div *ngIf="(blocks | keyvalue).length" class="p-4 pb-0">
+    <app-text-input
+      [(value)]="search"
+      [clearable]="true"
+      [placeholder]="'Search blocks...'"
+      (valueChange)="onSearch()"
+      class="w-full"
+    ></app-text-input>
+  </div>
+
+  <div
+    class="text-vs grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-4 p-4"
+    [ngClass]="{
+      filtered: search
+    }"
+  >
+    <button
+      *ngFor="let block of filteredBlocks | keyvalue"
+      [tooltip]="block.value.description"
+      (click)="add(block.value)"
+      class="hocus:border-primary-700 flex aspect-square flex-col items-center justify-center gap-3 rounded-md border p-2 transition"
+      type="button"
+    >
+      <app-icon [name]="block.value.icon!" class="h-5 w-5 shrink-0 text-gray-400"></app-icon>
+
+      <span class="clamp overflow-hidden overflow-ellipsis">{{ block.value.label }}</span>
+    </button>
+
+    <button
+      *ngIf="canPaste"
+      [tooltip]="'Insert the block from the clipboard'"
+      (click)="onPaste()"
+      class="hocus:border-primary-700 text-primary-500 hocus:text-primary-700 border-primary-300 flex aspect-square flex-col items-center justify-center gap-3 rounded-md border border-dashed p-2 transition"
+      type="button"
+    >
+      <app-icon [name]="'clipboard'" class="h-5 w-5 shrink-0"></app-icon>
+      <span class="clamp overflow-hidden overflow-ellipsis">Paste</span>
+    </button>
+  </div>
+</app-popup>

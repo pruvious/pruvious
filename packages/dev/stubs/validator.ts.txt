@@ -1,0 +1,8 @@
+import { Validator } from '@pruvious-test/cms'
+
+export default {
+  name: 'validatorName',
+  callback: async ({ field, value }) => {
+    // throw new Error('Validation failed')
+  },
+} satisfies Validator

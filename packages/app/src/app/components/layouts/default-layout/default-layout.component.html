@@ -1,0 +1,103 @@
+<div class="flex h-full">
+  <div class="scrollbar-thin h-full w-full max-w-[18rem] overflow-y-auto p-8 pr-0">
+    <ul class="menu pt-0.5">
+      <li *ngIf="config.cms.pages !== false && config.can['readPages']">
+        <a
+          [routerLink]="['/pages']"
+          [routerLinkActive]="'active'"
+          [title]="config.pages.labels!.description || ''"
+          (click)="onClickNavItem($event)"
+        >
+          <app-icon [name]="config.pages.icon!"></app-icon>
+          <span>{{ config.pages.labels!.title!.plural }}</span>
+        </a>
+      </li>
+
+      <li *ngIf="config.cms.presets !== false && config.can['readPresets']">
+        <a
+          [routerLink]="['/presets']"
+          [routerLinkActive]="'active'"
+          [title]="config.presets.labels!.description || ''"
+          (click)="onClickNavItem($event)"
+        >
+          <app-icon [name]="config.presets.icon!"></app-icon>
+          <span>{{ config.presets.labels!.title!.plural }}</span>
+        </a>
+      </li>
+
+      <li *ngIf="config.cms.uploads !== false && config.can['readMedia']">
+        <a [routerLink]="['/media']" [routerLinkActive]="'active'" (click)="onClickNavItem($event)">
+          <app-icon [name]="config.uploads.icon!"></app-icon>
+          <span>{{ config.uploads.labels!.title!.plural }}</span>
+        </a>
+      </li>
+
+      <ng-container *ngFor="let collection of collections">
+        <li *ngIf="collection.visible && config.can['readPosts:' + collection.name]">
+          <a
+            [routerLink]="['/collections', collection.name, 'posts']"
+            [routerLinkActive]="'active'"
+            [title]="collection.labels!.description || ''"
+            (click)="onClickNavItem($event)"
+          >
+            <app-icon [name]="collection.icon ?? 'pin'"></app-icon>
+            <span>{{ collection.labels!.title!.plural }}</span>
+          </a>
+        </li>
+      </ng-container>
+
+      <li *ngIf="config.can['readUsers']">
+        <a
+          [routerLink]="['/users']"
+          [routerLinkActive]="'active'"
+          [title]="config.users.labels!.description || ''"
+          (click)="onClickNavItem($event)"
+        >
+          <app-icon [name]="config.users.icon!"></app-icon>
+          <span>{{ config.users.labels!.title!.plural }}</span>
+        </a>
+      </li>
+
+      <li *ngIf="config.can['readRoles']">
+        <a
+          [routerLink]="['/roles']"
+          [routerLinkActive]="'active'"
+          [title]="config.roles.labels!.description || ''"
+          (click)="onClickNavItem($event)"
+        >
+          <app-icon [name]="config.roles.icon!"></app-icon>
+          <span>{{ config.roles.labels!.title!.plural }}</span>
+        </a>
+      </li>
+
+      <li *ngIf="config.cms.pages !== false && config.can['readRedirects']">
+        <a
+          [routerLink]="['/redirection']"
+          [routerLinkActive]="'active'"
+          (click)="onClickNavItem($event)"
+        >
+          <app-icon [name]="'arrow-bounce'"></app-icon>
+          <span>Redirection</span>
+        </a>
+      </li>
+
+      <ng-container *ngFor="let setting of settings">
+        <li *ngIf="config.can['readSettings:' + setting.group]">
+          <a
+            [routerLink]="['/settings', setting.group]"
+            [routerLinkActive]="'active'"
+            [title]="setting.description || ''"
+            (click)="onClickNavItem($event)"
+          >
+            <app-icon [name]="setting.icon ?? 'settings'"></app-icon>
+            <span>{{ setting.label || (setting.group! | camelToLabel) }}</span>
+          </a>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+
+  <div class="scrollbar-thin h-full flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </div>
+</div>

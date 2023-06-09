@@ -1,0 +1,35 @@
+<div class="flex flex-col items-start">
+  <label [for]="id" (dblclick)="$event.stopPropagation()" class="flex gap-2">
+    <input
+      [(ngModel)]="checkboxValue"
+      [attr.name]="name || id"
+      [disabled]="disabled || sorting"
+      [id]="id"
+      [indeterminate]="indeterminate"
+      (ngModelChange)="valueChange.emit($event ? on : off)"
+      class="mt-px h-4 w-4 shrink-0 appearance-none rounded border bg-contain bg-center outline-none transition focus:ring"
+      [ngClass]="{
+        'bg-white': !checkboxValue && !indeterminate,
+        'border-primary-700 bg-primary-700': checkboxValue || indeterminate,
+        'indeterminate': indeterminate,
+        'hocus:border-primary-700': !disabled
+      }"
+      type="checkbox"
+    />
+
+    <span
+      class="text-vs flex flex-col gap-0.5 empty:hidden"
+      [ngClass]="{
+        'text-gray-400': disabled,
+        'cursor-move': isSortable
+      }"
+    >
+      <ng-content></ng-content>
+    </span>
+  </label>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.grid:empty {
+  @apply grid-cols-1;
+}
+
+.grid:empty::after {
+  content: 'No blocks can be added in the selected slot';
+  @apply text-sm text-gray-400;
+}
+
+.grid.filtered:empty::after {
+  content: 'No blocks found';
+}

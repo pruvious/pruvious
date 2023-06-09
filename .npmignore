@@ -1,0 +1,5 @@
+node_modules/
+tmp/
+.DS_Store
+*.sqlite3
+*.sqlite3-journal

@@ -1,0 +1,111 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || name || description" class="flex w-full items-end justify-between gap-4">
+    <label
+      *ngIf="label || name"
+      [for]="id + '-value-0'"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex gap-1 font-medium text-gray-900"
+    >
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </label>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div class="flex w-full gap-2">
+    <div
+      class="relative flex h-9 w-full flex-1 divide-x rounded-md border bg-white transition"
+      [ngClass]="{
+        'focus-within:border-primary-700 hover:border-primary-700 focus-within:ring': !disabled,
+        'border-primary-700': labelHovered
+      }"
+    >
+      <div
+        *ngFor="let name of names; let i = index"
+        class="relative flex flex-1 items-center px-2.5"
+      >
+        <label [for]="id + '-value-' + i" class="flex h-full items-center">
+          <app-icon
+            *ngIf="inputIcons && inputIcons[name]"
+            [name]="inputIcons[name]!"
+            [tooltip]="inputLabels && inputLabels[name] ? inputLabels[name] : autoInputLabels[name]"
+            class="h-4 w-4"
+          ></app-icon>
+
+          <span *ngIf="!inputIcons || !inputIcons[name]" class="pt-px text-xs font-medium">
+            {{ inputLabels && inputLabels[name] ? inputLabels[name] : autoInputLabels[name] }}
+          </span>
+        </label>
+
+        <input
+          #inputEl
+          [(ngModel)]="value[name].value"
+          [attr.name]="(name || id) + '-value-' + i"
+          [attr.placeholder]="inputPlaceholder[name]"
+          [disabled]="disabled"
+          [id]="id + '-value-' + i"
+          [max]="inputMax[name] ?? null"
+          [min]="inputMin[name] ?? null"
+          (change)="onEditValue(name)"
+          (keydown.escape)="inputEl.blur()"
+          (keydown.tab)="inputEl.blur()"
+          (keydown)="onKeyDown(name, $event)"
+          (ngModelChange)="onChangeValue(name)"
+          class="h-full w-full truncate pl-2.5 text-sm outline-none placeholder:text-gray-300 disabled:text-gray-400"
+          type="number"
+        />
+
+        <div *ngIf="units.length" class="relative h-full pl-2.5">
+          <select
+            [(ngModel)]="value[name].unit"
+            [attr.name]="(name || id) + '-unit-' + i"
+            [disabled]="disabled || units.length === 1"
+            [id]="id + '-unit-' + i"
+            (ngModelChange)="onChangeUnit(name)"
+            class="focus focus-visible:text-primary-700 h-full appearance-none text-sm outline-none disabled:text-gray-400"
+            [ngClass]="{
+              'pr-4': units.length > 1
+            }"
+          >
+            <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+          </select>
+
+          <app-icon
+            *ngIf="units.length > 1"
+            [name]="'chevron-down'"
+            class="pointer-events-none absolute -right-1 top-1/2 h-4 w-4 -translate-y-1/2"
+          ></app-icon>
+        </div>
+      </div>
+    </div>
+
+    <button
+      *ngIf="syncable && !disabled"
+      [tooltip]="sync ? 'Desynchronize values' : 'Synchronize values'"
+      (click)="sync = !sync"
+      class="button button-white button-square"
+      [ngClass]="{
+        '!border-primary-700 !text-primary-700': sync
+      }"
+      type="button"
+    >
+      <app-icon [name]="'layers-linked'"></app-icon>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>
+
+<ng-content></ng-content>

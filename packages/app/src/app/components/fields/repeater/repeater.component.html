@@ -1,0 +1,193 @@
+<div #container class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || name || description" class="flex w-full items-end justify-between gap-4">
+    <div *ngIf="label || name" class="text-vs flex cursor-default gap-1 font-medium text-gray-900">
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </div>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div
+    *ngIf="value.length"
+    [sortable]="value"
+    [sortableOptions]="sortableOptions"
+    class="sortable-area w-full -space-y-px"
+  >
+    <div
+      *ngFor="let subFields of value; let i = index"
+      [attr.data-index]="i + 1"
+      class="relative flex"
+    >
+      <div
+        class="sortable-handle relative flex shrink-0 cursor-move items-center justify-center border border-r-0 bg-gray-50 py-4 text-xs text-gray-400"
+        [ngClass]="{
+          'pointer-events-none': disabled,
+          'rounded-tl-md': compact && i === 0,
+          'rounded-bl-md': compact && i === value.length - 1,
+          'w-4': compact,
+          'w-6': !compact
+        }"
+      >
+        <span class="text-upright parent-hocus:hidden">{{ i + 1 }}</span>
+        <app-icon [name]="'grip-vertical'" class="parent-hocus:block hidden h-4 w-4"></app-icon>
+
+        <div
+          class="parent-hocus:flex sorting:!hidden absolute left-1/2 top-0 z-10 hidden -translate-x-1/2 -translate-y-1/2"
+          [ngClass]="{
+            'parent-hocus:hidden': i === 0
+          }"
+        >
+          <button
+            *ngIf="!disabled"
+            [tooltip]="'Move up'"
+            (click)="moveItem(i, -1)"
+            class="button button-white button-circle-xs hocus:!text-primary-700 !text-gray-400"
+            type="button"
+          >
+            <app-icon [name]="'chevron-up'"></app-icon>
+          </button>
+        </div>
+
+        <div
+          class="parent-hocus:flex sorting:!hidden absolute -bottom-px left-1/2 z-10 hidden -translate-x-1/2 translate-y-1/2"
+          [ngClass]="{
+            'parent-hocus:hidden': i === value.length - 1
+          }"
+        >
+          <button
+            *ngIf="!disabled"
+            [tooltip]="'Move down'"
+            (click)="moveItem(i, 1)"
+            class="button button-white button-circle-xs hocus:!text-primary-700 !text-gray-400"
+            type="button"
+          >
+            <app-icon [name]="'chevron-down'"></app-icon>
+          </button>
+        </div>
+      </div>
+
+      <app-fields
+        [allowedBlocks]="allowedBlocks"
+        [blocks]="blocks"
+        [conditionalLogic]="conditionalLogic"
+        [disabled]="disabled"
+        [fields]="fields"
+        [idPrefix]="name + '.' + i + '.'"
+        [key]="key + '.' + i"
+        [records]="subFields"
+        [rootBlocks]="rootBlocks"
+        [validator]="validator"
+        (changed)="valueChange.emit(value)"
+        (edited)="edited.emit(value)"
+        class="min-w-0 flex-1"
+      ></app-fields>
+
+      <div
+        *ngIf="!disabled"
+        class="parent-hocus:flex hidden shrink-0 flex-col items-center justify-center border border-l-0 bg-gray-50 py-2"
+        [ngClass]="{
+          'w-4 gap-1.5': compact,
+          'w-6 gap-2': !compact,
+          'rounded-tr-md': compact && i === 0,
+          'rounded-br-md': compact && i === value.length - 1,
+        }"
+      >
+        <button
+          [tooltip]="'Duplicate'"
+          (click)="duplicateItem(i)"
+          class="hocus:text-primary-700 text-gray-400 transition"
+          [ngClass]="{
+            'hidden': max !== undefined && value.length >= max,
+            'h-3.5 w-3.5': compact,
+            'h-4 w-4': !compact
+          }"
+          type="button"
+        >
+          <app-icon [name]="'copy'"></app-icon>
+        </button>
+
+        <button
+          [tooltip]="
+            confirm === 'delete-repeater-item-' + name + '.' + i
+              ? 'Confirm to !!delete!!'
+              : 'Delete'
+          "
+          [tooltipShowOnUpdate]="confirm === 'delete-repeater-item-' + name + '.' + i"
+          (click)="deleteItem(i, $event)"
+          class="hocus:text-red-500 h-4 w-4 text-gray-400 transition"
+          [ngClass]="{
+            'h-3.5 w-3.5': compact,
+            'h-4 w-4': !compact
+          }"
+          type="button"
+        >
+          <app-icon [name]="'trash'"></app-icon>
+        </button>
+      </div>
+
+      <div
+        class="parent-hocus:flex sorting:!hidden absolute left-1/2 top-0 z-10 hidden -translate-x-1/2 -translate-y-1/2"
+        [ngClass]="{
+          'parent-hocus:hidden': max !== undefined && value.length >= max
+        }"
+      >
+        <button
+          *ngIf="!disabled"
+          [tooltip]="'Add ' + (itemLabel || 'item') + ' before'"
+          (click)="addItem(i)"
+          class="button button-white button-circle-xs hocus:!text-primary-700 !text-gray-400"
+          type="button"
+        >
+          <app-icon [name]="'plus'"></app-icon>
+        </button>
+      </div>
+
+      <div
+        class="parent-hocus:flex sorting:!hidden absolute bottom-px left-1/2 z-10 hidden -translate-x-1/2 translate-y-1/2"
+        [ngClass]="{
+          'parent-hocus:hidden': max !== undefined && value.length >= max
+        }"
+      >
+        <button
+          *ngIf="!disabled"
+          [tooltip]="'Add ' + (itemLabel || 'item') + ' after'"
+          (click)="addItem(i + 1)"
+          class="button button-white button-circle-xs hocus:!text-primary-700 !text-gray-400"
+          type="button"
+        >
+          <app-icon [name]="'plus'"></app-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <div
+    class="flex w-full"
+    [ngClass]="{
+      'mt-1.5': value.length && compact,
+      'mt-2': value.length && !compact
+    }"
+  >
+    <button
+      [disabled]="(max !== undefined && value.length >= max) || disabled"
+      (click)="addItem()"
+      class="button button-white"
+      type="button"
+    >
+      <span>Add {{ itemLabel || 'item' }}</span>
+    </button>
+  </div>
+</div>

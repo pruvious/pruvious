@@ -1,0 +1,184 @@
+<form class="flex flex-col gap-4">
+  <div *ngFor="let fieldFilter of filter.fieldFilters; let i = index" class="flex gap-2">
+    <button
+      [tooltip]="'Remove'"
+      (click)="filter.fieldFilters.splice(i, 1)"
+      class="button button-white-red button-square"
+      type="button"
+    >
+      <app-icon [name]="'trash'"></app-icon>
+    </button>
+
+    <app-select
+      [(value)]="fieldFilter.field"
+      [choices]="fieldChoices"
+      (valueChange)="onFieldChange(fieldFilter)"
+      class="w-0 flex-1"
+    ></app-select>
+
+    <div class="w-0 flex-1">
+      <app-select
+        *ngIf="
+          fieldFilter.field.type === 'buttons' ||
+          fieldFilter.field.type === 'editor' ||
+          fieldFilter.field.type === 'icon' ||
+          fieldFilter.field.type === 'select' ||
+          fieldFilter.field.type === 'text' ||
+          fieldFilter.field.type === 'textArea' ||
+          fieldFilter.field.type === 'url'
+        "
+        [(value)]="fieldFilter.operator"
+        [choices]="stringOperatorChoices"
+        (valueChange)="onOperatorChange(fieldFilter)"
+      ></app-select>
+
+      <app-select
+        *ngIf="
+          fieldFilter.field.type === 'date' ||
+          fieldFilter.field.type === 'dateTime' ||
+          fieldFilter.field.type === 'file' ||
+          fieldFilter.field.type === 'image' ||
+          fieldFilter.field.type === 'number' ||
+          fieldFilter.field.type === 'page' ||
+          fieldFilter.field.type === 'post' ||
+          fieldFilter.field.type === 'preset' ||
+          fieldFilter.field.type === 'role' ||
+          fieldFilter.field.type === 'slider' ||
+          fieldFilter.field.type === 'time' ||
+          fieldFilter.field.type === 'user'
+        "
+        [(value)]="fieldFilter.operator"
+        [choices]="numberOperatorChoices"
+        (valueChange)="onOperatorChange(fieldFilter)"
+      ></app-select>
+
+      <app-select
+        *ngIf="fieldFilter.field.type === 'checkbox' || fieldFilter.field.type === 'switch'"
+        [(value)]="fieldFilter.operator"
+        [choices]="booleanOperatorChoices"
+        (valueChange)="onOperatorChange(fieldFilter)"
+      ></app-select>
+    </div>
+
+    <div class="w-0 flex-1">
+      <app-text-input
+        *ngIf="
+          (fieldFilter.field.type === 'buttons' ||
+            fieldFilter.field.type === 'editor' ||
+            fieldFilter.field.type === 'icon' ||
+            fieldFilter.field.type === 'select' ||
+            fieldFilter.field.type === 'text' ||
+            fieldFilter.field.type === 'textArea' ||
+            fieldFilter.field.type === 'url') &&
+          (fieldFilter.operator === '$eq' ||
+            fieldFilter.operator === '$eqi' ||
+            fieldFilter.operator === '$ne' ||
+            fieldFilter.operator === '$startsWith' ||
+            fieldFilter.operator === '$endsWith' ||
+            fieldFilter.operator === '$contains')
+        "
+        [(value)]="fieldFilter.value"
+        [choices]="suggestions"
+        (fetchChoices)="getSuggestions(fieldFilter.field.name, $event.keywords, $event.nextPage)"
+      ></app-text-input>
+
+      <app-number
+        *ngIf="
+          (fieldFilter.field.type === 'file' ||
+            fieldFilter.field.type === 'image' ||
+            fieldFilter.field.type === 'number' ||
+            fieldFilter.field.type === 'page' ||
+            fieldFilter.field.type === 'post' ||
+            fieldFilter.field.type === 'preset' ||
+            fieldFilter.field.type === 'role' ||
+            fieldFilter.field.type === 'slider' ||
+            fieldFilter.field.type === 'user') &&
+          (fieldFilter.operator === '$eq' ||
+            fieldFilter.operator === '$ne' ||
+            fieldFilter.operator === '$lt' ||
+            fieldFilter.operator === '$lte' ||
+            fieldFilter.operator === '$gt' ||
+            fieldFilter.operator === '$gte')
+        "
+        [(value)]="fieldFilter.value"
+      ></app-number>
+
+      <app-date-time
+        *ngIf="
+          fieldFilter.field.type === 'date' &&
+          (fieldFilter.operator === '$eq' ||
+            fieldFilter.operator === '$ne' ||
+            fieldFilter.operator === '$lt' ||
+            fieldFilter.operator === '$lte' ||
+            fieldFilter.operator === '$gt' ||
+            fieldFilter.operator === '$gte')
+        "
+        [(timestamp)]="fieldFilter.value"
+        [mode]="fieldFilter.field.type"
+        [utc]="true"
+      ></app-date-time>
+
+      <app-date-time
+        *ngIf="
+          fieldFilter.field.type === 'dateTime' &&
+          (fieldFilter.operator === '$eq' ||
+            fieldFilter.operator === '$ne' ||
+            fieldFilter.operator === '$lt' ||
+            fieldFilter.operator === '$lte' ||
+            fieldFilter.operator === '$gt' ||
+            fieldFilter.operator === '$gte')
+        "
+        [(timestamp)]="fieldFilter.value"
+        [mode]="fieldFilter.field.type"
+        [utc]="!!fieldFilter.field.utc"
+      ></app-date-time>
+
+      <app-date-time
+        *ngIf="
+          fieldFilter.field.type === 'time' &&
+          (fieldFilter.operator === '$eq' ||
+            fieldFilter.operator === '$ne' ||
+            fieldFilter.operator === '$lt' ||
+            fieldFilter.operator === '$lte' ||
+            fieldFilter.operator === '$gt' ||
+            fieldFilter.operator === '$gte')
+        "
+        [(timestamp)]="fieldFilter.value"
+        [mode]="fieldFilter.field.type"
+        [utc]="true"
+      ></app-date-time>
+
+      <app-button-group
+        *ngIf="
+          (fieldFilter.field.type === 'checkbox' || fieldFilter.field.type === 'switch') &&
+          fieldFilter.operator === '$eq'
+        "
+        [(value)]="fieldFilter.value"
+        [choices]="[
+          { label: 'false', value: false },
+          { label: 'true', value: true }
+        ]"
+      ></app-button-group>
+    </div>
+
+    <app-button-group
+      *ngIf="filter.fieldFilters.length > 1"
+      [(value)]="
+        i === filter.fieldFilters.length - 1
+          ? filter.fieldFilters[i].relation
+          : filter.fieldFilters[i + 1].relation
+      "
+      [choices]="[
+        { label: 'and', value: '$and' },
+        { label: 'or', value: '$or' }
+      ]"
+      [ngClass]="{
+        invisible: i === filter.fieldFilters.length - 1
+      }"
+    ></app-button-group>
+  </div>
+
+  <button (click)="addAndGroup()" class="button button-white self-start" type="button">
+    <span>Add filter</span>
+  </button>
+</form>

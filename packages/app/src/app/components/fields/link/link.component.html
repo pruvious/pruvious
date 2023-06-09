@@ -1,0 +1,131 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || description" class="flex w-full items-end justify-between gap-4">
+    <label *ngIf="label" [for]="id + '-url'" class="text-vs flex gap-1 font-medium text-gray-900">
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label }}
+      </span>
+    </label>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div #container class="relative flex w-full gap-1.5">
+    <a
+      *ngIf="value?.url"
+      [href]="previewLinkUrl"
+      [tooltip]="'Open link in new tab'"
+      class="hocus:border-primary-700 flex h-9 items-center gap-1.5 truncate rounded-md border bg-white px-2.5 text-sm outline-none transition focus:ring"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <app-icon *ngIf="linked" [name]="'link'" class="h-4 w-4"></app-icon>
+      <app-icon *ngIf="!linked" [name]="'external-link'" class="h-4 w-4 shrink-0"></app-icon>
+      <span class="truncate">{{ value!.label || altLabel || value!.url }}</span>
+    </a>
+
+    <button
+      [disabled]="disabled"
+      [tooltip]="value?.url ? 'Edit' : ''"
+      (click)="openPopup()"
+      class="button button-white"
+      [ngClass]="{
+        'button-square': value?.url
+      }"
+      type="button"
+    >
+      <span *ngIf="!value?.url">Add link</span>
+      <app-icon *ngIf="value?.url" [name]="'pencil'"></app-icon>
+    </button>
+
+    <button
+      *ngIf="value?.url"
+      [disabled]="disabled"
+      [tooltip]="'Remove'"
+      (click)="removeLink()"
+      class="button button-white-red button-square"
+      type="button"
+    >
+      <app-icon [name]="'x'"></app-icon>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>
+
+<app-popup
+  [(visible)]="popupVisible"
+  [width]="'24rem'"
+  (keydown.enter)="$event.preventDefault(); onLinkChange()"
+>
+  <app-popup-header [size]="'sm'" (close)="closePopup()">
+    <h2 class="truncate text-sm">{{ value?.url ? 'Edit link' : 'Add link' }}</h2>
+  </app-popup-header>
+
+  <div class="flex flex-col gap-4 p-4">
+    <app-url
+      [(value)]="linkUrl"
+      [error]="linkUrlError"
+      [id]="id + '-url'"
+      [label]="'Hyperlink'"
+      [linkable]="true"
+      [required]="true"
+      (pickedLabel)="onPickUrl($event)"
+      (valueChange)="onLinkUrlChange()"
+    ></app-url>
+
+    <app-text-input [(value)]="linkLabel" [id]="id + '-label'" [label]="'Label'"></app-text-input>
+
+    <app-button-group
+      [(value)]="linkTargetSwitcher"
+      [choices]="[
+        { label: 'No', value: '_self' },
+        { label: 'Yes', value: '_blank' },
+        { label: 'Custom target', value: 'custom' }
+      ]"
+      [label]="'Open in new tab'"
+      (valueChange)="onLinkTargetSwitcherChange()"
+      class="w-full"
+    ></app-button-group>
+
+    <app-text-input
+      *ngIf="linkTargetSwitcher === 'custom' && linkTarget !== null"
+      [(value)]="linkTarget"
+      [id]="id + '-target'"
+      [label]="'Target'"
+    ></app-text-input>
+
+    <app-text-input
+      *ngIf="linked"
+      [(value)]="linkAppend"
+      [description]="
+        'A string to append to the URL or path of a linked page (e.g. an **#anchor** or a **?query**).'
+      "
+      [id]="id + '-append'"
+      [label]="'Append'"
+    ></app-text-input>
+  </div>
+
+  <div class="flex justify-end gap-2 border-t p-4">
+    <button (click)="closePopup()" class="button button-white" type="button">
+      <span>Cancel</span>
+    </button>
+
+    <button
+      [attr.data-save]="popupVisible || null"
+      (click)="onLinkChange()"
+      class="button"
+      type="button"
+    >
+      <span>{{ value?.url ? 'Update' : 'Add' }}</span>
+    </button>
+  </div>
+</app-popup>

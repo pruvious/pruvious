@@ -1,0 +1,295 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || description" class="flex w-full items-end justify-between gap-4">
+    <div
+      *ngIf="label"
+      (click)="onClickLabel()"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex cursor-default gap-1 font-medium text-gray-900"
+    >
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label }}
+      </span>
+    </div>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div
+    #wrapper
+    (click)="toolbarStates['fullscreen'].active && onClickLabel()"
+    class="w-full bg-white font-sans text-sm leading-[1.42857142857] transition"
+    [ngClass]="{
+      'hocus:border-primary-700 focus-within:ring':
+        !disabled && !toolbarStates['fullscreen'].active,
+      'border-primary-700': labelHovered && !disabled && !toolbarStates['fullscreen'].active,
+      'scrollbar-thin fixed inset-0 z-40 overflow-y-auto': toolbarStates['fullscreen'].active,
+      'overflow-hidden rounded-md border': !toolbarStates['fullscreen'].active
+    }"
+  >
+    <div
+      *ngIf="toolbar.length || allowFullscreen"
+      class="scrollbar-thin scrollbar-thin-bg flex justify-between overflow-x-auto bg-white"
+      [ngClass]="{
+        'sticky top-0 z-10 mx-auto max-w-4xl': toolbarStates['fullscreen'].active,
+        'border-b': !toolbarStates['fullscreen'].active
+      }"
+    >
+      <div class="-mr-px flex">
+        <div
+          *ngFor="let item of toolbar"
+          class="relative"
+          [ngClass]="{
+            'is-fullscreen mr-1 py-4': toolbarStates['fullscreen'].active,
+            'border-r': !toolbarStates['fullscreen'].active
+          }"
+        >
+          <button
+            *ngIf="
+              item === 'blockFormats' ||
+              item === 'blockquote' ||
+              item === 'bold' ||
+              item === 'bulletList' ||
+              item === 'center' ||
+              item === 'clear' ||
+              item === 'code' ||
+              item === 'codeBlock' ||
+              item === 'heading1' ||
+              item === 'heading2' ||
+              item === 'heading3' ||
+              item === 'heading4' ||
+              item === 'heading5' ||
+              item === 'heading6' ||
+              item === 'hardBreak' ||
+              item === 'highlight' ||
+              item === 'horizontalRule' ||
+              item === 'inlineFormats' ||
+              item === 'italic' ||
+              item === 'justify' ||
+              item === 'left' ||
+              item === 'link' ||
+              item === 'normalize' ||
+              item === 'orderedList' ||
+              item === 'paragraph' ||
+              item === 'redo' ||
+              item === 'right' ||
+              item === 'strike' ||
+              item === 'subscript' ||
+              item === 'superscript' ||
+              item === 'underline' ||
+              item === 'undo'
+            "
+            #button
+            [tabindex]="toolbarStates[item].disabled ? -1 : 0"
+            [tooltip]="toolbarStates[item].disabled ? undefined : toolbarStates[item].tooltip"
+            (click)="toolbarStates[item].disabled ? null : onClickToolbarButton(item, button)"
+            (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+            class="toolbar-button"
+            [ngClass]="{
+              'toolbar-button-active': toolbarStates[item].active,
+              'toolbar-button-disabled': toolbarStates[item].disabled,
+              'toolbar-button-dropdown': item === 'blockFormats' || item === 'inlineFormats'
+            }"
+            type="button"
+          >
+            <app-icon *ngIf="item === 'blockFormats'" [name]="'perspective'"></app-icon>
+            <app-icon *ngIf="item === 'blockquote'" [name]="'quote'"></app-icon>
+            <app-icon *ngIf="item === 'bold'" [name]="'bold'"></app-icon>
+            <app-icon *ngIf="item === 'bulletList'" [name]="'list'"></app-icon>
+            <app-icon *ngIf="item === 'center'" [name]="'align-center'"></app-icon>
+            <app-icon *ngIf="item === 'clear'" [name]="'clear-formatting'"></app-icon>
+            <app-icon *ngIf="item === 'code'" [name]="'code'"></app-icon>
+            <app-icon *ngIf="item === 'codeBlock'" [name]="'code-dots'"></app-icon>
+            <app-icon *ngIf="item === 'heading1'" [name]="'h-1'"></app-icon>
+            <app-icon *ngIf="item === 'heading2'" [name]="'h-2'"></app-icon>
+            <app-icon *ngIf="item === 'heading3'" [name]="'h-3'"></app-icon>
+            <app-icon *ngIf="item === 'heading4'" [name]="'h-4'"></app-icon>
+            <app-icon *ngIf="item === 'heading5'" [name]="'h-5'"></app-icon>
+            <app-icon *ngIf="item === 'heading6'" [name]="'h-6'"></app-icon>
+            <app-icon *ngIf="item === 'hardBreak'" [name]="'arrow-back'"></app-icon>
+            <app-icon *ngIf="item === 'highlight'" [name]="'highlight'"></app-icon>
+            <app-icon *ngIf="item === 'horizontalRule'" [name]="'separator-horizontal'"></app-icon>
+            <app-icon *ngIf="item === 'inlineFormats'" [name]="'palette'"></app-icon>
+            <app-icon *ngIf="item === 'italic'" [name]="'italic'"></app-icon>
+            <app-icon *ngIf="item === 'justify'" [name]="'align-justified'"></app-icon>
+            <app-icon *ngIf="item === 'left'" [name]="'align-left'"></app-icon>
+            <app-icon *ngIf="item === 'link'" [name]="'link'"></app-icon>
+            <app-icon *ngIf="item === 'normalize'" [name]="'list-numbers'"></app-icon>
+            <app-icon *ngIf="item === 'orderedList'" [name]="'list-numbers'"></app-icon>
+            <app-icon *ngIf="item === 'paragraph'" [name]="'typography'"></app-icon>
+            <app-icon *ngIf="item === 'redo'" [name]="'arrow-forward-up'"></app-icon>
+            <app-icon *ngIf="item === 'right'" [name]="'align-right'"></app-icon>
+            <app-icon *ngIf="item === 'underline'" [name]="'underline'"></app-icon>
+            <app-icon *ngIf="item === 'strike'" [name]="'strikethrough'"></app-icon>
+            <app-icon *ngIf="item === 'subscript'" [name]="'subscript'"></app-icon>
+            <app-icon *ngIf="item === 'superscript'" [name]="'superscript'"></app-icon>
+            <app-icon *ngIf="item === 'undo'" [name]="'arrow-back-up'"></app-icon>
+
+            <span *ngIf="item === 'blockFormats' || item === 'inlineFormats'">
+              <app-icon [name]="'chevron-down'"></app-icon>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="sticky right-0"
+        [ngClass]="{
+          'py-4': toolbarStates['fullscreen'].active
+        }"
+      >
+        <button
+          *ngIf="allowFullscreen"
+          [tooltip]="toolbarStates['fullscreen'].active ? 'Exit full screen' : 'Enter full screen'"
+          (click)="toolbarStates['fullscreen'].active = !toolbarStates['fullscreen'].active"
+          (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+          class="toolbar-button"
+          [ngClass]="{
+            'border-l': !toolbarStates['fullscreen'].active
+          }"
+          [ngClass]="{
+            'bg-primary-50 text-primary-700': toolbarStates['fullscreen'].active
+          }"
+          type="button"
+        >
+          <app-icon *ngIf="toolbarStates['fullscreen'].active" [name]="'minimize'"></app-icon>
+          <app-icon *ngIf="!toolbarStates['fullscreen'].active" [name]="'maximize'"></app-icon>
+        </button>
+      </div>
+    </div>
+
+    <div
+      #formatPopup
+      (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+      class="scrollbar-thin fixed left-0 top-full z-10 flex max-h-36 w-64 flex-col items-start gap-2 overflow-y-auto border bg-white p-2"
+      [ngClass]="{
+        'rounded-md': toolbarStates['fullscreen'].active,
+        'pointer-events-none invisible opacity-0':
+          !editor?.isFocused ||
+          ((!blockFormatsPopupVisible || !filteredBlockFormats.length) &&
+            (!inlineFormatsPopupVisible || !filteredInlineFormats.length))
+      }"
+      [ngStyle]="{
+        'top.px': formatPopupPosition.top,
+        'left.px': formatPopupPosition.left
+      }"
+      data-allow-outside-click
+    >
+      <ng-container *ngIf="blockFormatsPopupVisible && editor?.isFocused">
+        <app-checkbox
+          *ngFor="let format of filteredBlockFormats"
+          [(value)]="format.active"
+          (mousedown)="onClickFormatCheckbox(format, onBlockFormatChange)"
+          (valueChange)="onBlockFormatChange(format)"
+        >
+          {{ format.label || format.className }}
+        </app-checkbox>
+      </ng-container>
+
+      <ng-container *ngIf="inlineFormatsPopupVisible && editor?.isFocused">
+        <app-checkbox
+          *ngFor="let format of filteredInlineFormats"
+          [(value)]="format.active"
+          (mousedown)="onClickFormatCheckbox(format, onInlineFormatChange)"
+          (valueChange)="onInlineFormatChange(format)"
+        >
+          {{ format.label || format.className }}
+        </app-checkbox>
+      </ng-container>
+    </div>
+
+    <div
+      #container
+      (click)="blockFormatsPopupVisible = false; inlineFormatsPopupVisible = false"
+      (keydown.escape)="
+        toolbarStates['fullscreen'].active = false;
+        blockFormatsPopupVisible = false;
+        inlineFormatsPopupVisible = false
+      "
+      [ngClass]="{
+        'mx-auto max-w-4xl': toolbarStates['fullscreen'].active
+      }"
+    ></div>
+  </div>
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>
+
+<app-popup
+  [(visible)]="linkPopupVisible"
+  [width]="'24rem'"
+  (keydown.enter)="$event.preventDefault(); onLinkChange()"
+>
+  <app-popup-header [size]="'sm'" (close)="closeLinkPopup()">
+    <h2 class="truncate text-sm">{{ editingLink ? 'Edit link' : 'Add link' }}</h2>
+  </app-popup-header>
+
+  <div class="flex flex-col gap-4 p-4">
+    <app-url
+      [(value)]="linkUrl"
+      [error]="linkUrlError"
+      [id]="id + '-url'"
+      [label]="'Hyperlink'"
+      [linkable]="true"
+      [required]="true"
+      (valueChange)="onLinkUrlChange()"
+    ></app-url>
+
+    <app-button-group
+      [(value)]="linkTargetSwitcher"
+      [choices]="[
+        { label: 'No', value: '_self' },
+        { label: 'Yes', value: '_blank' },
+        { label: 'Custom target', value: 'custom' }
+      ]"
+      [label]="'Open in new tab'"
+      (valueChange)="onLinkTargetSwitcherChange()"
+      class="w-full"
+    ></app-button-group>
+
+    <app-text-input
+      *ngIf="linkTargetSwitcher === 'custom' && linkTarget !== null"
+      [(value)]="linkTarget"
+      [id]="id + '-target'"
+      [label]="'Target'"
+    ></app-text-input>
+
+    <app-text-input
+      *ngIf="linkLinked"
+      [(value)]="linkAppend"
+      [description]="'A string to append to the URL or path (e.g. **#anchor** or **?query**).'"
+      [id]="id + '-append'"
+      [label]="'Append'"
+    ></app-text-input>
+  </div>
+
+  <div class="flex gap-2 border-t p-4">
+    <button *ngIf="editingLink" (click)="removeLink()" class="button button-white" type="button">
+      <span>Remove</span>
+    </button>
+
+    <div class="ml-auto flex gap-2">
+      <button (click)="closeLinkPopup()" class="button button-white" type="button">
+        <span>Cancel</span>
+      </button>
+
+      <button
+        [attr.data-save]="linkPopupVisible || null"
+        (click)="onLinkChange()"
+        class="button"
+        type="button"
+      >
+        <span>{{ editingLink ? 'Update' : 'Add' }}</span>
+      </button>
+    </div>
+  </div>
+</app-popup>

@@ -1,0 +1,15 @@
+{
+  "include": ["**/*"],
+  "exclude": ["node_modules", "types"],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "Node",
+    "outDir": "types",
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "target": "ESNext"
+  }
+}

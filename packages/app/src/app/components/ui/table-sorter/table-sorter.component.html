@@ -1,0 +1,58 @@
+<button
+  *ngIf="sortable"
+  [class.active]="params.sort && params.sort[0].field === field.name"
+  [title]="
+    params.sort && params.sort[0].field === field.name && params.sort[0].direction === 'desc'
+      ? 'Sort in ascending order'
+      : 'Sort in descending order'
+  "
+  (click)="onClick()"
+  type="button"
+>
+  <app-icon
+    *ngIf="!params.sort || params.sort[0].field !== field.name"
+    [name]="'arrows-sort'"
+  ></app-icon>
+
+  <app-icon
+    *ngIf="
+      fieldValueType !== 'boolean' &&
+      fieldValueType !== 'number' &&
+      params.sort &&
+      params.sort[0].field === field.name &&
+      params.sort[0].direction === 'desc'
+    "
+    [name]="'sort-descending-letters'"
+  ></app-icon>
+
+  <app-icon
+    *ngIf="
+      fieldValueType !== 'boolean' &&
+      fieldValueType !== 'number' &&
+      params.sort &&
+      params.sort[0].field === field.name &&
+      params.sort[0].direction === 'asc'
+    "
+    [name]="'sort-ascending-letters'"
+  ></app-icon>
+
+  <app-icon
+    *ngIf="
+      (fieldValueType === 'boolean' || fieldValueType === 'number') &&
+      params.sort &&
+      params.sort[0].field === field.name &&
+      params.sort[0].direction === 'desc'
+    "
+    [name]="'sort-descending-numbers'"
+  ></app-icon>
+
+  <app-icon
+    *ngIf="
+      (fieldValueType === 'boolean' || fieldValueType === 'number') &&
+      params.sort &&
+      params.sort[0].field === field.name &&
+      params.sort[0].direction === 'asc'
+    "
+    [name]="'sort-ascending-numbers'"
+  ></app-icon>
+</button>

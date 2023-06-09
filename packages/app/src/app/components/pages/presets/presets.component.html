@@ -1,0 +1,15 @@
+<app-list
+  [canCreate]="config.can['createPresets']"
+  [canDelete]="config.can['deletePresets']"
+  [canDuplicate]="config.can['createPresets']"
+  [canUpdate]="config.can['updatePresets']"
+  [description]="config.presets.labels!.description || ''"
+  [itemLabelPlural]="config.presets.labels!.item!.plural"
+  [itemLabelSingular]="config.presets.labels!.item!.singular"
+  [model]="'Preset'"
+  [resetNavItemPath]="'presets'"
+  [table]="'presets'"
+  [title]="config.presets.labels!.title!.plural"
+  [translatable]="true"
+  (duplicate)="onDuplicate($event)"
+></app-list>

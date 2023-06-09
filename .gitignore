@@ -1,0 +1,7 @@
+dist/
+node_modules/
+tmp/
+types/
+.DS_Store
+*.sqlite3
+*.sqlite3-journal

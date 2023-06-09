@@ -1,0 +1,124 @@
+<form class="scrollbar-thin h-full flex-1 overflow-auto">
+  <div
+    class="sticky top-0 z-[31] flex min-h-[6.25rem] items-center justify-between gap-8 bg-gray-50/75 p-8 backdrop-blur backdrop-filter"
+  >
+    <div class="flex items-center gap-3">
+      <a
+        [routerLink]="['..']"
+        [tooltip]="'Show all ' + pluralItemLowerCase"
+        class="button button-white button-square"
+      >
+        <app-icon [name]="'chevron-left'"></app-icon>
+      </a>
+
+      <h1 *ngIf="exists" class="truncate text-xl">
+        {{ config.can['updatePosts:' + collection.name] ? 'Edit' : 'View' }}
+        {{ singularItemLowerCase }}
+      </h1>
+
+      <h1 *ngIf="!exists" class="truncate text-xl">New {{ singularItemLowerCase }}</h1>
+    </div>
+
+    <div *ngIf="!exists || config.can['updatePosts:' + collection.name]" class="flex gap-2">
+      <app-history-buttons
+        [historyLength]="history.length"
+        [stateIndex]="stateIndex"
+        (action)="$event === 'undo' ? undo() : redo()"
+      ></app-history-buttons>
+
+      <button
+        *ngIf="exists && config.can['deletePosts:' + collection.name]"
+        [tooltip]="confirm === 'delete-post-' + post.id ? 'Confirm to !!delete!!' : 'Delete'"
+        [tooltipShowOnUpdate]="confirm === 'delete-post-' + post.id"
+        (click)="onDeletePost($event)"
+        class="button button-white-red button-square"
+        type="button"
+      >
+        <app-icon [name]="'trash'"></app-icon>
+      </button>
+
+      <button
+        *ngIf="
+          (exists && config.can['updatePosts:' + collection.name]) ||
+          (!exists && config.can['createPosts:' + collection.name])
+        "
+        (click)="onSubmit()"
+        class="button"
+        type="button"
+      >
+        <span
+          *ngIf="stateIndex && initialState !== history[stateIndex]"
+          class="!absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white"
+        ></span>
+        <span>{{ exists ? 'Update' : 'Create' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex items-start gap-6 p-8 pb-0 pr-6 pt-0">
+    <app-fields
+      *ngIf="hasVisibleCustomFields"
+      [conditionalLogic]="conditionalLogic"
+      [disabled]="exists && !config.can['updatePosts:' + collection.name]"
+      [fields]="collection.fields!"
+      [records]="post"
+      [stickyTopBorder]="true"
+      [validator]="validator"
+      (edited)="pushHistoryState()"
+      class="mb-8 flex-1"
+    ></app-fields>
+
+    <div
+      *ngIf="!hasVisibleCustomFields"
+      class="mb-8 flex-1 border bg-white p-4 text-sm text-gray-400"
+    >
+      <p>No fields to display</p>
+    </div>
+
+    <div
+      class="scrollbar-thin sticky top-[6.25rem] flex h-[calc(100vh-9.75rem)] w-full max-w-xs flex-col gap-4 overflow-auto px-2 pb-8 text-sm"
+    >
+      <app-button-group
+        [(value)]="post.public"
+        [choices]="[
+          { label: 'Draft', value: false },
+          { label: 'Public', value: true }
+        ]"
+        [disabled]="
+          (exists && !config.can['updatePosts:' + collection.name]) ||
+          (!exists && !config.can['createPosts:' + collection.name])
+        "
+        [error]="validator.errors['public']"
+        [label]="'Status'"
+        (valueChange)="pushHistoryState()"
+        class="w-full"
+      ></app-button-group>
+
+      <app-date-time
+        [(value)]="post.publishDate!"
+        [description]="publishDateDescription"
+        [disabled]="
+          (exists && !config.can['updatePosts:' + collection.name]) ||
+          (!exists && !config.can['createPosts:' + collection.name])
+        "
+        [error]="validator.errors['publishDate']"
+        [label]="'Publish date'"
+        (valueChange)="pushHistoryState()"
+      ></app-date-time>
+
+      <app-translations
+        *ngIf="exists && config.cms.languages!.length > 1 && collection.translatable"
+        [canCreate]="config.can['createPosts:' + collection.name]"
+        [canUpdate]="config.can['updatePosts:' + collection.name]"
+        [record]="post"
+        (addTranslation)="addTranslation($event)"
+        (duplicateTranslation)="addTranslation($event, true)"
+      ></app-translations>
+    </div>
+  </div>
+</form>
+
+<app-media-picker
+  [(visible)]="mediaPickerVisible"
+  [pickRequirements]="mediaPickerRequirements"
+></app-media-picker>

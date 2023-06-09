@@ -1,0 +1,3 @@
+import { Config } from '@pruvious-test/cms'
+
+export default async (): Promise<Config> => ({})

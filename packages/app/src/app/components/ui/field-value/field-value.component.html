@@ -1,0 +1,277 @@
+<span
+  [ngClass]="{
+    dimmed: dimmed
+  }"
+>
+  <span
+    *ngIf="
+      field.type === 'checkbox' ||
+      field.type === 'checkboxes' ||
+      field.type === 'date' ||
+      field.type === 'dateTime' ||
+      field.type === 'editor' ||
+      field.type === 'number' ||
+      field.type === 'slider' ||
+      field.type === 'switch' ||
+      field.type === 'text' ||
+      field.type === 'textArea' ||
+      field.type === 'time'
+    "
+    [title]="displayedValue"
+    class="truncate"
+  >
+    {{ displayedValue }}
+  </span>
+
+  <span
+    *ngIf="field.type === 'buttons' || field.type === 'select'"
+    [title]="displayedValue + (value ? ' (' + value + ')' : '')"
+    class="truncate"
+  >
+    {{ displayedValue }}
+  </span>
+
+  <!-- Image -->
+
+  <span *ngIf="field.type === 'image' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'image' && !simplified" class="truncate">
+    <a
+      *ngIf="record"
+      [queryParams]="{ 'filters[id][$eq]': record['id'] }"
+      [routerLink]="['/media']"
+      [style.backgroundImage]="'url(assets/images/image-background.png)'"
+      [title]="
+        record['name'] +
+        (record['info']
+          ? ' (' + record['info']['width'] + '×' + record['info']['height'] + ')'
+          : '')
+      "
+      [tooltip]="'View image'"
+      class="relative flex h-16 w-16 shrink-0 rounded-md border bg-white before:absolute before:inset-0 before:rounded-md before:bg-gray-900 before:opacity-0 before:transition hover:before:opacity-50"
+      [ngClass]="{
+        'pointer-events-none': !record['path']
+      }"
+    >
+      <img
+        *ngIf="record && record['path']"
+        [alt]="record['description']"
+        [src]="config.uploadsBaseUrl + (record['thumbnail'] ?? record['path'])"
+        class="relative m-auto h-full w-full rounded object-cover"
+        [ngClass]="{
+          'object-cover':
+            record['info'] &&
+            (record['info']['format'] === 'jpg' ||
+              record['info']['format'] === 'jpeg' ||
+              record['info']['format'] === 'png' ||
+              record['info']['format'] === 'webp' ||
+              record['info']['format'] === 'avif' ||
+              record['info']['format'] === 'heif'),
+          'object-contain p-2':
+            !record['info'] ||
+            (record['info']['format'] !== 'jpg' &&
+              record['info']['format'] !== 'jpeg' &&
+              record['info']['format'] !== 'png' &&
+              record['info']['format'] !== 'webp' &&
+              record['info']['format'] !== 'avif' &&
+              record['info']['format'] !== 'heif')
+        }"
+        [ngStyle]="{
+          maxWidth: record['info'] ? record['info']['width'] + 'px' : '100%',
+          maxHeight: record['info'] ? record['info']['height'] + 'px' : '100%'
+        }"
+      />
+    </a>
+    <span *ngIf="!record">{{ displayedValue }}</span>
+  </span>
+
+  <!-- Link and URL -->
+
+  <span
+    *ngIf="(field.type === 'link' || field.type === 'url') && simplified"
+    [title]="displayedValue"
+    class="truncate"
+  >
+    {{ displayedValue }}
+  </span>
+
+  <span
+    *ngIf="(field.type === 'link' || field.type === 'url') && !simplified"
+    class="flex items-center gap-2 py-1 pr-1"
+  >
+    <a
+      *ngIf="link"
+      [href]="link"
+      [tooltip]="'Open link in new tab'"
+      [tooltipOffset]="[0, 8]"
+      class="hocus:text-primary-700 truncate transition"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {{ displayedValue }}
+    </a>
+
+    <span *ngIf="!link" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readPages']"
+      [routerLink]="['/pages', record['id']]"
+      [tooltip]="
+        (config.can['updatePages'] ? 'Edit linked ' : 'View linked ') +
+        (config.pages.labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updatePages']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updatePages']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- Repeater -->
+
+  <span *ngIf="field.type === 'repeater' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue | stringify }}
+  </span>
+
+  <span *ngIf="field.type === 'repeater' && !simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <!-- Page -->
+
+  <span *ngIf="field.type === 'page' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'page' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readPages']"
+      [routerLink]="['/pages', record['id']]"
+      [tooltip]="
+        (config.can['updatePages'] ? 'Edit related ' : 'View related ') +
+        (config.pages.labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updatePages']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updatePages']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- Preset -->
+
+  <span *ngIf="field.type === 'preset' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'preset' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readPresets']"
+      [routerLink]="['/presets', record['id']]"
+      [tooltip]="
+        (config.can['updatePresets'] ? 'Edit related ' : 'View related ') +
+        (config.presets.labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updatePresets']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updatePresets']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- File -->
+
+  <span *ngIf="field.type === 'file' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'file' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readMedia']"
+      [queryParams]="{ 'filters[id][$eq]': record['id'] }"
+      [routerLink]="['/media']"
+      [tooltip]="'View related file'"
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updateMedia']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updateMedia']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- Post -->
+
+  <span *ngIf="field.type === 'post' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'post' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readPosts:' + field.collection]"
+      [routerLink]="['/collections', field.collection, 'posts', record['id']]"
+      [tooltip]="
+        (config.can['updatePosts:' + field.collection] ? 'Edit related ' : 'View related ') +
+        (config.collections[field.collection].labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updatePosts:' + field.collection]" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updatePosts:' + field.collection]" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- Role -->
+
+  <span *ngIf="field.type === 'role' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'role' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readRoles']"
+      [routerLink]="['/roles', record['id']]"
+      [tooltip]="
+        (config.can['updateRoles'] ? 'Edit related ' : 'View related ') +
+        (config.roles.labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updateRoles']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updateRoles']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+
+  <!-- User -->
+
+  <span *ngIf="field.type === 'user' && simplified" [title]="displayedValue" class="truncate">
+    {{ displayedValue }}
+  </span>
+
+  <span *ngIf="field.type === 'user' && !simplified" class="flex items-center gap-2 py-1 pr-1">
+    <span [title]="displayedValue" class="truncate">{{ displayedValue }}</span>
+
+    <a
+      *ngIf="record && config.can['readUser']"
+      [routerLink]="['/users', record['id']]"
+      [tooltip]="
+        (config.can['updateUser'] ? 'Edit related ' : 'View related ') +
+        (config.users.labels!.item!.singular | lowercaseFirstLetter)
+      "
+      class="button button-white button-square-xs"
+    >
+      <app-icon *ngIf="config.can['updateUser']" [name]="'pencil'"></app-icon>
+      <app-icon *ngIf="!config.can['updateUser']" [name]="'eye'"></app-icon>
+    </a>
+  </span>
+</span>

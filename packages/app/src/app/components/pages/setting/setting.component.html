@@ -1,0 +1,78 @@
+<form class="scrollbar-thin h-full flex-1 overflow-auto">
+  <div
+    class="sticky top-0 z-[31] flex min-h-[6.25rem] items-center justify-between gap-8 bg-gray-50/75 p-8 backdrop-blur backdrop-filter"
+  >
+    <h1 [title]="settingConfig.description || ''" class="truncate text-xl">
+      {{ settingConfig.label || (settingConfig.group! | camelToLabel) }}
+    </h1>
+
+    <div *ngIf="this.config.can['updateSettings:' + setting.group]" class="flex gap-2">
+      <app-history-buttons
+        [historyLength]="history.length"
+        [stateIndex]="stateIndex"
+        (action)="$event === 'undo' ? undo() : redo()"
+      ></app-history-buttons>
+
+      <button (click)="restoreDefaults()" class="button button-white" type="button">
+        <span>Restore defaults</span>
+      </button>
+
+      <button
+        *ngIf="config.can['updateSettings:' + setting.group]"
+        (click)="onSubmit()"
+        class="button"
+        type="button"
+      >
+        <span
+          *ngIf="stateIndex && initialState !== history[stateIndex]"
+          class="!absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white"
+        ></span>
+        <span>Save</span>
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="flex items-start gap-6 p-8 pb-0 pt-0"
+    [ngClass]="{
+      'pr-6': config.cms.languages!.length > 1 && settingConfig.translatable,
+      'pr-8': config.cms.languages!.length === 1 || !settingConfig.translatable
+    }"
+  >
+    <app-fields
+      *ngIf="hasVisibleCustomFields"
+      [conditionalLogic]="conditionalLogic"
+      [disabled]="!this.config.can['updateSettings:' + setting.group]"
+      [fields]="settingConfig.fields"
+      [records]="setting.fields"
+      [stickyTopBorder]="true"
+      [validator]="validator"
+      (edited)="pushHistoryState()"
+      class="mb-8 flex-1"
+    ></app-fields>
+
+    <div
+      *ngIf="!hasVisibleCustomFields"
+      class="mb-8 flex-1 border bg-white p-4 text-sm text-gray-400"
+    >
+      <p>No fields to display</p>
+    </div>
+
+    <div
+      *ngIf="config.cms.languages!.length > 1 && settingConfig.translatable"
+      class="scrollbar-thin sticky top-[6.25rem] flex h-[calc(100vh-9.75rem)] w-full max-w-xs flex-col gap-4 overflow-auto px-2 pb-8 text-sm"
+    >
+      <app-setting-translations
+        [canMirror]="config.can['updateSettings:' + setting.group]"
+        [canUpdate]="config.can['updateSettings:' + setting.group]"
+        [record]="setting"
+        (mirrorTranslation)="onMirrorTranslation($event)"
+      ></app-setting-translations>
+    </div>
+  </div>
+</form>
+
+<app-media-picker
+  [(visible)]="mediaPickerVisible"
+  [pickRequirements]="mediaPickerRequirements"
+></app-media-picker>

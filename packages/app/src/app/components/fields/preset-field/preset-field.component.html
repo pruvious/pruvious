@@ -1,0 +1,41 @@
+<div>
+  <app-relation
+    [(value)]="records[field.name]"
+    [choiceLabel]="field.choiceLabel ? field.choiceLabel : 'title'"
+    [description]="field.description ?? ''"
+    [disabled]="disabled"
+    [error]="validator.errors[idPrefix + field.name]"
+    [key]="key ? key + '.' + field.name : field.name"
+    [label]="field.label || (field.name | camelToLabel)"
+    [language]="language"
+    [language]="field.language"
+    [name]="idPrefix + field.name"
+    [placeholder]="field.placeholder ?? ''"
+    [previewFields]="field.previewFields"
+    [required]="!!field.required"
+    [table]="'presets'"
+    (record)="onRecordChange($event)"
+    (valueChange)="changed.emit()"
+    class="w-full"
+  ></app-relation>
+
+  <div *ngIf="errors.length" class="text-vs mt-1.5 text-gray-400">
+    <p>
+      The following blocks from this
+      {{ config.presets.labels!.item!.singular | lowercaseFirstLetter }} were skipped:
+    </p>
+
+    <ul class="ml-5 mt-1 flex list-disc flex-col items-start">
+      <li
+        *ngFor="let error of errors"
+        [tooltip]="error.message"
+        [tooltipHighlightApostrophes]="true"
+        [tooltipOffset]="[0, 8]"
+        class="cursor-help"
+      >
+        <strong class="text-gray-500">{{ error.blockName }}</strong>
+        (ID: {{ error.blockId }})
+      </li>
+    </ul>
+  </div>
+</div>

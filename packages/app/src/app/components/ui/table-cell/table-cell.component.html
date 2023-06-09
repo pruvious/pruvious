@@ -1,0 +1,60 @@
+<div class="flex flex-col items-start gap-0.5">
+  <a
+    *ngIf="index === 0"
+    [routerLink]="[id]"
+    class="hocus:text-primary-700 max-w-full truncate whitespace-pre-line font-medium transition"
+  >
+    <app-field-value
+      [cache]="cache"
+      [data]="data"
+      [field]="field"
+      [simplified]="true"
+      [value]="value"
+    ></app-field-value>
+  </a>
+
+  <div *ngIf="index === 0" class="flex max-w-full gap-2">
+    <a [routerLink]="[id]" class="hocus:text-primary-700 truncate text-xs text-gray-400 transition">
+      {{ canUpdate ? 'Edit' : 'View' }}
+    </a>
+
+    <button
+      *ngIf="canDuplicate"
+      (click)="duplicate.emit(id)"
+      class="hocus:text-primary-700 truncate text-xs text-gray-400 transition"
+      type="button"
+    >
+      Duplicate
+    </button>
+
+    <button
+      *ngIf="canPreview"
+      (click)="preview.emit(id)"
+      class="hocus:text-primary-700 truncate text-xs text-gray-400 transition"
+      type="button"
+    >
+      Preview
+    </button>
+
+    <button
+      *ngIf="canDelete"
+      [tooltip]="confirm === 'delete-row-' + id ? 'Confirm to !!delete!!' : ''"
+      [tooltipOffset]="[0, 8]"
+      [tooltipShowOnUpdate]="confirm === 'delete-row-' + id"
+      (click)="onDelete($event)"
+      class="hocus:text-red-500 truncate text-xs text-gray-400 transition"
+      type="button"
+    >
+      Delete
+    </button>
+  </div>
+
+  <app-field-value
+    *ngIf="index > 0"
+    [cache]="cache"
+    [data]="data"
+    [field]="field"
+    [value]="value"
+    class="max-w-full truncate"
+  ></app-field-value>
+</div>

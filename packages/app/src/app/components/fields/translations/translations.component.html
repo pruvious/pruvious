@@ -1,0 +1,83 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || description" class="flex w-full items-end justify-between gap-4">
+    <div
+      *ngIf="label"
+      (click)="onClickLabel()"
+      (mouseenter)="labelHovered = true"
+      (mouseleave)="labelHovered = false"
+      class="text-vs flex cursor-default gap-1 font-medium text-gray-900"
+    >
+      <span>
+        {{ label }}
+      </span>
+    </div>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <div
+    #container
+    class="focus-within:border-primary-700 hover:border-primary-700 w-full space-y-2 rounded-md border bg-white px-2.5 py-[7px] transition focus-within:ring"
+    [ngClass]="{
+      'border-primary-700': labelHovered
+    }"
+  >
+    <div
+      *ngFor="let language of config.cms.languages"
+      class="flex items-center justify-between gap-2"
+    >
+      <span class="truncate">
+        <span>{{ language.label }}</span>
+      </span>
+
+      <span *ngIf="language.code === record.language" class="text-gray-400">(current)</span>
+
+      <div *ngIf="language.code !== record.language" class="flex gap-2">
+        <button
+          *ngIf="!record!.translations![language.code] && canCreate"
+          [tooltip]="'Add translation'"
+          (click)="addTranslation.emit(language.code)"
+          class="button button-white button-square-xs"
+          type="button"
+        >
+          <app-icon [name]="'plus'"></app-icon>
+        </button>
+
+        <button
+          *ngIf="!record!.translations![language.code] && canCreate"
+          [tooltip]="'Add translation with this content'"
+          (click)="duplicateTranslation.emit(language.code)"
+          class="button button-white button-square-xs"
+          type="button"
+        >
+          <app-icon [name]="'copy'"></app-icon>
+        </button>
+
+        <button
+          *ngIf="record!.translations![language.code] && canMirror"
+          [tooltip]="'Copy this content into translation'"
+          (click)="mirrorTranslation.emit(language.code)"
+          class="button button-white button-square-xs"
+          type="button"
+        >
+          <app-icon [name]="'copy'"></app-icon>
+        </button>
+
+        <a
+          *ngIf="record!.translations![language.code]"
+          [routerLink]="['../', record!.translations![language.code]!.id]"
+          [tooltip]="canUpdate ? 'Edit translation' : 'View translation'"
+          class="button button-white button-square-xs"
+        >
+          <app-icon *ngIf="canUpdate" [name]="'pencil'"></app-icon>
+          <app-icon *ngIf="!canUpdate" [name]="'eye'"></app-icon>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

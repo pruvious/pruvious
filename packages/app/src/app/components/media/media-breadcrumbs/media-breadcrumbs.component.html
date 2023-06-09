@@ -1,0 +1,38 @@
+<ul class="flex gap-1 overflow-hidden text-sm">
+  <li>
+    <button
+      *ngIf="directory"
+      (click)="openRoot.emit()"
+      class="hocus:text-primary-700 text-gray-400 outline-none transition"
+      data-autofocus-ignore
+      title="Open root folder"
+      type="button"
+    >
+      {{ rootLabel }}
+    </button>
+
+    <span *ngIf="!directory" title="Root folder">{{ rootLabel }}</span>
+  </li>
+
+  <li
+    *ngFor="let directory of tree"
+    class="flex gap-1 overflow-hidden truncate before:font-normal before:text-gray-400 before:content-['/']"
+  >
+    <button
+      [title]="'Open ' + directory.name"
+      (click)="directory.id && openDirectory.emit(directory)"
+      class="hocus:text-primary-700 truncate text-gray-400 outline-none transition"
+      data-autofocus-ignore
+      type="button"
+    >
+      {{ directory.name }}
+    </button>
+  </li>
+
+  <li
+    *ngIf="directory"
+    class="flex gap-1 truncate before:font-normal before:text-gray-400 before:content-['/']"
+  >
+    <span class="truncate">{{ directory.name }}</span>
+  </li>
+</ul>

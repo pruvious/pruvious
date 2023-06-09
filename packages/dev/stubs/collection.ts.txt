@@ -1,0 +1,7 @@
+import { Collection } from '@pruvious-test/cms'
+
+export default async (): Promise<Collection> => ({
+  name: 'collection-name',
+  translatable: true,
+  fields: [],
+})

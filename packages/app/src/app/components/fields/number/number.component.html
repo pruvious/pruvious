@@ -1,0 +1,47 @@
+<div class="relative flex w-full flex-col items-start gap-1">
+  <div *ngIf="label || name || description" class="flex w-full items-end justify-between gap-4">
+    <label *ngIf="label || name" [for]="id" class="text-vs flex gap-1 font-medium text-gray-900">
+      <span *ngIf="required" class="text-red-500" title="Required">*</span>
+      <span>
+        {{ label || name }}
+      </span>
+    </label>
+
+    <app-icon
+      *ngIf="description"
+      [name]="'help'"
+      [tooltip]="description"
+      class="mb-0.5 h-4 w-4 shrink-0 text-gray-400"
+    ></app-icon>
+  </div>
+
+  <input
+    #input
+    [(ngModel)]="value"
+    [attr.name]="name || id"
+    [attr.placeholder]="placeholder"
+    [disabled]="disabled"
+    [id]="id"
+    [max]="max"
+    [min]="min"
+    (blur)="onBlurInput()"
+    (focus)="onFocusInput()"
+    (keydown.escape)="input.blur()"
+    (keydown.tab)="input.blur()"
+    (keydown)="onKeyDown($event)"
+    (ngModelChange)="valueChange.emit(value)"
+    class="h-9 w-full truncate rounded-md border bg-white px-2.5 text-sm outline-none transition placeholder:text-gray-300 focus:ring"
+    [ngClass]="{
+      'hocus:border-primary-700': !disabled,
+      'text-gray-400': disabled
+    }"
+    type="number"
+  />
+
+  <div *ngIf="error" class="text-vs flex gap-1.5 pt-0.5 text-red-500">
+    <app-icon [name]="'alert-triangle'" class="h-5 w-4 shrink-0 py-0.5"></app-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>
+
+<ng-content></ng-content>

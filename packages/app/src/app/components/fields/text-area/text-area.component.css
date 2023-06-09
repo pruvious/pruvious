@@ -1,0 +1,8 @@
+.text-area-container::after {
+  content: attr(data-replicated-value) ' ';
+}
+
+.text-area-container::after,
+textarea {
+  grid-area: 1 / 1 / 2 / 2;
+}
