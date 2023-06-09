@@ -11,8 +11,8 @@ import {
   ValidationResults,
   standardPresetColumns,
   standardPresetFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
 import Preset from 'App/Models/Preset'
 import Translation from 'App/Models/Translation'
 import PresetValidator from 'App/Validators/PresetValidator'

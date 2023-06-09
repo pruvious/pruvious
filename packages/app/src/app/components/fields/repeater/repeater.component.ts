@@ -6,8 +6,8 @@ import {
   FieldGroup,
   flattenFields,
   getDefaultFieldValue,
-} from '@pruvious-test/shared'
-import { uppercaseFirstLetter } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { uppercaseFirstLetter } from '@pruvious/utils'
 import { SortableOptions } from 'sortablejs'
 import { ClickService } from 'src/app/services/click.service'
 import { DragImageService } from 'src/app/services/drag-image.service'

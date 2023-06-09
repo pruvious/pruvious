@@ -15,8 +15,8 @@ import {
   sanitizeAllowedBlocks,
   sanitizeBlocks,
   sanitizeFields,
-} from '@pruvious-test/shared'
-import { isObject, isUrl, isUrlPath, lowercaseFirstLetter, trimAll } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { isObject, isUrl, isUrlPath, lowercaseFirstLetter, trimAll } from '@pruvious/utils'
 import {
   blocks,
   collectionsConfig,

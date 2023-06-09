@@ -7,7 +7,7 @@
     "noEmit": true,
     "outDir": "types",
     "paths": {
-      "@pruvious-test/types": ["./.types"]
+      "@pruvious/types": ["./.types"]
     },
     "skipLibCheck": true,
     "strictNullChecks": true,

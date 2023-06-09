@@ -11,8 +11,8 @@ import {
   standardRoleFields,
   standardUploadFields,
   standardUserFields,
-} from '@pruvious-test/shared'
-import { Debounce, uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Debounce, uniqueArray } from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

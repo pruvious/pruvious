@@ -1,4 +1,4 @@
-import { EditorToolbarItem, OptimizedImage, OptimizedWebpImage } from '@pruvious-test/shared'
+import { EditorToolbarItem, OptimizedImage, OptimizedWebpImage } from '@pruvious/shared'
 
 export function getKeyNameArray(value: string): { key: string; name: string; array: string[] } {
   let key: string = ''

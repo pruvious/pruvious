@@ -1,4 +1,4 @@
-import { Spawn, pc } from '@pruvious-test/build'
+import { Spawn, pc } from '@pruvious/build'
 import fs from 'fs-extra'
 import path from 'path'
 
@@ -14,6 +14,6 @@ export async function runPruviousBuild(showOutput: boolean = true) {
 
   fs.writeFileSync(
     path.resolve(process.cwd(), 'packages/pruvious/.output/server.js'),
-    "process.env.PRUVIOUS_OUTPUT_DIR=__dirname\nrequire('@pruvious-test/cms/server.js')",
+    "process.env.PRUVIOUS_OUTPUT_DIR=__dirname\nrequire('@pruvious/cms/server.js')",
   )
 }

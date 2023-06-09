@@ -19,8 +19,8 @@ import {
   extractSpecialFields,
   sanitizeFields,
   standardCollectionFields,
-} from '@pruvious-test/shared'
-import { uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { uniqueArray } from '@pruvious/utils'
 import { collectionsConfig } from 'App/imports'
 import { filterExistingIds, getMetaFields, initMetaFields, rebuildKeywords } from 'App/model-utils'
 import Page from 'App/Models/Page'

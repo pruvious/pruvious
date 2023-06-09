@@ -7,8 +7,8 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core'
-import { Redirect } from '@pruvious-test/shared'
-import { Debounce, isUrl, isUrlPath } from '@pruvious-test/utils'
+import { Redirect } from '@pruvious/shared'
+import { Debounce, isUrl, isUrlPath } from '@pruvious/utils'
 
 @Component({
   selector: 'app-redirection-test',

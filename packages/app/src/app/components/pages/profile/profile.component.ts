@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { Component, HostListener, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
-import { ConditionalLogic, dayjs, standardUserFields, UserRecord } from '@pruvious-test/shared'
+import { ConditionalLogic, dayjs, standardUserFields, UserRecord } from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { interval, takeUntil } from 'rxjs'
 import { HistoryComponent } from 'src/app/components/history.component'

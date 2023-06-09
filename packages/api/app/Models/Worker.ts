@@ -1,5 +1,5 @@
 import { BaseModel, beforeCreate, column } from '@ioc:Adonis/Lucid/Orm'
-import { nanoid } from '@pruvious-test/shared'
+import { nanoid } from '@pruvious/shared'
 import { DateTime } from 'luxon'
 
 export default class Worker extends BaseModel {

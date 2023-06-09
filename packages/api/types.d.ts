@@ -109,7 +109,7 @@ export {
   Validator,
   parseQueryString,
   stringifyQueryParameters,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 export { Action } from './app/Controllers/Http/ActionsController'
 export {
   createPage,

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Bind } from '@pruvious-test/utils'
+import { Bind } from '@pruvious/utils'
 import { Subject } from 'rxjs'
 import { IdService } from 'src/app/services/id.service'
 

@@ -8,8 +8,8 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { Choice } from '@pruvious-test/shared'
-import { Debounce, clearArray, next, prev } from '@pruvious-test/utils'
+import { Choice } from '@pruvious/shared'
+import { Debounce, clearArray, next, prev } from '@pruvious/utils'
 import { IdService } from 'src/app/services/id.service'
 
 @Component({

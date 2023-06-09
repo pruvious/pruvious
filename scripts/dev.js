@@ -1,6 +1,6 @@
 import watcher from '@parcel/watcher'
-import { pc, Spawn } from '@pruvious-test/build'
-import { debounceParallel } from '@pruvious-test/utils'
+import { pc, Spawn } from '@pruvious/build'
+import { debounceParallel } from '@pruvious/utils'
 import fs from 'fs-extra'
 
 process.env.PRUVIOUS_DEV = '1'
@@ -27,13 +27,13 @@ if (!fs.existsSync('packages/api/pruvious.config.js')) {
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious-test/utils
+| @pruvious/utils
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev -w @pruvious-test/utils',
+  command: 'npm run dev -w @pruvious/utils',
   showOutput: true,
   outputPrefix: `${pc.blue('UTL')} ${pc.gray('|')}`,
 })
@@ -57,13 +57,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious-test/shared
+| @pruvious/shared
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev -w @pruvious-test/shared',
+  command: 'npm run dev -w @pruvious/shared',
   showOutput: true,
   outputPrefix: `${pc.dim('SRD')} ${pc.gray('|')}`,
 })
@@ -121,7 +121,7 @@ await new Spawn({
 */
 
 await new Spawn({
-  command: 'npm run dev -w create-pruvious-test',
+  command: 'npm run dev -w create-pruvious',
   showOutput: true,
   outputPrefix: `${pc.red('CR1')} ${pc.gray('|')}`,
 })
@@ -130,13 +130,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruject-test/dev
+| @pruject/dev
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev -w @pruject-test/dev',
+  command: 'npm run dev -w @pruject/dev',
   showOutput: true,
   outputPrefix: `${pc.cyan('PRJ')} ${pc.dim('|')}`,
 })
@@ -151,7 +151,7 @@ await new Spawn({
 */
 
 await new Spawn({
-  command: 'npm run dev -w create-pruject-test',
+  command: 'npm run dev -w create-pruject',
   showOutput: true,
   outputPrefix: `${pc.red('CR2')} ${pc.dim('|')}`,
 })
@@ -160,7 +160,7 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious-test/dev
+| @pruvious/dev
 |--------------------------------------------------------------------------
 |
 */
@@ -168,7 +168,7 @@ await new Spawn({
 fs.copySync('packages/shared/src/types.ts', 'packages/dev/stubs/types.ts.txt')
 
 await new Spawn({
-  command: 'npm run dev -w @pruvious-test/dev',
+  command: 'npm run dev -w @pruvious/dev',
   showOutput: true,
   outputPrefix: `${pc.magenta('DEV')} ${pc.gray('|')}`,
 })
@@ -177,13 +177,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious-test/zip
+| @pruvious/zip
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev -w @pruvious-test/zip',
+  command: 'npm run dev -w @pruvious/zip',
   showOutput: true,
   outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
 })
@@ -192,14 +192,14 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious-test/nuxt
+| @pruvious/nuxt
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
   command:
-    'npm run dev:prepare -w @pruvious-test/nuxt && npm run dev -w @pruvious-test/nuxt -- --dev',
+    'npm run dev:prepare -w @pruvious/nuxt && npm run dev -w @pruvious/nuxt -- --dev',
   showOutput: true,
   outputPrefix: `${pc.green('NXT')} ${pc.gray('|')}`,
 })

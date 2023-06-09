@@ -10,7 +10,7 @@
     "declaration": true,
     "removeComments": false,
     "paths": {
-      "@pruvious-test/types": ["./.types"],
+      "@pruvious/types": ["./.types"],
       "App/*": ["./app/*"],
       "Config/*": ["./config/*"],
       "Contracts/*": ["./contracts/*"],

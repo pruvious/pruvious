@@ -7,8 +7,8 @@ import {
   Output,
   ViewChild,
 } from '@angular/core'
-import { Choice, Field } from '@pruvious-test/shared'
-import { Debounce, clearArray, next, prev } from '@pruvious-test/utils'
+import { Choice, Field } from '@pruvious/shared'
+import { Debounce, clearArray, next, prev } from '@pruvious/utils'
 import { IdService } from 'src/app/services/id.service'
 
 export type Autocomplete =

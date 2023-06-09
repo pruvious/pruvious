@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core'
 import { Router } from '@angular/router'
-import { clearArray } from '@pruvious-test/utils'
+import { clearArray } from '@pruvious/utils'
 import { BaseComponent } from 'src/app/components/base.component'
 import { Index } from 'src/app/services/api.service'
 

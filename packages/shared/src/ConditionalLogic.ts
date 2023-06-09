@@ -1,4 +1,4 @@
-import { clearObject, resolvePath } from '@pruvious-test/utils'
+import { clearObject, resolvePath } from '@pruvious/utils'
 import dayjs from 'dayjs'
 import { getDefaultFieldValue } from './fields'
 import {

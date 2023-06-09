@@ -1,4 +1,4 @@
-import { pc, Spawn } from '@pruvious-test/build'
+import { pc, Spawn } from '@pruvious/build'
 import fs from 'fs-extra'
 import prettyMs from 'pretty-ms'
 
@@ -29,13 +29,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Build @pruvious-test/shared
+| Build @pruvious/shared
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run build -w @pruvious-test/shared',
+  command: 'npm run build -w @pruvious/shared',
   showOutput: true,
   outputPrefix: `${pc.dim('SRD')} ${pc.gray('|')}`,
 })
@@ -74,13 +74,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Build @pruvious-test/nuxt
+| Build @pruvious/nuxt
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev:prepare -w @pruvious-test/nuxt && npm run prepack -w @pruvious-test/nuxt',
+  command: 'npm run dev:prepare -w @pruvious/nuxt && npm run prepack -w @pruvious/nuxt',
   showOutput: true,
   outputPrefix: `${pc.green('NXT')} ${pc.gray('|')}`,
 })
@@ -106,7 +106,7 @@ fs.copySync('packages/api/database.sqlite3', 'packages/create/stubs/database.sql
 fs.copySync('packages/api/database.sqlite3', 'packages/dev/stubs/database.sqlite3.txt')
 
 await new Spawn({
-  command: 'npm run build -w create-pruvious-test',
+  command: 'npm run build -w create-pruvious',
   showOutput: true,
   outputPrefix: `${pc.red('CR1')} ${pc.gray('|')}`,
 })
@@ -115,13 +115,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Build @pruject-test/dev
+| Build @pruject/dev
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run build -w @pruject-test/dev',
+  command: 'npm run build -w @pruject/dev',
   showOutput: true,
   outputPrefix: `${pc.cyan('PRJ')} ${pc.dim('|')}`,
 })
@@ -136,7 +136,7 @@ await new Spawn({
 */
 
 await new Spawn({
-  command: 'npm run build -w create-pruject-test',
+  command: 'npm run build -w create-pruject',
   showOutput: true,
   outputPrefix: `${pc.red('CR2')} ${pc.dim('|')}`,
 })
@@ -145,7 +145,7 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Build @pruvious-test/dev
+| Build @pruvious/dev
 |--------------------------------------------------------------------------
 |
 */
@@ -153,7 +153,7 @@ await new Spawn({
 fs.copySync('packages/shared/src/types.ts', 'packages/dev/stubs/types.ts.txt')
 
 await new Spawn({
-  command: 'npm run build -w @pruvious-test/dev',
+  command: 'npm run build -w @pruvious/dev',
   showOutput: true,
   outputPrefix: `${pc.magenta('DEV')} ${pc.gray('|')}`,
 })
@@ -162,13 +162,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Build @pruvious-test/zip
+| Build @pruvious/zip
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run build -w @pruvious-test/zip',
+  command: 'npm run build -w @pruvious/zip',
   showOutput: true,
   outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
 })
@@ -211,7 +211,7 @@ fs.copySync('dist/cms/.env.example', 'dist/cms/.env')
 
 fs.writeJsonSync(
   'dist/cms/package.json',
-  { name: '@pruvious-test/cms', ...fs.readJsonSync('dist/cms/package.json') },
+  { name: '@pruvious/cms', ...fs.readJsonSync('dist/cms/package.json') },
   { spaces: 2 },
 )
 

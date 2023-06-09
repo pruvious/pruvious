@@ -1,4 +1,4 @@
-import { compareArrays, isObject, isUrl, isUrlPath, uniqueArray } from '@pruvious-test/utils'
+import { compareArrays, isObject, isUrl, isUrlPath, uniqueArray } from '@pruvious/utils'
 import { ConditionalLogic } from './ConditionalLogic'
 import { getDefaultFieldValue } from './fields'
 import { Block, BlockRecord, Field, FieldGroup, Size, Validator } from './types'

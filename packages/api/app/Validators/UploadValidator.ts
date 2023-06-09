@@ -1,6 +1,6 @@
 import { CustomMessages, rules, schema } from '@ioc:Adonis/Core/Validator'
-import { ConditionalLogic, standardUploadFields } from '@pruvious-test/shared'
-import { isObject } from '@pruvious-test/utils'
+import { ConditionalLogic, standardUploadFields } from '@pruvious/shared'
+import { isObject } from '@pruvious/utils'
 import { uploadConfig } from 'App/imports'
 import BaseValidator from 'App/Validators/BaseValidator'
 

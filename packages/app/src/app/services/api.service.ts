@@ -22,7 +22,7 @@ import {
   UserRecord,
   Users,
   stringifyQueryParameters,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { Observable, of, tap } from 'rxjs'
 import { ConfigService } from 'src/app/services/config.service'
 import { MediaSelection, MediaService } from 'src/app/services/media.service'

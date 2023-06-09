@@ -16,9 +16,9 @@ import {
   nanoid,
   standardUploadColumns,
   standardUploadFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
-import { slugify, trimAll } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
+import { slugify, trimAll } from '@pruvious/utils'
 import Upload from 'App/Models/Upload'
 import UploadValidator from 'App/Validators/UploadValidator'
 import { uploadConfig } from 'App/imports'

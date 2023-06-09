@@ -1,6 +1,6 @@
-import { Script } from '@pruvious-test/build'
+import { Script } from '@pruvious/build'
 
-/** @type import('@pruvious-test/build').ScriptOptions */
+/** @type import('@pruvious/build').ScriptOptions */
 const options = {
   input: 'src/index.ts',
   minify: !process.argv.includes('--watch'),
@@ -8,7 +8,7 @@ const options = {
   external: [
     '@babel/code-frame',
     '@parcel/watcher',
-    '@pruvious-test/build',
+    '@pruvious/build',
     'args',
     'detect-port',
     'esbuild',

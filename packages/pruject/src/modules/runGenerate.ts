@@ -1,5 +1,5 @@
-import { Spawn } from '@pruvious-test/build'
-import { camelize, uppercaseFirstLetter } from '@pruvious-test/utils'
+import { Spawn } from '@pruvious/build'
+import { camelize, uppercaseFirstLetter } from '@pruvious/utils'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import path from 'path'

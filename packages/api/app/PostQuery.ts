@@ -15,8 +15,8 @@ import {
   getFieldValueType,
   standardCollectionColumns,
   standardCollectionFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
 import Post from 'App/Models/Post'
 import Translation from 'App/Models/Translation'
 import PostValidator from 'App/Validators/PostValidator'

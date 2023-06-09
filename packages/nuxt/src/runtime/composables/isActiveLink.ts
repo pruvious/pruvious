@@ -1,5 +1,5 @@
 import { useRoute } from '#imports'
-import { Link } from '@pruvious-test/shared'
+import { Link } from '@pruvious/shared'
 
 /**
  * Determine if a `link` is active based on the current route.

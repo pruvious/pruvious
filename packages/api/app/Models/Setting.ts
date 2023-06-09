@@ -10,7 +10,7 @@ import {
   ManyToMany,
   manyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import { ConditionalLogic, extractSpecialFields, sanitizeFields } from '@pruvious-test/shared'
+import { ConditionalLogic, extractSpecialFields, sanitizeFields } from '@pruvious/shared'
 import { settingConfigs } from 'App/imports'
 import { filterExistingIds } from 'App/model-utils'
 import Page from 'App/Models/Page'

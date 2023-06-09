@@ -1,4 +1,4 @@
-const { parseQueryString, stringifyQueryParameters } = require('@pruvious-test/shared')
+const { parseQueryString, stringifyQueryParameters } = require('@pruvious/shared')
 const { Database } = require('./app/BaseQuery')
 const {
   createPage,

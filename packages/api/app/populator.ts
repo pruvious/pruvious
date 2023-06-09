@@ -19,8 +19,8 @@ import {
   standardUserColumns,
   UploadRecord,
   UserRecord,
-} from '@pruvious-test/shared'
-import { uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { uniqueArray } from '@pruvious/utils'
 import { getBaseUploadsUrl, getSiteBaseUrl } from 'App/helpers'
 import { blocks, collectionsConfig, icons, pageConfig, uploadConfig, userConfig } from 'App/imports'
 import Upload from 'App/Models/Upload'

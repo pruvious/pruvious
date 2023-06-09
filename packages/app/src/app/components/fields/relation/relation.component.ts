@@ -19,8 +19,8 @@ import {
   standardRoleFields,
   standardUploadFields,
   standardUserFields,
-} from '@pruvious-test/shared'
-import { Debounce, clearArray, clearObject, next, prev, uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Debounce, clearArray, clearObject, next, prev, uniqueArray } from '@pruvious/utils'
 import { Observable, takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService, Index } from 'src/app/services/api.service'

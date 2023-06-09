@@ -11,8 +11,8 @@ import {
   ViewChild,
 } from '@angular/core'
 import { DomSanitizer } from '@angular/platform-browser'
-import { EditorToolbarItem } from '@pruvious-test/shared'
-import { Debounce, clearArray, isUrl, isUrlPath, uniqueArray } from '@pruvious-test/utils'
+import { EditorToolbarItem } from '@pruvious/shared'
+import { Debounce, clearArray, isUrl, isUrlPath, uniqueArray } from '@pruvious/utils'
 import { Editor, Extension, Extensions, Mark, mergeAttributes } from '@tiptap/core'
 import Blockquote from '@tiptap/extension-blockquote'
 import Bold from '@tiptap/extension-bold'

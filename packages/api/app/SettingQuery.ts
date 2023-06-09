@@ -5,8 +5,8 @@ import {
   sanitizeFields,
   UpdateResult,
   ValidationResults,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
 import { config, settingConfigs } from 'App/imports'
 import Setting from 'App/Models/Setting'
 import SettingValidator from 'App/Validators/SettingValidator'

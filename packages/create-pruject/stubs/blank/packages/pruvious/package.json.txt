@@ -2,19 +2,19 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "start": "pruvious-test-serve",
-    "build": "pruvious-test build",
-    "dev": "pruvious-test dev",
-    "postinstall": "pruvious-test-migrate",
-    "migrate": "pruvious-test-migrate",
-    "pruvious": "pruvious-test",
-    "generate": "pruvious-test generate",
-    "g": "pruvious-test g"
+    "start": "pruvious-serve",
+    "build": "pruvious build",
+    "dev": "pruvious dev",
+    "postinstall": "pruvious-migrate",
+    "migrate": "pruvious-migrate",
+    "pruvious": "pruvious",
+    "generate": "pruvious generate",
+    "g": "pruvious g"
   },
   "dependencies": {
-    "@pruvious-test/cms": "^1.0.0"
+    "@pruvious/cms": "^1.0.0"
   },
   "devDependencies": {
-    "@pruvious-test/dev": "^1.0.0"
+    "@pruvious/dev": "^1.0.0"
   }
 }

@@ -1,4 +1,4 @@
-import { center, newLine, term, vCenter } from '@pruject-test/dev'
+import { center, newLine, term, vCenter } from '@pruject/dev'
 
 export async function splashScreen(message: string, enter: string = 'continue'): Promise<void> {
   term.clear()

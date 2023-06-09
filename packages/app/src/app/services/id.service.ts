@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { nanoid } from '@pruvious-test/shared'
+import { nanoid } from '@pruvious/shared'
 
 @Injectable()
 export class IdService {

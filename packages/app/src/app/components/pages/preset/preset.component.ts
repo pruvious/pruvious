@@ -18,8 +18,8 @@ import {
   sanitizeAllowedBlocks,
   standardPresetColumns,
   standardPresetFields,
-} from '@pruvious-test/shared'
-import { Debounce, debounceParallel, isObject, lowercaseFirstLetter } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Debounce, debounceParallel, isObject, lowercaseFirstLetter } from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { firstValueFrom, takeUntil } from 'rxjs'
 import { SortableOptions } from 'sortablejs'

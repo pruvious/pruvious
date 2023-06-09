@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
-import { Icon } from '@pruvious-test/shared'
+import { Icon } from '@pruvious/shared'
 import { BaseComponent } from 'src/app/components/base.component'
 
 @Component({

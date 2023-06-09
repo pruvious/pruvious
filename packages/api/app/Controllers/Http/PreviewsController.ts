@@ -1,6 +1,6 @@
 import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { nanoid, sanitizeAllowedBlocks } from '@pruvious-test/shared'
+import { nanoid, sanitizeAllowedBlocks } from '@pruvious/shared'
 import { blocks } from 'App/imports'
 import Preview from 'App/Models/Preview'
 import { sanitizeAllowedPageBlocks } from 'App/PageQuery'

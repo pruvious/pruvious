@@ -1,4 +1,4 @@
-import { error, isPruject, newLine, term } from '@pruject-test/dev'
+import { error, isPruject, newLine, term } from '@pruject/dev'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import path from 'path'

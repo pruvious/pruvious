@@ -1,4 +1,4 @@
-import { newLine, term } from '@pruject-test/dev'
+import { newLine, term } from '@pruject/dev'
 import inquirer from 'inquirer'
 
 export interface OtherPackages {

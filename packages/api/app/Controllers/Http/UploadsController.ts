@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { parseQueryString } from '@pruvious-test/shared'
+import { parseQueryString } from '@pruvious/shared'
 import { getStandardChoices } from 'App/model-utils'
 import { deleteUpload, queryUploads } from 'App/UploadQuery'
 import ChoicesValidator from 'App/Validators/ChoicesValidator'

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Resolve } from '@angular/router'
-import { OAT } from '@pruvious-test/shared'
+import { OAT } from '@pruvious/shared'
 import { AuthService } from 'src/app/services/auth.service'
 
 @Injectable()

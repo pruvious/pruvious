@@ -20,8 +20,8 @@ import {
   extractSpecialFields,
   sanitizeFields,
   standardUserFields,
-} from '@pruvious-test/shared'
-import { sortNatural, uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { sortNatural, uniqueArray } from '@pruvious/utils'
 import { userConfig } from 'App/imports'
 import { filterExistingIds, getMetaFields, initMetaFields, rebuildKeywords } from 'App/model-utils'
 import Page from 'App/Models/Page'

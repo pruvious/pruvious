@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { UploadRecord, flattenFields, standardUploadFields } from '@pruvious-test/shared'
-import { Debounce } from '@pruvious-test/utils'
+import { UploadRecord, flattenFields, standardUploadFields } from '@pruvious/shared'
+import { Debounce } from '@pruvious/utils'
 import { BaseComponent } from 'src/app/components/base.component'
 import { Directory } from 'src/app/services/api.service'
 import { ClickService } from 'src/app/services/click.service'

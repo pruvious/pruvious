@@ -1,4 +1,4 @@
-import { pc, Spawn } from '@pruvious-test/build'
+import { pc, Spawn } from '@pruvious/build'
 
 export async function runNuxtDev() {
   await new Spawn({

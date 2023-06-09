@@ -1,4 +1,4 @@
-import { isObject, stripHTML as stripHTML2, trimAll } from '@pruvious-test/utils'
+import { isObject, stripHTML as stripHTML2, trimAll } from '@pruvious/utils'
 import { stripHtml } from 'string-strip-html'
 import {
   Block,

@@ -8,8 +8,8 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { Link } from '@pruvious-test/shared'
-import { isUrl, isUrlPath } from '@pruvious-test/utils'
+import { Link } from '@pruvious/shared'
+import { isUrl, isUrlPath } from '@pruvious/utils'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService } from 'src/app/services/api.service'

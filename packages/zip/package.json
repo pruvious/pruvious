@@ -1,5 +1,5 @@
 {
-  "name": "@pruvious-test/zip",
+  "name": "@pruvious/zip",
   "version": "1.0.0",
   "description": "Un(zip) tool for Pruvious packages.",
   "type": "module",
@@ -36,7 +36,7 @@
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {
-    "@pruvious-test/build": "^1.0.0",
+    "@pruvious/build": "^1.0.0",
     "@types/adm-zip": "^0.5.0",
     "@types/fs-extra": "^9.0.13"
   }

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import { camelToLabel } from '@pruvious-test/utils'
+import { camelToLabel } from '@pruvious/utils'
 
 @Pipe({
   name: 'camelToLabel',

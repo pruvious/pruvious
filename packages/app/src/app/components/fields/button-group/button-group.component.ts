@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
-import { Choice } from '@pruvious-test/shared'
-import { next, prev } from '@pruvious-test/utils'
+import { Choice } from '@pruvious/shared'
+import { next, prev } from '@pruvious/utils'
 
 @Component({
   selector: 'app-button-group',

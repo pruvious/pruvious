@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router'
-import { Settings } from '@pruvious-test/shared'
+import { Settings } from '@pruvious/shared'
 import { Observable, of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { ApiService } from 'src/app/services/api.service'

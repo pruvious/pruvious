@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core'
-import { clearArray } from '@pruvious-test/utils'
+import { clearArray } from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { forkJoin, takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

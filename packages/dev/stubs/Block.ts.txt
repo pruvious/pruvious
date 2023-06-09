@@ -1,4 +1,4 @@
-import { Block } from '@pruvious-test/cms'
+import { Block } from '@pruvious/cms'
 
 export default async (): Promise<Block> => ({
   name: 'BlockName',

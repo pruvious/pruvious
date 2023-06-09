@@ -1,4 +1,4 @@
-import { Collection } from '@pruvious-test/cms'
+import { Collection } from '@pruvious/cms'
 
 export default async (): Promise<Collection> => ({
   name: 'collection-name',

@@ -1,5 +1,5 @@
 import { CustomMessages, rules, schema } from '@ioc:Adonis/Core/Validator'
-import { ConditionalLogic, Settings } from '@pruvious-test/shared'
+import { ConditionalLogic, Settings } from '@pruvious/shared'
 import BaseValidator from 'App/Validators/BaseValidator'
 
 export default class SettingValidator extends BaseValidator {

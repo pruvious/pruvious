@@ -4,7 +4,7 @@ import {
   ConditionalLogic,
   ExtendedTabbedFieldLayout,
   flattenFields,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { Validator } from 'src/app/utils/Validator'

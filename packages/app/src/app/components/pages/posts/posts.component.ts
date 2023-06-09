@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { Component, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { Collection } from '@pruvious-test/shared'
+import { Collection } from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

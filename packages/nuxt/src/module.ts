@@ -8,10 +8,10 @@ import {
   resolvePath,
   useLogger,
 } from '@nuxt/kit'
-import { pc } from '@pruvious-test/build'
+import { pc } from '@pruvious/build'
 import { fileURLToPath } from 'url'
 
-const logger = useLogger('@pruvious-test/nuxt')
+const logger = useLogger('@pruvious/nuxt')
 const version = '1.0.0'
 
 let fs: typeof import('fs') | undefined
@@ -36,7 +36,7 @@ export interface PruviousModuleOptions {
 
 export default defineNuxtModule<PruviousModuleOptions>({
   meta: {
-    name: '@pruvious-test/nuxt',
+    name: '@pruvious/nuxt',
     configKey: 'pruvious',
   },
   defaults: {
@@ -187,19 +187,19 @@ function checkVersions(): void {
 
       for (const pkg of ['cms', 'dev']) {
         const _version = (
-          packageJson.dependencies && packageJson.dependencies[`@pruvious-test/${pkg}`]
-            ? packageJson.dependencies[`@pruvious-test/${pkg}`]
-            : packageJson.devDependencies && packageJson.devDependencies[`@pruvious-test/${pkg}`]
-            ? packageJson.devDependencies[`@pruvious-test/${pkg}`]
+          packageJson.dependencies && packageJson.dependencies[`@pruvious/${pkg}`]
+            ? packageJson.dependencies[`@pruvious/${pkg}`]
+            : packageJson.devDependencies && packageJson.devDependencies[`@pruvious/${pkg}`]
+            ? packageJson.devDependencies[`@pruvious/${pkg}`]
             : ''
         )?.replace(/[^0-9\.]/g, '')
 
         if (_version && _version !== version) {
           logger.warn(
-            `The ${pc.yellow('@pruvious-test/' + pkg)} version ${pc.yellow(
+            `The ${pc.yellow('@pruvious/' + pkg)} version ${pc.yellow(
               _version,
             )} in your Pruvious project does not match the ${pc.cyan(
-              '@pruvious-test/nuxt',
+              '@pruvious/nuxt',
             )} version ${pc.cyan(
               version,
             )}. Please update the package with the lowest version to avoid compatibility problems.`,

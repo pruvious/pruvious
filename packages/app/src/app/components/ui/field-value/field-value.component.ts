@@ -6,8 +6,8 @@ import {
   UploadRecord,
   dayjs,
   dayjsUTC,
-} from '@pruvious-test/shared'
-import { sortNatural, sortNaturalByProp, stripHTML as stripHTML2 } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { sortNatural, sortNaturalByProp, stripHTML as stripHTML2 } from '@pruvious/utils'
 import { Observable, firstValueFrom, takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService, Index } from 'src/app/services/api.service'

@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   modules: [
-    ['@pruvious-test/nuxt', { cmsDir: '../pruvious' }],
+    ['@pruvious/nuxt', { cmsDir: '../pruvious' }],
     ['@pinia/nuxt', { autoImports: ['defineStore', ['defineStore', 'definePiniaStore']] }],
   ],
   pages: true,

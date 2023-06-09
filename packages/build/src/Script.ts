@@ -5,7 +5,7 @@ import {
   fillObjectDeep,
   lineColumnToOffset,
   offsetToLineColumn,
-} from '@pruvious-test/utils'
+} from '@pruvious/utils'
 import esbuild from 'esbuild'
 import fs from 'fs-extra'
 import path from 'path'
@@ -152,7 +152,7 @@ export class Script {
       logLevel: 'silent',
       plugins: [
         {
-          name: '@pruvious-test/build',
+          name: '@pruvious/build',
           setup: (build) => {
             build.onStart(() => {
               this.esbuildStopwatch = performance.now()

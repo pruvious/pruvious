@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { getPageLayoutChoices, getPageTypeChoices } from '@pruvious-test/shared'
+import { getPageLayoutChoices, getPageTypeChoices } from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { firstValueFrom, takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

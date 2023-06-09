@@ -1,5 +1,5 @@
 {
-  "name": "create-pruject-test",
+  "name": "create-pruject",
   "version": "1.0.0",
   "description": "The simple way to develop and deploy websites using Pruvious and Nuxt.",
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "create-pruject-test": "dist/index.cjs"
+    "create-pruject": "dist/index.cjs"
   },
   "types": "types/index.d.ts",
   "scripts": {
@@ -35,9 +35,9 @@
     "node": ">=16.10.0"
   },
   "dependencies": {
-    "@pruvious-test/build": "^1.0.0",
-    "@pruject-test/dev": "^1.0.0",
-    "@pruvious-test/utils": "^1.0.0",
+    "@pruvious/build": "^1.0.0",
+    "@pruject/dev": "^1.0.0",
+    "@pruvious/utils": "^1.0.0",
     "fs-extra": "^11.1.1",
     "inquirer": "^8.2.5"
   },

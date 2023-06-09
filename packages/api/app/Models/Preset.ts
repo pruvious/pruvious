@@ -18,8 +18,8 @@ import {
   extractSpecialBlocks,
   sanitizeBlocks,
   standardPresetFields,
-} from '@pruvious-test/shared'
-import { uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { uniqueArray } from '@pruvious/utils'
 import { blocks, presetConfig } from 'App/imports'
 import { filterExistingIds, rebuildKeywords } from 'App/model-utils'
 import Page from 'App/Models/Page'

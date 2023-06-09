@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router'
-import { PresetRecord } from '@pruvious-test/shared'
+import { PresetRecord } from '@pruvious/shared'
 import { Observable, of } from 'rxjs'
 import { catchError, tap } from 'rxjs/operators'
 import { ApiService } from 'src/app/services/api.service'

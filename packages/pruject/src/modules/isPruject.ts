@@ -6,7 +6,7 @@ export function isPruject(dir: string): boolean {
 
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = fs.readJsonSync(packageJsonPath)
-    return packageJson.devDependencies && packageJson.devDependencies['@pruject-test/dev']
+    return packageJson.devDependencies && packageJson.devDependencies['@pruject/dev']
   }
 
   return false

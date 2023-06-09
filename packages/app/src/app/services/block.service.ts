@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Block, BlockRecord, nanoid } from '@pruvious-test/shared'
+import { Block, BlockRecord, nanoid } from '@pruvious/shared'
 import { BehaviorSubject, Observable } from 'rxjs'
 import { ApiService } from 'src/app/services/api.service'
 

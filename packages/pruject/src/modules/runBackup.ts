@@ -1,4 +1,4 @@
-import { Zip } from '@pruvious-test/zip'
+import { Zip } from '@pruvious/zip'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
 import { globSync } from 'glob'

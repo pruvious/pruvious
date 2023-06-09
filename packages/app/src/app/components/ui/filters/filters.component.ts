@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'
-import { Choice, dayjs, dayjsUTC } from '@pruvious-test/shared'
-import { camelToLabel, isNumeric, sortNaturalByProp } from '@pruvious-test/utils'
+import { Choice, dayjs, dayjsUTC } from '@pruvious/shared'
+import { camelToLabel, isNumeric, sortNaturalByProp } from '@pruvious/utils'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService } from 'src/app/services/api.service'
 import { ConfigService } from 'src/app/services/config.service'

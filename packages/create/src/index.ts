@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { randomString, slugify } from '@pruvious-test/utils'
+import { randomString, slugify } from '@pruvious/utils'
 import fs from 'fs-extra'
 import path from 'path'
 import pc from 'picocolors'

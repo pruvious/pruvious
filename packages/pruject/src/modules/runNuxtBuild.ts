@@ -1,4 +1,4 @@
-import { Spawn, pc } from '@pruvious-test/build'
+import { Spawn, pc } from '@pruvious/build'
 import fs from 'fs-extra'
 import path from 'path'
 

@@ -22,8 +22,8 @@ import {
   standardUploadFields,
   standardUserFields,
   Validator,
-} from '@pruvious-test/shared'
-import { camelize, slugify, uppercaseFirstLetter } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { camelize, slugify, uppercaseFirstLetter } from '@pruvious/utils'
 import { Action } from 'App/Controllers/Http/ActionsController'
 import {
   blocks,

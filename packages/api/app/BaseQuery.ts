@@ -13,8 +13,8 @@ import {
   QueryableField,
   QueryStringParameters,
   QueryTable,
-} from '@pruvious-test/shared'
-import { camelize, camelToSnake, isNumeric, uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { camelize, camelToSnake, isNumeric, uniqueArray } from '@pruvious/utils'
 import { config } from 'App/imports'
 import Page from 'App/Models/Page'
 import PageMeta from 'App/Models/PageMeta'

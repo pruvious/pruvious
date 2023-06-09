@@ -9,8 +9,8 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { Choice } from '@pruvious-test/shared'
-import { clearArray, clearObject } from '@pruvious-test/utils'
+import { Choice } from '@pruvious/shared'
+import { clearArray, clearObject } from '@pruvious/utils'
 import { SortableOptions } from 'sortablejs'
 import { IdService } from 'src/app/services/id.service'
 

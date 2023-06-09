@@ -8,7 +8,7 @@ import {
   belongsTo,
   column,
 } from '@ioc:Adonis/Lucid/Orm'
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 import Page from 'App/Models/Page'
 
 export default class PageMeta extends BaseModel {

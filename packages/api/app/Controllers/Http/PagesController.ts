@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { trimAll } from '@pruvious-test/utils'
+import { trimAll } from '@pruvious/utils'
 import { pageConfig } from 'App/imports'
 import { getChoices } from 'App/model-utils'
 import PageMeta from 'App/Models/PageMeta'

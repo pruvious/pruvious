@@ -1,4 +1,4 @@
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 import dayjs from 'dayjs'
 import { Field, QueryableField } from './types'
 

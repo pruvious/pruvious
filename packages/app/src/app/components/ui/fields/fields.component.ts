@@ -6,8 +6,8 @@ import {
   Field,
   FieldGroup,
   RedirectionTestField,
-} from '@pruvious-test/shared'
-import { clearObject } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { clearObject } from '@pruvious/utils'
 import { Validator } from 'src/app/utils/Validator'
 
 @Component({

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { QueryableField } from '@pruvious-test/shared'
+import { QueryableField } from '@pruvious/shared'
 import { ClickService } from 'src/app/services/click.service'
 
 @Component({

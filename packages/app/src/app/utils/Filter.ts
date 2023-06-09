@@ -7,8 +7,8 @@ import {
   OrFilter,
   QueryableField,
   QueryStringParameters,
-} from '@pruvious-test/shared'
-import { last } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { last } from '@pruvious/utils'
 import { Observable, Subject } from 'rxjs'
 
 export interface ExtendedFilter {

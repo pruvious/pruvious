@@ -9,7 +9,7 @@ import {
   Uploads,
   Users,
   Validator,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { Action } from 'App/Controllers/Http/ActionsController'
 
 export const config: Config = {

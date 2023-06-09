@@ -1,4 +1,4 @@
-import { camelToLabel, sortNaturalByProp } from '@pruvious-test/utils'
+import { camelToLabel, sortNaturalByProp } from '@pruvious/utils'
 import { Choice, Pages } from './types'
 
 export function getPageTypeChoices(pageConfig: Pages): Choice[] {

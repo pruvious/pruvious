@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core'
-import { Icon, Size } from '@pruvious-test/shared'
-import { camelToLabel, clearObject } from '@pruvious-test/utils'
+import { Icon, Size } from '@pruvious/shared'
+import { camelToLabel, clearObject } from '@pruvious/utils'
 import { IdService } from 'src/app/services/id.service'
 
 @Component({

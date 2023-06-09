@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 import watcher from '@parcel/watcher'
-import { pc, Script, Spawn } from '@pruvious-test/build'
+import { pc, Script, Spawn } from '@pruvious/build'
 import {
   camelize,
   debounceParallel,
   randomString,
   slugify,
   uppercaseFirstLetter,
-} from '@pruvious-test/utils'
+} from '@pruvious/utils'
 import args from 'args'
 import detectPort from 'detect-port'
 import fs from 'fs-extra'

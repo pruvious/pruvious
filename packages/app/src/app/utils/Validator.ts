@@ -1,5 +1,5 @@
-import { ValidationError } from '@pruvious-test/shared'
-import { clearObject, Debounce } from '@pruvious-test/utils'
+import { ValidationError } from '@pruvious/shared'
+import { clearObject, Debounce } from '@pruvious/utils'
 import { BehaviorSubject, Observable } from 'rxjs'
 
 export class Validator {

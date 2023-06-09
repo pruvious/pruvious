@@ -7,7 +7,7 @@ import {
   Field,
   FieldGroup,
   RedirectionTestField,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { HistoryComponent } from 'src/app/components/history.component'

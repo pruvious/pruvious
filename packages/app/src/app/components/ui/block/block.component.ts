@@ -11,8 +11,8 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core'
-import { BlockRecord, filterAllowedChildBlocks, nanoid, Slot } from '@pruvious-test/shared'
-import { clearObject, lowercaseFirstLetter } from '@pruvious-test/utils'
+import { BlockRecord, filterAllowedChildBlocks, nanoid, Slot } from '@pruvious/shared'
+import { clearObject, lowercaseFirstLetter } from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { SortableOptions } from 'sortablejs'

@@ -1,14 +1,14 @@
-import { Script } from '@pruvious-test/build'
+import { Script } from '@pruvious/build'
 
-/** @type import('@pruvious-test/build').ScriptOptions */
+/** @type import('@pruvious/build').ScriptOptions */
 const options = {
   minify: !process.argv.includes('--watch'),
   watch: process.argv.includes('--watch'),
   external: [
     '@babel/code-frame',
-    '@pruvious-test/build',
-    '@pruvious-test/utils',
-    '@pruvious-test/zip',
+    '@pruvious/build',
+    '@pruvious/utils',
+    '@pruvious/zip',
     'adm-zip',
     'args',
     'child_process',

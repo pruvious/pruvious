@@ -9,8 +9,8 @@ import {
   getDefaultFieldValue,
   standardUserFields,
   UserRecord,
-} from '@pruvious-test/shared'
-import { lowercaseFirstLetter } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { lowercaseFirstLetter } from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { interval, takeUntil } from 'rxjs'
 import { HistoryComponent } from 'src/app/components/history.component'

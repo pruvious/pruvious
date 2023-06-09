@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { UploadRecord } from '@pruvious-test/shared'
+import { UploadRecord } from '@pruvious/shared'
 import { first, Observable, Subject, takeUntil } from 'rxjs'
 import { Directory } from 'src/app/services/api.service'
 

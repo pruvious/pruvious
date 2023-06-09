@@ -1,4 +1,4 @@
-import { camelToLabel, uppercaseFirstLetter } from '@pruvious-test/utils'
+import { camelToLabel, uppercaseFirstLetter } from '@pruvious/utils'
 import { Block, BlockRecord, PageRecord, Pages } from './types'
 
 export function filterAllowedChildBlocks(

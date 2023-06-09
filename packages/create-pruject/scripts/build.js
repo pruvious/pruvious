@@ -1,15 +1,15 @@
-import { Script } from '@pruvious-test/build'
+import { Script } from '@pruvious/build'
 
-/** @type import('@pruvious-test/build').ScriptOptions */
+/** @type import('@pruvious/build').ScriptOptions */
 const options = {
   input: 'src/index.ts',
   minify: !process.argv.includes('--watch'),
   watch: process.argv.includes('--watch'),
   external: [
     '@babel/code-frame',
-    '@pruvious-test/build',
-    '@pruject-test/dev',
-    '@pruvious-test/utils',
+    '@pruvious/build',
+    '@pruject/dev',
+    '@pruvious/utils',
     'args',
     'child_process',
     'esbuild',

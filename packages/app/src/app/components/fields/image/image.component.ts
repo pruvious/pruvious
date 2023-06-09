@@ -9,7 +9,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { UploadRecord, imageExtensions } from '@pruvious-test/shared'
+import { UploadRecord, imageExtensions } from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

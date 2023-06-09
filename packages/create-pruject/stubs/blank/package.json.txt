@@ -5,22 +5,22 @@
     "packages/*"
   ],
   "scripts": {
-    "pruject": "pruject-test",
-    "build": "pruject-test build",
-    "dev": "pruject-test dev",
-    "update": "pruject-test update",
-    "backup": "pruject-test backup",
-    "generate": "pruject-test generate",
-    "g": "pruject-test generate",
-    "increase": "pruject-test increase",
-    "deploy": "pruject-test deploy",
-    "mirror": "pruject-test mirror",
+    "pruject": "pruject",
+    "build": "pruject build",
+    "dev": "pruject dev",
+    "update": "pruject update",
+    "backup": "pruject backup",
+    "generate": "pruject generate",
+    "g": "pruject generate",
+    "increase": "pruject increase",
+    "deploy": "pruject deploy",
+    "mirror": "pruject mirror",
     "migrate": "npm run migrate -w pruvious",
     "postinstall": "npm run postinstall -w pruvious && npm run postinstall -w nuxt",
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@pruject-test/dev": "^1.0.0",
+    "@pruject/dev": "^1.0.0",
     "prettier": "^2.8.7"
   }
 }

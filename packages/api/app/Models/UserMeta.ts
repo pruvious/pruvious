@@ -8,7 +8,7 @@ import {
   belongsTo,
   column,
 } from '@ioc:Adonis/Lucid/Orm'
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 import User from 'App/Models/User'
 
 export default class UserMeta extends BaseModel {

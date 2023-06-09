@@ -23,7 +23,7 @@ import {
   OptimizedWebpImage,
   sanitizeFields,
   standardUploadFields,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { getBaseUploadsUrl } from 'App/helpers'
 import { uploadConfig } from 'App/imports'
 import { filterExistingIds, getMetaFields, initMetaFields, rebuildKeywords } from 'App/model-utils'

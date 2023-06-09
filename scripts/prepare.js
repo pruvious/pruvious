@@ -1,4 +1,4 @@
-import { randomString } from '@pruvious-test/utils'
+import { randomString } from '@pruvious/utils'
 import fs from 'fs-extra'
 
 /*

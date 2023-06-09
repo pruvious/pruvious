@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
-import { isNumeric, trimAll } from '@pruvious-test/utils'
+import { isNumeric, trimAll } from '@pruvious/utils'
 import { getStandardChoices } from 'App/model-utils'
 import Preset from 'App/Models/Preset'
 import { queryPages } from 'App/PageQuery'

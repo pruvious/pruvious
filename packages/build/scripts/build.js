@@ -13,7 +13,7 @@ const baseOptions = {
   watch: process.argv.includes('--watch'),
   external: [
     '@babel/code-frame',
-    '@pruvious-test/utils',
+    '@pruvious/utils',
     'child_process',
     'esbuild',
     'fs-extra',

@@ -1,6 +1,6 @@
 import { bind } from '@adonisjs/route-model-binding'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { uniqueArray } from '@pruvious-test/utils'
+import { uniqueArray } from '@pruvious/utils'
 import { getStandardChoices } from 'App/model-utils'
 import Role from 'App/Models/Role'
 import User from 'App/Models/User'

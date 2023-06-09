@@ -9,7 +9,7 @@ import {
   Uploads,
   UserRecord,
   Users,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { Subject } from 'rxjs'
 
 @Injectable()

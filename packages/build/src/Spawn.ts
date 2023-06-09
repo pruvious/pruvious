@@ -1,4 +1,4 @@
-import { fillObjectDeep } from '@pruvious-test/utils'
+import { fillObjectDeep } from '@pruvious/utils'
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import pc from 'picocolors'
 import { Observable, Subject, lastValueFrom, takeUntil } from 'rxjs'

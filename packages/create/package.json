@@ -1,5 +1,5 @@
 {
-  "name": "create-pruvious-test",
+  "name": "create-pruvious",
   "version": "1.0.0",
   "description": "Boilerplate to create a new Pruvious project.",
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "create-pruvious-test": "dist/index.cjs"
+    "create-pruvious": "dist/index.cjs"
   },
   "types": "types/index.d.ts",
   "scripts": {
@@ -35,13 +35,13 @@
     "node": ">=16.10.0"
   },
   "dependencies": {
-    "@pruvious-test/utils": "^1.0.0",
+    "@pruvious/utils": "^1.0.0",
     "fs-extra": "^11.1.1",
     "picocolors": "^1.0.0",
     "prompt-sync": "^4.2.0"
   },
   "devDependencies": {
-    "@pruvious-test/build": "^1.0.0",
+    "@pruvious/build": "^1.0.0",
     "@types/fs-extra": "^9.0.13",
     "@types/prompt-sync": "^4.2.0"
   }

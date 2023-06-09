@@ -24,8 +24,8 @@ import {
   sanitizeBlocks,
   sanitizeFields,
   standardPageFields,
-} from '@pruvious-test/shared'
-import { uniqueArray } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { uniqueArray } from '@pruvious/utils'
 import { getSiteBaseUrl } from 'App/helpers'
 import { blocks, pageConfig } from 'App/imports'
 import { filterExistingIds, getMetaFields, initMetaFields, rebuildKeywords } from 'App/model-utils'

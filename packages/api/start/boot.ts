@@ -16,8 +16,8 @@ import {
   ConfigFactory,
   SettingFactory,
   Validator,
-} from '@pruvious-test/shared'
-import { camelToLabel, camelize, lowercaseFirstLetter, mergeDeep } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { camelToLabel, camelize, lowercaseFirstLetter, mergeDeep } from '@pruvious/utils'
 import { Action } from 'App/Controllers/Http/ActionsController'
 import { CamelCaseNamingStrategy } from 'App/Strategies/CamelCaseNaming'
 import {

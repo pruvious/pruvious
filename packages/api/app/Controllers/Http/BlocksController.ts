@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { sanitizeAllowedBlocks } from '@pruvious-test/shared'
+import { sanitizeAllowedBlocks } from '@pruvious/shared'
 import { blocks } from 'App/imports'
 import { populateBlocks } from 'App/populator'
 

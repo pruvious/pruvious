@@ -6,8 +6,8 @@ import {
   parseQueryString,
   standardUploadFields,
   stringifyQueryParameters,
-} from '@pruvious-test/shared'
-import { Bind } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Bind } from '@pruvious/utils'
 import { skip, takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { Directory } from 'src/app/services/api.service'

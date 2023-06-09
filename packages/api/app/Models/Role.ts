@@ -12,7 +12,7 @@ import {
   manyToMany,
   ManyToMany,
 } from '@ioc:Adonis/Lucid/Orm'
-import { standardRoleFields } from '@pruvious-test/shared'
+import { standardRoleFields } from '@pruvious/shared'
 import { roleConfig } from 'App/imports'
 import { rebuildKeywords } from 'App/model-utils'
 import Page from 'App/Models/Page'

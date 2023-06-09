@@ -8,7 +8,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core'
-import { Block, BlockRecord, getDefaultFieldValue, nanoid } from '@pruvious-test/shared'
+import { Block, BlockRecord, getDefaultFieldValue, nanoid } from '@pruvious/shared'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

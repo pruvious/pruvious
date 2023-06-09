@@ -10,8 +10,8 @@ import {
   ValidationResults,
   standardRoleColumns,
   standardRoleFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
 import Role from 'App/Models/Role'
 import RoleValidator from 'App/Validators/RoleValidator'
 import { roleConfig } from 'App/imports'

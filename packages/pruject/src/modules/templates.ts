@@ -1,4 +1,4 @@
-export const pruviousBlockTemplate = `import { Block } from '@pruvious-test/cms'
+export const pruviousBlockTemplate = `import { Block } from '@pruvious/cms'
 
 export default async (): Promise<Block> => ({
   name: 'BlockName',

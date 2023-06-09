@@ -18,9 +18,9 @@ import {
   sanitizeAllowedBlocks,
   standardPageColumns,
   standardPageFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
-import { trimAll } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
+import { trimAll } from '@pruvious/utils'
 import Page from 'App/Models/Page'
 import Translation from 'App/Models/Translation'
 import PageValidator from 'App/Validators/PageValidator'

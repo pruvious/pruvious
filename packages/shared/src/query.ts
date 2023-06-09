@@ -1,4 +1,4 @@
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 import qs from 'qs'
 import { AndFilter, Filter, OrFilter, QueryStringParameters } from './types'
 

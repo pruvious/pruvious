@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { ConditionalLogic, sanitizeFields } from '@pruvious-test/shared'
+import { ConditionalLogic, sanitizeFields } from '@pruvious/shared'
 import { settingConfigs } from 'App/imports'
 import { getSetting, updateSettings } from 'App/SettingQuery'
 

@@ -1,5 +1,5 @@
 {
-  "name": "@pruvious-test/utils",
+  "name": "@pruvious/utils",
   "version": "1.0.0",
   "description": "Opinionated collection of JavaScript utility functions.",
   "type": "module",

@@ -5,8 +5,8 @@ import {
   PresetField,
   nanoid,
   walkBlocks,
-} from '@pruvious-test/shared'
-import { Debounce, clearArray, isNumeric } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Debounce, clearArray, isNumeric } from '@pruvious/utils'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService } from 'src/app/services/api.service'

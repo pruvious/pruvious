@@ -1,6 +1,6 @@
-import { codeFrame } from '@pruvious-test/build'
-import { Block, Field } from '@pruvious-test/shared'
-import { camelToLabel, isObject, offsetToLineColumn } from '@pruvious-test/utils'
+import { codeFrame } from '@pruvious/build'
+import { Block, Field } from '@pruvious/shared'
+import { camelToLabel, isObject, offsetToLineColumn } from '@pruvious/utils'
 import fs from 'fs'
 import path from 'path'
 import ts from 'typescript'
@@ -329,12 +329,12 @@ export class BlockParser {
       ? [
           `// @ts-check`,
           ``,
-          `/** @type {import('@pruvious-test/cms').BlockFactory} */`,
+          `/** @type {import('@pruvious/cms').BlockFactory} */`,
           `module.exports = async () => (${JSON.stringify(this.block, undefined, 2)})`,
           ``,
         ]
       : [
-          `import { Block } from '@pruvious-test/cms'`,
+          `import { Block } from '@pruvious/cms'`,
           ``,
           `export default async (): Promise<Block> => (${JSON.stringify(
             this.block,

@@ -1,4 +1,4 @@
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 import { Block, BlockRecord, Field, FieldGroup } from './types'
 
 /**

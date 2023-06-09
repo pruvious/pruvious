@@ -1,4 +1,4 @@
-import { Spawn } from '@pruvious-test/build'
+import { Spawn } from '@pruvious/build'
 import fs from 'fs-extra'
 import path from 'path'
 import { loadingScreen, newLine, ok, term } from './terminal'
@@ -8,7 +8,7 @@ export async function runUpdate() {
   let version: string = ''
   let changed: boolean = false
 
-  const npmViewVersion = new Spawn({ command: 'npm view @pruject-test/dev version' })
+  const npmViewVersion = new Spawn({ command: 'npm view @pruject/dev version' })
   const packages = ['package.json', 'packages/pruvious/package.json', 'packages/nuxt/package.json']
 
   npmViewVersion.output$.subscribe((output) => {
@@ -56,7 +56,7 @@ function updatePruviousDependencies(packageJson: Record<string, any>, version: s
   for (const dependencyType of dependencyTypes) {
     if (packageJson[dependencyType]) {
       for (const dependency of Object.keys(packageJson[dependencyType])) {
-        if (dependency.match(/^@pruvious-test\//) || dependency.match(/^@pruject-test\//)) {
+        if (dependency.match(/^@pruvious\//) || dependency.match(/^@pruject\//)) {
           if (packageJson[dependencyType][dependency] !== `^${version}`) {
             packageJson[dependencyType][dependency] = `^${version}`
             changed = true

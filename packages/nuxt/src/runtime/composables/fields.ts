@@ -33,7 +33,7 @@ import {
   TimeField as _TimeField,
   UrlField as _UrlField,
   UserField as _UserField,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { PropType } from 'vue'
 
 export namespace PruviousField {

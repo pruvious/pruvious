@@ -1,4 +1,4 @@
-import { ConditionalLogic, Field, FieldGroup, PageRecord } from '@pruvious-test/shared'
+import { ConditionalLogic, Field, FieldGroup, PageRecord } from '@pruvious/shared'
 import { LanguageType } from 'App/translations'
 
 declare module '@ioc:Adonis/Core/Validator' {

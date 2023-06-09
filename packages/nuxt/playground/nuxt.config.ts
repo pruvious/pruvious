@@ -7,7 +7,7 @@ const pruviousConfig = process.env.PRUVIOUS_PLAYGROUND
 export default defineNuxtConfig({
   pages: true,
   css: ['~/assets/css/main.css'],
-  modules: [['@pruvious-test/nuxt', { ...pruviousConfig }]],
+  modules: [['@pruvious/nuxt', { ...pruviousConfig }]],
   postcss: {
     plugins: {
       tailwindcss: {},

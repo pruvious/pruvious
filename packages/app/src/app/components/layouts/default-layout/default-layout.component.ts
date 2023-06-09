@@ -1,6 +1,6 @@
 import { Component } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
-import { Collection, Settings } from '@pruvious-test/shared'
+import { Collection, Settings } from '@pruvious/shared'
 import { ConfigService } from 'src/app/services/config.service'
 
 @Component({

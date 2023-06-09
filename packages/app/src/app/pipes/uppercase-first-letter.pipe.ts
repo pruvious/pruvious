@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import { uppercaseFirstLetter } from '@pruvious-test/utils'
+import { uppercaseFirstLetter } from '@pruvious/utils'
 
 @Pipe({
   name: 'uppercaseFirstLetter',

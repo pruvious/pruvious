@@ -1,4 +1,4 @@
-import { isObject } from '@pruvious-test/utils'
+import { isObject } from '@pruvious/utils'
 
 export function blur(): void {
   const el = document.activeElement as any

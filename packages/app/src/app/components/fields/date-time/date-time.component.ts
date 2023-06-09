@@ -10,8 +10,8 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { dayjs } from '@pruvious-test/shared'
-import { Debounce } from '@pruvious-test/utils'
+import { dayjs } from '@pruvious/shared'
+import { Debounce } from '@pruvious/utils'
 import flatpickr from 'flatpickr'
 import { Instance } from 'flatpickr/dist/types/instance'
 import { ConfigService } from 'src/app/services/config.service'

@@ -17,7 +17,7 @@ import {
   flattenFields,
   standardUploadFields,
   UploadRecord,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import {
   Bind,
   clearArray,
@@ -27,7 +27,7 @@ import {
   slugify,
   sortNaturalByProp,
   uppercaseFirstLetter,
-} from '@pruvious-test/utils'
+} from '@pruvious/utils'
 import { getFilesFromDataTransferItems } from 'datatransfer-files-promise'
 import { ToastrService } from 'ngx-toastr'
 import { catchError, firstValueFrom, forkJoin, Observable, of, takeUntil, tap } from 'rxjs'

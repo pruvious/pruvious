@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core'
-import { clearArray } from '@pruvious-test/utils'
+import { clearArray } from '@pruvious/utils'
 import { BaseComponent } from 'src/app/components/base.component'
 
 @Component({

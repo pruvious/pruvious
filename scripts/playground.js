@@ -1,4 +1,4 @@
-import { pc, Spawn } from '@pruvious-test/build'
+import { pc, Spawn } from '@pruvious/build'
 import fs from 'fs-extra'
 
 process.env.PRUVIOUS_PLAYGROUND = '1'
@@ -27,7 +27,7 @@ await new Spawn({
 fs.emptyDirSync('tmp')
 
 await new Spawn({
-  command: 'npm init pruvious-test tmp',
+  command: 'npm init pruvious tmp',
   showOutput: true,
   outputPrefix: `${pc.red('CRT')} ${pc.gray('|')}`,
 })
@@ -43,8 +43,8 @@ await new Spawn({
 
 const packageJson = fs.readJsonSync('tmp/package.json')
 
-packageJson.dependencies['@pruvious-test/cms'] = '../dist/cms'
-packageJson.devDependencies['@pruvious-test/dev'] = '../packages/dev'
+packageJson.dependencies['@pruvious/cms'] = '../dist/cms'
+packageJson.devDependencies['@pruvious/dev'] = '../packages/dev'
 
 fs.writeJsonSync('tmp/package.json', packageJson, { spaces: 2 })
 
@@ -61,7 +61,7 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Start @pruvious-test/cms server
+| Start @pruvious/cms server
 |--------------------------------------------------------------------------
 |
 */
@@ -77,13 +77,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| Start @pruvious-test/nuxt
+| Start @pruvious/nuxt
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command: 'npm run dev:prepare -w @pruvious-test/nuxt && npm run dev -w @pruvious-test/nuxt',
+  command: 'npm run dev:prepare -w @pruvious/nuxt && npm run dev -w @pruvious/nuxt',
   showOutput: true,
   outputPrefix: `${pc.green('NXT')} ${pc.gray('|')}`,
 })

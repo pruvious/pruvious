@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core'
-import { Field, PresetRecord, standardPageFields } from '@pruvious-test/shared'
-import { lowercaseFirstLetter } from '@pruvious-test/utils'
+import { Field, PresetRecord, standardPageFields } from '@pruvious/shared'
+import { lowercaseFirstLetter } from '@pruvious/utils'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'
 import { ApiService, Page } from 'src/app/services/api.service'

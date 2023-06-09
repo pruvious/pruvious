@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router'
-import { Collection } from '@pruvious-test/shared'
+import { Collection } from '@pruvious/shared'
 import { ConfigService } from 'src/app/services/config.service'
 
 @Injectable()

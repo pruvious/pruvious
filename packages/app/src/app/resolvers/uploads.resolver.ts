@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Resolve, Router } from '@angular/router'
-import { UploadRecord } from '@pruvious-test/shared'
+import { UploadRecord } from '@pruvious/shared'
 import { Observable, of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { ApiService } from 'src/app/services/api.service'

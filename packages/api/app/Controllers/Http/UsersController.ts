@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { uniqueArray } from '@pruvious-test/utils'
+import { uniqueArray } from '@pruvious/utils'
 import { userConfig } from 'App/imports'
 import { getChoices } from 'App/model-utils'
 import User from 'App/Models/User'

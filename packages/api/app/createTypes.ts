@@ -31,7 +31,7 @@ import {
   updateableStandardRoleColumns,
   updateableStandardUploadColumns,
   updateableStandardUserColumns,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import fs from 'fs-extra'
 import path from 'path'
 import { listCapabilities } from './UserQuery'
@@ -52,7 +52,7 @@ import {
 export function createTypes() {
   const typesDir = path.resolve(pruvDir(), '.types')
   const content: string[] = [
-    "import { BlockRecord, Image, Link, Size } from '@pruvious-test/shared'",
+    "import { BlockRecord, Image, Link, Size } from '@pruvious/shared'",
     '',
     'declare namespace Pruvious {',
   ]

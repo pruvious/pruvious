@@ -1,5 +1,5 @@
-import { Block, BlockRecord, Field, walkBlocks } from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
+import { Block, BlockRecord, Field, walkBlocks } from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
 import { blocks } from './imports'
 
 /**

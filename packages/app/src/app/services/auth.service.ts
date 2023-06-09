@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
-import { OAT } from '@pruvious-test/shared'
-import { Bind } from '@pruvious-test/utils'
+import { OAT } from '@pruvious/shared'
+import { Bind } from '@pruvious/utils'
 import { catchError, of, Subject, tap } from 'rxjs'
 import { ApiService } from 'src/app/services/api.service'
 

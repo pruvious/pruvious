@@ -1,4 +1,4 @@
-import { Action } from '@pruvious-test/cms'
+import { Action } from '@pruvious/cms'
 
 export default {
   name: 'action-name',

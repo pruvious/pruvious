@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { error, newLine, resolveArgs } from '@pruject-test/dev'
+import { error, newLine, resolveArgs } from '@pruject/dev'
 import fs from 'fs-extra'
 import { installBlank } from './modules/installBlank'
 import { resolveDir } from './modules/resolveDir'

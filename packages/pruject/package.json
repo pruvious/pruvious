@@ -1,5 +1,5 @@
 {
-  "name": "@pruject-test/dev",
+  "name": "@pruject/dev",
   "version": "1.0.0",
   "description": "The simple way to develop and deploy websites using Pruvious and Nuxt.",
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "bin": {
-    "pruject-test": "dist/bin.cjs"
+    "pruject": "dist/bin.cjs"
   },
   "types": "types/index.d.ts",
   "scripts": {
@@ -35,9 +35,9 @@
     "node": ">=16.10.0"
   },
   "dependencies": {
-    "@pruvious-test/build": "^1.0.0",
-    "@pruvious-test/utils": "^1.0.0",
-    "@pruvious-test/zip": "^1.0.0",
+    "@pruvious/build": "^1.0.0",
+    "@pruvious/utils": "^1.0.0",
+    "@pruvious/zip": "^1.0.0",
     "args": "^5.0.3",
     "dayjs": "^1.11.7",
     "detect-port": "^1.5.1",

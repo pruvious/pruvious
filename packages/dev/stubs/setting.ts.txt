@@ -1,4 +1,4 @@
-import { Settings } from '@pruvious-test/cms'
+import { Settings } from '@pruvious/cms'
 
 export default async (): Promise<Settings> => ({
   group: 'settings-group-name',

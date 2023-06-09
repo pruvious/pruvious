@@ -1,6 +1,6 @@
-import { Script } from '@pruvious-test/build'
+import { Script } from '@pruvious/build'
 
-/** @type import('@pruvious-test/build').ScriptOptions */
+/** @type import('@pruvious/build').ScriptOptions */
 const options = {
   input: 'src/index.ts',
   minify: !process.argv.includes('--watch'),
@@ -13,7 +13,7 @@ new Script({
   platform: 'neutral',
   name: 'ESM',
   emptyOutputDir: true,
-  external: ['@pruvious-test/utils', 'nanoid', 'qs'],
+  external: ['@pruvious/utils', 'nanoid', 'qs'],
 }).build()
 
 new Script({
@@ -22,5 +22,5 @@ new Script({
   platform: 'node',
   declarations: false,
   name: 'CJS',
-  external: ['@pruvious-test/utils', 'qs'],
+  external: ['@pruvious/utils', 'qs'],
 }).build()

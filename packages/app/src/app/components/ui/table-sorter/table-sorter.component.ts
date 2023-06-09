@@ -4,7 +4,7 @@ import {
   QueryableField,
   getFieldValueType,
   isSortableField,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 
 @Component({
   selector: 'app-table-sorter',

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Resolve, Router } from '@angular/router'
-import { Redirect } from '@pruvious-test/shared'
+import { Redirect } from '@pruvious/shared'
 import { Observable, of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { ApiService } from 'src/app/services/api.service'

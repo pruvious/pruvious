@@ -12,8 +12,8 @@ import {
   QueryableModel,
   walkBlockFields,
   walkFields,
-} from '@pruvious-test/shared'
-import { trimAll } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { trimAll } from '@pruvious/utils'
 import { BaseQuery } from 'App/BaseQuery'
 import Page from 'App/Models/Page'
 import Post from 'App/Models/Post'

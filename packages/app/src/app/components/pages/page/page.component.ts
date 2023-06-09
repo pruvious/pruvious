@@ -26,14 +26,14 @@ import {
   sanitizeAllowedBlocks,
   standardPageColumns,
   standardPageFields,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import {
   clearArray,
   Debounce,
   debounceParallel,
   isObject,
   lowercaseFirstLetter,
-} from '@pruvious-test/utils'
+} from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { firstValueFrom, takeUntil } from 'rxjs'
 import { SortableOptions } from 'sortablejs'

@@ -1,4 +1,4 @@
-import { Validator } from '@pruvious-test/cms'
+import { Validator } from '@pruvious/cms'
 
 export default {
   name: 'validatorName',

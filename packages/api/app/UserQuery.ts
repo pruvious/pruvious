@@ -19,9 +19,9 @@ import {
   getFieldValueType,
   standardUserColumns,
   standardUserFields,
-} from '@pruvious-test/shared'
-import { Pruvious } from '@pruvious-test/types'
-import { sortNatural } from '@pruvious-test/utils'
+} from '@pruvious/shared'
+import { Pruvious } from '@pruvious/types'
+import { sortNatural } from '@pruvious/utils'
 import User from 'App/Models/User'
 import UserValidator from 'App/Validators/UserValidator'
 import { collectionsConfig, config, settingConfigs, userConfig } from 'App/imports'

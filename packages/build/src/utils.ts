@@ -1,5 +1,5 @@
 import { codeFrameColumns } from '@babel/code-frame'
-import { uppercaseFirstLetter } from '@pruvious-test/utils'
+import { uppercaseFirstLetter } from '@pruvious/utils'
 import pc from 'picocolors'
 import { Message } from './types'
 

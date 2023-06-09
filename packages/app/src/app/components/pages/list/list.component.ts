@@ -16,14 +16,14 @@ import {
   standardRoleFields,
   standardUserFields,
   stringifyQueryParameters,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import {
   camelToLabel,
   clearArray,
   clearObject,
   lowercaseFirstLetter,
   sortNaturalByProp,
-} from '@pruvious-test/utils'
+} from '@pruvious/utils'
 import { ToastrService } from 'ngx-toastr'
 import { takeUntil } from 'rxjs'
 import { BaseComponent } from 'src/app/components/base.component'

@@ -4,7 +4,7 @@ import {
   FieldGroup,
   flattenFields,
   imageExtensions,
-} from '@pruvious-test/shared'
+} from '@pruvious/shared'
 import { blocks } from 'App/imports'
 import Page from 'App/Models/Page'
 import Post from 'App/Models/Post'

@@ -1,4 +1,4 @@
-import { Spawn } from '@pruvious-test/build'
+import { Spawn } from '@pruvious/build'
 import { spawnSync } from 'child_process'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
@@ -152,7 +152,7 @@ function updatePruviousDependencies(packageJson, version) {
   for (const dependencyType of dependencyTypes) {
     if (packageJson[dependencyType]) {
       for (const dependency of Object.keys(packageJson[dependencyType])) {
-        if (dependency.match(/^@pruvious-test\//) || dependency.match(/^@pruject-test\//)) {
+        if (dependency.match(/^@pruvious\//) || dependency.match(/^@pruject\//)) {
           packageJson[dependencyType][dependency] = `^${version}`
         }
       }
