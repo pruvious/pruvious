@@ -130,6 +130,21 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
+| @pruvious/zip
+|--------------------------------------------------------------------------
+|
+*/
+
+await new Spawn({
+  command: 'npm run dev -w @pruvious/zip',
+  showOutput: true,
+  outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
+})
+  .run()
+  .expectOutput(/CJS.+build completed in [0-9]+/)
+
+/*
+|--------------------------------------------------------------------------
 | @pruject/dev
 |--------------------------------------------------------------------------
 |
@@ -177,29 +192,13 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
-| @pruvious/zip
-|--------------------------------------------------------------------------
-|
-*/
-
-await new Spawn({
-  command: 'npm run dev -w @pruvious/zip',
-  showOutput: true,
-  outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
-})
-  .run()
-  .expectOutput(/CJS.+build completed in [0-9]+/)
-
-/*
-|--------------------------------------------------------------------------
 | @pruvious/nuxt
 |--------------------------------------------------------------------------
 |
 */
 
 await new Spawn({
-  command:
-    'npm run dev:prepare -w @pruvious/nuxt && npm run dev -w @pruvious/nuxt -- --dev',
+  command: 'npm run dev:prepare -w @pruvious/nuxt && npm run dev -w @pruvious/nuxt -- --dev',
   showOutput: true,
   outputPrefix: `${pc.green('NXT')} ${pc.gray('|')}`,
 })

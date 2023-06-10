@@ -115,6 +115,21 @@ await new Spawn({
 
 /*
 |--------------------------------------------------------------------------
+| Build @pruvious/zip
+|--------------------------------------------------------------------------
+|
+*/
+
+await new Spawn({
+  command: 'npm run build -w @pruvious/zip',
+  showOutput: true,
+  outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
+})
+  .run()
+  .expectOutput(/CJS.+build completed in [0-9]+/)
+
+/*
+|--------------------------------------------------------------------------
 | Build @pruject/dev
 |--------------------------------------------------------------------------
 |
@@ -156,21 +171,6 @@ await new Spawn({
   command: 'npm run build -w @pruvious/dev',
   showOutput: true,
   outputPrefix: `${pc.magenta('DEV')} ${pc.gray('|')}`,
-})
-  .run()
-  .expectOutput(/CJS.+build completed in [0-9]+/)
-
-/*
-|--------------------------------------------------------------------------
-| Build @pruvious/zip
-|--------------------------------------------------------------------------
-|
-*/
-
-await new Spawn({
-  command: 'npm run build -w @pruvious/zip',
-  showOutput: true,
-  outputPrefix: `${pc.blue('ZIP')} ${pc.gray('|')}`,
 })
   .run()
   .expectOutput(/CJS.+build completed in [0-9]+/)
