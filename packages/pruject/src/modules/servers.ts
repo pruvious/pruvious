@@ -136,7 +136,7 @@ export async function addServer(): Promise<ServerMeta> {
     'If you have not yet configured the server, run the following command ^+on the server^ as a superuser:',
   )
   newLine(2)
-  term('^ccurl -o- https://pruvious.com/ubuntu/install.sh | bash^:')
+  term('^ccurl -o- https://pruject.com/ubuntu/install.sh | bash^:')
   newLine(2)
   term('^-Note: This command works only for Ubuntu Server 18, 20, and 22.^:')
 
@@ -228,7 +228,7 @@ export async function connect(server: ServerMeta): Promise<NodeSSH> {
       '1. If you have not yet configured the server, run the following command ^+on the server^ as a superuser:',
     )
     newLine(2)
-    term('^ccurl -o- https://pruvious.com/ubuntu/install.sh | bash^:')
+    term('^ccurl -o- https://pruject.com/ubuntu/install.sh | bash^:')
     newLine(2)
     term('2. Run the following command ^+on the server^ as a superuser to add your public key:')
     newLine(2)
