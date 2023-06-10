@@ -2,7 +2,7 @@
   *ngIf="initialized"
   [trapAutofocus]="autofocus"
   [trapFocus]="visible"
-  class="scrollbar-thin scrollbar-inverse absolute inset-0 z-40 flex min-w-[90rem] transition"
+  class="scrollbar-thin scrollbar-inverse fixed inset-0 z-40 flex transition"
   [ngClass]="{
     'invisible opacity-0': !visible,
     'overflow-y-auto bg-gray-900/50 p-8': width !== '100%'
