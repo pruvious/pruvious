@@ -141,7 +141,11 @@ if (favicon) {
 useHead({
   htmlAttrs,
   title,
-  meta: Object.entries(meta).map(([name, content]) => ({ name, content })),
+  meta: Object.entries(meta).map(([name, content]) =>
+    name.startsWith('og:') || name.startsWith('twitter:')
+      ? { property: name, content }
+      : { name, content },
+  ),
   script,
   link,
 })
