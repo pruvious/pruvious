@@ -250,7 +250,7 @@ export interface Config {
     /**
      * A function to execute when the job is being processed.
      */
-    callback: (payload: string | null) => Promise<void> | void
+    callback: (payload: string | null) => Promise<any> | any
   }[]
 }
 
