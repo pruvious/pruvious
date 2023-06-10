@@ -3,7 +3,6 @@
 <script setup>
 import { _pruviousRequest, fetchPage, onUnmounted, usePruvious, useRuntimeConfig } from '#imports'
 
-const props = defineProps({ page: {} })
 const config = useRuntimeConfig()
 const guides = []
 const { blocks } = await _pruviousRequest('/blocks', { clientCache: 0, serverCache: 0 })
@@ -130,25 +129,20 @@ async function onMessage(event) {
           ?.scrollIntoView({ behavior: 'smooth' })
       }
     } else if (event.data.action === 'softReload') {
-      if (Object.keys(props.page).length) {
-        pruvious.value.page = await fetchPage()
+      const page = await fetchPage()
+      const top = window.scrollY
+      pruvious.value.page = null
+      document.body.style.height = `${document.body.offsetHeight}px`
 
-        if (Object.keys(pruvious.value.page).length) {
-          const top = window.scrollY
-          const page = { ...pruvious.value.page }
-
-          for (const property of Object.getOwnPropertyNames(props.page)) {
-            delete props.page[property]
-          }
-
-          setTimeout(() => {
-            Object.assign(props.page, page)
-            unhighlight()
-            setTimeout(() => window.scrollTo({ top, behavior: 'instant' }))
-            setTimeout(() => window.scrollTo({ top, behavior: 'instant' }), 250)
-          })
-        }
-      }
+      setTimeout(() => {
+        pruvious.value.page = page
+        unhighlight()
+        setTimeout(() => {
+          window.scrollTo({ top, behavior: 'instant' })
+          document.body.style.height = null
+          setTimeout(() => window.scrollTo({ top, behavior: 'instant' }), 250)
+        })
+      })
     } else if (event.data.action === 'reload') {
       window.location.reload()
     } else if (event.data.action === 'dragStart') {
@@ -157,9 +151,7 @@ async function onMessage(event) {
     } else if (event.data.action === 'dragEnd') {
       dragging = false
     } else if (event.data.action === 'ping') {
-      if (Object.keys(props.page).length) {
-        window.parent.postMessage({ action: 'pong' }, '*')
-      }
+      window.parent.postMessage({ action: 'pong' }, '*')
     }
   }
 }

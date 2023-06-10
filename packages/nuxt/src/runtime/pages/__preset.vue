@@ -1,9 +1,12 @@
 <template>
-  <div v-if="preset">
-    <PruviousBlocks v-if="preset.blocks" v-bind="{ blocks: preset.blocks, isPreview }" />
+  <div v-if="pruvious.page">
+    <PruviousBlocks
+      v-if="pruvious.page.blocks"
+      v-bind="{ blocks: pruvious.page.blocks, isPreview }"
+    />
 
     <ClientOnly>
-      <component v-if="pruviousGuides" v-bind="{ page: preset }" :is="pruviousGuides"></component>
+      <component v-if="pruviousGuides" :is="pruviousGuides"></component>
     </ClientOnly>
   </div>
 </template>
@@ -12,11 +15,13 @@
 import { createError, fetchPage, useRoute } from '#imports'
 
 const route = useRoute()
-const preset = await fetchPage()
 const isPreview = !!route.query.__p
+const pruvious = usePruvious()
 let pruviousGuides
 
-if (!preset) {
+pruvious.value.page = await fetchPage()
+
+if (!pruvious.value.page) {
   throw createError({ statusCode: 404, statusMessage: 'Preset Not Found' })
 }
 

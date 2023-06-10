@@ -1,9 +1,12 @@
 <template>
-  <NuxtLayout v-if="page" :name="page.layout">
-    <PruviousBlocks v-if="page.blocks" v-bind="{ blocks: page.blocks, isPreview }" />
+  <NuxtLayout v-if="pruvious.page" :name="pruvious.page.layout">
+    <PruviousBlocks
+      v-if="pruvious.page.blocks"
+      v-bind="{ blocks: pruvious.page.blocks, isPreview }"
+    />
 
     <ClientOnly>
-      <component v-if="pruviousGuides" v-bind="{ page }" :is="pruviousGuides"></component>
+      <component v-if="pruviousGuides" :is="pruviousGuides"></component>
     </ClientOnly>
 
     <LazyPruviousSEO v-if="config.public.pruvious.seo !== false"></LazyPruviousSEO>
@@ -20,11 +23,10 @@ const { defaultLanguage, languages } = await fetchLanguages()
 const language = languages.find((language) => {
   return language.code !== defaultLanguage && route.fullPath.startsWith(`/${language.code}/`)
 })
-const page = await fetchPage(language ? `/${language.code}/404` : '/404')
 const pruvious = usePruvious()
 let pruviousGuides
 
-pruvious.value.page = page
+pruvious.value.page = await fetchPage(language ? `/${language.code}/404` : '/404')
 
 if (isPreview) {
   pruviousGuides = resolveComponent('LazyPruviousGuides')
