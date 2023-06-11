@@ -167,9 +167,10 @@ async function fillRecords(relations: ExtractedFields, skipPopulate?: SkipPopula
         locations.some(({ field }) => {
           return (
             field.type === 'preset' &&
-            field.returnFields?.some((returnField) => {
-              return returnField === 'blocks'
-            })
+            (!field.returnFields ||
+              field.returnFields?.some((returnField) => {
+                return returnField === 'blocks'
+              }))
           )
         }),
       _skipPopulate: skipPopulate,
