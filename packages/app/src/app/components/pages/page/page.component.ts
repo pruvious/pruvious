@@ -185,7 +185,7 @@ export class PageComponent extends HistoryComponent implements OnInit, AfterView
 
   sharingImageDescription: string = `An image that appears when someone shares this ${lowercaseFirstLetter(
     this.config.pages.labels!.item!.singular,
-  )} link on a social network. The optimal image size is 1600 × 900 pixels.`
+  )} link on a social network. The optimal image size is 1200 × 630 pixels.`
 
   metaTagsDescription: string = `The **&lt;meta&gt;** tags for this ${lowercaseFirstLetter(
     this.config.pages.labels!.item!.singular,

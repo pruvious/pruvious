@@ -59,10 +59,10 @@ export const standardPageFields: QueryableField[] = [
   {
     name: 'sharingImage',
     type: 'image',
-    minWidth: 1600,
-    minHeight: 600,
+    minWidth: 1200,
+    minHeight: 630,
     allow: ['gif', 'jpg', 'png', 'webp'],
-    sources: [{ width: 1600, height: 600, quality: 90 }],
+    sources: [{ width: 1200, height: 630, quality: 90 }],
   },
   {
     name: 'metaTags',

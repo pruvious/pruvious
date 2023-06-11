@@ -75,11 +75,11 @@ module.exports = async () => ({
               label: 'Default sharing image',
               type: 'image',
               description:
-                'An image that appears when someone shares a page link on a social network. The optimal image size is 1600 × 900 pixels.',
-              minWidth: 1600,
-              minHeight: 600,
+                'An image that appears when someone shares a page link on a social network. The optimal image size is 1200 × 630 pixels.',
+              minWidth: 1200,
+              minHeight: 630,
               allow: ['gif', 'jpg', 'png', 'webp'],
-              sources: [{ width: 1600, height: 600, quality: 90 }],
+              sources: [{ width: 1200, height: 630, quality: 90 }],
             },
             {
               name: 'logo',
