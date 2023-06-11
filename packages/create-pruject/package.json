@@ -1,6 +1,6 @@
 {
   "name": "create-pruject",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The simple way to develop and deploy websites using Pruvious and Nuxt.",
   "type": "module",
   "exports": {
@@ -35,9 +35,9 @@
     "node": ">=16.10.0"
   },
   "dependencies": {
-    "@pruvious/build": "^1.0.0",
-    "@pruject/dev": "^1.0.0",
-    "@pruvious/utils": "^1.0.0",
+    "@pruvious/build": "^1.0.1",
+    "@pruject/dev": "^1.0.1",
+    "@pruvious/utils": "^1.0.1",
     "fs-extra": "^11.1.1",
     "inquirer": "^8.2.5"
   },

@@ -20,7 +20,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@pruject/dev": "^1.0.0",
+    "@pruject/dev": "^1.0.1",
     "prettier": "^2.8.7"
   }
 }
