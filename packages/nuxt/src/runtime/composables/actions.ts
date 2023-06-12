@@ -54,7 +54,7 @@ type ActionResponse<OkResponse = any, ErrorResponse = any> =
  */
 export async function getAction<OkResponse = any, ErrorResponse = any>(
   name: Pruvious.Action,
-  params: Record<string, any>,
+  params?: Record<string, any>,
   options: Options = {},
 ): Promise<ActionResponse<OkResponse, ErrorResponse>> {
   return request<OkResponse, ErrorResponse>(name, 'GET', { ...options, params })
