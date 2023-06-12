@@ -1,12 +1,12 @@
 <template></template>
 
 <script setup>
-import { _pruviousRequest, fetchPage, onUnmounted, usePruvious, useRuntimeConfig } from '#imports'
+import { _pruviousRequest, onUnmounted, useRuntimeConfig } from '#imports'
 
+const emit = defineEmits(['softReload'])
 const config = useRuntimeConfig()
 const guides = []
 const { blocks } = await _pruviousRequest('/blocks', { clientCache: 0, serverCache: 0 })
-const pruvious = usePruvious()
 const platform = navigator?.userAgentData?.platform || navigator?.platform || 'unknown'
 const isMac = /mac/i.test(platform)
 
@@ -129,20 +129,8 @@ async function onMessage(event) {
           ?.scrollIntoView({ behavior: 'smooth' })
       }
     } else if (event.data.action === 'softReload') {
-      const page = await fetchPage()
-      const top = window.scrollY
-      pruvious.value.page = null
-      document.body.style.height = `${document.body.offsetHeight}px`
-
-      setTimeout(() => {
-        pruvious.value.page = page
-        unhighlight()
-        setTimeout(() => {
-          window.scrollTo({ top, behavior: 'instant' })
-          document.body.style.height = null
-          setTimeout(() => window.scrollTo({ top, behavior: 'instant' }), 250)
-        })
-      })
+      emit('softReload')
+      setTimeout(() => unhighlight())
     } else if (event.data.action === 'reload') {
       window.location.reload()
     } else if (event.data.action === 'dragStart') {

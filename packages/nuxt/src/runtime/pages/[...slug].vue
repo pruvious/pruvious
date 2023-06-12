@@ -1,12 +1,9 @@
 <template>
-  <NuxtLayout v-if="pruvious.page" :name="pruvious.page?.layout">
-    <PruviousBlocks
-      v-if="pruvious.page.blocks"
-      v-bind="{ blocks: pruvious.page.blocks, isPreview }"
-    />
+  <NuxtLayout v-if="page" :name="page?.layout" :key="key">
+    <PruviousBlocks v-if="page.blocks" v-bind="{ blocks: page.blocks, isPreview }" />
 
     <ClientOnly>
-      <component v-if="pruviousGuides" :is="pruviousGuides"></component>
+      <component v-if="pruviousGuides" :is="pruviousGuides" @soft-reload="softReload()"></component>
     </ClientOnly>
 
     <LazyPruviousSEO v-if="config.public.pruvious.seo !== false"></LazyPruviousSEO>
@@ -31,18 +28,19 @@ const route = useRoute()
 const { defaultLanguage, languages } = await fetchLanguages()
 const isPreview = !!route.query.__p
 const pruvious = usePruvious()
+const key = ref(0)
+
+let page = await fetchPage()
 let pruviousGuides
 
-pruvious.value.page = await fetchPage()
+pruvious.value.page = page
 
 if (
-  !pruvious.value.page ||
+  !page ||
   (!isPreview &&
-    (pruvious.value.page.path === '/404' ||
+    (page.path === '/404' ||
       languages.some((language) => {
-        return (
-          language.code !== defaultLanguage && pruvious.value.page.path === `/${language.code}/404`
-        )
+        return language.code !== defaultLanguage && page.path === `/${language.code}/404`
       })))
 ) {
   if (process.server) {
@@ -50,15 +48,29 @@ if (
   } else {
     showError({ statusCode: 404, statusMessage: 'Page Not Found' })
   }
-} else if (pruvious.value.page.redirectTo) {
-  await navigateTo(pruvious.value.page.redirectTo, {
-    redirectCode: pruvious.value.page.redirectCode,
+} else if (page.redirectTo) {
+  await navigateTo(page.redirectTo, {
+    redirectCode: page.redirectCode,
     replace: true,
-    external: pruvious.value.page.redirectTo.startsWith('http'),
+    external: page.redirectTo.startsWith('http'),
   })
 }
 
 if (isPreview) {
   pruviousGuides = resolveComponent('LazyPruviousGuides')
+}
+
+async function softReload() {
+  const top = window.scrollY
+  document.body.style.height = `${document.body.offsetHeight}px`
+  page = await fetchPage()
+  pruvious.value.page = page
+  key.value++
+
+  setTimeout(() => {
+    window.scrollTo({ top, behavior: 'instant' })
+    document.body.style.height = null
+    setTimeout(() => window.scrollTo({ top, behavior: 'instant' }), 250)
+  })
 }
 </script>
