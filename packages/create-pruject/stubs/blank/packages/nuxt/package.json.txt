@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.4.8",
-    "@pruvious/nuxt": "^1.0.2",
+    "@pruvious/nuxt": "^1.0.3",
     "pinia": "^2.0.34"
   },
   "devDependencies": {

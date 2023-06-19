@@ -12,7 +12,7 @@ import { pc } from '@pruvious/build'
 import { fileURLToPath } from 'url'
 
 const logger = useLogger('@pruvious/nuxt')
-const version = '1.0.2'
+const version = '1.0.3'
 
 let fs: typeof import('fs') | undefined
 let path: typeof import('path') | undefined

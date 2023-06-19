@@ -1,6 +1,6 @@
 {
   "name": "@pruvious/utils",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Opinionated collection of JavaScript utility functions.",
   "type": "module",
   "exports": {

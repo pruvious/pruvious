@@ -1,6 +1,6 @@
 {
   "name": "pruvious",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A reliable CMS for your Nuxt app",
   "type": "module",
   "workspaces": [
@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "@parcel/watcher": "^2.1.0",
-    "@pruvious/build": "^1.0.2",
-    "@pruvious/utils": "^1.0.2",
+    "@pruvious/build": "^1.0.3",
+    "@pruvious/utils": "^1.0.3",
     "@tabler/icons": "^1.119.0",
     "@types/inquirer": "^9.0.3",
     "fs-extra": "^11.1.1",

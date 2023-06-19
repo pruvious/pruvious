@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "dev": "ng serve",
     "build": "ng build --configuration production",
@@ -15,8 +15,8 @@
     "@angular/platform-browser": "^15.0.0",
     "@angular/platform-browser-dynamic": "^15.0.0",
     "@angular/router": "^15.0.0",
-    "@pruvious/shared": "^1.0.2",
-    "@pruvious/utils": "^1.0.2",
+    "@pruvious/shared": "^1.0.3",
+    "@pruvious/utils": "^1.0.3",
     "@tiptap/core": "^2.0.0-beta.218",
     "@tiptap/extension-highlight": "^2.0.0-beta.218",
     "@tiptap/extension-link": "^2.0.0-beta.218",
