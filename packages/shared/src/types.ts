@@ -172,14 +172,20 @@ export interface Config {
   users?: Users
 
   /**
-   * A callback function that is triggered when the cache is cleared. It accepts a
-   * single `flushed` parameter that contains the IDs of the affected models,
-   * and the `pagePaths` and `settingsGroups` if pages and settings are flushed.
+   * A callback executed when the cache is cleared. It takes an object argument with the following properties:
    *
-   * This hook is intended for actions like flushing cache on CDN servers and
-   * similar.
+   * - `pageIds` - An array of modified page IDs with cleared cache.
+   * - `pagePaths` - An array of page paths related to the modified pages.
+   * - `presetIds` - An array of modified presets.
+   * - `uploadIds` - An array of modified uploads.
+   * - `postIds` - An array of modified posts.
+   * - `userIds` - An array of modified users.
+   * - `settingIds` - An array of modified settings group IDs with cleared cache.
+   * - `settingsGroups` - An array of settings group names related to the modified settings.
+   *
+   * You can use this hook, for example, to trigger cache clearing on your CDN when something is updated in the CMS.
    */
-  onFlush?: (flushed: {
+  onFlush?: (changed: {
     pageIds: number[]
     pagePaths: string[]
     presetIds: number[]
@@ -516,11 +522,14 @@ export interface Pages extends QueryableModel {
    * - `language` - The language code of the page.
    * - `translationId` - An internal ID used to link the page to its related translations.
    * - `title` - The document title displayed in the browser's title bar or page tab.
+   * - `baseTitle` - A flag that determines whether the base title defined in the SEO settings should be displayed along with the page title.
    * - `description` - A brief summary of the web page's content, typically displayed in search results and social media shares.
-   * - `type` - @todo
-   * - `layout` - @todo
-   * - `blocks` - @todo
-   * - `draftToken` - @todo
+   * - `metaTags` - An array of meta tag objects with their respective `name` and `content` properties.
+   * - `sharingImage` - An image typically displayed when sharing the page's link on social media platforms. If not specified, the default sharing image from the SEO settings is used.
+   * - `visible` - A setting that determines whether the page should be visible to search engines, controlled through the robots meta tag.
+   * - `type` - The page type used for grouping page layouts together and facilitating the inclusion of specific blocks.
+   * - `layout` - The layout that defines the base template of the page.
+   * - `blocks` - An array of block objects used to construct the page's content.
    * - `publishDate` - The date when the page was published. You can schedule the page to be published at a specific date and time in the future.
    * - `createdAt` - An automatically generated date string that indicates when a page is created.
    * - `updatedAt` - An automatically generated date string indicating when a page was last updated.
@@ -3513,23 +3522,23 @@ export type EditorToolbarItem =
 
 export interface ReturnOptions<T extends string> {
   /**
-   * The fields to return in the record. Use a wildcard (*) to return all
-   * fields.
+   * The fields to include in the results.
+   * Use a wildcard (*) to return all fields.
    *
    * Defaults to `'*'`.
    */
   fields?: string[] | '*'
 
   /**
-   * Whether the fields should be populated.
+   * Whether to populate the fields.
    *
    * Defaults to `true`.
    */
   populate?: boolean
 
   /**
-   * The relations to returned within the record. Use a wildcard (*) to return
-   * all relations.
+   * The relations to include in the results.
+   * Use a wildcard (*) to return all relations.
    *
    * Defaults to `'*'`.
    */

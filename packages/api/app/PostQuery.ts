@@ -488,7 +488,10 @@ export class PostQuery<
 /**
  * Create a query builder instance for posts.
  *
- * @todo example
+ * @example
+ * ```js
+ * await queryPosts('products').whereGte('price', 1).populate().paginate(1, 10)
+ * ```
  */
 export function queryPosts<CollectionName extends Pruvious.Collection>(
   collection: CollectionName,
@@ -515,7 +518,7 @@ export function queryPosts<CollectionName extends Pruvious.Collection>(
  *
  * @example
  * ```js
- * @todo
+ * await validatePostFields('products', { id: 1, price: -1 }, 'update')
  * ```
  */
 export async function validatePostFields<CollectionName extends Pruvious.Collection>(
@@ -565,7 +568,7 @@ export async function validatePostFields<CollectionName extends Pruvious.Collect
  *
  * @example
  * ```js
- * await createPost({}) @todo
+ * await createPost('products', { name: 'Pen', price: 1.99 })
  * ```
  */
 export async function createPost<CollectionName extends Pruvious.Collection>(
@@ -597,7 +600,7 @@ export async function createPost<CollectionName extends Pruvious.Collection>(
  *
  * @example
  * ```js
- * await getPost(1) @todo
+ * await getPost('products', 1)
  * ```
  */
 export async function getPost<CollectionName extends Pruvious.Collection>(
@@ -623,7 +626,12 @@ export async function getPost<CollectionName extends Pruvious.Collection>(
 }
 
 /**
- * @todo
+ * Fetch a post based on its ID.
+ *
+ * @example
+ * ```js
+ * await getAnyPost(1)
+ * ```
  */
 export async function getAnyPost(
   postId: number,
@@ -659,7 +667,7 @@ export async function getAnyPost(
  *
  * @example
  * ```js
- * await updatePost(1, {}) @todo
+ * await updatePost('products', 1, { price: 2.99 })
  * ```
  */
 export async function updatePost<CollectionName extends Pruvious.Collection>(
@@ -688,7 +696,7 @@ export async function updatePost<CollectionName extends Pruvious.Collection>(
  *
  * @example
  * ```js
- * await deletePost(1) @todo
+ * await deletePost(1)
  * ```
  */
 export async function deletePost<CollectionName extends Pruvious.Collection>(
@@ -703,7 +711,13 @@ export async function deletePost<CollectionName extends Pruvious.Collection>(
 }
 
 /**
- * @todo
+ * Retrieve a key-value object of translations for a given `postId` argument.
+ * The keys in the object represent the language codes of the translations, while the corresponding values can be either an object containing the post ID for the respective language or `null` if no translation is available.
+ *
+ * @example
+ * ```js
+ * const { de, fr } = await getPostTranslations(1)
+ * ```
  */
 export async function getPostTranslations(
   postId: number,

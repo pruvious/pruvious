@@ -13,9 +13,9 @@
     "g": "pruvious g"
   },
   "dependencies": {
-    "@pruvious/cms": "^1.0.1"
+    "@pruvious/cms": "^1.0.2"
   },
   "devDependencies": {
-    "@pruvious/dev": "^1.0.1"
+    "@pruvious/dev": "^1.0.2"
   }
 }

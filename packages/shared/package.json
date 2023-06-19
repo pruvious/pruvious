@@ -1,6 +1,6 @@
 {
   "name": "@pruvious/shared",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Shared types and utilities.",
   "type": "module",
   "exports": {
@@ -28,13 +28,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@pruvious/utils": "^1.0.1",
+    "@pruvious/utils": "^1.0.2",
     "dayjs": "^1.11.7",
     "nanoid": "^4.0.0",
     "qs": "^6.11.0",
     "string-strip-html": "^13.2.1"
   },
   "devDependencies": {
-    "@pruvious/build": "^1.0.1"
+    "@pruvious/build": "^1.0.2"
   }
 }

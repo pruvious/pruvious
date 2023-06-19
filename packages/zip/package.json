@@ -1,6 +1,6 @@
 {
   "name": "@pruvious/zip",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Un(zip) tool for Pruvious packages.",
   "type": "module",
   "exports": {
@@ -36,7 +36,7 @@
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {
-    "@pruvious/build": "^1.0.1",
+    "@pruvious/build": "^1.0.2",
     "@types/adm-zip": "^0.5.0",
     "@types/fs-extra": "^9.0.13"
   }

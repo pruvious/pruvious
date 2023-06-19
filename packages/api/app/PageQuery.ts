@@ -486,7 +486,10 @@ export class PageQuery extends BaseQuery<T> {
 /**
  * Create a query builder instance for pages.
  *
- * @todo example
+ * @example
+ * ```js
+ * await queryPages().whereLike('path', 'news/%').populate().paginate(1, 10)
+ * ```
  */
 export function queryPages(params?: string | QueryString): PageQuery {
   return new PageQuery(params)
@@ -499,7 +502,7 @@ export function queryPages(params?: string | QueryString): PageQuery {
  *
  * @example
  * ```js
- * @todo
+ * await validatePageFields({ id: 1, path: 'who ops' }, 'update')
  * ```
  */
 export async function validatePageFields(
@@ -553,7 +556,7 @@ export async function validatePageFields(
  *
  * @example
  * ```js
- * await createPage({}) @todo
+ * await createPage({ path: '/' })
  * ```
  */
 export async function createPage(
@@ -649,7 +652,13 @@ export async function deletePage(pageId: number): Promise<boolean> {
 }
 
 /**
- * @todo
+ * Retrieve a key-value object of translations for a given `pageId` argument.
+ * The keys in the object represent the language codes of the translations, while the corresponding values can be either an object containing the page ID for the respective language or `null` if no translation is available.
+ *
+ * @example
+ * ```js
+ * const { de, fr } = await getPageTranslations(1)
+ * ```
  */
 export async function getPageTranslations(
   pageId: number,
