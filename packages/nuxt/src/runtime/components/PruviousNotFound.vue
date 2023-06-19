@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { fetchLanguages, fetchPage, usePruvious, useRoute, useRuntimeConfig } from '#imports'
+import { fetchLanguages, fetchPage, ref, usePruvious, useRoute, useRuntimeConfig } from '#imports'
 
 const config = useRuntimeConfig()
 const route = useRoute()

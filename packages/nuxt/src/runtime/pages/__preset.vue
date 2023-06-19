@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { createError, fetchPage, useRoute } from '#imports'
+import { createError, fetchPage, ref, useRoute } from '#imports'
 
 const route = useRoute()
 const isPreview = !!route.query.__p
