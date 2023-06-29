@@ -27,6 +27,7 @@ import UserValidator from 'App/Validators/UserValidator'
 import { collectionsConfig, config, settingConfigs, userConfig } from 'App/imports'
 import { populateUser } from 'App/populator'
 import { createHash } from 'crypto'
+import ms from 'ms'
 import { BaseQuery, prepareFieldValue } from './BaseQuery'
 import { getMetaFields } from './model-utils'
 import { addInternalJob } from './worker'
@@ -795,10 +796,13 @@ export class Auth {
 
     const user = this.auth.use('api').user!
     const token = this.auth.use('api').token!
+    const long =
+      new Date(token.expiresAt as any).getTime() - new Date(token.meta.created_at).getTime() >
+      ms(Env.get('OAT_EXPIRES_IN'))
 
     await this.auth.use('api').revoke()
 
-    const newToken = await this.auth.use('api').generate(user, oatOptions(!!token.meta.long))
+    const newToken = await this.auth.use('api').generate(user, oatOptions(long))
 
     return newToken.toJSON() as any
   }
