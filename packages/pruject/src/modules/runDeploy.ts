@@ -105,6 +105,4 @@ export async function runDeploy(sub: string[]) {
   newLine()
   term(`CMS: ^chttps://${website.domain}/cms^:`)
   newLine(2)
-  term("If you haven't already, get your project license at https://pruvious.com/buy")
-  newLine(2)
 }

@@ -20,7 +20,7 @@
     "url": "git+https://github.com/pruvious/pruvious.git"
   },
   "author": "Muris Ceman <hello@pruvious.com>",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/pruvious/pruvious/issues"
   },
