@@ -615,8 +615,6 @@ export function listCapabilities(): Pruvious.Role['capabilities'] {
     'accessDashboard',
     'updateProfile',
     'clearCache',
-    'readCMSSettings',
-    'updateCMSSettings',
 
     'listCollections',
 
