@@ -333,6 +333,15 @@ export async function addInternalJob(
  * `previous.config.ts` beforehand.
  *
  * @returns whether the job was successfully added to the queue.
+ *
+ * @example
+ * ```js
+ * const to = 'support@pruvious.com'
+ * const subject = 'Test'
+ * const body = '...'
+ *
+ * await addJob('sendEmail', JSON.stringify({ to, subject, body }))
+ * ```
  */
 export async function addJob(name: Pruvious.Job, payload?: string): Promise<boolean> {
   if (['flush', 'flushPublic', 'rebuildSitemap'].includes(name)) {

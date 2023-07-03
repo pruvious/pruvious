@@ -431,7 +431,7 @@ export interface QueryableModel {
    * overrides the standard array order and can be used to have better control
    * over sorting of nested fields and block models.
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 }
@@ -465,7 +465,7 @@ export interface Pages extends QueryableModel {
    *
    * Defaults to `['title', 'path', 'description', 'blocks']`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -684,7 +684,7 @@ export interface Presets extends QueryableModel {
    *
    * Defaults to `['title', 'blocks']`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -798,7 +798,7 @@ export interface Uploads {
    *
    * Defaults to `['name', 'path', 'mime', 'description']`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -962,7 +962,7 @@ export interface Collection extends QueryableModel {
    *
    * Defaults to `[]`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -1095,7 +1095,7 @@ export interface Roles extends QueryableModel {
    *
    * Defaults to `['name', 'capabilities']`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -1195,7 +1195,7 @@ export interface Users extends QueryableModel {
    *
    * Defaults to `['email', 'firstName', 'lastName']`
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string[]
 
@@ -1460,7 +1460,7 @@ export interface QueryStringParameters<
    *
    * The search fields can be defined individually for all models.
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: string
 
@@ -1762,7 +1762,7 @@ export interface SearchableField {
    *
    * Defaults to `10`.
    *
-   * @see https://pruvious.com/documentation/essentials/search
+   * @see https://pruvious.com/documentation/essentials/query-builder#search
    */
   search?: number | false
 }
