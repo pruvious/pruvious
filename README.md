@@ -5,6 +5,8 @@ Pruvious is a content management system (CMS) based on [Node.js](https://nodejs.
 **Website:** [https://pruvious.com/](https://pruvious.com/)\
 **Documentation:** [https://pruvious.com/documentation](https://pruvious.com/documentation)
 
+> **_NOTE:_**  The documentation is currently a work in progress and is expected to be completed by the end of July 2023.
+
 ## Quickstart
 
 To quickly get a taste of Pruvious as a website CMS, we recommend using [Pruject](https://pruject.com/) for managing your project. Check out the [Pruject.com](https://pruject.com/) website for further information, or begin right away by running the following command:
