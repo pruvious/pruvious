@@ -8,6 +8,7 @@ const module = fs.readFileSync('src/module.ts', 'utf8')
 const init = fs.readFileSync('src/cli/init.ts', 'utf8')
 const currentVersion = packageJson.version
 const currentVersionMajorMinor = semver.major(currentVersion) + '.' + semver.minor(currentVersion)
+const execaOptions = { shell: true, stdout: 'inherit', stderr: 'inherit' }
 
 const newVersion = await consola.prompt('Select version:', {
   type: 'select',
