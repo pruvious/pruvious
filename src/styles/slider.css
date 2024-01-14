@@ -1,0 +1,38 @@
+.slider .vue-slider-dot-tooltip-inner {
+  background-color: theme('colors.gray.800');
+  border-color: theme('colors.gray.800');
+  font-size: theme('fontSize.vs');
+}
+
+.slider .vue-slider-rail {
+  background-color: theme('colors.gray.100');
+}
+
+.slider .vue-slider-process {
+  background-color: theme('colors.primary.400');
+}
+
+.slider .vue-slider:hover .vue-slider-process {
+  background-color: theme('colors.primary.600');
+}
+
+.slider .vue-slider-dot-handle {
+  border-color: theme('colors.primary.400');
+}
+
+.slider .vue-slider:hover .vue-slider-dot-handle {
+  border-color: theme('colors.primary.600');
+}
+
+.slider .vue-slider-mark-step-active {
+  box-shadow: 0 0 0 2px theme('colors.primary.400');
+}
+
+.slider .vue-slider:hover .vue-slider-mark-step-active {
+  box-shadow: 0 0 0 2px theme('colors.primary.600');
+}
+
+.slider .vue-slider-ltr .vue-slider-mark-label,
+.vue-slider-rtl .vue-slider-mark-label {
+  margin-top: 6px;
+}

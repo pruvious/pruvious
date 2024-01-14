@@ -1,0 +1,48 @@
+.button {
+  @apply relative inline-flex h-9 shrink-0 items-center justify-center gap-1.5 truncate rounded-md bg-gradient-to-b from-primary-600 to-primary-700 px-3 text-sm text-white outline-none transition before:absolute before:inset-0 before:bg-black before:opacity-0 before:transition focus:ring disabled:pointer-events-none disabled:from-blue-300 disabled:to-blue-300 children:relative hocus:before:opacity-10;
+}
+
+.button .icon-tabler {
+  @apply h-4 w-4;
+}
+
+.button-red {
+  @apply from-red-600 to-red-700 ring-red;
+}
+
+.button-white {
+  @apply border bg-white bg-none text-gray-900 before:hidden disabled:pointer-events-none disabled:bg-white disabled:text-gray-400 hocus:border-primary-700;
+}
+
+.button-white-red {
+  @apply border bg-white bg-none text-gray-900 ring-red before:hidden hocus:border-red-500;
+}
+
+.button-white[disabled] .icon-tabler,
+.button-white-red[disabled] .icon-tabler {
+  @apply text-gray-400;
+}
+
+.button-sm {
+  @apply h-7 rounded px-2;
+}
+
+.button-square {
+  @apply w-9 px-0;
+}
+
+.button-square-sm {
+  @apply h-7 w-7 rounded px-0;
+}
+
+.button-square-xs {
+  @apply h-5 w-5 rounded px-0;
+}
+
+.button-circle-xs {
+  @apply h-5 w-5 rounded-full px-0;
+}
+
+.button-circle-xs .icon-tabler {
+  @apply h-4 w-4;
+}

@@ -1,9 +1,8 @@
-.angular/
-build/
-!packages/build
-dist/
-node_modules/
-tmp/
-*.sqlite3
-*.sqlite3-journal
-*.txt
+.cache
+.nitro
+.nuxt
+.output
+.pruvious
+.uploads
+dist
+node_modules

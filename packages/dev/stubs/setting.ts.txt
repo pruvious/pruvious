@@ -1,7 +1,0 @@
-import { Settings } from '@pruvious/cms'
-
-export default async (): Promise<Settings> => ({
-  group: 'settings-group-name',
-  translatable: false,
-  fields: [],
-})

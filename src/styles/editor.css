@@ -1,0 +1,105 @@
+.ProseMirror {
+  @apply space-y-2 px-2.5 py-[0.4375rem] outline-none;
+}
+
+.ProseMirror[contenteditable='false'] {
+  @apply opacity-50;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply pointer-events-none float-left h-0 text-gray-300;
+}
+
+.ProseMirror a {
+  @apply underline decoration-double;
+}
+
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h1,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h2,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h3,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h4,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h5,
+.ProseMirror :where(:not(h1, h2, h3, h4, h5, h6)) + h6 {
+  @apply pt-4;
+}
+
+.ProseMirror h1 {
+  @apply text-2xl;
+}
+
+.ProseMirror h2 {
+  @apply text-xl;
+}
+
+.ProseMirror h3 {
+  @apply text-lg;
+}
+
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  @apply text-base;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 pl-2;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+  @apply pl-4;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  @apply pl-4;
+}
+
+.ProseMirror pre {
+  @apply rounded bg-gray-50 px-2 py-1 text-vs;
+}
+
+.ProseMirror hr {
+  @apply border-gray-200;
+}
+
+.ProseMirror mark {
+  @apply bg-yellow-200;
+}
+
+.ProseMirror :where(:not(pre)) code {
+  @apply inline-block rounded bg-gray-50 px-1 text-vs;
+}
+
+.ProseMirror span[_fr--] {
+  @apply text-primary-700;
+}
+
+.toolbar-button {
+  @apply flex h-7 w-7 shrink-0 items-center bg-white transition hocus:text-primary-700;
+}
+
+.is-fullscreen .toolbar-button {
+  @apply rounded-md;
+}
+
+.toolbar-button > * {
+  @apply m-auto h-4 w-4;
+}
+
+.toolbar-button.toolbar-button-active {
+  @apply bg-primary-50 text-primary-700;
+}
+
+.toolbar-button.toolbar-button-disabled {
+  @apply cursor-default bg-white text-gray-700 opacity-50;
+}
+
+.toolbar-button.toolbar-button-dropdown {
+  @apply w-auto gap-0.5 px-1;
+}
+
+.toolbar-button.toolbar-button-dropdown > *:last-child {
+  @apply h-3 w-3;
+}

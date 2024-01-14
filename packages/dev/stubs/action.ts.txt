@@ -1,8 +1,0 @@
-import { Action } from '@pruvious/cms'
-
-export default {
-  name: 'action-name',
-  callback: async ({ auth, request, response }) => {
-    return {}
-  },
-} satisfies Action

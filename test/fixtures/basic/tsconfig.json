@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "#pruvious": ["./.pruvious"],
+      "#pruvious/*": ["./.pruvious/*"]
+    }
+  }
+}

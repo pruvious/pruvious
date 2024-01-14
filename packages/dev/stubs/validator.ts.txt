@@ -1,8 +1,0 @@
-import { Validator } from '@pruvious/cms'
-
-export default {
-  name: 'validatorName',
-  callback: async ({ field, value }) => {
-    // throw new Error('Validation failed')
-  },
-} satisfies Validator

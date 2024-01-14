@@ -1,6 +1,0 @@
-import { Block } from '@pruvious/cms'
-
-export default async (): Promise<Block> => ({
-  name: 'BlockName',
-  fields: [],
-})
