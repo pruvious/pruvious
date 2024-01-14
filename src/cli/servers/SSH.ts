@@ -243,7 +243,7 @@ export class SSH {
     await this.ssh?.putFile('site.tar.gz', `/home/pruvious/sites/${site.domain}.tar.gz`)
     this.success(`Uploaded ${blue('site.tar.gz')} to ${cyan(`~/sites/${site.domain}.tar.gz`)}`)
     await this.exec(`mkdir -p ~/sites/_${site.domain}`)
-    await this.exec(`cp -r ~/sites/${site.domain}/.uploads ~/sites/_${site.domain}`)
+    await this.exec(`cp -r ~/sites/${site.domain}/.uploads ~/sites/_${site.domain}`, true)
     await this.exec(`tar -xzf ~/sites/${site.domain}.tar.gz -C ~/sites/_${site.domain}`)
     this.success(`Extracted ${cyan(`${site.domain}.tar.gz`)} to ${cyan(`~/sites/_${site.domain}`)}`)
     await this.exec(`rm ~/sites/${site.domain}.tar.gz`)
