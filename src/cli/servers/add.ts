@@ -111,7 +111,7 @@ export default defineCommand({
 
     // Write to config file
     const configFile = await readConfigFile()
-    const serverIndex = configFile.servers.findIndex(({ name }) => name === name)
+    const serverIndex = configFile.servers.findIndex(({ name: n }) => n === name)
     configFile.servers[serverIndex > -1 ? serverIndex : configFile.servers.length] = server
     await mergeConfigFile(configFile)
 

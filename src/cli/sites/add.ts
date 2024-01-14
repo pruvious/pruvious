@@ -120,7 +120,7 @@ export default defineCommand({
     const serverIndex = configFile.servers.findIndex(({ name }) => name === serverName)
 
     if (serverIndex > -1) {
-      const siteIndex = server.sites.findIndex(({ domain }) => domain === domain)
+      const siteIndex = server.sites.findIndex(({ domain: d }) => d === domain)
       configFile.servers[serverIndex].sites[siteIndex > -1 ? siteIndex : configFile.servers[serverIndex].sites.length] =
         site
     } else {
