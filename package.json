@@ -38,7 +38,7 @@
     "dev:s3": "cross-env NUXT_PRUVIOUS_UPLOADS_DRIVE_TYPE=s3 NUXT_PRUVIOUS_UPLOADS_DRIVE_KEY=pruvious NUXT_PRUVIOUS_UPLOADS_DRIVE_SECRET=pruvious NUXT_PRUVIOUS_UPLOADS_DRIVE_BUCKET=pruvious NUXT_PRUVIOUS_UPLOADS_DRIVE_REGION=pruvious NUXT_PRUVIOUS_UPLOADS_DRIVE_ENDPOINT=http://127.0.0.1:9000 NUXT_PRUVIOUS_UPLOADS_DRIVE_BASE_URL=http://127.0.0.1:9000/pruvious node ./scripts/dev.js",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "release": "pnpm build && npm publish",
+    "release": "node ./scripts/release.js",
     "test": "vitest run",
     "test:pg": "cross-env NUXT_PRUVIOUS_DATABASE=postgresql://pruvious:12345678@127.0.0.1:5432/pruvious_test vitest run",
     "test:redis": "cross-env NUXT_PRUVIOUS_REDIS=redis://127.0.0.1:6379/1 vitest run",
