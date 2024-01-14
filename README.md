@@ -1,8 +1,9 @@
-[![Pruvious banner](./.github/assets/banner.png)](https://pruvious.com)
+[![Pruvious banner](https://raw.githubusercontent.com/pruvious/pruvious/main/.github/assets/banner.png)](https://pruvious.com)
 
 # Pruvious
 
 <p>
+  <a href="https://www.npmjs.com/package/pruvious"><img src="https://img.shields.io/npm/v/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="Version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/pruvious/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="License"></a>
 </p>
 
