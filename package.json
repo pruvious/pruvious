@@ -4,7 +4,7 @@
   "description": "A reliable CMS for your Nuxt app.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pruvious/cms.git"
+    "url": "git+https://github.com/pruvious/pruvious.git"
   },
   "author": "Muris Ceman <hello@pruvious.com>",
   "license": "MIT",
