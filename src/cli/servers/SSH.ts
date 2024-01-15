@@ -117,6 +117,7 @@ export class SSH {
       await this.exec('rm csr.pem', true)
       this.success(`Created self-signed certificate for ${cyan(site.domain)}`)
     } else {
+      await this.exec(`sudo mkdir -p /etc/letsencrypt/live/${site.domain}`)
       await this.exec(
         `sudo certbot certonly --non-interactive --nginx --agree-tos -m ${config.email} -d ${site.domain} -d www.${site.domain}`,
         /^Saving /,
@@ -243,7 +244,9 @@ export class SSH {
     await this.ssh?.putFile('site.tar.gz', `/home/pruvious/sites/${site.domain}.tar.gz`)
     this.success(`Uploaded ${blue('site.tar.gz')} to ${cyan(`~/sites/${site.domain}.tar.gz`)}`)
     await this.exec(`mkdir -p ~/sites/_${site.domain}`)
-    await this.exec(`cp -r ~/sites/${site.domain}/.uploads ~/sites/_${site.domain}`, true)
+    await this.exec(`mkdir -p ~/sites/_${site.domain}/public`)
+    await this.exec(`mkdir -p ~/sites/${site.domain}/.uploads`)
+    await this.exec(`cp -r ~/sites/${site.domain}/.uploads ~/sites/_${site.domain}`)
     await this.exec(`tar -xzf ~/sites/${site.domain}.tar.gz -C ~/sites/_${site.domain}`)
     this.success(`Extracted ${cyan(`${site.domain}.tar.gz`)} to ${cyan(`~/sites/_${site.domain}`)}`)
     await this.exec(`rm ~/sites/${site.domain}.tar.gz`)
@@ -442,15 +445,15 @@ export class SSH {
     await this.exec(`pm2 flush ${site.domain}`)
     await this.exec(`pm2 save`)
     this.success(`Stopped ${cyan(site.domain)} pm2 process`)
-    await this.exec(`sudo rm ~/sites/${site.domain}.config.js`)
+    await this.exec(`sudo rm ~/sites/${site.domain}.config.js`, true)
     this.success(`Removed ecosystem file ${cyan(`~/sites/${site.domain}.config.js`)}`)
 
-    await this.exec(`sudo rm /etc/nginx/sites-enabled/${site.domain}.conf`)
+    await this.exec(`sudo rm /etc/nginx/sites-enabled/${site.domain}.conf`, true)
     this.success(`Removed nginx config ${cyan(`/etc/nginx/sites-enabled/${site.domain}.conf`)}`)
-    await this.exec(`sudo rm /etc/nginx/sites-available/${site.domain}.conf`)
+    await this.exec(`sudo rm /etc/nginx/sites-available/${site.domain}.conf`, true)
     this.success(`Removed nginx config ${cyan(`/etc/nginx/sites-available/${site.domain}.conf`)}`)
 
-    await this.exec(`sudo rm -rf /etc/letsencrypt/live/${site.domain}`)
+    await this.exec(`sudo certbot delete --cert-name ${site.domain} --non-interactive`, true)
     this.success(`Removed certificate for ${cyan(site.domain)}`)
 
     await this.exec(`sudo nginx -s reload`)

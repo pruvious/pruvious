@@ -457,6 +457,7 @@ export default defineNuxtModule<ModuleOptions>({
         moduleOptions.uploads.drive.urlPrefix ?? 'uploads',
       )
       fs.ensureDirSync(uploadsDir)
+      fs.removeSync(symDir)
       fs.ensureSymlinkSync(uploadsDir, symDir, 'junction')
       nuxt.options.ignore.push('**/' + path.basename(moduleOptions.uploads.drive.path ?? './uploads') + '/**/*')
     }
