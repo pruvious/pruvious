@@ -35,8 +35,6 @@ fs.writeFileSync(
     .replace(`{{ ${currentVersionMajorMinor}.x }}`, `{{ ${newVersionMajorMinor}.x }}`),
 )
 
-consola.info(`'${currentVersionMajorMinor}'`, `'${newVersionMajorMinor}'`)
-
 fs.writeFileSync(
   'src/cli/init.ts',
   init
