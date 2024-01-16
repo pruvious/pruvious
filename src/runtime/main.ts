@@ -1,4 +1,3 @@
-import { useLogger } from '@nuxt/kit'
 import type { WatchEvent } from '@nuxt/schema'
 import fs from 'fs-extra'
 import path from 'path'
@@ -16,7 +15,7 @@ import { clearCachedHook, resolveHooks } from './hooks/hook.resolver'
 import { generateIcons } from './icons/icon.generator'
 import { rebuildDatabase } from './instances/database'
 import { clearAppEvalCache, clearEvalCache } from './instances/evaluator'
-import { applyFormats, clearLogQueue, error, info, processLogQueue, success } from './instances/logger'
+import { applyFormats, clearLogQueue, error, info, logger, processLogQueue, success } from './instances/logger'
 import { resolveAppPath, resolveModulePath } from './instances/path'
 import { bootingFinished, getModuleOption } from './instances/state'
 import { generateJobs } from './jobs/job.generator'
@@ -299,7 +298,7 @@ const generateDotPruviousDebounced = debounce(
     }
 
     processLogQueue()
-    useLogger('pruvious')[results.level](applyFormats(results.message))
+    logger[results.level](applyFormats(results.message))
   },
   250,
   { leading: true, trailing: false },
@@ -334,7 +333,7 @@ export async function boot() {
   }
 
   processLogQueue()
-  useLogger('pruvious')[results.level](applyFormats(results.message))
+  logger[results.level](applyFormats(results.message))
 }
 
 /**

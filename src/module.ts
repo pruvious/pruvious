@@ -7,6 +7,7 @@ import { isDevelopment, isTest } from 'std-env'
 import { warn } from './runtime/instances/logger'
 import {
   initModulePathResolver,
+  initRootDir,
   resolveAppPath,
   resolveModulePath,
   resolveRelativeAppPath,
@@ -172,6 +173,7 @@ export default defineNuxtModule<ModuleOptions>({
     }
 
     initModulePathResolver(createResolver(import.meta.url))
+    initRootDir(nuxt.options.rootDir)
 
     for (const [name, componentPath] of Object.entries(options.dashboard.baseComponents!)) {
       ;(options.dashboard.baseComponents! as any)[name] = componentPath

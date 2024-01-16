@@ -1,27 +1,29 @@
-import { useLogger } from '@nuxt/kit'
 import { cyan, green, red, underline, yellow } from 'colorette'
+import { consola } from 'consola'
 import { clearArray } from '../utils/array'
 
 const queue: { level: 'error' | 'info' | 'success' | 'warn'; message: any; args: any[] }[] = []
 
+export const logger = consola.create({}).withTag('pruvious')
+
 export function log(message: any, ...args: any[]) {
-  useLogger('pruvious').log(applyFormats(message, ...args))
+  logger.log(applyFormats(message, ...args))
 }
 
 export function error(message: any, ...args: any[]) {
-  useLogger('pruvious').error(applyFormats(message, ...args))
+  logger.error(applyFormats(message, ...args))
 }
 
 export function info(message: any, ...args: any[]) {
-  useLogger('pruvious').info(applyFormats(message, ...args))
+  logger.info(applyFormats(message, ...args))
 }
 
 export function success(message: any, ...args: any[]) {
-  useLogger('pruvious').success(applyFormats(message, ...args))
+  logger.success(applyFormats(message, ...args))
 }
 
 export function warn(message: any, ...args: any[]) {
-  useLogger('pruvious').warn(applyFormats(message, ...args))
+  logger.warn(applyFormats(message, ...args))
 }
 
 export function queueError(message: any, ...args: any[]) {
@@ -46,7 +48,7 @@ export function clearLogQueue() {
 
 export function processLogQueue() {
   for (const { level, message, args } of queue) {
-    useLogger('pruvious')[level](applyFormats(message, ...args))
+    logger[level](applyFormats(message, ...args))
   }
 
   clearLogQueue()

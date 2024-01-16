@@ -1,15 +1,12 @@
-import { useNuxt, type Resolver } from '@nuxt/kit'
+import { type Resolver } from '@nuxt/kit'
 import { existsSync } from 'fs'
 import { relative, resolve } from 'path'
 
 let moduleResolver: Resolver | undefined
+let rootDir: string = ''
 
 export function resolveAppPath(...path: string[]): string {
-  try {
-    return resolve(useNuxt().options.rootDir, ...path)
-  } catch {}
-
-  return resolve(process.cwd(), ...path)
+  return resolve(rootDir, ...path)
 }
 
 export function resolveRelativeAppPath(...path: string[]): string {
@@ -32,6 +29,10 @@ export function resolveRelativeModulePath(...path: string[]): string {
 
 export function initModulePathResolver(resolver: Resolver) {
   moduleResolver = resolver
+}
+
+export function initRootDir(dir: string) {
+  rootDir = dir
 }
 
 export function appPathExists(...path: string[]): boolean {

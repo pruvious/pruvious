@@ -1,4 +1,4 @@
-import { useLogger } from '@nuxt/kit'
+import { consola } from 'consola'
 import fs from 'fs-extra'
 import 'pg'
 import {
@@ -88,7 +88,7 @@ export async function rebuildDatabase(
   const options: SequelizeOptions = {
     ...dbInfo,
     dialectOptions: { decimalNumbers: true },
-    logging: isDebugActive('database') ? useLogger('sequelize').log : false,
+    logging: isDebugActive('database') ? consola.create({}).withTag('sequelize').log : false,
   }
   const singleColletionsTable = getModuleOption('singleCollectionsTable')
   const multiCollections = Object.values(collections).filter(({ mode }) => mode === 'multi')
