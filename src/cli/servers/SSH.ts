@@ -196,8 +196,13 @@ export class SSH {
     this.success(`Stopped ${cyan(site.domain)} pm2 process`)
 
     const dbName = slugify(site.domain).replace(/[\.-]/g, '_').slice(0, 63)
+    const dbUser = dbName
     await this.exec(`sudo -u postgres psql -c "DROP DATABASE ${dbName};"`, /^could not change directory to /)
-    await this.exec(`sudo -u postgres psql -c "CREATE DATABASE ${dbName};"`, /^could not change directory to /)
+    await this.exec(
+      `sudo -u postgres psql -c "CREATE DATABASE ${dbName} OWNER ${dbUser};"`,
+      /^could not change directory to /,
+    )
+    await this.exec(`sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${dbName} TO ${dbUser};"`, true)
     await this.exec(
       `sudo -u postgres psql -d ${dbName} < ~/backups/${site.domain}/${backupId}/database.sql`,
       /^could not change directory to /,
@@ -297,7 +302,10 @@ export class SSH {
     this.success(`Stopped ${cyan(site.domain)} pm2 process`)
 
     await this.exec(`sudo -u postgres psql -c "DROP DATABASE ${dbName};"`, true)
-    await this.exec(`sudo -u postgres psql -c "CREATE DATABASE ${dbName};"`, /^could not change directory to /)
+    await this.exec(
+      `sudo -u postgres psql -c "CREATE DATABASE ${dbName} OWNER ${dbUser};"`,
+      /^could not change directory to /,
+    )
     await this.exec(`sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${dbName} TO ${dbUser};"`, true)
 
     if (database.startsWith('postgresql:')) {
