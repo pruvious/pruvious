@@ -80,7 +80,7 @@ export async function seo(
   if (page.translations && pagePath) {
     const translations: Record<string, string> = {}
 
-    for (const [language, id] of Object.entries<number>(page.translations).filter(([_, id]) => id)) {
+    for (const [language, id] of Object.entries<number>(page.translations ?? {}).filter(([_, id]) => id)) {
       const q = (query as any)(collection.name).where('id', id)
 
       if (pp.publicField) {
