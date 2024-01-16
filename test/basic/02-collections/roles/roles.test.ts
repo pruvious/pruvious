@@ -198,7 +198,7 @@ describe('collection: roles', async () => {
   })
 
   it('reads many roles', async () => {
-    const response = await $fetch('/api/collections/roles?limit=2', {
+    const response = await $fetch('/api/collections/roles?limit=2&order=name', {
       headers: { Authorization: `Bearer ${process.env.TOKEN}` },
     })
 
