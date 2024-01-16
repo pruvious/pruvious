@@ -8,10 +8,11 @@ import { NodeSSH } from 'node-ssh'
 import path from 'path'
 import pgConnectionString from 'pg-connection-string'
 import tar from 'tar'
+import { parse } from '../bytes.js'
 import type { PruviousServer, PruviousSite } from '../config/define'
 import { execaOptions } from '../default.js'
 import { getProjectInfo } from '../project.js'
-import { slugify } from '../shared.js'
+import { convertBytesToM, joinRouteParts, slugify } from '../shared.js'
 
 export interface PruviousSiteBackup {
   id: number
@@ -524,8 +525,9 @@ export class SSH {
 }
 
 async function nginxConfigTemplate() {
-  const { uploadUrlPrefix } = await getProjectInfo()
-  const normalizedUploadUrlPrefix = uploadUrlPrefix?.replace(/^\/|\/$/g, '')
+  const info = await getProjectInfo()
+  const uploadsUrlPrefix = joinRouteParts(info.uploadsUrlPrefix ?? 'uploads').slice(1)
+  const uploadsMaxFileSize = info.uploadsMaxFileSize ?? parse('16 MB')
 
   let config = `map $sent_http_content_type $expires {
   "text/html" epoch;
@@ -534,10 +536,10 @@ async function nginxConfigTemplate() {
 }
 `
 
-  if (normalizedUploadUrlPrefix) {
+  if (uploadsUrlPrefix) {
     config += `
 map $request_uri $cache_tag {
-  ~/${normalizedUploadUrlPrefix}/ "public, max-age=2592000";
+  ~/${uploadsUrlPrefix}/ "public, max-age=2592000";
   default "";
 }
 `
@@ -553,6 +555,7 @@ server {
 ### server {
 ###   listen 443 ssl http2;
 ###   server_name {{ domainName }} www.{{ domainName }};
+###   client_max_body_size ${convertBytesToM(uploadsMaxFileSize)};
 
 ###   if ($host = "www.{{ domainName }}") {
 ###     return 301 https://{{ domainName }}$request_uri;
@@ -576,6 +579,10 @@ server {
 ###     proxy_pass http://127.0.0.1:{{ nuxtPort }}/;
 
 ###     rewrite ^/(.*)/$ /$1 permanent;
+###   }
+
+###   location /${uploadsUrlPrefix} {
+###     alias /home/pruvious/sites/{{ domainName }}/.uploads;
 ###   }
 
 ###   ssl_certificate /etc/letsencrypt/live/{{ domainName }}/fullchain.pem;

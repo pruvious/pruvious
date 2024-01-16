@@ -28,6 +28,7 @@ prompt_confirm || exit 0
 # Create user "pruvious"
 sudo adduser --disabled-password --gecos "" pruvious
 sudo usermod -aG sudo pruvious
+sudo usermod -aG pruvious www-data
 sudo echo 'pruvious ALL=(ALL) NOPASSWD: /usr/bin/certbot,/usr/bin/env,/usr/bin/ln,/usr/bin/mv,/usr/bin/mkdir,/usr/bin/rm,/usr/bin/rmdir,/usr/bin/pg_dump,/usr/bin/psql,/usr/bin/tee,/usr/sbin/nginx' | sudo tee /etc/sudoers.d/pruvious > /dev/null
 sudo chmod 0440 /etc/sudoers.d/pruvious
 

@@ -1,10 +1,15 @@
 import fs from 'fs-extra'
 import { loadFile } from 'magicast'
 import path from 'path'
+import { parse } from './bytes.js'
 
-export async function getProjectInfo(
-  cwd?: string,
-): Promise<{ driveType: 'local' | 's3'; uploadsPath: string; uploadUrlPrefix: string | null; database: string }> {
+export async function getProjectInfo(cwd?: string): Promise<{
+  driveType: 'local' | 's3'
+  uploadsPath: string
+  uploadsMaxFileSize: number
+  uploadsUrlPrefix: string | null
+  database: string
+}> {
   const { config } = await getNuxtConfig(cwd)
 
   const uploadsPath =
@@ -12,12 +17,17 @@ export async function getProjectInfo(
     config?.modules?.find((m: [string, any]) => m[0] === 'pruvious')?.[1]?.uploads?.drive?.path ??
     './.uploads'
 
+  const uploadsMaxFileSize =
+    config?.pruvious?.uploads?.maxFileSize ??
+    config?.modules?.find((m: [string, any]) => m[0] === 'pruvious')?.[1]?.uploads?.maxFileSize ??
+    '16 MB'
+
   const driveType =
     config?.pruvious?.uploads?.drive?.type ??
     config?.modules?.find((m: [string, any]) => m[0] === 'pruvious')?.[1]?.uploads?.drive?.type ??
     'local'
 
-  const uploadUrlPrefix =
+  const uploadsUrlPrefix =
     config?.pruvious?.uploads?.drive?.type !== 's3' &&
     config?.modules?.find((m: [string, any]) => m[0] === 'pruvious')?.[1]?.uploads?.drive?.type !== 's3'
       ? config?.pruvious?.uploads?.drive?.urlPrefix ??
@@ -30,7 +40,13 @@ export async function getProjectInfo(
     config?.modules?.find((m: [string, any]) => m[0] === 'pruvious')?.[1]?.database ??
     'sqlite:./pruvious.db'
 
-  return { driveType, uploadsPath, uploadUrlPrefix, database }
+  return {
+    driveType,
+    uploadsPath,
+    uploadsMaxFileSize: typeof uploadsMaxFileSize === 'string' ? parse(uploadsMaxFileSize) : uploadsMaxFileSize,
+    uploadsUrlPrefix,
+    database,
+  }
 }
 
 export async function getNuxtConfig(cwd?: string) {
