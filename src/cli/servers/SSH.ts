@@ -119,10 +119,16 @@ export class SSH {
       this.success(`Created self-signed certificate for ${cyan(site.domain)}`)
     } else {
       await this.exec(`sudo mkdir -p /etc/letsencrypt/live/${site.domain}`)
-      await this.exec(
-        `sudo certbot certonly --non-interactive --nginx --agree-tos -m ${config.email} -d ${site.domain} -d www.${site.domain}`,
-        /^Saving /,
-      )
+
+      const certCommand = `sudo certbot certonly --non-interactive --nginx --agree-tos -m ${config.email} -d ${site.domain} -d www.${site.domain}`
+      const out = await this.ssh?.execCommand(certCommand)
+
+      if (!out?.stdout.includes('Successfully received certificate')) {
+        this.error(`Error executing command: ${certCommand}`)
+        this.error(out?.stderr)
+        process.exit(1)
+      }
+
       this.success(`Created certificate for ${cyan(site.domain)}`)
     }
 
