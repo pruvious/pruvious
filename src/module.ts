@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import { nanoid } from 'nanoid'
 import path from 'path'
 import semver from 'semver'
-import { isDevelopment } from 'std-env'
+import { isDevelopment, isTest } from 'std-env'
 import { warn } from './runtime/instances/logger'
 import {
   initModulePathResolver,
@@ -460,7 +460,7 @@ export default defineNuxtModule<ModuleOptions>({
       fs.ensureDirSync(uploadsDir)
       fs.removeSync(symDir)
 
-      if (isDevelopment) {
+      if (isDevelopment || isTest) {
         fs.ensureSymlinkSync(uploadsDir, symDir, 'junction')
       }
 
