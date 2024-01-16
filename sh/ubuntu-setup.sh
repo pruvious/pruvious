@@ -40,7 +40,7 @@ chown pruvious:pruvious /home/pruvious/sites/sites.config.json
 
 # Install packages
 sudo apt update
-DEBIAN_FRONTEND=noninteractive sudo apt install certbot nginx pgloader postgresql postgresql-contrib python3-certbot-nginx ufw unzip zip -y
+sudo apt install certbot nginx pgloader postgresql postgresql-contrib python3-certbot-nginx ufw unzip zip -y
 
 # Configure firewall
 sudo ufw allow ssh
