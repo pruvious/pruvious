@@ -65,14 +65,6 @@ export default defineCommand({
     const server = config.servers.find((server) => server.sites.some((site) => site.domain === domain))!
     const site = server.sites.find((site) => site.domain === domain)!
 
-    if (backup === undefined) {
-      backup = await consola.prompt('Backup current site before deploying?', { type: 'confirm', initial: true })
-
-      if (typeof backup === 'symbol') {
-        process.exit(0)
-      }
-    }
-
     if (!args.force) {
       consola.warn(`Site ${cyan(domain)} will be deployed to server ${cyan(server.name)}`)
       const confirmation = await consola.prompt('Do you want to continue?', { type: 'confirm', initial: false })
