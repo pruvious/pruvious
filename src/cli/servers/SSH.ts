@@ -136,7 +136,7 @@ export class SSH {
       `cat <<EOF | sudo tee /etc/nginx/sites-available/${site.domain}.conf\n${nginxConfig.replaceAll('### ', '')}EOF`,
     )
 
-    await this.exec('sudo nginx -s reload')
+    await this.exec('sudo nginx -s reload', /signal process started/)
     this.success('Reloaded nginx')
 
     const dbUser = slugify(site.domain).replace(/[\.-]/g, '_').slice(0, 63)
@@ -471,7 +471,7 @@ export class SSH {
     await this.exec(`sudo certbot delete --cert-name ${site.domain} --non-interactive`, true)
     this.success(`Removed certificate for ${cyan(site.domain)}`)
 
-    await this.exec(`sudo nginx -s reload`)
+    await this.exec(`sudo nginx -s reload`, /signal process started/)
     this.success('Reloaded nginx')
 
     await this.exec(`rm -rf ~/sites/${site.domain}`)
