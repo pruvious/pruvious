@@ -127,6 +127,7 @@ describe('collection: uploads', async () => {
 
     expect(response).toEqual({
       directory: 'This field is required',
+      filename: 'The file extension cannot be changed',
     })
   })
 
@@ -208,6 +209,28 @@ describe('collection: uploads', async () => {
     })
 
     expect(response).toEqual({ filename: 'The file path must be unique' })
+  })
+
+  it('does not allow changing file extension (1)', async () => {
+    const response = await $fetch('/api/collections/uploads?where=filename[=][baz.txt]', {
+      method: 'patch',
+      body: { directory: '', filename: 'baz.md' },
+      headers: { Authorization: `Bearer ${process.env.TOKEN}` },
+      ignoreResponseError: true,
+    })
+
+    expect(response).toEqual({ filename: 'The file extension cannot be changed' })
+  })
+
+  it('does not allow changing file extension (2)', async () => {
+    const response = await $fetch('/api/collections/uploads?where=filename[=][baz.txt]', {
+      method: 'patch',
+      body: { directory: '', filename: 'baz' },
+      headers: { Authorization: `Bearer ${process.env.TOKEN}` },
+      ignoreResponseError: true,
+    })
+
+    expect(response).toEqual({ filename: 'The file extension cannot be changed' })
   })
 
   it('deletes an upload', async () => {

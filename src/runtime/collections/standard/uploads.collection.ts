@@ -159,39 +159,53 @@ export default defineCollection({
             const query = currentQuery as QueryBuilderInstance<'uploads'>
             const directory = input.directory
             const filename = value
-            const errorMessage = __(language, 'pruvious-server', 'The file path must be unique')
+            const uniqueErrorMessage = __(language, 'pruvious-server', 'The file path must be unique')
 
             if (
               allInputs?.some(
                 (_input) => _input !== input && _input.directory === directory && _input.filename === filename,
               )
             ) {
-              throw new Error(errorMessage)
+              throw new Error(uniqueErrorMessage)
             }
 
             if (
               operation === 'create' &&
               (await query.clone().reset().where('directory', directory).where('filename', filename).exists())
             ) {
-              throw new Error(errorMessage)
+              throw new Error(uniqueErrorMessage)
             }
 
             if (operation === 'update') {
-              const subjects = await query.clone().clearGroup().clearOffset().clearLimit().select({ id: true }).all()
+              const subjects = await query
+                .clone()
+                .clearGroup()
+                .clearOffset()
+                .clearLimit()
+                .select({ id: true, filename: true })
+                .all()
 
               if (subjects.length > 1) {
-                throw new Error(errorMessage)
-              } else if (
-                subjects.length === 1 &&
-                (await query
-                  .clone()
-                  .reset()
-                  .where('directory', directory)
-                  .where('filename', filename)
-                  .whereNe('id', subjects[0].id)
-                  .exists())
-              ) {
-                throw new Error(errorMessage)
+                throw new Error(uniqueErrorMessage)
+              } else if (subjects.length === 1) {
+                const prevExtension = subjects[0].filename.split('.').pop() ?? ''
+                const currentExtension = filename.split('.').pop() ?? ''
+
+                if (prevExtension !== currentExtension) {
+                  throw new Error(__(language, 'pruvious-server', 'The file extension cannot be changed'))
+                }
+
+                if (
+                  await query
+                    .clone()
+                    .reset()
+                    .where('directory', directory)
+                    .where('filename', filename)
+                    .whereNe('id', subjects[0].id)
+                    .exists()
+                ) {
+                  throw new Error(uniqueErrorMessage)
+                }
               }
             }
           },

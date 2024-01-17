@@ -68,6 +68,7 @@ export default defineTranslatableStrings({
       pattern: "The field '$field' does not exist",
       input: { field: 'string' },
     },
+    'The file extension cannot be changed': 'The file extension cannot be changed',
     'The file path must be unique': 'The file path must be unique',
     'The file type must be one of the following: $types': {
       pattern: 'The file type must be one of the following: $types',

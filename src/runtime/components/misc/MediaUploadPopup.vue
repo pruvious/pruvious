@@ -8,14 +8,14 @@
 
     <form v-if="upload" @submit.prevent="edit()" class="flex flex-col gap-4 p-4">
       <component
-        v-model="upload.filename"
+        v-model="basename"
         :errors="errors"
         :is="TextField"
         :options="{
           label: dashboard.collections.uploads.fields.filename.options.label,
-          description: dashboard.collections.uploads.fields.filename.options.description,
-          required: true,
+          description: __('pruvious-dashboard', 'The filename without the extension'),
         }"
+        @update:modelValue="upload.filename = extension ? `${basename}.${extension}` : basename"
         fieldKey="filename"
       />
 
@@ -63,7 +63,9 @@ const mediaUploadPopup = useMediaUploadPopup()
 const mediaUpdated = useMediaUpdated()
 
 const action = ref<'create' | 'edit'>('create')
+const basename = ref('')
 const errors = ref<Record<string, string>>({})
+const extension = ref('')
 const isImage = ref(false)
 const upload = ref<Pick<CastedFieldType['uploads'], 'id' | 'filename' | 'directory' | 'description'>>()
 const visible = ref(false)
@@ -78,6 +80,8 @@ watch(mediaUploadPopup, () => {
     errors.value = {}
     isImage.value = imageTypes.includes(mediaUploadPopup.value.upload.type)
     upload.value = objectPick(mediaUploadPopup.value.upload, ['id', 'filename', 'directory', 'description'])
+    extension.value = upload.value.filename.split('.').pop() ?? ''
+    basename.value = upload.value.filename.slice(0, -(extension.value.length + 1))
     visible.value = true
   } else {
     visible.value = false
