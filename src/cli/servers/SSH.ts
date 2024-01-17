@@ -44,7 +44,7 @@ export class SSH {
         this.error(err)
         consola.box(
           'Make sure you have configured your server correctly with:\n\n' +
-            cyan('curl -o tmp.sh https://pruvious.com/ubuntu-setup.sh && bash tmp.sh && rm tmp.sh'),
+            cyan('curl -sLo tmp.sh https://pruvious.com/ubuntu-setup.sh && bash tmp.sh && rm tmp.sh'),
         )
         process.exit(1)
       })
