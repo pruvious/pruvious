@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         const population = collection.fields.blocks.additional?.population ?? fields.repeater.population
 
         if (collection.fields.blocks && population) {
-          populated.translations = collection.fields.translations.additional?.population?.populator({
+          populated.translations = await collection.fields.translations.additional?.population?.populator({
             currentQuery: query(collection.name as any),
             definition: fields.text,
             name: 'translations',
