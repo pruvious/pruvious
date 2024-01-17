@@ -290,69 +290,69 @@ export async function getOptimizedImage(
   const image = await (await db()).model('_optimized_images').findOne({ where: { upload_id: upload.id, hash } })
   const paths = generateImagePaths(upload.directory, upload.filename, hash, options.format)
 
-  try {
-    if (!image) {
+  if (!image) {
+    try {
       await (await db()).model('_optimized_images').create({ upload_id: upload.id, hash, ...resolvedOptions })
-    }
-  } catch (e: any) {
-    return { success: false, error: e.message }
-  }
-
-  try {
-    const uploadsDir = path.resolve(getModuleOption('uploadsDir'))
-    const original =
-      uploadsOptions.drive.type === 'local'
-        ? fs.readFileSync(path.resolve(joinRouteParts(uploadsDir, upload.directory, upload.filename)))
-        : await s3GetObject(joinRouteParts(upload.directory, upload.filename))
-    const sharpImage = sharp(original)
-
-    if (resolvedOptions.format === 'png') {
-      sharpImage.png()
-    } else if (resolvedOptions.format === 'webp') {
-      sharpImage.webp(
-        objectPick(resolvedOptions, ['quality', 'alphaQuality', 'lossless', 'nearLossless', 'smartSubsample']),
-      )
-    } else {
-      sharpImage.jpeg(objectPick(resolvedOptions, ['quality']))
+    } catch (e: any) {
+      return { success: false, error: e.message }
     }
 
-    sharpImage.resize({
-      width: resolvedOptions.width ?? undefined,
-      height: resolvedOptions.height ?? undefined,
-      fit: resolvedOptions.resize,
-      withoutEnlargement: resolvedOptions.withoutEnlargement,
-      withoutReduction: resolvedOptions.withoutReduction,
-      position:
-        resolvedOptions.position === 'center'
-          ? 'centre'
-          : resolvedOptions.position === 'topRight'
-          ? 'right top'
-          : resolvedOptions.position === 'bottomRight'
-          ? 'right bottom'
-          : resolvedOptions.position === 'bottomLeft'
-          ? 'left bottom'
-          : resolvedOptions.position === 'topLeft'
-          ? 'left top'
-          : resolvedOptions.position,
-      kernel: resolvedOptions.interpolation,
-    })
+    try {
+      const uploadsDir = path.resolve(getModuleOption('uploadsDir'))
+      const original =
+        uploadsOptions.drive.type === 'local'
+          ? fs.readFileSync(path.resolve(joinRouteParts(uploadsDir, upload.directory, upload.filename)))
+          : await s3GetObject(joinRouteParts(upload.directory, upload.filename))
+      const sharpImage = sharp(original)
 
-    if (uploadsOptions.drive.type === 'local') {
-      fs.writeFileSync(path.resolve(paths.drive), await sharpImage.toBuffer())
-    } else {
-      await s3PutObject(
-        paths.drive,
-        await sharpImage.toBuffer(),
-        resolvedOptions.format === 'jpeg'
-          ? 'image/jpeg'
-          : resolvedOptions.format === 'webp'
-          ? 'image/webp'
-          : 'image/png',
-      )
+      if (resolvedOptions.format === 'png') {
+        sharpImage.png()
+      } else if (resolvedOptions.format === 'webp') {
+        sharpImage.webp(
+          objectPick(resolvedOptions, ['quality', 'alphaQuality', 'lossless', 'nearLossless', 'smartSubsample']),
+        )
+      } else {
+        sharpImage.jpeg(objectPick(resolvedOptions, ['quality']))
+      }
+
+      sharpImage.resize({
+        width: resolvedOptions.width ?? undefined,
+        height: resolvedOptions.height ?? undefined,
+        fit: resolvedOptions.resize,
+        withoutEnlargement: resolvedOptions.withoutEnlargement,
+        withoutReduction: resolvedOptions.withoutReduction,
+        position:
+          resolvedOptions.position === 'center'
+            ? 'centre'
+            : resolvedOptions.position === 'topRight'
+            ? 'right top'
+            : resolvedOptions.position === 'bottomRight'
+            ? 'right bottom'
+            : resolvedOptions.position === 'bottomLeft'
+            ? 'left bottom'
+            : resolvedOptions.position === 'topLeft'
+            ? 'left top'
+            : resolvedOptions.position,
+        kernel: resolvedOptions.interpolation,
+      })
+
+      if (uploadsOptions.drive.type === 'local') {
+        fs.writeFileSync(path.resolve(paths.drive), await sharpImage.toBuffer())
+      } else {
+        await s3PutObject(
+          paths.drive,
+          await sharpImage.toBuffer(),
+          resolvedOptions.format === 'jpeg'
+            ? 'image/jpeg'
+            : resolvedOptions.format === 'webp'
+            ? 'image/webp'
+            : 'image/png',
+        )
+      }
+    } catch (e: any) {
+      await (await db()).model('_optimized_images').destroy({ where: { upload_id: upload.id, hash } })
+      return { success: false, error: e.message }
     }
-  } catch (e: any) {
-    await (await db()).model('_optimized_images').destroy({ where: { upload_id: upload.id, hash } })
-    return { success: false, error: e.message }
   }
 
   return { success: true, src: paths.public }
