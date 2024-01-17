@@ -102,12 +102,12 @@ const collection = dashboard.value.collections[dashboard.value.collection!]
 const fieldChoices = Object.fromEntries(
   sortNaturalByProp(
     Object.entries(collection.fields)
-      .filter(([_, { type }]) => fieldTypes[type] !== 'object')
+      .filter(
+        ([name, { type, additional }]) => fieldTypes[type] !== 'object' && !additional.protected && name !== 'language',
+      )
       .map(([name, { options }]) => ({ value: name, label: __('pruvious-dashboard', options.label as any) })),
     'label',
-  )
-    .filter(({ value }) => value !== 'language')
-    .map(({ label, value }) => [value, label]),
+  ).map(({ label, value }) => [value, label]),
 )
 const parsable = ref(false)
 const simpleWhere = ref<SimpleWhere[]>([])
