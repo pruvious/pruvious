@@ -102,7 +102,7 @@ export default defineCommand({
 
       // Specify versions of nuxt, vue and vue-router
       packageJson.devDependencies ??= {}
-      packageJson.devDependencies.nuxt = '^3.9.2'
+      packageJson.devDependencies.nuxt = '^3.9.3'
       packageJson.devDependencies.vue = '^3.4.14'
       packageJson.devDependencies['vue-router'] = '^4.2.5'
 
