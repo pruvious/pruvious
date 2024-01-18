@@ -6,7 +6,7 @@ import { writeFile } from 'magicast'
 import { nanoid } from 'nanoid'
 import path, { basename } from 'path'
 import { getNuxtConfig, getProjectInfo } from './project.js'
-import { sortArgs } from './shared.js'
+import { joinRouteParts, sortArgs } from './shared.js'
 
 export default defineCommand({
   meta: {
@@ -142,8 +142,14 @@ export async function patchGitignore(cwd?: string) {
 
   if (fs.existsSync(gitignorePath)) {
     const gitignore = fs.readFileSync(gitignorePath, 'utf-8').trim().split('\n')
-    const { uploadsPath, database } = await getProjectInfo(cwd)
-    const newRules = ['.autoload.sql', '.pruvious', '.pruviousrc', path.basename(uploadsPath), '.ssh.*'].sort()
+    const { driveType, uploadsPath, uploadsUrlPrefix, database } = await getProjectInfo(cwd)
+    const newRules = ['.autoload.sql', '.pruvious', '.ssh.*'].sort()
+
+    if (driveType === 'local') {
+      newRules.push(uploadsPath.replace(/^\.\//, '/'), joinRouteParts('public', uploadsUrlPrefix ?? 'uploads'))
+    }
+
+    newRules.sort()
 
     if (database.startsWith('sqlite:')) {
       newRules.push(basename(database), basename(database) + '-journal')
