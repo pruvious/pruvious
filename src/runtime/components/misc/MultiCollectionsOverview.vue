@@ -200,7 +200,7 @@
                   class="max-w-full truncate whitespace-pre-line font-medium transition hocus:text-primary-700"
                   :class="{'text-gray-400': (row as any)[field] === '' || (row as any)[field] === null}"
                 >
-                  <span>
+                  <span class="truncate">
                     {{
                       (row as any)[field] !== '' && (row as any)[field] !== null
                         ? (row as any)[field]
