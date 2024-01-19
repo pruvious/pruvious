@@ -7,7 +7,7 @@
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/pruvious/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="License"></a>
 </p>
 
-**Website:** [https://pruvious.com/](https://pruvious.com/)\
+**Website:** [https://pruvious.com](https://pruvious.com/)\
 **Documentation:** [https://pruvious.com/docs](https://pruvious.com/docs)
 
 ## Getting started
