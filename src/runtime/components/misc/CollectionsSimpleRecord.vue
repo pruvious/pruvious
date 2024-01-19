@@ -213,7 +213,7 @@ const canUpdate =
   collection.apiRoutes.update &&
   (user.value?.isAdmin || (userCapabilities as any)[`collection-${collection.name}-update`])
 
-useHead({ title })
+useHead({ title: () => title.value })
 
 useEventListener('keydown', (event) => {
   const action = getHotkeyAction(event)
