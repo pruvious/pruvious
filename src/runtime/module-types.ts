@@ -326,6 +326,13 @@ export interface ModuleOptions {
      * @default 'dashboard'
      */
     prefix?: string
+
+    /**
+     * Whether to remove the stylesheets of the Nuxt app when the dashboard is active.
+     *
+     * @default true
+     */
+    removeSiteStyles?: boolean
   }
 
   /**

@@ -41,7 +41,7 @@ export default addRouteMiddleware('pruvious-dashboard-before-all', async (to) =>
   const dashboard = usePruviousDashboard()
   const user = useUser()
 
-  if (!unwantedStylesRemoved) {
+  if (runtimeConfig.public.pruvious.dashboardRemoveSiteStyles && !unwantedStylesRemoved) {
     for (const styleSheet of document.styleSheets) {
       if (isProduction || !(styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId?.includes('node_modules')) {
         styleSheet.ownerNode?.remove()

@@ -69,6 +69,7 @@ export default defineNuxtModule<ModuleOptions>({
       enabled: true,
       legalLinks: [],
       prefix: 'dashboard',
+      removeSiteStyles: true,
     },
     database: 'sqlite:./pruvious.db',
     jobs: { searchInterval: 60 },
@@ -207,6 +208,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.runtimeConfig.public.pruvious = mergeDefaults(nuxt.options.runtimeConfig.public.pruvious, {
       api: options.api,
       dashboardPrefix: options.dashboard.prefix,
+      dashboardRemoveSiteStyles: options.dashboard.removeSiteStyles,
       jwtRenewInterval: options.jwt.renewInterval,
       jwtLocalStorageKey: options.jwt.localStorageKey,
       language: options.language as any,
