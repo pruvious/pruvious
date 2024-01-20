@@ -228,20 +228,26 @@ onMounted(() => {
   watch(
     () => props.modelValue,
     (value) => {
+      picker1.set(
+        'minDate',
+        isNull(value[0]) ? toMinMaxDate(props.options.min!) : toMinMaxDate(Math.max(value[0], props.options.min!)),
+      )
+
+      picker0.set(
+        'maxDate',
+        isNull(value[1]) ? toMinMaxDate(props.options.max!) : toMinMaxDate(Math.min(value[1], props.options.max!)),
+      )
+
       if (isNull(value[0])) {
         picker0.clear()
-        picker1.set('minDate', toMinMaxDate(props.options.min!))
       } else {
         picker0.setDate(dayjs(value[0]).toISOString())
-        picker1.set('minDate', toMinMaxDate(Math.max(value[0], props.options.min!)))
       }
 
       if (isNull(value[1])) {
         picker1.clear()
-        picker0.set('maxDate', toMinMaxDate(props.options.max!))
       } else {
         picker1.setDate(dayjs(value[1]).toISOString())
-        picker0.set('maxDate', toMinMaxDate(Math.min(value[1], props.options.max!)))
       }
     },
     { immediate: true },
