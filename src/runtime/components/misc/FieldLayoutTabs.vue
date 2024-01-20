@@ -49,6 +49,7 @@
         :fieldLayout="tab.fields"
         :fieldsDeclaration="fieldsDeclaration"
         :history="history"
+        :isEditing="isEditing"
         :keyPrefix="keyPrefix"
         :record="record"
         :resolvedConditionalLogic="resolvedConditionalLogic"
@@ -106,6 +107,10 @@ const props = defineProps({
   canUpdate: {
     type: Boolean,
     default: false,
+  },
+  isEditing: {
+    type: Boolean,
+    default: true,
   },
   compact: {
     type: Boolean,

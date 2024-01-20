@@ -108,6 +108,7 @@
         :fieldLayout="collection.dashboard.fieldLayout"
         :fieldsDeclaration="collection.fields"
         :history="history"
+        :isEditing="isEditing"
         :record="record"
         :resolvedConditionalLogic="resolvedConditionalLogic"
         :stickyTopBorder="true"

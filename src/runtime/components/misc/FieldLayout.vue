@@ -26,6 +26,7 @@
           :fieldLayout="item.fields"
           :fieldsDeclaration="fieldsDeclaration"
           :history="history"
+          :isEditing="isEditing"
           :keyPrefix="keyPrefix"
           :record="record"
           :resolvedConditionalLogic="resolvedConditionalLogic"
@@ -42,6 +43,7 @@
           :errors="errors"
           :fieldsDeclaration="fieldsDeclaration"
           :history="history"
+          :isEditing="isEditing"
           :keyPrefix="keyPrefix"
           :record="record"
           :resolvedConditionalLogic="resolvedConditionalLogic"
@@ -68,7 +70,7 @@
           <component
             v-if="fieldsDeclaration[item.fieldName] && keyPrefix + item.fieldName !== 'translations'"
             :compact="compact"
-            :disabled="!canUpdate || fieldsDeclaration[item.fieldName].additional?.immutable"
+            :disabled="isEditing && (!canUpdate || fieldsDeclaration[item.fieldName].additional?.immutable)"
             :errors="errors"
             :fieldKey="keyPrefix + item.fieldName"
             :history="history"
@@ -92,7 +94,7 @@
         <component
           v-if="item?.type === 'component'"
           :compact="compact"
-          :disabled="!canUpdate"
+          :disabled="isEditing && !canUpdate"
           :errors="errors"
           :history="history"
           :is="CustomFieldLayoutComponents[item.component]"
@@ -181,6 +183,10 @@ const props = defineProps({
   canUpdate: {
     type: Boolean,
     default: false,
+  },
+  isEditing: {
+    type: Boolean,
+    default: true,
   },
   compact: {
     type: Boolean,
