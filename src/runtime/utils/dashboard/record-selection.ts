@@ -158,7 +158,7 @@ export class RecordSelection {
       query: {
         select: 'id',
         where: this.selectedAll.value
-          ? `id[in][${this.allIds.join(',')}]`
+          ? `id[in][${this.allIds.join(',') || Object.keys(this.selected.value).join(',')}]`
           : `id[in][${Object.keys(this.selected.value).join(',')}]`,
       },
     })
