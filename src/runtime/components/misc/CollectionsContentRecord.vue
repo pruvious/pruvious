@@ -47,6 +47,7 @@
           <div :data-key="(collection.contentBuilder as ContentBuilder).blocksField" id="blocks" ref="blocksEl">
             <PruviousBlockTreeItem
               v-for="({ block }, i) of record[(collection.contentBuilder as ContentBuilder).blocksField]"
+              v-model:blockFocused="blockFocused"
               v-model:errors="errors"
               v-model:selectedBlock="selectedBlock"
               v-model:sortableBlockName="sortableBlockName"
@@ -543,25 +544,29 @@ useEventListener(
   () => (blockFocused.value = !!document.activeElement?.hasAttribute('data-block')),
 )
 
-const sortable = useSortable(blocksEl, props.record[(collection.contentBuilder as ContentBuilder).blocksField], {
-  ...defaultSortableOptions,
-  group: sortableBlockName.value,
-  emptyInsertThreshold: 0,
-  onUpdate: () => null,
-  onStart: (e: any) => {
-    document.body.classList.add('is-sorting')
-    selectedBlock.value = `${e.from.dataset.key}.${e.oldIndex}`
-
-    sortableBlockName.value = ''
-    nextTick(() => (sortableBlockName.value = blockTree.blocks[`${e.from.dataset.key}.${e.oldIndex}`].item.block.name))
+const sortable = useSortable(
+  () => blocksEl.value,
+  props.record[(collection.contentBuilder as ContentBuilder).blocksField],
+  {
+    ...defaultSortableOptions,
+    group: sortableBlockName.value,
+    emptyInsertThreshold: 0,
+    onUpdate: () => null,
+    onStart: (e: any) => {
+      document.body.classList.add('is-sorting')
+      sortableBlockName.value = ''
+      nextTick(
+        () => (sortableBlockName.value = blockTree.blocks[`${e.from.dataset.key}.${e.oldIndex}`].item.block.name),
+      )
+    },
+    onEnd: onSortEnd,
+    setData: (dataTransfer: DataTransfer, el: HTMLDivElement) => {
+      startMoving({ dragImageLabel: __('pruvious-dashboard', el.dataset.label as any) })
+      dataTransfer.setDragImage(document.getElementById('pruvious-drag-image')!, -16, 10)
+      dataTransfer.effectAllowed = 'move'
+    },
   },
-  onEnd: onSortEnd,
-  setData: (dataTransfer: DataTransfer, el: HTMLDivElement) => {
-    startMoving({ dragImageLabel: __('pruvious-dashboard', el.dataset.label as any) })
-    dataTransfer.setDragImage(document.getElementById('pruvious-drag-image')!, -16, 10)
-    dataTransfer.effectAllowed = 'move'
-  },
-})
+)
 
 watch(sortableBlockName, () => {
   sortableGroup.value =

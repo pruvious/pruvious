@@ -36,7 +36,7 @@
       <div ref="sortableEl" class="m-[0.3125rem] flex flex-wrap items-center gap-1.5">
         <div
           v-for="value of modelValue"
-          :key="value"
+          :key="`${sortableKey}-${value}`"
           class="flex min-w-0 items-center rounded-full bg-primary-100 text-vs"
           :class="{ 'cursor-move': options.sortable }"
         >
@@ -127,6 +127,7 @@ import { pruviousUnique } from '../../composables/unique'
 import { clearArray, next, prev, searchByKeywords } from '../../utils/array'
 import { defaultSortableOptions } from '../../utils/dashboard/defaults'
 import { blurActiveElement } from '../../utils/dom'
+import { isString } from '../../utils/string'
 
 interface Choice {
   value: string
@@ -185,6 +186,7 @@ const inputEl = ref<HTMLInputElement>()
 const inputValue = ref('')
 const name = props.options.name || pruviousUnique(props.fieldKey || 'chips-field')
 const sortableEl = ref<HTMLElement>()
+const sortableKey = ref(0)
 const suggestionChoices = ref<Choice[]>([])
 const suggestionsEl = ref<HTMLDivElement>()
 const suggestionsHeight = ref<number>(0)
@@ -217,7 +219,7 @@ watch(
     sortableReturn?.stop()
 
     if (props.options.sortable) {
-      sortableReturn = useSortable(sortableEl, props.modelValue, {
+      sortableReturn = useSortable(() => sortableEl.value, props.modelValue, {
         ...defaultSortableOptions,
         onUpdate: (e: any) => {
           const from = e.oldIndex
@@ -252,14 +254,19 @@ function onBlur() {
   emitModelValue()
 }
 
-function emitModelValue() {
+function emitModelValue(pushValue?: string) {
   const selected = choices.value.filter(({ selected }) => selected).map(({ value }) => value)
-  const value = [...props.modelValue].filter((v) => selected.includes(v))
+  const value = [...props.modelValue].filter((v) => selected.includes(v) && v !== pushValue)
 
   for (const v of selected) {
     if (!value.includes(v)) {
       value.push(v)
     }
+  }
+
+  if (isString(pushValue)) {
+    sortableKey.value++
+    value.push(pushValue)
   }
 
   emit('update:modelValue', value)
@@ -328,7 +335,7 @@ function pickHighlightedSuggestion(event: Event) {
     }
 
     onInput()
-    emitModelValue()
+    emitModelValue(highlightedSuggestion.value.value)
   }
 }
 
@@ -339,7 +346,7 @@ function onClickSuggestion(choice: Choice) {
     inputValue.value = ''
   }
 
-  emitModelValue()
+  emitModelValue(choice.value)
 
   setTimeout(() => {
     if (suggestionChoices.value.length === 1) {

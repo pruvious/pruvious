@@ -186,7 +186,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from '#imports'
+import { onMounted, ref, watch } from '#imports'
 import type { FieldLayout, StandardFieldOptions } from '#pruvious'
 import { defaultFieldValues } from '#pruvious/dashboard'
 import type { UseSortableReturn } from '@vueuse/integrations/useSortable'
@@ -276,6 +276,8 @@ watch(
   },
   { immediate: true },
 )
+
+onMounted(refreshSortable)
 
 await loadTranslatableStrings('pruvious-dashboard')
 
@@ -371,7 +373,7 @@ function refreshSortable() {
   setTimeout(() => {
     sortableReturn?.stop()
 
-    sortableReturn = useSortable(sortableEl, props.modelValue, {
+    sortableReturn = useSortable(() => sortableEl.value, props.modelValue, {
       ...defaultSortableOptions,
       handle: '.sortable-handle',
       onUpdate: (e: any) => {

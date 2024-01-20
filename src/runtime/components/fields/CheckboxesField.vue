@@ -128,7 +128,7 @@ watch(
     sortableReturn?.stop()
 
     if (props.options.sortable) {
-      sortableReturn = useSortable(containerEl, choices, {
+      sortableReturn = useSortable(() => containerEl.value, choices.value, {
         ...defaultSortableOptions,
         onUpdate: (e: any) => {
           moveArrayElement(choices.value, e.oldIndex, e.newIndex)

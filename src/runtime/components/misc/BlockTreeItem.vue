@@ -4,13 +4,23 @@
       :data-block="blockKey"
       :title="__('pruvious-dashboard', (dashboard.blocks[blockData.name as BlockName].description ?? '' ) as any)"
       @click="$emit('update:selectedBlock', blockKey), $emit('clickBlock', blockKey)"
+      @mousedown="
+        (e) => {
+          if (selectedBlock !== blockKey) {
+            $emit('update:selectedBlock', blockKey)
+            $emit('update:blockFocused', true)
+            $emit('clickBlock', blockKey)
+            e.preventDefault()
+          }
+        }
+      "
       @mouseenter="$emit('highlight', blockKey)"
       @mouseleave="$emit('unhighlight', blockKey)"
       tabindex="0"
-      class="relative flex h-9 min-w-[10rem] cursor-pointer items-center gap-2 pr-2 outline-none transition"
+      class="relative flex h-9 min-w-[10rem] items-center gap-2 pr-2 outline-none transition"
       :class="{
-        'text-gray-900': selectedBlock === blockKey,
-        'text-gray-400': selectedBlock !== blockKey,
+        'cursor-move text-gray-900': selectedBlock === blockKey,
+        'cursor-pointer text-gray-400': selectedBlock !== blockKey,
         'not-sorting:hover:text-primary-700': selectedBlock !== blockKey,
         'sorting:opacity-50': allDisabled,
       }"
@@ -110,6 +120,7 @@
         <PruviousBlockTreeItem
           v-for="({ block }, i) of ((blockData.slots as any)[slotName] as { block:CastedBlockData }[])"
           :blockData="block"
+          :blockFocused="blockFocused"
           :blockKey="`${blockKey}.block.slots.${slotName}.${i}`"
           :data-label="__('pruvious-dashboard', dashboard.blocks[block.name].label as any)"
           :disabled="disabled"
@@ -134,6 +145,7 @@
           @openMoreBlockOptionsPopup="$emit('openMoreBlockOptionsPopup')"
           @sortEnd="$emit('sortEnd', $event)"
           @unhighlight="$emit('unhighlight', $event)"
+          @update:blockFocused="$emit('update:blockFocused', $event)"
           @update:errors="$emit('update:errors', $event)"
           @update:selectedBlock="$emit('update:selectedBlock', $event)"
           @update:sortableBlockName="$emit('update:sortableBlockName', $event)"
@@ -178,6 +190,10 @@ const props = defineProps({
     type: String as PropType<string | null>,
     default: null,
   },
+  blockFocused: {
+    type: Boolean,
+    required: true,
+  },
   index: {
     type: Number,
     required: true,
@@ -200,6 +216,7 @@ const emit = defineEmits<{
   'update:errors': [Record<string, string>]
   'update:selectedBlock': [string | null]
   'update:sortableBlockName': [string]
+  'update:blockFocused': [boolean]
   'update:sortableKey': [number]
   'updated': []
   'openAddBlockPopup': [AddBlockOptions]
@@ -228,7 +245,6 @@ onMounted(() => {
       emptyInsertThreshold: 0,
       onStart: (e: any) => {
         document.body.classList.add('is-sorting')
-        emit('update:selectedBlock', `${e.from.dataset.key}.${e.oldIndex}`)
         emit('update:sortableBlockName', '')
         nextTick(() =>
           emit('update:sortableBlockName', props.tree.blocks[`${e.from.dataset.key}.${e.oldIndex}`].item.block.name),

@@ -36,7 +36,7 @@
       <div ref="sortableEl" class="m-[0.3125rem] flex flex-wrap items-center gap-1.5">
         <div
           v-for="(value, i) of modelValue"
-          :key="value"
+          :key="`${sortableKey}-${value}`"
           class="flex min-w-0 items-center rounded-full text-vs"
           :class="{
             'cursor-move': options.sortable,
@@ -258,6 +258,7 @@ const recordLabels = computed<[string, string | null]>(() => [
 ])
 const spinner = ref<boolean>(false)
 const sortableEl = ref<HTMLElement>()
+const sortableKey = ref(0)
 
 let choicesPage = 1
 let fetchChoicesCounter = 0
@@ -312,7 +313,7 @@ watch(
     sortableReturn?.stop()
 
     if (props.options.sortable) {
-      sortableReturn = useSortable(sortableEl, props.modelValue, {
+      sortableReturn = useSortable(() => sortableEl.value, props.modelValue, {
         ...defaultSortableOptions,
         onUpdate: (e: any) => {
           const from = e.oldIndex
@@ -428,6 +429,7 @@ function pick(choice?: Choice) {
 
   if (value && !props.modelValue.includes(value)) {
     choices.value = choices.value.filter((c) => c.value !== value)
+    sortableKey.value++
     updateHeight()
     emit('update:modelValue', [...props.modelValue, value])
   }
