@@ -6,10 +6,10 @@ import {
   type UploadsCollectionName,
 } from '#pruvious'
 import { collections } from '#pruvious/server'
+import type { QueryOptions, QueryOptionsWithType, QueryTypes } from 'sequelize'
 import { db } from '../instances/database'
 import { getModuleOption } from '../instances/state'
 import type { QueryBuilderInstance } from '../utility-types'
-import { isNumber } from '../utils/number'
 import { isObject } from '../utils/object'
 import { __ } from '../utils/server/translate-string'
 import { QueryBuilder } from './query-builder'
@@ -74,19 +74,15 @@ export function query(collection: string, contextLanguage: SupportedLanguage = p
  *
  * @example
  * ```typescript
- * // Example 1: Fetch products with a specific price range
  * await rawQuery('SELECT * FROM products WHERE price BETWEEN :min AND :max', { min: 20, max: 50 })
- * // Output: [{ id: 1, name: 'Product A', price: 25 }, { id: 2, name: 'Product B', price: 30 }]
- *
- * // Example 2: Update product prices in bulk
- * await rawQuery('UPDATE products SET price = price * :multiplier', { multiplier: 1.1 })
- * // Output: 1337 (number of affected rows)
+ * // Output: { results: [{ id: 1, name: 'Product A', price: 25 }, ...], metadata: {} }
  * ```
  */
 export async function rawQuery(
   sql: string,
   replacements?: Record<string, any>,
-): Promise<Record<string, boolean | number | string> | number> {
+  options?: QueryOptions | QueryOptionsWithType<QueryTypes.RAW>,
+): Promise<{ results: any; metadata: any }> {
   const preparedReplacements: Record<string, any> = {}
 
   if (replacements) {
@@ -95,13 +91,7 @@ export async function rawQuery(
     }
   }
 
-  const [results, metadata]: any = await (await db()).query(sql, { replacements: preparedReplacements })
+  const [results, metadata]: any = await (await db()).query(sql, { replacements: preparedReplacements, ...options })
 
-  if (isNumber(metadata)) {
-    return metadata
-  } else if (metadata.command === 'SELECT') {
-    return results
-  }
-
-  return metadata.rowCount
+  return { results, metadata }
 }
