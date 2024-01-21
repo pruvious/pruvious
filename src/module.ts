@@ -182,7 +182,7 @@ export default defineNuxtModule<ModuleOptions>({
         : resolveRelativeModulePath('./runtime/components/dashboard', `${pascalCase(name)}.vue`)
     }
 
-    nuxt.options.runtimeConfig.pruvious = mergeDefaults(nuxt.options.runtimeConfig.pruvious, {
+    nuxt.options.runtimeConfig.pruvious = mergeDefaults(nuxt.options.runtimeConfig.pruvious as any, {
       catchAllPages: options.catchAllPages,
       customCapabilities: options.customCapabilities,
       dashboard: options.dashboard,
@@ -205,7 +205,7 @@ export default defineNuxtModule<ModuleOptions>({
           : undefined,
     })
 
-    nuxt.options.runtimeConfig.public.pruvious = mergeDefaults(nuxt.options.runtimeConfig.public.pruvious, {
+    nuxt.options.runtimeConfig.public.pruvious = mergeDefaults(nuxt.options.runtimeConfig.public.pruvious as any, {
       api: options.api,
       dashboardPrefix: options.dashboard.prefix,
       dashboardRemoveSiteStyles: options.dashboard.removeSiteStyles,
