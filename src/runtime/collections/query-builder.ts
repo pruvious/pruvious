@@ -1406,7 +1406,11 @@ export class QueryBuilder<
    * ```
    */
   async count(): Promise<number> {
-    return await (await db()).model(this.table).count(await this.applySequelizeOptions(['where']))
+    const result = (await (await db())
+      .model(this.table)
+      .count(await this.applySequelizeOptions(['group', 'where']))) as any
+
+    return this.groupOptions.length ? result.length : result[0]?.count ?? 0
   }
 
   /**
