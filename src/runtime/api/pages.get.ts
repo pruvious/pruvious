@@ -96,11 +96,12 @@ export default defineEventHandler(async (event) => {
       page &&
       (!pp.publicField || page[pp.publicField] || page[pp.draftTokenField as string] === getQuery(event).__d)
     ) {
-      const seoProps = await seo(collection, page, event)
+      const { props: seoProps, settings: seoSettings } = await seo(collection, page, event)
 
       return {
         id: page.id,
         path: fullPath,
+        url: seoSettings.baseUrl + fullPath,
         collection: collection.name as CollectionName,
         blocks: collection.contentBuilder ? page[collection.contentBuilder.blocksField] : [],
         language: page.language!,

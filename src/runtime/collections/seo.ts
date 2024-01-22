@@ -2,6 +2,7 @@ import {
   primaryLanguage,
   supportedLanguages,
   type Image,
+  type PopulatedFieldType,
   type PublicPagesOptions,
   type ResolvedCollectionDefinition,
   type SupportedLanguage,
@@ -21,7 +22,10 @@ export async function seo(
   collection: ResolvedCollectionDefinition,
   page: Record<string, any>,
   event: H3Event,
-): Promise<Pick<PruviousPage, 'title' | 'description' | 'htmlAttrs' | 'meta' | 'link' | 'script'>> {
+): Promise<{
+  props: Pick<PruviousPage, 'title' | 'description' | 'htmlAttrs' | 'meta' | 'link' | 'script'>
+  settings: PopulatedFieldType['seo']
+}> {
   const qs = getQuery(event)
   const seo = await query('seo')
     .language(page.language as SupportedLanguage)
@@ -250,5 +254,8 @@ export async function seo(
     script.push(item)
   }
 
-  return { title, description: pageDescription ?? '', htmlAttrs, meta, link, script }
+  return {
+    props: { title, description: pageDescription ?? '', htmlAttrs, meta, link, script },
+    settings: seo,
+  }
 }

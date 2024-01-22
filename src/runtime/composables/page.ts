@@ -15,6 +15,13 @@ export interface PruviousPage {
   path: string
 
   /**
+   * The page's full URL.
+   *
+   * Note: The `baseUrl` must be set in the SEO collection.
+   */
+  url: string
+
+  /**
    * The page's collection name.
    */
   collection: CollectionName

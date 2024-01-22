@@ -45,12 +45,13 @@ export default defineEventHandler(async (event) => {
           }
         }
 
-        const seoProps = await seo(collection, populated, event)
+        const { props: seoProps, settings: seoSettings } = await seo(collection, populated, event)
         const pp = collection.publicPages as PublicPagesOptions
 
         return {
           id: populated.id,
           path,
+          url: seoSettings.baseUrl + path,
           collection: collection.name as CollectionName,
           blocks: collection.contentBuilder ? populated[collection.contentBuilder.blocksField] : [],
           language: populated.language,
