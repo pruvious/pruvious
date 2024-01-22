@@ -45,7 +45,7 @@ describe('collection: pages', async () => {
   it('validates page path', async () => {
     const response = await $fetch('/api/collections/pages', {
       method: 'post',
-      body: { path: 'invalid path' },
+      body: { path: 'invalid-path-#' },
       headers: { Authorization: `Bearer ${process.env.TOKEN}` },
       ignoreResponseError: true,
     })

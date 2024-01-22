@@ -220,7 +220,9 @@ export function pageLikeCollection(options: PageLikeCollectionOptions): Collecti
         },
         additional: {
           unique: 'perLanguage',
-          sanitizers: [({ value }) => (isString(value) ? joinRouteParts(value.toLowerCase()) : value)],
+          sanitizers: [
+            ({ value }) => (isString(value) ? joinRouteParts(value.toLowerCase().replace(/ +/g, '-')) : value),
+          ],
           validators: [
             lowercaseValidator,
             ({ __, language, value }) => {
