@@ -159,7 +159,10 @@ export function generateTranslatableStrings(
   */
   const standardStructure: Record<string, Record<string, string>> = {}
   let i = 0
-  for (const { file, fullPath } of walkDir(resolveModulePath('./runtime/translatable-strings/standard'))) {
+  for (const { file, fullPath } of walkDir(resolveModulePath('./runtime/translatable-strings/standard'), {
+    endsWith: ['.mjs', '.ts'],
+    endsWithout: '.d.ts',
+  })) {
     const fileParts = file.split('.')
     const importName = `standard${pascalCase(fileParts[0])}${pascalCase(fileParts[1])}TranslatableStringsDefinition`
     const from = relativeImport(dotPruviousPath, fullPath)
