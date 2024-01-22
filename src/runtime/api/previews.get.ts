@@ -21,34 +21,28 @@ export default defineEventHandler(async (event) => {
       if (collection.mode === 'multi') {
         const data = JSON.parse(preview.data)
         const populated = { ...data }
-        const population = collection.fields.blocks.additional?.population ?? fields.repeater.population
 
-        if (collection.fields.blocks && population) {
-          populated.translations = await collection.fields.translations.additional?.population?.populator({
-            currentQuery: query(collection.name as any),
-            definition: fields.text,
-            name: 'translations',
-            fields,
-            value: data.translations,
-            options: {},
-            query,
-          })
+        for (const [fieldName, field] of Object.entries(collection.fields)) {
+          const definition = fields[field.type]
+          const population = field.additional?.population ?? definition?.population
 
-          populated.blocks = await population.populator({
-            value: data.blocks,
-            definition: fields.repeater,
-            name: 'blocks',
-            options: resolveCollectionFieldOptions(
-              collection.name,
-              'repeater',
-              'blocks',
-              collection.fields.blocks.options,
+          if (population) {
+            populated[fieldName] = await population.populator({
+              currentQuery: query(collection.name as any),
+              definition,
+              name: fieldName,
               fields,
-            ),
-            currentQuery: query(collection.name as any),
-            query: query,
-            fields,
-          })
+              value: data[fieldName],
+              options: resolveCollectionFieldOptions(
+                collection.name,
+                field.type,
+                fieldName,
+                collection.fields.blocks.options,
+                fields,
+              ),
+              query,
+            })
+          }
         }
 
         const seoProps = await seo(collection, populated, event)
