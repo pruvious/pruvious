@@ -1,4 +1,10 @@
-import { primaryLanguage, supportedLanguages, type CollectionName, type SupportedLanguage } from '#pruvious'
+import {
+  primaryLanguage,
+  supportedLanguages,
+  type CollectionName,
+  type PublicPagesOptions,
+  type SupportedLanguage,
+} from '#pruvious'
 import { collections } from '#pruvious/collections'
 import { defineEventHandler, getQuery, getRouterParam, setResponseStatus } from 'h3'
 import { isProduction } from 'std-env'
@@ -23,12 +29,33 @@ export default defineEventHandler(async (event) => {
       .filter((c) => c.publicPages)
       .map((c) => [resolveCollectionPathPrefix(c, language, primaryLanguage), c]),
   )
-  const collection = ppc[pathPrefixCandidate] ?? ppc['']
+
   const pathPrefix = ppc[pathPrefixCandidate] ? pathPrefixCandidate : ''
 
-  if (collection && collection.publicPages) {
-    const pagePath = (pathPrefix ? collectionPath.replace(`/${pathPrefix}`, '') : collectionPath) || '/'
+  let collection = ppc[pathPrefixCandidate] ?? ppc['']
+
+  if (collection) {
     const prefixPrimaryLanguage = getModuleOption('language').prefixPrimary
+
+    let pagePath = (pathPrefix ? collectionPath.replace(`/${pathPrefix}`, '') : collectionPath) || '/'
+
+    if (pagePath === '/' && pathPrefix) {
+      const pp = ppc[''].publicPages as PublicPagesOptions
+      const landingPage = await (query as any)(ppc[''].name)
+        .where(pp.pathField ?? 'path', collectionPath)
+        .where('language', language)
+        .first()
+
+      if (
+        landingPage &&
+        (!pp.publicField ||
+          landingPage[pp.publicField] ||
+          landingPage[pp.draftTokenField as string] === getQuery(event).__d)
+      ) {
+        collection = ppc['']
+        pagePath = collectionPath
+      }
+    }
 
     if (prefixPrimaryLanguage && !translationPrefix && language === primaryLanguage) {
       setResponseStatus(event, isProduction ? 301 : 302)
@@ -58,13 +85,17 @@ export default defineEventHandler(async (event) => {
       return redirect.to
     }
 
+    const pp = collection.publicPages as PublicPagesOptions
     const page = await (query as any)(collection.name)
-      .where(collection.publicPages.pathField ?? 'path', pagePath)
+      .where(pp.pathField ?? 'path', pagePath)
       .where('language', language)
       .populate()
       .first()
 
-    if (page && (page.public || page.draftToken === getQuery(event).__d)) {
+    if (
+      page &&
+      (!pp.publicField || page[pp.publicField] || page[pp.draftTokenField as string] === getQuery(event).__d)
+    ) {
       const seoProps = await seo(collection, page, event)
 
       return {
@@ -79,17 +110,12 @@ export default defineEventHandler(async (event) => {
             seoProps.link.find((link) => link.rel === 'alternate' && link.hreflang === code)?.href ?? null,
           ]),
         ) as Record<SupportedLanguage, string | null>,
-        layout: collection.publicPages.layoutField ? page[collection.publicPages.layoutField] : null,
-        publishDate: collection.publicPages.publishDateField ? page[collection.publicPages.publishDateField] : null,
+        layout: pp.layoutField ? page[pp.layoutField] : null,
+        publishDate: pp.publishDateField ? page[pp.publishDateField] : null,
         createdAt: collection.createdAtField ? page[collection.createdAtField] : null,
         updatedAt: collection.updatedAtField ? page[collection.updatedAtField] : null,
         ...seoProps,
-        fields: objectPick(
-          page,
-          collection.publicPages && collection.publicPages.additionalFields
-            ? collection.publicPages.additionalFields
-            : [],
-        ),
+        fields: objectPick(page, pp && pp.additionalFields ? pp.additionalFields : []),
       } satisfies PruviousPage
     }
   }
