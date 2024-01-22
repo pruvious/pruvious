@@ -1,4 +1,11 @@
-import type { BlockName, CollectionField, LayoutName, PrimaryLanguage, SupportedLanguage } from '#pruvious'
+import type {
+  BlockName,
+  CollectionField,
+  LayoutName,
+  PrimaryLanguage,
+  PruviousIcon,
+  SupportedLanguage,
+} from '#pruvious'
 import { layouts } from '#pruvious/preflight'
 import { nanoid } from 'nanoid'
 import pluralize from 'pluralize-esm'
@@ -69,6 +76,13 @@ export interface PageLikeCollectionOptions {
    * The lowercased label to use for the record in the dashboard.
    */
   recordLabel?: { singular: string; plural: string }
+
+  /**
+   * The icon used for this collection in the dashboard.
+   *
+   * @default 'Note'
+   */
+  icon?: PruviousIcon
 }
 
 /**
@@ -119,7 +133,7 @@ export function pageLikeCollection(options: PageLikeCollectionOptions): Collecti
       rootBlocks: options.rootBlocks ?? '*',
     },
     dashboard: {
-      icon: 'Note',
+      icon: options.icon ?? 'Note',
       primaryField: 'title',
       overviewTable: {
         columns: [{ field: 'title', width: 30 }, { field: 'path', width: 30 }, 'public', 'createdAt', 'publishDate'],
