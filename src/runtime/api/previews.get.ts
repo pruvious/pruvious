@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
                 collection.name,
                 field.type,
                 fieldName,
-                collection.fields.blocks.options,
+                collection.fields[fieldName].options,
                 fields,
               ),
               query,
