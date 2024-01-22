@@ -17,7 +17,7 @@ export interface ResolvedLayout {
   code: string
 }
 
-const cachedLayoutCode: Record<string, string> = {}
+const cachedLayouts: Record<string, { code: string; label?: string }> = {}
 
 const generate: typeof babelGenerate =
   typeof babelGenerate === 'function' ? babelGenerate : (babelGenerate as any).default
@@ -51,10 +51,11 @@ async function resolveLayout(
     code: '',
   }
 
-  if (cachedLayoutCode[filePath]) {
+  if (cachedLayouts[filePath]) {
     records[res.definition.name] = {
-      ...res,
-      code: cachedLayoutCode[filePath],
+      definition: { ...res.definition, label: cachedLayouts[filePath].label },
+      source: res.source,
+      code: cachedLayouts[filePath].code,
     }
     return 0
   }
@@ -83,7 +84,7 @@ async function resolveLayout(
         ...res,
         code: `export default { name: '${res.definition.name}', label: '${titleCase(res.definition.name, false)}' }`,
       }
-      cachedLayoutCode[filePath] = records[res.definition.name].code
+      cachedLayouts[filePath] = { code: records[res.definition.name].code }
       return 0
     }
 
@@ -112,6 +113,14 @@ async function resolveLayout(
           walkIdentifiers(node, (id) => {
             if (id.name === 'defineLayout') {
               hasMacro = true
+
+              try {
+                res.definition.label = (node as any).expression?.arguments[0]?.properties?.find(
+                  (x: any) => x.key.name === 'label',
+                )?.value?.value
+              } catch (e) {
+                console.error(e)
+              }
             }
           })
 
@@ -162,7 +171,7 @@ async function resolveLayout(
       const hasLocalImports = /^\s*import.+['""](?:\.|~~|~|@@|@)/m.test(imports)
 
       if (!hasLocalImports) {
-        cachedLayoutCode[filePath] = records[res.definition.name].code
+        cachedLayouts[filePath] = { code: records[res.definition.name].code, label: res.definition.label }
       }
 
       return 0
@@ -177,5 +186,5 @@ async function resolveLayout(
 }
 
 export function clearCachedLayout(path: string) {
-  delete cachedLayoutCode[path]
+  delete cachedLayouts[path]
 }
