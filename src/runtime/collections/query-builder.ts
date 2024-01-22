@@ -1622,7 +1622,7 @@ export class QueryBuilder<
    */
   async min<T extends SelectableFieldName[CollectionName] & StringOrNumberField<SerializedFieldType[CollectionName]>>(
     field: T,
-  ): Promise<SerializedFieldType[CollectionName][T]> {
+  ): Promise<SerializedFieldType[CollectionName][T] | null> {
     const start = performance.now()
     const key = this.generateCacheKey('min')
     const cached = await this.readFromCache(key)
@@ -1652,7 +1652,7 @@ export class QueryBuilder<
    */
   async max<T extends SelectableFieldName[CollectionName] & StringOrNumberField<SerializedFieldType[CollectionName]>>(
     field: T,
-  ): Promise<SerializedFieldType[CollectionName][T]> {
+  ): Promise<SerializedFieldType[CollectionName][T] | null> {
     const start = performance.now()
     const key = this.generateCacheKey('max')
     const cached = await this.readFromCache(key)
