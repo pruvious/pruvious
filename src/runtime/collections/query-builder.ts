@@ -1697,7 +1697,7 @@ export class QueryBuilder<
       await this.storeInCache(key, sum, start)
     }
 
-    return sum
+    return sum ?? 0
   }
 
   /**
