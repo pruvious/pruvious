@@ -620,7 +620,7 @@ const onUpdate = debounce(onUpdateInstant, 50)
 async function onUpdateInstant(record?: Record<string, any>, forceAddHistory: boolean = false) {
   history.add(record ?? props.record, forceAddHistory)
   emitUpdateRecord(record ?? props.record)
-  await resolve()
+  setTimeout(resolve)
 }
 
 function undo() {
@@ -635,7 +635,7 @@ function undo() {
 
     emitUpdateRecord(record)
     nextTick(() => sortableKey.value++)
-    resolve()
+    setTimeout(resolve)
     reloadInstant()
 
     if (selectedBlock.value) {
@@ -660,7 +660,7 @@ function redo() {
 
     emitUpdateRecord(record)
     nextTick(() => sortableKey.value++)
-    resolve()
+    setTimeout(resolve)
     reloadInstant()
 
     if (selectedBlock.value) {

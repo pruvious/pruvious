@@ -255,19 +255,19 @@ async function resolve() {
 const onUpdate = debounce((record: Record<string, any>, forceAddHistory: boolean = false) => {
   emit('update:record', record)
   history.add(record, forceAddHistory)
-  resolve()
+  setTimeout(resolve)
 }, 50)
 
 function undo() {
   emit('update:record', history.undo() ?? props.record)
   errors.value = {}
-  resolve()
+  setTimeout(resolve)
 }
 
 function redo() {
   emit('update:record', history.redo() ?? props.record)
   errors.value = {}
-  resolve()
+  setTimeout(resolve)
 }
 
 async function save() {
@@ -291,7 +291,7 @@ async function save() {
     emit('update:record', response.data)
     history.add(response.data)
     history.setInitialState(response.data)
-    resolve()
+    setTimeout(resolve)
 
     if (props.isEditing) {
       pruviousToasterShow({
