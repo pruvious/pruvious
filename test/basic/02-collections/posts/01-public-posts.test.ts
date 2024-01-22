@@ -23,6 +23,7 @@ describe('public posts', async () => {
     const expected = {
       id: expect.any(Number),
       path: '/posts/foo',
+      url: '/posts/foo',
       collection: 'posts',
       title: 'foo | My Pruvious Site',
       description: '',

@@ -27,6 +27,7 @@ describe('public pages', async () => {
     expect(response).toEqual({
       id: expect.any(Number),
       path: '/foo',
+      url: '/foo',
       collection: 'pages',
       title: 'DRAFT | My Pruvious Site',
       description: '',
@@ -59,6 +60,7 @@ describe('public pages', async () => {
     const expected = {
       id: expect.any(Number),
       path: '/foo',
+      url: '/foo',
       title: 'foo | My Pruvious Site',
       collection: 'pages',
       description: '',
