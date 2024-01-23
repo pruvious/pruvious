@@ -7,7 +7,6 @@ import {
   type ResolvedCollectionDefinition,
   type SupportedLanguage,
 } from '#pruvious'
-import { fields, resolveCollectionFieldOptions } from '#pruvious/server'
 import { H3Event, getQuery } from 'h3'
 import type { PruviousPage } from '../composables/page'
 import { getModuleOption } from '../instances/state'
@@ -155,29 +154,6 @@ export async function seo(
 
   // Sharing image
   let sharingImage: Image | null = pageSharingImage || seo.sharingImage
-
-  if (pageSharingImage) {
-    const fieldName = pp.seo!.sharingImageField as string
-    const population = collection.fields[fieldName].additional?.population ?? fields.image.population
-
-    if (population) {
-      sharingImage = await population.populator({
-        value: sharingImage as any,
-        definition: fields.image,
-        name: fieldName,
-        options: resolveCollectionFieldOptions(
-          collection.name,
-          'image',
-          fieldName,
-          collection.fields[fieldName].options,
-          fields,
-        ),
-        currentQuery: query(collection.name as any),
-        query: query,
-        fields,
-      })
-    }
-  }
 
   if (sharingImage?.src) {
     const content = sharingImage.src.startsWith('http') ? sharingImage.src : seo.baseUrl + sharingImage.src
