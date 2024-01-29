@@ -87,7 +87,10 @@ export async function rebuildDatabase(
   const migration = getModuleOption('migration')
   const options: SequelizeOptions = {
     ...dbInfo,
-    dialectOptions: { decimalNumbers: true },
+    dialectOptions: {
+      decimalNumbers: true,
+      ssl: dbInfo.dialect === 'postgres' && dbInfo.ssl ? { require: true, rejectUnauthorized: false } : undefined,
+    },
     logging: isDebugActive('database') ? consola.create({}).withTag('sequelize').log : false,
   }
   const singleColletionsTable = getModuleOption('singleCollectionsTable')

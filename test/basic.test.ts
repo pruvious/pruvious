@@ -20,6 +20,7 @@ describe('server', async () => {
       username: config.user,
       password: config.password,
       ssl: isString(config.ssl) ? config.ssl === 'true' : !!config.ssl,
+      dialectOptions: { ssl: config.ssl ? { require: true, rejectUnauthorized: false } : undefined },
       logging: false,
     })
 
