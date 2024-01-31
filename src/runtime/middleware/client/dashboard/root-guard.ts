@@ -19,7 +19,7 @@ export default addRouteMiddleware('pruvious-dashboard-root-guard', (to) => {
     return user.value?.isAdmin || getCapabilities(user.value)['access-dashboard']
       ? navigateTo(
           dashboard.value.menu[0]?.path
-            ? dashboard.value.menu[0]?.path.includes('/collections/')
+            ? dashboard.value.menu[0]?.collection
               ? dashboard.value.menu[0]?.path + (language ? `?where=language[=][${language}]` : '')
               : joinRouteParts(runtimeConfig.public.pruvious.dashboardPrefix, dashboard.value.menu[0]?.path)
             : joinRouteParts(runtimeConfig.public.pruvious.dashboardPrefix, 'profile'),
