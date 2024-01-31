@@ -286,7 +286,7 @@ export function pruviousApiPath(base: string, ...path: (string | number)[]): str
   return joinRouteParts(
     runtimeConfig.app.baseURL, // The subdirectory
     runtimeConfig.public.pruvious.api.prefix,
-    (runtimeConfig.public.pruvious.api.routes as any)[base] || base,
+    (runtimeConfig.public.pruvious.api.routes as any)[base] || base.split('.')[0],
     ...path.map(String),
   )
 }
