@@ -244,10 +244,16 @@ export class SSH {
   }
 
   async deploySite(site: PruviousSite) {
+    if (!fs.existsSync('.git')) {
+      this.error('The current directory is not a git repository')
+      process.exit(1)
+    }
+
     const filesOut = await execa('git ls-files --others --exclude-standard --cached', {
       ...execaOptions,
       stdout: 'pipe',
     })
+    fs.removeSync('site.tar.gz')
     tar.c(
       { gzip: true, file: 'site.tar.gz' },
       filesOut.stdout.split('\n').filter((v) => v && fs.existsSync(v)),
