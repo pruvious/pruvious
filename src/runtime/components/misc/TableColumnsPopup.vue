@@ -17,7 +17,7 @@
       </div>
 
       <div class="flex justify-between gap-2 border-t p-4">
-        <button v-if="!isDefault" @click="restoreDefaults()" type="button" class="button button-white">
+        <button v-show="!isDefault" @click="restoreDefaults()" type="button" class="button button-white">
           <span>{{ __('pruvious-dashboard', 'Restore defaults') }}</span>
         </button>
 
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, type PropType } from '#imports'
+import { computed, ref, watch, type PropType } from '#imports'
 import { checkboxesFieldComponent } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
@@ -65,7 +65,7 @@ const columnChoices = ref<Record<string, string>>(createColumnChoices())
 const columns = ref<string[]>([])
 const defaultColumns = collection.dashboard.overviewTable.columns.map(({ field }) => field)
 const errors = ref<Record<string, string>>({})
-const isDefault = ref(false)
+const isDefault = computed(() => JSON.stringify(columns.value) === JSON.stringify(defaultColumns))
 
 await loadTranslatableStrings('pruvious-dashboard')
 
@@ -80,7 +80,6 @@ watch(
 
 watch(columns, () => {
   errors.value = {}
-  isDefault.value = JSON.stringify(columns.value) === JSON.stringify(defaultColumns)
 })
 
 async function apply() {
