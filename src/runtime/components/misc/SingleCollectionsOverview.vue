@@ -56,6 +56,7 @@
         v-model:errors="errors"
         v-model:record="record"
         :canUpdate="canUpdate"
+        :collectionRecord="record"
         :fieldLayout="collection.dashboard.fieldLayout"
         :fieldsDeclaration="collection.fields"
         :history="history"

@@ -21,6 +21,7 @@
         <PruviousFieldLayout
           v-if="item?.type === 'stack'"
           :canUpdate="canUpdate"
+          :collectionRecord="collectionRecord"
           :compact="compact"
           :errors="errors"
           :fieldLayout="item.fields"
@@ -39,6 +40,7 @@
         <PruviousFieldLayoutTabs
           v-if="item?.type === 'tabs'"
           :canUpdate="canUpdate"
+          :collectionRecord="collectionRecord"
           :compact="compact"
           :errors="errors"
           :fieldsDeclaration="fieldsDeclaration"
@@ -77,7 +79,7 @@
             :is="Field[fieldsDeclaration[item.fieldName].type]"
             :modelValue="record[item.fieldName]"
             :options="(fieldsDeclaration[item.fieldName].options as any)"
-            :record="record"
+            :record="collectionRecord"
             :resolvedConditionalLogic="resolvedConditionalLogic"
             @update:errors="$emit('update:errors', $event as any)"
             @update:modelValue="$emit('update:record', { ...record, [item.fieldName]: $event })"
@@ -86,7 +88,7 @@
           <PruviousCollectionTranslations
             v-if="fieldsDeclaration[item.fieldName] && keyPrefix + item.fieldName === 'translations'"
             :label="(fieldsDeclaration[item.fieldName].options as any).label"
-            :record="record"
+            :record="collectionRecord"
             @changeLanguage="$emit('changeLanguage', $event)"
           />
         </div>
@@ -99,7 +101,7 @@
           :history="history"
           :is="CustomFieldLayoutComponents[item.component]"
           :keyPrefix="keyPrefix"
-          :record="record"
+          :record="collectionRecord"
           :resolvedConditionalLogic="resolvedConditionalLogic"
           @update:errors="$emit('update:errors', $event)"
           @update:record="$emit('update:record', $event)"
@@ -144,7 +146,18 @@ type ResolvedFieldLayout =
     }
 
 const props = defineProps({
+  /**
+   * The current record containing the fields that are being edited.
+   */
   record: {
+    type: Object as PropType<Record<string, any>>,
+    required: true,
+  },
+
+  /**
+   * The top level collection record.
+   */
+  collectionRecord: {
     type: Object as PropType<Record<string, any>>,
     required: true,
   },

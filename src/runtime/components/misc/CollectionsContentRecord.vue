@@ -273,6 +273,7 @@
               v-if="activeTab === i && layout.length"
               v-model:errors="errors"
               :canUpdate="canUpdate"
+              :collectionRecord="record"
               :compact="true"
               :fieldLayout="layout"
               :fieldsDeclaration="collection.fields"
@@ -294,6 +295,7 @@
             <PruviousFieldLayout
               v-model:errors="errors"
               :canUpdate="canUpdate"
+              :collectionRecord="record"
               :compact="true"
               :fieldLayout="selectedBlockFields"
               :fieldsDeclaration="(dashboard.blocks[blockTree.blocks[selectedBlock].item.block.name].fields as any)"
@@ -588,11 +590,7 @@ if (collection.publicPages && collection.publicPages.layoutField) {
   )
 }
 
-watch(
-  selectedBlock,
-
-  refreshSelectedBlock,
-)
+watch(selectedBlock, refreshSelectedBlock)
 
 watch(isMoving, () => messageIframe('isMoving', isMoving.value))
 

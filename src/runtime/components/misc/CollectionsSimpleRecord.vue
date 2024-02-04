@@ -105,6 +105,7 @@
         v-if="collection.dashboard.fieldLayout.length"
         v-model:errors="errors"
         :canUpdate="canUpdate"
+        :collectionRecord="record"
         :fieldLayout="collection.dashboard.fieldLayout"
         :fieldsDeclaration="collection.fields"
         :history="history"

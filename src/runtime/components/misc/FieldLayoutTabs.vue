@@ -44,6 +44,7 @@
       <PruviousFieldLayout
         v-if="i === activeTab"
         :canUpdate="canUpdate"
+        :collectionRecord="collectionRecord"
         :compact="compact"
         :errors="errors"
         :fieldLayout="tab.fields"
@@ -70,7 +71,18 @@ import { __, loadTranslatableStrings } from '../../composables/translatable-stri
 import type { History } from '../../utils/dashboard/history'
 
 const props = defineProps({
+  /**
+   * The current record containing the fields that are being edited.
+   */
   record: {
+    type: Object as PropType<Record<string, any>>,
+    required: true,
+  },
+
+  /**
+   * The top level collection record.
+   */
+  collectionRecord: {
     type: Object as PropType<Record<string, any>>,
     required: true,
   },

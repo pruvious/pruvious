@@ -202,7 +202,6 @@ import {
 } from '#pruvious'
 import { debounce } from 'perfect-debounce'
 import { usePruviousDashboard, type SimpleCollection } from '../../composables/dashboard/dashboard'
-import { useLanguage } from '../../composables/language'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
 import { useUser } from '../../composables/user'
@@ -249,6 +248,11 @@ const props = defineProps<{
   disabled?: boolean
 
   /**
+   * The current collection record as a reactive key-value object, containing all field names and their values.
+   */
+  record?: Record<string, any>
+
+  /**
    * When set to `true`, the field will won't autofocus in popups.
    */
   ignoreAutofocus?: boolean
@@ -259,7 +263,6 @@ const emit = defineEmits<{
 }>()
 
 const dashboard = usePruviousDashboard()
-const language = useLanguage()
 const runtimeConfig = useRuntimeConfig()
 const user = useUser()
 
@@ -408,7 +411,7 @@ async function getSuggestions(page: number, groups?: string | string[]) {
             ])
               .filter(Boolean)
               .join(','),
-            where: `language[=][${language.value}]`,
+            where: `language[=][${props.record?.language ?? primaryLanguage}]`,
             page,
             perPage: 30,
             order: ':default',
@@ -430,7 +433,7 @@ async function getSuggestions(page: number, groups?: string | string[]) {
           const c = collections[i]
           const a = c.dashboard.overviewTable.searchLabel[0]
           const pp = c.publicPages as PublicPagesOptions
-          const pathPrefix = resolveCollectionPathPrefix(c, language.value ?? primaryLanguage, primaryLanguage)
+          const pathPrefix = resolveCollectionPathPrefix(c, props.record?.language ?? primaryLanguage, primaryLanguage)
 
           return {
             group: c.name,
@@ -442,7 +445,9 @@ async function getSuggestions(page: number, groups?: string | string[]) {
                   ? __('pruvious-dashboard', c.fields[a].additional.emptyLabel as any)
                   : record[a],
               detail: joinRouteParts(
-                language.value === primaryLanguage && !prefixPrimaryLanguage ? '' : language.value ?? primaryLanguage,
+                props.record?.language === primaryLanguage && !prefixPrimaryLanguage
+                  ? ''
+                  : props.record?.language ?? primaryLanguage,
                 pathPrefix,
                 record[pp.pathField ?? 'path'],
               ),

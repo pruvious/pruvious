@@ -70,6 +70,7 @@
 
         <PruviousFieldLayout
           :canUpdate="!disabled"
+          :collectionRecord="record"
           :compact="compact"
           :errors="errors ?? {}"
           :fieldLayout="fieldLayout"
@@ -226,6 +227,11 @@ const props = defineProps<{
    * By default, the field is enabled.
    */
   disabled?: boolean
+
+  /**
+   * The current collection record as a reactive key-value object, containing all field names and their values.
+   */
+  record: Record<string, any>
 
   /**
    * Indicates whether the field is in compact mode.

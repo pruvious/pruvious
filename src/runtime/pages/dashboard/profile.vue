@@ -32,6 +32,7 @@
         v-model:errors="errors"
         v-model:record="record"
         :canUpdate="true"
+        :collectionRecord="record"
         :fieldLayout="[
           ['firstName', 'lastName'],
           'email',
