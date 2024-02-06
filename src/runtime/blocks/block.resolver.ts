@@ -1,4 +1,5 @@
 import babelGenerate from '@babel/generator'
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { dirname, resolve, sep } from 'path'
 import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
@@ -30,6 +31,7 @@ export async function resolveBlocks(fields: Record<string, ResolvedField>): Prom
   records: Record<string, ResolvedBlock>
   errors: number
 }> {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedBlock> = {}
   const fromApp = resolveAppPath('./blocks')
 
@@ -38,6 +40,14 @@ export async function resolveBlocks(fields: Record<string, ResolvedField>): Prom
   if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
     for (const { fullPath, relativePath } of walkDir(fromApp, { endsWith: '.vue' })) {
       errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'])
+    }
+  }
+
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'blocks'))) {
+      for (const { fullPath, relativePath } of walkDir(resolve(layer.cwd, 'blocks'), { endsWith: '.vue' })) {
+        errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
+      }
     }
   }
 
@@ -55,6 +65,7 @@ async function resolveBlock(
   records: Record<string, ResolvedBlock>,
   fields: Record<string, ResolvedField>,
   reserved: string[] = [],
+  ignoreDuplicate = false,
 ): Promise<0 | 1> {
   const res: ResolvedBlock = {
     definition: { name: relativePath.slice(0, -4).replaceAll(sep, '') },
@@ -72,8 +83,12 @@ async function resolveBlock(
   }
 
   if (records[res.definition.name]) {
-    queueError(`Cannot register duplicate block name $c{{ ${res.definition.name} }} in $c{{ ${filePath} }}`)
-    return 1
+    if (ignoreDuplicate) {
+      return 0
+    } else {
+      queueError(`Cannot register duplicate block name $c{{ ${res.definition.name} }} in $c{{ ${filePath} }}`)
+      return 1
+    }
   } else if (
     !validatePascalCase({
       subject: 'block',

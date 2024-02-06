@@ -1,5 +1,7 @@
 import type { CollectionField } from '#pruvious'
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
+import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath, resolveModulePath } from '../instances/path'
@@ -22,6 +24,7 @@ export interface ResolvedCollection {
 const cachedCollections: Record<string, any> = {}
 
 export function resolveCollections(): { records: Record<string, ResolvedCollection>; errors: number } {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedCollection> = {}
   const fromModule = resolveModulePath('./runtime/collections/standard')
   const fromApp = resolveAppPath('./collections')
@@ -41,10 +44,26 @@ export function resolveCollections(): { records: Record<string, ResolvedCollecti
     }
   }
 
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'collections'))) {
+      for (const { fullPath } of walkDir(resolve(layer.cwd, 'collections'), {
+        endsWith: ['.ts'],
+        endsWithout: '.d.ts',
+      })) {
+        errors += resolveCollection(fullPath, records, false, true)
+      }
+    }
+  }
+
   return { records, errors }
 }
 
-function resolveCollection(filePath: string, records: Record<string, ResolvedCollection>, isStandard: boolean): 0 | 1 {
+function resolveCollection(
+  filePath: string,
+  records: Record<string, ResolvedCollection>,
+  isStandard: boolean,
+  ignoreDuplicate = false,
+): 0 | 1 {
   try {
     let exports = cachedCollections[filePath]
 
@@ -74,7 +93,11 @@ function resolveCollection(filePath: string, records: Record<string, ResolvedCol
       })
     ) {
       if (records[exports.default.name]) {
-        queueError(`Cannot register duplicate collection name $c{{ ${exports.default.name} }} in $c{{ ${filePath} }}`)
+        if (ignoreDuplicate) {
+          return 0
+        } else {
+          queueError(`Cannot register duplicate collection name $c{{ ${exports.default.name} }} in $c{{ ${filePath} }}`)
+        }
       } else if (Object.keys(exports.default.fields).some((fieldName) => fieldName.startsWith('_'))) {
         queueError(`Cannot declare field names beginning with an underscore in $c{{ ${filePath} }}`)
       } else if (snakeCase(exports.default.name) === getModuleOption('singleCollectionsTable')) {

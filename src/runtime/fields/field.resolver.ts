@@ -1,4 +1,6 @@
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
+import { resolve } from 'path'
 import { evaluate, evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath, resolveModulePath } from '../instances/path'
@@ -24,6 +26,7 @@ const cachedFields: Record<string, any> = {}
 const cachedStandardFields: Record<string, ResolvedFieldDefinition> = {}
 
 export function resolveFields(): { records: Record<string, ResolvedField>; errors: number } {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedField> = {}
   const fromModule = resolveModulePath('./runtime/fields/standard')
   const fromApp = resolveAppPath('./fields')
@@ -43,10 +46,26 @@ export function resolveFields(): { records: Record<string, ResolvedField>; error
     }
   }
 
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'fields'))) {
+      for (const { fullPath } of walkDir(resolve(layer.cwd, 'fields'), {
+        endsWith: ['.ts'],
+        endsWithout: '.d.ts',
+      })) {
+        errors += resolveField(fullPath, records, false, true)
+      }
+    }
+  }
+
   return { records, errors }
 }
 
-function resolveField(filePath: string, records: Record<string, ResolvedField>, isStandard: boolean): 0 | 1 {
+function resolveField(
+  filePath: string,
+  records: Record<string, ResolvedField>,
+  isStandard: boolean,
+  ignoreDuplicate = false,
+): 0 | 1 {
   try {
     let exports = cachedFields[filePath]
 
@@ -80,7 +99,11 @@ function resolveField(filePath: string, records: Record<string, ResolvedField>, 
       })
     ) {
       if (records[exports.default.name]) {
-        queueError(`Cannot register duplicate field name $c{{ ${exports.default.name} }} in $c{{ ${filePath} }}`)
+        if (ignoreDuplicate) {
+          return 0
+        } else {
+          queueError(`Cannot register duplicate field name $c{{ ${exports.default.name} }} in $c{{ ${filePath} }}`)
+        }
       } else {
         records[exports.default.name] = {
           definition: exports.default,

@@ -422,6 +422,12 @@ export default defineNuxtModule<ModuleOptions>({
         { path: resolveModulePath('./runtime/components/misc'), prefix: 'Pruvious' },
         { path: resolveAppPath('./blocks') },
       )
+
+      for (const layer of nuxt.options._layers.slice(1)) {
+        if (fs.existsSync(path.resolve(layer.cwd, 'blocks'))) {
+          dirs.unshift({ path: path.resolve(layer.cwd, 'blocks') })
+        }
+      }
     })
     nuxt.hook('nitro:config', (config) => {
       if (moduleOptions.dashboard.enabled) {

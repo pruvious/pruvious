@@ -1,4 +1,5 @@
 import babelGenerate from '@babel/generator'
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { dirname, resolve, sep } from 'path'
 import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
@@ -26,6 +27,7 @@ export async function resolveLayouts(): Promise<{
   records: Record<string, ResolvedLayout>
   errors: number
 }> {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedLayout> = {}
   const fromApp = resolveAppPath('./layouts')
 
@@ -37,6 +39,16 @@ export async function resolveLayouts(): Promise<{
     }
   }
 
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'layouts'))) {
+      for (const { fullPath, relativePath } of walkDir(resolve(layer.cwd, 'layouts'), {
+        endsWith: '.vue',
+      })) {
+        errors += await resolveLayout(fullPath, relativePath, records, true)
+      }
+    }
+  }
+
   return { records, errors }
 }
 
@@ -44,6 +56,7 @@ async function resolveLayout(
   filePath: string,
   relativePath: string,
   records: Record<string, ResolvedLayout>,
+  ignoreDuplicate = false,
 ): Promise<0 | 1> {
   const res: ResolvedLayout = {
     definition: { name: relativePath.slice(0, -4).replaceAll(sep, '') },
@@ -61,8 +74,12 @@ async function resolveLayout(
   }
 
   if (records[res.definition.name]) {
-    queueError(`Cannot register duplicate layout name $c{{ ${res.definition.name} }} in $c{{ ${filePath} }}`)
-    return 1
+    if (ignoreDuplicate) {
+      return 0
+    } else {
+      queueError(`Cannot register duplicate layout name $c{{ ${res.definition.name} }} in $c{{ ${filePath} }}`)
+      return 1
+    }
   } else if (
     !validateSlug({
       subject: 'layout',

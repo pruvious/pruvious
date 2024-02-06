@@ -1,4 +1,6 @@
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
+import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath, resolveModulePath } from '../instances/path'
@@ -21,6 +23,7 @@ export interface ResolvedTranslatableStrings {
 const cachedTranslatableStrings: Record<string, any> = {}
 
 export function resolveTranslatableStrings(): { records: Record<string, ResolvedTranslatableStrings>; errors: number } {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedTranslatableStrings> = {}
   const fromModule = resolveModulePath('./runtime/translatable-strings/standard')
   const fromApp = resolveAppPath('./translatable-strings')
@@ -30,20 +33,36 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
 
   for (const { file, fullPath } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
     if (registeredStandardTranslatableStrings[file.split('.').shift()!]) {
-      errors += resolve(fullPath, records, true)
+      errors += resolveTranslatableStringFile(fullPath, records, true)
     }
   }
 
   if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
     for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolve(fullPath, records, false)
+      errors += resolveTranslatableStringFile(fullPath, records, false)
+    }
+  }
+
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'translatable-strings'))) {
+      for (const { fullPath } of walkDir(resolve(layer.cwd, 'translatable-strings'), {
+        endsWith: ['.ts'],
+        endsWithout: '.d.ts',
+      })) {
+        errors += resolveTranslatableStringFile(fullPath, records, false)
+      }
     }
   }
 
   return { records, errors }
 }
 
-function resolve(filePath: string, records: Record<string, ResolvedTranslatableStrings>, isStandard: boolean): 0 | 1 {
+function resolveTranslatableStringFile(
+  filePath: string,
+  records: Record<string, ResolvedTranslatableStrings>,
+  isStandard: boolean,
+  ignoreDuplicate = false,
+): 0 | 1 {
   try {
     let exports = cachedTranslatableStrings[filePath]
 
@@ -79,9 +98,13 @@ function resolve(filePath: string, records: Record<string, ResolvedTranslatableS
             definition.domain === exports.default.domain && definition.language === exports.default.language,
         )
       ) {
-        queueError(
-          `Cannot register duplicate translatable strings $c{{ ${exports.default.domain} (${exports.default.language}) }} in $c{{ ${filePath} }}`,
-        )
+        if (ignoreDuplicate) {
+          return 0
+        } else {
+          queueError(
+            `Cannot register duplicate translatable strings $c{{ ${exports.default.domain} (${exports.default.language}) }} in $c{{ ${filePath} }}`,
+          )
+        }
       } else {
         records[filePath] = { definition: exports.default, source: filePath, isStandard }
         return 0

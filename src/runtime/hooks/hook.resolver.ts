@@ -1,5 +1,6 @@
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
-import { sep } from 'path'
+import { resolve, sep } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath, resolveModulePath } from '../instances/path'
@@ -19,6 +20,7 @@ export interface ResolvedHook {
 const cachedHooks: Record<string, any> = {}
 
 export function resolveHooks(): { records: Record<string, ResolvedHook>; errors: number } {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedHook> = {}
   const fromModule = resolveModulePath('./runtime/hooks/standard')
   const fromApp = resolveAppPath('./hooks')
@@ -30,6 +32,17 @@ export function resolveHooks(): { records: Record<string, ResolvedHook>; errors:
     for (const { fullPath, directory } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
       if (registeredStandardHooks[directory.split(sep).pop()!]) {
         errors += resolveHook(fullPath, records, true)
+      }
+    }
+  }
+
+  for (const layer of nuxt.options._layers.slice(1).reverse()) {
+    if (fs.existsSync(resolve(layer.cwd, 'hooks'))) {
+      for (const { fullPath } of walkDir(resolve(layer.cwd, 'hooks'), {
+        endsWith: ['.ts'],
+        endsWithout: '.d.ts',
+      })) {
+        errors += resolveHook(fullPath, records, false)
       }
     }
   }

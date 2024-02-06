@@ -1,4 +1,6 @@
+import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
+import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath } from '../instances/path'
@@ -16,6 +18,7 @@ export interface ResolvedDashboardPage {
 const cachedDashboardPages: Record<string, any> = {}
 
 export function resolveDashboardPages(): { records: Record<string, ResolvedDashboardPage>; errors: number } {
+  const nuxt = useNuxt()
   const records: Record<string, ResolvedDashboardPage> = {}
   const fromApp = resolveAppPath('./dashboard')
 
@@ -27,6 +30,17 @@ export function resolveDashboardPages(): { records: Record<string, ResolvedDashb
     }
   }
 
+  for (const layer of nuxt.options._layers.slice(1)) {
+    if (fs.existsSync(resolve(layer.cwd, 'dashboard'))) {
+      for (const { fullPath } of walkDir(resolve(layer.cwd, 'dashboard'), {
+        endsWith: ['.ts'],
+        endsWithout: '.d.ts',
+      })) {
+        errors += resolveDashboardPage(fullPath, records, false, true)
+      }
+    }
+  }
+
   return { records, errors }
 }
 
@@ -34,6 +48,7 @@ function resolveDashboardPage(
   filePath: string,
   records: Record<string, ResolvedDashboardPage>,
   isStandard: boolean,
+  ignoreDuplicate = false,
 ): 0 | 1 {
   try {
     let exports = cachedDashboardPages[filePath]
@@ -54,7 +69,10 @@ function resolveDashboardPage(
     }
 
     if (validateDefaultExport('dashboard pages', 'defineDashboardPage({ ... })', exports, filePath)) {
-      records[exports.default.path] = { definition: exports.default, source: filePath }
+      if (!records[exports.default.path] || !ignoreDuplicate) {
+        records[exports.default.path] = { definition: exports.default, source: filePath }
+      }
+
       return 0
     }
   } catch (e) {
