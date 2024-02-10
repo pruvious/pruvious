@@ -175,6 +175,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     initModulePathResolver(createResolver(import.meta.url))
     initRootDir(nuxt.options.rootDir)
+    fs.emptyDirSync(resolveAppPath('./.pruvious'))
 
     for (const [name, componentPath] of Object.entries(options.dashboard.baseComponents!)) {
       ;(options.dashboard.baseComponents! as any)[name] = componentPath
