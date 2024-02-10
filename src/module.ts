@@ -360,7 +360,7 @@ export default defineNuxtModule<ModuleOptions>({
         pages.push({
           name: 'pruvious-dashboard',
           path: joinRouteParts(moduleOptions.dashboard.prefix!, ':catchAll(.*)?'),
-          file: resolveModulePath('./runtime/pages/dashboard/index'),
+          file: resolveModulePath('./runtime/pages/dashboard/index.vue'),
         })
       }
 
@@ -368,7 +368,7 @@ export default defineNuxtModule<ModuleOptions>({
         pages.push({
           name: 'pruvious-page',
           path: '/:catchAll(.*)',
-          file: resolveModulePath('./runtime/pages/[...slug]'),
+          file: resolveModulePath('./runtime/pages/[...slug].vue'),
         })
       }
     })
