@@ -155,8 +155,11 @@ export async function seo(
   // Sharing image
   let sharingImage: Image | null = pageSharingImage || seo.sharingImage
 
-  if (sharingImage?.src) {
-    const content = sharingImage.src.startsWith('http') ? sharingImage.src : seo.baseUrl + sharingImage.src
+  if (sharingImage?.sources[0]) {
+    const content = sharingImage.sources[0].srcset.startsWith('http')
+      ? sharingImage.sources[0].srcset
+      : seo.baseUrl + sharingImage.sources[0].srcset
+
     meta.push({ property: 'og:image', content })
     meta.push({ property: 'twitter:image', content })
   }
