@@ -43,16 +43,16 @@ export default addRouteMiddleware('pruvious-dashboard-before-all', async (to) =>
 
   if (runtimeConfig.public.pruvious.dashboardRemoveSiteStyles && !unwantedStylesRemoved) {
     for (const styleSheet of document.styleSheets) {
-      if (isProduction || !(styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId?.includes('node_modules')) {
+      const devId = (styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId
+
+      if (isProduction || !devId?.includes('node_modules')) {
         styleSheet.ownerNode?.remove()
       }
     }
 
     if (isDevelopment) {
       for (const styleElement of document.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')) {
-        if (styleElement.dataset.viteDevId && !styleElement.dataset.viteDevId.includes('node_modules')) {
-          styleElement.remove()
-        }
+        styleElement.remove()
       }
     }
 
