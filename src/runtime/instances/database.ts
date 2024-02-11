@@ -15,7 +15,7 @@ import { isDevelopment } from 'std-env'
 import type { ResolvedCollectionDefinition } from '../collections/collection.definition'
 import type { ResolvedFieldDefinition } from '../fields/field.definition'
 import { clearArray, isArray } from '../utils/array'
-import { getDatabaseInfo } from '../utils/database-info'
+import { foreignKeyConstraintName, getDatabaseInfo, indexName } from '../utils/database'
 import { isDebugActive } from '../utils/debug'
 import { sleep } from '../utils/function'
 import { camelCase, snakeCase } from '../utils/string'
@@ -116,7 +116,7 @@ export async function rebuildDatabase(
       if (additional?.index) {
         indexes.push({
           fields: [columnName],
-          name: `ix_${tableName}_${columnName}`.slice(0, 63),
+          name: indexName(tableName, columnName),
         })
       }
 
@@ -124,7 +124,7 @@ export async function rebuildDatabase(
         indexes.push({
           fields: additional.unique === 'perLanguage' ? [columnName, 'language'] : [columnName],
           unique: dbInfo.dialect === 'postgres', // https://github.com/sequelize/sequelize/pull/13647
-          name: `ux_${tableName}_${columnName}`.slice(0, 63),
+          name: indexName(tableName, columnName, true),
         })
       }
     }
@@ -140,7 +140,7 @@ export async function rebuildDatabase(
       const attributes = index.map((fieldName) => snakeCase(fieldName))
       indexes.push({
         fields: attributes,
-        name: `cx_${tableName}_${attributes.join('_')}`.slice(0, 63),
+        name: indexName(tableName, attributes),
       })
     }
 
@@ -149,7 +149,7 @@ export async function rebuildDatabase(
       indexes.push({
         fields: attributes,
         unique: dbInfo.dialect === 'postgres',
-        name: `uc_${tableName}_${attributes.join('_')}`.slice(0, 63),
+        name: indexName(tableName, attributes, true),
       })
     }
 
@@ -248,7 +248,7 @@ export async function rebuildDatabase(
         {
           fields: ['name', 'language'],
           unique: dbInfo.dialect === 'postgres',
-          name: `ux_${singleColletionsTable}_name_language`,
+          name: indexName(singleColletionsTable, ['name', 'language'], true),
         },
       ],
       createdAt: false,
@@ -310,12 +310,13 @@ export async function rebuildDatabase(
 
         for (const [fieldName, { additional }] of Object.entries(collection.fields)) {
           const columnName = snakeCase(fieldName)
+          const constraintName = foreignKeyConstraintName(tableName, columnName)
 
-          await instance!.query(`${pragma}ALTER TABLE ${tableName} DROP CONSTRAINT IF EXISTS fk_${columnName}`)
+          await instance!.query(`${pragma}ALTER TABLE "${tableName}" DROP CONSTRAINT IF EXISTS "${constraintName}"`)
 
           if (additional?.foreignKey) {
             await instance!.query(
-              `${pragma}ALTER TABLE ${tableName} ADD CONSTRAINT fk_${columnName} FOREIGN KEY (${columnName}) REFERENCES ${
+              `${pragma}ALTER TABLE "${tableName}" ADD CONSTRAINT "${constraintName}" FOREIGN KEY ("${columnName}") REFERENCES ${
                 additional.foreignKey.table
               }(${additional.foreignKey.column ?? 'id'}) ${(
                 additional.foreignKey.action ?? ['ON UPDATE RESTRICT', 'ON DELETE SET NULL']
@@ -327,7 +328,7 @@ export async function rebuildDatabase(
 
       if (!tokensTableInitialized) {
         await instance!.query(
-          `${pragma}ALTER TABLE _tokens ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE`,
+          `${pragma}ALTER TABLE _tokens ADD CONSTRAINT fk__tokens_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE`,
         )
       }
     }

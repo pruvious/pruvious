@@ -22,7 +22,7 @@ import { cache } from '../instances/cache'
 import { db, opMap, opMapSqlite } from '../instances/database'
 import { clearArray, isArray, sortNaturalByProp, uniqueArray } from '../utils/array'
 import { isDefined, isNull, isUndefined } from '../utils/common'
-import { getDatabaseDialect } from '../utils/database-info'
+import { getDatabaseDialect } from '../utils/database'
 import { isFunction } from '../utils/function'
 import {
   deepClone,

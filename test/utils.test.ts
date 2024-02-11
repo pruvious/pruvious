@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { TranslatableStringsDefinition } from '../src/runtime/translatable-strings/translatable-strings.definition'
 import { isArray, searchByKeywords, toArray, uniqueArray } from '../src/runtime/utils/array'
 import { isBoolean, isDefined, isFile, isNull, isRegExp, isUndefined } from '../src/runtime/utils/common'
+import { foreignKeyConstraintName, indexName } from '../src/runtime/utils/database'
 import { catchFirstErrorMessage, isFunction } from '../src/runtime/utils/function'
 import { countDecimals, isInteger, isNumber, isPositiveInteger, isRealNumber } from '../src/runtime/utils/number'
 import {
@@ -140,6 +141,41 @@ describe('common utilities', () => {
     expect(isUndefined(null)).toBe(false)
     expect(isUndefined('')).toBe(false)
     expect(isUndefined(0)).toBe(false)
+  })
+})
+
+/*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+*/
+describe('database utilities', () => {
+  it('generates an index name', () => {
+    expect(indexName('foo', 'bar')).toBe('ix_foo_bar')
+    expect(indexName('foo', 'bar', true)).toBe('ux_foo_bar')
+    expect(indexName('foo', ['bar', 'baz'])).toBe('cx_foo_bar_baz')
+    expect(indexName('foo', ['bar', 'baz'], true)).toBe('uc_foo_bar_baz')
+    expect(indexName('very_long_table_name_with_less_than_63_character', ['foo', 'bar', 'baz'])).toBe(
+      'cx_very_long_table_name_with_less_than_63_character_foo_bar_baz',
+    )
+    expect(indexName('very_long_table_name_with_less_than_63_character', ['foo', 'bar', 'baz', 'qux'])).toHaveLength(63)
+    expect(indexName('very_long_table_name_with_less_than_63_character', ['foo', 'bar', 'baz', 'qux'])).toBe(
+      indexName('very_long_table_name_with_less_than_63_character', ['foo', 'bar', 'baz', 'qux']),
+    )
+  })
+
+  it('generates a foreign key constraint name', () => {
+    expect(foreignKeyConstraintName('foo', 'bar')).toBe('fk_foo_bar')
+    expect(foreignKeyConstraintName('very_long_table_name_with_less_than_64_character', 'elevenchars')).toBe(
+      'fk_very_long_table_name_with_less_than_64_character_elevenchars',
+    )
+    expect(foreignKeyConstraintName('very_long_table_name_with_less_than_64_character', 'twelve_chars')).toHaveLength(
+      63,
+    )
+    expect(foreignKeyConstraintName('very_long_table_name_with_less_than_64_character', 'twelve_chars')).toBe(
+      foreignKeyConstraintName('very_long_table_name_with_less_than_64_character', 'twelve_chars'),
+    )
   })
 })
 

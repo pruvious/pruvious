@@ -17,7 +17,7 @@ import { cacheModuleOptions, getModuleOption, getModuleOptions } from './runtime
 import { boot, createComponentDirectories, validateLanguageOptions, watchPruviousFiles } from './runtime/main'
 import type { ModuleOptions } from './runtime/module-types'
 import { parse } from './runtime/utils/bytes'
-import { getDatabaseInfo } from './runtime/utils/database-info'
+import { getDatabaseInfo } from './runtime/utils/database'
 import { patchModuleOptions } from './runtime/utils/module-options'
 import { mergeDefaults } from './runtime/utils/object'
 import { isString, joinRouteParts, pascalCase } from './runtime/utils/string'
