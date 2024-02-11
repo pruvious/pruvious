@@ -21,7 +21,7 @@ export default defineField({
   vueComponent: undefined as any,
   options: {
     fields: {
-      type: 'Record<string, true>',
+      type: 'Record<string, true> | string[]',
       description: [
         "The fields of the 'uploads' collection to be returned when this field's value is populated.",
         '',
@@ -102,11 +102,16 @@ export default defineField({
     type: {
       js: 'object',
       ts: ({ options }) => {
-        const fields = options.fields ?? { directory: true, filename: true }
+        const fields = options.fields
+          ? isObject(options.fields)
+            ? Object.keys(options.fields)
+            : options.fields
+          : ['directory', 'filename']
+
         return (
           (options.populate
-            ? `Pick<PopulatedFieldType['uploads'], ${unifyLiteralStrings(...Object.keys(fields))}>`
-            : `Pick<CastedFieldType['uploads'], ${unifyLiteralStrings(...Object.keys(fields))}>`) + ' | null'
+            ? `Pick<PopulatedFieldType['uploads'], ${unifyLiteralStrings(...fields)}>`
+            : `Pick<CastedFieldType['uploads'], ${unifyLiteralStrings(...fields)}>`) + ' | null'
         )
       },
     },
@@ -195,8 +200,9 @@ export default defineField({
       try {
         const collection = collections.uploads
         const keywords: string[] = []
+        const fieldNames = isObject(options.fields) ? Object.keys(options.fields) : options.fields
 
-        for (const fieldName of Object.keys(options.fields)) {
+        for (const fieldName of fieldNames) {
           const declaration = collection.fields[fieldName]
           const definition = fields[declaration.type]
 

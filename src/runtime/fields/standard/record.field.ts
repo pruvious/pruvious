@@ -32,7 +32,7 @@ export default defineField({
       required: true,
     },
     fields: {
-      type: 'Record<string, true>',
+      type: 'Record<string, true> | string[]',
       description: [
         "The fields of the selected collection to be returned when this field's value is populated.",
         '',
@@ -125,11 +125,19 @@ export default defineField({
   population: {
     type: {
       js: 'object',
-      ts: ({ options }) =>
-        (options.populate
-          ? `Pick<PopulatedFieldType['${options.collection}'], ${unifyLiteralStrings(...Object.keys(options.fields))}>`
-          : `Pick<CastedFieldType['${options.collection}'], ${unifyLiteralStrings(...Object.keys(options.fields))}>`) +
-        ' | null',
+      ts: ({ options }) => {
+        const fields = options.fields
+          ? isObject(options.fields)
+            ? Object.keys(options.fields)
+            : options.fields
+          : ['id']
+
+        return (
+          (options.populate
+            ? `Pick<PopulatedFieldType['${options.collection}'], ${unifyLiteralStrings(...fields)}>`
+            : `Pick<CastedFieldType['${options.collection}'], ${unifyLiteralStrings(...fields)}>`) + ' | null'
+        )
+      },
     },
     populator: async ({ currentQuery, name, options, query, value }) => {
       const q = query(options.collection) as any
@@ -181,8 +189,9 @@ export default defineField({
       try {
         const collection = collections[options.collection as CollectionName]
         const keywords: string[] = []
+        const fieldNames = isObject(options.fields) ? Object.keys(options.fields) : options.fields
 
-        for (const fieldName of Object.keys(options.fields)) {
+        for (const fieldName of fieldNames) {
           const declaration = collection.fields[fieldName]
           const definition = fields[declaration.type]
 
