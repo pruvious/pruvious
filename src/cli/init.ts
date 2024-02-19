@@ -108,7 +108,7 @@ export default defineCommand({
 
       // Add pruvious
       packageJson.dependencies ??= {}
-      packageJson.dependencies.pruvious = '^3.10.3'
+      packageJson.dependencies.pruvious = '^3.10.4'
 
       fs.writeJsonSync(join(template.dir, 'package.json'), packageJson, { spaces: 2 })
     } catch (err) {
@@ -213,7 +213,7 @@ export function replaceReadme(cwd?: string) {
     path.resolve(cwd ?? process.cwd(), 'README.md'),
     [
       '# Project',
-      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.10.3.',
+      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.10.4.',
       '',
       'Documentation: [https://pruvious.com/docs](https://pruvious.com/docs)',
       '',
