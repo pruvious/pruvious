@@ -224,7 +224,7 @@ async function resolveBlock(
               .replace(/'(\.(.*))';$/gm, (_, source) => {
                 return `'${relativeImport(resolveAppPath('./.pruvious/blocks'), resolve(dirname(filePath), source))}';`
               })
-              .replace(/'(?:~~|~|@@|@)/g, "'../.."),
+              .replace(/'(?:~{1,2}|@{1,2})\//g, "'../../"),
           )
           .add(res.code)
           .newLine(`const __defineBlockFields = (__defineBlock as any)['fields'] || {}`)
@@ -243,7 +243,7 @@ async function resolveBlock(
           .getContent(),
       }
 
-      const hasLocalImports = /^\s*import.+['""](?:\.|~~|~|@@|@)/m.test(imports)
+      const hasLocalImports = /^\s*import.+['""](?:\.{1,2}|~{1,2}|@{1,2})\//m.test(imports)
 
       if (!hasLocalImports) {
         cachedBlockCode[filePath] = records[res.definition.name].code
