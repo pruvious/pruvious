@@ -55,9 +55,9 @@
         </div>
 
         <div class="flex h-[4.3125rem] shrink-0 items-center gap-2 border-t p-4">
-          <div v-if="!selection.count.value && !searchValue" class="flex gap-2">
+          <div v-show="!selection.count.value && !searchValue" class="flex gap-2">
             <button
-              v-if="!filter.isActive.value && canCreate"
+              v-show="!filter.isActive.value && canCreate"
               @click="createMediaDirectory(directory)"
               type="button"
               class="button button-white"
@@ -66,8 +66,8 @@
             </button>
 
             <button
-              v-if="!filter.isActive.value && canCreate"
               v-pruvious-tooltip="__('pruvious-dashboard', 'Upload limit is $limit', { limit: uploadLimitString })"
+              v-show="!filter.isActive.value && canCreate"
               @click="startUpload()"
               type="button"
               class="button button-white"
@@ -76,7 +76,7 @@
             </button>
           </div>
 
-          <div v-if="selection.count.value && !searchValue" class="flex gap-2">
+          <div v-show="selection.count.value && !searchValue" class="flex gap-2">
             <button
               v-pruvious-tooltip="__('pruvious-dashboard', 'Clear selection')"
               @click="selection.deselectAll()"
@@ -87,7 +87,7 @@
             </button>
 
             <button
-              v-if="!filter.isActive.value && canUpdate"
+              v-show="!filter.isActive.value && canUpdate"
               @click="movePopupVisible = true"
               type="button"
               class="button button-white"
@@ -96,7 +96,6 @@
             </button>
 
             <button
-              v-if="canDeleteMany"
               v-pruvious-tooltip="{
                 content:
                   clickConfirmation?.id === 'delete-media-items'
@@ -104,6 +103,7 @@
                     : __('pruvious-dashboard', 'Delete'),
                 showOnCreate: clickConfirmation?.id === 'delete-media-items',
               }"
+              v-show="canDeleteMany"
               @click="deleteSelectedItems"
               type="button"
               class="button"
@@ -123,12 +123,12 @@
             </button>
           </div>
 
-          <div v-if="allowedTypesTooltip || minSizeTooltip" class="ml-auto flex items-center gap-3">
-            <span v-if="allowedTypesTooltip" v-pruvious-tooltip="allowedTypesTooltip">
+          <div v-show="allowedTypesTooltip || minSizeTooltip" class="ml-auto flex items-center gap-3">
+            <span v-pruvious-tooltip="allowedTypesTooltip" v-show="allowedTypesTooltip">
               <PruviousIconFileSearch class="h-4 w-4" />
             </span>
 
-            <span v-if="minSizeTooltip.length" v-pruvious-tooltip="minSizeTooltip">
+            <span v-pruvious-tooltip="minSizeTooltip" v-show="minSizeTooltip.length">
               <PruviousIconRulerMeasure class="h-4 w-4" />
             </span>
           </div>
