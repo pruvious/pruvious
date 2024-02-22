@@ -191,7 +191,10 @@ function onMoveEnter() {
 
 async function onMoveDrop() {
   isHighlighted.value = false
-  await moveSelection(props.selection.clone(), props.directory.path)
+
+  if (!props.selection.directories.value[props.directory.path]) {
+    await moveSelection(props.selection.clone(), props.directory.path)
+  }
 }
 
 function onMoveEnd() {
