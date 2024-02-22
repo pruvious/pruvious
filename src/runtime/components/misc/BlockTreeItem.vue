@@ -1,5 +1,5 @@
 <template>
-  <div @mousedown.stop class="pl-2">
+  <div class="pl-2">
     <div
       :data-block="blockKey"
       :title="__('pruvious-dashboard', (dashboard.blocks[blockData.name as BlockName].description ?? '' ) as any)"
@@ -75,7 +75,7 @@
 
         <button
           v-pruvious-tooltip="__('pruvious-dashboard', 'Delete')"
-          @click.prevent.stop="$emit('delete', blockKey)"
+          @mousedown.prevent.stop="$emit('delete', blockKey)"
           tabindex="-1"
           type="button"
           class="h-4 w-4 text-gray-400 transition hocus:text-red-500"
