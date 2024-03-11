@@ -1,6 +1,6 @@
 import { consola } from 'consola'
 import fs from 'fs-extra'
-import 'pg'
+import pg from 'pg'
 import {
   DataTypes,
   Model,
@@ -91,6 +91,7 @@ export async function rebuildDatabase(
       decimalNumbers: true,
       ssl: dbInfo.dialect === 'postgres' && dbInfo.ssl ? { require: true, rejectUnauthorized: false } : undefined,
     },
+    dialectModule: dbInfo.dialect === 'postgres' ? pg : undefined,
     logging: isDebugActive('database') ? consola.create({}).withTag('sequelize').log : false,
   }
   const singleColletionsTable = getModuleOption('singleCollectionsTable')
