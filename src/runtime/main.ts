@@ -179,6 +179,7 @@ export async function generateDotPruvious(
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/validators/required')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/validators/string')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/validators/unique')}'`)
+    .newLine(`export * from '${relativeDotPruviousImport('./runtime/utils/server/pages')}'`)
 
   tsDashboard
     .newDecl(`// @ts-nocheck`)
