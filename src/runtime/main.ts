@@ -165,7 +165,9 @@ export async function generateDotPruvious(
       )}'`,
     )
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/http/auth')}'`)
-    .newLine(`export { getModuleOption } from '${relativeDotPruviousImport('./runtime/instances/state')}'`)
+    .newLine(
+      `export { cacheModuleOptions, getModuleOption } from '${relativeDotPruviousImport('./runtime/instances/state')}'`,
+    )
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/booleanish')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/default')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/numeric')}'`)
