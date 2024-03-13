@@ -869,16 +869,6 @@ export interface ModuleOptions {
        * @default true
        */
       language?: boolean
-
-      /**
-       * Serves uploaded files from the local file system.
-       * Set to `false` to disable this middleware.
-       *
-       * Note: This middleware is only active when the `uploads.drive.type` option is set to `'local'`.
-       *
-       * @default true
-       */
-      uploads?: boolean
     }
   }
 
