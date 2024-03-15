@@ -3830,6 +3830,22 @@ span.flatpickr-day.selected {
   margin-bottom: 0px;
 }
 
+.read-only\:cursor-default:-moz-read-only {
+  cursor: default;
+}
+
+.read-only\:cursor-default:read-only {
+  cursor: default;
+}
+
+.read-only\:\!cursor-default:-moz-read-only {
+  cursor: default !important;
+}
+
+.read-only\:\!cursor-default:read-only {
+  cursor: default !important;
+}
+
 .empty\:hidden:empty {
   display: none;
 }

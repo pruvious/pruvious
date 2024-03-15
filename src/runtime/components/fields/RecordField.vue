@@ -57,10 +57,11 @@
         <div class="relative h-[2.125rem] w-full">
           <input
             :data-ignore-autofocus="ignoreAutofocus ? '' : undefined"
-            :disabled="disabled || !collection?.search"
+            :disabled="disabled"
             :id="id"
             :name="name"
             :placeholder="__('pruvious-dashboard', props.options.placeholder as any)"
+            :readonly="!collection?.search"
             :value="inputText"
             @blur="onBlurInput()"
             @focus="onFocusInput()"
@@ -72,7 +73,7 @@
             autocomplete="off"
             ref="inputTextEl"
             spellcheck="false"
-            class="h-full w-full cursor-default truncate rounded-md pl-2.5 pr-9 outline-none placeholder:text-gray-300 focus:cursor-text"
+            class="h-full w-full cursor-default truncate rounded-md pl-2.5 pr-9 outline-none placeholder:text-gray-300 read-only:!cursor-default focus:cursor-text"
             :class="{
               '!pr-14': options.clearable && modelValue && !disabled && !focused,
               'pointer-events-none text-gray-400': disabled,

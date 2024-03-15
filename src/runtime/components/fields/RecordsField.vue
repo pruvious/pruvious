@@ -98,6 +98,7 @@
             :id="id"
             :name="name"
             :placeholder="__('pruvious-dashboard', options.placeholder as any)"
+            :readonly="!collection.search"
             @blur="onBlur()"
             @focus="onFocus()"
             @input=";(inputText = ($event.target as HTMLInputElement).value), onInputTextChangeDebounced()"
@@ -110,7 +111,7 @@
             ref="inputEl"
             spellcheck="false"
             type="text"
-            class="m-[-0.3125rem] h-8.5 flex-1 truncate bg-transparent px-2.5 text-sm outline-none transition placeholder:text-gray-300"
+            class="m-[-0.3125rem] h-8.5 flex-1 truncate bg-transparent px-2.5 text-sm outline-none transition placeholder:text-gray-300 read-only:cursor-default"
           />
 
           <div v-if="spinner" class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-400">
