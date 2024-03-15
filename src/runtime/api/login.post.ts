@@ -6,7 +6,7 @@ import { generateToken, storeToken } from '../http/auth'
 import { getModuleOption } from '../instances/state'
 import { booleanishSanitizer } from '../sanitizers/booleanish'
 import { stringSanitizer } from '../sanitizers/string'
-import { catchFirstErrorMessage, sleep } from '../utils/function'
+import { catchFirstErrorMessage } from '../utils/function'
 import { isKeyOf, isObject } from '../utils/object'
 import { __ } from '../utils/server/translate-string'
 import { booleanValidator } from '../validators/boolean'
@@ -45,7 +45,10 @@ export default defineEventHandler(async (event) => {
 
   // Defend against user existence checks
   if (!user) {
-    await sleep(55)
+    await argon2.verify(
+      '$argon2id$v=19$m=65536,t=3,p=4$KfP27QvlNx/4Kjk2krKJ3Q$MwNHO4YcR+EPy3CtJYdkd+VJAygllJuBfClflE/kixQ',
+      password,
+    )
   }
 
   if (!user || !(await argon2.verify(user.password, password))) {
