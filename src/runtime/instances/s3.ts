@@ -35,7 +35,7 @@ export async function s3PutObject(key: string, body: string | Buffer, contentTyp
   await s3Client().send(
     new PutObjectCommand({
       Bucket: (getModuleOption('uploads').drive as any).bucket,
-      Key: key,
+      Key: key.replace(/^\//, ''),
       Body: body,
       ContentType: contentType,
       ACL: 'public-read',
@@ -47,7 +47,7 @@ export async function s3GetObject(key: string) {
   const response = await s3Client().send(
     new GetObjectCommand({
       Bucket: (getModuleOption('uploads').drive as any).bucket,
-      Key: key,
+      Key: key.replace(/^\//, ''),
     }),
   )
 
@@ -58,14 +58,14 @@ export async function s3MoveObject(from: string, to: string) {
   const response = await s3Client().send(
     new CopyObjectCommand({
       Bucket: (getModuleOption('uploads').drive as any).bucket,
-      CopySource: `/${(getModuleOption('uploads').drive as any).bucket}/${from}`,
-      Key: to,
+      CopySource: `${(getModuleOption('uploads').drive as any).bucket}/${from}`,
+      Key: to.replace(/^\//, ''),
       ACL: 'public-read',
     }),
   )
 
   if (response.$metadata.httpStatusCode === 200) {
-    await s3DeleteObject(from)
+    await s3DeleteObject(from.replace(/^\//, ''))
   }
 }
 
@@ -73,7 +73,7 @@ export async function s3DeleteObject(key: string) {
   await s3Client().send(
     new DeleteObjectCommand({
       Bucket: (getModuleOption('uploads').drive as any).bucket,
-      Key: key,
+      Key: key.replace(/^\//, ''),
     }),
   )
 }
