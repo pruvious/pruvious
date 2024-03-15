@@ -144,7 +144,6 @@ export default defineNuxtModule<ModuleOptions>({
         auth: true,
         config: true,
         language: true,
-        uploads: true,
       },
     },
     standardTranslatableStrings: {
