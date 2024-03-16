@@ -101,14 +101,18 @@ export default defineCommand({
       const packageJson = fs.readJsonSync(join(template.dir, 'package.json'))
 
       // Specify versions of nuxt, vue and vue-router
-      packageJson.devDependencies ??= {}
-      packageJson.devDependencies.nuxt = '^3.10.0'
-      packageJson.devDependencies.vue = '^3.4.15'
-      packageJson.devDependencies['vue-router'] = '^4.2.5'
+      packageJson.dependencies ??= {}
+      packageJson.dependencies.nuxt = '^3.10.3'
+      packageJson.dependencies.vue = '^3.4.21'
+      packageJson.dependencies['vue-router'] = '^4.3.0'
 
       // Add pruvious
-      packageJson.dependencies ??= {}
       packageJson.dependencies.pruvious = '^3.10.8'
+
+      // Sort
+      packageJson.dependencies = Object.fromEntries(
+        Object.entries(packageJson.dependencies).sort(([a], [b]) => a.localeCompare(b)),
+      )
 
       fs.writeJsonSync(join(template.dir, 'package.json'), packageJson, { spaces: 2 })
     } catch (err) {
