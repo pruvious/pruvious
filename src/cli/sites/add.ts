@@ -21,9 +21,14 @@ export default defineCommand({
       alias: 'site',
       description: 'Domain name of the site',
     },
-    www: {
+    forceWWW: {
       type: 'boolean',
       description: 'Redirect non-www to www',
+    },
+    noWWW: {
+      type: 'boolean',
+      description: 'Do not set up www subdomain',
+      default: false,
     },
     trailing: {
       type: 'boolean',
@@ -43,7 +48,7 @@ export default defineCommand({
 
     let serverName = args.server
     let domain = args.domain
-    let www = args.www
+    let forceWWW = args.forceWWW
     let trailing = args.trailing
 
     if (!config.servers.length) {
@@ -84,15 +89,15 @@ export default defineCommand({
       }
     }
 
-    if (www === undefined) {
+    if (forceWWW === undefined && !args.noWWW) {
       const nonWWWDomain = domain.replace(/^www\./, '')
 
-      www = await consola.prompt(`Redirect ${cyan(nonWWWDomain)} to ${cyan(`www.${nonWWWDomain}`)}?`, {
+      forceWWW = await consola.prompt(`Redirect ${cyan(nonWWWDomain)} to ${cyan(`www.${nonWWWDomain}`)}?`, {
         type: 'confirm',
         initial: false,
       })
 
-      if (typeof www === 'symbol') {
+      if (typeof forceWWW === 'symbol') {
         process.exit(0)
       }
     }
@@ -106,7 +111,7 @@ export default defineCommand({
     }
 
     const server = config.servers.find(({ name }) => name === serverName)!
-    const site: PruviousSite = { domain, www, trailing }
+    const site: PruviousSite = { domain, forceWWW, noWWW: !!args.noWWW, trailing }
 
     // Configure site on server
     const ssh = new SSH(server, !!args.ignore)

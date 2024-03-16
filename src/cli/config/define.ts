@@ -44,7 +44,12 @@ export interface PruviousSite {
   /**
    * Redirect non-www to www.
    */
-  www: boolean
+  forceWWW: boolean
+
+  /**
+   * Do not set up www subdomain.
+   */
+  noWWW: boolean
 
   /**
    * Append trailing slashes to URLs.

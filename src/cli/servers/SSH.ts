@@ -83,9 +83,9 @@ export class SSH {
     const config = await this.getSitesConfig()
     const nuxtPort = 3000 + config.count
 
-    let nginxConfig = await nginxConfigTemplate()
+    let nginxConfig = await nginxConfigTemplate(!site.noWWW)
 
-    if (site.www) {
+    if (site.forceWWW && !site.noWWW) {
       nginxConfig = nginxConfig
         .replaceAll('https://{{ domainName }}', 'https://www.{{ domainName }}')
         .replaceAll("if ($host = 'www.{{ domainName }}')", "if ($host = '{{ domainName }}')")
@@ -120,7 +120,9 @@ export class SSH {
     } else {
       await this.exec(`sudo mkdir -p /etc/letsencrypt/live/${site.domain}`)
 
-      const certCommand = `sudo certbot certonly --non-interactive --nginx --agree-tos -m ${config.email} -d ${site.domain} -d www.${site.domain}`
+      const certCommand =
+        `sudo certbot certonly --non-interactive --nginx --agree-tos -m ${config.email} -d ${site.domain}` +
+        (site.noWWW ? '' : ` -d www.${site.domain}`)
       const out = await this.ssh?.execCommand(certCommand)
 
       if (!out?.stdout.includes('Successfully received certificate')) {
@@ -544,7 +546,7 @@ export class SSH {
   }
 }
 
-async function nginxConfigTemplate() {
+async function nginxConfigTemplate(www: boolean) {
   const info = await getProjectInfo()
   const uploadsUrlPrefix = joinRouteParts(info.uploadsUrlPrefix ?? 'uploads').slice(1)
   const uploadsMaxFileSize = info.uploadsMaxFileSize ?? parse('16 MB')
@@ -565,22 +567,28 @@ map $request_uri $cache_tag {
 `
   }
 
-  config += `
+  config +=
+    `
 server {
   listen 80;
-  server_name {{ domainName }} www.{{ domainName }};
+  server_name {{ domainName }}${www ? ' www.{{ domainName }}' : ''};
   rewrite ^(.*) https://{{ domainName }}$1 permanent;
 }
 
 ### server {
 ###   listen 443 ssl http2;
-###   server_name {{ domainName }} www.{{ domainName }};
+###   server_name {{ domainName }}${www ? ' www.{{ domainName }}' : ''};
 ###   client_max_body_size ${convertBytesToM(uploadsMaxFileSize)};
-
+` +
+    (www
+      ? `
 ###   if ($host = "www.{{ domainName }}") {
 ###     return 301 https://{{ domainName }}$request_uri;
 ###   }
 
+`
+      : '') +
+    `
 ###   gzip on;
 ###   gzip_types text/plain application/xml text/css application/javascript;
 ###   gzip_min_length 1000;
