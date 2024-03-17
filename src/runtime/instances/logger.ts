@@ -1,10 +1,10 @@
 import { cyan, green, red, underline, yellow } from 'colorette'
-import { consola } from 'consola'
+import { consola, type ConsolaInstance } from 'consola'
 import { clearArray } from '../utils/array'
 
 const queue: { level: 'error' | 'info' | 'success' | 'warn'; message: any; args: any[] }[] = []
 
-export const logger = consola.create({}).withTag('pruvious')
+export const logger: ConsolaInstance = consola.create({}).withTag('pruvious')
 
 export function log(message: any, ...args: any[]) {
   logger.log(applyFormats(message, ...args))
