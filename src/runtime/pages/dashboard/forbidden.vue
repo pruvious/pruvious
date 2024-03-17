@@ -16,13 +16,11 @@
 
 <script lang="ts" setup>
 import { useRuntimeConfig } from '#imports'
-import '../../assets/style.css'
-import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 
-const dashboard = usePruviousDashboard()
 const runtimeConfig = useRuntimeConfig()
 
+await new Promise((resolve) => import('../../assets/style.css').then(resolve))
 await loadTranslatableStrings()
 </script>
 
