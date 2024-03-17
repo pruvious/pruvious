@@ -17,4 +17,4 @@ esbuild.build({
   external: [],
 })
 
-execa('nuxt-module-build', { ...execaOptions })
+execa('nuxt-module-build build', { ...execaOptions })
