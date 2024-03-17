@@ -52,7 +52,9 @@ export default addRouteMiddleware('pruvious-dashboard-before-all', async (to) =>
 
     if (isDevelopment) {
       for (const styleElement of document.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')) {
-        styleElement.remove()
+        if (!styleElement.dataset.viteDevId?.match(/[\/\\]pruvious[\/\\]dist[\/\\]/)) {
+          styleElement.remove()
+        }
       }
     }
 
