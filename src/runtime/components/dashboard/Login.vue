@@ -43,6 +43,7 @@
 <script lang="ts" setup>
 import { ref, useRoute } from '#imports'
 import { checkboxFieldComponent, dashboardLoginLogoComponent, textFieldComponent } from '#pruvious/dashboard'
+import '../../assets/style.css'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { setToken } from '../../composables/token'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -61,7 +62,6 @@ const password = ref<string>('')
 const remember = ref<boolean>(false)
 const errors = ref<Record<string, string>>({})
 
-await new Promise((resolve) => import('../../assets/style.css').then(resolve))
 await loadTranslatableStrings('pruvious-dashboard')
 
 async function logIn() {

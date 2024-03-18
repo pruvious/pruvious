@@ -76,6 +76,7 @@
 <script lang="ts" setup>
 import { ref } from '#imports'
 import { dashboardLoginLogoComponent, textFieldComponent } from '#pruvious/dashboard'
+import '../../assets/style.css'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { setToken } from '../../composables/token'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -93,7 +94,6 @@ const email = ref<string>('')
 const password = ref<string>('')
 const errors = ref<Record<string, string>>({})
 
-await new Promise((resolve) => import('../../assets/style.css').then(resolve))
 await loadTranslatableStrings('pruvious-dashboard')
 
 async function createAccount() {

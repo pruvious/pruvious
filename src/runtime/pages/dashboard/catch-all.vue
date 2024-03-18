@@ -17,12 +17,12 @@
 <script lang="ts" setup>
 import { navigateTo, useRoute, useRuntimeConfig } from '#imports'
 import { useEventListener } from '@vueuse/core'
+import '../../assets/style.css'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
-await new Promise((resolve) => import('../../assets/style.css').then(resolve))
 await loadTranslatableStrings()
 
 useEventListener(window, 'focus', async () => {

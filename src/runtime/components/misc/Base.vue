@@ -109,6 +109,7 @@
 import { ref, useRoute, useRuntimeConfig, watch } from '#imports'
 import { primaryLanguage } from '#pruvious'
 import { dashboardHeaderLogoComponent } from '#pruvious/dashboard'
+import '../../assets/style.css'
 import { useCollectionLanguage } from '../../composables/dashboard/collection-language'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { pruviousToasterShow } from '../../composables/dashboard/toaster'
@@ -132,7 +133,6 @@ const HeaderLogo = dashboardHeaderLogoComponent()
 const queryStringLanguage = ref('')
 const queryStringLanguageWhere = ref('')
 
-await new Promise((resolve) => import('../../assets/style.css').then(resolve))
 await loadTranslatableStrings('pruvious-dashboard')
 
 watch(
