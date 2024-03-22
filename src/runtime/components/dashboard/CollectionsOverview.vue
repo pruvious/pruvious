@@ -1,6 +1,8 @@
 <template>
-  <LazyPruviousMultiCollectionsOverview v-if="collection.mode === 'multi'" />
-  <LazyPruviousSingleCollectionsOverview v-if="(collection as any).mode === 'single'" />
+  <div>
+    <LazyPruviousMultiCollectionsOverview v-if="collection.mode === 'multi'" />
+    <LazyPruviousSingleCollectionsOverview v-if="(collection as any).mode === 'single'" />
+  </div>
 </template>
 
 <script lang="ts" setup>
