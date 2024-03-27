@@ -36,9 +36,10 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import type { CastedFieldType } from '#pruvious'
-import { pruviousToasterShow, textFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { useMediaDirectories, useMediaDirectoryPopup, useMediaUpdated } from '../../composables/dashboard/media'
+import { pruviousToasterShow } from '../../composables/dashboard/toaster'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { addMediaDirectories, listMediaDirectory, renameMediaDirectory } from '../../utils/dashboard/media-directory'
 import { pruviousFetch } from '../../utils/fetch'
@@ -56,6 +57,7 @@ const parent = ref('')
 const prevPath = ref('')
 const visible = ref(false)
 
+const PruviousPopup = dashboardMiscComponent.Popup()
 const TextField = textFieldComponent()
 
 await loadTranslatableStrings('pruvious-dashboard')

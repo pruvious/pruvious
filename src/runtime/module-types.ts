@@ -294,6 +294,66 @@ export interface ModuleOptions {
        * @example './components/Dashboard/Media.vue'
        */
       'media'?: string
+
+      /**
+       * Miscellaneous components used in the dashboard.
+       *
+       * @example
+       * ```typescript
+       * {
+       *   Base: './components/Dashboard/Misc/Base.vue',
+       *   Dialog: './components/Dashboard/Misc/CustomDialog.vue',
+       * }
+       * ```
+       */
+      'misc'?: {
+        AddBlockPopup?: string
+        Base?: string
+        BlockTreeItem?: string
+        BooleanFieldPreview?: string
+        CollectionsContentRecord?: string
+        CollectionsSimpleRecord?: string
+        CollectionTranslations?: string
+        DateFormatField?: string
+        DateTimeFormatField?: string
+        Dialog?: string
+        DragImage?: string
+        FieldLayout?: string
+        FieldLayoutTabs?: string
+        FilterPopup?: string
+        FilterRule?: string
+        Globals?: string
+        HistoryButtons?: string
+        ImagePreview?: string
+        InputError?: string
+        LegalLinks?: string
+        LoadingIndicator?: string
+        Logo?: string
+        LogoFull?: string
+        MediaBreadcrumbs?: string
+        MediaDirectoryPopup?: string
+        MediaFileInput?: string
+        MediaItemDirectory?: string
+        MediaItemUpload?: string
+        MediaLibrary?: string
+        MediaLibraryPopup?: string
+        MediaMovePopup?: string
+        MediaMovePopupItem?: string
+        MediaUploadPopup?: string
+        MoreBlockOptionsPopup?: string
+        MultiCollectionsOverview?: string
+        Popup?: string
+        SearchMedia?: string
+        SearchRecords?: string
+        SingleCollectionsOverview?: string
+        StringFieldPreview?: string
+        TableColumnsPopup?: string
+        TablePagination?: string
+        TableSorter?: string
+        Toaster?: string
+        TranslationsFieldPreview?: string
+        UnsavedChanges?: string
+      }
     }
 
     /**

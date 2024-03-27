@@ -106,10 +106,9 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch, type PropType } from '#imports'
-import type { CastedFieldType } from '#pruvious'
-import { type CastedBlockData } from '#pruvious'
+import type { CastedBlockData, CastedFieldType } from '#pruvious'
 import { blocks } from '#pruvious/blocks'
-import { textFieldComponent, usePruviousDashboard } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent, usePruviousDashboard } from '#pruvious/dashboard'
 import { usePruviousClipboard } from '../../composables/dashboard/clipboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { pruviousToasterShow } from '../../composables/dashboard/toaster'
@@ -165,6 +164,7 @@ const userCapabilities = getCapabilities(user.value)
 
 const canCreatePresets = user.value?.isAdmin || userCapabilities['collection-presets-create']
 
+const PruviousPopup = dashboardMiscComponent.Popup()
 const TextField = textFieldComponent()
 
 await loadTranslatableStrings('pruvious-dashboard')

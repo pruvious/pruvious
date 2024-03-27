@@ -82,6 +82,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, watch } from '#imports'
 import { type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import flatpickr from 'flatpickr'
 import type { Instance as FlatpickrInstance } from 'flatpickr/dist/types/instance'
 import { getHotkeyAction } from '../../composables/dashboard/hotkeys'
@@ -138,6 +139,8 @@ const id = pruviousUnique('date-time-field')
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'date-time-field')
 const inputEl = ref<HTMLInputElement>()
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let picker: FlatpickrInstance
 

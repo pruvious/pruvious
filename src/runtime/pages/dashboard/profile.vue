@@ -60,6 +60,7 @@
 <script lang="ts" setup>
 import { ref, useHead } from '#imports'
 import type { AuthUser } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import { debounce } from 'perfect-debounce'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -89,6 +90,10 @@ const resolvedConditionalLogic = ref<Record<string, boolean>>({})
 const record = ref<Record<string, any>>(deepClone(user.value!))
 const history = new History(record.value)
 const fieldDeclaration: any = deepMerge(collection.fields, { email: { additional: { immutable: true } } })
+
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousHistoryButtons = dashboardMiscComponent.HistoryButtons()
 
 await resolve()
 watchUnsavedChanges(history)

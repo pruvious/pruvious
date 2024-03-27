@@ -37,6 +37,7 @@
 
 <script lang="ts" setup>
 import { type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
 import { moveSelection, type MediaMoveTargetDirectory } from '../../composables/dashboard/media'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -58,6 +59,8 @@ const emit = defineEmits<{
 }>()
 
 const clickConfirmation = useClickConfirmation()
+
+const PruviousMediaMovePopupItem = dashboardMiscComponent.MediaMovePopupItem()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

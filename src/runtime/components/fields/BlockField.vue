@@ -7,9 +7,10 @@
 
 <script lang="ts" setup>
 import type { CastedBlockData, StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 
-const props = defineProps<{
+defineProps<{
   /**
    * Represents the value of the field.
    */
@@ -47,6 +48,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [CastedBlockData]
 }>()
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 </script>

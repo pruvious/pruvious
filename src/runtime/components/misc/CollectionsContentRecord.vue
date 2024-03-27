@@ -364,7 +364,7 @@ import {
   type PublicPagesOptions,
   type SupportedLanguage,
 } from '#pruvious'
-import { recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { nanoid } from 'nanoid'
@@ -454,6 +454,13 @@ const blockTree = new BlockTree(
   errors.value,
 )
 
+const PruviousAddBlockPopup = dashboardMiscComponent.AddBlockPopup()
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousBlockTreeItem = dashboardMiscComponent.BlockTreeItem()
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousHistoryButtons = dashboardMiscComponent.HistoryButtons()
+const PruviousMoreBlockOptionsPopup = dashboardMiscComponent.MoreBlockOptionsPopup()
+const PruviousSearchRecords = dashboardMiscComponent.SearchRecords()
 const SelectField = selectFieldComponent()
 
 await loadTranslatableStrings('pruvious-dashboard')

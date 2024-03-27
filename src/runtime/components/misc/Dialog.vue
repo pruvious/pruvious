@@ -18,6 +18,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { usePruviousDialog, type PruviousDialog } from '../../composables/dashboard/dialog'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -26,6 +27,8 @@ const dialog = usePruviousDialog()
 
 const current = ref<PruviousDialog | null>(null)
 const visible = ref(false)
+
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

@@ -106,6 +106,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, ref, watch } from '#imports'
 import type { StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { debounce } from 'perfect-debounce'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
@@ -168,6 +169,8 @@ const inputText = ref('')
 const inputTextEl = ref<HTMLInputElement>()
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'select-field')
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let heightAnimationTimeout: NodeJS.Timeout | undefined
 let pickedLabel = ''

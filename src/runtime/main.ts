@@ -188,23 +188,46 @@ export async function generateDotPruvious(
     .newLine(`import { defineAsyncComponent } from '#imports'`)
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/dashboard.ts')}'`)
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/dialog.ts')}'`)
-    .newLine(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/toaster.ts')}'`)
 
   for (const [componentName, relativeComponentPath] of Object.entries(getModuleOption('dashboard').baseComponents)) {
-    const componentPath = path.resolve(relativeComponentPath)
+    if (componentName !== 'misc') {
+      const componentPath = path.resolve(relativeComponentPath as string)
 
-    tsDashboard
-      .newDecl(
-        `export const dashboard${pascalCase(componentName)}ComponentImport = () => import('${relativeDotPruviousImport(
-          componentPath,
-        )}')`,
-      )
-      .newLine(
-        `export const dashboard${pascalCase(
-          componentName,
-        )}Component = () => defineAsyncComponent(() => import('${relativeDotPruviousImport(componentPath)}'))`,
-      )
+      tsDashboard
+        .newDecl(
+          `export const dashboard${pascalCase(
+            componentName,
+          )}ComponentImport = () => import('${relativeDotPruviousImport(componentPath)}')`,
+        )
+        .newLine(
+          `export const dashboard${pascalCase(
+            componentName,
+          )}Component = () => defineAsyncComponent(() => import('${relativeDotPruviousImport(componentPath)}'))`,
+        )
+    }
   }
+
+  const dashboardMiscComponentPaths: Record<string, string> = {}
+  tsDashboard.newDecl(`export const dashboardMiscComponentImport = {`)
+  for (const [componentName, relativeComponentPath] of Object.entries(
+    getModuleOption('dashboard').baseComponents.misc ?? {},
+  )) {
+    dashboardMiscComponentPaths[componentName] = path.resolve(relativeComponentPath)
+    tsDashboard.newLine(
+      `'${componentName}': () => import('${relativeDotPruviousImport(dashboardMiscComponentPaths[componentName])}'),`,
+    )
+  }
+  tsDashboard.newLine(`}`)
+
+  tsDashboard.newDecl(`export const dashboardMiscComponent = {`)
+  for (const componentName of Object.keys(dashboardMiscComponentPaths)) {
+    tsDashboard.newLine(
+      `'${componentName}': () => defineAsyncComponent(() => import('${relativeDotPruviousImport(
+        dashboardMiscComponentPaths[componentName],
+      )}')),`,
+    )
+  }
+  tsDashboard.newLine(`}`)
 
   if (!Object.keys(icons).length) {
     for (const { file, fullPath } of walkDir(resolveModulePath('./runtime/components/icons'))) {

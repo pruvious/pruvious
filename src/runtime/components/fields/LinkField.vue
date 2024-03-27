@@ -200,6 +200,7 @@ import {
   type PublicPagesOptions,
   type StandardFieldOptions,
 } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { debounce } from 'perfect-debounce'
 import { usePruviousDashboard, type SimpleCollection } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -287,6 +288,8 @@ const suggestionChoices = ref<
 const suggestionsEl = ref<HTMLDivElement>()
 const suggestionsHeight = ref<number>(0)
 const userCapabilities = getCapabilities(user.value)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let heightAnimationTimeout: NodeJS.Timeout | undefined
 let prevValue: string = ''

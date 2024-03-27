@@ -16,12 +16,15 @@
 
 <script lang="ts" setup>
 import { navigateTo, useRoute, useRuntimeConfig } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import '../../assets/style.css'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
+
+const PruviousGlobals = dashboardMiscComponent.Globals()
 
 await loadTranslatableStrings()
 

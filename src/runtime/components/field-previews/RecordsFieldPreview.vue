@@ -38,6 +38,7 @@
 <script lang="ts" setup>
 import { computed, ref, useRuntimeConfig, watch, type PropType } from '#imports'
 import type { CollectionName } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { useUser } from '../../composables/user'
@@ -88,6 +89,8 @@ const recordLabel = computed<string>(
   () => toArray(props.options.recordLabel)?.[0] ?? collection.value.dashboard.overviewTable.searchLabel[0],
 )
 const isLoading = ref(false)
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

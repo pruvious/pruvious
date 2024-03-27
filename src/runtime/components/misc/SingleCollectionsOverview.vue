@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 import { navigateTo, ref, useHead, useRoute, watch } from '#imports'
 import { languageLabels, primaryLanguage, supportedLanguages, type SupportedLanguage } from '#pruvious'
-import { recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import { debounce } from 'perfect-debounce'
 import { useCollectionLanguage } from '../../composables/dashboard/collection-language'
@@ -126,6 +126,11 @@ const userCapabilities = getCapabilities(user.value)
 const history = new History(record.value)
 
 const canUpdate = user.value?.isAdmin || (userCapabilities as any)[`collection-${collection.name}-update`]
+
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousCollectionTranslations = dashboardMiscComponent.CollectionTranslations()
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousHistoryButtons = dashboardMiscComponent.HistoryButtons()
 
 useHead({ title })
 

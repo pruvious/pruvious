@@ -108,7 +108,7 @@
 <script lang="ts" setup>
 import { ref, useRoute, useRuntimeConfig, watch } from '#imports'
 import { primaryLanguage } from '#pruvious'
-import { dashboardHeaderLogoComponent } from '#pruvious/dashboard'
+import { dashboardHeaderLogoComponent, dashboardMiscComponent } from '#pruvious/dashboard'
 import '../../assets/style.css'
 import { useCollectionLanguage } from '../../composables/dashboard/collection-language'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -128,10 +128,18 @@ const dashboard = usePruviousDashboard()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
-const HeaderLogo = dashboardHeaderLogoComponent()
-
 const queryStringLanguage = ref('')
 const queryStringLanguageWhere = ref('')
+
+const HeaderLogo = dashboardHeaderLogoComponent()
+const PruviousDialog = dashboardMiscComponent.Dialog()
+const PruviousDragImage = dashboardMiscComponent.DragImage()
+const PruviousGlobals = dashboardMiscComponent.Globals()
+const PruviousMediaDirectoryPopup = dashboardMiscComponent.MediaDirectoryPopup()
+const PruviousMediaFileInput = dashboardMiscComponent.MediaFileInput()
+const PruviousMediaLibraryPopup = dashboardMiscComponent.MediaLibraryPopup()
+const PruviousMediaUploadPopup = dashboardMiscComponent.MediaUploadPopup()
+const PruviousUnsavedChanges = dashboardMiscComponent.UnsavedChanges()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

@@ -120,6 +120,7 @@
 <script lang="ts" setup>
 import { nextTick, ref, watch } from '#imports'
 import { type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import type { UseSortableReturn } from '@vueuse/integrations/useSortable'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -190,6 +191,8 @@ const sortableKey = ref(0)
 const suggestionChoices = ref<Choice[]>([])
 const suggestionsEl = ref<HTMLDivElement>()
 const suggestionsHeight = ref<number>(0)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let heightAnimationTimeout: NodeJS.Timeout | undefined
 let sortableReturn: UseSortableReturn | undefined

@@ -84,6 +84,7 @@
 <script lang="ts" setup>
 import { ref, useRuntimeConfig, watch } from '#imports'
 import type { CastedFieldType, StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import backgroundImage from '../../assets/image-background.png'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import {
@@ -166,6 +167,9 @@ const userCapabilities = getCapabilities(user.value)
 const canCreate =
   dashboard.value.collections.uploads.apiRoutes.create &&
   (user.value?.isAdmin || userCapabilities['collection-uploads-create'])
+
+const PruviousImagePreview = dashboardMiscComponent.ImagePreview()
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

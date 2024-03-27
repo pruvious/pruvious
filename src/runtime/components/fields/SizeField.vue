@@ -106,6 +106,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import { type SizeInput, type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
 import { numericSanitizer } from '../../sanitizers/numeric'
@@ -164,6 +165,8 @@ const inputs = ref<(Required<Omit<SizeInput, 'default'>> & { name: string })[]>(
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'size-field')
 const sync = ref<boolean>(false)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

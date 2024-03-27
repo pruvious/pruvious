@@ -164,6 +164,7 @@
 <script lang="ts" setup>
 import { nextTick, onBeforeUnmount, ref, watch } from '#imports'
 import type { StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { debounce } from 'perfect-debounce'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
@@ -248,6 +249,8 @@ const spinner = ref<boolean>(false)
 const suggestionChoices = ref<Suggestion[]>([])
 const suggestionsEl = ref<HTMLDivElement>()
 const suggestionsHeight = ref<number>(0)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let heightAnimationTimeout: NodeJS.Timeout | undefined
 let prevValue: string = ''

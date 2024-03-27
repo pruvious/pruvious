@@ -31,6 +31,7 @@
 <script lang="ts" setup>
 import { computed, ref, useRuntimeConfig, watch, type PropType } from '#imports'
 import type { CollectionName } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { useUser } from '../../composables/user'
@@ -83,6 +84,8 @@ const dimmed = ref(false)
 const isLoading = ref(false)
 const label = ref('')
 const record = ref<Record<string, any> | null>(null)
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

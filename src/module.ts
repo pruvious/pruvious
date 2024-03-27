@@ -65,6 +65,54 @@ export default defineNuxtModule<ModuleOptions>({
         'login/logo': undefined,
         'logout': undefined,
         'media': undefined,
+        'misc': {
+          AddBlockPopup: undefined,
+          Base: undefined,
+          BlockTreeItem: undefined,
+          BooleanFieldPreview: undefined,
+          CollectionsContentRecord: undefined,
+          CollectionsSimpleRecord: undefined,
+          CollectionTranslations: undefined,
+          DateFormatField: undefined,
+          DateTimeFormatField: undefined,
+          Dialog: undefined,
+          DragImage: undefined,
+          FieldLayout: undefined,
+          FieldLayoutTabs: undefined,
+          FilterPopup: undefined,
+          FilterRule: undefined,
+          Globals: undefined,
+          HistoryButtons: undefined,
+          ImagePreview: undefined,
+          InputError: undefined,
+          LegalLinks: undefined,
+          LoadingIndicator: undefined,
+          Logo: undefined,
+          LogoFull: undefined,
+          MediaBreadcrumbs: undefined,
+          MediaDirectoryPopup: undefined,
+          MediaFileInput: undefined,
+          MediaItemDirectory: undefined,
+          MediaItemUpload: undefined,
+          MediaLibrary: undefined,
+          MediaLibraryPopup: undefined,
+          MediaMovePopup: undefined,
+          MediaMovePopupItem: undefined,
+          MediaUploadPopup: undefined,
+          MoreBlockOptionsPopup: undefined,
+          MultiCollectionsOverview: undefined,
+          Popup: undefined,
+          SearchMedia: undefined,
+          SearchRecords: undefined,
+          SingleCollectionsOverview: undefined,
+          StringFieldPreview: undefined,
+          TableColumnsPopup: undefined,
+          TablePagination: undefined,
+          TableSorter: undefined,
+          Toaster: undefined,
+          TranslationsFieldPreview: undefined,
+          UnsavedChanges: undefined,
+        },
       },
       enabled: true,
       legalLinks: [],
@@ -177,9 +225,17 @@ export default defineNuxtModule<ModuleOptions>({
     fs.emptyDirSync(resolveAppPath('./.pruvious'))
 
     for (const [name, componentPath] of Object.entries(options.dashboard.baseComponents!)) {
-      ;(options.dashboard.baseComponents! as any)[name] = componentPath
-        ? resolveRelativeAppPath(componentPath)
-        : resolveRelativeModulePath('./runtime/components/dashboard', `${pascalCase(name)}.vue`)
+      if (name === 'misc') {
+        for (const [miscName, miscComponentPath] of Object.entries(componentPath as any)) {
+          ;(options.dashboard.baseComponents!.misc as any)[miscName] = miscComponentPath
+            ? resolveRelativeAppPath(miscComponentPath as string)
+            : resolveRelativeModulePath('./runtime/components/misc', `${miscName}.vue`)
+        }
+      } else {
+        ;(options.dashboard.baseComponents! as any)[name] = componentPath
+          ? resolveRelativeAppPath(componentPath as string)
+          : resolveRelativeModulePath('./runtime/components/dashboard', `${pascalCase(name)}.vue`)
+      }
     }
 
     nuxt.options.runtimeConfig.pruvious = mergeDefaults(nuxt.options.runtimeConfig.pruvious as any, {

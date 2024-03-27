@@ -54,6 +54,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import type { StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { useTextareaAutosize } from '@vueuse/core'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
@@ -110,6 +111,8 @@ const { textarea, input } = useTextareaAutosize()
 const id = pruviousUnique('text-area-field')
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'text-area-field')
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

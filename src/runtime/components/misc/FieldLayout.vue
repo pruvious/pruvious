@@ -114,7 +114,7 @@
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
 import { supportedLanguages, type Field, type FieldLayout, type SupportedLanguage } from '#pruvious'
-import { customFieldLayoutComponents, fields } from '#pruvious/dashboard'
+import { customFieldLayoutComponents, dashboardMiscComponent, fields } from '#pruvious/dashboard'
 import { usePruviousDashboard, type DashboardCollectionFields } from '../../composables/dashboard/dashboard'
 import { isArray } from '../../utils/array'
 import { extractFieldKeys } from '../../utils/dashboard/extract-field-keys'
@@ -234,6 +234,10 @@ const dashboard = usePruviousDashboard()
 const collection = dashboard.value.collections[dashboard.value.collection!]
 const CustomFieldLayoutComponents: Record<string, any> = {}
 const resolvedFieldLayout = ref<(ResolvedFieldLayout | null)[]>([])
+
+const PruviousCollectionTranslations = dashboardMiscComponent.CollectionTranslations()
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousFieldLayoutTabs = dashboardMiscComponent.FieldLayoutTabs()
 
 watch(
   () => props.fieldLayout,

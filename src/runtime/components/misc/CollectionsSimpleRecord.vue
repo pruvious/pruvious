@@ -137,7 +137,7 @@
 <script lang="ts" setup>
 import { computed, ref, useHead, useRuntimeConfig, type PropType } from '#imports'
 import { languageLabels, primaryLanguage, supportedLanguages, type SupportedLanguage } from '#pruvious'
-import { recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import { debounce } from 'perfect-debounce'
 import { useCollectionLanguage } from '../../composables/dashboard/collection-language'
@@ -186,6 +186,11 @@ const languageChoices = Object.fromEntries(languageLabels.map(({ code, name }) =
 const pageUrl = ref('')
 const resolvedConditionalLogic = ref<Record<string, boolean>>({})
 
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousCollectionTranslations = dashboardMiscComponent.CollectionTranslations()
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousHistoryButtons = dashboardMiscComponent.HistoryButtons()
+const PruviousSearchRecords = dashboardMiscComponent.SearchRecords()
 const SelectField = selectFieldComponent()
 
 await loadTranslatableStrings('pruvious-dashboard')

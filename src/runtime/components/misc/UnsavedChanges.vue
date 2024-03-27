@@ -20,6 +20,7 @@
 
 <script lang="ts" setup>
 import { navigateTo, onBeforeRouteUpdate, ref } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { onBeforeRouteLeave, type NavigationGuardNext, type RouteLocationNormalized } from '#vue-router'
 import { useEventListener } from '@vueuse/core'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
@@ -30,6 +31,8 @@ const unsavedChanges = useUnsavedChanges()
 
 const popupVisible = ref(false)
 const destination = ref<RouteLocationNormalized>()
+
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

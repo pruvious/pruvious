@@ -156,6 +156,7 @@
 <script lang="ts" setup>
 import { computed, nextTick, onBeforeUnmount, ref, useRuntimeConfig, watch } from '#imports'
 import { primaryLanguage, type CollectionName, type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import type { UseSortableReturn } from '@vueuse/integrations/useSortable'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { debounce } from 'perfect-debounce'
@@ -260,6 +261,8 @@ const recordLabels = computed<[string, string | null]>(() => [
 const spinner = ref<boolean>(false)
 const sortableEl = ref<HTMLElement>()
 const sortableKey = ref(0)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let choicesPage = 1
 let fetchChoicesCounter = 0

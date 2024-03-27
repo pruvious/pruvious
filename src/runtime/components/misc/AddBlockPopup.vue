@@ -56,7 +56,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch, type PropType } from '#imports'
 import { type BlockName } from '#pruvious'
-import { textFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import { usePruviousClipboard } from '../../composables/dashboard/clipboard'
 import { usePruviousDashboard, type BlockMeta } from '../../composables/dashboard/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
@@ -102,6 +102,8 @@ const canPaste = computed(
 )
 const isFiltered = ref(false)
 const searchValue = ref('')
+
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

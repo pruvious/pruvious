@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
 import { prefixPrimaryLanguage, primaryLanguage } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import type { PublicPagesOptions } from '../../collections/collection.definition'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -57,6 +58,8 @@ const dashboard = usePruviousDashboard()
 
 const linked = ref<string | null>(null)
 const publicCollections = Object.values(dashboard.value.collections).filter((c) => c.publicPages)
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 let linkedCounter = 0
 

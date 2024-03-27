@@ -79,6 +79,7 @@
 <script lang="ts" setup>
 import { ref, useRuntimeConfig, watch, type PropType } from '#imports'
 import type { CastedFieldType, CreateInput } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import {
   fetchDirectories,
@@ -166,6 +167,9 @@ const userCapabilities = getCapabilities(user.value)
 const canCreateMany = user.value?.isAdmin || userCapabilities['collection-uploads-create-many']
 const canDelete = user.value?.isAdmin || userCapabilities['collection-uploads-delete']
 const canUpdate = user.value?.isAdmin || userCapabilities['collection-uploads-update']
+
+const PruviousMediaItemDirectory = dashboardMiscComponent.MediaItemDirectory()
+const PruviousMediaItemUpload = dashboardMiscComponent.MediaItemUpload()
 
 watch(() => props.directory, fetchData, { immediate: true })
 watch(() => props.fetchCount, fetchData)

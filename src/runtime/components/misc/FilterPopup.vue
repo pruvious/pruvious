@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
-import { fieldTypes } from '#pruvious/dashboard'
+import { dashboardMiscComponent, fieldTypes } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { pruviousToasterShow } from '../../composables/dashboard/toaster'
@@ -111,6 +111,9 @@ const fieldChoices = Object.fromEntries(
 )
 const parsable = ref(false)
 const simpleWhere = ref<SimpleWhere[]>([])
+
+const PruviousFilterRule = dashboardMiscComponent.FilterRule()
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

@@ -153,6 +153,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, useRuntimeConfig, watch } from '#imports'
 import { primaryLanguage, type CollectionName, type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { debounce } from 'perfect-debounce'
 import { usePruviousDashboard, type SimpleCollection } from '../../composables/dashboard/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -246,6 +247,8 @@ const inputTextEl = ref<HTMLInputElement>()
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'record-field')
 const spinner = ref<boolean>(false)
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let choicesPage = 1
 let fetchChoicesCounter = 0

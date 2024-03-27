@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import { type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 
 defineProps({
   name: {
@@ -39,4 +40,6 @@ defineProps({
 defineEmits<{
   refresh: []
 }>()
+
+const PruviousBooleanFieldPreview = dashboardMiscComponent.BooleanFieldPreview()
 </script>

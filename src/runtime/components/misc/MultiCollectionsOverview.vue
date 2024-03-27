@@ -272,7 +272,7 @@
                 :value="(row as any)[field]"
               />
 
-              <LazyPruviousTranslationsFieldPreview
+              <PruviousTranslationsFieldPreview
                 v-if="i && field === 'translations'"
                 :canUpdate="canUpdate"
                 :id="row.id"
@@ -362,6 +362,7 @@ import type { CollectionName } from '#pruvious'
 import { languageLabels, primaryLanguage, supportedLanguages, type SupportedLanguage } from '#pruvious'
 import {
   checkboxFieldComponent,
+  dashboardMiscComponent,
   fieldPreviews,
   selectFieldComponent,
   tableAdditionalCollectionOptions,
@@ -389,6 +390,14 @@ const route = useRoute()
 const user = useUser()
 
 const CheckboxField = checkboxFieldComponent()
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousFilterPopup = dashboardMiscComponent.FilterPopup()
+const PruviousPopup = dashboardMiscComponent.Popup()
+const PruviousSearchRecords = dashboardMiscComponent.SearchRecords()
+const PruviousTableColumnsPopup = dashboardMiscComponent.TableColumnsPopup()
+const PruviousTablePagination = dashboardMiscComponent.TablePagination()
+const PruviousTableSorter = dashboardMiscComponent.TableSorter()
+const PruviousTranslationsFieldPreview = dashboardMiscComponent.TranslationsFieldPreview()
 const SelectField = selectFieldComponent()
 
 dashboard.value.collection = route.params.collection as CollectionName

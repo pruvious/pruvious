@@ -189,7 +189,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from '#imports'
 import type { FieldLayout, StandardFieldOptions } from '#pruvious'
-import { defaultFieldValues } from '#pruvious/dashboard'
+import { dashboardMiscComponent, defaultFieldValues } from '#pruvious/dashboard'
 import type { UseSortableReturn } from '@vueuse/integrations/useSortable'
 import { moveArrayElement, useSortable } from '@vueuse/integrations/useSortable'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
@@ -266,6 +266,9 @@ const containerEl = ref<HTMLElement>()
 const fieldLayout = ref<FieldLayout[]>([])
 const sortableEl = ref<HTMLElement>()
 const sortableKey = ref<number[]>([])
+
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let sortableReturn: UseSortableReturn | undefined
 

@@ -50,6 +50,7 @@ import { computed } from '#imports'
 import { type StandardFieldOptions } from '#pruvious'
 import { numberFieldComponent } from '#pruvious/dashboard'
 // @ts-ignore
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/antd.css'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -94,8 +95,6 @@ const emit = defineEmits<{
   'update:modelValue': [number]
 }>()
 
-const NumberField = numberFieldComponent()
-
 const inputSize = computed(
   () =>
     Math.max(
@@ -103,6 +102,9 @@ const inputSize = computed(
       props.options.max!.toString().replace(/[^0-9]/g, '').length,
     ) + (isInteger(props.options.step!) ? 0 : props.options.step!.toString().split('.')[1].length + 1),
 )
+
+const NumberField = numberFieldComponent()
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 </script>

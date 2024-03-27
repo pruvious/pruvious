@@ -11,6 +11,7 @@
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
 import type { FieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { titleCase } from '../../utils/string'
 
@@ -43,6 +44,8 @@ defineEmits<{
 }>()
 
 const displayedValue = ref<string>('')
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

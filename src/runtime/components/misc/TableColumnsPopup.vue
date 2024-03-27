@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch, type PropType } from '#imports'
-import { checkboxesFieldComponent } from '#pruvious/dashboard'
+import { checkboxesFieldComponent, dashboardMiscComponent } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -66,6 +66,8 @@ const columns = ref<string[]>([])
 const defaultColumns = collection.dashboard.overviewTable.columns.map(({ field }) => field)
 const errors = ref<Record<string, string>>({})
 const isDefault = computed(() => JSON.stringify(columns.value) === JSON.stringify(defaultColumns))
+
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

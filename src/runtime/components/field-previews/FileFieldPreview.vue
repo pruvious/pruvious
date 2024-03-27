@@ -23,6 +23,7 @@
 
 <script lang="ts" setup>
 import { ref, useRuntimeConfig, watch, type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousFetch } from '../../utils/fetch'
 
@@ -58,6 +59,8 @@ const runtimeConfig = useRuntimeConfig()
 
 const isLoading = ref(false)
 const upload = ref<Record<string, any> | null>(null)
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

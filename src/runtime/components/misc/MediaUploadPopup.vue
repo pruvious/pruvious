@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import { imageTypes, type CastedFieldType } from '#pruvious'
-import { textFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { useMediaUpdated, useMediaUploadPopup } from '../../composables/dashboard/media'
@@ -69,6 +69,8 @@ const extension = ref('')
 const isImage = ref(false)
 const upload = ref<Pick<CastedFieldType['uploads'], 'id' | 'filename' | 'directory' | 'description'>>()
 const visible = ref(false)
+
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 const TextField = textFieldComponent()
 

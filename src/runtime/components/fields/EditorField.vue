@@ -314,6 +314,7 @@ import { prefixPrimaryLanguage, primaryLanguage, type PublicPagesOptions, type S
 import {
   buttonGroupFieldComponent,
   checkboxFieldComponent,
+  dashboardMiscComponent,
   linkFieldComponent,
   textFieldComponent,
 } from '#pruvious/dashboard'
@@ -399,6 +400,8 @@ const dashboard = usePruviousDashboard()
 
 const ButtonGroupField = buttonGroupFieldComponent()
 const CheckboxField = checkboxFieldComponent()
+const PruviousInputError = dashboardMiscComponent.InputError()
+const PruviousPopup = dashboardMiscComponent.Popup()
 const TextField = textFieldComponent()
 const LinkField = linkFieldComponent()
 

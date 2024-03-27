@@ -66,7 +66,7 @@
         </button>
       </form>
 
-      <LazyPruviousLegalLinks class="mt-4" />
+      <PruviousLegalLinks class="mt-4" />
     </div>
   </div>
 
@@ -75,7 +75,7 @@
 
 <script lang="ts" setup>
 import { ref } from '#imports'
-import { dashboardLoginLogoComponent, textFieldComponent } from '#pruvious/dashboard'
+import { dashboardLoginLogoComponent, dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import '../../assets/style.css'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { setToken } from '../../composables/token'
@@ -85,14 +85,16 @@ import { isObject } from '../../utils/object'
 
 const dashboard = usePruviousDashboard()
 
-const LoginLogo = dashboardLoginLogoComponent()
-const TextField = textFieldComponent()
-
 const firstName = ref<string>('')
 const lastName = ref<string>('')
 const email = ref<string>('')
 const password = ref<string>('')
 const errors = ref<Record<string, string>>({})
+
+const LoginLogo = dashboardLoginLogoComponent()
+const PruviousGlobals = dashboardMiscComponent.Globals()
+const PruviousLegalLinks = dashboardMiscComponent.LegalLinks()
+const TextField = textFieldComponent()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

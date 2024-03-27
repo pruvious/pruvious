@@ -33,6 +33,7 @@
 
 <script lang="ts" setup>
 import { ref, useRuntimeConfig, watch } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
 import { pruviousToasterShow } from '../../composables/dashboard/toaster'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -64,6 +65,8 @@ const runtimeConfig = useRuntimeConfig()
 const translations = ref<{ label: string; id: number }[]>([])
 
 const collection = dashboard.value.collections[dashboard.value.collection!]
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

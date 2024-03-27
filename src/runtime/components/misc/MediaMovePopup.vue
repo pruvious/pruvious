@@ -28,6 +28,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import type { HotkeyAction } from '../../composables/dashboard/hotkeys'
 import { useMediaDirectories, type MediaMoveTargetDirectory } from '../../composables/dashboard/media'
 import { pruviousToasterShow } from '../../composables/dashboard/toaster'
@@ -57,6 +58,9 @@ const emit = defineEmits<{
 const mediaDirectories = useMediaDirectories()
 
 const tree = ref<MediaMoveTargetDirectory[]>([])
+
+const PruviousMediaMovePopupItem = dashboardMiscComponent.MediaMovePopupItem()
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

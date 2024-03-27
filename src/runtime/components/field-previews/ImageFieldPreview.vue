@@ -22,6 +22,7 @@
 <script lang="ts" setup>
 import { ref, useRuntimeConfig, watch, type PropType } from '#imports'
 import { imageTypes, type CastedFieldType } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import backgroundImage from '../../assets/image-background.png'
 import type { MediaUpload } from '../../composables/dashboard/media'
 import { pruviousFetch } from '../../utils/fetch'
@@ -58,6 +59,9 @@ const runtimeConfig = useRuntimeConfig()
 
 const isLoading = ref(false)
 const upload = ref<MediaUpload | null>(null)
+
+const PruviousImagePreview = dashboardMiscComponent.ImagePreview()
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 watch(
   () => props.value,

@@ -39,6 +39,7 @@
 
 <script lang="ts" setup>
 import type { StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
 
@@ -101,6 +102,8 @@ const emit = defineEmits<{
 
 const id = pruviousUnique('checkbox-field')
 const name = props.options.name || pruviousUnique(props.fieldKey || 'checkbox-field')
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 </script>

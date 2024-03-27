@@ -66,7 +66,7 @@
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
 import { type Field, type FieldLayout } from '#pruvious'
-import { fields } from '#pruvious/dashboard'
+import { dashboardMiscComponent, fields } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import type { History } from '../../utils/dashboard/history'
 
@@ -141,6 +141,8 @@ const Field = Object.fromEntries(
 
 const activeTab = ref<number>(0)
 const tabErrors = ref<number[]>([])
+
+const PruviousFieldLayout = dashboardMiscComponent.FieldLayout()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

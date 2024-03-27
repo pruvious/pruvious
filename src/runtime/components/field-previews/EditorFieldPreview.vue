@@ -10,6 +10,7 @@
 
 <script lang="ts" setup>
 import { type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import DOMPurify from 'dompurify'
 import { isString } from '../../utils/string'
 
@@ -40,4 +41,6 @@ defineProps({
 defineEmits<{
   refresh: []
 }>()
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 </script>

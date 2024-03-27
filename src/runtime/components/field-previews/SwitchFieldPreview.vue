@@ -11,6 +11,7 @@
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
 import type { FieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 
 const props = defineProps({
@@ -42,6 +43,8 @@ defineEmits<{
 }>()
 
 const displayed = ref('')
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 watch(
   () => props.value,

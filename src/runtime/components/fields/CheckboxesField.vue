@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import type { StandardFieldOptions } from '#pruvious'
-import { checkboxFieldComponent } from '#pruvious/dashboard'
+import { checkboxFieldComponent, dashboardMiscComponent } from '#pruvious/dashboard'
 import type { UseSortableReturn } from '@vueuse/integrations/useSortable'
 import { moveArrayElement, useSortable } from '@vueuse/integrations/useSortable'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -101,11 +101,12 @@ const emit = defineEmits<{
   'updateChoices': [Record<string, string>]
 }>()
 
-const CheckboxField = checkboxFieldComponent()
-
 const choices = ref<Choice[]>([])
 const containerEl = ref<HTMLElement>()
 const name = props.options.name || pruviousUnique(props.fieldKey || 'checkboxes-field')
+
+const CheckboxField = checkboxFieldComponent()
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 let sortableReturn: UseSortableReturn | undefined
 

@@ -160,6 +160,7 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, ref, watch, type PropType } from '#imports'
 import type { BlockName, CastedBlockData } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { nanoid } from 'nanoid'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -236,6 +237,8 @@ const slotNames = Object.keys(dashboard.value.blocks[props.blockData.name].slots
 const sortableGroups = ref<string[]>([])
 const sortableEls = ref<HTMLElement[]>([])
 const allDisabled = computed(() => sortableGroups.value.every((group) => group !== 'blocks'))
+
+const PruviousBlockTreeItem = dashboardMiscComponent.BlockTreeItem()
 
 onMounted(() => {
   for (const [i, el] of sortableEls.value.entries()) {

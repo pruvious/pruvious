@@ -95,6 +95,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import { type StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import 'vue-slider-component/theme/antd.css'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
@@ -154,6 +155,8 @@ const name = [
   ),
 ]
 const values = ref<[string, string]>(['', ''])
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

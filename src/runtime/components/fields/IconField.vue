@@ -95,7 +95,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import { icons, type Icon, type StandardFieldOptions } from '#pruvious'
-import { textFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import { iconImports } from '#pruvious/icons'
 import backgroundImage from '../../assets/image-background.png'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -155,6 +155,9 @@ const iconComponents = Object.fromEntries(Object.entries(iconImports).map(([name
 const popupTitle = ref('')
 const popupVisible = ref(false)
 const search = ref('')
+
+const PruviousInputError = dashboardMiscComponent.InputError()
+const PruviousPopup = dashboardMiscComponent.Popup()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

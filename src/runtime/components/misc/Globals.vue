@@ -7,5 +7,8 @@
 </template>
 
 <script lang="ts" setup>
-import { dashboardHeadComponent } from '#pruvious/dashboard'
+import { dashboardHeadComponent, dashboardMiscComponent } from '#pruvious/dashboard'
+
+const PruviousLoadingIndicator = dashboardMiscComponent.LoadingIndicator()
+const PruviousToaster = dashboardMiscComponent.Toaster()
 </script>

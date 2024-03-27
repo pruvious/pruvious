@@ -143,7 +143,7 @@
 <script lang="ts" setup>
 import { nextTick, ref, useRuntimeConfig, watch } from '#imports'
 import type { CastedFieldType } from '#pruvious'
-import { textFieldComponent } from '#pruvious/dashboard'
+import { dashboardMiscComponent, textFieldComponent } from '#pruvious/dashboard'
 import { debounce } from 'perfect-debounce'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
 import { usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -179,6 +179,10 @@ const mediaLibraryPopup = useMediaLibraryPopup()
 const runtimeConfig = useRuntimeConfig()
 const user = useUser()
 
+const PruviousMediaBreadcrumbs = dashboardMiscComponent.MediaBreadcrumbs()
+const PruviousMediaLibrary = dashboardMiscComponent.MediaLibrary()
+const PruviousMediaMovePopup = dashboardMiscComponent.MediaMovePopup()
+const PruviousPopup = dashboardMiscComponent.Popup()
 const TextField = textFieldComponent()
 
 const allowedTypes = ref<Record<string, true>>()

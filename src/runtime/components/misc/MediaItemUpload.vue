@@ -164,7 +164,7 @@
 <script lang="ts" setup>
 import { computed, useRuntimeConfig, type PropType } from '#imports'
 import type { CastedFieldType } from '#pruvious'
-import { checkboxFieldComponent } from '#pruvious/dashboard'
+import { checkboxFieldComponent, dashboardMiscComponent } from '#pruvious/dashboard'
 import backgroundImage from '../../assets/image-background.png'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
 import {
@@ -226,8 +226,6 @@ const isMoving = useIsMoving()
 const mediaUpdated = useMediaUpdated()
 const runtimeConfig = useRuntimeConfig()
 
-const CheckboxField = checkboxFieldComponent()
-
 const meetsRequirements = computed(() => {
   if (props.allowedTypes && !props.allowedTypes[props.upload.type] && !props.allowedTypes[props.upload.extension]) {
     return false
@@ -241,6 +239,9 @@ const meetsRequirements = computed(() => {
 
   return true
 })
+
+const CheckboxField = checkboxFieldComponent()
+const PruviousImagePreview = dashboardMiscComponent.ImagePreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

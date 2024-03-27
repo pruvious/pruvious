@@ -58,6 +58,7 @@
 <script lang="ts" setup>
 import { ref, watch } from '#imports'
 import type { StandardFieldOptions } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { pruviousUnique } from '../../composables/unique'
 import { next, prev } from '../../utils/array'
@@ -107,6 +108,8 @@ const containerEl = ref<HTMLDivElement>()
 const id = pruviousUnique('button-group-field')
 const labelHovered = ref<boolean>(false)
 const name = props.options.name || pruviousUnique(props.fieldKey || 'button-group-field')
+
+const PruviousInputError = dashboardMiscComponent.InputError()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

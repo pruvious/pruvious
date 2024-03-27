@@ -22,6 +22,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, type PropType } from '#imports'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import type { Choice } from '../fields/SelectField.vue'
 
@@ -54,6 +55,8 @@ defineEmits<{
 }>()
 
 const chips = ref<Choice[]>([])
+
+const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

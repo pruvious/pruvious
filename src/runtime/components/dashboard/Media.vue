@@ -135,6 +135,7 @@
 <script lang="ts" setup>
 import { ref, useHead, useRoute, useRuntimeConfig, watch } from '#imports'
 import { type CastedFieldType } from '#pruvious'
+import { dashboardMiscComponent } from '#pruvious/dashboard'
 import { stringifyQuery } from '#vue-router'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -181,6 +182,13 @@ const canDeleteMany =
 const canUpdate =
   dashboard.value.collections.uploads.apiRoutes.update &&
   (user.value?.isAdmin || userCapabilities['collection-uploads-update'])
+
+const PruviousBase = dashboardMiscComponent.Base()
+const PruviousFilterPopup = dashboardMiscComponent.FilterPopup()
+const PruviousMediaBreadcrumbs = dashboardMiscComponent.MediaBreadcrumbs()
+const PruviousMediaLibrary = dashboardMiscComponent.MediaLibrary()
+const PruviousMediaMovePopup = dashboardMiscComponent.MediaMovePopup()
+const PruviousSearchMedia = dashboardMiscComponent.SearchMedia()
 
 await loadTranslatableStrings('pruvious-dashboard')
 

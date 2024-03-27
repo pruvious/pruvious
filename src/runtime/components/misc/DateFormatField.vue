@@ -10,6 +10,8 @@
 </template>
 
 <script lang="ts" setup>
+import { dashboardMiscComponent } from '#pruvious/dashboard'
+
 defineProps<{
   record: Record<string, any>
   errors: Record<string, string>
@@ -20,4 +22,6 @@ defineProps<{
 defineEmits<{
   'update:record': [Record<string, any>]
 }>()
+
+const PruviousDateTimeFormatField = dashboardMiscComponent.DateTimeFormatField()
 </script>
