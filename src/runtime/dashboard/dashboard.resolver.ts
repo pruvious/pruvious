@@ -1,9 +1,9 @@
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
 import { resolveAppPath } from '../instances/path'
+import { getModuleOption } from '../instances/state'
 import { isUndefined } from '../utils/common'
 import { walkDir } from '../utils/fs'
 import { validateDefaultExport } from '../utils/validation'
@@ -18,7 +18,6 @@ export interface ResolvedDashboardPage {
 const cachedDashboardPages: Record<string, any> = {}
 
 export function resolveDashboardPages(): { records: Record<string, ResolvedDashboardPage>; errors: number } {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedDashboardPage> = {}
   const fromApp = resolveAppPath('./dashboard')
 
@@ -30,9 +29,9 @@ export function resolveDashboardPages(): { records: Record<string, ResolvedDashb
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'dashboard'))) {
-      for (const { fullPath } of walkDir(resolve(layer.cwd, 'dashboard'), {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'dashboard'))) {
+      for (const { fullPath } of walkDir(resolve(layer, 'dashboard'), {
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {

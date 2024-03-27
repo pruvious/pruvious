@@ -5,7 +5,7 @@ import {
   type ResolvedFieldPopulation,
 } from '../fields/field.definition'
 import type { ResolvedField } from '../fields/field.resolver'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveAppPath, resolveLayerPath, resolveModulePath } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { isArray, toArray } from '../utils/array'
 import { CodeGenerator } from '../utils/code-generator'
@@ -646,7 +646,7 @@ function extractCustomFieldLayoutComponents(
       if (componentPath?.startsWith('~')) {
         components.push({ componentPath: item, componentImport: resolveModulePath(componentPath.replace('~', '')) })
       } else if (componentPath) {
-        components.push({ componentPath: item, componentImport: resolveAppPath(componentPath) })
+        components.push({ componentPath: item, componentImport: resolveLayerPath(componentPath) })
       }
     } else if (isArray(item)) {
       components.push(...extractCustomFieldLayoutComponents(item))

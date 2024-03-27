@@ -1,4 +1,3 @@
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
@@ -19,7 +18,6 @@ export interface ResolvedJob {
 const cachedJobs: Record<string, any> = {}
 
 export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: number } {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedJob> = {}
   const fromModule = resolveModulePath('./runtime/jobs/standard')
   const fromApp = resolveAppPath('./jobs')
@@ -39,9 +37,9 @@ export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: n
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'jobs'))) {
-      for (const { fullPath } of walkDir(resolve(layer.cwd, 'jobs'), {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'jobs'))) {
+      for (const { fullPath } of walkDir(resolve(layer, 'jobs'), {
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {

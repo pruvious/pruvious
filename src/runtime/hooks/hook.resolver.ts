@@ -1,4 +1,3 @@
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { resolve, sep } from 'path'
 import { evaluateModule } from '../instances/evaluator'
@@ -20,7 +19,6 @@ export interface ResolvedHook {
 const cachedHooks: Record<string, any> = {}
 
 export function resolveHooks(): { records: Record<string, ResolvedHook>; errors: number } {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedHook> = {}
   const fromModule = resolveModulePath('./runtime/hooks/standard')
   const fromApp = resolveAppPath('./hooks')
@@ -36,9 +34,9 @@ export function resolveHooks(): { records: Record<string, ResolvedHook>; errors:
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1).reverse()) {
-    if (fs.existsSync(resolve(layer.cwd, 'hooks'))) {
-      for (const { fullPath } of walkDir(resolve(layer.cwd, 'hooks'), {
+  for (const layer of getModuleOption('layers').slice(1).reverse()) {
+    if (fs.existsSync(resolve(layer, 'hooks'))) {
+      for (const { fullPath } of walkDir(resolve(layer, 'hooks'), {
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {

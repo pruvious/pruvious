@@ -1,5 +1,4 @@
 import babelGenerate from '@babel/generator'
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { dirname, resolve, sep } from 'path'
 import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
@@ -31,7 +30,6 @@ export async function resolveBlocks(fields: Record<string, ResolvedField>): Prom
   records: Record<string, ResolvedBlock>
   errors: number
 }> {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedBlock> = {}
   const fromApp = resolveAppPath('./blocks')
 
@@ -43,9 +41,9 @@ export async function resolveBlocks(fields: Record<string, ResolvedField>): Prom
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'blocks'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer.cwd, 'blocks'), { endsWith: '.vue' })) {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'blocks'))) {
+      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'blocks'), { endsWith: '.vue' })) {
         errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
       }
     }

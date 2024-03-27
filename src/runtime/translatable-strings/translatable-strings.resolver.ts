@@ -1,4 +1,3 @@
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
@@ -23,7 +22,6 @@ export interface ResolvedTranslatableStrings {
 const cachedTranslatableStrings: Record<string, any> = {}
 
 export function resolveTranslatableStrings(): { records: Record<string, ResolvedTranslatableStrings>; errors: number } {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedTranslatableStrings> = {}
   const fromModule = resolveModulePath('./runtime/translatable-strings/standard')
   const fromApp = resolveAppPath('./translatable-strings')
@@ -43,9 +41,9 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'translatable-strings'))) {
-      for (const { fullPath } of walkDir(resolve(layer.cwd, 'translatable-strings'), {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'translatable-strings'))) {
+      for (const { fullPath } of walkDir(resolve(layer, 'translatable-strings'), {
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {

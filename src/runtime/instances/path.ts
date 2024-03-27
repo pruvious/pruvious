@@ -1,6 +1,7 @@
 import { type Resolver } from '@nuxt/kit'
 import { existsSync } from 'fs'
-import { relative, resolve } from 'path'
+import { join, relative, resolve } from 'path'
+import { getModuleOption } from './state'
 
 let moduleResolver: Resolver | undefined
 let rootDir: string = ''
@@ -12,6 +13,20 @@ export function resolveAppPath(...path: string[]): string {
 export function resolveRelativeAppPath(...path: string[]): string {
   const relativePath = relative(process.cwd(), resolveAppPath(...path))
   return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+}
+
+export function resolveLayerPath(...path: string[]): string {
+  const joined = join(...path)
+
+  for (const layer of getModuleOption('layers')) {
+    const resolved = resolve(layer, joined)
+
+    if (existsSync(resolved)) {
+      return resolved
+    }
+  }
+
+  throw new Error(`Unable to resolve path ${joined.startsWith('.') ? joined : `./${joined}`}`)
 }
 
 export function resolveModulePath(...path: string[]): string {

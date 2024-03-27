@@ -1,10 +1,10 @@
 import babelGenerate from '@babel/generator'
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { dirname, resolve, sep } from 'path'
 import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
 import { queueError } from '../instances/logger'
 import { resolveAppPath } from '../instances/path'
+import { getModuleOption } from '../instances/state'
 import { uniqueArray } from '../utils/array'
 import { CodeGenerator } from '../utils/code-generator'
 import { relativeImport, walkDir } from '../utils/fs'
@@ -27,7 +27,6 @@ export async function resolveLayouts(): Promise<{
   records: Record<string, ResolvedLayout>
   errors: number
 }> {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedLayout> = {}
   const fromApp = resolveAppPath('./layouts')
 
@@ -39,9 +38,9 @@ export async function resolveLayouts(): Promise<{
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'layouts'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer.cwd, 'layouts'), {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'layouts'))) {
+      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'layouts'), {
         endsWith: '.vue',
       })) {
         errors += await resolveLayout(fullPath, relativePath, records, true)

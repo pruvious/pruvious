@@ -9,11 +9,12 @@ import {
   initModulePathResolver,
   initRootDir,
   resolveAppPath,
+  resolveLayerPath,
   resolveModulePath,
   resolveRelativeAppPath,
   resolveRelativeModulePath,
 } from './runtime/instances/path'
-import { cacheModuleOptions, getModuleOption, getModuleOptions } from './runtime/instances/state'
+import { cacheLayerPaths, cacheModuleOptions, getModuleOption, getModuleOptions } from './runtime/instances/state'
 import { boot, createComponentDirectories, validateLanguageOptions, watchPruviousFiles } from './runtime/main'
 import type { ModuleOptions } from './runtime/module-types'
 import { parse } from './runtime/utils/bytes'
@@ -222,18 +223,19 @@ export default defineNuxtModule<ModuleOptions>({
 
     initModulePathResolver(createResolver(import.meta.url))
     initRootDir(nuxt.options.rootDir)
+    cacheLayerPaths(nuxt.options._layers.map(({ cwd, config }) => path.resolve(cwd, config.rootDir)))
     fs.emptyDirSync(resolveAppPath('./.pruvious'))
 
     for (const [name, componentPath] of Object.entries(options.dashboard.baseComponents!)) {
       if (name === 'misc') {
         for (const [miscName, miscComponentPath] of Object.entries(componentPath as any)) {
           ;(options.dashboard.baseComponents!.misc as any)[miscName] = miscComponentPath
-            ? resolveRelativeAppPath(miscComponentPath as string)
+            ? resolveLayerPath(miscComponentPath as string)
             : resolveRelativeModulePath('./runtime/components/misc', `${miscName}.vue`)
         }
       } else {
         ;(options.dashboard.baseComponents! as any)[name] = componentPath
-          ? resolveRelativeAppPath(componentPath as string)
+          ? resolveLayerPath(componentPath as string)
           : resolveRelativeModulePath('./runtime/components/dashboard', `${pascalCase(name)}.vue`)
       }
     }
@@ -479,9 +481,9 @@ export default defineNuxtModule<ModuleOptions>({
         { path: resolveAppPath('./blocks') },
       )
 
-      for (const layer of nuxt.options._layers.slice(1)) {
-        if (fs.existsSync(path.resolve(layer.cwd, 'blocks'))) {
-          dirs.unshift({ path: path.resolve(layer.cwd, 'blocks') })
+      for (const layer of moduleOptions.layers) {
+        if (fs.existsSync(path.resolve(layer, 'blocks'))) {
+          dirs.unshift({ path: path.resolve(layer, 'blocks') })
         }
       }
     })

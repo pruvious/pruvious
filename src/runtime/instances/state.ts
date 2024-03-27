@@ -25,6 +25,7 @@ type OptionName = Pick<
   | 'uploads'
 > & {
   baseUrl: string
+  layers: string[]
   uploadsDir: string
 }
 
@@ -43,6 +44,7 @@ const moduleOptions: Record<keyof OptionName, any> = {
   jobs: {},
   jwt: {},
   language: {},
+  layers: [],
   migration: {},
   redis: false,
   singleCollectionsTable: '',
@@ -94,6 +96,10 @@ export function cacheModuleOptions(runtimeConfig: RuntimeConfig) {
 
     optionsInitialized = true
   }
+}
+
+export function cacheLayerPaths(layers: string[]) {
+  moduleOptions.layers = layers
 }
 
 export function getModuleOption<T extends keyof OptionName>(option: T): Required<OptionName[T]> {

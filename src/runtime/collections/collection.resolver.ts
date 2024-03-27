@@ -1,5 +1,4 @@
 import type { CollectionField } from '#pruvious'
-import { useNuxt } from '@nuxt/kit'
 import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
@@ -24,7 +23,6 @@ export interface ResolvedCollection {
 const cachedCollections: Record<string, any> = {}
 
 export function resolveCollections(): { records: Record<string, ResolvedCollection>; errors: number } {
-  const nuxt = useNuxt()
   const records: Record<string, ResolvedCollection> = {}
   const fromModule = resolveModulePath('./runtime/collections/standard')
   const fromApp = resolveAppPath('./collections')
@@ -44,9 +42,9 @@ export function resolveCollections(): { records: Record<string, ResolvedCollecti
     }
   }
 
-  for (const layer of nuxt.options._layers.slice(1)) {
-    if (fs.existsSync(resolve(layer.cwd, 'collections'))) {
-      for (const { fullPath } of walkDir(resolve(layer.cwd, 'collections'), {
+  for (const layer of getModuleOption('layers').slice(1)) {
+    if (fs.existsSync(resolve(layer, 'collections'))) {
+      for (const { fullPath } of walkDir(resolve(layer, 'collections'), {
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {
