@@ -12,11 +12,5 @@ export default defineNuxtConfig({
     jwt: {
       secretKey: 'xxx',
     },
-    language: {
-      supported: [
-        { name: 'English', code: 'en' },
-        { name: 'Deutsch', code: 'de' },
-      ],
-    },
   },
 })
