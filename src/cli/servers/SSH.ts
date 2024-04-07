@@ -611,6 +611,7 @@ server {
 
 ###   location /${uploadsUrlPrefix} {
 ###     alias /home/pruvious/sites/{{ domainName }}/.uploads;
+###     add_header Cache-Control "public, max-age=31536000";
 ###   }
 
 ###   ssl_certificate /etc/letsencrypt/live/{{ domainName }}/fullchain.pem;
