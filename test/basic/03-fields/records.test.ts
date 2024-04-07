@@ -38,7 +38,7 @@ describe('records field', () => {
       {
         method: 'post',
         body: {
-          users: [userId, userId],
+          users: [1, userId, userId],
           populatedUsers: [userId.toString()],
           populatedRoles: [roleId],
           requiredUsers: [userId],
@@ -49,7 +49,7 @@ describe('records field', () => {
 
     expect(response).toEqual({
       id: expect.any(Number),
-      users: [userId],
+      users: [1, userId],
       roles: [],
       populatedUsers: [userId],
       populatedRoles: [roleId],
@@ -66,7 +66,7 @@ describe('records field', () => {
     )
 
     expect(response).toEqual({
-      users: [{ id: userId }],
+      users: [{ id: 1 }, { id: userId }],
       roles: [],
       populatedUsers: [
         { id: userId, role: { id: roleId, name: 'records-field', capabilities: ['collection-roles-create'] } },
@@ -120,6 +120,29 @@ describe('records field', () => {
     expect(response).toEqual({ requiredUsers: 'This field is required' })
   })
 
+  it('filters with records field specific where clauses', async () => {
+    const response = await $fetch(`/api/fields/where-records?userId=${userId}`)
+
+    expect(response).toEqual({
+      whereRecordsIn1: true,
+      whereRecordsIn2: false,
+      whereRecordsNotIn1: false,
+      whereRecordsNotIn2: true,
+
+      whereRecordsInUserIdOr1: true,
+      whereRecordsInUserIdAnd1: true,
+
+      whereRecordsInUserIdOr2: true,
+      whereRecordsInUserIdAnd2: false,
+
+      whereRecordsNotInUserIdOr1: false,
+      whereRecordsNotInUserIdAnd1: false,
+
+      whereRecordsNotInUserIdOr2: true,
+      whereRecordsNotInUserIdAnd2: false,
+    })
+  })
+
   it('deletes temp user and role', async () => {
     const response1 = await $fetch(`/api/collections/roles/${roleId}`, {
       method: 'delete',
@@ -142,7 +165,7 @@ describe('records field', () => {
     )
 
     expect(response).toEqual({
-      users: [],
+      users: [{ id: 1 }],
       roles: [],
       populatedUsers: [],
       populatedRoles: [],

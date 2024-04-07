@@ -4,6 +4,7 @@ import type {
   CollectionFieldName,
   CollectionSearchStructure,
   CreateInput,
+  FieldNameByType,
   ImmutableFieldName,
   MultiCollectionName,
   PopulatedFieldType,
@@ -20,7 +21,7 @@ import type { WhereOptions as SequelizeWhereOptions } from 'sequelize'
 import { Op, Sequelize } from 'sequelize'
 import { cache } from '../instances/cache'
 import { db, opMap, opMapSqlite } from '../instances/database'
-import { clearArray, isArray, sortNaturalByProp, uniqueArray } from '../utils/array'
+import { clearArray, isArray, sortNaturalByProp, toArray, uniqueArray } from '../utils/array'
 import { isDefined, isNull, isUndefined } from '../utils/common'
 import { getDatabaseDialect } from '../utils/database'
 import { isFunction } from '../utils/function'
@@ -65,6 +66,8 @@ export type FilterMethod =
   | 'whereNotBetween'
   | 'whereIn'
   | 'whereNotIn'
+  | 'whereRecordsIn'
+  | 'whereRecordsNotIn'
   | 'whereLike'
   | 'whereNotLike'
   | 'whereILike'
@@ -864,6 +867,100 @@ export class QueryBuilder<
     values: SerializedFieldType[CollectionName][T][],
   ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method> {
     return this.where(field, 'notIn', values)
+  }
+
+  /**
+   * Specify a filtering condition for a specific `records` field in the database query.
+   *
+   * @example
+   * ```typescript
+   * // Select products with `tags` that contain the record with ID 1
+   * query('products').whereRecordsIn('tags', 1)
+   * ```
+   */
+  whereRecordsIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    id: number,
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method>
+
+  /**
+   * Specify a filtering condition for a specific `records` field in the database query.
+   *
+   * @example
+   * ```typescript
+   * // Select products with `tags` containing records of IDs 1, 2, or 3
+   * query('products').whereRecordsIn('tags', [1, 2, 3])
+   * query('products').whereRecordsIn('tags', [1, 2, 3], 'some')
+   *
+   * // Select products with `tags` containing all records of IDs 1, 2, and 3
+   * query('products').whereRecordsIn('tags', [1, 2, 3], 'every')
+   * ```
+   */
+  whereRecordsIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    id: number[],
+    logic?: 'every' | 'some',
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method>
+
+  whereRecordsIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    ids: number | number[],
+    logic: 'every' | 'some' = 'some',
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method> {
+    const subQueries: any[] = []
+
+    for (const id of toArray(ids)) {
+      subQueries.push((subQuery: any) => subQuery.where(field, 'like', `%"${id}"%`))
+    }
+
+    return subQueries.length ? this[logic](subQueries[0], ...subQueries.slice(1)) : this
+  }
+
+  /**
+   * Specify a filtering condition for a specific `records` field in the database query.
+   *
+   * @example
+   * ```typescript
+   * // Select products with `tags` that do not contain the record with ID 4
+   * query('products').whereRecordsNotIn('tags', 4)
+   * ```
+   */
+  whereRecordsNotIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    id: number,
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method>
+
+  /**
+   * Specify a filtering condition for a specific `records` field in the database query.
+   *
+   * @example
+   * ```typescript
+   * // Select products with tags not containing any of the records with IDs 4, 5, or 6
+   * query('products').whereRecordsNotIn('tags', [4, 5, 6])
+   * query('products').whereRecordsNotIn('tags', [4, 5, 6], 'some')
+   *
+   * // Select products with `tags` not containing records of IDs 4, 5, and 6
+   * query('products').whereRecordsNotIn('tags', [4, 5, 6], 'every')
+   * ```
+   */
+  whereRecordsNotIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    id: number[],
+    logic?: 'every' | 'some',
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method>
+
+  whereRecordsNotIn<T extends FieldNameByType[CollectionName]['records']>(
+    field: T,
+    ids: number | number[],
+    logic: 'every' | 'some' = 'some',
+  ): Pick<QueryBuilder<CollectionName, ReturnableFieldName, ReturnedFieldType, Method>, Method> {
+    const subQueries: any[] = []
+
+    for (const id of toArray(ids)) {
+      subQueries.push((subQuery: any) => subQuery.where(field, 'notLike', `%"${id}"%`))
+    }
+
+    return subQueries.length ? this[logic](subQueries[0], ...subQueries.slice(1)) : this
   }
 
   /**

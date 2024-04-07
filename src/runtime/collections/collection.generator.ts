@@ -454,6 +454,28 @@ export function generateCollections(
 
   /*
   |--------------------------------------------------------------------------
+  | Field name by type
+  |--------------------------------------------------------------------------
+  |
+  */
+  ts.newDecl('export interface FieldNameByType {')
+  for (const { definition } of collectionsArray) {
+    ts.newLine(`'${definition.name}': {`)
+    const fieldsByType: Record<string, string[]> = Object.fromEntries(
+      Object.values(fields).map(({ definition }) => [definition.name, []]),
+    )
+    for (const [fieldName, { type }] of Object.entries(definition.fields)) {
+      fieldsByType[type].push(fieldName)
+    }
+    for (const [type, fieldNames] of Object.entries(fieldsByType)) {
+      ts.newLine(`'${type}': ${unifyLiteralStrings(...fieldNames)},`)
+    }
+    ts.newLine(`}`)
+  }
+  ts.newLine('}')
+
+  /*
+  |--------------------------------------------------------------------------
   | CreateInput
   |--------------------------------------------------------------------------
   |
