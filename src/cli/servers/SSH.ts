@@ -590,7 +590,7 @@ server {
       : '') +
     `
 ###   gzip on;
-###   gzip_types text/plain application/xml text/css application/javascript;
+###   gzip_types text/css text/plain text/javascript application/javascript application/json application/x-javascript application/xml application/xml+rss application/xhtml+xml application/x-font-ttf application/x-font-opentype application/vnd.ms-fontobject image/svg+xml image/x-icon application/rss+xml application/atom_xml;
 ###   gzip_min_length 1000;
 
 ###   location / {
