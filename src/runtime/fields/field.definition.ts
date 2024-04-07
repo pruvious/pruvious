@@ -290,6 +290,30 @@ export interface FieldDefinition {
   extractKeywords?: (context: ExtractKeywordsContext) => string | Promise<string>
 
   /**
+   * A custom function that serializes the field value for storage in the database.
+   * It accepts a `value` argument containing the field value.
+   *
+   * By default, the field value is serialized using `JSON.stringify` if it's an object.
+   *
+   * Note: This is only applicable to top-level fields of multi-entry collections.
+   *
+   * @default null
+   */
+  serialize?: ((value: any) => any) | null
+
+  /**
+   * A custom function that deserializes the field value from the database.
+   * It accepts a `value` argument containing the serialized field value.
+   *
+   * By default, the field value is deserialized based on it's JavaScript type.
+   *
+   * Note: This is only applicable to top-level fields of multi-entry collections.
+   *
+   * @default null
+   */
+  deserialize?: ((value: any) => any) | null
+
+  /**
    * Specifies the input settings for this field when used in the `create`, `createMany`, and `update` methods of the query builder.
    *
    * By default, the field will be marked as optional, with the casted TypeScript type, and wi
@@ -1195,6 +1219,8 @@ export function defineField(definition: FieldDefinition): ResolvedFieldDefinitio
     extractKeywords:
       definition.extractKeywords ||
       (({ value }) => (isObject(value) ? JSON.stringify(value) : isNull(value) ? '' : String(value))),
+    serialize: definition.serialize ?? null,
+    deserialize: definition.deserialize ?? null,
     inputMeta: {
       type:
         definition.inputMeta?.type ||

@@ -1943,7 +1943,9 @@ export class QueryBuilder<
     }
 
     try {
-      const results: any[] = await (await db()).model(this.table).bulkCreate(sanitized.map(this.serializeInput))
+      const results: any[] = await (await db())
+        .model(this.table)
+        .bulkCreate(sanitized.map((input) => this.serializeInput(input)))
       const records = results.map(({ dataValues }) => dataValues)
       const buildSearchKeywords: Promise<void>[] = []
 
@@ -2165,7 +2167,14 @@ export class QueryBuilder<
     const serialized: Record<string, any> = {}
 
     for (const [fieldName, value] of Object.entries(input)) {
-      serialized[snakeCase(fieldName)] = value && typeof value === 'object' ? JSON.stringify(value) : value
+      const declaration = collections[this.collection].fields[fieldName]
+      const definition = declaration ? fields[declaration.type] : null
+
+      if (definition?.serialize) {
+        serialized[snakeCase(fieldName)] = definition.serialize(value)
+      } else {
+        serialized[snakeCase(fieldName)] = value && typeof value === 'object' ? JSON.stringify(value) : value
+      }
     }
 
     return serialized
@@ -2272,7 +2281,13 @@ export class QueryBuilder<
       const definition = declaration ? fields[declaration.type] : null
 
       if (definition) {
-        if (definition.type.js === 'boolean' && (record[fieldName] === 0 || record[fieldName] === 1)) {
+        if (definition.deserialize) {
+          try {
+            record[fieldName] = definition.deserialize(record[fieldName])
+          } catch {
+            record[fieldName] = null
+          }
+        } else if (definition.type.js === 'boolean' && (record[fieldName] === 0 || record[fieldName] === 1)) {
           record[fieldName] = !!record[fieldName]
         } else if (definition.type.js === 'number' && isString(record[fieldName])) {
           record[fieldName] = +record[fieldName]
