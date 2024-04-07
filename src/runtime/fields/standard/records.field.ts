@@ -241,6 +241,8 @@ export default defineField({
 
     return isObject(value) ? JSON.stringify(value) : isNull(value) ? '' : String(value)
   },
+  serialize: (value) => JSON.stringify(isArray(value) ? value.map(String) : []),
+  deserialize: (value) => JSON.parse(value).map(Number),
   inputMeta: {
     required: ({ options }) => !!options.required,
     codeComment: ({ options }) => options.description || '',
