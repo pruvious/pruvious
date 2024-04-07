@@ -2071,7 +2071,9 @@ export class QueryBuilder<
         setTimeout(() => Promise.all(buildSearchKeywords).then(() => this.clearCache('onCreate')))
       }
 
-      await this.clearCache('onCreate')
+      if (records.length) {
+        await this.clearCache('onCreate')
+      }
 
       return { success: true, records }
     } catch (e: any) {
@@ -2762,7 +2764,9 @@ export class QueryBuilder<
       await callback(buildSearchKeywordsRecordIds)
     }
 
-    await this.clearCache(operation === 'update' ? 'onUpdate' : 'onDelete')
+    if (records.length) {
+      await this.clearCache(operation === 'update' ? 'onUpdate' : 'onDelete')
+    }
 
     return records
   }
