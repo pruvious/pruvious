@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   },
   modules: ['pruvious'],
   pruvious: {
+    pageCache: { type: 'redis' },
     dashboard: {
       baseComponents: {
         misc: {

@@ -16,6 +16,7 @@ import type { WhereOptions as SequelizeWhereOptions } from 'sequelize'
 import { cache } from '../instances/cache'
 import { db } from '../instances/database'
 import { getModuleOption } from '../instances/state'
+import { clearPageCache } from '../plugins/page-cache'
 import { clearArray, isArray, sortNaturalByProp } from '../utils/array'
 import { isNull } from '../utils/common'
 import { isFunction } from '../utils/function'
@@ -853,6 +854,7 @@ export class SingleQueryBuilder<
 
     if (collection.clearCacheRules && collection.clearCacheRules.onUpdate !== false) {
       await (await cache())?.flushDb()
+      await clearPageCache()
     }
   }
 

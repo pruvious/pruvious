@@ -1055,4 +1055,40 @@ export interface ModuleOptions {
    * @default true
    */
   catchAllPages?: boolean
+
+  /**
+   * Configuration for page caching.
+   * By default, pages are cached locally in the `.cache` directory.
+   *
+   * Set to `false` to disable page caching.
+   *
+   * @default
+   * { type: 'local', path: './.cache/pages' }
+   */
+  pageCache?:
+    | {
+        /**
+         * Cache storage type.
+         *
+         * Local file system.
+         */
+        type: 'local'
+
+        /**
+         * A path, either absolute or relative, indicating the directory in the project where cached pages are stored.
+         * It could look like `'./.cache/pages'`, for instance.
+         */
+        path: string
+      }
+    | {
+        /**
+         * Cache storage type.
+         *
+         * Redis database.
+         *
+         * Note: Redis must be enabled in the `redis` option.
+         */
+        type: 'redis'
+      }
+    | false
 }

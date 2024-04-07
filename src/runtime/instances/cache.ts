@@ -10,8 +10,8 @@ let status: 'initial' | 'connecting' | 'ready' = 'initial'
  *
  * Returns `null` if the connection cannot be established.
  */
-export async function cache() {
-  if (status === 'initial') {
+export async function cache(force = false) {
+  if (status === 'initial' || (!client && force)) {
     const url = getModuleOption('redis')
 
     if (url) {

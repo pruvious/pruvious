@@ -14,6 +14,7 @@ type OptionName = Pick<
   | 'jwt'
   | 'language'
   | 'migration'
+  | 'pageCache'
   | 'redis'
   | 'singleCollectionsTable'
   | 'standardCollections'
@@ -46,6 +47,7 @@ const moduleOptions: Record<keyof OptionName, any> = {
   language: {},
   layers: [],
   migration: {},
+  pageCache: true,
   redis: false,
   singleCollectionsTable: '',
   standardCollections: {},
@@ -82,6 +84,7 @@ export function cacheModuleOptions(runtimeConfig: RuntimeConfig) {
       jwt: config.pruvious.jwt,
       language: config.public.pruvious.language as any,
       migration: config.pruvious.migration,
+      pageCache: config.pageCache,
       redis: config.pruvious.redis as any,
       singleCollectionsTable: config.pruvious.singleCollectionsTable,
       standardCollections: config.pruvious.standardCollections,

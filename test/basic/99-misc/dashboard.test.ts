@@ -8,7 +8,7 @@ describe('dashboard specific api routes', () => {
     expect(response).toEqual({
       blocks: expect.any(Object),
       collections: expect.any(Object),
-      isCacheActive: !!process.env.NUXT_PRUVIOUS_REDIS,
+      isCacheActive: true,
       legalLinks: [],
       menu: expect.any(Array),
     })

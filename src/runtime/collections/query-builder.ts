@@ -21,6 +21,7 @@ import type { WhereOptions as SequelizeWhereOptions } from 'sequelize'
 import { Op, Sequelize } from 'sequelize'
 import { cache } from '../instances/cache'
 import { db, opMap, opMapSqlite } from '../instances/database'
+import { clearPageCache } from '../plugins/page-cache'
 import { clearArray, isArray, sortNaturalByProp, toArray, uniqueArray } from '../utils/array'
 import { isDefined, isNull, isUndefined } from '../utils/common'
 import { getDatabaseDialect } from '../utils/database'
@@ -2833,6 +2834,7 @@ export class QueryBuilder<
 
     if (collection.clearCacheRules && collection.clearCacheRules[operation] !== false) {
       await (await cache())?.flushDb()
+      await clearPageCache()
     }
   }
 }

@@ -168,6 +168,7 @@ export async function generateDotPruvious(
     .newLine(
       `export { cacheModuleOptions, getModuleOption } from '${relativeDotPruviousImport('./runtime/instances/state')}'`,
     )
+    .newDecl(`export { clearPageCache } from '${relativeDotPruviousImport('./runtime/plugins/page-cache')}'`)
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/booleanish')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/default')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/sanitizers/numeric')}'`)

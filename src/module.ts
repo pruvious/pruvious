@@ -1,4 +1,11 @@
-import { addRouteMiddleware, addServerHandler, createResolver, defineNuxtModule, extendPages } from '@nuxt/kit'
+import {
+  addRouteMiddleware,
+  addServerHandler,
+  addServerPlugin,
+  createResolver,
+  defineNuxtModule,
+  extendPages,
+} from '@nuxt/kit'
 import fs from 'fs-extra'
 import { nanoid } from 'nanoid'
 import path from 'path'
@@ -135,6 +142,7 @@ export default defineNuxtModule<ModuleOptions>({
       localStorageKey: 'language',
     },
     migration: true,
+    pageCache: { type: 'local', path: './.cache/pages' },
     redis: false,
     singleCollectionsTable: 'single_collections',
     standardCollections: {
@@ -248,6 +256,7 @@ export default defineNuxtModule<ModuleOptions>({
       jwt: options.jwt,
       jobs: options.jobs,
       migration: options.migration,
+      pageCache: options.pageCache,
       redis: options.redis as any,
       singleCollectionsTable: options.singleCollectionsTable,
       standardCollections: options.standardCollections,
@@ -535,6 +544,7 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt.options.ignore.push('**/' + path.basename(moduleOptions.uploads.drive.path ?? './uploads') + '/**/*')
     }
 
+    addServerPlugin(resolveModulePath('./runtime/plugins/page-cache'))
     validateLanguageOptions()
     createComponentDirectories()
   },

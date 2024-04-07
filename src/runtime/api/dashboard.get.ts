@@ -163,7 +163,7 @@ export default defineEventHandler(async (event) => {
     collections,
     isCacheActive:
       canAccessDashboard && (event.context.auth.user?.isAdmin || userCapabilities['clear-cache'])
-        ? !!(await cache())
+        ? !!runtimeConfig.pruvious.pageCache || !!(await cache())
         : false,
     legalLinks: getModuleOption('dashboard').legalLinks,
     menu,

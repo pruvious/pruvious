@@ -258,12 +258,10 @@ interface BaseCollectionDefinition {
   cacheQueries?: number | false
 
   /**
-   * Specifies whether to clear the cache when a record is created, updated, or deleted.
+   * Specifies whether to clear the query and page cache when a record is created, updated, or deleted.
    * Set to `false` to never clear the cache.
    *
    * By default, the cache is cleared on all operations.
-   *
-   * Note: To enable this feature, you must specify the `redis` parameter in the Pruvious module options.
    */
   clearCacheRules?:
     | {

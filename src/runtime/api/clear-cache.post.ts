@@ -1,5 +1,7 @@
+import { useRuntimeConfig } from '#imports'
 import { defineEventHandler, setResponseStatus } from 'h3'
-import { cache as _cache } from '../instances/cache'
+import { cache as getRedisCache } from '../instances/cache'
+import { clearPageCache } from '../plugins/page-cache'
 import { __ } from '../utils/server/translate-string'
 import { getCapabilities } from '../utils/users'
 
@@ -14,10 +16,12 @@ export default defineEventHandler(async (event) => {
     return __(event, 'pruvious-server', 'Forbidden due to insufficient permissions')
   }
 
-  const cache = await _cache()
+  const redisCache = await getRedisCache()
+  const runtimeConfig = useRuntimeConfig()
 
-  if (cache) {
-    cache.flushDb()
+  if (redisCache || runtimeConfig.pruvious.pageCache) {
+    redisCache?.flushDb()
+    await clearPageCache()
     setResponseStatus(event, 204)
     return ''
   }
