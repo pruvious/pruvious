@@ -139,150 +139,154 @@
         </PruviousDump>
       </DevOnly>
 
-      <table v-if="table.data.value.length" class="mt-8 w-full table-fixed">
-        <thead>
-          <tr>
-            <th v-if="isSelecting" class="z-20 w-0">
-              <component
-                :indeterminate="selection.count.value > 0 && !selection.selectedAll.value"
-                :is="CheckboxField"
-                :modelValue="selection.count.value > 0"
-                :options="{}"
-                @update:modelValue="onSelectAllChange"
-              />
-            </th>
-
-            <th
-              v-for="field of filter.selectOption.value"
-              scope="col"
-              class="truncate"
-              :style="
-                table.hasDefaultColumns.value && columnWidths[field] ? { width: `${columnWidths[field]}%` } : undefined
-              "
-            >
-              <div class="flex items-center pt-px">
-                <span
-                  v-pruvious-tooltip="collection.fields[field].options.description"
-                  class="truncate"
-                  :class="{ 'cursor-help': collection.fields[field].options.description }"
-                >
-                  {{ __('pruvious-dashboard', collection.fields[field].options.label as any) }}
-                </span>
-
-                <PruviousTableSorter
-                  :defaultOrder="`${collection.dashboard.overviewTable.sort.field}:${collection.dashboard.overviewTable.sort.direction}`"
-                  :fieldDeclaration="collection.fields[field]"
-                  :fieldName="field"
-                  :table="table"
+      <div>
+        <table v-if="table.data.value.length" class="mt-8 w-full table-fixed">
+          <thead>
+            <tr>
+              <th v-if="isSelecting" class="z-20 w-0">
+                <component
+                  :indeterminate="selection.count.value > 0 && !selection.selectedAll.value"
+                  :is="CheckboxField"
+                  :modelValue="selection.count.value > 0"
+                  :options="{}"
+                  @update:modelValue="onSelectAllChange"
                 />
-              </div>
-            </th>
-          </tr>
-        </thead>
+              </th>
 
-        <tbody>
-          <tr v-for="row of table.data.value">
-            <td v-if="isSelecting" class="z-20 w-0">
-              <component
-                :is="CheckboxField"
-                :modelValue="!!selection.selected.value[row.id]"
-                :options="{}"
-                @update:modelValue="
-                  selection.selected.value[row.id] ? selection.deselect(row.id) : selection.select(row.id)
+              <th
+                v-for="field of filter.selectOption.value"
+                scope="col"
+                class="truncate"
+                :style="
+                  table.hasDefaultColumns.value && columnWidths[field]
+                    ? { width: `${columnWidths[field]}%` }
+                    : undefined
                 "
-              />
-            </td>
-
-            <td v-for="(field, i) of filter.selectOption.value">
-              <div v-if="!i" class="flex flex-col items-start gap-0.5">
-                <NuxtLink
-                  :to="`${collection.name}/${row.id}`"
-                  class="max-w-full truncate whitespace-pre-line font-medium transition hocus:text-primary-700"
-                  :class="{'text-gray-400': (row as any)[field] === '' || (row as any)[field] === null}"
-                >
-                  <span class="truncate">
-                    {{
-                      (row as any)[field] !== '' && (row as any)[field] !== null
-                        ? (row as any)[field]
-                        : __('pruvious-dashboard', collection.fields[field].additional.emptyLabel as any)
-                    }}
+              >
+                <div class="flex items-center pt-px">
+                  <span
+                    v-pruvious-tooltip="collection.fields[field].options.description"
+                    class="truncate"
+                    :class="{ 'cursor-help': collection.fields[field].options.description }"
+                  >
+                    {{ __('pruvious-dashboard', collection.fields[field].options.label as any) }}
                   </span>
-                </NuxtLink>
 
-                <div class="flex max-w-full gap-2">
-                  <NuxtLink
-                    :to="`${collection.name}/${row.id}`"
-                    class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
-                  >
-                    {{ canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View') }}
-                  </NuxtLink>
-
-                  <button
-                    v-if="collection.canDuplicate && canCreate"
-                    @click="duplicateRecord(row.id)"
-                    type="button"
-                    class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
-                  >
-                    {{ __('pruvious-dashboard', 'Duplicate') }}
-                  </button>
-
-                  <button
-                    v-if="collection.publicPages"
-                    @click="openUrl(row.id)"
-                    type="button"
-                    class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
-                  >
-                    {{ __('pruvious-dashboard', 'Open') }}
-                  </button>
-
-                  <component
-                    v-if="AdditionalCollectionOptions"
-                    :id="row.id"
-                    :is="AdditionalCollectionOptions"
+                  <PruviousTableSorter
+                    :defaultOrder="`${collection.dashboard.overviewTable.sort.field}:${collection.dashboard.overviewTable.sort.direction}`"
+                    :fieldDeclaration="collection.fields[field]"
+                    :fieldName="field"
                     :table="table"
                   />
-
-                  <button
-                    v-if="canDelete"
-                    v-pruvious-tooltip="{
-                      content:
-                        clickConfirmation?.id === `delete-record-${row.id}`
-                          ? __('pruvious-dashboard', 'Confirm to !!delete!!')
-                          : __('pruvious-dashboard', 'Delete'),
-                      showOnCreate: clickConfirmation?.id === `delete-record-${row.id}`,
-                      offset: [0, 8],
-                    }"
-                    @click="deleteRecord(row.id, $event)"
-                    type="button"
-                    class="truncate text-xs text-gray-400 transition hocus:text-red-500"
-                  >
-                    {{ __('pruvious-dashboard', 'Delete') }}
-                  </button>
                 </div>
-              </div>
+              </th>
+            </tr>
+          </thead>
 
-              <component
-                v-if="i && field !== 'translations'"
-                :canUpdate="canUpdate"
-                :is="fieldPreviewsComponents[collection.fields[field].type]"
-                :language="language"
-                :name="field"
-                :options="collection.fields[field].options"
-                :record="row"
-                :value="(row as any)[field]"
-              />
+          <tbody>
+            <tr v-for="row of table.data.value">
+              <td v-if="isSelecting" class="z-20 w-0">
+                <component
+                  :is="CheckboxField"
+                  :modelValue="!!selection.selected.value[row.id]"
+                  :options="{}"
+                  @update:modelValue="
+                    selection.selected.value[row.id] ? selection.deselect(row.id) : selection.select(row.id)
+                  "
+                />
+              </td>
 
-              <PruviousTranslationsFieldPreview
-                v-if="i && field === 'translations'"
-                :canUpdate="canUpdate"
-                :id="row.id"
-                :language="language"
-                :value="(row as any).translations"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td v-for="(field, i) of filter.selectOption.value">
+                <div v-if="!i" class="flex flex-col items-start gap-0.5">
+                  <NuxtLink
+                    :to="`${collection.name}/${row.id}`"
+                    class="max-w-full truncate whitespace-pre-line font-medium transition hocus:text-primary-700"
+                    :class="{'text-gray-400': (row as any)[field] === '' || (row as any)[field] === null}"
+                  >
+                    <span class="truncate">
+                      {{
+                        (row as any)[field] !== '' && (row as any)[field] !== null
+                          ? (row as any)[field]
+                          : __('pruvious-dashboard', collection.fields[field].additional.emptyLabel as any)
+                      }}
+                    </span>
+                  </NuxtLink>
+
+                  <div class="flex max-w-full gap-2">
+                    <NuxtLink
+                      :to="`${collection.name}/${row.id}`"
+                      class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
+                    >
+                      {{ canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View') }}
+                    </NuxtLink>
+
+                    <button
+                      v-if="collection.canDuplicate && canCreate"
+                      @click="duplicateRecord(row.id)"
+                      type="button"
+                      class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
+                    >
+                      {{ __('pruvious-dashboard', 'Duplicate') }}
+                    </button>
+
+                    <button
+                      v-if="collection.publicPages"
+                      @click="openUrl(row.id)"
+                      type="button"
+                      class="truncate text-xs text-gray-400 transition hocus:text-primary-700"
+                    >
+                      {{ __('pruvious-dashboard', 'Open') }}
+                    </button>
+
+                    <component
+                      v-if="AdditionalCollectionOptions"
+                      :id="row.id"
+                      :is="AdditionalCollectionOptions"
+                      :table="table"
+                    />
+
+                    <button
+                      v-if="canDelete"
+                      v-pruvious-tooltip="{
+                        content:
+                          clickConfirmation?.id === `delete-record-${row.id}`
+                            ? __('pruvious-dashboard', 'Confirm to !!delete!!')
+                            : __('pruvious-dashboard', 'Delete'),
+                        showOnCreate: clickConfirmation?.id === `delete-record-${row.id}`,
+                        offset: [0, 8],
+                      }"
+                      @click="deleteRecord(row.id, $event)"
+                      type="button"
+                      class="truncate text-xs text-gray-400 transition hocus:text-red-500"
+                    >
+                      {{ __('pruvious-dashboard', 'Delete') }}
+                    </button>
+                  </div>
+                </div>
+
+                <component
+                  v-if="i && field !== 'translations'"
+                  :canUpdate="canUpdate"
+                  :is="fieldPreviewsComponents[collection.fields[field].type]"
+                  :language="language"
+                  :name="field"
+                  :options="collection.fields[field].options"
+                  :record="row"
+                  :value="(row as any)[field]"
+                />
+
+                <PruviousTranslationsFieldPreview
+                  v-if="i && field === 'translations'"
+                  :canUpdate="canUpdate"
+                  :id="row.id"
+                  :language="language"
+                  :value="(row as any).translations"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <PruviousTablePagination :table="table" />
 
