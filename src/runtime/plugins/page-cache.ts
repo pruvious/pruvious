@@ -3,13 +3,14 @@ import type { useNitroApp } from '#build/types/nitro-imports'
 import { defineNitroPlugin, useRuntimeConfig, type RenderResponse } from '#imports'
 import crypto from 'crypto'
 import fs from 'fs-extra'
+import { isProduction } from 'std-env'
 import { resolveAppPath } from '../instances/path'
 import type { ModuleOptions } from '../module-types'
 
 export default defineNitroPlugin((nitroApp: ReturnType<typeof useNitroApp>) => {
   const runtimeConfig = useRuntimeConfig()
 
-  if (runtimeConfig.pruvious.pageCache) {
+  if (isProduction && runtimeConfig.pruvious.pageCache) {
     nitroApp.hooks.hook('request', async (event) => {
       const res = await getCachedResponse(event.path)
 
@@ -85,7 +86,7 @@ async function getCachedResponse(path: string): Promise<Partial<RenderResponse> 
 export async function clearPageCache() {
   const pageCache = useRuntimeConfig().pruvious.pageCache as ModuleOptions['pageCache']
 
-  if (!pageCache) {
+  if (!isProduction || !pageCache) {
     return
   } else if (pageCache.type === 'local') {
     fs.emptyDirSync(resolveAppPath(pageCache.path))

@@ -1059,8 +1059,9 @@ export interface ModuleOptions {
   /**
    * Configuration for page caching.
    * By default, pages are cached locally in the `.cache` directory.
+   * Page caching is only enabled in production environments.
    *
-   * Set to `false` to disable page caching.
+   * Set to `false` to disable this feature.
    *
    * @default
    * { type: 'local', path: './.cache/pages' }

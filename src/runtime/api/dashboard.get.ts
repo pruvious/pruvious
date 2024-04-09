@@ -4,6 +4,7 @@ import { blocks } from '#pruvious/blocks'
 import { dashboardIcons } from '#pruvious/dashboard-icons'
 import { collections as _collections, dashboardPages, fields } from '#pruvious/server'
 import { defineEventHandler } from 'h3'
+import { isProduction } from 'std-env'
 import { resolveCollectionFieldOptions } from '../collections/field-options.resolver'
 import type { BlockMeta, DashboardCollectionFields, PruviousDashboard } from '../composables/dashboard/dashboard'
 import { cache } from '../instances/cache'
@@ -163,7 +164,7 @@ export default defineEventHandler(async (event) => {
     collections,
     isCacheActive:
       canAccessDashboard && (event.context.auth.user?.isAdmin || userCapabilities['clear-cache'])
-        ? !!runtimeConfig.pruvious.pageCache || !!(await cache())
+        ? (isProduction && !!runtimeConfig.pruvious.pageCache) || !!(await cache())
         : false,
     legalLinks: getModuleOption('dashboard').legalLinks,
     menu,

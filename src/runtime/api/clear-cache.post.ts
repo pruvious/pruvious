@@ -1,5 +1,6 @@
 import { useRuntimeConfig } from '#imports'
 import { defineEventHandler, setResponseStatus } from 'h3'
+import { isProduction } from 'std-env'
 import { cache as getRedisCache } from '../instances/cache'
 import { clearPageCache } from '../plugins/page-cache'
 import { __ } from '../utils/server/translate-string'
@@ -19,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const redisCache = await getRedisCache()
   const runtimeConfig = useRuntimeConfig()
 
-  if (redisCache || runtimeConfig.pruvious.pageCache) {
+  if (redisCache || (isProduction && runtimeConfig.pruvious.pageCache)) {
     redisCache?.flushDb()
     await clearPageCache()
     setResponseStatus(event, 204)
