@@ -36,7 +36,7 @@
         @dragend="onMoveEnd"
         @dragstart="onMoveStart"
         type="button"
-        class="absolute inset-0"
+        class="absolute inset-0 w-full"
         :class="{ 'cursor-default': selection.count.value || !meetsRequirements }"
       ></button>
 
@@ -60,7 +60,7 @@
         @dblclick="open(runtimeConfig.public.pruvious.uploadsBase + upload.directory + upload.filename)"
         @dragend="onMoveEnd"
         @dragstart="onMoveStart"
-        class="absolute inset-0"
+        class="absolute inset-0 w-full"
       ></span>
 
       <div

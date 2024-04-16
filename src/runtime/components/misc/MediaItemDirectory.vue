@@ -30,7 +30,7 @@
         @dragend="onMoveEnd"
         @dragstart="onMoveStart"
         type="button"
-        class="absolute inset-0 outline-none"
+        class="absolute inset-0 w-full outline-none"
         :class="{ 'cursor-default': selection.count.value }"
       ></button>
 
