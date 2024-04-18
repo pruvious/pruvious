@@ -9,12 +9,17 @@ export default defineEventHandler(async (event) => {
     return __(event, 'pruvious-server', 'Unauthorized due to either invalid credentials or missing authentication')
   }
 
-  const currentToken = getBearerToken(event)
-  const { iat, exp } = jwt.decode(currentToken) as TokenData
-  const newToken = generateToken(event.context.auth.user.id, exp - iat)
+  try {
+    const currentToken = getBearerToken(event)
+    const { iat, exp } = jwt.decode(currentToken) as TokenData
+    const newToken = generateToken(event.context.auth.user.id, exp - iat)
 
-  await storeToken(newToken)
-  await removeToken(currentToken)
+    await storeToken(newToken)
+    await removeToken(currentToken)
 
-  return newToken
+    return newToken
+  } catch {
+    setResponseStatus(event, 400)
+    return __(event, 'pruvious-server', 'Invalid token')
+  }
 })

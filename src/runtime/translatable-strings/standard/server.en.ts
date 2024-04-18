@@ -34,6 +34,7 @@ export default defineTranslatableStrings({
     'Invalid input name': 'Invalid input name',
     'Invalid input type': 'Invalid input type',
     "Invalid '$name' unit": { pattern: "Invalid '$name' unit", input: { name: 'string' } },
+    'Invalid token': 'Invalid token',
     'Invalid URL': 'Invalid URL',
     'Invalid URL path': 'Invalid URL path',
     'Invalid user ID': 'Invalid user ID',
