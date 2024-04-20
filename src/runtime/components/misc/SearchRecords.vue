@@ -14,7 +14,7 @@
     />
 
     <NuxtLink
-      v-if="user?.isAdmin || (userCapabilities as any)[`collection-${collection.name}-create`]"
+      v-if="collection.apiRoutes.create && (user?.isAdmin || (userCapabilities as any)[`collection-${collection.name}-create`])"
       v-pruvious-tooltip="{
         content: __('pruvious-dashboard', 'Add $item', { item: collection.label.record.singular }),
       }"
