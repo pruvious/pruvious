@@ -18,7 +18,7 @@
       v-pruvious-tooltip="{
         content: __('pruvious-dashboard', 'Add $item', { item: collection.label.record.singular }),
       }"
-      :to="createPath + (language === primaryLanguage ? '' : '?language=' + language)"
+      :to="createPath + (language && language === primaryLanguage ? '' : '?language=' + language)"
       class="button button-white button-square"
     >
       <PruviousIconPlus />
