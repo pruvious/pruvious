@@ -275,6 +275,21 @@ export function getTranslationPrefix(path: string, supportedLanguages: string[])
 }
 
 /**
+ * Remove accents from a given `value`.
+ *
+ * @example
+ * ```typescript
+ * removeAccents('áéíóú') // 'aeiou'
+ * ```
+ */
+export function removeAccents(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replaceAll('ß', 'ss')
+}
+
+/**
  * Convert a `value` string to snake case.
  *
  * @example

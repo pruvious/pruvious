@@ -35,6 +35,7 @@ import {
   isUrl,
   isUrlPath,
   joinRouteParts,
+  removeAccents,
   setTranslationPrefix,
   titleCase,
   uncapitalize,
@@ -605,6 +606,21 @@ describe('string utilities', () => {
     expect(setTranslationPrefix('/en/foo', 'de', ['en', 'de'])).toBe('/de/foo')
     expect(setTranslationPrefix('/en/foo', 'en', ['en', 'de'])).toBe('/en/foo')
     expect(setTranslationPrefix('/it/foo', 'de', ['en', 'de'])).toBe('/de/it/foo')
+  })
+
+  it('removes accents', () => {
+    expect(removeAccents('föö')).toBe('foo')
+    expect(removeAccents('föö bärü')).toBe('foo baru')
+    expect(removeAccents('áéíóú')).toBe('aeiou')
+    expect(removeAccents('àèìòù')).toBe('aeiou')
+    expect(removeAccents('âêîôû')).toBe('aeiou')
+    expect(removeAccents('äëïöü')).toBe('aeiou')
+    expect(removeAccents('ćčšž')).toBe('ccsz')
+    expect(removeAccents('ĆČŠŽ')).toBe('CCSZ')
+    expect(removeAccents('ç')).toBe('c')
+    expect(removeAccents('ñ')).toBe('n')
+    expect(removeAccents('ß')).toBe('ss')
+    expect(removeAccents('')).toBe('')
   })
 
   it('creates title cased string', () => {

@@ -11,7 +11,7 @@ import { nanoid } from 'nanoid'
 import pluralize from 'pluralize-esm'
 import type { LayoutDefinition } from '../layouts/layout.definition'
 import { isUndefined } from '../utils/common'
-import { capitalize, isString, isUrlPath, joinRouteParts, titleCase } from '../utils/string'
+import { capitalize, isString, isUrlPath, joinRouteParts, removeAccents, titleCase } from '../utils/string'
 import { lowercaseValidator } from '../validators/string'
 import { uniqueValidator } from '../validators/unique'
 import { type CollectionDefinition } from './collection.definition'
@@ -221,7 +221,8 @@ export function pageLikeCollection(options: PageLikeCollectionOptions): Collecti
         additional: {
           unique: 'perLanguage',
           sanitizers: [
-            ({ value }) => (isString(value) ? joinRouteParts(value.toLowerCase().replace(/ +/g, '-')) : value),
+            ({ value }) =>
+              isString(value) ? joinRouteParts(removeAccents(value).toLowerCase().replace(/ +/g, '-')) : value,
           ],
           validators: [
             lowercaseValidator,
