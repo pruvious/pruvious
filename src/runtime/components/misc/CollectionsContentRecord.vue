@@ -106,21 +106,8 @@
               :placeholder="__('pruvious-dashboard', (collection.fields[collection.dashboard.primaryField].options as any).label)"
               :title="__('pruvious-dashboard', (collection.fields[collection.dashboard.primaryField].options as any).description)"
               :value="record[collection.dashboard.primaryField]"
-              @blur="
-                onUpdate(
-                  {
-                    ...record,
-                    [collection.dashboard.primaryField]: ($event.target as HTMLInputElement).value,
-                  },
-                  true,
-                ).then(reloadInstant)
-              "
-              @input="
-                onUpdate({
-                  ...record,
-                  [collection.dashboard.primaryField]: ($event.target as HTMLInputElement).value,
-                }).then(reload)
-              "
+              @blur="onUpdatePrimaryField(($event.target as HTMLInputElement).value).then(reloadInstant)"
+              @input="onUpdatePrimaryField(($event.target as HTMLInputElement).value).then(reload)"
               autocomplete="off"
               name="record-primary-field"
               type="text"
@@ -364,7 +351,12 @@ import {
   type PublicPagesOptions,
   type SupportedLanguage,
 } from '#pruvious'
-import { dashboardMiscComponent, recordAdditionalCollectionOptions, selectFieldComponent } from '#pruvious/dashboard'
+import {
+  dashboardMiscComponent,
+  fieldTypes,
+  recordAdditionalCollectionOptions,
+  selectFieldComponent,
+} from '#pruvious/dashboard'
 import { useEventListener } from '@vueuse/core'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { nanoid } from 'nanoid'
@@ -391,6 +383,7 @@ import { blurActiveElement, isEditingText } from '../../utils/dom'
 import { pruviousFetch } from '../../utils/fetch'
 import { isNumber } from '../../utils/number'
 import { getProperty, isObject } from '../../utils/object'
+import { slugify } from '../../utils/slugify'
 import { capitalize, isString, joinRouteParts, resolveCollectionPathPrefix } from '../../utils/string'
 import { getCapabilities } from '../../utils/users'
 import type { AddBlockOptions } from './AddBlockPopup.vue'
@@ -438,6 +431,7 @@ const iframeFocused = ref(false)
 const iframeSize = ref('')
 const languageChoices = Object.fromEntries(languageLabels.map(({ code, name }) => [code, name]))
 const moreBlockOptionsPopupVisible = ref(false)
+const pathFieldDirty = ref(false)
 const preview = ref<CastedFieldType['previews']>()
 const previewUrl = ref('')
 const resolvedConditionalLogic = ref<Record<string, boolean>>({})
@@ -621,10 +615,39 @@ async function resolve() {
 }
 
 const onUpdate = debounce(onUpdateInstant, 50)
+const onUpdatePrimaryField = debounce(onUpdatePrimaryFieldInstant, 50)
 
 async function onUpdateInstant(record?: Record<string, any>, forceAddHistory: boolean = false) {
   history.add(record ?? props.record, forceAddHistory)
   emitUpdateRecord(record ?? props.record)
+  setTimeout(resolve)
+}
+
+async function onUpdatePrimaryFieldInstant(value: string) {
+  const primaryFieldType = fieldTypes[collection.fields[collection.dashboard.primaryField!].type]
+  const resolvedValue = primaryFieldType === 'number' ? +value : value
+  const record = { ...props.record }
+
+  if (
+    primaryFieldType === 'string' &&
+    !props.isEditing &&
+    !pathFieldDirty.value &&
+    collection.publicPages &&
+    collection.publicPages.seo?.titleField === collection.dashboard.primaryField
+  ) {
+    const pathField = collection.publicPages.pathField ? collection.publicPages.pathField : 'path'
+    const oldPath = '/' + slugify(props.record[collection.dashboard.primaryField!])
+
+    if (oldPath === props.record[pathField]) {
+      record[pathField] = '/' + slugify(resolvedValue as string)
+    } else {
+      pathFieldDirty.value = true
+    }
+  }
+
+  record[collection.dashboard.primaryField!] = resolvedValue
+  history.add(record)
+  emitUpdateRecord(record)
   setTimeout(resolve)
 }
 
