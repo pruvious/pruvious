@@ -366,7 +366,7 @@ export class QueryBuilder<
     Method
   > {
     const collection: ResolvedCollectionDefinition = (collections as any)[this.collection]
-    this.selectedFields.push(...Object.keys(collection.fields))
+    clearArray(this.selectedFields).push(...Object.keys(collection.fields))
     return this as any
   }
 
@@ -1865,7 +1865,7 @@ export class QueryBuilder<
       }
     }
 
-    return errors
+    return errors as any
   }
 
   /**
@@ -2010,7 +2010,7 @@ export class QueryBuilder<
       const conditionalLogicResults = this.applyConditionalLogic(sanitizedEntry)
 
       if (Object.keys(conditionalLogicResults.errors).length) {
-        errors.push(conditionalLogicResults.errors)
+        errors.push(conditionalLogicResults.errors as any)
       } else {
         const validationErrors = await this.validate(
           sanitizedEntry,

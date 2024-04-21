@@ -159,7 +159,7 @@ export class SingleQueryBuilder<
    */
   selectAll(): SingleQueryBuilder<CollectionName, SelectableFieldName[CollectionName], ReturnedFieldType> {
     const collection: ResolvedCollectionDefinition = collections[this.collection]
-    this.selectedFields.push(...Object.keys(collection.fields))
+    clearArray(this.selectedFields).push(...Object.keys(collection.fields))
     return this as any
   }
 
@@ -487,7 +487,7 @@ export class SingleQueryBuilder<
       }
     }
 
-    return errors
+    return errors as any
   }
 
   /**
