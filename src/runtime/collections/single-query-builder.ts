@@ -141,9 +141,9 @@ export class SingleQueryBuilder<
    * ```
    */
   select<T extends SelectableFieldName[CollectionName]>(
-    fields: PickFields<SelectableFieldName[CollectionName], T>,
+    fields: PickFields<SelectableFieldName[CollectionName], T> | T[],
   ): SingleQueryBuilder<CollectionName, T, ReturnedFieldType> {
-    clearArray(this.selectedFields).push(...Object.keys(fields))
+    clearArray(this.selectedFields).push(...(isArray(fields) ? fields : Object.keys(fields)))
     return this as any
   }
 
@@ -175,9 +175,10 @@ export class SingleQueryBuilder<
    * ```
    */
   deselect<T extends ReturnableFieldName>(
-    fields: PickFields<ReturnableFieldName, T>,
+    fields: PickFields<ReturnableFieldName, T> | T[],
   ): SingleQueryBuilder<CollectionName, Exclude<ReturnableFieldName, T>, ReturnedFieldType> {
-    this.selectedFields = this.selectedFields.filter((fieldName) => !(fields as any)[fieldName])
+    const fieldsObj = isArray(fields) ? Object.fromEntries(fields.map((field) => [field, true])) : fields
+    this.selectedFields = this.selectedFields.filter((fieldName) => !(fieldsObj as any)[fieldName])
     return this as any
   }
 
