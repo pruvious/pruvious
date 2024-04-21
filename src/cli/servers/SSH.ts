@@ -222,6 +222,7 @@ export class SSH {
     await this.exec(`tar -xzf ~/backups/${site.domain}/${backupId}/site.tar.gz -C ~/sites/${site.domain}`)
     this.success(`Restored site backup ${cyan(`~/backups/${site.domain}/${backupId}/site.tar.gz`)}`)
 
+    await this.exec(`rm -rf ~/sites/${site.domain}/.cache`, true)
     await this.exec(`pm2 restart ~/sites/${site.domain}.config.js`)
     this.success(`Started ${cyan(site.domain)} with pm2`)
   }
@@ -284,6 +285,7 @@ export class SSH {
     await this.exec(`mv ~/sites/_${site.domain} ~/sites/${site.domain}`)
     this.success(`Swapped ${cyan(`~/sites/_${site.domain}`)} with ${cyan(`~/sites/${site.domain}`)}`)
 
+    await this.exec(`rm -rf ~/sites/${site.domain}/.cache`, true)
     await this.exec(`pm2 reload ~/sites/${site.domain}.config.js`)
     await this.exec(`pm2 save`)
     this.success(`Reloaded ${cyan(site.domain)} with pm2`)
@@ -390,6 +392,7 @@ export class SSH {
     })
     this.clearLastLine().success(`Mirrored uploads for ${cyan(site.domain)}`)
 
+    await this.exec(`rm -rf ~/sites/${site.domain}/.cache`, true)
     await this.exec(`pm2 restart ~/sites/${site.domain}.config.js`)
     this.success(`Started ${cyan(site.domain)} with pm2`)
   }
