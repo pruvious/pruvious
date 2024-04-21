@@ -347,7 +347,7 @@ export class QueryBuilder<
   select<T extends SelectableFieldName[CollectionName]>(
     fields: PickFields<SelectableFieldName[CollectionName], T> | T[],
   ): Pick<QueryBuilder<CollectionName, T, ReturnedFieldType, Method>, Method> {
-    clearArray(this.selectedFields).push(...(isArray(fields) ? fields : Object.keys(fields)))
+    clearArray(this.selectedFields).push(...(isArray(fields) ? uniqueArray(fields) : Object.keys(fields)))
     return this as any
   }
 

@@ -17,7 +17,7 @@ import { cache } from '../instances/cache'
 import { db } from '../instances/database'
 import { getModuleOption } from '../instances/state'
 import { clearPageCache } from '../plugins/page-cache'
-import { clearArray, isArray, sortNaturalByProp } from '../utils/array'
+import { clearArray, isArray, sortNaturalByProp, uniqueArray } from '../utils/array'
 import { isNull } from '../utils/common'
 import { isFunction } from '../utils/function'
 import {
@@ -143,7 +143,7 @@ export class SingleQueryBuilder<
   select<T extends SelectableFieldName[CollectionName]>(
     fields: PickFields<SelectableFieldName[CollectionName], T> | T[],
   ): SingleQueryBuilder<CollectionName, T, ReturnedFieldType> {
-    clearArray(this.selectedFields).push(...(isArray(fields) ? fields : Object.keys(fields)))
+    clearArray(this.selectedFields).push(...(isArray(fields) ? uniqueArray(fields) : Object.keys(fields)))
     return this as any
   }
 
