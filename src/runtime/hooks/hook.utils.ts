@@ -23,7 +23,7 @@ export async function applyHooksBeforeCreate<T extends MultiCollectionName>(
  */
 export async function applyHooksAfterCreate<T extends MultiCollectionName>(
   collection: T,
-  context: Pick<HookContext<T>, 'query' | 'record' | 'user'>,
+  context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>,
 ): Promise<void> {
   await applyHooks(collection, 'afterCreate', context)
 }
@@ -49,7 +49,7 @@ export async function applyHooksBeforeRead<T extends CollectionName>(
  */
 export async function applyHooksAfterRead<T extends CollectionName>(
   collection: T,
-  context: Pick<HookContext<T>, 'query' | 'record' | 'user'>,
+  context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>,
 ): Promise<void> {
   await applyHooks(collection, 'afterRead', context)
 }
@@ -75,7 +75,7 @@ export async function applyHooksBeforeUpdate<T extends CollectionName>(
  */
 export async function applyHooksAfterUpdate<T extends CollectionName>(
   collection: T,
-  context: Pick<HookContext<T>, 'query' | 'record' | 'user'>,
+  context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>,
 ): Promise<void> {
   await applyHooks(collection, 'afterUpdate', context)
 }
@@ -101,7 +101,7 @@ export async function applyHooksBeforeDelete<T extends MultiCollectionName>(
  */
 export async function applyHooksAfterDelete<T extends MultiCollectionName>(
   collection: T,
-  context: Pick<HookContext<T>, 'query' | 'record' | 'user'>,
+  context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>,
 ): Promise<void> {
   await applyHooks(collection, 'afterDelete', context)
 }

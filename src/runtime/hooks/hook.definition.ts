@@ -38,9 +38,14 @@ export interface HookContext<T extends CollectionName> {
   query: typeof query
 
   /**
-   * The processed collection record.
+   * The collection record processed by the `currentQuery`.
    */
   record: Partial<CastedFieldType[T] | PopulatedFieldType[T]>
+
+  /**
+   * The ID of the collection record processed by the `currentQuery`.
+   */
+  recordId: number
 
   /**
    * The current logged-in user associated with the request or `null` if no user is authenticated.
@@ -76,7 +81,7 @@ export function defineHook<T extends MultiCollectionName>(
 export function defineHook<T extends MultiCollectionName>(
   collection: T,
   action: 'afterCreate',
-  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'user'>) => any | Promise<any>,
+  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>) => any | Promise<any>,
 ): Required<HookDefinition>
 
 export function defineHook<T extends CollectionName>(
@@ -88,7 +93,7 @@ export function defineHook<T extends CollectionName>(
 export function defineHook<T extends CollectionName>(
   collection: T,
   action: 'afterRead',
-  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'user'>) => any | Promise<any>,
+  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>) => any | Promise<any>,
 ): Required<HookDefinition>
 
 export function defineHook<T extends CollectionName>(
@@ -100,7 +105,7 @@ export function defineHook<T extends CollectionName>(
 export function defineHook<T extends CollectionName>(
   collection: T,
   action: 'afterUpdate',
-  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'user'>) => any | Promise<any>,
+  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>) => any | Promise<any>,
 ): Required<HookDefinition>
 
 export function defineHook<T extends MultiCollectionName>(
@@ -112,7 +117,7 @@ export function defineHook<T extends MultiCollectionName>(
 export function defineHook<T extends MultiCollectionName>(
   collection: T,
   action: 'afterDelete',
-  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'user'>) => any | Promise<any>,
+  callback: (context: Pick<HookContext<T>, 'query' | 'record' | 'recordId' | 'user'>) => any | Promise<any>,
 ): Required<HookDefinition>
 
 export function defineHook<T extends CollectionName>(

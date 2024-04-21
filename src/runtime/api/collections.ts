@@ -26,7 +26,7 @@ import { isArray, toArray } from '../utils/array'
 import { isDefined, isNull } from '../utils/common'
 import { isFunction } from '../utils/function'
 import { isPositiveInteger } from '../utils/number'
-import { objectPick } from '../utils/object'
+import { deepClone, objectPick } from '../utils/object'
 import { _, __ } from '../utils/server/translate-string'
 import { isString } from '../utils/string'
 import { getCapabilities, hasCapability } from '../utils/users'
@@ -145,10 +145,17 @@ export default defineEventHandler(async (event) => {
         })
       }
 
+      const params = objectPick(qs.params, ['select', 'order', 'populate'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = _query(
         collection as MultiCollectionName & UploadsCollectionName,
         event.context.language,
-      ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate']) as any)
+      ).applyQueryStringParams(params as any)
 
       if (!user.isAdmin) {
         const cache: Record<string, any> = {}
@@ -224,8 +231,10 @@ export default defineEventHandler(async (event) => {
         await applyHooksAfterCreate(collection as MultiCollectionName, {
           query: _query,
           record: result.record as any,
+          recordId: result.record.id!,
           user,
         })
+        if (!idSelected) delete result.record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.record as any, user })
         return result.record
       } else if (result.message) {
@@ -307,8 +316,15 @@ export default defineEventHandler(async (event) => {
           })
         }
 
+        const params = objectPick(qs.params, ['select', 'order', 'populate'])
+        const idSelected = params.select.includes('id')
+
+        if (!idSelected) {
+          params.select.push('id')
+        }
+
         const query = (_query(collection as MultiCollectionName & UploadsCollectionName, event.context.language) as any)
-          .applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate']))
+          .applyQueryStringParams(params)
           .where('id', to.id)
 
         if (!user.isAdmin) {
@@ -382,9 +398,14 @@ export default defineEventHandler(async (event) => {
 
         if (result.success && result.records.length) {
           removeProtectedFields(collection, result.records)
-          await applyHooksAfterUpdate(collection, { query: _query, record: result.records[0], user })
+          await applyHooksAfterUpdate(collection, {
+            query: _query,
+            record: result.records[0],
+            recordId: result.records[0].id,
+            user,
+          })
+          if (!idSelected) delete result.records[0].id
           await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.records[0], user })
-
           return result.records[0]
         } else if (result.success) {
           setResponseStatus(event, 404)
@@ -405,10 +426,17 @@ export default defineEventHandler(async (event) => {
           })
         }
 
+        const params = objectPick(qs.params, ['select', 'order', 'populate'])
+        const idSelected = params.select.includes('id')
+
+        if (!idSelected) {
+          params.select.push('id')
+        }
+
         const query = _query(
           collection as MultiCollectionName & UploadsCollectionName,
           event.context.language,
-        ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate']) as any)
+        ).applyQueryStringParams(params as any)
 
         if (!user.isAdmin) {
           const cache: Record<string, any> = {}
@@ -484,8 +512,10 @@ export default defineEventHandler(async (event) => {
           await applyHooksAfterCreate(collection as MultiCollectionName, {
             query: _query,
             record: result.record as any,
+            recordId: result.record.id!,
             user,
           })
+          if (!idSelected) delete result.record.id
           await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.record as any, user })
           return result.record
         } else if (result.message) {
@@ -614,10 +644,16 @@ export default defineEventHandler(async (event) => {
         query: _query,
       })
 
-      const query = (_query(collection as SingleCollectionName, event.context.language) as any).applyQueryStringParams({
-        ...objectPick(qs.params, ['select', 'populate']),
-        language: toLanguage,
-      })
+      const params = { ...objectPick(qs.params, ['select', 'populate']), language: toLanguage }
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
+      const query = (_query(collection as SingleCollectionName, event.context.language) as any).applyQueryStringParams(
+        params,
+      )
 
       if (!user.isAdmin) {
         const cache: Record<string, any> = {}
@@ -685,9 +721,14 @@ export default defineEventHandler(async (event) => {
 
       if (result.success) {
         removeProtectedFields(collection, result.record)
-        await applyHooksAfterUpdate(collection, { query: _query, record: result.record, user })
+        await applyHooksAfterUpdate(collection, {
+          query: _query,
+          record: result.record,
+          recordId: result.record.id,
+          user,
+        })
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.record, user })
-
+        if (!idSelected) delete result.record.id
         return result.record
       } else if (result.message) {
         setResponseStatus(event, 400)
@@ -763,10 +804,17 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'order', 'populate'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = _query(
         collection as MultiCollectionName & UploadsCollectionName,
         event.context.language,
-      ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate']) as any)
+      ).applyQueryStringParams(params as any)
 
       if (!user?.isAdmin) {
         const cache: Record<string, any> = {}
@@ -842,8 +890,10 @@ export default defineEventHandler(async (event) => {
         await applyHooksAfterCreate(collection as MultiCollectionName, {
           query: _query,
           record: result.record as any,
+          recordId: result.record.id!,
           user,
         })
+        if (!idSelected) delete result.record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.record as any, user })
         return result.record
       } else if (result.message) {
@@ -882,10 +932,17 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'order', 'populate'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = _query(
         collection as MultiCollectionName & UploadsCollectionName,
         event.context.language,
-      ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate']) as any)
+      ).applyQueryStringParams(params as any)
 
       if (!user?.isAdmin) {
         const cache: Record<string, any> = {}
@@ -969,7 +1026,13 @@ export default defineEventHandler(async (event) => {
       if (result.success) {
         for (const record of result.records) {
           removeProtectedFields(collection, result.records)
-          await applyHooksAfterCreate(collection as MultiCollectionName, { query: _query, record: record as any, user })
+          await applyHooksAfterCreate(collection as MultiCollectionName, {
+            query: _query,
+            record: record as any,
+            recordId: record.id!,
+            user,
+          })
+          if (!idSelected) delete record.id
           await applyHooksBeforeReturnRecord(collection, { query: _query, record: record as any, user })
         }
 
@@ -1041,7 +1104,7 @@ export default defineEventHandler(async (event) => {
 
       if (record) {
         removeProtectedFields(collection, record)
-        await applyHooksAfterRead(collection, { query: _query, record, user })
+        await applyHooksAfterRead(collection, { query: _query, record, recordId: id!, user })
         await applyHooksBeforeReturnRecord(collection, { query: _query, record, user })
         return record
       } else {
@@ -1072,6 +1135,13 @@ export default defineEventHandler(async (event) => {
             record: __(event, 'pruvious-server', collections[collection].label.record.plural as any),
           })
         }
+      }
+
+      const params = deepClone(qs.params)
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
       }
 
       const query = _query(
@@ -1113,7 +1183,8 @@ export default defineEventHandler(async (event) => {
 
       for (const record of records) {
         removeProtectedFields(collection, record)
-        await applyHooksAfterRead(collection, { query: _query, record: record as any, user })
+        await applyHooksAfterRead(collection, { query: _query, record: record as any, recordId: record.id!, user })
+        if (!idSelected) delete record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: record as any, user })
       }
 
@@ -1214,9 +1285,8 @@ export default defineEventHandler(async (event) => {
 
       if (result.success && result.records.length) {
         removeProtectedFields(collection, result.records)
-        await applyHooksAfterUpdate(collection, { query: _query, record: result.records[0], user })
+        await applyHooksAfterUpdate(collection, { query: _query, record: result.records[0], recordId: id!, user })
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.records[0], user })
-
         return result.records[0]
       } else if (result.success) {
         setResponseStatus(event, 404)
@@ -1257,10 +1327,17 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'order', 'populate', 'where'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = _query(
         collection as MultiCollectionName & UploadsCollectionName,
         event.context.language,
-      ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate', 'where']) as any)
+      ).applyQueryStringParams(params as any)
 
       if (!user?.isAdmin) {
         const cache: Record<string, any> = {}
@@ -1329,7 +1406,8 @@ export default defineEventHandler(async (event) => {
       if (result.success) {
         for (const record of result.records) {
           removeProtectedFields(collection, result.records)
-          await applyHooksAfterUpdate(collection, { query: _query, record: record as any, user })
+          await applyHooksAfterUpdate(collection, { query: _query, record: record as any, recordId: record.id!, user })
+          if (!idSelected) delete record.id
           await applyHooksBeforeReturnRecord(collection, { query: _query, record: record as any, user })
         }
 
@@ -1405,9 +1483,13 @@ export default defineEventHandler(async (event) => {
 
       if (records.length) {
         removeProtectedFields(collection, records)
-        await applyHooksAfterDelete(collection as MultiCollectionName, { query: _query, record: records[0], user })
+        await applyHooksAfterDelete(collection as MultiCollectionName, {
+          query: _query,
+          record: records[0],
+          recordId: id!,
+          user,
+        })
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: records[0], user })
-
         return records[0]
       } else {
         setResponseStatus(event, 404)
@@ -1442,10 +1524,17 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'order', 'populate', 'where'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = _query(
         collection as MultiCollectionName & UploadsCollectionName,
         event.context.language,
-      ).applyQueryStringParams(objectPick(qs.params, ['select', 'order', 'populate', 'where']) as any)
+      ).applyQueryStringParams(params as any)
 
       if (!user?.isAdmin) {
         const cache: Record<string, any> = {}
@@ -1481,7 +1570,13 @@ export default defineEventHandler(async (event) => {
 
       for (const record of records) {
         removeProtectedFields(collection, record)
-        await applyHooksAfterDelete(collection as MultiCollectionName, { query: _query, record: record as any, user })
+        await applyHooksAfterDelete(collection as MultiCollectionName, {
+          query: _query,
+          record: record as any,
+          recordId: record.id!,
+          user,
+        })
+        if (!idSelected) delete record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: record as any, user })
       }
 
@@ -1546,8 +1641,15 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'language', 'populate'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = (_query(collection as SingleCollectionName, event.context.language) as any).applyQueryStringParams(
-        objectPick(qs.params, ['select', 'language', 'populate']),
+        params,
       )
 
       if (!user?.isAdmin) {
@@ -1580,7 +1682,8 @@ export default defineEventHandler(async (event) => {
 
       if (record) {
         removeProtectedFields(collection, record)
-        await applyHooksAfterRead(collection, { query: _query, record, user })
+        await applyHooksAfterRead(collection, { query: _query, record, recordId: record.id, user })
+        if (!idSelected) delete record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record, user })
         return record
       } else {
@@ -1613,8 +1716,15 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      const params = objectPick(qs.params, ['select', 'language', 'populate'])
+      const idSelected = params.select.includes('id')
+
+      if (!idSelected) {
+        params.select.push('id')
+      }
+
       const query = (_query(collection as SingleCollectionName, event.context.language) as any).applyQueryStringParams(
-        objectPick(qs.params, ['select', 'language', 'populate']),
+        params,
       )
 
       if (!user?.isAdmin) {
@@ -1683,9 +1793,14 @@ export default defineEventHandler(async (event) => {
 
       if (result.success) {
         removeProtectedFields(collection, result.record)
-        await applyHooksAfterUpdate(collection, { query: _query, record: result.record, user })
+        await applyHooksAfterUpdate(collection, {
+          query: _query,
+          record: result.record,
+          recordId: result.record.id,
+          user,
+        })
+        if (!idSelected) delete result.record.id
         await applyHooksBeforeReturnRecord(collection, { query: _query, record: result.record, user })
-
         return result.record
       } else if (result.message) {
         setResponseStatus(event, 400)
