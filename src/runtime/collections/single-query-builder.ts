@@ -123,7 +123,7 @@ export class SingleQueryBuilder<
       | Record<SelectableFieldName[CollectionName], undefined>
     ) & { [key in keyof CastedFieldType[CollectionName]]: unknown }
   > {
-    if (isKeyOf(params, 'select')) this.selectedFields = params.select!
+    if (isKeyOf(params, 'select')) this.selectedFields = uniqueArray(params.select!)
     if (isKeyOf(params, 'language')) this.languageOption = params.language!
     if (isKeyOf(params, 'populate')) this.populateOption = params.populate!
 

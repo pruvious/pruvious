@@ -322,7 +322,7 @@ export class QueryBuilder<
     >,
     MultiQueryBuilderMethod<CollectionName>
   > {
-    if (isKeyOf(params, 'select')) this.selectedFields = params.select!
+    if (isKeyOf(params, 'select')) this.selectedFields = uniqueArray(params.select!)
     if (isKeyOf(params, 'where')) this.whereOptions = params.where!
     if (isKeyOf(params, 'search')) this.searchOptions = params.search!
     if (isKeyOf(params, 'group')) this.groupOptions = params.group!
