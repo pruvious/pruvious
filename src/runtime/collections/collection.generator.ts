@@ -92,13 +92,13 @@ export function generateCollections(
   const definitionPath = resolveModulePath('./runtime/collections/collection.definition')
 
   ts.newDecl(
-    `import type { CollectionGuard, CollectionGuardContext, CollectionSearch, ContentBuilder, DuplicateContext, FieldLayout, MirrorTranslationContext, PublicPagesOptions, ResolvedCollectionDefinition } from '${relativeImport(
+    `import type { CollectionDefinition, CollectionGuard, CollectionGuardContext, CollectionSearch, ContentBuilder, DuplicateContext, FieldLayout, MirrorTranslationContext, MultiEntryCollectionDefinition, PublicPagesOptions, ResolvedCollectionDefinition, SingleEntryCollectionDefinition } from '${relativeImport(
       dotPruviousPath,
       definitionPath,
     )}'`,
   )
     .newLine(
-      'export { type CollectionGuard, type CollectionGuardContext, type CollectionSearch, type ContentBuilder, type DuplicateContext, type FieldLayout, type MirrorTranslationContext, type PublicPagesOptions, type ResolvedCollectionDefinition }',
+      'export { type CollectionDefinition, type CollectionGuard, type CollectionGuardContext, type CollectionSearch, type ContentBuilder, type DuplicateContext, type FieldLayout, type MirrorTranslationContext, type MultiEntryCollectionDefinition, type PublicPagesOptions, type ResolvedCollectionDefinition, type SingleEntryCollectionDefinition }',
     )
     .newLine(
       `import type { Image, ImageSource, OptimizedImage, OptimizedImageSource } from '${relativeImport(

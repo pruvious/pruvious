@@ -300,7 +300,7 @@ interface BaseCollectionDefinition {
   nonCachedFields?: string[]
 }
 
-interface SingleEntryCollectionDefinition extends BaseCollectionDefinition {
+export interface SingleEntryCollectionDefinition extends BaseCollectionDefinition {
   mode: 'single'
 
   /**
@@ -370,7 +370,7 @@ interface SingleEntryCollectionDefinition extends BaseCollectionDefinition {
     | false
 }
 
-interface MultiEntryCollectionDefinition extends BaseCollectionDefinition {
+export interface MultiEntryCollectionDefinition extends BaseCollectionDefinition {
   mode: 'multi'
 
   /**
