@@ -26,7 +26,7 @@
           :href="url"
           :title="__('pruvious-dashboard', 'Open in new tab')"
           target="_blank"
-          class="truncate text-gray-400 transition hocus:text-primary-700"
+          class="truncate text-sm text-gray-400 transition hocus:text-primary-700"
         >
           {{ url }}
         </a>
