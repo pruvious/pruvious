@@ -14,7 +14,7 @@ import { isUndefined } from '../utils/common'
 import { capitalize, isString, isUrlPath, joinRouteParts, removeAccents, titleCase } from '../utils/string'
 import { lowercaseValidator } from '../validators/string'
 import { uniqueValidator } from '../validators/unique'
-import { type CollectionDefinition } from './collection.definition'
+import { type MultiEntryCollectionDefinition } from './collection.definition'
 
 export interface PageLikeCollectionOptions {
   /**
@@ -88,7 +88,7 @@ export interface PageLikeCollectionOptions {
 /**
  * Create a collection definition for a page-like collection.
  */
-export function pageLikeCollection(options: PageLikeCollectionOptions): CollectionDefinition {
+export function pageLikeCollection(options: PageLikeCollectionOptions): MultiEntryCollectionDefinition {
   const recordLabelPlural = options.recordLabel?.plural ?? titleCase(options.name, false).toLowerCase()
   const recordLabelSingular = options.recordLabel?.singular ?? pluralize.singular(recordLabelPlural)
   const filteredLayouts = layouts.filter(
