@@ -343,6 +343,7 @@ export interface ModuleOptions {
         MoreBlockOptionsPopup?: string
         MultiCollectionsOverview?: string
         Popup?: string
+        QuickActions?: string
         SearchMedia?: string
         SearchRecords?: string
         SingleCollectionsOverview?: string

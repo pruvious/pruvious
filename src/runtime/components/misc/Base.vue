@@ -24,6 +24,8 @@
         <slot name="language-switcher" />
 
         <div class="flex">
+          <PruviousQuickActions />
+
           <button
             v-if="dashboard.isCacheActive"
             v-pruvious-tooltip="{ content: __('pruvious-dashboard', 'Clear cache'), offset: [0, 13] }"
@@ -139,6 +141,7 @@ const PruviousMediaDirectoryPopup = dashboardMiscComponent.MediaDirectoryPopup()
 const PruviousMediaFileInput = dashboardMiscComponent.MediaFileInput()
 const PruviousMediaLibraryPopup = dashboardMiscComponent.MediaLibraryPopup()
 const PruviousMediaUploadPopup = dashboardMiscComponent.MediaUploadPopup()
+const PruviousQuickActions = dashboardMiscComponent.QuickActions()
 const PruviousUnsavedChanges = dashboardMiscComponent.UnsavedChanges()
 
 await loadTranslatableStrings('pruvious-dashboard')

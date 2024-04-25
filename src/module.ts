@@ -110,6 +110,7 @@ export default defineNuxtModule<ModuleOptions>({
           MoreBlockOptionsPopup: undefined,
           MultiCollectionsOverview: undefined,
           Popup: undefined,
+          QuickActions: undefined,
           SearchMedia: undefined,
           SearchRecords: undefined,
           SingleCollectionsOverview: undefined,
