@@ -154,6 +154,7 @@ export async function generateDotPruvious(
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/composables/token')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/composables/translatable-strings')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/composables/unique')}'`)
+    .newLine(`export * from '${relativeDotPruviousImport('./runtime/composables/user')}'`)
     .newLine(`export * from '${relativeDotPruviousImport('./runtime/utils/fetch')}'`)
 
   tsServer
@@ -187,8 +188,19 @@ export async function generateDotPruvious(
   tsDashboard
     .newDecl(`// @ts-nocheck`)
     .newLine(`import { defineAsyncComponent } from '#imports'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/clipboard.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/collection-language.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/confirm-click.ts')}'`)
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/dashboard.ts')}'`)
     .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/dialog.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/fetch-count.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/hotkeys.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/media.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/move.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/redirects-test.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/search.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/toaster.ts')}'`)
+    .newDecl(`export * from '${relativeDotPruviousImport('./runtime/composables/dashboard/unsaved-changes.ts')}'`)
 
   for (const [componentName, relativeComponentPath] of Object.entries(getModuleOption('dashboard').baseComponents)) {
     if (componentName !== 'misc') {
