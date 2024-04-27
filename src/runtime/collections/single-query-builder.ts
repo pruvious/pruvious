@@ -440,10 +440,15 @@ export class SingleQueryBuilder<
   async validate(
     input: Record<string, any>,
     operation: 'read' | 'update',
+    skipFields?: string[],
   ): Promise<ValidationError<ReturnableFieldName>> {
     const errors: Record<string, string> = {}
 
     for (const fieldName of this.getOperableFields(input)) {
+      if (skipFields?.includes(fieldName)) {
+        continue
+      }
+
       const declaration = collections[this.collection].fields[fieldName]
       const definition = fields[declaration.type]
 
@@ -535,7 +540,7 @@ export class SingleQueryBuilder<
       return { success: false, errors: conditionalLogicResults.errors }
     }
 
-    const validationErrors = await this.validate(sanitized, 'update')
+    const validationErrors = await this.validate(sanitized, 'update', conditionalLogicResults.failed)
 
     if (Object.keys(validationErrors).length) {
       return { success: false, errors: validationErrors }
