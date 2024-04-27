@@ -19,7 +19,7 @@
 
       <template v-for="item of resolvedFieldLayout">
         <PruviousFieldLayout
-          v-if="item?.type === 'stack'"
+          v-if="item?.type === 'stack' && item.fields.some((field) => resolvedConditionalLogic[keyPrefix + field])"
           :canUpdate="canUpdate"
           :collectionRecord="collectionRecord"
           :compact="compact"
