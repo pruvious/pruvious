@@ -269,7 +269,10 @@ function emitModelValue(pushValue?: string) {
 
   if (isString(pushValue)) {
     sortableKey.value++
-    value.push(pushValue)
+
+    if (!value.includes(pushValue)) {
+      value.push(pushValue)
+    }
   }
 
   emit('update:modelValue', value)
