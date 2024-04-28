@@ -41,8 +41,11 @@
           @keydown.escape="blurActiveElement()"
           @update:modelValue="onChange()"
           ref="textarea"
-          class="block w-full resize-none px-2.5 py-[0.4375rem] outline-none placeholder:text-gray-300"
-          :class="{ 'whitespace-pre': !options.wrap }"
+          class="block w-full resize-none bg-transparent px-2.5 py-[0.4375rem] outline-none placeholder:text-gray-300"
+          :class="{
+            'whitespace-pre': !options.wrap,
+            'text-gray-400': disabled,
+          }"
         />
       </div>
     </div>
