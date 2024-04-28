@@ -99,10 +99,9 @@ async function apply() {
 
 function createColumnChoices() {
   return Object.fromEntries(
-    Object.entries(collection.fields).map(([fieldName, { options }]) => [
-      fieldName,
-      __('pruvious-dashboard', options.label as any),
-    ]),
+    Object.entries(collection.fields)
+      .filter(([_, { additional }]) => !additional.hidden)
+      .map(([fieldName, { options }]) => [fieldName, __('pruvious-dashboard', options.label as any)]),
   )
 }
 

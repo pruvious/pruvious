@@ -17,7 +17,7 @@ export type DashboardCollectionFields = Record<
   string,
   Required<Pick<Field, 'options' | 'type'>> & {
     additional: Pick<CollectionFieldAdditional, 'conditionalLogic'> &
-      Required<Pick<CollectionFieldAdditional, 'emptyLabel' | 'immutable' | 'protected'>>
+      Required<Pick<CollectionFieldAdditional, 'emptyLabel' | 'hidden' | 'immutable' | 'protected'>>
     default: any
   }
 >

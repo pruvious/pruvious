@@ -65,6 +65,7 @@ export default defineEventHandler(async (event) => {
                   emptyLabel: field.additional?.emptyLabel ?? '-',
                   immutable: !!field.additional?.immutable,
                   protected: !!field.additional?.protected,
+                  hidden: !!field.additional?.hidden,
                 },
               },
             ]
@@ -152,6 +153,9 @@ export default defineEventHandler(async (event) => {
                       field.options,
                       fields,
                     ),
+                    additional: {
+                      hidden: !!field.additional?.hidden,
+                    },
                   },
                 ]),
               ) as any,

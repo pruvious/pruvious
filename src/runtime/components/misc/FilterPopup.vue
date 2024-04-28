@@ -6,7 +6,13 @@
 
     <form v-if="parsable" @submit.prevent="apply()" class="flex flex-col gap-4 p-4">
       <template v-for="(rule, i) of simpleWhere" :key="i">
-        <div v-if="!collection.fields[rule.fieldName].additional.protected && rule.fieldName !== 'language'">
+        <div
+          v-if="
+            !collection.fields[rule.fieldName].additional.hidden &&
+            !collection.fields[rule.fieldName].additional.protected &&
+            rule.fieldName !== 'language'
+          "
+        >
           <PruviousFilterRule :fieldChoices="fieldChoices" :rule="rule" @delete="simpleWhere.splice(i, 1)" />
         </div>
       </template>
@@ -103,7 +109,8 @@ const fieldChoices = Object.fromEntries(
   sortNaturalByProp(
     Object.entries(collection.fields)
       .filter(
-        ([name, { type, additional }]) => fieldTypes[type] !== 'object' && !additional.protected && name !== 'language',
+        ([name, { type, additional }]) =>
+          fieldTypes[type] !== 'object' && !additional.hidden && !additional.protected && name !== 'language',
       )
       .map(([name, { options }]) => ({ value: name, label: __('pruvious-dashboard', options.label as any) })),
     'label',

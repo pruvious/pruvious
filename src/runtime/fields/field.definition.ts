@@ -997,6 +997,13 @@ export interface FieldAdditional {
    * @default undefined
    */
   population?: FieldPopulation
+
+  /**
+   * Specifies whether the field is hidden in the dashboard.
+   *
+   * @default false
+   */
+  hidden?: boolean
 }
 
 export interface CollectionFieldAdditional extends FieldAdditional {
