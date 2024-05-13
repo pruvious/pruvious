@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     supported.length > 1 ? parser.pick(supported, qsLanguage, { loose: true }) || options.primary : options.primary
   const definition: Required<TranslatableStringsDefinition> = (translatableStrings as any)[domain][language]?.api
     ? (translatableStrings as any)[domain][language]
-    : (translatableStrings as any)[domain][options.primary]
+    : (translatableStrings as any)[domain][options.primary] ?? (translatableStrings as any)[domain].en
 
   if (!definition && domain === 'default') {
     return {}
