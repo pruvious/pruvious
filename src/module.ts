@@ -6,6 +6,7 @@ import {
   defineNuxtModule,
   extendPages,
 } from '@nuxt/kit'
+import { defu } from 'defu'
 import fs from 'fs-extra'
 import { nanoid } from 'nanoid'
 import path from 'path'
@@ -504,6 +505,12 @@ export default defineNuxtModule<ModuleOptions>({
       }
     })
     nuxt.hook('ready', boot)
+    nuxt.hook('vite:extendConfig', (config) => {
+      config.optimizeDeps = defu(config.optimizeDeps ?? {}, {
+        needsInterop: ['vue-slider-component'],
+        include: ['vue-slider-component'],
+      })
+    })
 
     if (moduleOptions.uploads) {
       nuxt.hook('nitro:init', (nitro) => {
