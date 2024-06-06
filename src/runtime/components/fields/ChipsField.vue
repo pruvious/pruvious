@@ -46,7 +46,7 @@
               :title="options.tooltips ? undefined : value"
               class="truncate py-0.5"
             >
-              {{ choicesLabels[value] }}
+              {{ choicesLabels[value] ?? value }}
             </span>
           </span>
 
@@ -73,6 +73,7 @@
           @input="onInput()"
           @keydown.backspace="onBackspaceKey()"
           @keydown.down.prevent
+          @keydown.enter="onEnterKey()"
           @keydown.escape="onEscapeKey"
           @keydown.tab="blurActiveElement"
           @keydown.up.prevent
@@ -258,8 +259,11 @@ function onBlur() {
 }
 
 function emitModelValue(pushValue?: string) {
+  const choicesValues = choices.value.map(({ value }) => value)
   const selected = choices.value.filter(({ selected }) => selected).map(({ value }) => value)
-  const value = [...props.modelValue].filter((v) => selected.includes(v) && v !== pushValue)
+  const value = [...props.modelValue].filter(
+    (v) => (choicesValues.includes(v) ? selected.includes(v) : !!props.options.allowCustomValues) && v !== pushValue,
+  )
 
   for (const v of selected) {
     if (!value.includes(v)) {
@@ -296,6 +300,12 @@ function removeChoice(value: string) {
   if (choice) {
     choice.selected = false
     emitModelValue()
+  } else if (props.options.allowCustomValues && props.modelValue.includes(value)) {
+    emit(
+      'update:modelValue',
+      props.modelValue.filter((v) => v !== value),
+    )
+    sortableKey.value++
   }
 }
 
@@ -336,26 +346,28 @@ function pickHighlightedSuggestion(event: Event) {
 
     highlightedSuggestion.value.selected = true
 
-    if (suggestionChoices.value.length === 1) {
+    if (props.options.clearInputOnPick || suggestionChoices.value.length === 1) {
       inputValue.value = ''
     }
 
     onInput()
     emitModelValue(highlightedSuggestion.value.value)
+
+    highlightedSuggestion.value = undefined
   }
 }
 
 function onClickSuggestion(choice: Choice) {
   choice.selected = true
 
-  if (suggestionChoices.value.length === 1) {
+  if (props.options.clearInputOnPick || suggestionChoices.value.length === 1) {
     inputValue.value = ''
   }
 
   emitModelValue(choice.value)
 
   setTimeout(() => {
-    if (suggestionChoices.value.length === 1) {
+    if (props.options.clearInputOnPick || suggestionChoices.value.length === 1) {
       inputValue.value = ''
     } else {
       inputEl.value?.focus()
@@ -372,6 +384,21 @@ function onEscapeKey(event: KeyboardEvent) {
   blurActiveElement()
 }
 
+function onEnterKey() {
+  if (!highlightedSuggestion.value) {
+    const trimmedValue = inputValue.value.trim()
+    const choice = choices.value.find(({ value }) => value === trimmedValue)
+
+    if (choice) {
+      choice.selected = true
+      emitModelValue()
+    } else if (props.options.allowCustomValues && !props.modelValue.includes(trimmedValue)) {
+      emitModelValue(trimmedValue)
+      inputValue.value = ''
+    }
+  }
+}
+
 function onBackspaceKey() {
   if (inputValue.value === '') {
     const lastChoice = props.modelValue.length
@@ -381,6 +408,9 @@ function onBackspaceKey() {
     if (lastChoice) {
       lastChoice.selected = false
       emitModelValue()
+    } else if (props.modelValue.length) {
+      emit('update:modelValue', props.modelValue.slice(0, -1))
+      sortableKey.value++
     }
   }
 }

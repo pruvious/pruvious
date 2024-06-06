@@ -6,7 +6,7 @@
       :title="options.tooltips ? undefined : value"
       class="whitespace-nowrap rounded-full bg-primary-100 px-2.5 py-0.5 text-vs"
     >
-      {{ label }}
+      {{ label ?? value }}
     </li>
   </ul>
 

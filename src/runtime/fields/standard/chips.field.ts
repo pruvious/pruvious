@@ -18,6 +18,8 @@ export default defineField({
     ts: ({ options }) => {
       if (options.overrideType) {
         return options.overrideType
+      } else if (options.allowCustomValues) {
+        return 'string[]'
       }
 
       const choiceValues = options.choices ? Object.keys(options.choices) : []
@@ -86,6 +88,22 @@ export default defineField({
       description: ['Indicates whether to show chip values as tooltips.', '', '@default false'],
       default: () => false,
     },
+    allowCustomValues: {
+      type: 'boolean',
+      description: [
+        'Indicates whether to allow adding custom values dynamically.',
+        '',
+        'This will also set the field type to `string[]`.',
+        '',
+        '@default false',
+      ],
+      default: () => false,
+    },
+    clearInputOnPick: {
+      type: 'boolean',
+      description: ['Indicates whether to clear the search input after selecting a value.', '', '@default false'],
+      default: () => false,
+    },
     visibleSuggestions: {
       type: 'number',
       description: ['The number of visible suggestion choices in the dropdown list (must be less than 30).'],
@@ -117,7 +135,7 @@ export default defineField({
       for (const v of value) {
         if (!isString(v)) {
           throw new Error(__(language, 'pruvious-server', 'Selected values must be strings'))
-        } else if (!isKeyOf(options.choices, v)) {
+        } else if (!options.allowCustomValues && !isKeyOf(options.choices, v)) {
           throw new Error(__(language, 'pruvious-server', "Invalid value: '$value'", { value: v }))
         }
       }
