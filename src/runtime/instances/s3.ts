@@ -23,7 +23,7 @@ export function s3Client() {
         secretAccessKey: options.drive.secret,
       },
       endpoint: options.drive.endpoint,
-      forcePathStyle: false,
+      forcePathStyle: !!options.drive.forcePathStyle,
       region: options.drive.region,
     })
   }

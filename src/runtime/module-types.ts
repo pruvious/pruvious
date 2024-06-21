@@ -1037,6 +1037,14 @@ export interface ModuleOptions {
            * Example: `https://your-space-here.fra1.digitaloceanspaces.com`
            */
           baseUrl: string
+
+          /**
+           * Whether to force path style URLs for S3 objects
+           * (e.g., https://s3.amazonaws.com// instead of https://.s3.amazonaws.com/).
+           *
+           * @default false
+           */
+          forcePathStyle?: boolean
         }
 
     /**
