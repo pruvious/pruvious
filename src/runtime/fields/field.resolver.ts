@@ -32,7 +32,7 @@ export function resolveFields(): { records: Record<string, ResolvedField>; error
 
   let errors = 0
 
-  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
     if (registeredStandardFields[file.split('.')[0]]) {
       errors += resolveField(fullPath, records, true)
     }
@@ -140,7 +140,7 @@ export function getStandardFieldNames(): string[] {
 export function getStandardFieldDefinitions(): Record<string, ResolvedFieldDefinition> {
   const fromModule = resolveModulePath('./runtime/fields/standard')
 
-  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
     const fieldName = file.split('.')[0]
 
     if (!cachedStandardFields[fieldName]) {

@@ -30,7 +30,7 @@ export function resolveCollections(): { records: Record<string, ResolvedCollecti
 
   let errors = 0
 
-  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
     if (registeredStandardCollections[file.split('.')[0]]) {
       errors += resolveCollection(fullPath, records, true)
     }

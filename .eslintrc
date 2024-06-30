@@ -1,7 +1,0 @@
-{
-  "root": true,
-  "extends": ["@nuxt/eslint-config"],
-  "rules": {
-    "no-empty": "off"
-  }
-}

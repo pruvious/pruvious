@@ -25,7 +25,7 @@ export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: n
 
   let errors = 0
 
-  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+  for (const { fullPath, file } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
     if (registeredStandardJobs[file.split('.')[0]]) {
       errors += resolveJob(fullPath, records, true)
     }

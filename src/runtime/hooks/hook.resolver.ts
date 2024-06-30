@@ -27,7 +27,7 @@ export function resolveHooks(): { records: Record<string, ResolvedHook>; errors:
   let errors = 0
 
   if (fs.existsSync(fromModule)) {
-    for (const { fullPath, directory } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+    for (const { fullPath, directory } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
       if (registeredStandardHooks[directory.split(sep).pop()!]) {
         errors += resolveHook(fullPath, records, true)
       }

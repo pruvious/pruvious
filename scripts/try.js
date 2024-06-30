@@ -23,7 +23,6 @@ const execaOptions = { shell: true, stdout: 'inherit', stderr: 'inherit' }
 |
 */
 if (!process.argv.includes('--nopack')) {
-  await execa('pnpm build', { ...execaOptions })
   await execa('pnpm pack', { ...execaOptions })
 }
 

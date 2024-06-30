@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     enabled: true,
     timeline: { enabled: true },
   },
-  modules: ['pruvious'],
+  modules: ['../src/module'],
   pruvious: {
     database: 'sqlite:./dev.db',
     jwt: {

@@ -118,7 +118,7 @@
 
       <div :data-key="`${blockKey}.block.slots.${slotName}`" ref="sortableEls" class="sortable-area">
         <PruviousBlockTreeItem
-          v-for="({ block }, i) of ((blockData.slots as any)[slotName] as { block:CastedBlockData }[])"
+          v-for="({ block }, i) of ((blockData.slots as any)[slotName] as any)"
           :blockData="block"
           :blockFocused="blockFocused"
           :blockKey="`${blockKey}.block.slots.${slotName}.${i}`"

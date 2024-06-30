@@ -160,7 +160,7 @@ export function generateTranslatableStrings(
   const standardStructure: Record<string, Record<string, string>> = {}
   let i = 0
   for (const { file, fullPath } of walkDir(resolveModulePath('./runtime/translatable-strings/standard'), {
-    endsWith: ['.mjs', '.ts'],
+    endsWith: ['.js', '.ts'],
     endsWithout: '.d.ts',
   })) {
     const fileParts = file.split('.')

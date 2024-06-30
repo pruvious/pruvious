@@ -29,7 +29,7 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
 
   let errors = 0
 
-  for (const { file, fullPath } of walkDir(fromModule, { endsWith: ['.mjs', '.ts'], endsWithout: '.d.ts' })) {
+  for (const { file, fullPath } of walkDir(fromModule, { endsWith: ['.js', '.ts'], endsWithout: '.d.ts' })) {
     if (registeredStandardTranslatableStrings[file.split('.').shift()!]) {
       errors += resolveTranslatableStringFile(fullPath, records, true)
     }

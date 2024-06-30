@@ -19,4 +19,8 @@ export default defineNuxtConfig({
       users: false,
     },
   },
+  sourcemap: {
+    server: false,
+    client: false,
+  },
 })
