@@ -359,7 +359,9 @@ export async function getOptimizedImage(
             : 'image/png',
         )
       }
-      await (await db()).model('_optimized_images').create({ upload_id: upload.id, hash, ...resolvedOptions, width, height })
+      await (await db())
+        .model('_optimized_images')
+        .create({ upload_id: upload.id, hash, ...resolvedOptions, width, height })
     } catch (e: any) {
       return { success: false, error: e.message }
     }
