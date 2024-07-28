@@ -243,6 +243,16 @@ export async function getOptimizedImage(
        * The URL or absolute path to the optimized image.
        */
       src: string
+
+      /**
+       * The width of the optimized image.
+       */
+      width: number
+
+      /**
+       * The height of the optimized image.
+       */
+      height: number
     }
   | {
       /**
@@ -287,16 +297,12 @@ export async function getOptimizedImage(
 
   const uploadsOptions = getModuleOption('uploads')
   const hash = _hash(resolvedOptions)
-  const image = await (await db()).model('_optimized_images').findOne({ where: { upload_id: upload.id, hash } })
+  const image: any = await (await db()).model('_optimized_images').findOne({ where: { upload_id: upload.id, hash } })
   const paths = generateImagePaths(upload.directory, upload.filename, hash, options.format)
+  let width: number = image?.width ?? resolvedOptions.width
+  let height: number = image?.height ?? resolvedOptions.height
 
   if (!image) {
-    try {
-      await (await db()).model('_optimized_images').create({ upload_id: upload.id, hash, ...resolvedOptions })
-    } catch (e: any) {
-      return { success: false, error: e.message }
-    }
-
     try {
       const uploadsDir = path.resolve(getModuleOption('uploadsDir'))
       const original =
@@ -336,12 +342,16 @@ export async function getOptimizedImage(
         kernel: resolvedOptions.interpolation,
       })
 
+      const imageBuffer = await sharpImage.toBuffer({ resolveWithObject: true })
+      width = imageBuffer.info.width
+      height = imageBuffer.info.height
+
       if (uploadsOptions.drive.type === 'local') {
-        fs.writeFileSync(path.resolve(paths.drive), await sharpImage.toBuffer())
+        fs.writeFileSync(path.resolve(paths.drive), imageBuffer.data)
       } else {
         await s3PutObject(
           paths.drive,
-          await sharpImage.toBuffer(),
+          imageBuffer.data,
           resolvedOptions.format === 'jpeg'
             ? 'image/jpeg'
             : resolvedOptions.format === 'webp'
@@ -349,13 +359,13 @@ export async function getOptimizedImage(
             : 'image/png',
         )
       }
+      await (await db()).model('_optimized_images').create({ upload_id: upload.id, hash, ...resolvedOptions, width, height })
     } catch (e: any) {
-      await (await db()).model('_optimized_images').destroy({ where: { upload_id: upload.id, hash } })
       return { success: false, error: e.message }
     }
   }
 
-  return { success: true, src: paths.public }
+  return { success: true, src: paths.public, width, height }
 }
 
 export function generateImagePaths(

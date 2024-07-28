@@ -149,8 +149,8 @@ export default defineField({
               if (optimizedImage.success) {
                 sources.push({
                   srcset: optimizedImage.src,
-                  width: source.width ?? upload.width,
-                  height: source.height ?? upload.height,
+                  width: optimizedImage.width,
+                  height: optimizedImage.height,
                   media: source.media ?? null,
                   type: source.format === 'jpeg' ? 'image/jpeg' : `image/${source.format}`,
                 })
