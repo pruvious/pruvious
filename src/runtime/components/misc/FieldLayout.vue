@@ -57,7 +57,7 @@
         <div
           v-if="
             item?.type === 'field' &&
-            !fieldsDeclaration[item.fieldName].additional?.hidden &&
+            !fieldsDeclaration[item.fieldName]?.additional?.hidden &&
             resolvedConditionalLogic[keyPrefix + item.fieldName] &&
             (keyPrefix + item.fieldName !== 'translations' ||
               (collection.mode === 'multi' && record.id && collection.translatable && supportedLanguages.length > 1))
