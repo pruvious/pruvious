@@ -263,7 +263,9 @@ export default defineTranslatableStrings({
       pattern: 'The file **$file** exceeds the upload limit of $limit',
       input: { file: 'string', limit: 'string' },
     },
+    'The file does not meet the requirements': 'The file does not meet the requirements',
     'The filename without the extension': 'The filename without the extension',
+    'The image does not meet the requirements': 'The image does not meet the requirements',
     "The page you're looking for doesn't exist.": "The page you're looking for doesn't exist.",
     'The **rel** attribute specifies the relationship between the current document and the linked document.':
       'The **rel** attribute specifies the relationship between the current document and the linked document.',

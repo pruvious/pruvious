@@ -1,5 +1,15 @@
 <template>
-  <div class="flex flex-col items-center gap-2" :class="{ 'opacity-25': !meetsRequirements || isMoving }">
+  <div
+    v-pruvious-tooltip="
+      meetsRequirements
+        ? undefined
+        : upload.isImage
+        ? __('pruvious-dashboard', 'The image does not meet the requirements')
+        : __('pruvious-dashboard', 'The file does not meet the requirements')
+    "
+    class="flex flex-col items-center gap-2"
+    :class="{ 'opacity-25': !meetsRequirements || isMoving }"
+  >
     <div
       :tabindex="allowPick ? -1 : 0"
       class="group relative flex aspect-square w-full rounded-md border bg-white transition"
@@ -9,6 +19,7 @@
           upload.isImage,
         'hocus:before:opacity-50': upload.isImage && meetsRequirements,
         'focus-within:border-primary-70 hocus:border-primary-700': meetsRequirements,
+        'pointer-events-none': allowPick && !meetsRequirements,
       }"
       :style="{ backgroundImage: upload.isImage ? `url(${backgroundImage})` : undefined }"
     >
