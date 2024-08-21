@@ -47,7 +47,7 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
         endsWith: ['.ts'],
         endsWithout: '.d.ts',
       })) {
-        errors += resolveTranslatableStringFile(fullPath, records, false)
+        errors += resolveTranslatableStringFile(fullPath, records, false, true)
       }
     }
   }
