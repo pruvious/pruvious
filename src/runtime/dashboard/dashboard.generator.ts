@@ -41,7 +41,7 @@ export function generateDashboardPages(
   tsDashboard.newDecl(`export const dashboardPageComponentImports = {`)
   for (const { definition, source } of dashboardPagesArray) {
     tsDashboard.newLine(
-      `'${definition.path}': () => import('${relativeDotPruviousImport(resolveAppPath(definition.vueComponent))}')`,
+      `'${definition.path}': () => import('${relativeDotPruviousImport(resolveAppPath(definition.vueComponent))}'),`,
     )
   }
   tsDashboard.newLine(`}`)
