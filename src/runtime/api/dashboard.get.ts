@@ -36,7 +36,6 @@ export default defineEventHandler(async (event) => {
 
   for (const [collectionName, definition] of Object.entries(_collections)) {
     if (
-      definition.dashboard.visible &&
       definition.apiRoutes.readMany &&
       canAccessDashboard &&
       (event.context.auth.user?.isAdmin || (userCapabilities as any)[`collection-${collectionName}-read`])
@@ -81,7 +80,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const menu: PruviousDashboard['menu'] = Object.values(collections)
-    .filter(({ name }) => name !== 'uploads')
+    .filter(({ name, dashboard }) => name !== 'uploads' && dashboard.visible)
     .map(({ dashboard, label, mode, name }) => ({
       collection: name as CollectionName,
       icon: dashboard.icon,
