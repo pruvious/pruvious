@@ -1,0 +1,33 @@
+version: '3'
+services:
+
+  nuxt:
+    # This dockerfile will automatically build an image from your repositoru
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+    environment:
+      - NUXT_PRUVIOUS_DATABASE=postgresql://pruvious:pruvious@db:5432/pruvious
+    volumes:
+      - # Make sure to set a path where you want to store your uploads
+      - <CHANGE TO WHERE YOU WANNA STORE YOUR UPLOADS>:/app/uploads
+    networks:
+      - 3000:3000
+  db:
+    image: postgres:16-alpine
+    restart: always
+    #    command: ["postgres", "-c", "config_file=/var/lib/postgresql/data/postgresql.conf"]
+    environment:
+      - POSTGRES_USER=pruvious
+      - POSTGRES_PASSWORD=pruvious
+      - POSTGRES_DB=pruvious
+      - PGDATA=/var/lib/postgresql/data/
+    volumes:
+      - # Make sure to set a path where you want postgres to store your database data
+      - <CHANGE TO A PATH WHERE YOU WANT TO STORE YOU DB FILES>:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+
