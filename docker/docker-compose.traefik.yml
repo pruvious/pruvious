@@ -1,40 +1,45 @@
-# This file can be used as a starting point for deploying a built pruvious container
-# in a docker swarm cluster with traefik as the loadbalancer.
-# We (onesrv.net) use this in production, but cannot guarantee that this will work for your
-# cluster right out of the box as it depends on how you installed and setup traefik
+# Docker Compose file for deploying a built Pruvious container in a Docker Swarm cluster with Traefik as the load balancer
+# Note: This configuration is based on onesrv.net's production setup and may require adjustments for your specific environment
+
 version: '3'
 services:
   nuxt:
-    # Make sure to replace this with the pruvious image you have built before!
-    # How to build a docker image: https://docs.docker.com/get-started/workshop/02_our_app/
+    # Replace this with your built Pruvious Docker image
+    # For instructions on building Docker images, visit: https://docs.docker.com/get-started/workshop/02_our_app/
     image: <REPLACE:your-docker-image>:latest
     restart: unless-stopped
     deploy:
       replicas: 1
       labels:
+        # Traefik configuration for HTTP
         - traefik.http.routers.pruvious-http.rule=Host(`<yourdomain.com>`)
         - traefik.http.routers.pruvious-http.entrypoints=web
 
+        # Traefik configuration for HTTPS
         - traefik.http.routers.pruvious.rule=Host(`<yourdomain.com>`)
         - traefik.http.routers.pruvious.entrypoints=websecure
         - traefik.http.routers.pruvious.tls
-        # Our letsencrypt cert resolver is called le, change name if needed
+        # Specify the Let's Encrypt certificate resolver (change 'le' if your resolver has a different name)
         - traefik.http.routers.pruvious.tls.certResolver=le
-        -
+
+        # Specify the port your Nuxt app is running on (default is 3000)
         - traefik.http.services.pruvious-service.loadbalancer.server.port=3000
         - traefik.constraint-label=traefik-public
         - traefik.enable=true
     environment:
+      # Database connection string - adjust if necessary
       - NUXT_PRUVIOUS_DATABASE=postgresql://pruvious:pruvious@db:5432/pruvious
     volumes:
       - uploads:/app/uploads
     networks:
       - traefik-public
       - internal
+
   db:
     image: postgres:15-alpine
     restart: always
-    #    command: ["postgres", "-c", "config_file=/var/lib/postgresql/data/postgresql.conf"]
+    # Uncomment the following line if you need to specify a custom PostgreSQL configuration file
+    #command: ["postgres", "-c", "config_file=/var/lib/postgresql/data/postgresql.conf"]
     environment:
       - POSTGRES_USER=pruvious
       - POSTGRES_PASSWORD=pruvious
@@ -46,13 +51,15 @@ services:
       - internal
 
 networks:
+  # External network for Traefik communication
   traefik-public:
     external: true
+  # Internal network for service-to-service communication
   internal:
 
-
-# MAKE SURE TO CHANGE THESE VOLUMES TO YOUR PREFERED VOLUME DRIVER! (Please see docker docs or use the standard docker-compose.yml
-# if you do not know what to do here!
+# Volume configuration
+# IMPORTANT: Adjust these volume definitions according to your preferred volume driver
+# If you're unsure, consider using the standard docker-compose.yml or refer to Docker documentation
 volumes:
   db:
   uploads:

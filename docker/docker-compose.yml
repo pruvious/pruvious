@@ -1,8 +1,7 @@
 version: '3'
 services:
-
   nuxt:
-    # This dockerfile will automatically build an image from your repositoru
+    # Build the Nuxt application using the Dockerfile in the current directory
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,24 +9,27 @@ services:
     deploy:
       replicas: 1
     environment:
+      # Database connection string for Pruvious
       - NUXT_PRUVIOUS_DATABASE=postgresql://pruvious:pruvious@db:5432/pruvious
     volumes:
-      - # Make sure to set a path where you want to store your uploads
-      - <CHANGE TO WHERE YOU WANNA STORE YOUR UPLOADS>:/app/uploads
+      # Mount point for uploads. Replace <PATH_TO_UPLOADS> with your desired local path
+      - <PATH_TO_UPLOADS>:/app/uploads
     networks:
+      # Expose the Nuxt application on port 3000
       - 3000:3000
   db:
     image: postgres:16-alpine
     restart: always
-    #    command: ["postgres", "-c", "config_file=/var/lib/postgresql/data/postgresql.conf"]
+    # Uncomment the following line to use a custom PostgreSQL configuration file
+    # command: ["postgres", "-c", "config_file=/var/lib/postgresql/data/postgresql.conf"]
     environment:
       - POSTGRES_USER=pruvious
       - POSTGRES_PASSWORD=pruvious
       - POSTGRES_DB=pruvious
       - PGDATA=/var/lib/postgresql/data/
     volumes:
-      - # Make sure to set a path where you want postgres to store your database data
-      - <CHANGE TO A PATH WHERE YOU WANT TO STORE YOU DB FILES>:/var/lib/postgresql/data/
+      # Mount point for PostgreSQL data. Replace <PATH_TO_DB_DATA> with your desired local path
+      - <PATH_TO_DB_DATA>:/var/lib/postgresql/data/
     ports:
+      # Expose PostgreSQL on port 5432
       - 5432:5432
-
