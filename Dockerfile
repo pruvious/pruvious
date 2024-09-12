@@ -20,7 +20,8 @@ COPY --link package.json package-lock.json ./
 
 # Install all dependencies, including devDependencies
 # --production=false ensures devDependencies are installed
-# --arch=x64 specifies the architecture
+# --arch=x64 specifies the architecture - this has been added to ensure the build output runs as expected if built on non x64 processors but has to run on an x64 server
+# If you plan on running pruvious on an arm or non x64 based host, make sure to remove this argument!
 RUN npm install --production=false --arch=x64
 
 # Copy the rest of the application code
