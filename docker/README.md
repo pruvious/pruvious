@@ -7,7 +7,6 @@ By: [@flexusma](https://github.com/Flexusma)
 > The CLI allows you to deploy your local Instance to a remote server using SSH while also including database data.
 > More information on Pruvious CLI can be found here: https://pruvious.com/docs/deployment.
 
-
 This guide provides a quick overview and general guidelines on how to deploy your Pruvious instance using Docker.
 
 The supplied Dockerfile builds a production container you can use to run Pruvious on most container runtimes.
@@ -43,7 +42,6 @@ The supplied docker-compose files in the `/docker` directory are intended to be 
 
 Have docker-compose automatically build an image from your current repository and use that in the deployment.
 This is the easiest way to deploy Pruvious with a database on a single system, if you want to use docker.
-
 
 #### Step 1: Copy /docker/docker-compose.yml to /
 

@@ -41,7 +41,7 @@ describe('optimized images', async () => {
     })
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: originalWidth, height: originalHeight },
       format: 'jpeg',
       width: originalWidth,
       height: originalHeight,
@@ -60,7 +60,7 @@ describe('optimized images', async () => {
     )
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: 100, height: 100 },
       format: 'jpeg',
       width: 100,
       height: 100,
@@ -75,7 +75,7 @@ describe('optimized images', async () => {
     })
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: originalWidth, height: originalHeight },
       format: 'webp',
       width: originalWidth,
       height: originalHeight,
@@ -94,7 +94,7 @@ describe('optimized images', async () => {
     )
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: 100, height: 100 },
       format: 'webp',
       width: 100,
       height: 100,
@@ -109,7 +109,7 @@ describe('optimized images', async () => {
     })
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: originalWidth, height: originalHeight },
       format: 'png',
       width: originalWidth,
       height: originalHeight,
@@ -128,7 +128,7 @@ describe('optimized images', async () => {
     )
 
     expect(response).toEqual({
-      result: { success: true, src: expect.any(String) },
+      result: { success: true, src: expect.any(String), width: 100, height: 100 },
       format: 'png',
       width: 100,
       height: 100,
