@@ -225,9 +225,9 @@ export default defineNuxtModule<ModuleOptions>({
     |--------------------------------------------------------------------------
     |
     */
-    if (!semver.satisfies(nuxt._version, '3.12')) {
+    if (!semver.satisfies(nuxt._version, '3.13')) {
       warn(
-        `This version of Pruvious is compatible with Nuxt $c{{ 3.12.x }}. You are currently using Nuxt $y{{ ${nuxt._version} }}.`,
+        `This version of Pruvious is compatible with Nuxt $c{{ 3.13.x }}. You are currently using Nuxt $y{{ ${nuxt._version} }}.`,
       )
     }
 
