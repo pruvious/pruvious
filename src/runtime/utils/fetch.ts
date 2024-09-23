@@ -205,19 +205,21 @@ export async function pruviousFetch<Data>(
     )
   }
 
+  // Resolve headers
+  const token = getRawToken()
+  const headers = (options?.headers ?? {}) as Record<string, any>
+
+  if (!headers['Accept-Language']) {
+    headers['Accept-Language'] = getLanguage()
+  }
+
+  if (!headers['Authorization'] && token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const data = await $fetch<Data>(resolvedPath, {
-    onRequest({ options }) {
-      const token = getRawToken()
-      const headers = (options.headers ||= {}) as Record<string, string>
-
-      if (!headers['Accept-Language']) {
-        headers['Accept-Language'] = getLanguage()
-      }
-
-      if (!headers['Authorization'] && token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-
+    headers,
+    onRequest() {
       if (process.client && dispatchEvents) {
         window.dispatchEvent(new CustomEvent('pruvious-fetch-start'))
       }
