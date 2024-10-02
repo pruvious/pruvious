@@ -14,7 +14,7 @@ services:
     volumes:
       # Mount point for uploads. Replace <PATH_TO_UPLOADS> with your desired local path
       - <PATH_TO_UPLOADS>:/app/uploads
-    networks:
+    ports:
       # Expose the Nuxt application on port 3000
       - 3000:3000
   db:
