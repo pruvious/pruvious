@@ -102,12 +102,12 @@ export default defineCommand({
 
       // Specify versions of nuxt, vue and vue-router
       packageJson.dependencies ??= {}
-      packageJson.dependencies.nuxt = '^3.12.2'
-      packageJson.dependencies.vue = '^3.4.29'
-      packageJson.dependencies['vue-router'] = '^4.4.0'
+      packageJson.dependencies.nuxt = '^3.13.2'
+      packageJson.dependencies.vue = '^3.5.8'
+      packageJson.dependencies['vue-router'] = '^4.4.5'
 
       // Add pruvious
-      packageJson.dependencies.pruvious = '^3.12.8'
+      packageJson.dependencies.pruvious = '^3.13.0'
 
       // Sort
       packageJson.dependencies = Object.fromEntries(
@@ -217,7 +217,7 @@ export function replaceReadme(cwd?: string) {
     path.resolve(cwd ?? process.cwd(), 'README.md'),
     [
       '# Project',
-      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.12.8.',
+      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.13.0.',
       '',
       'Documentation: [https://pruvious.com/docs](https://pruvious.com/docs)',
       '',

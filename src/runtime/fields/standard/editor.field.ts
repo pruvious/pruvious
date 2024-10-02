@@ -2,7 +2,7 @@ import { type CollectionName, type PublicPagesOptions } from '#pruvious'
 import { prefixPrimaryLanguage, primaryLanguage } from '#pruvious/preflight'
 import { defaultSanitizer } from '../../sanitizers/default'
 import { stringSanitizer } from '../../sanitizers/string'
-import { capitalize, joinRouteParts, resolveCollectionPathPrefix, titleCase } from '../../utils/string'
+import { capitalize, isString, joinRouteParts, resolveCollectionPathPrefix, titleCase } from '../../utils/string'
 import { stringValidator } from '../../validators/string'
 import { defineField } from '../field.definition'
 
@@ -166,6 +166,10 @@ export default defineField({
   population: {
     type: 'string',
     populator: async ({ query, value }) => {
+      if (!isString(value)) {
+        return ''
+      }
+
       const { collections } = await import('#pruvious/collections')
       const regex = /href="([a-z0-9-]+):([1-9][0-9]*?)([#\?].*)?"/g
 

@@ -302,6 +302,7 @@ function onClickLabel() {
 
 function addItem(index?: number) {
   const newItem: Record<string, any> = {}
+  const array = [...props.modelValue]
 
   for (const [subfieldName, subfield] of Object.entries(props.options.subfields)) {
     newItem[subfieldName] = JSON.parse(
@@ -312,12 +313,12 @@ function addItem(index?: number) {
   }
 
   if (isUndefined(index)) {
-    props.modelValue.push(newItem)
+    array.push(newItem)
   } else {
-    props.modelValue.splice(index, 0, newItem)
+    array.splice(index, 0, newItem)
   }
 
-  emit('update:modelValue', props.modelValue)
+  emit('update:modelValue', array)
   refreshSortable()
 }
 
