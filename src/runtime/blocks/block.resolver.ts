@@ -26,7 +26,10 @@ const cachedBlockDefinition: Record<string, BlockDefinition> = {}
 const generate: typeof babelGenerate =
   typeof babelGenerate === 'function' ? babelGenerate : (babelGenerate as any).default
 
-export async function resolveBlocks(fields: Record<string, ResolvedField>): Promise<{
+export async function resolveBlocks(
+  fields: Record<string, ResolvedField>,
+  skipCache = false,
+): Promise<{
   records: Record<string, ResolvedBlock>
   errors: number
 }> {
@@ -52,6 +55,10 @@ export async function resolveBlocks(fields: Record<string, ResolvedField>): Prom
   if (getModuleOption('standardCollections').presets) {
     const filePath = resolveModulePath('./runtime/blocks/standard/Preset.vue')
     errors += await resolveBlock(filePath, 'Preset.vue', records, fields)
+  }
+
+  if (skipCache) {
+    clearAllCachedBlocks()
   }
 
   return { records, errors }
@@ -288,4 +295,10 @@ export async function resolveBlockDefinition(block: ResolvedBlock): Promise<Bloc
 export function clearCachedBlock(path: string) {
   delete cachedBlockCode[path]
   delete cachedBlockDefinition[path]
+}
+
+export function clearAllCachedBlocks() {
+  for (const path of Object.keys(cachedBlockCode)) {
+    clearCachedBlock(path)
+  }
 }

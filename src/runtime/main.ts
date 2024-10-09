@@ -100,7 +100,7 @@ export async function generateDotPruvious(
   const collections = resolveCollections()
   const hooks = resolveHooks()
   const translatableStrings = resolveTranslatableStrings()
-  const blocks = await resolveBlocks(fields.records)
+  const blocks = await resolveBlocks(fields.records, !!fields.errors)
   const layouts = await resolveLayouts()
   const jobs = resolveJobs()
   const dashboardPages = resolveDashboardPages()
