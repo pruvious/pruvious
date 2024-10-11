@@ -10,7 +10,6 @@
 import { ref, type PropType } from '#imports'
 import type { CollectionName, UserCapability } from '#pruvious'
 import { useAuth } from '../../composables/auth'
-import { setLanguage } from '../../composables/language'
 import { usePage } from '../../composables/page'
 import { useUser } from '../../composables/user'
 import { pruviousFetch } from '../../utils/fetch'
@@ -38,7 +37,6 @@ if (process.client && window.top === window.self) {
 
     if (response.success) {
       user.value = response.data
-      setLanguage(user.value.dashboardLanguage!, { reloadTranslatableStrings: false })
     } else {
       auth.value.isLoggedIn = false
       auth.value.userId = null
