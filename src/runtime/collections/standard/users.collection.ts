@@ -116,25 +116,23 @@ export default defineCollection({
       },
       additional: {
         guards: [
-          async ({ user, cache, currentQuery, language, operation, value }) => {
-            if (!user?.isAdmin) {
-              if (operation === 'create') {
-                if (value) {
-                  throw new Error(__(language, 'pruvious-server', 'You are not authorized to create admin users'))
-                }
-              } else if (operation === 'update') {
-                const records = await fetchSubsetRecords<'users'>(currentQuery as any, 'update', {
-                  data: cache,
-                  key: 'records',
-                })
+          async ({ cache, currentQuery, language, operation, value }) => {
+            if (operation === 'create') {
+              if (value) {
+                throw new Error(__(language, 'pruvious-server', 'You are not authorized to create admin users'))
+              }
+            } else if (operation === 'update') {
+              const records = await fetchSubsetRecords<'users'>(currentQuery as any, 'update', {
+                data: cache,
+                key: 'records',
+              })
 
-                if (value && records.some(({ isAdmin }) => !isAdmin)) {
-                  throw new Error(
-                    __(language, 'pruvious-server', 'You are not authorized to promote users to admin status'),
-                  )
-                } else if (!value && records.some(({ isAdmin }) => isAdmin)) {
-                  throw new Error(__(language, 'pruvious-server', 'You are not authorized to demote admin users'))
-                }
+              if (value && records.some(({ isAdmin }) => !isAdmin)) {
+                throw new Error(
+                  __(language, 'pruvious-server', 'You are not authorized to promote users to admin status'),
+                )
+              } else if (!value && records.some(({ isAdmin }) => isAdmin)) {
+                throw new Error(__(language, 'pruvious-server', 'You are not authorized to demote admin users'))
               }
             }
           },
