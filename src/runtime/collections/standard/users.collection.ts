@@ -117,7 +117,7 @@ export default defineCollection({
       additional: {
         guards: [
           async ({ cache, currentQuery, language, operation, value }) => {
-            if (operation === 'create') {
+            if (operation === 'create' && value) {
               throw new Error(__(language, 'pruvious-server', 'You are not authorized to create admin users'))
             }
 
