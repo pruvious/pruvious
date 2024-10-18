@@ -116,22 +116,26 @@ export default defineCollection({
       },
       additional: {
         guards: [
-          async ({ cache, currentQuery, language, operation, value }) => {
-            if (operation === 'create') {
-              throw new Error(__(language, 'pruvious-server', 'You are not authorized to create admin users'))
-            }
+          async ({ user, cache, currentQuery, language, operation, value }) => {
+            if (!user?.isAdmin) {
+              if (operation === 'create') {
+                if (value) {
+                  throw new Error(__(language, 'pruvious-server', 'You are not authorized to create admin users'))
+                }
+              } else if (operation === 'update') {
+                const records = await fetchSubsetRecords<'users'>(currentQuery as any, 'update', {
+                  data: cache,
+                  key: 'records',
+                })
 
-            const records = await fetchSubsetRecords<'users'>(currentQuery as any, 'update', {
-              data: cache,
-              key: 'records',
-            })
-
-            if (value && records.some(({ isAdmin }) => !isAdmin)) {
-              throw new Error(
-                __(language, 'pruvious-server', 'You are not authorized to promote users to admin status'),
-              )
-            } else if (!value && records.some(({ isAdmin }) => isAdmin)) {
-              throw new Error(__(language, 'pruvious-server', 'You are not authorized to demote admin users'))
+                if (value && records.some(({ isAdmin }) => !isAdmin)) {
+                  throw new Error(
+                    __(language, 'pruvious-server', 'You are not authorized to promote users to admin status'),
+                  )
+                } else if (!value && records.some(({ isAdmin }) => isAdmin)) {
+                  throw new Error(__(language, 'pruvious-server', 'You are not authorized to demote admin users'))
+                }
+              }
             }
           },
         ],
@@ -187,13 +191,13 @@ export default defineCollection({
           {
             onCreate: false,
             onUpdate: true,
-            guard: async ({ cache, currentQuery, language }) => {
+            guard: async ({ value, cache, currentQuery, language }) => {
               const records = await fetchSubsetRecords<'users'>(currentQuery as any, 'update', {
                 data: cache,
                 key: 'records',
               })
 
-              if (records.some(({ isAdmin }) => isAdmin)) {
+              if (records.some(({ isAdmin, email }) => isAdmin && email !== value)) {
                 throw new Error(
                   __(
                     language,
