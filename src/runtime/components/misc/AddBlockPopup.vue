@@ -20,14 +20,14 @@
     <div class="grid gap-4 p-4 text-vs" :class="{ 'grid-cols-[repeat(auto-fill,minmax(8rem,1fr))]': blocks.length }">
       <button
         v-for="{ name, label, description, icon } of blocks"
-        v-pruvious-tooltip="description"
+        v-pruvious-tooltip="__('pruvious-dashboard', description)"
         @click="add(name)"
         data-ignore-autofocus
         type="button"
         class="flex aspect-square flex-col items-center justify-center gap-3 rounded-md border p-2 transition hocus:border-primary-700"
       >
         <span v-html="icon" class="h-5 w-5 shrink-0 text-gray-400"></span>
-        <span class="clamp overflow-hidden overflow-ellipsis">{{ label }}</span>
+        <span class="clamp overflow-hidden overflow-ellipsis">{{ __('pruvious-dashboard', label) }}</span>
       </button>
 
       <button
