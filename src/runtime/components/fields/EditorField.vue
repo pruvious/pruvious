@@ -249,6 +249,7 @@
           :fieldKey="`${id}.linkUrl`"
           :is="LinkField"
           :options="{ label: __('pruvious-dashboard', 'Hyperlink'), required: true }"
+          :record="record"
           @update:modelValue="onLinkUrlChange()"
         />
 
@@ -382,6 +383,11 @@ const props = defineProps<{
    * By default, the field is enabled.
    */
   disabled?: boolean
+
+  /**
+   * The current collection record as a reactive key-value object, containing all field names and their values.
+   */
+  record?: Record<string, any>
 
   /**
    * When set to `true`, the field will won't autofocus in popups.
