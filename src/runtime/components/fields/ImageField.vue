@@ -249,9 +249,11 @@ async function refresh() {
       }
     } else {
       upload.value = null
+      emit('update:modelValue', null)
     }
   } else {
     upload.value = null
+    emit('update:modelValue', null)
   }
 
   loaded.value = true
