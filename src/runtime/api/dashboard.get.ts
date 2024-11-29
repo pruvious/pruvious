@@ -38,7 +38,9 @@ export default defineEventHandler(async (event) => {
     if (
       definition.apiRoutes.readMany &&
       canAccessDashboard &&
-      (event.context.auth.user?.isAdmin || (userCapabilities as any)[`collection-${collectionName}-read`])
+      (event.context.auth.user?.isAdmin ||
+        (userCapabilities as any)[`collection-${collectionName}-read`] ||
+        collectionName === 'users')
     ) {
       collections[collectionName] = {
         apiRoutes: definition.apiRoutes,
@@ -48,6 +50,10 @@ export default defineEventHandler(async (event) => {
         dashboard: {
           ...definition.dashboard,
           icon: dashboardIcons[definition.dashboard.icon] ?? definition.dashboard.icon,
+          visible:
+            event.context.auth.user?.isAdmin || (userCapabilities as any)[`collection-${collectionName}-read`]
+              ? definition.dashboard.visible
+              : false,
         },
         fields: Object.fromEntries(
           Object.entries(definition.fields).map(([fieldName, field]) => {
