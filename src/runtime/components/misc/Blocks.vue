@@ -10,6 +10,9 @@
     <component
       v-if="block.name !== 'Preset'"
       v-bind="block.fields"
+      :__block="block"
+      :__index="i"
+      :__list="blocks"
       :data-pruvious-block-key="
         fixedKey || (keyPrefix && !isPreset && route.query.__p ? `${keyPrefix}.${i}` : undefined)
       "
