@@ -986,7 +986,10 @@ export interface ModuleOptions {
 
           /**
            * A URL prefix for accessing uploaded files.
-           * In example, the `urlPrefix` value of `'files'` will result in the following URL: `http://localhost:3000/files/[upload-path]`.
+           * For example, the `urlPrefix` value of `'files'` will result in the following URL: `http://localhost:3000/files/[upload-path]`.
+           *
+           * Pruvious creates a symbolic link in Nuxt's `public` directory matching the `urlPrefix` name.
+           * Due to this implementation, `urlPrefix` cannot be an empty string or a path that already exists in the `public` directory.
            *
            * @default 'uploads'
            */
