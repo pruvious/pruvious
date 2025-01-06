@@ -1030,7 +1030,7 @@ export interface ModuleOptions {
           /**
            * The S3 endpoint.
            *
-           * Example: `fra1.digitaloceanspaces.com`
+           * Example: `https://fra1.digitaloceanspaces.com`
            */
           endpoint: string
 
