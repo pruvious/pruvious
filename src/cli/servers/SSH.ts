@@ -88,7 +88,7 @@ export class SSH {
     if (site.forceWWW && !site.noWWW) {
       nginxConfig = nginxConfig
         .replaceAll('https://{{ domainName }}', 'https://www.{{ domainName }}')
-        .replaceAll("if ($host = 'www.{{ domainName }}')", "if ($host = '{{ domainName }}')")
+        .replaceAll('if ($host = "www.{{ domainName }}")', 'if ($host = "{{ domainName }}")')
     }
 
     if (site.trailing) {
