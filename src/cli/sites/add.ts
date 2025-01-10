@@ -42,6 +42,10 @@ export default defineCommand({
       type: 'boolean',
       description: 'Ignore all errors',
     },
+    noLookup: {
+      type: 'boolean',
+      description: 'Skip checking if domain points to server',
+    },
   }),
   async run({ args }) {
     const config = await loadConfig()
@@ -116,7 +120,11 @@ export default defineCommand({
     // Configure site on server
     const ssh = new SSH(server, !!args.ignore)
     await ssh.connect()
-    await ssh.domainPointsToServer(domain)
+
+    if (!args.noLookup) {
+      await ssh.domainPointsToServer(domain)
+    }
+
     await ssh.addSite(site, !!args.override)
     ssh.disconnect()
 
