@@ -217,7 +217,7 @@ export function replaceReadme(cwd?: string) {
     path.resolve(cwd ?? process.cwd(), 'README.md'),
     [
       '# Project',
-      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.14.0.',
+      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.15.0.',
       '',
       'Documentation: [https://pruvious.com/docs](https://pruvious.com/docs)',
       '',
