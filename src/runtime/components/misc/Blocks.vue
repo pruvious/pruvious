@@ -5,6 +5,7 @@
       :blocks="block.fields.preset.blocks"
       :fixedKey="fixedKey || (keyPrefix && route.query.__p) ? `${keyPrefix}.${i}` : undefined"
       :isPreset="true"
+      :parents="parents"
     />
 
     <component
@@ -13,6 +14,7 @@
       :__block="block"
       :__index="i"
       :__list="blocks"
+      :__parents="parents"
       :data-pruvious-block-key="
         fixedKey || (keyPrefix && !isPreset && route.query.__p ? `${keyPrefix}.${i}` : undefined)
       "
@@ -31,6 +33,7 @@
           :fixedKey="fixedKey"
           :isPreset="isPreset"
           :keyPrefix="`${keyPrefix}.${i}.block.slots.${slotName}`"
+          :parents="[...parents, block]"
         />
       </template>
     </component>
@@ -39,7 +42,7 @@
 
 <script lang="ts" setup>
 import { useRoute, watch, type PropType } from '#imports'
-import type { PopulatedFieldType } from '#pruvious'
+import type { PopulatedBlockData, PopulatedFieldType } from '#pruvious'
 import { blocks as blockImports } from '#pruvious/blocks/imports'
 
 const props = defineProps({
@@ -57,6 +60,10 @@ const props = defineProps({
   },
   fixedKey: {
     type: String,
+  },
+  parents: {
+    type: Array as PropType<PopulatedBlockData[]>,
+    default: () => [],
   },
 })
 

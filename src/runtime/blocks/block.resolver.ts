@@ -160,7 +160,7 @@ async function resolveBlock(
           if (value === 'props') {
             if (!key.match(/[a-z]/i)) {
               queueError(`Prop name $c{{ ${key} }} must include at least one letter in $c{{ ${filePath} }}`)
-            } else if (camelCase(key) !== key) {
+            } else if (camelCase(key) !== key && !key.startsWith('__')) {
               queueError(
                 `Prop name $c{{ ${key} }} must be written in camel case (e.g., $c{{ ${camelCase(
                   key,
