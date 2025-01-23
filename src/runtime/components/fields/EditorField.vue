@@ -1022,7 +1022,13 @@ const updateStates = debounce(() => {
         className: format.className,
         label: format.label,
         tags: format.tags,
-        active: path.some((node) => node.classes.includes(format.className)),
+        active: path.some((node) =>
+          format.className
+            .split(' ')
+            .map((c) => c.trim())
+            .filter(Boolean)
+            .every((c) => node.classes.includes(c)),
+        ),
       })),
   )
 
@@ -1030,7 +1036,11 @@ const updateStates = debounce(() => {
     ...(props.options.inlineFormats ?? []).map((format) => ({
       className: format.className,
       label: format.label,
-      active: textStyleClasses.includes(format.className),
+      active: format.className
+        .split(' ')
+        .map((c) => c.trim())
+        .filter(Boolean)
+        .every((c) => textStyleClasses.includes(c)),
     })),
   )
 
@@ -1098,17 +1108,22 @@ const updateStates = debounce(() => {
 }, 50)
 
 function onBlockFormatChange(format: { className: string; label?: string; tags?: string[]; active: boolean }) {
+  const classes = format.className
+    .split(' ')
+    .map((c) => c.trim())
+    .filter(Boolean)
+
   for (const node of getSelectionPath()) {
     if (!format.tags || format.tags.includes('*') || format.tags.includes(node.tag)) {
       if (format.active) {
-        if (!node.classes.includes(format.className)) {
-          node.classes.push(format.className)
-        }
+        node.classes = uniqueArray([...node.classes, ...classes])
       } else {
-        const index = node.classes.indexOf(format.className)
+        for (const c of classes) {
+          const index = node.classes.indexOf(c)
 
-        if (index > -1) {
-          node.classes.splice(index, 1)
+          if (index > -1) {
+            node.classes.splice(index, 1)
+          }
         }
       }
 
@@ -1122,19 +1137,25 @@ function onBlockFormatChange(format: { className: string; label?: string; tags?:
 function onInlineFormatChange(format: { className: string; label?: string; active: boolean }) {
   const textStyle = editor?.getAttributes('spanClass')
   const textStyleClasses: string[] = textStyle && textStyle['_fr--'] ? textStyle['_fr--'].split(' ') : []
+  const classes = format.className
+    .split(' ')
+    .map((c) => c.trim())
+    .filter(Boolean)
 
   if (format.active) {
-    textStyleClasses.push(format.className)
+    textStyleClasses.splice(0, textStyleClasses.length, ...uniqueArray([...textStyleClasses, ...classes]))
   } else {
-    const index = textStyleClasses.indexOf(format.className)
+    for (const c of classes) {
+      const index = textStyleClasses.indexOf(c)
 
-    if (index > -1) {
-      textStyleClasses.splice(index, 1)
+      if (index > -1) {
+        textStyleClasses.splice(index, 1)
+      }
     }
   }
 
   if (textStyleClasses.length) {
-    ;(editor?.commands as any).setSpanClass(uniqueArray(textStyleClasses).join(' '))
+    ;(editor?.commands as any).setSpanClass(textStyleClasses.sort().join(' '))
   } else {
     ;(editor?.commands as any).unsetSpanClass()
   }
