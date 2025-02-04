@@ -121,15 +121,16 @@
         @openDirectory="onOpenDirectory"
       />
     </div>
-  </PruviousBase>
 
-  <PruviousFilterPopup
-    v-model:visible="filterPopupVisible"
-    :filter="filter"
-    :title="__('pruvious-dashboard', 'Filter $items', { items: __('pruvious-dashboard', 'files') })"
-    @updateFilter="onUpdateFilter()"
-  />
-  <PruviousMediaMovePopup v-model:visible="movePopupVisible" :directory="directory" :selection="selection" />
+    <PruviousFilterPopup
+      v-model:visible="filterPopupVisible"
+      :filter="filter"
+      :title="__('pruvious-dashboard', 'Filter $items', { items: __('pruvious-dashboard', 'files') })"
+      @updateFilter="onUpdateFilter()"
+    />
+
+    <PruviousMediaMovePopup v-model:visible="movePopupVisible" :directory="directory" :selection="selection" />
+  </PruviousBase>
 </template>
 
 <script lang="ts" setup>
