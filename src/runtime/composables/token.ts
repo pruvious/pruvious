@@ -101,6 +101,9 @@ export function removeToken() {
 export function setToken(token: string) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
+    const storedToken = useToken()
+
     localStorage.setItem(runtimeConfig.public.pruvious.jwtLocalStorageKey, token)
+    storedToken.value = { token, ...(decode(token) as Omit<PruviousToken, 'token'>) }
   }
 }
