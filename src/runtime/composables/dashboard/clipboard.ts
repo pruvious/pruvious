@@ -32,6 +32,7 @@ useEventListener('focus', checkClipboard)
 useEventListener('pruvious-copy' as any, checkClipboard)
 
 async function checkClipboard() {
+  return
   try {
     const value = JSON.parse(await navigator.clipboard.readText())
 
