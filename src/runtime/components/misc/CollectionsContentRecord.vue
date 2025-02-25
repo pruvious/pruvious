@@ -983,7 +983,6 @@ useEventListener(window, 'message', async (event) => {
         }
         break
       case 'pruvious:paste':
-        console.log('paste')
         if (selectedBlock.value) {
           const { text } = event.data.data as { text: string }
           setClipboardState(text)
