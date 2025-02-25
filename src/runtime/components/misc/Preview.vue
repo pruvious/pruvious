@@ -25,6 +25,7 @@ import { __, loadTranslatableStrings } from '../../composables/translatable-stri
 import { isArray } from '../../utils/array'
 import { pruviousFetch } from '../../utils/fetch'
 import { isKeyOf, isObject } from '../../utils/object'
+import { useClipboardText } from '../../composables/dashboard/clipboard'
 
 const page = usePage()
 const route = useRoute()
@@ -126,6 +127,13 @@ if (process.client) {
     useEventListener(window, 'focus', () => messageParent('focus'))
     useEventListener(window, 'blur', () => messageParent('blur'))
 
+    useEventListener(window, 'paste', (e) => {
+      const text = useClipboardText(e)
+      if (text) {
+        messageParent('paste', { text })
+      }
+    })
+
     useEventListener('keydown', (event) => {
       const action = getHotkeyAction(event)
 
@@ -140,8 +148,6 @@ if (process.client) {
           messageParent('copy')
         } else if (action === 'cut') {
           messageParent('cut')
-        } else if (action === 'paste') {
-          messageParent('paste')
         } else if (action === 'delete') {
           messageParent('delete')
         } else if (action === 'duplicate') {

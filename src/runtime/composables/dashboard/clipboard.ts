@@ -17,30 +17,44 @@ export const usePruviousClipboard: () => Ref<PruviousClipboard | null> = () =>
 
 /**
  * Copy something to the clipboard.
+ * Also keeps the pruvious clipboard state in sync.
  */
 export async function copyToClipboard(type: PruviousClipboard['pruviousClipboardType'], payload: any) {
+  const text = JSON.stringify({ pruviousClipboardType: type, payload })
+  setClipboardState(text)
+
   await navigator.clipboard
-    .writeText(JSON.stringify({ pruviousClipboardType: type, payload }))
+    .writeText(text)
     .then(() => pruviousToasterShow({ message: __('pruvious-dashboard', 'Copied') }))
     .catch((error) => pruviousToasterShow({ message: error.toString(), type: 'error' }))
-
-  await checkClipboard()
 }
 
-useEventListener('copy', checkClipboard)
-useEventListener('focus', checkClipboard)
-useEventListener('pruvious-copy' as any, checkClipboard)
+/**
+ * Set the pruvious clipboard state from a string.
+ * Called when:
+ *  - writing to the clipboard (to keep the in-app clipboard state in sync)
+ *  - receiving a paste event from an external source
+ * @param text 
+ */
+export function setClipboardState(text: string) {
+  const value = JSON.parse(text)
 
-async function checkClipboard() {
-  return
-  try {
-    const value = JSON.parse(await navigator.clipboard.readText())
+  if (value.pruviousClipboardType) {
+    usePruviousClipboard().value = value
+  }
+}
 
-    if (value.pruviousClipboardType) {
-      usePruviousClipboard().value = value
-      return
-    }
-  } catch {}
+/**
+ * Override the default paste behavior.
+ * Get the clipboard text from a paste event and prevent the default action.
+ * @param e 
+ */
+export function useClipboardText(e: ClipboardEvent) {
+  const text = e.clipboardData?.getData('text/plain')
 
-  usePruviousClipboard().value = null
+  if (text) {
+    e.preventDefault()
+  }
+
+  return text
 }
