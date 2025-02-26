@@ -19,13 +19,13 @@
 import { ref, useRoute } from '#imports'
 import { useEventListener } from '@vueuse/core'
 import { debounce } from 'perfect-debounce'
+import { useClipboardText } from '../../composables/dashboard/clipboard'
 import { getHotkeyAction } from '../../composables/dashboard/hotkeys'
 import { usePage } from '../../composables/page'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
 import { isArray } from '../../utils/array'
 import { pruviousFetch } from '../../utils/fetch'
 import { isKeyOf, isObject } from '../../utils/object'
-import { useClipboardText } from '../../composables/dashboard/clipboard'
 
 const page = usePage()
 const route = useRoute()
