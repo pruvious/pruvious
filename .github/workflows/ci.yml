@@ -32,4 +32,5 @@ jobs:
       - name: Install dependencies (and build)
         run: pnpm install
 
-      - run: pnpm pkg-pr-new publish './packages/*'
+      - name: Publish on pkg.pr.new
+        run: pnpm pkg-pr-new publish './packages/*'
