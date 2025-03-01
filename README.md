@@ -5,6 +5,82 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 > [!IMPORTANT]  
 > Version 4 is currently under development. Please don't use it in production environments yet.
 
+## Installation
+
+Create a new Nuxt project:
+
+```bash
+npm create nuxt
+```
+
+Fix the Nuxt version to `3.15.2` in your `package.json`. Versions above `3.15.2` currently have an issue with Nuxt layers that affects compatibility. This should be resolved in future updates.
+
+Install Pruvious 4:
+
+```bash
+pnpm add https://pkg.pr.new/pruvious/pruvious/pruvious@v4
+```
+
+You can also use specific git commits instead of `@v4`. For example: `https://pkg.pr.new/pruvious/pruvious/pruvious@ad54f7d76d314b130918e652a585c05b54c12e46`
+
+Add the Pruvious layer to your `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  extends: ['pruvious'],
+  pruvious: { auth: { jwt: { secret: 'dev' } } }, // Maintain login sessions during development
+})
+```
+
+Remove the `app.vue` file from your project and start the development server:
+
+```bash
+pnpm dev
+```
+
+Visit http://localhost:3000/dashboard to complete the CMS installation.
+
+The documentation for version 4 is currently under development. In the meantime, please refer to the inline code comments, which contain examples and explanations for most features.
+
+### Tips
+
+#### Creating Collections
+
+To define a new collection, create a file in the `server/collections` folder of your project:
+
+```ts
+// server/collections/YourCollection.ts
+import { defineCollection, textField } from '#pruvious/server'
+
+export default defineCollection({
+  fields: {
+    test: textField({}),
+  },
+})
+```
+
+#### Creating Singletons
+
+Singletons (previously called single-entry collections in v3) can be defined by creating a file in the `server/singletons` folder:
+
+```ts
+// server/singletons/YourSingleton.ts
+import { defineSingleton, textField } from '#pruvious/server'
+
+export default defineSingleton({
+  fields: {
+    test: textField({}),
+  },
+})
+```
+
+#### Import Paths
+
+- Use `#pruvious/server` imports for server-side code.
+- Use `#pruvious/client` imports for client-side code.
+
+You can find detailed documentation for each export in their code comments.
+
 ## Packages
 
 - ✅ [i18n](#package-i18n)
@@ -13,6 +89,12 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 - ✅ [storage](#package-storage)
 - 🚧 [ui](#package-ui)
 - ✅ [utils](#package-utils)
+
+### Icon Status Guide
+
+- ✅ **Completed**: Feature is fully implemented and ready to use.
+- 🚧 **In Progress**: Development has started but the feature is not yet finished.
+- 👻 **Planned**: Feature is on the roadmap but development hasn't begun.
 
 ### 📦 <a id="package-i18n">i18n</a>
 
@@ -85,11 +167,11 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | Logging |
 | ✅ | UI customization |
 | ✅ | Reusable collection templates |
-| 🚧 | Page-like collections |
+| 👻 | Page-like collections |
 | ✅ | Resolvers |
-| 🚧 | Search structures |
-| 🚧 | Soft-deletion (trash) |
-| 🚧 | Revisions |
+| 👻 | Search structures |
+| 👻 | Soft-deletion (trash) |
+| 👻 | Revisions |
 | ✅ | TypeScript types |
 | 🚧 | Tests |
 | 🚧 | Documentation |
@@ -113,32 +195,32 @@ Package: <a href="packages/pruvious">pruvious</a>
 |:---:|:---|
 | 🚧 | Button group field |
 | ✅ | Checkbox field |
-| 🚧 | Checkboxes field |
+| 👻 | Checkboxes field |
 | 🚧 | Chips field |
-| 🚧 | Date field |
-| 🚧 | Date range field |
+| 👻 | Date field |
+| 👻 | Date range field |
 | 🚧 | Date-time field |
-| 🚧 | Date-time range field |
-| 🚧 | Editor field |
-| 🚧 | File field |
-| 🚧 | Gallery field |
-| 🚧 | Icon field |
-| 🚧 | Image field |
-| 🚧 | Link field |
+| 👻 | Date-time range field |
+| 👻 | Editor field |
+| 👻 | File field |
+| 👻 | Gallery field |
+| 👻 | Icon field |
+| 👻 | Image field |
+| 👻 | Link field |
 | 🚧 | Number field |
-| 🚧 | Range field |
+| 👻 | Range field |
 | 🚧 | Record field |
 | 🚧 | Records field |
 | 🚧 | Repeater field |
 | ✅ | Select field |
-| 🚧 | Size field |
-| 🚧 | Slider field |
-| 🚧 | Slider range field |
+| 👻 | Size field |
+| 👻 | Slider field |
+| 👻 | Slider range field |
 | ✅ | Switch field |
 | ✅ | Text field |
-| 🚧 | Text area field |
-| 🚧 | Time field |
-| 🚧 | Time range field |
+| 👻 | Text area field |
+| 👻 | Time field |
+| 👻 | Time range field |
 | 🚧 | Timestamp field |
 | ✅ | True-false field |
 
@@ -180,7 +262,7 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | Logging |
 | ✅ | UI customization |
 | ✅ | Resolvers |
-| 🚧 | Revisions |
+| 👻 | Revisions |
 | ✅ | TypeScript types |
 | 🚧 | Tests |
 | 🚧 | Documentation |
@@ -216,7 +298,7 @@ Package: <a href="packages/pruvious">pruvious</a>
 |:---:|:---|
 | ✅ | API |
 | ✅ | Image optimization |
-| 🚧 | UI |
+| 👻 | UI |
 | ✅ | TypeScript types |
 | 🚧 | Tests |
 | 🚧 | Documentation |
@@ -230,7 +312,7 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | PostgreSQL driver |
 | ✅ | D1 driver |
 | ✅ | Redis driver |
-| 🚧 | Cloudflare CDN |
+| 👻 | Cloudflare CDN |
 | 🚧 | Page caching |
 | ✅ | TypeScript types |
 | 🚧 | Tests |
@@ -252,8 +334,8 @@ Package: <a href="packages/pruvious">pruvious</a>
 
 | Status | Feature |
 |:---:|:---|
-| 🚧 | Pages |
-| 🚧 | Presets |
+| 👻 | Pages |
+| 👻 | Presets |
 | 🚧 | Users |
 | 🚧 | Roles |
 | ✅ | Uploads |
@@ -267,8 +349,8 @@ Package: <a href="packages/pruvious">pruvious</a>
 
 | Status | Feature |
 |:---:|:---|
-| 🚧 | API |
-| 🚧 | Blocks |
+| 👻 | API |
+| 👻 | Blocks |
 | 🚧 | SEO |
 | 🚧 | Documentation |
 
@@ -283,11 +365,11 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | Responsive design |
 | 🚧 | Custom dashboard page helper |
 | 🚧 | Field components |
-| 🚧 | Developer menu |
-| 🚧 | Deployment tools |
-| 🚧 | Finder |
+| 👻 | Developer menu |
+| 👻 | Deployment tools |
+| 👻 | Finder |
 | 🚧 | Data table |
-| 🚧 | Media library |
+| 👻 | Media library |
 | 🚧 | Documentation |
 
 ### 📦 <a id="package-storage">storage</a>
