@@ -34,12 +34,14 @@ export async function refreshAuthState(force = false) {
   const payload = getAuthTokenPayload()
 
   if (payload && payload.exp * 1000 > Date.now()) {
-    if (force || JSON.stringify(payload) !== _authStatePayload) {
+    const stringifiedPayload = JSON.stringify(payload)
+
+    if (force || stringifiedPayload !== _authStatePayload) {
       const { success, data, error } = await pruviousGet('auth/state')
 
       if (success) {
         auth.value = data
-        _authStatePayload = JSON.stringify(getAuthTokenPayload())
+        _authStatePayload = stringifiedPayload
       } else {
         removeAuthToken()
         _authStatePayload = null

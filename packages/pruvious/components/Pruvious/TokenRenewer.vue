@@ -5,7 +5,7 @@ import {
   getAuthTokenExpiresIn,
   getAuthTokenPayload,
   pruviousPost,
-  refreshAuthState,
+  removeAuthToken,
   storeAuthToken,
   useAuth,
   usePruviousLoginPopup,
@@ -94,7 +94,7 @@ async function renewToken() {
       storeAuthToken(data.token)
       loginPopup.value = false
     } else {
-      await refreshAuthState(true)
+      removeAuthToken()
     }
 
     checkTrigger()
