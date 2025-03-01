@@ -117,7 +117,7 @@ function getServerFileContent() {
     ),
     ...(nuxt.options.nitro.preset?.startsWith('cloudflare')
       ? [`import type Redis from 'ioredis'`]
-      : [`import pg from 'pg'`, `import Redis from 'ioredis'`]),
+      : [`// @ts-ignore`, `import pg from 'pg'`, `// @ts-ignore`, `import Redis from 'ioredis'`]),
     ``,
     `export interface PruviousContext<TUser = { id: number } & DynamicCollectionFieldTypes['Populated']['Users']> {`,
     `  /**`,
