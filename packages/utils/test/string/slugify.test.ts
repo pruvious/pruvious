@@ -1,0 +1,38 @@
+import { expect, test } from 'vitest'
+import { slugify } from '../../src'
+
+test('slugify', () => {
+  expect(slugify('fooBar')).toBe('foo-bar')
+  expect(slugify('foo – bar')).toBe('foo-bar')
+  expect(slugify('fö bär')).toBe('foe-baer')
+  expect(slugify('niđe')).toBe('nidje')
+  expect(slugify('čekić')).toBe('cekic')
+  expect(slugify('niđeČekića')).toBe('nidje-cekica')
+  expect(slugify('NIĐE Čekića')).toBe('nidje-cekica')
+  expect(slugify('niđe ČEKIĆA')).toBe('nidje-cekica')
+
+  // Test cases from `kebabCase`
+  expect(slugify('foo-bar')).toBe('foo-bar')
+  expect(slugify('fooBar')).toBe('foo-bar')
+  expect(slugify('FooBar')).toBe('foo-bar')
+  expect(slugify('foo_bar')).toBe('foo-bar')
+  expect(slugify('foo bar')).toBe('foo-bar')
+  expect(slugify(' foo bar ')).toBe('foo-bar')
+  expect(slugify('foo--bar')).toBe('foo-bar')
+  expect(slugify('foo-bar-baz')).toBe('foo-bar-baz')
+  expect(slugify('FOO')).toBe('foo')
+  expect(slugify('fooBAR')).toBe('foo-bar')
+  expect(slugify('FooBAR')).toBe('foo-bar')
+  expect(slugify('foo123')).toBe('foo123')
+  expect(slugify('123Bar')).toBe('123-bar')
+  expect(slugify('Foo Bar')).toBe('foo-bar')
+  expect(slugify('Foo BAR')).toBe('foo-bar')
+  expect(slugify('FOO bar')).toBe('foo-bar')
+  expect(slugify('')).toBe('')
+  expect(slugify('-')).toBe('')
+  expect(slugify('a-')).toBe('a')
+  expect(slugify('-a')).toBe('a')
+  expect(slugify('A-')).toBe('a')
+  expect(slugify('-A')).toBe('a')
+  expect(slugify('Ä')).toBe('ae')
+})

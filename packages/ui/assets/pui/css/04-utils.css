@@ -1,0 +1,71 @@
+.pui-primary {
+  color: hsl(var(--pui-primary-foreground));
+}
+
+.pui-muted {
+  color: hsl(var(--pui-muted-foreground));
+}
+
+.pui-justify-between {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pui-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pui-flex-1 {
+  flex: 1;
+}
+
+.pui-shrink-0 {
+  flex-shrink: 0;
+}
+
+.pui-w-full {
+  width: 100%;
+}
+
+.pui-mr-auto {
+  margin-right: auto;
+}
+
+.pui-ml-auto {
+  margin-left: auto;
+}
+
+.pui-center {
+  text-align: center;
+}
+
+.pui-uppercase {
+  text-transform: uppercase;
+}
+
+.pui-capitalize {
+  text-transform: capitalize;
+}
+
+.pui-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pui-no-transition,
+.pui-no-transition * {
+  transition: none !important;
+}
+
+.pui-no-click * {
+  pointer-events: none !important;
+}
+
+.pui-stroke-2,
+.pui-stroke-2 [stroke] {
+  stroke-width: 2 !important;
+}

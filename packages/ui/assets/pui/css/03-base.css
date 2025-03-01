@@ -1,0 +1,99 @@
+:where(*, ::before, ::after) {
+  min-width: 0;
+  box-sizing: border-box;
+  border: 0 solid hsl(var(--pui-border));
+  text-underline-offset: 0.125em;
+  text-underline-offset: round(0.125em, 1px);
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background-color: hsl(var(--pui-background));
+  color: hsl(var(--pui-foreground));
+  font-family: var(--pui-font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: none;
+}
+
+:where(img, picture, video, canvas, svg) {
+  display: block;
+  max-width: 100%;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--pui-headings);
+  font-size: inherit;
+  font-weight: 600;
+}
+
+:where(p, h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: break-word;
+}
+
+:where(blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre) {
+  margin: 0;
+}
+
+:where(ol, ul, menu) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+:is(a, button):not(.pui-raw) {
+  border-radius: min(var(--pui-radius), 0.125rem);
+  color: hsl(var(--pui-foreground));
+  text-decoration: underline;
+  transition: var(--pui-transition);
+  transition-property: color;
+}
+
+:is(a, button):not(.pui-raw):hover {
+  color: hsl(var(--pui-foreground) / 0.64);
+}
+
+:is(a, button):not(.pui-raw):focus-visible {
+  box-shadow:
+    0 0 0 0.125rem hsl(var(--pui-background)),
+    0 0 0 0.25rem hsl(var(--pui-ring)),
+    0 0 #0000;
+  outline: 0.125rem solid transparent;
+  outline-offset: 0.125rem;
+}
+
+:where(strong) {
+  font-weight: 600;
+}
+
+:where(hr) {
+  width: 100%;
+  border-top-width: 1px;
+}
+
+:where(input, button, textarea, select) {
+  font: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+:where([type='button'], [type='reset'], [type='submit'], button) {
+  -webkit-appearance: button;
+  appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+:where([role='button'], button) {
+  cursor: pointer;
+}
+
+:where(button, select) {
+  text-transform: none;
+}
+
+.iconify--tabler,
+.iconify--tabler [stroke] {
+  stroke-width: 1.5;
+}

@@ -1,0 +1,107 @@
+.tippy-box[data-animation='fade'][data-state='hidden'],
+.is-sorting .tippy-box {
+  opacity: 0;
+}
+
+[data-tippy-root] {
+  max-width: calc(100vw - 0.625rem);
+}
+
+.tippy-box {
+  position: relative;
+  background-color: hsl(var(--pui-primary));
+  border-radius: var(--pui-radius);
+  outline: 0;
+  filter: drop-shadow(0 0.25rem 0.25rem rgb(0 0 0 / 0.12));
+  color: hsl(var(--pui-primary-foreground));
+  font-size: calc(0.875rem + var(--pui-tooltip-size) * 0.125rem);
+  white-space: normal;
+  transition-property: transform, visibility, opacity;
+}
+
+.tippy-box[data-theme='destructive'] {
+  background-color: hsl(var(--pui-destructive));
+  color: hsl(var(--pui-destructive-foreground));
+}
+
+.tippy-box[data-placement^='top'] > .tippy-arrow {
+  bottom: 0;
+}
+
+.tippy-box[data-placement^='top'] > .tippy-arrow:before {
+  bottom: -0.4375em;
+  left: 0;
+  border-width: 0.5em 0.5em 0;
+  border-top-color: initial;
+  transform-origin: center top;
+}
+
+.tippy-box[data-placement^='bottom'] > .tippy-arrow {
+  top: 0;
+}
+
+.tippy-box[data-placement^='bottom'] > .tippy-arrow:before {
+  top: -0.4375em;
+  left: 0;
+  border-width: 0 0.5em 0.5em;
+  border-bottom-color: initial;
+  transform-origin: center bottom;
+}
+
+.tippy-box[data-placement^='left'] > .tippy-arrow {
+  right: 0;
+}
+
+.tippy-box[data-placement^='left'] > .tippy-arrow:before {
+  border-width: 0.5em 0 0.5em 0.5em;
+  border-left-color: initial;
+  right: -0.4375rem;
+  transform-origin: center left;
+}
+
+.tippy-box[data-placement^='right'] > .tippy-arrow {
+  left: 0;
+}
+
+.tippy-box[data-placement^='right'] > .tippy-arrow:before {
+  left: -0.4375em;
+  border-width: 0.5em 0.5em 0.5em 0;
+  border-right-color: initial;
+  transform-origin: center right;
+}
+
+.tippy-box[data-inertia][data-state='visible'] {
+  transition-timing-function: cubic-bezier(0.54, 1.5, 0.38, 1.11);
+}
+
+.tippy-arrow {
+  width: 1em;
+  height: 1em;
+  color: hsl(var(--pui-primary));
+}
+
+.tippy-box[data-theme='destructive'] .tippy-arrow {
+  color: hsl(var(--pui-destructive));
+}
+
+.tippy-arrow:before {
+  content: '';
+  position: absolute;
+  border-color: transparent;
+  border-style: solid;
+}
+
+.tippy-content {
+  position: relative;
+  z-index: 1;
+  padding: 0.5em 0.75em;
+}
+
+.tippy-box code {
+  padding: 0.25em 0.5em;
+  background-color: hsl(var(--pui-accent) / 0.2);
+  border-radius: 0.5em;
+  font-size: 0.875em;
+  font-weight: 500;
+  font-style: normal;
+}

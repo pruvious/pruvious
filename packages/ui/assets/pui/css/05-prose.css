@@ -1,0 +1,166 @@
+.pui-prose {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  font-size: calc(1rem + var(--pui-size) * 0.125rem);
+  line-height: calc(calc(1.5 + var(--pui-line-height, var(--pui-spacing)) * 0.125) * 1em);
+  line-height: round(calc(calc(1.5 + var(--pui-line-height, var(--pui-spacing)) * 0.125) * 1em), 1px);
+}
+
+.pui-prose > :where(*) {
+  margin-top: calc(1.5em + var(--pui-spacing) * 0.25em);
+}
+
+.pui-prose > :where(p) + :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: calc(2em + var(--pui-spacing) * 0.25em);
+}
+
+.pui-prose > :where(hr) + :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+}
+
+.pui-prose > :where(h1, h2, h3, h4, h5, h6) + :where(p) {
+  margin-top: calc(1.25em + var(--pui-spacing) * 0.25em);
+}
+
+.pui-prose > :where(h1, h2, h3, h4, h5, h6) + :where(h1, h2, h3, h4, h5, h6) {
+  margin-top: calc(0.75em + var(--pui-spacing) * 0.25em);
+}
+
+.pui-prose > :where(:first-child) {
+  margin-top: 0;
+}
+
+.pui-prose > :where(h1) {
+  font-size: 2em;
+}
+
+.pui-prose > :where(h2) {
+  font-size: 1.75em;
+}
+
+.pui-prose > :where(h3) {
+  font-size: 1.5em;
+}
+
+.pui-prose > :where(h4) {
+  font-size: 1.25em;
+}
+
+.pui-prose > :where(h5) {
+  font-size: 1.125em;
+}
+
+.pui-prose > :where(hr) {
+  margin: calc(2.5em + var(--pui-spacing) * 0.5em) 0;
+}
+
+.pui-prose :where(a:not(.pui-raw)) {
+  font-weight: 500;
+}
+
+.pui-prose :where(ul, ol) {
+  padding-inline-start: 2em;
+}
+
+.pui-prose :where(ul) {
+  list-style-type: disc;
+}
+
+.pui-prose :where(ol) {
+  list-style-type: decimal;
+}
+
+.pui-prose :where(li) {
+  margin-top: calc(0.5em + var(--pui-spacing) * 0.125em);
+}
+
+.pui-prose :where(code) {
+  font-family: var(--pui-font-mono);
+}
+
+.pui-prose :where(:not(pre)) :where(code) {
+  padding: 0.25em 0.5em;
+  background-color: hsl(var(--pui-accent));
+  border-radius: 0.5em;
+  color: hsl(var(--pui-accent-foreground));
+  font-size: calc(1em - 0.0625rem);
+  font-weight: 500;
+  font-style: normal;
+}
+
+.pui-prose :where(pre) {
+  width: 100%;
+  padding: 1em;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
+  background-color: hsl(var(--pui-primary));
+  border-radius: var(--pui-radius);
+  outline: none;
+  color: hsl(var(--pui-primary-foreground));
+  font-family: var(--pui-font-mono);
+  font-size: calc(1em - 0.0625rem);
+  font-style: normal;
+}
+
+.dark .pui-prose :where(pre) {
+  background-color: hsl(var(--pui-accent));
+  color: hsl(var(--pui-accent-foreground));
+}
+
+.pui-prose :where(blockquote) {
+  padding-inline-start: calc(0.75em + var(--pui-spacing) * 0.125em);
+  border-left-width: 0.25em;
+  font-weight: 500;
+}
+
+.pui-prose :where(dt) {
+  margin-top: calc(1.5em + var(--pui-spacing) * 0.25em);
+  font-weight: 600;
+}
+
+.pui-prose :where(dd) {
+  margin-top: calc(0.25em + var(--pui-spacing) * 0.125em);
+  padding-inline-start: calc(1em + var(--pui-spacing) * 0.125em);
+}
+
+.pui-prose :where(table) {
+  width: 100%;
+  table-layout: auto;
+  border-color: inherit;
+  border-collapse: collapse;
+  text-indent: 0;
+}
+
+.pui-prose :where(thead) {
+  border-bottom-width: 2px;
+}
+
+.pui-prose :where(tr:not(:last-child)) {
+  border-bottom-width: 1px;
+}
+
+.pui-prose :where(th, td) {
+  padding: calc(0.5em + var(--pui-spacing) * 0.125em);
+  text-align: start;
+}
+
+.pui-prose :where(th) {
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+.pui-prose :where(figcaption) {
+  margin-top: calc(0.5em + var(--pui-spacing) * 0.125em);
+  color: hsl(var(--pui-muted-foreground));
+  font-style: italic;
+}
+
+.pui-lead {
+  font-size: calc(1em + 0.125rem);
+}
+
+.pui-muted {
+  color: hsl(var(--pui-muted-foreground));
+}

@@ -1,0 +1,67 @@
+<template>
+  <span v-if="showContentLanguageSwitcher && languages.length > 1">
+    <PUIButton
+      v-pui-tooltip="__('pruvious-dashboard', 'Content language')"
+      :variant="isVisible ? 'primary' : 'outline'"
+      @click="isVisible = true"
+      ref="button"
+      :class="{ 'p-button-disabled': disableContentLanguageSwitcher }"
+    >
+      <span class="p-label pui-uppercase">{{ contentLanguage }}</span>
+      <Icon v-if="!disableContentLanguageSwitcher" mode="svg" name="tabler:chevron-down" class="p-icon" />
+    </PUIButton>
+    <PUIDropdown
+      v-if="isVisible"
+      :reference="button?.$el"
+      :restoreFocus="false"
+      @click="isVisible = false"
+      @close="isVisible = false"
+    >
+      <PUIDropdownItem
+        v-for="language in languages"
+        :indent="contentLanguage !== language.code"
+        :key="language.code"
+        @click="contentLanguage = language.code"
+      >
+        <Icon v-if="contentLanguage === language.code" mode="svg" name="tabler:check" />
+        <span>{{ language.name }}</span>
+      </PUIDropdownItem>
+    </PUIDropdown>
+  </span>
+</template>
+
+<script lang="ts" setup>
+import { __, languages, pruviousDashboardPatch, useAuth, useDashboardContentLanguage } from '#pruvious/client'
+
+const showContentLanguageSwitcher = inject('showContentLanguageSwitcher', false)
+const disableContentLanguageSwitcher = inject('disableContentLanguageSwitcher', false)
+const auth = useAuth()
+const contentLanguage = useDashboardContentLanguage()
+const button = useTemplateRef('button')
+const isVisible = ref(false)
+
+watch(
+  contentLanguage,
+  async (contentLanguage) => {
+    if (auth.value.user?.contentLanguage !== contentLanguage) {
+      const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
+
+      if (query.success) {
+        Object.assign(auth.value.user ?? {}, query.data)
+      }
+    }
+  },
+  { immediate: true },
+)
+</script>
+
+<style scoped>
+.p-label,
+.p-icon {
+  font-size: 1em;
+}
+
+.p-button-disabled {
+  pointer-events: none;
+}
+</style>

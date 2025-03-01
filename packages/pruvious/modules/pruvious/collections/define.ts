@@ -1,0 +1,1758 @@
+import {
+  walkFieldLayoutItems,
+  type FieldsLayout,
+  type LanguageCode,
+  type Permission,
+  type Templates,
+  type TranslatableStringCallbackContext,
+} from '#pruvious/server'
+import type { icons } from '@iconify-json/tabler/icons.json'
+import {
+  Collection,
+  type CollectionDefinition,
+  type CollectionHooks,
+  type Context,
+  type Database,
+  type ExtractCastedTypes,
+  type ExtractInputTypes,
+  type GenericField,
+  type InsertInput,
+} from '@pruvious/orm'
+import {
+  camelCase,
+  deepClone,
+  defu,
+  isArray,
+  isDefined,
+  isObject,
+  isPositiveInteger,
+  isString,
+  isUndefined,
+  kebabCase,
+  omit,
+  setProperty,
+  type DeepRequired,
+  type DefaultFalse,
+  type DefaultTrue,
+  type PartialMax4Levels,
+} from '@pruvious/utils'
+import { colorize } from 'consola/utils'
+import { hash } from 'ohash'
+import { isDevelopment } from 'std-env'
+import { httpStatusCodeMessages } from '../api/utils.server'
+import { resolveCustomComponentPath } from '../components/utils.server'
+import { warnWithContext } from '../debug/console'
+import {
+  authorFieldPreset,
+  createdAtFieldPreset,
+  editorsFieldPreset,
+  languageFieldPreset,
+  translationsFieldPreset,
+  updatedAtFieldPreset,
+  type AuthorFieldPresetOptions,
+  type CreatedAtFieldPresetOptions,
+  type EditorsFieldPresetOptions,
+  type UpdatedAtFieldPresetOptions,
+} from '../fields/presets'
+import type { ResolveFromLayersResult } from '../utils/resolve'
+import { collectionPermissionGuard } from './guards'
+
+export type DefineCollectionOptions<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | CreatedAtFieldPresetOptions | undefined,
+  TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
+  TAuthor extends boolean | AuthorFieldPresetOptions | undefined,
+  TEditors extends boolean | EditorsFieldPresetOptions | undefined,
+> = Omit<CollectionDefinition<TFields, CollectionMeta>, 'meta'> & {
+  /**
+   * A key-value object of `Field` instances representing the structure of the collection.
+   *
+   * - Object keys represent the field names.
+   *   - They must be in camelCase format.
+   *   - Maximum length is 63 characters.
+   *   - The `id` field is reserved and automatically created as the primary key.
+   * - Object values are instances of the `Field` class.
+   *
+   * @example
+   * ```ts
+   * {
+   *   email: textField({
+   *     required: true,
+   *     validators: [emailValidator(), uniqueValidator()],
+   *   }),
+   *   roles: recordsField({
+   *     collection: 'Roles',
+   *     fields: ['id', 'name', 'permissions'],
+   *   }),
+   * }
+   * ```
+   */
+  fields: TFields
+} & CollectionMetaOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
+
+export interface CollectionMetaOptions<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+> {
+  /**
+   * Specifies whether the collection is translatable.
+   *
+   * When set to `true`, each translation is stored as an individual database record for each language
+   * specified in the `pruvious.i18n.languages` option in `nuxt.config.ts`.
+   *
+   * Additionally, the following fields are automatically added to the collection:
+   *
+   * - `translations` - A unique key that identifies the translation record.
+   * - `language` - The language code of the translation record.
+   *
+   * @default false
+   */
+  translatable?: TTranslatable
+
+  /**
+   * Specifies which fields should stay in sync across all translations.
+   * When you change a synced field in one translation, the same change happens automatically in all other translations.
+   * This feature only works if the collection is `translatable`.
+   *
+   * Important: Ensure that synced fields do not contain `conditionalLogic` or `dependencies` that require other fields in the input data.
+   * Having such dependencies may cause the sync operation to fail.
+   *
+   * @default []
+   */
+  syncedFields?: (keyof TFields & string)[]
+
+  /**
+   * API endpoint configuration for this collection.
+   * Controls which CRUD operations are enabled via HTTP endpoints.
+   * All endpoints are enabled by default and use guarded query builder functions.
+   *
+   * Standard REST API endpoints:
+   *
+   * - POST `/<pruvious.api.basePath>/collections/{slug}`
+   *   - Creates one or more collection records.
+   * - GET `/<pruvious.api.basePath>/collections/{slug}`
+   *   - Lists/searches collection records.
+   * - GET `/<pruvious.api.basePath>/collections/{slug}/:id`
+   *   - Retrieves a single record by ID.
+   * - GET `/<pruvious.api.basePath>/collections/{slug}/:id/copy-translation?targetLanguage&operation`
+   *   - Generates and retrieves a translated copy of a record by ID for a specified target language and operation.
+   *   - Only available when the collection is `translatable` and `copyTranslation` is enabled.
+   * - GET `/<pruvious.api.basePath>/collections/{slug}/:id/duplicate`
+   *   - Generates and retrieves a duplicate of a record by ID.
+   *   - Only available when the `duplicate` function is enabled.
+   * - PATCH `/<pruvious.api.basePath>/collections/{slug}`
+   *   - Bulk updates multiple records.
+   * - PATCH `/<pruvious.api.basePath>/collections/{slug}/:id`
+   *   - Updates a single record by ID.
+   * - DELETE `/<pruvious.api.basePath>/collections/{slug}`
+   *   - Bulk deletes multiple records.
+   * - DELETE `/<pruvious.api.basePath>/collections/{slug}/:id`
+   *   - Deletes a single record by ID.
+   *
+   * Additional POST endpoints:
+   *
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/query/create`
+   *   - Creates one or more collection records.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/query/read`
+   *   - Lists/searches collection records.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/query/update`
+   *   - Bulk updates multiple records.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/query/delete`
+   *   - Bulk deletes multiple records.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/create`
+   *   - Validates new record data without saving it to the database.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/update`
+   *   - Validates record update data without saving it to the database.
+   * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/update/:id`
+   *   - Validates update data for a specific record ID without saving it to the database.
+   *
+   * The `query/{operation}` endpoints allow query parameters to be sent in the request body instead of the URL.
+   * The request body must be a JSON object with:
+   *
+   * - `query` - Object containing query parameters that would normally go in the URL.
+   * - `data` - Object containing the regular request payload data.
+   *
+   * The created endpoints are only accessible to users with `collection:{slug}:{operation}` permissions.
+   *
+   * The dashboard will automatically enable/disable the corresponding UI elements based on these settings.
+   *
+   * You can provide a boolean value to enable/disable all endpoints.
+   *
+   * @default
+   * { create: true, read: true, update: true, delete: true }
+   */
+  api?:
+    | boolean
+    | {
+        /**
+         * Enables/disables record creation via POST endpoint.
+         * When enabled, the following endpoints are available:
+         *
+         * - POST `/<pruvious.api.basePath>/collections/{slug}`
+         *   - The request body must be a single object or an array of objects to create.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/query/create`
+         *   - The request body must be a JSON object with `query` and `data` keys.
+         *     - The `query` object contains query parameters that would normally go in the URL.
+         *     - The `data` object contains a single object or an array of objects to create.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/create`
+         *   - The request body must be a single object or an array of objects to validate.
+         *
+         * Both endpoints support creating either a single record or multiple records in a single request.
+         *
+         * Available query parameters:
+         *
+         * - `returning` - Fields to return after the INSERT operation (e.g. `?returning=id,name`).
+         * - `populate` - Determines if the query should run field populators and return populated field values (e.g. `?populate=true`).
+         *
+         * Only users with `collection:{slug}:create` permission can access these endpoints.
+         *
+         * @see https://pruvious.com/docs/collections/api#create (@todo set up this link)
+         *
+         * @default true
+         */
+        create?: boolean
+
+        /**
+         * Enables/disables record retrieval via GET endpoints.
+         * When enabled, the following endpoints are available:
+         *
+         * - GET `/<pruvious.api.basePath>/collections/{slug}` - retrieves multiple records.
+         * - GET `/<pruvious.api.basePath>/collections/{slug}/:id` - retrieves a single record by ID.
+         * - GET `/<pruvious.api.basePath>/collections/{slug}/:id/copy-translation?targetLanguage&operation` - retrieves a translated copy of
+         *   a record by ID for a specified target language and operation.
+         *   - Only available when the collection is `translatable` and `copyTranslation` is enabled.
+         * - GET `/<pruvious.api.basePath>/collections/{slug}/:id/duplicate` - retrieves a duplicate of a record by ID.
+         *   - Only available when the `duplicate` function is enabled.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/query/read` - retrieves multiple records.
+         *   - The request body is a JSON object with an optional `query` parameter.
+         *     - The `query` object contains query parameters that would normally go in the URL.
+         *
+         * Common query parameters:
+         *
+         * - `select` - Fields to retrieve (e.g. `?select=id,name`).
+         * - `populate` - Determines if the query should run field populators and return populated field values (e.g. `?populate=true`).
+         *
+         * Multi-record query parameters:
+         *
+         * - `where` - Filtering conditions for the query (e.g. `?where=category[=][2]`).
+         * - `groupBy` - Fields to group by (e.g. `?groupBy=category`).
+         * - `orderBy` - Fields to order by (e.g. `?orderBy=name:asc`).
+         * - `limit` - The maximum number of rows to return (e.g. `?limit=10`).
+         * - `offset` - The number of rows to skip before returning results (e.g. `?offset=10`).
+         * - `page` - The page number for paginated results (e.g. `?page=2`).
+         * - `perPage` - The number of items to display per page (e.g. `?perPage=10`).
+         *
+         * Only users with `collection:{slug}:read` permission can access these endpoints.
+         *
+         * @see https://pruvious.com/docs/collections/api#read (@todo set up this link)
+         *
+         * @default true
+         */
+        read?: boolean
+
+        /**
+         * Enables/disables record updates via PATCH endpoints.
+         * When enabled, the following endpoints are available:
+         *
+         * - PATCH `/<pruvious.api.basePath>/collections/{slug}` - updates multiple records.
+         *   - The request body must be an object with the new field values.
+         * - PATCH `/<pruvious.api.basePath>/collections/{slug}/:id` - updates a single record by ID.
+         *   - The request body must be an object with the new field values.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/query/update` - updates multiple records.
+         *   - The request body must be a JSON object with `query` and `data` keys.
+         *     - The `query` object contains query parameters that would normally go in the URL.
+         *     - The `data` object contains an object with the new field values.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/update` - validates record update data without saving it to the database.
+         *   - The request body must be an object with the new field values.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/validate/update/:id` - validates update data for a specific record ID without saving it to the database.
+         *   - The request body must be an object with the new field values.
+         *
+         * Common query parameters:
+         *
+         * - `returning` - Fields to return after the UPDATE operation (e.g. `?returning=id,name`).
+         * - `populate` - Determines if the query should run field populators and return populated field values (e.g. `?populate=true`).
+         *
+         * Multi-record query parameters:
+         *
+         * - `where` - Filtering conditions for the query (e.g. `?where=category[=][2]`).
+         *
+         * Only users with `collection:{slug}:update` permission can access these endpoints.
+         *
+         * @see https://pruvious.com/docs/collections/api#update (@todo set up this link)
+         *
+         * @default true
+         */
+        update?: boolean
+
+        /**
+         * Enables/disables record deletion via DELETE endpoints.
+         * When enabled, the following endpoints are available:
+         *
+         * - DELETE `/<pruvious.api.basePath>/collections/{slug}` - deletes multiple records.
+         * - DELETE `/<pruvious.api.basePath>/collections/{slug}/:id` - deletes a single record by ID.
+         * - POST `/<pruvious.api.basePath>/collections/{slug}/query/delete` - deletes multiple records.
+         *   - The request body is a JSON object with an optional `query` parameter.
+         *     - The `query` object contains query parameters that would normally go in the URL.
+         *
+         * Common query parameters:
+         *
+         * - `returning` - Fields to return after the DELETE operation (e.g. `?returning=id,name`).
+         * - `populate` - Determines if the query should run field populators and return populated field values (e.g. `?populate=true`).
+         *
+         * Multi-record query parameters:
+         *
+         * - `where` - Filtering conditions for the query (e.g. `?where=category[=][2]`).
+         *
+         * Only users with `collection:{slug}:delete` permission can access these endpoints.
+         *
+         * @see https://pruvious.com/docs/collections/api#delete (@todo set up this link)
+         *
+         * @default true
+         */
+        delete?: boolean
+      }
+
+  /**
+   * An array of functions that control access to database records in this collection.
+   * These functions are only executed during CRUD operations when using the following utility functions from `#pruvious/server`:
+   *
+   * - `guardedQueryBuilder()`
+   * - `guardedInsertInto(collection)`
+   * - `guardedSelectFrom(collection)`
+   * - `guardedUpdate(collection)`
+   * - `guardedDeleteFrom(collection)`
+   *
+   * Every collection guard function receives the parameter:
+   *
+   * - `context` - A `MetaContext` instance related to the current query builder operation.
+   *
+   * The guard function does not require to return a value.
+   * When it throws an error, the current query builder execution stops immediately.
+   * It also sets the HTTP response status code to `401` or `403` by default.
+   * The status code prefix will be stripped from the final error `message` in the response.
+   *
+   * ---
+   *
+   * A built-in authentication guard is enabled by default to manage user access through permissions for all collection operations:
+   *
+   * - `collection:{slug}:create` - Allows creating new records.
+   * - `collection:{slug}:read` - Allows reading existing records.
+   * - `collection:{slug}:update` - Allows modifying existing records.
+   * - `collection:{slug}:delete` - Allows removing existing records.
+   *
+   * This guard only takes effect when the `authGuard` option is enabled.
+   *
+   * @see https://pruvious.com/docs/collections/guards (@todo set up this link)
+   *
+   * @example
+   * ```ts
+   * import { defineCollection } from '#pruvious/server'
+   *
+   * export default defineCollection({
+   *   fields: {
+   *     // ...
+   *   },
+   *   guards: [
+   *     ({ _ }) => {
+   *       if (!useEvent().context.pruvious.auth.isLoggedIn) {
+   *         throw new Error(_('You must be logged in'))
+   *       }
+   *     },
+   *   ],
+   * })
+   * ```
+   */
+  guards?: CollectionGuard[]
+
+  /**
+   * Specifies which CRUD operations are protected by default.
+   * When enabled, users must be authenticated and have the required permissions to perform operations on collections:
+   *
+   * - `collection:{slug}:create` - Permission to create new records.
+   * - `collection:{slug}:read` - Permission to read existing records.
+   * - `collection:{slug}:update` - Permission to modify existing records.
+   * - `collection:{slug}:delete` - Permission to remove existing records.
+   *
+   * Accepts either:
+   *
+   * - `boolean` - Enable/disable guard for all operations.
+   * - `('create' | 'read' | 'update' | 'delete')[]` - Array of operation names to protect specifically.
+   *
+   * This protection is implemented as a collection guard that automatically applies to all defined collections.
+   * It takes effect only when using these utility functions from `#pruvious/server`:
+   *
+   * - `guardedQueryBuilder()`
+   * - `guardedInsertInto(collection)`
+   * - `guardedSelectFrom(collection)`
+   * - `guardedUpdate(collection)`
+   * - `guardedDeleteFrom(collection)`
+   *
+   * @default true
+   */
+  authGuard?: boolean | ('create' | 'read' | 'update' | 'delete')[]
+
+  /**
+   * A function that generates a copy of record data, enabling translation mapping between different language versions.
+   * When specified, the API endpoint GET `<pruvious.api.basePath>/collections/{slug}/:id/copy-translation?targetLanguage&operation`
+   * becomes available for generating translated copies of records.
+   * The source language is read directly from the source record, and the target language is specified in the query parameters.
+   * The operation type is also specified in the query parameters and can be either `create` or `update`.
+   *
+   * The function receives a single `context` parameter with the following properties:
+   *
+   * - `source` - Object containing field names and their casted values from the source record.
+   * - `sourceLanguage` - The language code of the source translation.
+   * - `targetLanguage` - The language code of the target translation returned by this function.
+   * - `operation` - Specifies whether the translation copy will be used for a `create` or `update` operation.
+   *
+   * The function must return an object containing the input data needed to either create or update the translated record.
+   * Any fields marked as `autoGenerated` will be automatically excluded from the returned object.
+   * If the `operation` is `update`, `immutable` fields will also be excluded.
+   * The `language` and `translations` fields are handled automatically and should not be included in the returned object.
+   *
+   * Set to `null` to disable translation copying (default behavior).
+   *
+   * Note: The collection must be `translatable` for this function to have any effect.
+   *
+   * @default null
+   *
+   * @example
+   * ```ts
+   * ({ source }) => ({ ...source, foo: 'New value' })
+   * ```
+   */
+  copyTranslation?: CollectionCopyTranslationFunction<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors
+  > | null
+
+  /**
+   * A function that generates a duplicate of an existing record.
+   * When specified, the API endpoint GET `<pruvious.api.basePath>/collections/{slug}/:id/duplicate`
+   * becomes available for generating duplicates of records.
+   *
+   * The function receives a single `context` parameter with the following properties:
+   *
+   * - `source` - Object containing field names and their casted values from the source record.
+   *
+   * The function must return an object containing the input data needed to create a new record in the same collection.
+   * Any fields marked as `autoGenerated` will be automatically excluded from the returned object.
+   * If the collection is `translatable`, the `translations` and `language` fields are handled automatically.
+   *
+   * Set to `null` to disable record duplication (default behavior).
+   *
+   * @default null
+   *
+   * @example
+   * ```ts
+   * ({ source }) => ({ ...source, foo: 'New value' })
+   * ```
+   */
+  duplicate?: CollectionDuplicateFunction<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> | null
+
+  /**
+   * Controls whether to log queries executed on this collection.
+   * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+   * Requires `pruvious.debug.logs.queries` to be enabled in `nuxt.config.ts`.
+   *
+   * Use `true` or `false` to enable/disable query logging with default settings.
+   * For advanced configuration, provide an object with these options:
+   *
+   * - `exposeData` - Store actual query parameters and results instead of type placeholders (default: `true`).
+   * - `operations` - Specify which database operations should be logged (logs all by default).
+   *
+   * @default true
+   */
+  logs?:
+    | boolean
+    | {
+        /**
+         * Controls the visibility of query parameters and results in log entries.
+         * When set to `false`, it stores their data types instead of actual values.
+         *
+         * Warning: Enabling this will include potentially sensitive information in logs.
+         *
+         * @default true
+         */
+        exposeData?: boolean
+
+        /**
+         * Specifies which database operations should be logged.
+         * Logs all operations by default.
+         *
+         * @default
+         * { insert: true, select: true, update: true, delete: true }
+         */
+        operations?: {
+          /**
+           * Log `INSERT` operations.
+           *
+           * @default true
+           */
+          insert?: boolean
+
+          /**
+           * Log `SELECT` operations.
+           *
+           * @default true
+           */
+          select?: boolean
+
+          /**
+           * Log `UPDATE` operations.
+           *
+           * @default true
+           */
+          update?: boolean
+
+          /**
+           * Log `DELETE` operations.
+           *
+           * @default true
+           */
+          delete?: boolean
+        }
+      }
+
+  /**
+   * Controls if the collection includes a `createdAt` timestamp field.
+   * When creating a new record, this field automatically gets populated with the current timestamp.
+   *
+   * Available options:
+   *
+   * - `true` - Uses default field name and settings.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default
+   * {
+   *   fieldName: 'createdAt',
+   *   index: true,
+   *   hidden: true,
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Created at'),
+   *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
+   * }
+   */
+  createdAt?: TCreatedAt
+
+  /**
+   * Controls if the collection includes an `updatedAt` timestamp field.
+   * When updating an existing record, this field automatically gets updated with the current timestamp.
+   *
+   * Available options:
+   *
+   * - `true` - Uses default field name and settings.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default
+   * {
+   *   fieldName: 'updatedAt',
+   *   index: false,
+   *   hidden: true,
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated at'),
+   *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+   * }
+   */
+  updatedAt?: TUpdatedAt
+
+  /**
+   * Controls if the collection includes an `author` field which assigns The user who created the record. automatically.
+   *
+   * When enabled, a filter is applied to all **guarded** query builder functions to prevent unauthorized access to records.
+   * Additionally, the `collection:{slug}:manage` permission becomes available for user role assignments.
+   *
+   * The following rules apply:
+   *
+   * - Users can read all records but are restricted to updating and deleting only the records they own.
+   *   - Users must also have `collection:{slug}:{read|update|delete}` permissions in order to perform these actions.
+   *   - If the `author.strict` option is enabled, users cannot read records that they do not own.
+   *   - If the `editors` option is enabled, editors can also read and update assigned records.
+   *     - Editors cannot update the `author` field unless they are the author.
+   *   - Administrators and users with the `collection:{slug}:manage` permission can bypass these limitations.
+   * - Guarded query builder functions automatically exclude records where the `author` field does not match the current user.
+   *   - This behavior is consistently applied across all default collection API endpoints.
+   *   - Only administrators and users with the `collection:{slug}:manage` permission can bypass these filters.
+   * - The `author` field is set to the current user on record creation, unless manually specified.
+   *
+   * Available options:
+   *
+   * - `true` - Uses default field name and settings.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default false
+   */
+  author?: TAuthor
+
+  /**
+   * Controls if the collection includes an `editors` field which assigns The users who can edit the record..
+   *
+   * When enabled, a filter is applied to all **guarded** query builder functions to prevent unauthorized access to records.
+   * Additionally, the `collection:{slug}:manage` permission becomes available for user role assignments.
+   *
+   * The following rules apply:
+   *
+   * - Users can read all records but are restricted to updating only assigned records.
+   *   - Users must also have `collection:{slug}:{read|update}` permissions in order to perform these actions.
+   *   - If the `editors.strict` option is enabled, users cannot read records where they are not assigned as editors.
+   *   - If the `author` option is enabled, authors can also read, update, and delete records they own.
+   *     - Editors cannot update the `author` field unless they are the author.
+   *   - Administrators and users with the `collection:{slug}:manage` permission can bypass these limitations.
+   * - Guarded query builder functions automatically exclude records where the current user is not assigned as an editor.
+   *   - This behavior is consistently applied across all default collection API endpoints.
+   *   - Only administrators and users with the `collection:{slug}:manage` permission can bypass these filters.
+   *
+   * Available options:
+   *
+   * - `true` - Uses default field name and settings.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default false
+   */
+  editors?: TEditors
+
+  /**
+   * Controls how the collection is displayed in the dashboard user interface.
+   *
+   * @default
+   * {
+   *   hidden: false,        // Visible in the dashboard
+   *   label: undefined,     // Automatically generated from the collection name
+   *   menu: {
+   *     hidden: false,
+   *     group: 'collections',
+   *     order: 10,
+   *     icon: 'folder',
+   *   },
+   *   indexPage: {
+   *     layout: 'default',  // Standard dashboard layout with header and sidebar
+   *   },
+   *   createPage: {
+   *     layout: 'auto',     // Automatic layout selection based on block support
+   *     fields: undefined,  // Display all fields in the order they are defined
+   *   },
+   *   updatePage: {
+   *     layout: 'auto',     // Automatic layout selection based on block support
+   *     fields: undefined,  // Display all fields in the order they are defined
+   *   },
+   * }
+   */
+  ui?: PartialMax4Levels<CollectionUIOptions<keyof TFields & string>>
+}
+
+export type CollectionGuard = (
+  /**
+   * A `MetaContext` instance related to the current query builder operation.
+   */
+  context: MetaContext,
+) => any
+
+type CollectionCopyTranslationFunction<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  TAllFields extends Record<string, GenericField> = TFields &
+    (DefaultFalse<TTranslatable> extends true
+      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
+      : {}) &
+    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
+    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
+    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
+    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+> = (context: {
+  /**
+   * Object containing field names and their casted values from the source translation.
+   */
+  source: ExtractCastedTypes<TAllFields> & { id: number }
+
+  /**
+   * The language code of the source translation.
+   */
+  sourceLanguage: LanguageCode
+
+  /**
+   * The language code of the target translation returned by this function.
+   */
+  targetLanguage: LanguageCode
+
+  /**
+   * Specifies whether the translation copy will be used for a `create` or `update` operation.
+   */
+  operation: 'create' | 'update'
+}) => Partial<ExtractInputTypes<TAllFields>> | Promise<Partial<ExtractInputTypes<TAllFields>>>
+
+type CollectionDuplicateFunction<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  TAllFields extends Record<string, GenericField> = TFields &
+    (DefaultFalse<TTranslatable> extends true
+      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
+      : {}) &
+    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
+    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
+    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
+    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+  TInsertInput extends Record<string, any> = InsertInput<{
+    TInputTypes: ExtractInputTypes<TAllFields>
+    fields: TAllFields
+  }>,
+> = (context: {
+  /**
+   * Object containing field names and their casted values from the source record.
+   */
+  source: ExtractCastedTypes<TAllFields> & { id: number }
+}) => TInsertInput | Promise<TInsertInput>
+
+export interface CollectionUIOptions<TFieldNames extends string = string> {
+  /**
+   * Controls if the collection should be hidden in the admin dashboard.
+   * When `true`, the collection will not be visible in the navigation menu and its dashboard pages become inaccessible.
+   *
+   * @default false
+   */
+  hidden: boolean
+
+  /**
+   * Sets the visible label text for the collection in the dashboard.
+   *
+   * If not specified, the collection name will be automatically transformed to Title case and used as the label.
+   * The resulting label is wrapped in the translation function `__('pruvious-dashboard', label)`.
+   * This transformation happens in the Vue component.
+   *
+   * You can either provide a string or a function that returns a string.
+   * The function receives an object with `_` and `__` properties to access the translation functions.
+   *
+   * Important: When using a function, only use simple anonymous functions without context binding,
+   * since the option needs to be serialized for client-side use.
+   *
+   * @example
+   * ```ts
+   * // String (non-translatable)
+   * label: 'Theme options'
+   *
+   * // Function (translatable)
+   * label: ({ __ }) => __('pruvious-dashboard', 'Theme options')
+   *
+   * // Collection name transformation (default)
+   * // Example: the collection name `MyCollection` is transformed into `__('pruvious-dashboard', 'My collection')`
+   * label: undefined
+   * ```
+   */
+  label: string | ((context: TranslatableStringCallbackContext) => string) | undefined
+
+  /**
+   * Options to customize how the collection appears in the dashboard's navigation menu.
+   *
+   * For more advanced menu customization, use the client-side filters:
+   *
+   * - `dashboard:menu:general`
+   * - `dashboard:menu:collections`
+   * - `dashboard:menu:utilities`
+   *
+   * @default
+   * {
+   *   hidden: false,
+   *   group: 'collections',
+   *   order: 10,
+   *   icon: 'folder',
+   * }
+   */
+  menu: {
+    /**
+     * Controls whether the collection should be hidden in the dashboard navigation menu.
+     * Set to `true` to hide it, `false` to show it.
+     *
+     * @default false
+     */
+    hidden: boolean
+
+    /**
+     * Defines the menu category where the collection will be displayed in the dashboard sidebar.
+     *
+     * @default 'collections'
+     */
+    group: 'general' | 'collections' | 'management' | 'utilities'
+
+    /**
+     * Controls the collection's position in the dashboard navigation menu.
+     * Items with lower numbers appear at the top.
+     * When items have the same order number, they are sorted by their label alphabetically.
+     *
+     * @default 10
+     */
+    order: number
+
+    /**
+     * The icon displayed in the menu item.
+     * Must be a valid Tabler icon name.
+     *
+     * @see https://tabler-icons.io for available icons
+     *
+     * @default 'folder'
+     */
+    icon: keyof typeof icons
+  }
+
+  /**
+   * Settings that control how collection records are displayed and organized in the dashboard's listing page.
+   * This includes column configurations, sorting preferences, filters, and other display options.
+   *
+   * @default
+   * {
+   *   layout: 'default', // Standard dashboard layout with header and sidebar
+   * }
+   */
+  indexPage: {
+    /**
+     * The dashboard layout used when listing collection records.
+     * By default, it displays a data table with pagination and filtering options.
+     *
+     * Available options:
+     *
+     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
+     *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+     *   - The import path must be a literal string, not a variable.
+     *   - The import path can be an absolute or relative to the definition file.
+     *
+     * The custom component receives the following props:
+     *
+     * - @todo
+     *
+     * @default 'default'
+     */
+    layout: 'default' | (string & {})
+
+    table: {
+      /**
+       * Defines which columns are shown in the table.
+       * The order of columns is determined by the order they are defined in the array.
+       *
+       * When not explicitly configured:
+       *
+       * - Shows first 4-5 visible fields in their original definition order.
+       * - If `createdAt` field is enabled, it appears as the rightmost column.
+       *
+       * @default undefined
+       *
+       * @example
+       * ```ts
+       * [
+       *   { field: 'email' },
+       * ]
+       * ```
+       */
+      columns:
+        | ((
+            | {
+                /**
+                 * The field (column) to display.
+                 */
+                field: TFieldNames
+              }
+            | {
+                /**
+                 * Custom component to render in the table column.
+                 * The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+                 *
+                 * The following rules apply:
+                 *
+                 * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
+                 * - The import `path` must be a literal string, not a variable.
+                 * - The import `path` can be:
+                 *   - A path starting with the Nuxt alias `>/`.
+                 *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+                 *   - A relative path to a `.vue` component.
+                 *     - This path must be relative to the file where the function is called.
+                 *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
+                 *   - An absolute path to a `.vue` component.
+                 *   - A path for an npm module.
+                 *
+                 * The custom component receives the following props:
+                 *
+                 * - @todo
+                 *
+                 * @example
+                 * ```ts
+                 * import { resolvePruviousComponent } from '#pruvious/server'
+                 *
+                 * // Correct
+                 * resolvePruviousComponent('>/components/MyComponent.vue')
+                 * resolvePruviousComponent('../../app/components/MyComponent.vue')
+                 * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
+                 *
+                 * // Incorrect
+                 * resolvePruviousComponent(`>/components/${name}.vue`)
+                 * resolvePruviousComponent('MyComponent')
+                 * ```
+                 */
+                component: string
+              }
+          ) & {
+            /**
+             * A custom text label shown in the table header column.
+             * If not provided, falls back to using the `field` label when one exists.
+             *
+             * @default undefined
+             */
+            label?: string
+
+            /**
+             * Sets the width of a table column using CSS values like `100px`, `20rem`, `50%`, `auto`, etc.
+             * The specified `width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
+             */
+            width?: string
+
+            /**
+             * Sets the minimum width of a table column using CSS values like `100px`, `20rem`, etc.
+             * The specified `min-width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
+             *
+             * The `minWidth` property is useful for specifying `width` in percentages while ensuring a minimum width for the column.
+             *
+             * @default '16rem'
+             */
+            minWidth?: string
+          })[]
+        | undefined
+
+      /**
+       * Specifies how records should be sorted by default.
+       * When no sorting order is provided:
+       *
+       * - Uses `createdAt` field in descending order if the field exists.
+       * - Falls back to sorting by `id` in descending order if `createdAt` is not available
+       *
+       * @default undefined
+       */
+      orderBy:
+        | {
+            /**
+             * The field (column) name to order by.
+             */
+            field: TFieldNames
+
+            /**
+             * The direction to order by.
+             *
+             * @default 'asc'
+             */
+            direction?: 'asc' | 'desc'
+
+            /**
+             * The order of null values.
+             *
+             * - `nullsAuto` - Null values are ordered based on the specified direction (`nullsFirst` for `asc`, `nullsLast` for `desc`).
+             * - `nullsFirst` - Null values are ordered first.
+             * - `nullsLast` - Null values are ordered last.
+             *
+             * @default 'nullsAuto'
+             */
+            nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
+          }
+        | undefined
+
+      /**
+       * The number of items to display per page.
+       *
+       * @default 50
+       */
+      perPage: number
+    }
+  }
+
+  /**
+   * Settings that define the form layout when creating new collection records.
+   *
+   * @default
+   * {
+   *   layout: 'auto',    // Automatic layout selection based on block support
+   *   fields: undefined  // Display all fields in the order they are defined
+   * }
+   */
+  createPage: {
+    /**
+     * The dashboard layout used when creating a new collection record.
+     *
+     * When set to 'auto', the layout is determined based on block support:
+     *
+     * - With blocks enabled: Uses 'live-preview' layout
+     * - Without blocks: Uses 'default' layout
+     *
+     * Available options:
+     *
+     * - `'auto'` - Automatic layout selection based on block support.
+     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
+     * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
+     *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+     *   - The import path must be a literal string, not a variable.
+     *   - The import path can be an absolute or relative to the definition file.
+     *
+     * The custom component receives the following props:
+     *
+     * - @todo
+     *
+     * The custom component can emit the following events:
+     *
+     * - @todo
+     *
+     * @default 'auto'
+     */
+    layout: 'auto' | 'default' | 'live-preview' | (string & {})
+
+    /**
+     * Customizes the layout of the collection's fields in the dashboard.
+     * Provide `mirror` to use the same layout as in the `updatePage` settings.
+     * If not specified, the fields are stacked vertically in the order they are defined.
+     *
+     * @default undefined
+     *
+     * @example
+     * ```ts
+     * [
+     *   // Single field
+     *   'email',
+     *
+     *   // Half-width field
+     *   'firstName | 50%',
+     *
+     *   // Field with custom component styles
+     *   {
+     *     field: {
+     *       name: 'lastName',
+     *       style: { maxWidth: '50%' },
+     *     },
+     *   },
+     *
+     *   // Field group (row)
+     *   {
+     *     row: [
+     *       // Has maximum width of 8rem
+     *       'countryCode | 8rem',
+     *
+     *       // Takes up the remaining space
+     *       'phone',
+     *     ],
+     *   },
+     *
+     *   // Horizontal rule
+     *   '---',
+     *
+     *   // Field group (tabs)
+     *   {
+     *     tabs: [
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Address'),
+     *         fields: ['street | 40%', 'city | 40%', 'zipCode'],
+     *       },
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Contact'),
+     *         fields: [
+     *           {
+     *             // Custom Vue component
+     *             // - The component must be resolved using `resolvePruviousComponent()`
+     *             //   or `resolveNamedPruviousComponent()`.
+     *             // - The import path must be a literal string, not a variable.
+     *             // - The import path can be an absolute or relative to the definition file.
+     *             component: resolvePruviousComponent('>/components/Dashboard/ContactForm.vue'),
+     *           },
+     *         ],
+     *       },
+     *     ],
+     *   },
+     *
+     *   // Card group
+     *   {
+     *     card: ['comments', 'assignedTo'],
+     *   },
+     * ]
+     * ```
+     */
+    fields: FieldsLayout<TFieldNames> | undefined | 'mirror'
+  }
+
+  /**
+   * Settings that control how existing records are displayed and edited in the dashboard.
+   *
+   * @default
+   * {
+   *   layout: 'auto',    // Automatic layout selection based on block support
+   *   fields: undefined  // Display all fields in the order they are defined
+   * }
+   */
+  updatePage: {
+    /**
+     * The dashboard layout used when editing a collection record.
+     *
+     * When set to 'auto', the layout is determined based on block support:
+     *
+     * - With blocks enabled: Uses 'live-preview' layout
+     * - Without blocks: Uses 'default' layout
+     *
+     * Available options:
+     *
+     * - `'auto'` - Automatic layout selection based on block support.
+     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
+     * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
+     *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+     *   - The import path must be a literal string, not a variable.
+     *   - The import path can be an absolute or relative to the definition file.
+     *
+     * The custom component receives the following props:
+     *
+     * - @todo
+     *
+     * The custom component can emit the following events:
+     *
+     * - @todo
+     *
+     * @default 'auto'
+     */
+    layout: 'auto' | 'default' | 'live-preview' | (string & {})
+
+    /**
+     * Customizes the layout of the collection's fields in the dashboard.
+     * Provide `mirror` to use the same layout as in the `createPage` settings.
+     * If not specified, the fields are stacked vertically in the order they are defined.
+     *
+     * @default undefined
+     *
+     * @example
+     * ```ts
+     * [
+     *   // Single field
+     *   'email',
+     *
+     *   // Half-width field
+     *   'firstName | 50%',
+     *
+     *   // Field with custom component styles
+     *   {
+     *     field: {
+     *       name: 'lastName',
+     *       style: { maxWidth: '50%' },
+     *     },
+     *   },
+     *
+     *   // Field group (row)
+     *   {
+     *     row: [
+     *       // Has maximum width of 8rem
+     *       'countryCode | 8rem',
+     *
+     *       // Takes up the remaining space
+     *       'phone',
+     *     ],
+     *   },
+     *
+     *   // Horizontal rule
+     *   '---',
+     *
+     *   // Field group (tabs)
+     *   {
+     *     tabs: [
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Address'),
+     *         fields: ['street | 40%', 'city | 40%', 'zipCode'],
+     *       },
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Contact'),
+     *         fields: [
+     *           {
+     *             // Custom Vue component
+     *             // - The component must be resolved using `resolvePruviousComponent()`
+     *             //   or `resolveNamedPruviousComponent()`.
+     *             // - The import path must be a literal string, not a variable.
+     *             // - The import path can be an absolute or relative to the definition file.
+     *             component: resolvePruviousComponent('>/components/Dashboard/ContactForm.vue'),
+     *           },
+     *         ],
+     *       },
+     *     ],
+     *   },
+     *
+     *   // Card group
+     *   {
+     *     card: ['comments', 'assignedTo'],
+     *   },
+     * ]
+     * ```
+     */
+    fields: FieldsLayout<TFieldNames> | undefined | 'mirror'
+  }
+}
+
+interface AutoFieldEnabled {
+  /**
+   * Specifies whether this collection has the field activated.
+   */
+  enabled: boolean
+}
+
+interface BaseCreatedAtFieldOptions {
+  /**
+   * Specifies the name of the field to be used within the data structure.
+   *
+   * @default 'createdAt'
+   */
+  fieldName?: string
+
+  /**
+   * Controls whether to create a database index for this field.
+   *
+   * @default true
+   */
+  index?: boolean
+}
+
+interface BaseUpdatedAtFieldOptions {
+  /**
+   * Specifies the name of the field to be used within the data structure.
+   *
+   * @default 'updatedAt'
+   */
+  fieldName?: string
+
+  /**
+   * Controls whether to create a database index for this field.
+   *
+   * @default false
+   */
+  index?: boolean
+}
+
+interface BaseAuthorFieldOptions {
+  /**
+   * Specifies the name of the field to be used within the data structure.
+   *
+   * @default 'author'
+   */
+  fieldName?: string
+
+  /**
+   * Controls whether to create a database index for this field.
+   *
+   * @default true
+   */
+  index?: boolean
+}
+
+interface BaseEditorsFielOptions {
+  /**
+   * Specifies the name of the field to be used within the data structure.
+   *
+   * @default 'editors'
+   */
+  fieldName?: string
+
+  /**
+   * Controls whether to create a database index for this field.
+   *
+   * @default false
+   */
+  index?: boolean
+}
+
+interface ResolveContext {
+  /**
+   * The name of the collection being resolved.
+   */
+  collectionName: string
+
+  /**
+   * The `ResolveFromLayersResult` object containing the file location.
+   */
+  location: ResolveFromLayersResult
+}
+
+export type CollectionMeta = DeepRequired<
+  Pick<CollectionMetaOptions<any, undefined, undefined, undefined, undefined, undefined>, 'api'>
+> &
+  Required<
+    Pick<
+      CollectionMetaOptions<any, undefined, undefined, undefined, undefined, undefined>,
+      'translatable' | 'syncedFields' | 'guards' | 'authGuard' | 'copyTranslation' | 'duplicate'
+    >
+  > & {
+    api: { create: boolean; read: boolean; update: boolean; delete: boolean }
+    authGuard: ('create' | 'read' | 'update' | 'delete')[]
+    logs: {
+      enabled: boolean
+      exposeData: boolean
+      operations: { insert: boolean; select: boolean; update: boolean; delete: boolean }
+    }
+    createdAt: AutoFieldEnabled & CreatedAtFieldPresetOptions & Required<BaseCreatedAtFieldOptions>
+    updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions & Required<BaseUpdatedAtFieldOptions>
+    author: AutoFieldEnabled & AuthorFieldPresetOptions & Required<BaseAuthorFieldOptions>
+    editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFielOptions>
+    ui: CollectionUIOptions
+  }
+export type GenericMetaCollection = Collection<Record<string, GenericField>, CollectionMeta>
+export type MetaContext = Context<Database<Record<string, GenericMetaCollection>>>
+
+/**
+ * Creates a new Pruvious collection.
+ *
+ * Use this as the default export in a file within the `server/collections/` directory.
+ * The filename determines the collection name, which should be in PascalCase (e.g. 'Products.ts', 'ProductCategories.ts', etc.).
+ *
+ * @see https://pruvious.com/docs/collections
+ *
+ * @example
+ * ```ts
+ * // server/collections/Products.ts
+ * import { defineCollection } from '#pruvious/server'
+ *
+ * export default defineCollection({
+ *   fields: {
+ *     // @todo
+ *     // ...
+ *   },
+ *   foreignKeys: [
+ *     // @todo
+ *   ],
+ *   // @todo dashboard and API options
+ * })
+ * ```
+ */
+export function defineCollection<
+  const TFields extends Record<string, GenericField>,
+  const TTranslatable extends boolean | undefined,
+  const TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  const TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  const TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+>(
+  options: DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+): (
+  resolveContext: ResolveContext,
+) => Collection<
+  TFields &
+    (DefaultFalse<TTranslatable> extends true
+      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
+      : {}) &
+    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
+    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
+    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
+    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+  CollectionMeta
+> {
+  return function (resolveContext: ResolveContext) {
+    const fields: Record<string, GenericField> = { ...options.fields }
+    const hooks: Required<CollectionHooks> = {
+      beforeQueryPreparation: options.hooks?.beforeQueryPreparation ?? [],
+      beforeQueryExecution: options.hooks?.beforeQueryExecution ?? [],
+      afterQueryExecution: options.hooks?.afterQueryExecution ?? [],
+    }
+    const translatable = options.translatable ?? false
+    const syncedFields = options.syncedFields ?? []
+    const createdAt: AutoFieldEnabled & CreatedAtFieldPresetOptions & Required<BaseCreatedAtFieldOptions> = defu(
+      { enabled: options.createdAt !== false },
+      isObject(options.createdAt) ? options.createdAt : {},
+      { fieldName: 'createdAt', index: true },
+    )
+    const updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions & Required<BaseUpdatedAtFieldOptions> = defu(
+      { enabled: options.updatedAt !== false },
+      isObject(options.updatedAt) ? options.updatedAt : {},
+      { fieldName: 'updatedAt', index: false },
+    )
+    const author: AutoFieldEnabled & AuthorFieldPresetOptions & Required<BaseAuthorFieldOptions> = defu(
+      { enabled: !!options.author },
+      isObject(options.author) ? options.author : {},
+      { fieldName: 'author', index: true },
+    )
+    const editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFielOptions> = defu(
+      { enabled: !!options.editors },
+      isObject(options.editors) ? options.editors : {},
+      { fieldName: 'editors', index: false },
+    )
+    const ui = deepClone(options.ui)
+    const indexes = [...(options.indexes ?? [])]
+
+    for (const fieldName of Object.keys(fields)) {
+      if (fieldName === 'id') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `The primary key field is automatically created for all collections.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        delete fields[fieldName]
+      } else if (translatable && fieldName === 'translationId') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`translatable\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (translatable && fieldName === 'language') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`translatable\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (createdAt.enabled && fieldName === createdAt.fieldName) {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`createdAt\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        delete fields[fieldName]
+      } else if (updatedAt.enabled && fieldName === updatedAt.fieldName) {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`updatedAt\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        delete fields[fieldName]
+      } else if (author.enabled && fieldName === author.fieldName) {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`author\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (editors.enabled && fieldName === editors.fieldName) {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`editors\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        // @todo check for other reserved field names (deletedAt, language, translations, ...)
+      } else if (camelCase(fieldName) !== fieldName || fieldName.length > 63) {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is invalid.`, [
+          `Field names must be in camelCase format and maximum 63 characters long.`,
+          `Suggested name: ${colorize('greenBright', camelCase(fieldName).slice(0, 63) || 'fieldName')}`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        delete fields[fieldName]
+      }
+    }
+
+    if (createdAt.enabled) {
+      fields[createdAt.fieldName] = createdAtFieldPreset(omit(createdAt, ['enabled']))
+      if (createdAt.index) {
+        indexes.push({ fields: [createdAt.fieldName] })
+      }
+    }
+
+    if (updatedAt.enabled) {
+      fields[updatedAt.fieldName] = updatedAtFieldPreset(omit(updatedAt, ['enabled']))
+      if (updatedAt.index) {
+        indexes.push({ fields: [updatedAt.fieldName] })
+      }
+    }
+
+    if (author.enabled) {
+      fields[author.fieldName] = authorFieldPreset(omit(author, ['enabled']))
+      if (author.index) {
+        indexes.push({ fields: [author.fieldName] })
+      }
+    }
+
+    if (editors.enabled) {
+      fields[editors.fieldName] = editorsFieldPreset(omit(editors, ['enabled']))
+      if (editors.index) {
+        indexes.push({ fields: [editors.fieldName] })
+      }
+    }
+
+    if (translatable) {
+      fields.translations = translationsFieldPreset({})
+      fields.language = languageFieldPreset({})
+      indexes.push(
+        { fields: ['language'] },
+        { fields: ['translations'] },
+        { fields: ['translations', 'language'], unique: true },
+      )
+
+      if (syncedFields.length) {
+        hooks.afterQueryExecution.push(async (context, { result }) => {
+          if (
+            !context.customData.__syncingFields &&
+            context.operation === 'update' &&
+            result.success &&
+            syncedFields.some((syncedField: any) => isDefined(context.sanitizedInput[syncedField])) &&
+            (isPositiveInteger(result.data) || (isArray(result.data) && result.data.length))
+          ) {
+            const translationKeys: string[] = []
+            const firstResult = isArray(result.data) ? (result.data[0] as Record<string, any>) : {}
+            if (isString(firstResult.translations)) {
+              translationKeys.push(...(result.data as Record<string, any>[]).map(({ translations }) => translations))
+            } else {
+              const updatedRecords = await context.database
+                .queryBuilder()
+                .selectFrom(context.collectionName!)
+                .select('translations')
+                .setWhereCondition(context.whereCondition)
+                .useCache(context.cache)
+                .all()
+              if (updatedRecords.success) {
+                translationKeys.push(...updatedRecords.data.map(({ translations }) => translations))
+              }
+            }
+            const filteredTranslationKeys = translationKeys.filter(Boolean)
+            if (filteredTranslationKeys.length) {
+              const fieldsToSync = syncedFields.filter((syncedField: any) =>
+                isDefined(context.sanitizedInput[syncedField]),
+              )
+              await context.database
+                .queryBuilder()
+                .update(context.collectionName!)
+                .set(
+                  Object.fromEntries(
+                    fieldsToSync.map((syncedField: any) => [syncedField, context.sanitizedInput[syncedField]]),
+                  ),
+                )
+                .where('translations', 'in', filteredTranslationKeys)
+                .withCustomContextData({ __syncingFields: true })
+                .run()
+            }
+          }
+        })
+      }
+    }
+
+    if (author.enabled || editors.enabled) {
+      hooks.beforeQueryPreparation.push(({ collectionName, operation, queryBuilder, customData }) => {
+        if (!customData.__guarded) {
+          return
+        }
+
+        if (operation !== 'insert') {
+          const event = useEvent()
+          if (!event.context.pruvious.auth.isLoggedIn) {
+            setResponseStatus(event, 401, httpStatusCodeMessages[401])
+            throw new Error(
+              isDevelopment ? 'You must be logged in to access this resource' : httpStatusCodeMessages[401],
+            )
+          }
+          const slug = kebabCase(collectionName!)
+          const permission = `collection:${slug}:manage` as Permission
+          if (!event.context.pruvious.auth.permissions.includes(permission)) {
+            const userId = event.context.pruvious.auth.user.id
+            if (operation === 'select') {
+              if (author.enabled && author.strict && editors.enabled && editors.strict) {
+                queryBuilder!.orGroup([
+                  (eb) => eb.where(author.fieldName, '=', userId),
+                  (eb) => eb.where(editors.fieldName, 'includes', userId),
+                ])
+              } else if (author.enabled && author.strict) {
+                queryBuilder!.where(author.fieldName, '=', userId)
+              } else if (editors.enabled && editors.strict) {
+                queryBuilder!.where(editors.fieldName, 'includes', userId)
+              }
+            } else if (operation === 'update') {
+              if (author.enabled && editors.enabled) {
+                queryBuilder!.orGroup([
+                  (eb) => eb.where(author.fieldName, '=', userId),
+                  (eb) => eb.where(editors.fieldName, 'includes', userId),
+                ])
+              } else if (author.enabled) {
+                queryBuilder!.where(author.fieldName, '=', userId)
+              } else if (editors.enabled) {
+                queryBuilder!.where(editors.fieldName, 'includes', userId)
+              }
+            } else if (operation === 'delete') {
+              if (author.enabled) {
+                queryBuilder!.where(author.fieldName, '=', userId)
+              } else {
+                queryBuilder!.where('id', '=', 0)
+              }
+            }
+          }
+        }
+      })
+    }
+
+    if (isString(ui?.indexPage?.layout) && ui.indexPage.layout !== 'default') {
+      ui.indexPage.layout = ui.indexPage.layout.includes('/')
+        ? hash(
+            resolveCustomComponentPath(
+              resolveContext.location.file.absolute,
+              ui.indexPage.layout,
+              resolveContext.location.layer.config.srcDir,
+            ),
+          )
+        : ui.indexPage.layout
+    }
+
+    if (isArray(ui?.indexPage?.table?.columns)) {
+      for (const column of ui.indexPage.table.columns) {
+        column.minWidth ??= '16rem'
+        if ('component' in column) {
+          column.component = column.component.includes('/')
+            ? hash(
+                resolveCustomComponentPath(
+                  resolveContext.location.file.absolute,
+                  column.component,
+                  resolveContext.location.layer.config.srcDir,
+                ),
+              )
+            : column.component
+        }
+      }
+    }
+
+    for (const page of ['createPage', 'updatePage'] as const) {
+      if (isString(ui?.[page]?.layout) && !['auto', 'default', 'live-preview'].includes(ui[page].layout)) {
+        ui[page].layout = ui[page].layout.includes('/')
+          ? hash(
+              resolveCustomComponentPath(
+                resolveContext.location.file.absolute,
+                ui[page].layout,
+                resolveContext.location.layer.config.srcDir,
+              ),
+            )
+          : ui[page].layout
+      }
+
+      if (isArray(ui?.[page]?.fields)) {
+        for (const { item, path } of walkFieldLayoutItems(ui[page].fields)) {
+          if (isObject(item) && 'component' in item) {
+            setProperty(
+              ui[page].fields,
+              `${path}.component`,
+              item.component.includes('/')
+                ? hash(
+                    resolveCustomComponentPath(
+                      resolveContext.location.file.absolute,
+                      item.component,
+                      resolveContext.location.layer.config.srcDir,
+                    ),
+                  )
+                : item.component,
+            )
+          }
+        }
+      }
+    }
+
+    return new Collection({
+      key: options.key,
+      fields: fields as any,
+      indexes,
+      foreignKeys: options.foreignKeys,
+      hooks,
+      meta: {
+        translatable: !!options.translatable as never,
+        syncedFields,
+        api: defu(
+          isUndefined(options.api) || options.api === true
+            ? {}
+            : options.api === false
+              ? { create: false, read: false, update: false, delete: false }
+              : options.api,
+          { create: true, read: true, update: true, delete: true },
+        ),
+        guards: [collectionPermissionGuard, ...(options.guards ?? [])],
+        authGuard:
+          isUndefined(options.authGuard) || options.authGuard === true
+            ? ['create', 'read', 'update', 'delete']
+            : options.authGuard === false
+              ? []
+              : options.authGuard,
+        copyTranslation: options.copyTranslation ?? null,
+        duplicate: options.duplicate ?? null,
+        logs: {
+          enabled: options.logs !== false,
+          exposeData: isObject(options.logs) ? !!options.logs.exposeData : true,
+          operations: defu(isObject(options.logs) && isObject(options.logs.operations) ? options.logs.operations : {}, {
+            insert: true,
+            select: true,
+            update: true,
+            delete: true,
+          }),
+        },
+        createdAt,
+        updatedAt,
+        author,
+        editors,
+        ui: defu(ui ?? {}, {
+          hidden: false,
+          label: undefined,
+          menu: { hidden: false, group: 'collections', order: 10, icon: 'folder' as const },
+          indexPage: { layout: 'default' as const, table: { columns: undefined, orderBy: undefined, perPage: 50 } },
+          createPage: { layout: 'auto', fields: undefined },
+          updatePage: { layout: 'auto', fields: undefined },
+        } satisfies Required<CollectionUIOptions>),
+      } satisfies CollectionMeta,
+    }) as any
+  }
+}
+
+/**
+ * Creates a new Pruvious collection based on a predefined template.
+ * This function receives two arguments:
+ *
+ * - `templateName` - The name of the collection template to use.
+ * - `callback` - A function that receives the `template` object and returns the final collection options.
+ *
+ * Inside the `callback` function, you can freely modify any properties of the `template` object.
+ *
+ * @returns a `Promise` that resolves to the defined collection instance.
+ *
+ * @see https://pruvious.com/docs/collection-templates (@todo set up this link)
+ *
+ * @example
+ * ```ts
+ * // server/collections/Users.ts
+ * import { defineCollectionFromTemplate, textField } from '#pruvious/server'
+ *
+ * export default defineCollectionFromTemplate('Users', (template) => ({
+ *   ...template,
+ *   fields: {
+ *     ...template.fields,
+ *     nickname: textField({}),
+ *   },
+ * }))
+ * ```
+ */
+export async function defineCollectionFromTemplate<
+  TTemplateName extends keyof Templates,
+  const TFields extends Record<string, GenericField>,
+  const TTranslatable extends boolean | undefined,
+  const TCreatedAt extends boolean | CreatedAtFieldPresetOptions | undefined,
+  const TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
+  const TAuthor extends boolean | AuthorFieldPresetOptions | undefined,
+  const TEditors extends boolean | EditorsFieldPresetOptions | undefined,
+>(
+  templateName: TTemplateName,
+  callback: (
+    template: Templates[TTemplateName],
+  ) => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+): Promise<
+  (
+    resolveContext: ResolveContext,
+  ) => Collection<
+    TFields &
+      (DefaultFalse<TTranslatable> extends true
+        ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
+        : {}) &
+      (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
+      (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
+      (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
+      (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+    CollectionMeta
+  >
+> {
+  const { getTemplate } = await import('#pruvious/server')
+  const template = (await getTemplate(templateName)) as any
+
+  return defineCollection(callback(template()))
+}

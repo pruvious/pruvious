@@ -1,7 +1,0 @@
-.sortable-ghost {
-  @apply opacity-0;
-}
-
-.sortable-area {
-  @apply relative after:absolute after:inset-x-0 after:-top-3 after:h-6;
-}

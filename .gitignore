@@ -1,80 +1,22 @@
-# Dependencies
-node_modules
-
-# Logs
-*.log*
-
-# Temp directories
-.temp
-.tmp
-.cache
-
-# Yarn
-**/.yarn/cache
-**/.yarn/*state*
-
-# Generated dirs
-bin
-/config
-dist
-
-# Nuxt
+# Build outputs
 .nuxt
 .output
-.vercel_build_output
-.build-*
-.env
-.netlify
-
-# Pruvious
 .pruvious
-.pruviousrc
-.ssh.*
-.uploads
-*.db
-*.db-journal
-pruvious-*.tgz
+dist
+tmp
 
-# Env
-.env
+# Node dependencies
+node_modules
 
-# Testing
-reports
-coverage
-*.lcov
-.nyc_output
-playground/*
-playground/*/*
-!playground/blocks
-!playground/blocks/.gitkeep
-!playground/icons
-!playground/icons/.gitkeep
-!playground/server
-!playground/server/tsconfig.json
-!playground/server/test
-!playground/app.vue
-!playground/nuxt.config.ts
-!playground/package.json
-!playground/tsconfig.json
-
-# VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-
-# Intellij idea
-*.iml
-.idea
-
-# OSX
+# Misc
 .DS_Store
-.AppleDouble
-.LSOverride
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+.uploads
+*.sqlite
+*.sqlite-*
+/playground
+
+# Local env files
+.env
+.env.*
+!.env.example
+!.env.test.example

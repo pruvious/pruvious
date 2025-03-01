@@ -1,8 +1,2 @@
-.cache
-.nitro
-.nuxt
-.output
-.pruvious
-.uploads
-dist
-node_modules
+*.MD
+pnpm-lock.yaml

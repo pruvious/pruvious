@@ -1,0 +1,57 @@
+:root {
+  --pui-background: 210 22.2% 96.5%;
+  --pui-foreground: 324 49% 10%;
+  --pui-card: 0 0% 100%;
+  --pui-card-foreground: 324 49% 10%;
+  --pui-popover: 0 0% 100%;
+  --pui-popover-foreground: 324 49% 10%;
+  --pui-primary: 324 49% 10%;
+  --pui-primary-foreground: 0 0% 98%;
+  --pui-secondary: 240 4.8% 94%;
+  --pui-secondary-foreground: 324 49% 10%;
+  --pui-muted: 240 4.8% 94%;
+  --pui-muted-foreground: 228 11% 44%;
+  --pui-accent: 209 71% 88%;
+  --pui-accent-foreground: 324 49% 10%;
+  --pui-destructive: 0 84.2% 60.2%;
+  --pui-destructive-foreground: 0 0% 98%;
+  --pui-border: 210 8% 90.2%;
+  --pui-input: 210 7.41% 89.4%;
+  --pui-ring: 324 49% 10%;
+
+  --pui-radius: 0.5rem;
+  --pui-font: 'Inter', sans-serif;
+  --pui-font-mono: 'Fira Mono', monospace;
+  --pui-headings: var(--pui-font);
+  --pui-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --pui-transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --pui-overlay-transition-duration: 300ms;
+
+  --pui-size: 0;
+  --pui-spacing: 0;
+  --pui-dialog-size: 0;
+  --pui-toast-size: 0;
+  --pui-tooltip-size: 0;
+}
+
+.dark {
+  --pui-background: 234 16.7% 11.8%;
+  --pui-foreground: 0 0% 98%;
+  --pui-card: 231 16.7% 16.5%;
+  --pui-card-foreground: 0 0% 98%;
+  --pui-popover: 231 16.7% 16.5%;
+  --pui-popover-foreground: 0 0% 98%;
+  --pui-primary: 0 0% 98%;
+  --pui-primary-foreground: 240 5.9% 10%;
+  --pui-secondary: 231 16.7% 24%;
+  --pui-secondary-foreground: 0 0% 98%;
+  --pui-muted: 231 16.7% 24%;
+  --pui-muted-foreground: 228 11% 65%;
+  --pui-accent: 208 52% 28%;
+  --pui-accent-foreground: 0 0% 98%;
+  --pui-destructive: 7.41 84.2% 60.4%;
+  --pui-destructive-foreground: 0 0% 98%;
+  --pui-border: 231 16.7% 24%;
+  --pui-input: 231 16.7% 32%;
+  --pui-ring: 240 4.9% 83.9%;
+}

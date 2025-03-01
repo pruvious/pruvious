@@ -1,0 +1,155 @@
+import { getUser, hasPermission, languages, selectFrom } from '#pruvious/client'
+import type { Collections, LanguageCode, Permission, SerializableCollection } from '#pruvious/server'
+import { isNumber, kebabCase } from '@pruvious/utils'
+
+export type ResolvedCollectionRecordPermissions = Record<
+  LanguageCode,
+  {
+    /**
+     * The current record ID.
+     */
+    id: number | null
+
+    /**
+     * Whether the current user can create new collection records.
+     */
+    canCreate: boolean
+
+    /**
+     * Whether the current user has permission to update a record by its `id`.
+     * Checks `author` and `editors` fields (if enabled in the collection) to verify update rights.
+     */
+    canUpdate: boolean
+
+    /**
+     * Whether the current user has permission to delete a record by its `id`.
+     * Checks the `author` field (if enabled in the collection) to verify delete rights.
+     */
+    canDelete: boolean
+  }
+>
+
+/**
+ * Resolves user permissions for all defined languages of a `collection` record identified by its `id`.
+ * Requires the authenticated user to have read access to the base record.
+ *
+ *
+ * @returns a key-value object with language codes as keys and resolved permissions as values.
+ *          If the `collection` is not translatable, the resolved permissions will be the same for all languages.
+ *
+ * @example
+ * ```ts
+ * await resolveCollectionRecordPermissions(1, translatableCollection)
+ * // {
+ * //   en: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
+ * //   de: { id: null, canCreate: true, canUpdate: true, canDelete: true },
+ * //   fr: { id: 2, canCreate: true, canUpdate: true, canDelete: true },
+ * // }
+ *
+ * await resolveCollectionRecordPermissions(1, nonTranslatableCollection)
+ * // {
+ * //   en: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
+ * //   de: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
+ * //   fr: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
+ * // }
+ * ```
+ */
+export async function resolveCollectionRecordPermissions(
+  id: number,
+  collection: { name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: SerializableCollection },
+): Promise<ResolvedCollectionRecordPermissions> {
+  const translations: Partial<Record<LanguageCode, number | null>> = {}
+  const results = {} as ResolvedCollectionRecordPermissions
+  const isManaged = collection.definition.authorField || collection.definition.editorsField
+  const canManage = hasPermission(`collection:${kebabCase(collection.name)}:manage` as Permission)
+  const canCreate = hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
+  const canUpdate = hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
+  const canDelete = hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
+
+  if (collection.definition.translatable) {
+    const q1 = await selectFrom(collection.name)
+      .select('translations' as any)
+      .where('id', '=', id)
+      .populate()
+      .first()
+
+    if (q1.success && q1.data) {
+      for (const [language, id] of Object.entries(q1.data.translations as Record<LanguageCode, number | null>)) {
+        translations[language as LanguageCode] = id
+      }
+    } else {
+      console.warn(`Failed to fetch translations for record \`${id}\` in collection \`${collection.name}\``, q1)
+    }
+  }
+
+  for (const { code } of languages) {
+    const _id = collection.definition.translatable ? (translations[code] ?? null) : id
+    results[code] = {
+      id: _id,
+      canCreate,
+      canUpdate: isNumber(_id) && canUpdate && (!isManaged || canManage),
+      canDelete: isNumber(_id) && canDelete && (!isManaged || canManage),
+    }
+  }
+
+  if (isManaged && !canManage && (canUpdate || canDelete)) {
+    const userId = getUser()?.id
+
+    if (collection.definition.translatable) {
+      const q2 = await Promise.all(
+        languages.map(({ code }) => {
+          if (translations[code]) {
+            return selectFrom(collection.name)
+              .select([collection.definition.authorField, collection.definition.editorsField].filter(Boolean) as any)
+              .where('id', '=', translations[code])
+              .populate()
+              .first()
+          }
+          return null
+        }),
+      )
+
+      for (const [i, { code }] of languages.entries()) {
+        let _canUpdate = false
+        let _canDelete = false
+
+        if (collection.definition.authorField) {
+          _canUpdate = q2[i]?.data?.[collection.definition.authorField] === userId
+          _canDelete = q2[i]?.data?.[collection.definition.authorField] === userId
+        }
+
+        if (collection.definition.editorsField) {
+          _canUpdate ||= !!q2[i]?.data?.[collection.definition.editorsField]?.includes(userId)
+        }
+
+        results[code].canUpdate = _canUpdate
+        results[code].canDelete = _canDelete
+      }
+    } else {
+      const q3 = await selectFrom(collection.name)
+        .select([collection.definition.authorField, collection.definition.editorsField].filter(Boolean) as any)
+        .where('id', '=', id)
+        .populate()
+        .first()
+
+      for (const { code } of languages) {
+        let _canUpdate = false
+        let _canDelete = false
+
+        if (collection.definition.authorField) {
+          _canUpdate = q3?.data?.[collection.definition.authorField] === userId
+          _canDelete = q3?.data?.[collection.definition.authorField] === userId
+        }
+
+        if (collection.definition.editorsField) {
+          _canUpdate ||= !!q3?.data?.[collection.definition.editorsField]?.includes(userId)
+        }
+
+        results[code].canUpdate = _canUpdate
+        results[code].canDelete = _canDelete
+      }
+    }
+  }
+
+  return results
+}

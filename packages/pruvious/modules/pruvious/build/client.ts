@@ -1,0 +1,442 @@
+import { validatorsMeta } from '@pruvious/orm'
+import { camelCase } from '@pruvious/utils'
+import fs from 'node:fs'
+import { createResolver, useNuxt } from 'nuxt/kit'
+import { relative } from 'pathe'
+import { debug } from '../debug/console'
+import { resolveFieldComponentFiles, resolveFieldDefinitionFiles } from '../fields/resolver'
+import {
+  resolveActionCallbackFiles,
+  resolveActionDefinitionFiles,
+  resolveFilterCallbackFiles,
+  resolveFilterDefinitionFiles,
+} from '../hooks/resolver'
+import { resolveTranslationFiles } from '../translations/resolver'
+import { getSimpleValidatorsMeta } from './validators'
+
+/**
+ * Generates the `#pruvious/client` files.
+ */
+export function generateClientFiles() {
+  const nuxt = useNuxt()
+  const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
+
+  fs.writeFileSync(`${buildDir}/client/index.ts`, getClientFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/client/index.d.ts`, getClientTypeFileContent() + '\n')
+}
+
+/**
+ * Generates the `#pruvious/client` file content.
+ */
+function getClientFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/index.ts>`)
+
+  const { resolve } = createResolver(import.meta.url)
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
+  const fieldComponentFiles = resolveFieldComponentFiles()
+  const fieldComponentEntries = Object.entries(fieldComponentFiles)
+  const simpleValidatorsMeta = getSimpleValidatorsMeta()
+  const actionDefinitionFiles = resolveActionDefinitionFiles()
+  const clientActionDefinitionEntries = Object.entries(actionDefinitionFiles.client)
+  const actionCallbackFiles = resolveActionCallbackFiles()
+  const clientActionCallbackEntries = Object.entries(actionCallbackFiles.client)
+  const filterDefinitionFiles = resolveFilterDefinitionFiles()
+  const clientFilterDefinitionEntries = Object.entries(filterDefinitionFiles.client)
+  const filterCallbackFiles = resolveFilterCallbackFiles()
+  const clientFilterCallbackEntries = Object.entries(filterCallbackFiles.client)
+  const translationFiles = resolveTranslationFiles()
+  const dashboardLanguages = Object.keys(translationFiles['pruvious-dashboard'] ?? {}).map((code) => ({
+    code,
+    name: new Intl.DisplayNames([code, 'en'], { type: 'language' }).of(code) ?? code,
+  }))
+
+  return [
+    `import { type Component, defineAsyncComponent } from 'vue'`,
+    `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
+    `import type { i18n as _i18n } from '../server'`,
+    `import { useLanguage } from '${resolve('../translations/utils.client')}'`,
+    ...fieldDefinitionEntries.map(([name, { file }]) => `import type _${name}Field from '${file.import}'`),
+    ...clientActionDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
+    ),
+    ...clientFilterDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Filter from '${file.import}'`,
+    ),
+    ``,
+    `/**`,
+    ` * Type representing all defined client-side action hooks.`,
+    ` * The keys are the action names, and the values are the \`Action\` definition objects.`,
+    ` */`,
+    `export type Actions = {`,
+    ...clientActionDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Action,`,
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Type representing all defined client-side filter hooks.`,
+    ` * The keys are the filter names, and the values are the \`Filter\` definition objects.`,
+    ` */`,
+    `export type Filters = {`,
+    ...clientFilterDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Filter,`,
+    ),
+    `}`,
+    ``,
+    `const _fieldFn = () => null`,
+    ``,
+    ...fieldDefinitionEntries.flatMap(([name]) => [
+      `export const ${name}Field = _fieldFn as unknown as typeof _${name}Field.clientFn`,
+    ]),
+    ``,
+    `/**`,
+    ` * The base path for the dashboard.`,
+    ` * This setting comes from the Nuxt config \`pruvious.dashboard.basePath\` and is formatted to always start and end with a forward slash.`,
+    ` */`,
+    `export const dashboardBasePath = '${pruviousOptions.dashboard.basePath}'`,
+    ``,
+    `/**`,
+    ` * Stores all loaded client-side actions in a key-value structure.`,
+    ` * The keys represent action names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The action function to be executed.`,
+    ` * - \`priority\` - The priority of the action.`,
+    ` */`,
+    `export const actions: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Stores all loaded client-side filters in a key-value structure.`,
+    ` * The keys represent filter names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The filter function to be executed.`,
+    ` * - \`priority\` - The priority of the filter.`,
+    ` */`,
+    `export const filters: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Key-value object mapping field names to their corresponding Vue components.`,
+    ` * Each component provides editing functionality for a specific field type in the CMS.`,
+    ` *`,
+    ` * Components are loaded asynchronously using Vue's \`defineAsyncComponent\` function.`,
+    ` * They are automatically registered by creating \`.vue\` files in the \`app/fields/\` directory of the project.`,
+    ` *`,
+    ` * Note: Always include a fallback component for any field that doesn't have a designated component assigned to it.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <component v-if="fieldComponents[fieldName]" :is="fieldComponents[fieldName]" v-model="props" />`,
+    ` * </template>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const fieldComponents: Record<string, () => Component> = {`,
+    ...fieldComponentEntries
+      .filter(([_, { regular }]) => regular)
+      .map(
+        ([name, { regular }]) => `  '${name}': () => defineAsyncComponent(() => import('${regular!.file.absolute}')),`,
+      ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Key-value object mapping field names to their corresponding Vue components for table views.`,
+    ` * These components are used to render field values in table cells.`,
+    ` *`,
+    ` * Components are loaded asynchronously using Vue's \`defineAsyncComponent\` function.`,
+    ` * They are automatically registered by creating \`.table.vue\` files in the \`app/fields/\` directory of the project.`,
+    ` *`,
+    ` * Note: Always include a fallback component for any field that doesn't have a designated component assigned to it.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <component v-if="tableFieldComponents[fieldName]" :is="tableFieldComponents[fieldName]" v-model="props" />`,
+    ` * </template>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const tableFieldComponents: Record<string, () => Component> = {`,
+    ...fieldComponentEntries
+      .filter(([_, { table }]) => table)
+      .map(([name, { table }]) => `  '${name}': () => defineAsyncComponent(() => import('${table!.file.absolute}')),`),
+    `}`,
+    ``,
+    `/**`,
+    ` * Array of all registered content languages in the CMS.`,
+    ` */`,
+    `export const languages = [`,
+    ...Object.values(pruviousOptions.i18n.languages).map(({ code, name }) => `  { code: '${code}', name: '${name}' },`),
+    `] as const`,
+    ``,
+    `/**`,
+    ` * The primary content language used by the CMS.`,
+    ` */`,
+    `export const primaryLanguage = '${pruviousOptions.i18n.primaryLanguage}'`,
+    ``,
+    `/**`,
+    ` * Array containing all supported languages for the dashboard interface.`,
+    ` */`,
+    `export const dashboardLanguages = [`,
+    ...Object.values(dashboardLanguages).map(({ code, name }) => `  { code: '${code}', name: '${name}' },`),
+    `] as const`,
+    ``,
+    `/**`,
+    ` * The \`I18n\` instance containing all translatable strings in the CMS.`,
+    ` */`,
+    `export const i18n = new I18n().setFallbackLanguages([${pruviousOptions.i18n.fallbackLanguages.map((lang) => `'${lang}'`).join(', ')}]) as typeof _i18n`,
+    ``,
+    `/**`,
+    ` * Retrieves a translated string for a given \`domain\` and \`handle\`, with optional \`input\` parameters.`,
+    ` * The language is automatically resolved from the current page language.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <div>{{ __('my-domain', 'Hello!') }}</div>`,
+    ` * </template>`,
+    ` *`,
+    ` * <script lang="ts" setup>`,
+    ` * import { __, preloadTranslatableStrings } from '#pruvious/client'`,
+    ` *`,
+    ` * // You can also preload custom translatable string domains in your Nuxt config:`,
+    ` * // \`pruvious.i18n.preloadTranslatableStrings\``,
+    ` * await preloadTranslatableStrings('my-domain')`,
+    ` * </script>`,
+    ` * \`\`\``,
+    ` */`,
+    `export function __<TDomain extends ExtractDomains<ExtractTranslatableStringsDefinitions<typeof i18n>>, THandle extends ExtractHandlesByDomainAndLanguage<TDomain, string, ExtractTranslatableStringsDefinitions<typeof i18n>>, TInput extends ExtractInput<TDomain, string, THandle & string, ExtractTranslatableStringsDefinitions<typeof i18n>>>(domain: TDomain, handle: THandle, input?: TInput): string { return i18n.__$(domain, useLanguage().value, handle as any, input) }`,
+    ``,
+    `/**`,
+    ` * A shorthand function for retrieving translated strings from the \`default\` domain.`,
+    ` * This method is equivalent to calling \`__\` with \`default\` as the domain.`,
+    ` * The language is automatically resolved from the current page language.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <div>{{ _('Hello, $name!', { name: 'Stranger' }) }}</div>`,
+    ` * </template>`,
+    ` *`,
+    ` * <script lang="ts" setup>`,
+    ` * import { _ } from '#pruvious/client'`,
+    ` * </script>`,
+    ` * \`\`\``,
+    ` */`,
+    `export function _<THandle extends ExtractHandlesByDomainAndLanguage<'default', string, ExtractTranslatableStringsDefinitions<typeof i18n>>, TInput extends ExtractInput<'default', string, THandle & string, ExtractTranslatableStringsDefinitions<typeof i18n>>>(handle: THandle, input?: TInput): string { return i18n.__$('default', useLanguage().value, handle as any, input) }`,
+    ``,
+    `const _validatorFn: any = () => null`,
+    ...simpleValidatorsMeta.flatMap(({ name, comment, exampleField }) => [
+      ``,
+      `import type { ${name}Validator as _${name}Validator } from '@pruvious/orm'`,
+      ``,
+      `/**`,
+      ...comment.map((line) => ` * ${line}`),
+      ` *`,
+      ` * This validator should only be used within the \`validators\` array when defining block fields.`,
+      ` * The imported function is a meta function that does not execute any actual validation logic.`,
+      ` * The real validation is performed on the server side and \`${name}Validator\` is removed from the Vue component during compilation.`,
+      ` *`,
+      ` * @example`,
+      ` * \`\`\`vue`,
+      ` * <script lang="ts" setup>`,
+      ` * import { ${exampleField}, ${name}Validator } from '#pruvious/client'`,
+      ` *`,
+      ` * defineProps({`,
+      ` *   foo: ${exampleField}({`,
+      ` *     validators: [${name}Validator()],`,
+      ` *   }),`,
+      ` * })`,
+      ` * </script>`,
+      ` * \`\`\``,
+      ` */`,
+      `export const ${name}Validator: typeof _${name}Validator = _validatorFn`,
+    ]),
+    ``,
+    `import type { uniqueValidator as _uniqueValidator } from '@pruvious/orm'`,
+    ``,
+    `/**`,
+    ...validatorsMeta.find(({ name }) => name === 'unique')!.comment.map((line) => ` * ${line}`),
+    ` *`,
+    ` * This validator should only be used within the \`validators\` array when defining **repeater** fields in blocks.`,
+    ` * The imported function is a meta function that does not execute any actual validation logic.`,
+    ` * The real validation is performed on the server side and \`uniqueValidator\` is removed from the Vue component during compilation.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`ts`,
+    ` * <script lang="ts" setup>`,
+    ` * import { repeaterField, textField, uniqueValidator } from '#pruvious/client'`,
+    ` *`,
+    ` * defineProps({`,
+    ` *   variants: repeaterField({`,
+    ` *     subfields: {`,
+    ` *       name: textField({`,
+    ` *         required: true,`,
+    ` *         validators: [uniqueValidator()],`,
+    ` *       }),`,
+    ` *     },`,
+    ` *   }),`,
+    ` * })`,
+    ` * </script>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const uniqueValidator: typeof _uniqueValidator = _validatorFn`,
+    ``,
+    `/**`,
+    ` * Loads specific client-side actions by their action \`name\`.`,
+    ` *`,
+    ` * Actions are functions that allow you to hook into specific points in the application flow.`,
+    ` * They provide a way to execute custom code without changing the original implementation.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`ts`,
+    ` * // app/hooks/actions/foo/before.ts`,
+    ` * import { defineAction } from '#pruvious/client'`,
+    ` *`,
+    ` * export default defineAction<{ time: number }>()`,
+    ` *`,
+    ` * // app/hooks/actions/foo/after.ts`,
+    ` * import { defineAction } from '#pruvious/client'`,
+    ` *`,
+    ` * export default defineAction<{ time: number }>()`,
+    ` *`,
+    ` * // app/actions/foo.ts`,
+    ` * import { addAction } from '#pruvious/client'`,
+    ` *`,
+    ` * addAction('foo:before', ({ time }) => {`,
+    ` *   // Do something`,
+    ` * })`,
+    ` *`,
+    ` * addAction('foo:after', ({ time }) => {`,
+    ` *   // Do something`,
+    ` * })`,
+    ` *`,
+    ` * // app/utils/foo.ts`,
+    ` * import { doActions, loadActions } from '#pruvious/client'`,
+    ` *`,
+    ` * await loadActions('foo:before', 'foo:after')`,
+    ` *`,
+    ` * export async function foo() {`,
+    ` *   await doActions('foo:before', { time: performance.now() })`,
+    ` *   // Do something`,
+    ` *   await doActions('foo:after', { time: performance.now() })`,
+    ` * }`,
+    ` * \`\`\``,
+    ` */`,
+    `export async function loadActions<TName extends keyof Actions>(name: TName, ...additional: TName[]) {`,
+    `  for (const action of [name, ...additional]) {`,
+    ...clientActionCallbackEntries.flatMap(([name, locations]) => [
+      `    if (action === '${name}' && !actions[action]) {`,
+      ...locations.map(({ file }) => `      await import('${resolve(file.import)}')`),
+      `    }`,
+    ]),
+    `  }`,
+    `}`,
+    ``,
+    `/**`,
+    ` * Loads specific client-side filters by their filter \`name\`.`,
+    ` *`,
+    ` * Filters are functions that allow modification of data at specific points in the application flow.`,
+    ` * They provide a way to transform data without changing the original implementation.`,
+    ` *`,
+    ` * @example`,
+    ` * // app/hooks/filters/foo/returnable.ts`,
+    ` * import { defineFilter } from '#pruvious/client'`,
+    ` *`,
+    ` * export default defineFilter<string>()`,
+    ` *`,
+    ` * // app/filters/foo.ts`,
+    ` * import { addFilter } from '#pruvious/client'`,
+    ` *`,
+    ` * addFilter('foo:returnable', (value) => {`,
+    ` *   return value + ', world!'`,
+    ` * })`,
+    ` *`,
+    ` * // app/utils/foo.ts`,
+    ` * import { applyFilters, loadFilters } from '#pruvious/client'`,
+    ` *`,
+    ` * await loadFilters('foo:returnable')`,
+    ` *`,
+    ` * export async function foo() {`,
+    ` *   const returnable = 'Hello'`,
+    ` *   return applyFilters('foo:returnable', returnable, {})`,
+    ` * }`,
+    ` * \`\`\``,
+    ` */`,
+    `export async function loadFilters<TName extends keyof Filters>(name: TName, ...additional: TName[]) {`,
+    `  for (const filter of [name, ...additional]) {`,
+    ...clientFilterCallbackEntries.flatMap(([name, locations]) => [
+      `    if (filter === '${name}' && !filters[filter]) {`,
+      ...locations.map(({ file }) => `      await import('${resolve(file.import)}')`),
+      `    }`,
+    ]),
+    `  }`,
+    `}`,
+    ``,
+    getReExports(),
+  ].join('\n')
+}
+
+/**
+ * Generates the `#pruvious/client` type file content.
+ */
+function getClientTypeFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/index.d.ts>`)
+
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
+
+  return [
+    ...fieldDefinitionEntries.map(([name]) => `export function ${name}Field(): any`),
+    `export type Actions = any`,
+    `export type Filters = any`,
+    `export const dashboardBasePath: any`,
+    `export const tokenStorage: any`,
+    `export const actions: any`,
+    `export const filters: any`,
+    `export const fieldComponents: any`,
+    `export const tableFieldComponents: any`,
+    `export const languages: any`,
+    `export const primaryLanguage: any`,
+    `export const dashboardLanguages: any`,
+    `export const translatableStringsPreloadRules: any`,
+    `export const i18n: any`,
+    `export function __(): any`,
+    `export function _(): any`,
+    ...validatorsMeta.map(({ name }) => `export function ${name}Validator(): any`),
+    `export function uniqueValidator(): any`,
+    `export function loadActions(): any`,
+    `export function loadFilters(): any`,
+    getReExports(),
+  ].join('\n')
+}
+
+function getReExports() {
+  const { resolve } = createResolver(import.meta.url)
+
+  return [
+    `export { pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError } from '${resolve('../api/utils.client')}'`,
+    `export { useAuth, refreshAuthState, getAuthTokenPayload, getAuthTokenExpiresIn, storeAuthToken, removeAuthToken, isLoggedIn, getUser, hasPermission, type AuthState } from '${resolve('../auth/utils.client')}'`,
+    `export { usePruvious, usePruviousDashboard, refreshPruviousState, refreshPruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
+    `export { useLanguage, useDashboardContentLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath, deserializeTranslatableStringCallbacks, maybeTranslate, isValidLanguageCode } from '${resolve('../translations/utils.client')}'`,
+    `export { pruviousDashboardPost, pruviousDashboardGet, pruviousDashboardPatch, pruviousDashboardDelete } from '${resolve('../api/dashboard-utils.client')}'`,
+    `export { defineAction, defineFilter } from '${resolve('../hooks/define.client')}'`,
+    `export { addAction, doActions, addFilter, applyFilters } from '${resolve('../hooks/utils.client')}'`,
+    `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
+    `export { QueryBuilder } from '${resolve('../client-query-builder/QueryBuilder')}'`,
+    `export { insertInto, selectFrom, update, deleteFrom, selectSingleton, updateSingleton, useSelectQueryBuilderParams } from '${resolve('../client-query-builder/utils.client')}'`,
+    `export { SingletonSelectQueryBuilder } from '${resolve('../client-query-builder/SingletonSelectQueryBuilder')}'`,
+    `export { SingletonUpdateQueryBuilder } from '${resolve('../client-query-builder/SingletonUpdateQueryBuilder')}'`,
+    `export { fillFieldData, prepareFieldData, resolveSubfieldsFromData, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
+    `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
+    `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,
+    `export { usePruviousLoginPopup } from '${resolve('../../../utils/pruvious/dashboard/login')}'`,
+    `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
+    `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
+    `export { customComponents } from './custom-components'`,
+  ].join('\n')
+}

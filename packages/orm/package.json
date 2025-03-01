@@ -1,0 +1,56 @@
+{
+  "name": "@pruvious/orm",
+  "description": "An opinionated TypeScript ORM.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/orm"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./conditional-logic-resolver": {
+      "import": "./dist/core/ConditionalLogicResolver.mjs",
+      "types": "./dist/core/ConditionalLogicResolver.d.ts"
+    },
+    "./query-string": {
+      "import": "./dist/query-builder/query-string.mjs",
+      "types": "./dist/query-builder/query-string.d.ts"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "node scripts/validators.mjs && unbuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pruvious/i18n": "workspace:*",
+    "@pruvious/utils": "workspace:*",
+    "better-sqlite3": "^11.5.0",
+    "ohash": "^1.1.4",
+    "pathe": "^2.0.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "get-port-please": "^3.1.2",
+    "miniflare": "^3.20250129.0",
+    "pg": "^8.13.1",
+    "typescript": "^5.7.3",
+    "unbuild": "^3.3.1"
+  }
+}

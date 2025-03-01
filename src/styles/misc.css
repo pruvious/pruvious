@@ -1,3 +1,0 @@
-.errors {
-  @apply inline-block h-5 min-w-5 shrink-0 rounded-full bg-red-500 px-1.5 text-center text-xs leading-5 text-white;
-}

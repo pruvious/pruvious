@@ -1,95 +1,366 @@
-[![Pruvious banner](https://raw.githubusercontent.com/pruvious/pruvious/main/.github/assets/banner.png)](https://pruvious.com)
-
 # Pruvious
 
-<p>
-  <a href="https://www.npmjs.com/package/pruvious"><img src="https://img.shields.io/npm/v/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="Version"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/pruvious/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="License"></a>
-</p>
+Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](https://nuxt.com).
 
-**Website:** [https://pruvious.com](https://pruvious.com/)\
-**Documentation:** [https://pruvious.com/docs](https://pruvious.com/docs)
+> [!IMPORTANT]  
+> Version 4 is currently under development. Please don't use it in production environments yet.
 
-## Getting started
+## Packages
 
-Pruvious is a free and open-source CMS that seamlessly integrates with the [Nuxt](https://nuxt.com) framework, allowing you to utilize Nuxt as you normally would without worrying about compatibility issues.
+- ✅ [i18n](#i18n)
+- ✅ [orm](#orm)
+- 🚧 [pruvious](#pruvious)
+- ✅ [storage](#storage)
+- 🚧 [ui](#ui)
+- ✅ [utils](#utils)
 
-### Installation
+### <a id="i18n">i18n</a>
 
-To start a new project, use the `pruvious init` command. This command will install Nuxt and Pruvious, and configure all the necessary settings.
+Package: <a href="packages/i18n">@pruvious/i18n</a>
 
-```shell
-# pnpm
-pnpm dlx pruvious@latest init <dir>
+| Status | Feature |
+|:---:|:---|
+| ✅ | Patterns |
+| ✅ | Placeholders |
+| ✅ | TypeScript types |
+| ✅ | Tests |
+| ✅ | Documentation |
 
-# npm
-npx pruvious@latest init <dir>
-```
+### <a id="orm">orm</a>
 
-Replace `<dir>` with the path (relative or absolute) to an empty directory where you want to initialize the project.
+Package: <a href="packages/orm">@pruvious/orm</a>
 
-### Getting started
+| Status | Feature |
+|:---:|:---|
+| ✅ | SQLite database driver |
+| ✅ | PostgreSQL database driver |
+| ✅ | D1 database driver |
+| ✅ | Automatic schema migration |
+| ✅ | Normalized SQL queries |
+| ✅ | Normalized error handling |
+| ✅ | Indexes |
+| ✅ | Foreign keys |
+| ✅ | Collections (table abstraction) |
+| ✅ | Collections hooks |
+| ✅ | Field models (general column abstraction) |
+| ✅ | Fields (table column abstraction) |
+| ✅ | Field sanitizers |
+| ✅ | Field validators |
+| ✅ | Field populators |
+| ✅ | Field properties (required, nullable, etc.) |
+| ✅ | Field conditional logic |
+| ✅ | Field input filters |
+| ✅ | Query builder |
+| ✅ | Translatable error messages |
+| ✅ | TypeScript types |
+| ✅ | Tests |
+| ✅ | Documentation |
 
-Visit the Pruvious [documentation](https://pruvious.com/docs) for detailed information on its features and usage. Alternatively, you can explore our [tutorial](https://pruvious.com/tutorial) for a practical demonstration of building a website from scratch using Pruvious.
+### <a id="pruvious">pruvious</a>
 
-## Playground
+Package: <a href="packages/pruvious">pruvious</a>
 
-Explore and experiment with Pruvious in a Nuxt test environment located in the `playground` folder. Within this environment, you can create new collections, fields, blocks, and more to test various configurations and functionalities. The `playground` is automatically loaded when you run `pnpm dev`.
+#### 🚧 API
 
-## Testing
+| Status | Feature |
+|:---:|:---|
+| ✅ | Authentication |
+| ✅ | Middleware |
+| ✅ | Translations |
+| ✅ | Logging |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-### SQLite
+#### 🚧 Collections
 
-```shell
-pnpm test
-```
+| Status | Feature |
+|:---:|:---|
+| ✅ | Extended ORM implementation |
+| ✅ | API |
+| ✅ | Guards |
+| ✅ | Translatable collections |
+| ✅ | Synced fields |
+| ✅ | Translation copying |
+| ✅ | Record duplication |
+| ✅ | Logging |
+| ✅ | UI customization |
+| ✅ | Reusable collection templates |
+| 🚧 | Page-like collections |
+| ✅ | Resolvers |
+| 🚧 | Search structures |
+| 🚧 | Soft-deletion (trash) |
+| 🚧 | Revisions |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-### PostgreSQL
+#### 🚧 Fields
 
-```shell
-pnpm test:pg
-```
+| Status | Feature |
+|:---:|:---|
+| ✅ | Extended ORM implementation |
+| ✅ | Guards |
+| ✅ | Custom fields |
+| ✅ | UI customization |
+| ✅ | Resolvers |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-To perform this test, you need to connect to a local PostgreSQL database named `pruvious_test` running on the default port `5432`.
-Use the username `pruvious` and password `12345678` to establish the connection.
+#### 🚧 Field types
 
-Connection URI: `postgresql://pruvious:12345678@127.0.0.1:5432/pruvious_test`
+| Status | Feature |
+|:---:|:---|
+| 🚧 | Button group field |
+| ✅ | Checkbox field |
+| 🚧 | Checkboxes field |
+| 🚧 | Chips field |
+| 🚧 | Date field |
+| 🚧 | Date range field |
+| 🚧 | Date-time field |
+| 🚧 | Date-time range field |
+| 🚧 | Editor field |
+| 🚧 | File field |
+| 🚧 | Gallery field |
+| 🚧 | Icon field |
+| 🚧 | Image field |
+| 🚧 | Link field |
+| 🚧 | Number field |
+| 🚧 | Range field |
+| 🚧 | Record field |
+| 🚧 | Records field |
+| 🚧 | Repeater field |
+| ✅ | Select field |
+| 🚧 | Size field |
+| 🚧 | Slider field |
+| 🚧 | Slider range field |
+| ✅ | Switch field |
+| ✅ | Text field |
+| 🚧 | Text area field |
+| 🚧 | Time field |
+| 🚧 | Time range field |
+| 🚧 | Timestamp field |
+| ✅ | True-false field |
 
-#### Set up PostgreSQL database
+#### 🚧 Field presets
 
-1. Install PostgreSQL (e.g., `brew install postgresql@16` and then `brew services start postgresql@16`).
-2. Run `psql -d postgres`.
-3. Create the database and user
+| Status | Feature |
+|:---:|:---|
+| 🚧 | Created at |
+| 🚧 | Updated at |
+| 🚧 | Author |
+| 🚧 | Editors |
+| 🚧 | Language |
+| 🚧 | Translations |
 
-   ```sql
-   CREATE DATABASE pruvious_test;
-   CREATE USER pruvious WITH PASSWORD '12345678';
-   ALTER DATABASE pruvious_test OWNER TO pruvious;
-   ```
+#### 🚧 Validator presets
 
-### Redis
+| Status | Feature |
+|:---:|:---|
+| ✅ | Email |
+| ✅ | Timestamp |
+| ✅ | Unique |
+| ✅ | Upload path |
+| ✅ | URL |
+| 🚧 | More presets |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-```shell
-pnpm test:redis
-```
+#### 🚧 Singletons
 
-The tests are performed on the Redis database `1`, using a local connection on the default port `6379`.
+| Status | Feature |
+|:---:|:---|
+| ✅ | Extended ORM implementation |
+| ✅ | API |
+| ✅ | Guards |
+| ✅ | Translatable singletons |
+| ✅ | Synced fields |
+| ✅ | Translation copying |
+| ✅ | Logging |
+| ✅ | UI customization |
+| ✅ | Resolvers |
+| 🚧 | Revisions |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-Connection URI: `redis://127.0.0.1:6379/1`
+#### 🚧 Query builder
 
-#### Setting up Redis
+| Status | Feature |
+|:---:|:---|
+| ✅ | Collections (client-side) |
+| ✅ | Collections (server-side) |
+| ✅ | Singletons (client-side) |
+| ✅ | Singletons (server-side) |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-For MacOS, install Redis by running the commands `brew install redis` and `brew services start redis`.
+#### 🚧 Hooks
 
-### S3
+| Status | Feature |
+|:---:|:---|
+| ✅ | Actions (client-side) |
+| ✅ | Actions (server-side) |
+| ✅ | Filters (client-side) |
+| ✅ | Filters (server-side) |
+| ✅ | Resolvers |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
 
-```shell
-pnpm test:s3
-```
+#### 🚧 Uploads
 
-To perform this test, you need an S3-like local object storage server.
-We recommend using [Minio](https://github.com/minio/minio).
-On MacOS, you can install Minio by running `brew install minio/stable/minio`, and then start the server with `minio server ~/minio`.
-After that, open the Minio admin dashboard at [http://127.0.0.1:9000](http://127.0.0.1:9000) and create a new public bucket called `pruvious`.
-In the region settings, set the server location to `pruvious`.
-Finally, create a new access key named `pruvious` with `pruvious` as its secret key.
+| Status | Feature |
+|:---:|:---|
+| ✅ | API |
+| ✅ | Image optimization |
+| 🚧 | UI |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
+
+#### 🚧 Caching
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | API |
+| ✅ | SQLite driver |
+| ✅ | PostgreSQL driver |
+| ✅ | D1 driver |
+| ✅ | Redis driver |
+| 🚧 | Cloudflare CDN |
+| 🚧 | Page caching |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
+
+#### 🚧 Queue (jobs)
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | API |
+| ✅ | SQLite driver |
+| ✅ | PostgreSQL driver |
+| ✅ | D1 driver |
+| ✅ | TypeScript types |
+| 🚧 | Tests |
+| 🚧 | Documentation |
+
+#### 🚧 Standard collections
+
+| Status | Feature |
+|:---:|:---|
+| 🚧 | Pages |
+| 🚧 | Presets |
+| 🚧 | Users |
+| 🚧 | Roles |
+| ✅ | Uploads |
+| ✅ | Cache |
+| ✅ | Queue |
+| ✅ | Logs |
+| 🚧 | Tests |
+| 🚧 | Documentation |
+
+#### 🚧 Pages
+
+| Status | Feature |
+|:---:|:---|
+| 🚧 | API |
+| 🚧 | Blocks |
+| 🚧 | SEO |
+| 🚧 | Documentation |
+
+#### 🚧 Dashboard
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | Authentication |
+| ✅ | Custom components |
+| ✅ | Edit profile |
+| ✅ | Menus |
+| ✅ | Responsive design |
+| 🚧 | Custom dashboard page helper |
+| 🚧 | Field components |
+| 🚧 | Developer menu |
+| 🚧 | Deployment tools |
+| 🚧 | Finder |
+| 🚧 | Data table |
+| 🚧 | Media library |
+| 🚧 | Documentation |
+
+### <a id="storage">storage</a>
+
+Package: <a href="packages/storage">@pruvious/storage</a>
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | Filesystem driver |
+| ✅ | S3 driver |
+| ✅ | R2 driver |
+| ✅ | Read |
+| ✅ | Stream |
+| ✅ | Upload |
+| ✅ | Multipart upload |
+| ✅ | Move |
+| ✅ | Delete |
+| ✅ | TypeScript types |
+| ✅ | Tests |
+| ✅ | Documentation |
+
+### <a id="ui">ui</a>
+
+Package: <a href="packages/ui">@pruvious/ui</a>
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | Alert |
+| ✅ | Badge |
+| ✅ | Base |
+| ✅ | Button |
+| ✅ | Button group |
+| ✅ | Card |
+| ✅ | Checkbox |
+| ✅ | Code |
+| ✅ | Color mode |
+| ✅ | Context menu |
+| ✅ | Dialog |
+| ✅ | Dropdown |
+| ✅ | Dropdown item |
+| ✅ | Field |
+| ✅ | Field label |
+| ✅ | Field message |
+| ✅ | Icon group |
+| ✅ | Input |
+| ✅ | Number |
+| ✅ | Pagination |
+| ✅ | Popup |
+| ✅ | Prose |
+| ✅ | Scrollable |
+| ✅ | Select |
+| ✅ | Select choice |
+| ✅ | Switch |
+| ✅ | Tab |
+| ✅ | Tabs |
+| ✅ | Toaster |
+| ✅ | Tree |
+| ✅ | Tree item |
+| ✅ | Vertical menu |
+| ✅ | Vertical menu item |
+| 🚧 | More components |
+
+### <a id="utils">utils</a>
+
+Package: <a href="packages/utils">@pruvious/utils</a>
+
+| Status | Feature |
+|:---:|:---|
+| ✅ | Utility functions |
+| ✅ | TypeScript types |
+| ✅ | Tests |
+| ✅ | Documentation |
+
+## License
+
+This repository is licensed under the [MIT License](./LICENSE).
