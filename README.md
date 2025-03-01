@@ -7,14 +7,14 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 
 ## Packages
 
-- ✅ [i18n](#i18n)
-- ✅ [orm](#orm)
-- 🚧 [pruvious](#pruvious)
-- ✅ [storage](#storage)
-- 🚧 [ui](#ui)
-- ✅ [utils](#utils)
+- ✅ [i18n](#package-i18n)
+- ✅ [orm](#package-orm)
+- 🚧 [pruvious](#package-pruvious)
+- ✅ [storage](#package-storage)
+- 🚧 [ui](#package-ui)
+- ✅ [utils](#package-utils)
 
-### <a id="i18n">i18n</a>
+### 📦 <a id="package-i18n">i18n</a>
 
 Package: <a href="packages/i18n">@pruvious/i18n</a>
 
@@ -26,7 +26,7 @@ Package: <a href="packages/i18n">@pruvious/i18n</a>
 | ✅ | Tests |
 | ✅ | Documentation |
 
-### <a id="orm">orm</a>
+### 📦 <a id="package-orm">orm</a>
 
 Package: <a href="packages/orm">@pruvious/orm</a>
 
@@ -56,7 +56,7 @@ Package: <a href="packages/orm">@pruvious/orm</a>
 | ✅ | Tests |
 | ✅ | Documentation |
 
-### <a id="pruvious">pruvious</a>
+### 📦 <a id="package-pruvious">pruvious</a>
 
 Package: <a href="packages/pruvious">pruvious</a>
 
@@ -290,7 +290,7 @@ Package: <a href="packages/pruvious">pruvious</a>
 | 🚧 | Media library |
 | 🚧 | Documentation |
 
-### <a id="storage">storage</a>
+### 📦 <a id="package-storage">storage</a>
 
 Package: <a href="packages/storage">@pruvious/storage</a>
 
@@ -309,7 +309,7 @@ Package: <a href="packages/storage">@pruvious/storage</a>
 | ✅ | Tests |
 | ✅ | Documentation |
 
-### <a id="ui">ui</a>
+### 📦 <a id="package-ui">ui</a>
 
 Package: <a href="packages/ui">@pruvious/ui</a>
 
@@ -350,7 +350,7 @@ Package: <a href="packages/ui">@pruvious/ui</a>
 | ✅ | Vertical menu item |
 | 🚧 | More components |
 
-### <a id="utils">utils</a>
+### 📦 <a id="package-utils">utils</a>
 
 Package: <a href="packages/utils">@pruvious/utils</a>
 
