@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    paths-ignore:
+      - '*.md'
+    branches:
+      - v4
+  pull_request:
+    paths-ignore:
+      - '*.md'
+    branches:
+      - v4
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - run: pnpm pkg-pr-new publish './packages/*'

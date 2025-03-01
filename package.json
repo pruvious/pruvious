@@ -30,6 +30,7 @@
     "dotenv": "^16.4.7",
     "execa": "^9.5.2",
     "ofetch": "^1.4.1",
+    "pkg-pr-new": "^0.0.40",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-attributes": "^1.0.0",
     "typescript": "^5.7.3",
