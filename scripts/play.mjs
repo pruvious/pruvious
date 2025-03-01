@@ -192,7 +192,7 @@ async function initPlayground() {
 
   await execa('pnpm', ['store', 'prune'], execaPlaygroundOptions)
   await execa('pnpm', ['--ignore-workspace', 'i'], execaPlaygroundOptions)
-  await execa('pnpm', ['add', '@pruvious/orm@1', 'pruvious@4'], execaPlaygroundOptions)
+  await execa('pnpm', ['add', 'pruvious@4'], execaPlaygroundOptions)
   await execa('pnpm', ['add', '-D', '@nuxt/test-utils', 'vitest'], execaPlaygroundOptions)
 
   fs.writeFileSync(
