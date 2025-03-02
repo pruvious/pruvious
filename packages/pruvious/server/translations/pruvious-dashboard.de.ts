@@ -123,7 +123,7 @@ export default defineTranslation({
 
   'Language': 'Sprache',
   'Language of the dashboard interface.': 'Sprache der Dashboard-Benutzeroberfläche.',
-  'Language used content entries and pages.': 'Sprache für Inhalts-Einträge und Seiten.',
+  'Language used in content entries and pages.': 'Sprache für Inhalts-Einträge und Seiten.',
   'Last name': 'Nachname',
   'Later': 'Später',
   'Leave': 'Verlassen',

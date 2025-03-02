@@ -107,7 +107,7 @@ export default defineTemplate(() => ({
       default: primaryLanguage,
       ui: {
         label: ({ __ }) => __('pruvious-dashboard', 'Content language'),
-        description: ({ __ }) => __('pruvious-dashboard', 'Language used content entries and pages.'),
+        description: ({ __ }) => __('pruvious-dashboard', 'Language used in content entries and pages.'),
       },
     }),
     dashboardLanguage: selectField({
