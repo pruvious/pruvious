@@ -1,5 +1,11 @@
 import { type GenericField } from '@pruvious/orm'
-import type { DefineCollectionOptions } from '../collections/define'
+import type {
+  BaseAuthorFieldOptions,
+  BaseCreatedAtFieldOptions,
+  BaseEditorsFielOptions,
+  BaseUpdatedAtFieldOptions,
+  DefineCollectionOptions,
+} from '../collections/define'
 import {
   type AuthorFieldPresetOptions,
   type CreatedAtFieldPresetOptions,
@@ -44,10 +50,10 @@ import {
 export function defineTemplate<
   const TFields extends Record<string, GenericField>,
   const TTranslatable extends boolean | undefined,
-  const TCreatedAt extends boolean | CreatedAtFieldPresetOptions | undefined,
-  const TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
-  const TAuthor extends boolean | AuthorFieldPresetOptions | undefined,
-  const TEditors extends boolean | EditorsFieldPresetOptions | undefined,
+  const TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  const TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  const TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
 >(
   factory: () => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
 ): () => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> {

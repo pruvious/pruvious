@@ -33,6 +33,7 @@ import {
   setProperty,
   type DeepRequired,
   type DefaultFalse,
+  type DefaultFalseWithOptions,
   type DefaultTrue,
   type PartialMax4Levels,
 } from '@pruvious/utils'
@@ -427,12 +428,7 @@ export interface CollectionMetaOptions<
    * ```
    */
   copyTranslation?: CollectionCopyTranslationFunction<
-    TFields,
-    TTranslatable,
-    TCreatedAt,
-    TUpdatedAt,
-    TAuthor,
-    TEditors
+    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
   > | null
 
   /**
@@ -457,7 +453,9 @@ export interface CollectionMetaOptions<
    * ({ source }) => ({ ...source, foo: 'New value' })
    * ```
    */
-  duplicate?: CollectionDuplicateFunction<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> | null
+  duplicate?: CollectionDuplicateFunction<
+    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
+  > | null
 
   /**
    * Controls whether to log queries executed on this collection.
@@ -535,7 +533,6 @@ export interface CollectionMetaOptions<
    *
    * @default
    * {
-   *   fieldName: 'createdAt',
    *   index: true,
    *   hidden: true,
    *   label: ({ __ }) => __('pruvious-dashboard', 'Created at'),
@@ -556,7 +553,6 @@ export interface CollectionMetaOptions<
    *
    * @default
    * {
-   *   fieldName: 'updatedAt',
    *   index: false,
    *   hidden: true,
    *   label: ({ __ }) => __('pruvious-dashboard', 'Updated at'),
@@ -658,26 +654,11 @@ export type CollectionGuard = (
   context: MetaContext,
 ) => any
 
-type CollectionCopyTranslationFunction<
-  TFields extends Record<string, GenericField>,
-  TTranslatable extends boolean | undefined,
-  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
-  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
-  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
-  TAllFields extends Record<string, GenericField> = TFields &
-    (DefaultFalse<TTranslatable> extends true
-      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
-      : {}) &
-    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
-    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
-    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
-    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
-> = (context: {
+type CollectionCopyTranslationFunction<TFields extends Record<string, GenericField>> = (context: {
   /**
    * Object containing field names and their casted values from the source translation.
    */
-  source: ExtractCastedTypes<TAllFields> & { id: number }
+  source: ExtractCastedTypes<TFields> & { id: number }
 
   /**
    * The language code of the source translation.
@@ -693,32 +674,19 @@ type CollectionCopyTranslationFunction<
    * Specifies whether the translation copy will be used for a `create` or `update` operation.
    */
   operation: 'create' | 'update'
-}) => Partial<ExtractInputTypes<TAllFields>> | Promise<Partial<ExtractInputTypes<TAllFields>>>
+}) => Partial<ExtractInputTypes<TFields>> | Promise<Partial<ExtractInputTypes<TFields>>>
 
 type CollectionDuplicateFunction<
   TFields extends Record<string, GenericField>,
-  TTranslatable extends boolean | undefined,
-  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
-  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
-  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
-  TAllFields extends Record<string, GenericField> = TFields &
-    (DefaultFalse<TTranslatable> extends true
-      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
-      : {}) &
-    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
-    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
-    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
-    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
   TInsertInput extends Record<string, any> = InsertInput<{
-    TInputTypes: ExtractInputTypes<TAllFields>
-    fields: TAllFields
+    TInputTypes: ExtractInputTypes<TFields>
+    fields: TFields
   }>,
 > = (context: {
   /**
    * Object containing field names and their casted values from the source record.
    */
-  source: ExtractCastedTypes<TAllFields> & { id: number }
+  source: ExtractCastedTypes<TFields> & { id: number }
 }) => TInsertInput | Promise<TInsertInput>
 
 export interface CollectionUIOptions<TFieldNames extends string = string> {
@@ -1208,14 +1176,7 @@ interface AutoFieldEnabled {
   enabled: boolean
 }
 
-interface BaseCreatedAtFieldOptions {
-  /**
-   * Specifies the name of the field to be used within the data structure.
-   *
-   * @default 'createdAt'
-   */
-  fieldName?: string
-
+export interface BaseCreatedAtFieldOptions {
   /**
    * Controls whether to create a database index for this field.
    *
@@ -1224,14 +1185,7 @@ interface BaseCreatedAtFieldOptions {
   index?: boolean
 }
 
-interface BaseUpdatedAtFieldOptions {
-  /**
-   * Specifies the name of the field to be used within the data structure.
-   *
-   * @default 'updatedAt'
-   */
-  fieldName?: string
-
+export interface BaseUpdatedAtFieldOptions {
   /**
    * Controls whether to create a database index for this field.
    *
@@ -1240,30 +1194,31 @@ interface BaseUpdatedAtFieldOptions {
   index?: boolean
 }
 
-interface BaseAuthorFieldOptions {
-  /**
-   * Specifies the name of the field to be used within the data structure.
-   *
-   * @default 'author'
-   */
-  fieldName?: string
-
+export interface BaseAuthorFieldOptions {
   /**
    * Controls whether to create a database index for this field.
    *
    * @default true
    */
   index?: boolean
+
+  /**
+   * Controls if a foreign key constraint should be added to this field.
+   *
+   * Accept boolean or string values:
+   *
+   * - `true` - Creates a foreign key constraint on the `id` field of the `Users` collection.
+   * - `false` - No foreign key constraint will be created.
+   * - `string` - Name of the collection to reference.
+   *
+   * The referenced field is always the `id` field of the target collection.
+   *
+   * @default true
+   */
+  foreignKey?: boolean | string
 }
 
-interface BaseEditorsFielOptions {
-  /**
-   * Specifies the name of the field to be used within the data structure.
-   *
-   * @default 'editors'
-   */
-  fieldName?: string
-
+export interface BaseEditorsFielOptions {
   /**
    * Controls whether to create a database index for this field.
    *
@@ -1309,6 +1264,22 @@ export type CollectionMeta = DeepRequired<
 export type GenericMetaCollection = Collection<Record<string, GenericField>, CollectionMeta>
 export type MetaContext = Context<Database<Record<string, GenericMetaCollection>>>
 
+type MergeCollectionFields<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+> = TFields &
+  (DefaultFalse<TTranslatable> extends true
+    ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
+    : {}) &
+  (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
+  (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
+  (DefaultFalseWithOptions<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
+  (DefaultFalseWithOptions<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> })
+
 /**
  * Creates a new Pruvious collection.
  *
@@ -1346,14 +1317,7 @@ export function defineCollection<
 ): (
   resolveContext: ResolveContext,
 ) => Collection<
-  TFields &
-    (DefaultFalse<TTranslatable> extends true
-      ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
-      : {}) &
-    (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
-    (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
-    (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
-    (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+  MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
   CollectionMeta
 > {
   return function (resolveContext: ResolveContext) {
@@ -1368,25 +1332,26 @@ export function defineCollection<
     const createdAt: AutoFieldEnabled & CreatedAtFieldPresetOptions & Required<BaseCreatedAtFieldOptions> = defu(
       { enabled: options.createdAt !== false },
       isObject(options.createdAt) ? options.createdAt : {},
-      { fieldName: 'createdAt', index: true },
+      { index: true },
     )
     const updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions & Required<BaseUpdatedAtFieldOptions> = defu(
       { enabled: options.updatedAt !== false },
       isObject(options.updatedAt) ? options.updatedAt : {},
-      { fieldName: 'updatedAt', index: false },
+      { index: false },
     )
     const author: AutoFieldEnabled & AuthorFieldPresetOptions & Required<BaseAuthorFieldOptions> = defu(
       { enabled: !!options.author },
       isObject(options.author) ? options.author : {},
-      { fieldName: 'author', index: true },
+      { index: true, foreignKey: true },
     )
     const editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFielOptions> = defu(
       { enabled: !!options.editors },
       isObject(options.editors) ? options.editors : {},
-      { fieldName: 'editors', index: false },
+      { index: false },
     )
     const ui = deepClone(options.ui)
     const indexes = [...(options.indexes ?? [])]
+    const foreignKeys = [...(options.foreignKeys ?? [])]
 
     for (const fieldName of Object.keys(fields)) {
       if (fieldName === 'id') {
@@ -1407,27 +1372,27 @@ export function defineCollection<
           `You can disable this behavior by setting the \`translatable\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
-      } else if (createdAt.enabled && fieldName === createdAt.fieldName) {
+      } else if (createdAt.enabled && fieldName === 'createdAt') {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
           `This field is automatically generated by the collection.`,
           `You can disable this behavior by setting the \`createdAt\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
         delete fields[fieldName]
-      } else if (updatedAt.enabled && fieldName === updatedAt.fieldName) {
+      } else if (updatedAt.enabled && fieldName === 'updatedAt') {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
           `This field is automatically generated by the collection.`,
           `You can disable this behavior by setting the \`updatedAt\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
         delete fields[fieldName]
-      } else if (author.enabled && fieldName === author.fieldName) {
+      } else if (author.enabled && fieldName === 'author') {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
           `This field is automatically generated by the collection.`,
           `You can disable this behavior by setting the \`author\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
-      } else if (editors.enabled && fieldName === editors.fieldName) {
+      } else if (editors.enabled && fieldName === 'editors') {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
           `This field is automatically generated by the collection.`,
           `You can disable this behavior by setting the \`editors\` option to \`false\` in your collection definition.`,
@@ -1445,30 +1410,36 @@ export function defineCollection<
     }
 
     if (createdAt.enabled) {
-      fields[createdAt.fieldName] = createdAtFieldPreset(omit(createdAt, ['enabled']))
+      fields.createdAt = createdAtFieldPreset(omit(createdAt, ['enabled']))
       if (createdAt.index) {
-        indexes.push({ fields: [createdAt.fieldName] })
+        indexes.push({ fields: ['createdAt'] })
       }
     }
 
     if (updatedAt.enabled) {
-      fields[updatedAt.fieldName] = updatedAtFieldPreset(omit(updatedAt, ['enabled']))
+      fields.updatedAt = updatedAtFieldPreset(omit(updatedAt, ['enabled']))
       if (updatedAt.index) {
-        indexes.push({ fields: [updatedAt.fieldName] })
+        indexes.push({ fields: ['updatedAt'] })
       }
     }
 
     if (author.enabled) {
-      fields[author.fieldName] = authorFieldPreset(omit(author, ['enabled']))
+      fields.author = authorFieldPreset(omit(author, ['enabled']))
       if (author.index) {
-        indexes.push({ fields: [author.fieldName] })
+        indexes.push({ fields: ['author'] })
+      }
+      if (author.foreignKey) {
+        foreignKeys.push({
+          field: 'author',
+          referencedCollection: isString(author.foreignKey) ? author.foreignKey : 'Users',
+        })
       }
     }
 
     if (editors.enabled) {
-      fields[editors.fieldName] = editorsFieldPreset(omit(editors, ['enabled']))
+      fields.editors = editorsFieldPreset(omit(editors, ['enabled']))
       if (editors.index) {
-        indexes.push({ fields: [editors.fieldName] })
+        indexes.push({ fields: ['editors'] })
       }
     }
 
@@ -1549,28 +1520,28 @@ export function defineCollection<
             if (operation === 'select') {
               if (author.enabled && author.strict && editors.enabled && editors.strict) {
                 queryBuilder!.orGroup([
-                  (eb) => eb.where(author.fieldName, '=', userId),
-                  (eb) => eb.where(editors.fieldName, 'includes', userId),
+                  (eb) => eb.where('author', '=', userId),
+                  (eb) => eb.where('editors', 'includes', userId),
                 ])
               } else if (author.enabled && author.strict) {
-                queryBuilder!.where(author.fieldName, '=', userId)
+                queryBuilder!.where('author', '=', userId)
               } else if (editors.enabled && editors.strict) {
-                queryBuilder!.where(editors.fieldName, 'includes', userId)
+                queryBuilder!.where('editors', 'includes', userId)
               }
             } else if (operation === 'update') {
               if (author.enabled && editors.enabled) {
                 queryBuilder!.orGroup([
-                  (eb) => eb.where(author.fieldName, '=', userId),
-                  (eb) => eb.where(editors.fieldName, 'includes', userId),
+                  (eb) => eb.where('author', '=', userId),
+                  (eb) => eb.where('editors', 'includes', userId),
                 ])
               } else if (author.enabled) {
-                queryBuilder!.where(author.fieldName, '=', userId)
+                queryBuilder!.where('author', '=', userId)
               } else if (editors.enabled) {
-                queryBuilder!.where(editors.fieldName, 'includes', userId)
+                queryBuilder!.where('editors', 'includes', userId)
               }
             } else if (operation === 'delete') {
               if (author.enabled) {
-                queryBuilder!.where(author.fieldName, '=', userId)
+                queryBuilder!.where('author', '=', userId)
               } else {
                 queryBuilder!.where('id', '=', 0)
               }
@@ -1647,7 +1618,7 @@ export function defineCollection<
       key: options.key,
       fields: fields as any,
       indexes,
-      foreignKeys: options.foreignKeys,
+      foreignKeys,
       hooks,
       meta: {
         translatable: !!options.translatable as never,
@@ -1740,14 +1711,7 @@ export async function defineCollectionFromTemplate<
   (
     resolveContext: ResolveContext,
   ) => Collection<
-    TFields &
-      (DefaultFalse<TTranslatable> extends true
-        ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
-        : {}) &
-      (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
-      (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
-      (DefaultFalse<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
-      (DefaultFalse<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }),
+    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
     CollectionMeta
   >
 > {

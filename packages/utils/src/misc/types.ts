@@ -106,6 +106,11 @@ export type DefaultTrue<T> = [T] extends [false] ? false : true
 export type DefaultFalse<T> = [T] extends [true] ? true : false
 
 /**
+ * Sets the default value to `false` if `T` is not explicitly `true` or an object.
+ */
+export type DefaultFalseWithOptions<T> = [T] extends [true] ? true : [T] extends [object] ? true : false
+
+/**
  * Sets the default value to `T` if `D` is `undefined`.
  * Otherwise, sets the default value to `T`.
  */
