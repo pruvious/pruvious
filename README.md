@@ -32,6 +32,15 @@ export default defineNuxtConfig({
 })
 ```
 
+Add the following lines to your `.gitignore` file:
+
+```text
+.pruvious
+.uploads
+*.sqlite
+*.sqlite-*
+```
+
 Remove the `app.vue` file from your project and start the development server:
 
 ```bash
