@@ -10,13 +10,14 @@
     <div class="pui-row">
       <PUIButtonGroup
         v-if="operation === 'update'"
-        v-model="changePassword"
         :choices="[
           { label: __('pruvious-dashboard', 'No'), value: false },
           { label: __('pruvious-dashboard', 'Yes'), value: true },
         ]"
         :id="`${id}-switch`"
+        :modelValue="changePassword"
         :name="`${name}-switch`"
+        @update:modelValue="changePassword = Boolean($event)"
         @update:modelValue="!changePassword && emit('commit', '')"
         variant="accent"
       />
