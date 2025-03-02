@@ -137,3 +137,10 @@ export type OmitUndefined<T> = {
 export interface NestedStringRecord {
   [key: string]: string | Record<string, NestedStringRecord>
 }
+
+/**
+ * Removes the `readonly` modifier from all properties of a type.
+ */
+export type Writable<T> = {
+  -readonly [K in keyof T]: T[K]
+}
