@@ -17,8 +17,14 @@
         :id="`${id}-switch`"
         :modelValue="changePassword"
         :name="`${name}-switch`"
-        @update:modelValue="changePassword = Boolean($event)"
-        @update:modelValue="!changePassword && emit('commit', '')"
+        @update:modelValue="
+          (value) => {
+            changePassword = Boolean(value)
+            if (!value) {
+              emit('commit', '')
+            }
+          }
+        "
         variant="accent"
       />
 
