@@ -35,8 +35,9 @@ async function resolvePruviousTSConfigPaths(tsConfig: Partial<Pick<TSConfig, 'co
 
   tsConfig.compilerOptions ||= {}
   tsConfig.compilerOptions.paths ||= {}
+  tsConfig.compilerOptions.paths['#pruvious/server'] ??= [`${nuxt.options.runtimeConfig.pruvious.dir.build}/server`]
+  tsConfig.compilerOptions.paths['#pruvious/server/*'] ??= [`${nuxt.options.runtimeConfig.pruvious.dir.build}/server/*`]
   tsConfig.compilerOptions.paths = {
-    // @todo: https://github.com/nuxt/nuxt/issues/27161
     ...Object.fromEntries(
       Object.entries(tsConfig.compilerOptions.paths).filter(
         ([path]) => path.startsWith('#pruvious/') && !path.startsWith('#pruvious/client'),
