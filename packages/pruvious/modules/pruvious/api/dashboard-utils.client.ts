@@ -1,7 +1,9 @@
+import type { StandardRoutes } from '#pruvious/server'
 import { isFunction } from '@pruvious/utils'
-import type { NitroFetchOptions } from 'nitropack/types'
+import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
 import { usePruviousLoginPopup } from '../../../utils/pruvious/dashboard/login'
 import {
+  pfetch,
   pruviousDelete,
   pruviousFetchHeaders,
   pruviousGet,
@@ -225,4 +227,50 @@ function pruviousDashboardFetch(
       }
     },
   } satisfies NitroFetchOptions<string>)
+}
+
+/**
+ * A custom wrapper around `$fetch` that automatically handles:
+ *
+ * - `Accept-Language` header based on the current page language.
+ * - `Authorization` header based on the current user's token.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ * - Common error responses by displaying a toast message.
+ *
+ * Use this utility for making custom authenticated API requests from the dashboard.
+ * For standard Pruvious API routes, prefer using:
+ *
+ * - `pruviousDashboardGet()`
+ * - `pruviousDashboardPost()`
+ * - `pruviousDashboardPatch()`
+ * - `pruviousDashboardDelete()`
+ */
+export async function pfetchDashboard<
+  TRoute extends Exclude<Parameters<$Fetch>['0'], StandardRoutes>,
+  TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
+>(route: TRoute, options?: TOptions) {
+  return pfetch(route, {
+    ...options,
+    headers: pruviousFetchHeaders(options?.headers),
+    onResponse: async (payload) => {
+      if (isFunction(options?.onResponse)) {
+        await options.onResponse(payload)
+      }
+
+      const data = payload.response._data ?? {}
+
+      if (!payload.response.ok) {
+        if (payload.response.status === 401) {
+          if (route === 'auth/login') {
+            puiQueueToast(data.message, { type: 'error' })
+          } else if (route !== 'auth/logout') {
+            usePruviousLoginPopup().value = true
+          }
+        } else if (payload.response.status !== 422) {
+          puiQueueToast(data.message, { type: 'warning' })
+        }
+      }
+    },
+  } satisfies NitroFetchOptions<string> as TOptions)
 }

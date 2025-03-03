@@ -5,9 +5,10 @@ import type {
   httpStatusCodeMessages,
   PruviousDashboardState,
   PruviousState,
+  StandardRoutes,
 } from '#pruvious/server'
 import { clear, isFunction } from '@pruvious/utils'
-import type { NitroFetchOptions } from 'nitropack/types'
+import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
 import type { AuthState } from '../auth/utils.client'
 import { useLanguage } from '../translations/utils.client'
 
@@ -351,7 +352,7 @@ async function pruviousFetch(
   }
 
   await $fetch(apiBasePath + route, {
-    ...(options as any),
+    ...options,
     body: method === 'post' || method === 'patch' ? unref(options.body) : undefined,
     headers: pruviousFetchHeaders(options.headers),
     ignoreResponseError: true,
@@ -398,4 +399,63 @@ async function pruviousFetch(
   }
 
   return fetchResponse
+}
+
+/**
+ * A custom wrapper around `$fetch` that automatically handles:
+ *
+ * - `Accept-Language` header based on the current page language.
+ * - `Authorization` header based on the current user's token.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *
+ * Use this utility for custom API requests requiring authentication and language headers.
+ * For standard Pruvious API routes, prefer using:
+ *
+ * - `pruviousGet()`
+ * - `pruviousPost()`
+ * - `pruviousPatch()`
+ * - `pruviousDelete()`
+ */
+export async function pfetch<
+  TRoute extends Exclude<Parameters<$Fetch>['0'], StandardRoutes>,
+  TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
+>(route: TRoute, options?: TOptions) {
+  // Disable UI
+  if (options?.disableRef) {
+    options.disableRef.value = true
+  }
+
+  return $fetch(route, {
+    ...options,
+    headers: pruviousFetchHeaders(options?.headers),
+    onResponse: async (payload) => {
+      if (isFunction(options?.onResponse)) {
+        await options.onResponse(payload)
+      }
+
+      const data = payload.response._data ?? {}
+
+      if (payload.response.ok) {
+        // Clear input errors
+        if (isRef(options?.inputErrors)) {
+          options.inputErrors.value = {}
+        } else if (options?.inputErrors) {
+          clear(options.inputErrors)
+        }
+      } else {
+        // Set input errors
+        if (isRef(options?.inputErrors)) {
+          options.inputErrors.value = data.statusCode === 422 ? data.data : {}
+        } else if (options?.inputErrors) {
+          options.inputErrors = data.statusCode === 422 ? data.data : {}
+        }
+      }
+    },
+  } satisfies NitroFetchOptions<string> as TOptions).finally(() => {
+    // Enable UI
+    if (options?.disableRef) {
+      options.disableRef.value = false
+    }
+  })
 }

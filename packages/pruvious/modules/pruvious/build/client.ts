@@ -419,11 +419,11 @@ function getReExports() {
   const { resolve } = createResolver(import.meta.url)
 
   return [
-    `export { pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError } from '${resolve('../api/utils.client')}'`,
+    `export { pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, pfetch, type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError } from '${resolve('../api/utils.client')}'`,
     `export { useAuth, refreshAuthState, getAuthTokenPayload, getAuthTokenExpiresIn, storeAuthToken, removeAuthToken, isLoggedIn, getUser, hasPermission, type AuthState } from '${resolve('../auth/utils.client')}'`,
     `export { usePruvious, usePruviousDashboard, refreshPruviousState, refreshPruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
     `export { useLanguage, useDashboardContentLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath, deserializeTranslatableStringCallbacks, maybeTranslate, isValidLanguageCode } from '${resolve('../translations/utils.client')}'`,
-    `export { pruviousDashboardPost, pruviousDashboardGet, pruviousDashboardPatch, pruviousDashboardDelete } from '${resolve('../api/dashboard-utils.client')}'`,
+    `export { pruviousDashboardPost, pruviousDashboardGet, pruviousDashboardPatch, pruviousDashboardDelete, pfetchDashboard } from '${resolve('../api/dashboard-utils.client')}'`,
     `export { defineAction, defineFilter } from '${resolve('../hooks/define.client')}'`,
     `export { addAction, doActions, addFilter, applyFilters } from '${resolve('../hooks/utils.client')}'`,
     `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
