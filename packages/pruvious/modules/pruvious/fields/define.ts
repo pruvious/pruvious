@@ -525,8 +525,10 @@ export interface FieldUIOptions<
    * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
    * - The import `path` must be a literal string, not a variable.
    * - The import `path` can be:
-   *   - A path starting with the Nuxt alias `>/`.
+   *   - A path starting with the alias `>/`.
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+   *   - A path starting with the Nuxt alias `@/` or `~/`.
+   *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
    *   - A relative path to a `.vue` component.
    *     - This path must be relative to the file where the function is called.
    *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
@@ -583,8 +585,10 @@ export interface FieldUIOptions<
    * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
    * - The import `path` must be a literal string, not a variable.
    * - The import `path` can be:
-   *   - A path starting with the Nuxt alias `>/`.
+   *   - A path starting with the alias `>/`.
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+   *   - A path starting with the Nuxt alias `@/` or `~/`.
+   *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
    *   - A relative path to a `.vue` component.
    *     - This path must be relative to the file where the function is called.
    *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
@@ -899,7 +903,13 @@ export function defineField<
         fieldTypeOptions.uiOptions?.customComponent !== false
       ) {
         ui.customComponent = ui.customComponent.includes('/')
-          ? hash(resolveCustomComponentPath(location.file.absolute, ui.customComponent, location.layer.config.srcDir))
+          ? hash(
+              resolveCustomComponentPath({
+                component: ui.customComponent,
+                file: location.file.absolute,
+                srcDir: location.layer.config.srcDir,
+              }),
+            )
           : ui.customComponent
       }
 
@@ -910,7 +920,11 @@ export function defineField<
       ) {
         ui.customTableComponent = ui.customTableComponent.includes('/')
           ? hash(
-              resolveCustomComponentPath(location.file.absolute, ui.customTableComponent, location.layer.config.srcDir),
+              resolveCustomComponentPath({
+                component: ui.customTableComponent,
+                file: location.file.absolute,
+                srcDir: location.layer.config.srcDir,
+              }),
             )
           : ui.customTableComponent
       }

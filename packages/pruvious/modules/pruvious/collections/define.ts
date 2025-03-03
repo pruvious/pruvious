@@ -846,8 +846,10 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                  * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
                  * - The import `path` must be a literal string, not a variable.
                  * - The import `path` can be:
-                 *   - A path starting with the Nuxt alias `>/`.
+                 *   - A path starting with the alias `>/`.
                  *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+                 *   - A path starting with the Nuxt alias `@/` or `~/`.
+                 *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
                  *   - A relative path to a `.vue` component.
                  *     - This path must be relative to the file where the function is called.
                  *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
@@ -1554,11 +1556,11 @@ export function defineCollection<
     if (isString(ui?.indexPage?.layout) && ui.indexPage.layout !== 'default') {
       ui.indexPage.layout = ui.indexPage.layout.includes('/')
         ? hash(
-            resolveCustomComponentPath(
-              resolveContext.location.file.absolute,
-              ui.indexPage.layout,
-              resolveContext.location.layer.config.srcDir,
-            ),
+            resolveCustomComponentPath({
+              component: ui.indexPage.layout,
+              file: resolveContext.location.file.absolute,
+              srcDir: resolveContext.location.layer.config.srcDir,
+            }),
           )
         : ui.indexPage.layout
     }
@@ -1569,11 +1571,11 @@ export function defineCollection<
         if ('component' in column) {
           column.component = column.component.includes('/')
             ? hash(
-                resolveCustomComponentPath(
-                  resolveContext.location.file.absolute,
-                  column.component,
-                  resolveContext.location.layer.config.srcDir,
-                ),
+                resolveCustomComponentPath({
+                  component: column.component,
+                  file: resolveContext.location.file.absolute,
+                  srcDir: resolveContext.location.layer.config.srcDir,
+                }),
               )
             : column.component
         }
@@ -1584,11 +1586,11 @@ export function defineCollection<
       if (isString(ui?.[page]?.layout) && !['auto', 'default', 'live-preview'].includes(ui[page].layout)) {
         ui[page].layout = ui[page].layout.includes('/')
           ? hash(
-              resolveCustomComponentPath(
-                resolveContext.location.file.absolute,
-                ui[page].layout,
-                resolveContext.location.layer.config.srcDir,
-              ),
+              resolveCustomComponentPath({
+                component: ui[page].layout,
+                file: resolveContext.location.file.absolute,
+                srcDir: resolveContext.location.layer.config.srcDir,
+              }),
             )
           : ui[page].layout
       }
@@ -1601,11 +1603,11 @@ export function defineCollection<
               `${path}.component`,
               item.component.includes('/')
                 ? hash(
-                    resolveCustomComponentPath(
-                      resolveContext.location.file.absolute,
-                      item.component,
-                      resolveContext.location.layer.config.srcDir,
-                    ),
+                    resolveCustomComponentPath({
+                      component: item.component,
+                      file: resolveContext.location.file.absolute,
+                      srcDir: resolveContext.location.layer.config.srcDir,
+                    }),
                   )
                 : item.component,
             )

@@ -1,5 +1,22 @@
 import { dirname, resolve } from 'pathe'
 
+export interface ResolveCustomComponentPathOptions {
+  /**
+   * The component path to resolve.
+   */
+  component: string
+
+  /**
+   * The absolute file path where the component is being referenced.
+   */
+  file: string
+
+  /**
+   * The source directory of the Nuxt layer where the function is called.
+   */
+  srcDir: string
+}
+
 /**
  * Resolves a custom Vue component by its `path` for use in a Pruvious field, collection, or singleton option.
  * This function should only be used in the server-side context within the following directories:
@@ -18,6 +35,8 @@ import { dirname, resolve } from 'pathe'
  * - The import `path` can be:
  *   - A path starting with the alias `>/`.
  *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+ *   - A path starting with the Nuxt alias `@/` or `~/`.
+ *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
  *   - A relative path to a `.vue` component.
  *     - This path must be relative to the file where the function is called.
  *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
@@ -62,11 +81,13 @@ export function resolvePruviousComponent(path: string) {
  * The following rules apply:
  *
  * - The function name `resolvePruviousComponent` must remain unchanged and not be aliased.
- * - The component `name` must be a literal string, not a variable.
- * - The import `path` must be a literal string, not a variable.
+ * - The component `name` must be a unique literal string, not a variable.
+ *   - It cannot include forward slashes (`/`) or periods (`.`)
  * - The import `path` can be:
  *   - A path starting with the alias `>/`.
  *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+ *   - A path starting with the Nuxt alias `@/` or `~/`.
+ *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
  *   - A relative path to a `.vue` component.
  *     - This path must be relative to the file where the function is called.
  *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
@@ -98,17 +119,15 @@ export function resolveNamedPruviousComponent(name: string, path: string) {
 /**
  * Resolves the absolute file path for a custom component based on different path formats.
  *
- * Handles three types of component path formats:
+ * Handles three types of `component` path formats:
  *
- * - Alias paths starting with `>/` (resolved relative to `srcDir` of the Nuxt layer where the function is called).
- * - Relative paths starting with `.` (resolved relative to current `file`).
- * - Absolute/module paths (returned as-is).
- *
- * @param file - The current file path where the component is being referenced.
- * @param component - The component path to resolve.
- * @param srcDir - Source directory of a Nuxt layer.
+ * - Alias paths starting with `>/` - resolved relative to `srcDir` of the Nuxt layer where the function is called.
+ * - Alias paths starting with `@/` or `~/` - returned as-is.
+ * - Relative paths starting with `.` - resolved relative to current `file`.
+ * - Absolute/module paths - returned as-is.
  */
-export function resolveCustomComponentPath(file: string, component: string, srcDir: string) {
+export function resolveCustomComponentPath(options: ResolveCustomComponentPathOptions) {
+  const { component, file, srcDir } = options
   return component.startsWith('>/')
     ? resolve(srcDir, component.slice(2))
     : component.startsWith('.')

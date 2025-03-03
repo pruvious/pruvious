@@ -941,11 +941,11 @@ export function defineSingleton<
     if (isString(ui?.layout) && !['auto', 'default', 'live-preview'].includes(ui.layout)) {
       ui.layout = ui.layout.includes('/')
         ? hash(
-            resolveCustomComponentPath(
-              resolveContext.location.file.absolute,
-              ui.layout,
-              resolveContext.location.layer.config.srcDir,
-            ),
+            resolveCustomComponentPath({
+              component: ui.layout,
+              file: resolveContext.location.file.absolute,
+              srcDir: resolveContext.location.layer.config.srcDir,
+            }),
           )
         : ui.layout
     }
@@ -958,11 +958,11 @@ export function defineSingleton<
             `${path}.component`,
             item.component.includes('/')
               ? hash(
-                  resolveCustomComponentPath(
-                    resolveContext.location.file.absolute,
-                    item.component,
-                    resolveContext.location.layer.config.srcDir,
-                  ),
+                  resolveCustomComponentPath({
+                    component: item.component,
+                    file: resolveContext.location.file.absolute,
+                    srcDir: resolveContext.location.layer.config.srcDir,
+                  }),
                 )
               : item.component,
           )

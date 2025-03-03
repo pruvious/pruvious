@@ -205,8 +205,10 @@ export interface FieldsLayoutComponentItem {
    * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
    * - The import `path` must be a literal string, not a variable.
    * - The import `path` can be:
-   *   - A path starting with the Nuxt alias `>/`.
+   *   - A path starting with the alias `>/`.
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+   *   - A path starting with the Nuxt alias `@/` or `~/`.
+   *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
    *   - A relative path to a `.vue` component.
    *     - This path must be relative to the file where the function is called.
    *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.

@@ -58,7 +58,11 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       clearCachedClientHooks()
       generateClientFiles()
     } else if (path.startsWith(`${sharedDir}/`)) {
-      resolveCustomComponentsInFile(path, layer.config.srcDir, true)
+      resolveCustomComponentsInFile({
+        file: path,
+        srcDir: layer.config.srcDir,
+        srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+      })
     } else if (
       (collectionsDir && path.startsWith(`${collectionsDir}/`)) ||
       (singletonsDir && path.startsWith(`${singletonsDir}/`)) ||
@@ -114,7 +118,11 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
               (singletonsDir && path.startsWith(`${singletonsDir}/`)) ||
               (templatesDir && path.startsWith(`${templatesDir}/`))
             ) {
-              resolveCustomComponentsInFile(path, layer.config.srcDir, true)
+              resolveCustomComponentsInFile({
+                file: path,
+                srcDir: layer.config.srcDir,
+                srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+              })
             }
 
             return

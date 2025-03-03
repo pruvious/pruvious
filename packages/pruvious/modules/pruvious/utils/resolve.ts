@@ -124,9 +124,14 @@ export interface ResolveFromLayersOptions extends Pick<ResolveOptions, 'extensio
 
 export interface ResolveFromLayersResult extends ResolveResult {
   /**
-   * The Nuxt layer configuration.
+   * The current Nuxt layer configuration.
    */
   layer: NuxtConfigLayer
+
+  /**
+   * All layers from the Nuxt configuration.
+   */
+  layers: NuxtConfigLayer[]
 
   /**
    * All nested directories from the `options.pruviousDir` directory to the resolved file.
@@ -216,7 +221,7 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
 
       for (const res of resolve({ dir, extensions: options.extensions })) {
         const pruviousDirNames = relative(dir, res.dir.absolute).split('/').filter(Boolean)
-        yield { ...res, layer, pruviousDirNames }
+        yield { ...res, layer, layers: nuxt.options._layers, pruviousDirNames }
       }
     }
   }

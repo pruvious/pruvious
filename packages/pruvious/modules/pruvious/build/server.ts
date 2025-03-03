@@ -1796,7 +1796,7 @@ function getReExports() {
     `export { addAction, doActions, addFilter, applyFilters } from '${resolve('../hooks/utils.server')}'`,
     `export type { PruviousState, PruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
     `export { type CustomLogOptions, insertCustomLog } from '${resolve('../debug/utils.server')}'`,
-    `export { resolvePruviousComponent, resolveNamedPruviousComponent, resolveCustomComponentPath } from '${resolve('../components/utils.server')}'`,
+    `export { type ResolveCustomComponentPathOptions, resolvePruviousComponent, resolveNamedPruviousComponent, resolveCustomComponentPath } from '${resolve('../components/utils.server')}'`,
   ].join('\n')
 }
 
