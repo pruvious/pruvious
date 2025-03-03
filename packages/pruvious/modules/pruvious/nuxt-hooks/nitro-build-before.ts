@@ -1,4 +1,5 @@
 import type { Nitro } from 'nitropack/types'
+import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { join, relative } from 'pathe'
 import type { TSConfig } from 'pkg-types'
@@ -25,6 +26,30 @@ export async function optimizeServerTsConfig(nitro: Nitro) {
 
   nitro.options.typescript.tsConfig.exclude ||= []
   nitro.options.typescript.tsConfig.exclude.push(resolve('..'))
+
+  /**
+   * Reorders the paths in `tsconfig.server.json` after compilation.
+   * Ensures that `#pruvious/server` and `#pruvious/server/*` paths are placed first in the `paths` list.
+   */
+  nitro.hooks.hook('compiled', () => {
+    const serverPath = relative(nuxt.options.buildDir, `${nuxt.options.runtimeConfig.pruvious.dir.build}/server`)
+    const content = fs
+      .readFileSync(nuxt.options.buildDir + '/tsconfig.server.json', 'utf-8')
+      .replace(
+        /^    "paths": {/m,
+        [
+          `    "paths": {`,
+          `      "#pruvious/server": [`,
+          `        "${serverPath}"`,
+          `      ],`,
+          `      "#pruvious/server/*": [`,
+          `        "${serverPath}/*"`,
+          `      ],`,
+        ].join('\n'),
+      )
+
+    fs.writeFileSync(nuxt.options.buildDir + '/tsconfig.server.json', content)
+  })
 }
 
 /**
@@ -35,20 +60,11 @@ async function resolvePruviousTSConfigPaths(tsConfig: Partial<Pick<TSConfig, 'co
 
   tsConfig.compilerOptions ||= {}
   tsConfig.compilerOptions.paths ||= {}
-  tsConfig.compilerOptions.paths['#pruvious/server'] ??= [`${nuxt.options.runtimeConfig.pruvious.dir.build}/server`]
-  tsConfig.compilerOptions.paths['#pruvious/server/*'] ??= [`${nuxt.options.runtimeConfig.pruvious.dir.build}/server/*`]
-  tsConfig.compilerOptions.paths = {
-    ...Object.fromEntries(
-      Object.entries(tsConfig.compilerOptions.paths).filter(
-        ([path]) => path.startsWith('#pruvious/') && !path.startsWith('#pruvious/client'),
-      ),
-    ),
-    ...Object.fromEntries(
-      Object.entries(tsConfig.compilerOptions.paths).filter(
-        ([path]) => !path.startsWith('#pruvious/') && !path.startsWith('#pruvious/client'),
-      ),
-    ),
-  }
+
+  delete tsConfig.compilerOptions.paths['#pruvious/client']
+  delete tsConfig.compilerOptions.paths['#pruvious/client/*']
+  delete tsConfig.compilerOptions.paths['#pruvious/server']
+  delete tsConfig.compilerOptions.paths['#pruvious/server/*']
 
   for (const pkgName of ['i18n', 'orm', 'storage', 'utils']) {
     const resolvedPath = await resolveTypePath(`@pruvious/${pkgName}`, '', nuxt.options.modulesDir)
