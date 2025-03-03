@@ -259,13 +259,10 @@ const canUpdate = computed(() => {
     if (!isManaged || canManage) {
       return true
     }
-    if (collection.definition.authorField && data.value[collection.definition.authorField] === auth.value.user?.id) {
+    if (collection.definition.authorField && data.value.author === auth.value.user?.id) {
       return true
     }
-    if (
-      collection.definition.editorsField &&
-      data.value[collection.definition.editorsField]?.includes(auth.value.user?.id)
-    ) {
+    if (collection.definition.editorsField && data.value.editors?.includes(auth.value.user?.id)) {
       return true
     }
   }
@@ -276,10 +273,7 @@ const canDelete = computed(() => {
     if (!isManaged || canManage) {
       return true
     }
-    if (
-      collection.definition.editorsField &&
-      (canManage || data.value[collection.definition.editorsField]?.includes(auth.value.user?.id))
-    ) {
+    if (collection.definition.editorsField && (canManage || data.value.editors?.includes(auth.value.user?.id))) {
       return true
     }
   }

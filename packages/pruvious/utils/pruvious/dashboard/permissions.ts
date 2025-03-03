@@ -100,7 +100,7 @@ export async function resolveCollectionRecordPermissions(
         languages.map(({ code }) => {
           if (translations[code]) {
             return selectFrom(collection.name)
-              .select([collection.definition.authorField, collection.definition.editorsField].filter(Boolean) as any)
+              .select(['author', 'editors'].filter(Boolean) as any)
               .where('id', '=', translations[code])
               .populate()
               .first()
@@ -114,12 +114,12 @@ export async function resolveCollectionRecordPermissions(
         let _canDelete = false
 
         if (collection.definition.authorField) {
-          _canUpdate = q2[i]?.data?.[collection.definition.authorField] === userId
-          _canDelete = q2[i]?.data?.[collection.definition.authorField] === userId
+          _canUpdate = q2[i]?.data?.author === userId
+          _canDelete = q2[i]?.data?.author === userId
         }
 
         if (collection.definition.editorsField) {
-          _canUpdate ||= !!q2[i]?.data?.[collection.definition.editorsField]?.includes(userId)
+          _canUpdate ||= !!q2[i]?.data?.editors?.includes(userId)
         }
 
         results[code].canUpdate = _canUpdate
@@ -127,7 +127,7 @@ export async function resolveCollectionRecordPermissions(
       }
     } else {
       const q3 = await selectFrom(collection.name)
-        .select([collection.definition.authorField, collection.definition.editorsField].filter(Boolean) as any)
+        .select(['author', 'editors'].filter(Boolean) as any)
         .where('id', '=', id)
         .populate()
         .first()
@@ -137,12 +137,12 @@ export async function resolveCollectionRecordPermissions(
         let _canDelete = false
 
         if (collection.definition.authorField) {
-          _canUpdate = q3?.data?.[collection.definition.authorField] === userId
-          _canDelete = q3?.data?.[collection.definition.authorField] === userId
+          _canUpdate = q3?.data?.author === userId
+          _canDelete = q3?.data?.author === userId
         }
 
         if (collection.definition.editorsField) {
-          _canUpdate ||= !!q3?.data?.[collection.definition.editorsField]?.includes(userId)
+          _canUpdate ||= !!q3?.data?.editors?.includes(userId)
         }
 
         results[code].canUpdate = _canUpdate

@@ -2,28 +2,24 @@ import type { CollectionMeta, GenericSerializableFieldOptions } from '#pruvious/
 
 export interface SerializableCollection extends Pick<CollectionMeta, 'translatable' | 'syncedFields' | 'ui'> {
   /**
-   * The name of the `createdAt` field in the collection.
-   * If the collection does not have a `createdAt` field, this property is `null`.
+   * Indicates whether the `createdAt` field is enabled in the collection.
    */
-  createdAtField: string | null
+  createdAtField: boolean
 
   /**
-   * The name of the `updatedAt` field in the collection.
-   * If the collection does not have an `updatedAt` field, this property is `null`.
+   * Indicates whether the `updatedAt` field is enabled in the collection.
    */
-  updatedAtField: string | null
+  updatedAtField: boolean
 
   /**
-   * The name of the `author` field in the collection.
-   * If the collection does not have an `author` field, this property is `null`.
+   * Indicates whether the `author` field is enabled in the collection.
    */
-  authorField: string | null
+  authorField: boolean
 
   /**
-   * The name of the `editors` field in the collection.
-   * If the collection does not have an `editors` field, this property is `null`.
+   * Indicates whether the `editors` field is enabled in the collection.
    */
-  editorsField: string | null
+  editorsField: boolean
 
   /**
    * A key-value object of `GenericSerializableFieldOptions` objects representing the structure of the collection.

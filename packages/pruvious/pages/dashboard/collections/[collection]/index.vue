@@ -311,7 +311,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     select: ['id', ...Object.keys(columns).filter((column) => !column.startsWith('$'))],
     orderBy: [
       collection.definition.ui.indexPage.table.orderBy ?? {
-        field: collection.definition.createdAtField ?? 'id',
+        field: collection.definition.createdAtField ? 'createdAt' : 'id',
         direction: 'desc',
       },
     ],
@@ -386,13 +386,12 @@ function resolveColumns(): PUIColumns {
     }
 
     if (collection.definition.createdAtField) {
-      const options = collection.definition.fields[collection.definition.createdAtField]!
-
-      columns[collection.definition.createdAtField] = puiColumn({
+      const options = collection.definition.fields.createdAt!
+      columns.createdAt = puiColumn({
         label:
           'ui' in options && isDefined(options.ui?.label)
             ? maybeTranslate(options.ui.label)
-            : __('pruvious-dashboard', titleCase(collection.definition.createdAtField, false) as any),
+            : __('pruvious-dashboard', 'Created at'),
         sortable: 'numeric',
         minWidth: '16rem',
       })
