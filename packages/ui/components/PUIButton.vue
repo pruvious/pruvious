@@ -4,7 +4,7 @@
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     class="pui-button pui-raw"
-    :class="[`pui-button-${variant}`]"
+    :class="[`pui-button-${variant}`, { 'pui-button-disabled': disabled }]"
     :style="{ '--pui-size': size }"
   >
     <span class="pui-button-inner">
@@ -59,6 +59,16 @@ defineProps({
   variant: {
     type: String as PropType<'primary' | 'secondary' | 'accent' | 'destructive' | 'outline' | 'ghost'>,
     default: 'primary',
+  },
+
+  /**
+   * Controls whether the button is disabled.
+   *
+   * @default false
+   */
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 
   /**
@@ -170,7 +180,7 @@ defineProps({
   outline-offset: 0.125rem;
 }
 
-.pui-button:disabled {
+.pui-button-disabled {
   pointer-events: none;
   opacity: 0.5;
 }
