@@ -185,6 +185,7 @@
     <PruviousDashboardCollectionTranslationsPopup
       v-if="isTranslationPopupVisible && resolvedPermissions"
       :collection="collection"
+      :currentlyEditingLabel="__('pruvious-dashboard', 'selected')"
       :id="resolvedPermissions[contentLanguage].id!"
       :resolvedPermissions="resolvedPermissions"
       :size="-1"

@@ -194,6 +194,7 @@ export default defineTranslation({
   'Saved': 'Gespeichert',
   'Scheduled at': 'Geplant am',
   'Select': 'Auswählen',
+  'selected': 'ausgewählt',
   'Selected $count $entries': createPattern(
     '$count $entries ausgewählt',
     { count: 'number' },

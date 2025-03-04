@@ -26,7 +26,7 @@
             <span v-if="permissions[code].id === id" class="pui-row pui-muted pui-truncate">
               <span>-</span>
               <span class="pui-truncate">
-                {{ __('pruvious-dashboard', 'currently editing') }}
+                {{ currentlyEditingLabel ?? __('pruvious-dashboard', 'currently editing') }}
               </span>
             </span>
           </div>
@@ -140,6 +140,13 @@ const props = defineProps({
    */
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
+  },
+
+  /**
+   * The label to display when a translation is currently being edited.
+   */
+  currentlyEditingLabel: {
+    type: String,
   },
 })
 
