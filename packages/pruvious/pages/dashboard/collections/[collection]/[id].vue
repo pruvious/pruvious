@@ -305,7 +305,12 @@ watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
       const resolvedPermissions = await resolveCollectionRecordPermissions(id, collection)
 
       if (resolvedPermissions[newContentLanguage].id) {
-        if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
+        if (!resolvedPermissions[newContentLanguage].canRead) {
+          puiToast(__('pruvious-dashboard', 'You do not have permission to access this translation'), {
+            type: 'warning',
+          })
+          contentLanguage.value = oldContentLanguage
+        } else if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
           setTimeout(
             () =>
               navigateTo(
@@ -317,6 +322,14 @@ watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
         } else {
           contentLanguage.value = oldContentLanguage
         }
+      } else if (!canCreate) {
+        puiToast(
+          __('pruvious-dashboard', 'The `$language` translation does not exist', {
+            language: newContentLanguage.toUpperCase(),
+          }),
+          { type: 'warning' },
+        )
+        contentLanguage.value = oldContentLanguage
       } else {
         const action = await puiDialog({
           content: __('pruvious-dashboard', 'The `$language` translation does not exist. Do you want to create it?', {
