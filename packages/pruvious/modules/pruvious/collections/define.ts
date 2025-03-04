@@ -821,7 +821,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        *
        * When not explicitly configured:
        *
-       * - Shows first 4-5 visible fields in their original definition order.
+       * - Shows first 4-5 visible (not `hidden`) fields in their original definition order.
        * - If `createdAt` field is enabled, it appears as the rightmost column.
        *
        * @default undefined
@@ -995,8 +995,9 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
 
     /**
      * Customizes the layout of the collection's fields in the dashboard.
-     * Provide `mirror` to use the same layout as in the `updatePage` settings.
      * If not specified, the fields are stacked vertically in the order they are defined.
+     *
+     * Provide `mirror` to use the same layout as in the `updatePage` settings.
      *
      * @default undefined
      *

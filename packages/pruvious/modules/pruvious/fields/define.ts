@@ -437,7 +437,8 @@ export interface FieldUIOptions<
   TCustomTableComponent extends boolean | undefined,
 > {
   /**
-   * Specifies whether to hide the field from the user interface.
+   * Controls the visibility of the field in the user interface.
+   * When set to `true`, the field is hidden in forms but remains visible in data tables and accessible via the API.
    *
    * @default false
    */
