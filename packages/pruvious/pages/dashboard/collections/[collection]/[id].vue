@@ -52,14 +52,14 @@
       operation="update"
     />
 
-    <template #footer>
+    <template v-if="canCreate || canUpdate || canDelete" #footer class="pui-row pui-ml-auto">
       <div class="pui-justify-between">
         <PruviousDashboardHistoryButtons v-if="canUpdate && data" v-model="data" :history="history" />
 
-        <div class="pui-row pui-ml-auto">
+        <div>
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
 
-          <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
+          <PUIButton v-if="canUpdate" :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
             <span>{{ __('pruvious-dashboard', 'Save') }}</span>
             <Icon mode="svg" name="tabler:device-floppy" />
           </PUIButton>
@@ -193,7 +193,10 @@ definePageMeta({
           showAfterRouteChange: true,
         })
         return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-      } else if (!hasPermission(`collection:${to.params.collection}:update` as Permission)) {
+      } else if (
+        !hasPermission(`collection:${to.params.collection}:read` as Permission) &&
+        !hasPermission(`collection:${to.params.collection}:update` as Permission)
+      ) {
         puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
           type: 'error',
           description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {

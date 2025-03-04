@@ -16,6 +16,12 @@ export type ResolvedCollectionRecordPermissions = Record<
     canCreate: boolean
 
     /**
+     * Whether the current user has permission to read a record by its `id`.
+     * Checks the `author` and `editors` fields (if enabled in the collection) to verify read rights.
+     */
+    canRead: boolean
+
+    /**
      * Whether the current user has permission to update a record by its `id`.
      * Checks `author` and `editors` fields (if enabled in the collection) to verify update rights.
      */
@@ -87,23 +93,24 @@ export async function resolveCollectionRecordPermissions(
     results[code] = {
       id: _id,
       canCreate,
+      canRead: isNumber(_id) && (!isManaged || canManage),
       canUpdate: isNumber(_id) && canUpdate && (!isManaged || canManage),
       canDelete: isNumber(_id) && canDelete && (!isManaged || canManage),
     }
   }
 
-  if (isManaged && !canManage && (canUpdate || canDelete)) {
+  if (isManaged && !canManage && (canUpdate || canDelete || collection.definition.translatable)) {
     const userId = getUser()?.id
+    const select: any = [
+      collection.definition.authorField ? 'author' : null,
+      collection.definition.editorsField ? 'editors' : null,
+    ].filter(Boolean)
 
     if (collection.definition.translatable) {
       const q2 = await Promise.all(
         languages.map(({ code }) => {
           if (translations[code]) {
-            return selectFrom(collection.name)
-              .select(['author', 'editors'].filter(Boolean) as any)
-              .where('id', '=', translations[code])
-              .populate()
-              .first()
+            return selectFrom(collection.name).select(select).where('id', '=', translations[code]).first()
           }
           return null
         }),
@@ -122,15 +129,12 @@ export async function resolveCollectionRecordPermissions(
           _canUpdate ||= !!q2[i]?.data?.editors?.includes(userId)
         }
 
-        results[code].canUpdate = _canUpdate
-        results[code].canDelete = _canDelete
+        results[code].canRead = !!q2[i]?.data
+        results[code].canUpdate = canUpdate && _canUpdate
+        results[code].canDelete = canDelete && _canDelete
       }
-    } else {
-      const q3 = await selectFrom(collection.name)
-        .select(['author', 'editors'].filter(Boolean) as any)
-        .where('id', '=', id)
-        .populate()
-        .first()
+    } else if (canUpdate || canDelete) {
+      const q3 = await selectFrom(collection.name).select(select).where('id', '=', id).first()
 
       for (const { code } of languages) {
         let _canUpdate = false
@@ -145,8 +149,13 @@ export async function resolveCollectionRecordPermissions(
           _canUpdate ||= !!q3?.data?.editors?.includes(userId)
         }
 
-        results[code].canUpdate = _canUpdate
-        results[code].canDelete = _canDelete
+        results[code].canRead = !!q3?.data
+        results[code].canUpdate = canUpdate && _canUpdate
+        results[code].canDelete = canDelete && _canDelete
+      }
+    } else {
+      for (const { code } of languages) {
+        results[code].canRead = true
       }
     }
   }

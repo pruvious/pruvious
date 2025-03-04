@@ -57,6 +57,7 @@
               v-pui-tooltip="
                 permissions[code].canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View')
               "
+              :disabled="!permissions[code].canRead"
               :size="-2"
               :variant="!permissions[code].canUpdate ? 'ghost' : 'outline'"
               @click="
