@@ -78,6 +78,7 @@ npm install @pruvious/utils
   - [deepClone](#deepclone)
   - [deepCompare](#deepcompare)
   - [deleteProperty](#deleteproperty)
+  - [filterObject](#filterobject)
   - [getProperty](#getproperty)
   - [isKeyOf](#iskeyof)
   - [isObject](#isobject)
@@ -930,6 +931,20 @@ Removes a property from an `object` using a specified `path` in dot notation.
 deleteProperty({ foo: { bar: 'baz' }}, 'foo.bar') // true
 deleteProperty({ foo: ['bar', 'baz']}, 'foo.1')   // true
 deleteProperty({ foo: { bar: 'baz' }}, 'bar')     // false
+```
+
+### <a id="filterobject">`filterObject(object, filter)`</a>
+
+Filters an `object` by applying a `filter` function to each of its properties.
+
+**Example:**
+
+```ts
+filterObject({ a: 1, b: 2 }, (key, value) => value % 2 === 0)
+// { b: 2 }
+
+filterObject({ foo: 'bar', baz: 'qux' }, (key, value) => key === 'foo')
+// { foo: 'bar' }
 ```
 
 ### <a id="getproperty">`getProperty(object, path, append)`</a>

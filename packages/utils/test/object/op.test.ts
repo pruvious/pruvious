@@ -6,6 +6,7 @@ import {
   deepClone,
   deepCompare,
   deleteProperty,
+  filterObject,
   getProperty,
   omit,
   pick,
@@ -145,4 +146,9 @@ test('clear', () => {
 test('remap', () => {
   expect(remap({ a: 1, b: 2 }, (key, value) => [key, value * value])).toEqual({ a: 1, b: 4 })
   expect(remap({ foo: { bar: 'baz' } }, (key, { bar }) => [key, bar.toUpperCase()])).toEqual({ foo: 'BAZ' })
+})
+
+test('filter object', () => {
+  expect(filterObject({ a: 1, b: 2 }, (_, value) => value % 2 === 0)).toEqual({ b: 2 })
+  expect(filterObject({ foo: 'bar', baz: 'qux' }, (key) => key === 'foo')).toEqual({ foo: 'bar' })
 })

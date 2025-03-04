@@ -302,6 +302,33 @@ export function remap<const TInput extends Record<string, unknown>, TKey extends
   return result
 }
 
+/**
+ * Filters an `object` by applying a `filter` function to each of its properties.
+ *
+ * @example
+ * ```ts
+ * filterObject({ a: 1, b: 2 }, (key, value) => value % 2 === 0)
+ * // { b: 2 }
+ *
+ * filterObject({ foo: 'bar', baz: 'qux' }, (key, value) => key === 'foo')
+ * // { foo: 'bar' }
+ * ```
+ */
+export function filterObject<T extends Record<string, any>>(
+  object: T,
+  filter: (key: keyof T, value: T[keyof T]) => boolean,
+): Partial<T> {
+  const result: any = {}
+
+  for (const [key, value] of Object.entries(object)) {
+    if (filter(key as keyof T, value as T[keyof T])) {
+      result[key] = value
+    }
+  }
+
+  return result
+}
+
 function convertDotToBracket(path: string) {
   if (/^\d+$/.test(path)) {
     return `[${path}]`
