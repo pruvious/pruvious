@@ -31,7 +31,14 @@
 </template>
 
 <script lang="ts" setup>
-import { __, languages, pruviousDashboardPatch, useAuth, useDashboardContentLanguage } from '#pruvious/client'
+import {
+  __,
+  hasPermission,
+  languages,
+  pruviousDashboardPatch,
+  useAuth,
+  useDashboardContentLanguage,
+} from '#pruvious/client'
 
 const showContentLanguageSwitcher = inject('showContentLanguageSwitcher', false)
 const disableContentLanguageSwitcher = inject('disableContentLanguageSwitcher', false)
@@ -44,10 +51,14 @@ watch(
   contentLanguage,
   async (contentLanguage) => {
     if (auth.value.user?.contentLanguage !== contentLanguage) {
-      const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
+      if (hasPermission('update-account')) {
+        const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
 
-      if (query.success) {
-        Object.assign(auth.value.user ?? {}, query.data)
+        if (query.success) {
+          Object.assign(auth.value.user ?? {}, query.data)
+        }
+      } else {
+        localStorage.setItem('contentLanguage', contentLanguage)
       }
     }
   },

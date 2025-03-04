@@ -1,4 +1,5 @@
 import {
+  hasPermission,
   isValidLanguageCode,
   preloadTranslatableStrings,
   primaryLanguage,
@@ -9,6 +10,7 @@ import {
   useDashboardContentLanguage,
   useLanguage,
 } from '#pruvious/client'
+import type { LanguageCode } from '#pruvious/server'
 
 /**
  * Pruvious client middleware intended for use in the dashboard.
@@ -39,9 +41,12 @@ export default defineNuxtRouteMiddleware(async () => {
         ? auth.value.user.dashboardLanguage
         : (useLanguage().value ?? 'en')
     const contentLanguage =
-      auth.value.isLoggedIn && isValidLanguageCode(auth.value.user!.contentLanguage)
+      auth.value.isLoggedIn && hasPermission('update-account') && isValidLanguageCode(auth.value.user!.contentLanguage)
         ? auth.value.user.contentLanguage
-        : (useDashboardContentLanguage().value ?? primaryLanguage)
+        : (useDashboardContentLanguage().value ??
+          (isValidLanguageCode(localStorage.getItem('contentLanguage'))
+            ? (localStorage.getItem('contentLanguage') as LanguageCode)
+            : primaryLanguage))
 
     useLanguage().value = dashboardLanguage as any
     useDashboardContentLanguage().value = contentLanguage
