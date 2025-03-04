@@ -231,6 +231,9 @@ export default defineTranslation({
   'Status code': 'Status code',
   'Success': 'Success',
 
+  'The `$language` translation does not exist': createPattern('The `$language` translation does not exist', {
+    language: 'string',
+  }),
   'The `$language` translation does not exist. Do you want to create it?': createPattern(
     'The `$language` translation does not exist. Do you want to create it?',
     { language: 'string' },
@@ -273,6 +276,7 @@ export default defineTranslation({
     'You do not have permission to access the page `$page`',
     { page: 'string' },
   ),
+  'You do not have permission to access this translation': 'You do not have permission to access this translation',
   'Your session has timed out due to inactivity. Please log in again to continue.':
     'Your session has timed out due to inactivity. Please log in again to continue.',
 })
