@@ -3,7 +3,7 @@ import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 type FieldComponents = Record<string, { regular?: ResolveFromLayersResult; table?: ResolveFromLayersResult }>
 
@@ -36,7 +36,7 @@ export function resolveFieldDefinitionFiles(): Record<string, ResolveFromLayersR
         debug(`Resolving field definitions in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const fieldName = camelCase(pruviousDirNames.join('-') + '-' + base)
+      const fieldName = camelCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
 
       if (isDefined(duplicates[fieldName]) && duplicates[fieldName].layer === layer) {
         warnWithContext(`Two field definition files resolving to the same name \`${fieldName}\`:`, [

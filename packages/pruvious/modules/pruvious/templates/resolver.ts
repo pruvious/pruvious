@@ -3,7 +3,7 @@ import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing template names and their definition file locations.
@@ -29,7 +29,7 @@ export function resolveTemplateFiles(): Record<string, ResolveFromLayersResult> 
         debug(`Resolving templates in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const templateName = pascalCase(pruviousDirNames.join('-') + '-' + base)
+      const templateName = pascalCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
 
       if (isDefined(duplicates[templateName]) && duplicates[templateName].layer === layer) {
         warnWithContext(`Two template files resolving to the same name \`${templateName}\`:`, [

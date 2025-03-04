@@ -3,7 +3,7 @@ import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing singleton names and their definition file locations.
@@ -29,7 +29,7 @@ export function resolveSingletonFiles(): Record<string, ResolveFromLayersResult>
         debug(`Resolving singletons in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const singletonName = pascalCase(pruviousDirNames.join('-') + '-' + base)
+      const singletonName = pascalCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
       const slug = slugify(singletonName)
 
       if (isDefined(duplicates[singletonName]) && duplicates[singletonName].layer === layer) {

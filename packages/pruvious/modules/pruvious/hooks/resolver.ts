@@ -5,7 +5,7 @@ import type { NuxtConfigLayer } from 'nuxt/schema'
 import { join, relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
 import { extractStringLiteralArguments } from '../utils/ast'
-import { resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing action names and their definition file locations for both client and server.
@@ -80,7 +80,7 @@ export function resolveActionDefinitionFiles(): {
         ),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const actionName = [...pruviousDirNames, base].map(kebabCase).join(':')
+      const actionName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
       if (isDefined(duplicates[actionName]) && duplicates[actionName].layer === layer) {
         warnWithContext(`Two client-side action definition files resolving to the same name \`${actionName}\`:`, [

@@ -4,7 +4,7 @@ import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing collection names and their definition file locations.
@@ -30,7 +30,7 @@ export function resolveCollectionFiles(): Record<string, ResolveFromLayersResult
         debug(`Resolving collections in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const collectionName = pascalCase(pruviousDirNames.join('-') + '-' + base)
+      const collectionName = pascalCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
       const slug = slugify(collectionName)
 
       if (isDefined(duplicates[collectionName]) && duplicates[collectionName].layer === layer) {

@@ -1,4 +1,4 @@
-import { isDefined } from '@pruvious/utils'
+import { isDefined, kebabCase } from '@pruvious/utils'
 import fs from 'node:fs'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
@@ -225,4 +225,63 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
       }
     }
   }
+}
+
+/**
+ * Processes an array of path segments to remove redundancy while preserving meaning.
+ * This function:
+ * 1. Removes consecutive duplicate segments
+ * 2. Removes a segment if the next segment starts with the same part of the previous segment
+ * 3. Optionally appends a baseName to the segments before processing
+ * 
+ * @example
+ * ["path","file"] -> 'path-file' // No matches
+ * ["path","path","path","file"] -> 'path-file' // Segment is skipped because it fully matches previous segment
+ * ["path","pathFile"] -> 'path-file' // Segment starts with previous segment name
+ * ["path","pathfile"] -> 'pathfile' // Segment starts with previous segment name
+ * ["pathFile","file"] -> 'path-file-file' // A segment has a sub-segmented name
+ * ["my","path","myFile"] -> 'my-path-my-file' // A segment has a sub-segmented name
+ * 
+ * 
+ * @param baseName The file base name
+ * @param segments A string array of a split path
+ */
+export function reduceFileNameSegments(_segments: string[],baseName?: string ): string[] {
+  const segments = [..._segments]
+  if(!!baseName) {
+    segments.push(baseName)
+  }
+
+  const result = segments.reduce<string[]>((prev, curr, i) => {
+    const prevSegment = prev[prev.length - 1]!
+
+    // If the segment is an exact match of previous segment && not the first segment
+    if(prevSegment === curr && i !== 0) {
+      return prev
+    }
+
+    // If the segment starts with the previous segment, append the segment to the last path segment
+    if(curr.startsWith(prevSegment)) {
+      prev.pop()
+    }
+    
+    prev.push(curr)
+    return prev
+  }, [])
+
+  // console.log(`Reduced segments: ${JSON.stringify(_segments)} -> '${JSON.stringify(result)}'`)
+
+  return result
+}
+
+/**
+ * Normalizes an array of segments into a kebab case string.
+ *
+ * @example
+ * ```ts
+ * normalizeSegments(['path', 'file']) // 'path-file'
+ * ```
+ */
+export function normalizeSegments(segments: string[]): string {
+  return kebabCase(segments.join('-'))
 }
