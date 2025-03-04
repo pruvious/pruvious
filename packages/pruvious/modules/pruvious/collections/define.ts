@@ -125,7 +125,8 @@ export interface CollectionMetaOptions<
    *
    * @default []
    */
-  syncedFields?: (keyof TFields & string)[]
+  syncedFields?: (keyof MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> &
+    string)[]
 
   /**
    * API endpoint configuration for this collection.
@@ -644,7 +645,11 @@ export interface CollectionMetaOptions<
    *   },
    * }
    */
-  ui?: PartialMax4Levels<CollectionUIOptions<keyof TFields & string>>
+  ui?: PartialMax4Levels<
+    CollectionUIOptions<
+      keyof MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> & string
+    >
+  >
 }
 
 export type CollectionGuard = (
