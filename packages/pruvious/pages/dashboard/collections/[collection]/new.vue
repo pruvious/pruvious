@@ -171,12 +171,10 @@ if (collection.definition.translatable) {
       .where('id', '=', translationOf)
       .first()
     if (q1.success && q1.data?.language === resolvedLanguage) {
-      puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-        type: 'error',
-        description: __('pruvious-dashboard', 'You cannot translate a record into its source language'),
-        showAfterRouteChange: true,
-      })
+      const description = __('pruvious-dashboard', 'You cannot translate a record into its source language')
+      puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
       await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
+      throw new Error(description)
     } else if (q1.success && isString(q1.data?.translations)) {
       translationKey.value = q1.data.translations
       const q2 = await selectFrom(collection.name)
@@ -186,34 +184,36 @@ if (collection.definition.translatable) {
         .first()
       if (q2.success && q2.data) {
         if ((q2.data.translations as any)?.[resolvedLanguage]) {
+          const description = __('pruvious-dashboard', 'A translation for language `$language` already exists', {
+            language: resolvedLanguage.toUpperCase(),
+          })
           puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
             type: 'error',
-            description: __('pruvious-dashboard', 'A translation for language `$language` already exists', {
-              language: resolvedLanguage.toUpperCase(),
-            }),
+            description,
             showAfterRouteChange: true,
           })
           await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
+          throw new Error(description)
         }
       } else {
+        const description = __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
+          id: translationOf,
+        })
         puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
           type: 'error',
-          description: __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
-            id: translationOf,
-          }),
+          description,
           showAfterRouteChange: true,
         })
         await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
+        throw new Error(description)
       }
     } else {
-      puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-        type: 'error',
-        description: __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
-          id: translationOf,
-        }),
-        showAfterRouteChange: true,
+      const description = __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
+        id: translationOf,
       })
+      puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
       await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
+      throw new Error(description)
     }
   }
 }

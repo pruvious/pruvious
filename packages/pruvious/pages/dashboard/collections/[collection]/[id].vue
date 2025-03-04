@@ -219,12 +219,10 @@ const contentLanguage = useDashboardContentLanguage()
 const recordLanguage = ref(contentLanguage.value)
 
 if (!data.value) {
-  puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-    type: 'error',
-    description: __('pruvious-dashboard', 'Page not found'),
-    showAfterRouteChange: true,
-  })
+  const description = __('pruvious-dashboard', 'Page not found')
+  puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
   await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
+  throw new Error(description)
 }
 
 if (collection.definition.translatable && isValidLanguageCode(data.value?.language)) {
