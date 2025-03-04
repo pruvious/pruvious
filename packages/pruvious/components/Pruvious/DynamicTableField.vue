@@ -64,7 +64,7 @@ const props = defineProps({
    * The name of the current collection in PascalCase format.
    */
   collectionName: {
-    type: String as PropType<keyof Collections>,
+    type: String as PropType<keyof Omit<Collections, 'Cache' | 'Queue'>>,
     required: true,
   },
 

@@ -183,7 +183,7 @@ const props = defineProps({
    * The name of the data container in PascalCase format.
    */
   dataContainerName: {
-    type: String as PropType<keyof Collections | keyof Singletons>,
+    type: String as PropType<keyof Omit<Collections, 'Cache' | 'Queue'> | keyof Singletons>,
     required: true,
   },
 
