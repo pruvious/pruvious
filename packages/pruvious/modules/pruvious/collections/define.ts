@@ -1,4 +1,5 @@
 import {
+  languages,
   walkFieldLayoutItems,
   type FieldsLayout,
   type LanguageCode,
@@ -1372,6 +1373,13 @@ export function defineCollection<
     const ui = deepClone(options.ui)
     const indexes = [...(options.indexes ?? [])]
     const foreignKeys = [...(options.foreignKeys ?? [])]
+
+    if (translatable && languages.length < 2) {
+      warnWithContext('Translatable collections require at least two languages.', [
+        `Add more languages to \`pruvious.i18n.languages\` in your \`nuxt.config.ts\` file.`,
+        `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+      ])
+    }
 
     for (const fieldName of Object.keys(fields)) {
       if (fieldName === 'id') {

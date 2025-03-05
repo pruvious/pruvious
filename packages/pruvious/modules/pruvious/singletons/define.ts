@@ -1,4 +1,5 @@
 import {
+  languages,
   walkFieldLayoutItems,
   type FieldsLayout,
   type GenericDatabase,
@@ -883,6 +884,13 @@ export function defineSingleton<
       isObject(options.updatedAt) ? options.updatedAt : {},
     )
     const ui = deepClone(options.ui)
+
+    if (translatable && languages.length < 2) {
+      warnWithContext('Translatable singletons require at least two languages.', [
+        `Add more languages to \`pruvious.i18n.languages\` in your \`nuxt.config.ts\` file.`,
+        `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+      ])
+    }
 
     for (const fieldName of Object.keys(fields)) {
       if (updatedAt.enabled && fieldName === 'updatedAt') {
