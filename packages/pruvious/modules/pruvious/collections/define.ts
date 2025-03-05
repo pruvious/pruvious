@@ -455,6 +455,7 @@ export interface CollectionMetaOptions<
    * ```
    */
   duplicate?: CollectionDuplicateFunction<
+    TTranslatable,
     MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
   > | null
 
@@ -659,7 +660,13 @@ export type CollectionGuard = (
   context: MetaContext,
 ) => any
 
-type CollectionCopyTranslationFunction<TFields extends Record<string, GenericField>> = (context: {
+type CollectionCopyTranslationFunction<
+  TFields extends Record<string, GenericField>,
+  TInsertInput extends Record<string, any> = InsertInput<{
+    TInputTypes: ExtractInputTypes<TFields>
+    fields: TFields
+  }>,
+> = (context: {
   /**
    * Object containing field names and their casted values from the source translation.
    */
@@ -679,9 +686,12 @@ type CollectionCopyTranslationFunction<TFields extends Record<string, GenericFie
    * Specifies whether the translation copy will be used for a `create` or `update` operation.
    */
   operation: 'create' | 'update'
-}) => Partial<ExtractInputTypes<TFields>> | Promise<Partial<ExtractInputTypes<TFields>>>
+}) =>
+  | Partial<Omit<TInsertInput, 'language' | 'translations'>>
+  | Promise<Partial<Omit<TInsertInput, 'language' | 'translations'>>>
 
 type CollectionDuplicateFunction<
+  TTranslatable extends boolean | undefined,
   TFields extends Record<string, GenericField>,
   TInsertInput extends Record<string, any> = InsertInput<{
     TInputTypes: ExtractInputTypes<TFields>
@@ -692,7 +702,9 @@ type CollectionDuplicateFunction<
    * Object containing field names and their casted values from the source record.
    */
   source: ExtractCastedTypes<TFields> & { id: number }
-}) => TInsertInput | Promise<TInsertInput>
+}) => DefaultFalse<TTranslatable> extends true
+  ? Omit<TInsertInput, 'language' | 'translations'> | Promise<Omit<TInsertInput, 'language' | 'translations'>>
+  : TInsertInput | Promise<TInsertInput>
 
 export interface CollectionUIOptions<TFieldNames extends string = string> {
   /**

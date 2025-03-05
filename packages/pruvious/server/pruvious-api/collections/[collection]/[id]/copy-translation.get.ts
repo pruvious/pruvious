@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const copy = await collection.definition.meta.copyTranslation({
+  const copy: Record<string, any> = await collection.definition.meta.copyTranslation({
     source: query.data as any,
     sourceLanguage: query.data.language,
     targetLanguage: targetLanguage as LanguageCode,
