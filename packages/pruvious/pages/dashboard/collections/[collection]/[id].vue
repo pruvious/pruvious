@@ -53,10 +53,10 @@
     />
 
     <template v-if="canCreate || canUpdate || canDelete" #footer class="pui-row pui-ml-auto">
-      <div class="pui-justify-between">
+      <div class="pui-row">
         <PruviousDashboardHistoryButtons v-if="canUpdate && data" v-model="data" :history="history" />
 
-        <div>
+        <div class="pui-ml-auto">
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
 
           <PUIButton v-if="canUpdate" :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
