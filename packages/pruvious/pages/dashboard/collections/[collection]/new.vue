@@ -174,7 +174,6 @@ if (collection.definition.translatable) {
       const description = __('pruvious-dashboard', 'You cannot translate a record into its source language')
       puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
       await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
-      throw new Error(description)
     } else if (q1.success && isString(q1.data?.translations)) {
       translationKey.value = q1.data.translations
       const q2 = await selectFrom(collection.name)
@@ -193,7 +192,6 @@ if (collection.definition.translatable) {
             showAfterRouteChange: true,
           })
           await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
-          throw new Error(description)
         }
       } else {
         const description = __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
@@ -205,7 +203,6 @@ if (collection.definition.translatable) {
           showAfterRouteChange: true,
         })
         await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
-        throw new Error(description)
       }
     } else {
       const description = __('pruvious-dashboard', 'Could not retrieve the source translation (ID: `$id`)', {
@@ -213,7 +210,6 @@ if (collection.definition.translatable) {
       })
       puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
       await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
-      throw new Error(description)
     }
   }
 }
@@ -257,13 +253,13 @@ const footerButtons = await applyFilters('dashboard:collections:new:footer:butto
 
 onMounted(() => {
   contentLanguage.value = resolvedLanguage
-})
 
-listen('save', () => {
-  if (!overlayCounter.value) {
-    blurActiveElement()
-    setTimeout(saveData)
-  }
+  listen('save', () => {
+    if (!overlayCounter.value) {
+      blurActiveElement()
+      setTimeout(saveData)
+    }
+  })
 })
 
 function resolveConditionalLogic(reset = true) {

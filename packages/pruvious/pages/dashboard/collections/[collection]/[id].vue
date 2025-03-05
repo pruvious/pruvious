@@ -222,7 +222,6 @@ if (!data.value) {
   const description = __('pruvious-dashboard', 'Page not found')
   puiQueueToast(__('pruvious-dashboard', 'Redirected'), { type: 'error', description, showAfterRouteChange: true })
   await navigateTo(dashboardBasePath + `collections/${route.params.collection}`)
-  throw new Error(description)
 }
 
 if (collection.definition.translatable && isValidLanguageCode(data.value?.language)) {
@@ -297,78 +296,80 @@ await loadFilters('dashboard:collections:edit:footer:buttons')
 const footerButtonsContext = { collection, data, id, conditionalLogicResolver, conditionalLogic, errors }
 const footerButtons = await applyFilters('dashboard:collections:edit:footer:buttons', [], footerButtonsContext)
 
-watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
-  if (newContentLanguage !== recordLanguage.value) {
-    if (isSubmitting.value) {
-      contentLanguage.value = oldContentLanguage
-    } else {
-      const resolvedPermissions = await resolveCollectionRecordPermissions(id, collection)
-
-      if (resolvedPermissions[newContentLanguage].id) {
-        if (!resolvedPermissions[newContentLanguage].canRead) {
-          puiToast(__('pruvious-dashboard', 'You do not have permission to access this translation'), {
-            type: 'warning',
-          })
-          contentLanguage.value = oldContentLanguage
-        } else if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
-          setTimeout(
-            () =>
-              navigateTo(
-                dashboardBasePath +
-                  `collections/${route.params.collection}/${resolvedPermissions[newContentLanguage].id}`,
-              ),
-            getOverlayTransitionDuration(),
-          )
-        } else {
-          contentLanguage.value = oldContentLanguage
-        }
-      } else if (!canCreate) {
-        puiToast(
-          __('pruvious-dashboard', 'The `$language` translation does not exist', {
-            language: newContentLanguage.toUpperCase(),
-          }),
-          { type: 'warning' },
-        )
+onMounted(() => {
+  watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
+    if (newContentLanguage !== recordLanguage.value) {
+      if (isSubmitting.value) {
         contentLanguage.value = oldContentLanguage
       } else {
-        const action = await puiDialog({
-          content: __('pruvious-dashboard', 'The `$language` translation does not exist. Do you want to create it?', {
-            language: newContentLanguage.toUpperCase(),
-          }),
-          actions: [
-            { name: 'cancel', label: __('pruvious-dashboard', 'Cancel') },
-            { name: 'create', label: __('pruvious-dashboard', 'Create'), variant: 'primary' },
-          ],
-        })
+        const resolvedPermissions = await resolveCollectionRecordPermissions(id, collection)
 
-        if (action === 'create') {
-          setTimeout(async () => {
-            if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
-              setTimeout(
-                () =>
-                  navigateTo(
-                    dashboardBasePath +
-                      `collections/${route.params.collection}/new?translationOf=${id}&language=${newContentLanguage}`,
-                  ),
-                getOverlayTransitionDuration(),
-              )
-            } else {
-              contentLanguage.value = oldContentLanguage
-            }
-          }, getOverlayTransitionDuration())
-        } else {
+        if (resolvedPermissions[newContentLanguage].id) {
+          if (!resolvedPermissions[newContentLanguage].canRead) {
+            puiToast(__('pruvious-dashboard', 'You do not have permission to access this translation'), {
+              type: 'warning',
+            })
+            contentLanguage.value = oldContentLanguage
+          } else if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
+            setTimeout(
+              () =>
+                navigateTo(
+                  dashboardBasePath +
+                    `collections/${route.params.collection}/${resolvedPermissions[newContentLanguage].id}`,
+                ),
+              getOverlayTransitionDuration(),
+            )
+          } else {
+            contentLanguage.value = oldContentLanguage
+          }
+        } else if (!canCreate) {
+          puiToast(
+            __('pruvious-dashboard', 'The `$language` translation does not exist', {
+              language: newContentLanguage.toUpperCase(),
+            }),
+            { type: 'warning' },
+          )
           contentLanguage.value = oldContentLanguage
+        } else {
+          const action = await puiDialog({
+            content: __('pruvious-dashboard', 'The `$language` translation does not exist. Do you want to create it?', {
+              language: newContentLanguage.toUpperCase(),
+            }),
+            actions: [
+              { name: 'cancel', label: __('pruvious-dashboard', 'Cancel') },
+              { name: 'create', label: __('pruvious-dashboard', 'Create'), variant: 'primary' },
+            ],
+          })
+
+          if (action === 'create') {
+            setTimeout(async () => {
+              if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
+                setTimeout(
+                  () =>
+                    navigateTo(
+                      dashboardBasePath +
+                        `collections/${route.params.collection}/new?translationOf=${id}&language=${newContentLanguage}`,
+                    ),
+                  getOverlayTransitionDuration(),
+                )
+              } else {
+                contentLanguage.value = oldContentLanguage
+              }
+            }, getOverlayTransitionDuration())
+          } else {
+            contentLanguage.value = oldContentLanguage
+          }
         }
       }
     }
-  }
-})
+  })
 
-listen('save', () => {
-  if (!overlayCounter.value) {
-    blurActiveElement()
-    setTimeout(saveData)
-  }
+  listen('save', () => {
+    if (!overlayCounter.value) {
+      blurActiveElement()
+      setTimeout(saveData)
+    }
+  })
 })
 
 async function readData() {
