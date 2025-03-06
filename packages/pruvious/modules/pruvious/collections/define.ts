@@ -832,6 +832,10 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        * Defines which columns are shown in the table.
        * The order of columns is determined by the order they are defined in the array.
        *
+       * You can provide an array of field names or objects to configure the columns.
+       * When using field names as strings, you can use the format `fieldName | width | minWidth`.
+       * The `width` and `minWidth` values are optional CSS values.
+       *
        * When not explicitly configured:
        *
        * - Shows first 4-5 visible (not `hidden`) fields in their original definition order.
@@ -842,83 +846,104 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        * @example
        * ```ts
        * [
-       *   { field: 'email' },
+       *   'firstName | 20rem | 16rem',
+       *   'lastName',
+       *   { field: 'isActive', label: ({ __ }) => __('pruvious-dashboard', 'Active') },
        * ]
        * ```
        */
       columns:
-        | ((
-            | {
+        | (
+            | ((
+                | {
+                    /**
+                     * The field (column) to display.
+                     */
+                    field: TFieldNames
+                  }
+                | {
+                    /**
+                     * Custom component to render in the table column.
+                     * The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+                     *
+                     * The following rules apply:
+                     *
+                     * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
+                     * - The import `path` must be a literal string, not a variable.
+                     * - The import `path` can be:
+                     *   - A path starting with the alias `>/`.
+                     *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+                     *   - A path starting with the Nuxt alias `@/` or `~/`.
+                     *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
+                     *   - A relative path to a `.vue` component.
+                     *     - This path must be relative to the file where the function is called.
+                     *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
+                     *   - An absolute path to a `.vue` component.
+                     *   - A path for an npm module.
+                     *
+                     * The custom component receives the following props:
+                     *
+                     * - @todo
+                     *
+                     * @example
+                     * ```ts
+                     * import { resolvePruviousComponent } from '#pruvious/server'
+                     *
+                     * // Correct
+                     * resolvePruviousComponent('>/components/MyComponent.vue')
+                     * resolvePruviousComponent('../../app/components/MyComponent.vue')
+                     * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
+                     *
+                     * // Incorrect
+                     * resolvePruviousComponent(`>/components/${name}.vue`)
+                     * resolvePruviousComponent('MyComponent')
+                     * ```
+                     */
+                    component: string
+                  }
+              ) & {
                 /**
-                 * The field (column) to display.
-                 */
-                field: TFieldNames
-              }
-            | {
-                /**
-                 * Custom component to render in the table column.
-                 * The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+                 * A custom text label shown in the table header column.
+                 * If not provided, falls back to using the `field` label when one exists.
                  *
-                 * The following rules apply:
+                 * You can either provide a string or a function that returns a string.
+                 * The function receives an object with `_` and `__` properties to access the translation functions.
                  *
-                 * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
-                 * - The import `path` must be a literal string, not a variable.
-                 * - The import `path` can be:
-                 *   - A path starting with the alias `>/`.
-                 *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
-                 *   - A path starting with the Nuxt alias `@/` or `~/`.
-                 *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-                 *   - A relative path to a `.vue` component.
-                 *     - This path must be relative to the file where the function is called.
-                 *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
-                 *   - An absolute path to a `.vue` component.
-                 *   - A path for an npm module.
+                 * Important: When using a function, only use simple anonymous functions without context binding,
+                 * since the option needs to be serialized for client-side use.
                  *
-                 * The custom component receives the following props:
-                 *
-                 * - @todo
+                 * @default undefined
                  *
                  * @example
                  * ```ts
-                 * import { resolvePruviousComponent } from '#pruvious/server'
+                 * // String (non-translatable)
+                 * label: 'Custom label'
                  *
-                 * // Correct
-                 * resolvePruviousComponent('>/components/MyComponent.vue')
-                 * resolvePruviousComponent('../../app/components/MyComponent.vue')
-                 * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
-                 *
-                 * // Incorrect
-                 * resolvePruviousComponent(`>/components/${name}.vue`)
-                 * resolvePruviousComponent('MyComponent')
+                 * // Function (translatable)
+                 * label: ({ __ }) => __('pruvious-dashboard', 'Custom label')
                  * ```
                  */
-                component: string
-              }
-          ) & {
-            /**
-             * A custom text label shown in the table header column.
-             * If not provided, falls back to using the `field` label when one exists.
-             *
-             * @default undefined
-             */
-            label?: string
+                label?: string | ((context: TranslatableStringCallbackContext) => string) | undefined
 
-            /**
-             * Sets the width of a table column using CSS values like `100px`, `20rem`, `50%`, `auto`, etc.
-             * The specified `width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
-             */
-            width?: string
+                /**
+                 * Sets the width of a table column using CSS values like `100px`, `20rem`, `50%`, `auto`, etc.
+                 * The specified `width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
+                 */
+                width?: string
 
-            /**
-             * Sets the minimum width of a table column using CSS values like `100px`, `20rem`, etc.
-             * The specified `min-width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
-             *
-             * The `minWidth` property is useful for specifying `width` in percentages while ensuring a minimum width for the column.
-             *
-             * @default '16rem'
-             */
-            minWidth?: string
-          })[]
+                /**
+                 * Sets the minimum width of a table column using CSS values like `100px`, `20rem`, etc.
+                 * The specified `min-width` is applied to the `style` attribute of `<col>` elements within the `<colgroup>`.
+                 *
+                 * The `minWidth` property is useful for specifying `width` in percentages while ensuring a minimum width for the column.
+                 *
+                 * @default '16rem'
+                 */
+                minWidth?: string
+              })
+            | TFieldNames
+            | `${TFieldNames} | ${string}`
+          )[]
         | undefined
 
       /**
@@ -1593,17 +1618,19 @@ export function defineCollection<
 
     if (isArray(ui?.indexPage?.table?.columns)) {
       for (const column of ui.indexPage.table.columns) {
-        column.minWidth ??= '16rem'
-        if ('component' in column) {
-          column.component = column.component.includes('/')
-            ? hash(
-                resolveCustomComponentPath({
-                  component: column.component,
-                  file: resolveContext.location.file.absolute,
-                  srcDir: resolveContext.location.layer.config.srcDir,
-                }),
-              )
-            : column.component
+        if (isObject(column)) {
+          column.minWidth ??= '16rem'
+          if ('component' in column) {
+            column.component = column.component.includes('/')
+              ? hash(
+                  resolveCustomComponentPath({
+                    component: column.component,
+                    file: resolveContext.location.file.absolute,
+                    srcDir: resolveContext.location.layer.config.srcDir,
+                  }),
+                )
+              : column.component
+          }
         }
       }
     }

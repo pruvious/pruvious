@@ -212,7 +212,7 @@ import {
 } from '#pruvious/client'
 import type { Permission } from '#pruvious/server'
 import type { Paginated, QueryBuilderResult } from '@pruvious/orm'
-import { isDefined, isEmpty, isUndefined, nanoid, omit, titleCase } from '@pruvious/utils'
+import { isDefined, isEmpty, isString, isUndefined, nanoid, omit, titleCase } from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
 
@@ -400,13 +400,37 @@ function resolveColumns(): PUIColumns {
   } else {
     let i = 0
     for (const column of collection.definition.ui.indexPage.table.columns) {
-      if ('field' in column) {
+      if (isString(column)) {
+        const [field, width, minWidth] = column.split('|').map((p) => p.trim())
+
+        if (field) {
+          const options = collection.definition.fields[field]
+
+          if (options) {
+            columns[field] = puiColumn({
+              label:
+                'ui' in options && isDefined(options.ui?.label)
+                  ? maybeTranslate(options.ui.label)
+                  : __('pruvious-dashboard', titleCase(field, false) as any),
+              sortable: options.__dataType === 'text' ? 'text' : 'numeric',
+              width,
+              minWidth,
+            })
+          } else {
+            console.warn(
+              `Unable to resolve field \`${field}\` in \`${collection.name}\` collection table columns. Available fields:`,
+              toRaw(collection.definition.fields),
+            )
+          }
+        }
+      } else if ('field' in column) {
         const options = collection.definition.fields[column.field]
 
         if (options) {
           columns[column.field] = puiColumn({
-            label:
-              'ui' in options && isDefined(options.ui?.label)
+            label: isDefined(column.label)
+              ? maybeTranslate(column.label)
+              : 'ui' in options && isDefined(options.ui?.label)
                 ? maybeTranslate(options.ui.label)
                 : __('pruvious-dashboard', titleCase(column.field, false) as any),
             sortable: options.__dataType === 'text' ? 'text' : 'numeric',
@@ -424,7 +448,7 @@ function resolveColumns(): PUIColumns {
           const key = `$${++i}`
           resolvedCustomComponents[key] = customComponents[column.component]!()
           columns[key] = puiColumn({
-            label: column.label ?? '',
+            label: isDefined(column.label) ? maybeTranslate(column.label) : '',
             width: column.width,
             minWidth: column.minWidth,
           })
