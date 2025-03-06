@@ -3,7 +3,12 @@ import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import {
+  normalizeSegments,
+  reduceFileNameSegments,
+  resolveFromLayers,
+  type ResolveFromLayersResult,
+} from '../utils/resolve'
 
 type FieldComponents = Record<string, { regular?: ResolveFromLayersResult; table?: ResolveFromLayersResult }>
 
@@ -80,7 +85,7 @@ export function resolveFieldComponentFiles(): FieldComponents {
     })) {
       const { layer, file, base, pruviousDirNames } = location
       const type: 'regular' | 'table' = base.endsWith('.table') ? 'table' : 'regular'
-      const slug = pruviousDirNames.join('-') + '-' + base.replace(/\.(?:regular|table)$/, '')
+      const slug = normalizeSegments(reduceFileNameSegments(pruviousDirNames, base.replace(/\.(?:regular|table)$/, '')))
       const fieldName =
         pruviousDirNames[0] && ['collections', 'singletons'].includes(pruviousDirNames[0])
           ? slug.replaceAll('-', '/')
