@@ -58,6 +58,13 @@ defineProps({
   line-height: round(calc(1.25 * 1em), 1px);
 }
 
+.pui-field-message-inner code {
+  color: hsl(var(--pui-foreground));
+  font-family: var(--pui-font-mono);
+  font-weight: 500;
+  font-style: normal;
+}
+
 .pui-field-message svg {
   margin-top: -0.5px;
   font-size: calc(1em + 0.0625rem);

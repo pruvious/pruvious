@@ -21,7 +21,7 @@
       <p>{{ error }}</p>
     </PUIFieldMessage>
     <PUIFieldMessage v-else-if="description">
-      <p>{{ description }}</p>
+      <div v-html="description"></div>
     </PUIFieldMessage>
   </PUIField>
 </template>
@@ -30,6 +30,7 @@
 import { __, maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isDefined, titleCase } from '@pruvious/utils'
+import { marked } from 'marked'
 
 const props = defineProps({
   /**
@@ -93,5 +94,5 @@ const label = computed(() =>
     ? maybeTranslate(props.options.ui.label)
     : __('pruvious-dashboard', titleCase(props.name, false) as any),
 )
-const description = computed(() => maybeTranslate(props.options.ui.description))
+const description = computed(() => marked.parse(maybeTranslate(props.options.ui.description) ?? ''))
 </script>
