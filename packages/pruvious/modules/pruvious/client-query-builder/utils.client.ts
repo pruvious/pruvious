@@ -78,7 +78,7 @@ import type { UpdateQueryBuilder } from './UpdateQueryBuilder'
  * ```
  */
 export function insertInto<
-  TCollections extends Omit<Collections, 'Cache' | 'Queue'>,
+  TCollections extends Collections,
   TCollectionName extends keyof TCollections,
   // @ts-expect-error
 >(collectionName: TCollectionName): InsertQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
@@ -167,7 +167,7 @@ export function insertInto<
  * ```
  */
 export function selectFrom<
-  TCollections extends Omit<Collections, 'Cache' | 'Queue'>,
+  TCollections extends Collections,
   TCollectionName extends keyof TCollections,
   // @ts-expect-error
 >(collectionName: TCollectionName): SelectQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
@@ -232,7 +232,7 @@ export function selectFrom<
  * ```
  */
 export function update<
-  TCollections extends Omit<Collections, 'Cache' | 'Queue'>,
+  TCollections extends Collections,
   TCollectionName extends keyof TCollections,
   // @ts-expect-error
 >(collectionName: TCollectionName): UpdateQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
@@ -286,7 +286,7 @@ export function update<
  * ```
  */
 export function deleteFrom<
-  TCollections extends Omit<Collections, 'Cache' | 'Queue'>,
+  TCollections extends Collections,
   TCollectionName extends keyof TCollections,
   // @ts-expect-error
 >(collectionName: TCollectionName): DeleteQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {

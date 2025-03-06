@@ -13,10 +13,10 @@ import { slugify } from '@pruvious/utils'
  */
 export function getCollectionBySlug(
   slug: string | string[] | undefined,
-): { name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: SerializableCollection } | null {
+): { name: keyof Collections; definition: SerializableCollection } | null {
   const dashboard = usePruviousDashboard()
   const collectionName = Object.keys(dashboard.value?.collections ?? {}).find((key) => slugify(key) === slug) as
-    | keyof Omit<Collections, 'Cache' | 'Queue'>
+    | keyof Collections
     | undefined
 
   if (collectionName) {

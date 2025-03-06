@@ -88,7 +88,7 @@ const props = defineProps({
    * The name and definition of the current translatable singleton.
    */
   singleton: {
-    type: Object as PropType<{ name: keyof Omit<Singletons, 'Cache' | 'Queue'>; definition: SerializableSingleton }>,
+    type: Object as PropType<{ name: keyof Singletons; definition: SerializableSingleton }>,
     required: true,
   },
 })

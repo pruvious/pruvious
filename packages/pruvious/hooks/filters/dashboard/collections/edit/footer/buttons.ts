@@ -8,7 +8,7 @@ export default defineFilter<
     /**
      * The name and definition of the current collection.
      */
-    collection: { name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: SerializableCollection }
+    collection: { name: keyof Collections; definition: SerializableCollection }
 
     /**
      * The current collection record data.

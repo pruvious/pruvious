@@ -130,7 +130,7 @@ const props = defineProps({
    * The name and definition of the current translatable collection.
    */
   collection: {
-    type: Object as PropType<{ name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: SerializableCollection }>,
+    type: Object as PropType<{ name: keyof Collections; definition: SerializableCollection }>,
     required: true,
   },
 

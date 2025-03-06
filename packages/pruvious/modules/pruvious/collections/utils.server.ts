@@ -3,10 +3,7 @@ import { isDefined, isString, kebabCase } from '@pruvious/utils'
 import { pruviousError } from '../api/utils.server'
 import type { GenericMetaCollection } from './define'
 
-let collectionSlugMap: Record<
-  string,
-  { name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: GenericMetaCollection }
->
+let collectionSlugMap: Record<string, { name: keyof Collections; definition: GenericMetaCollection }>
 
 /**
  * Retrieves a collection object containing its name and definition using its URL path identifier (`slug`).
@@ -20,7 +17,7 @@ let collectionSlugMap: Record<
  */
 export async function getCollectionBySlug<T extends string | undefined>(
   slug: T,
-): Promise<{ name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: GenericMetaCollection }> {
+): Promise<{ name: keyof Collections; definition: GenericMetaCollection }> {
   if (!collectionSlugMap) {
     const { database } = await import('#pruvious/server')
 
@@ -50,7 +47,7 @@ export async function getCollectionBySlug<T extends string | undefined>(
  * @throws a `404` H3 error if the collection does not exist, halting any subsequent code execution in the current event handler.
  */
 export async function getCollectionFromEvent(): Promise<{
-  name: keyof Omit<Collections, 'Cache' | 'Queue'>
+  name: keyof Collections
   definition: GenericMetaCollection
 }> {
   const event = useEvent()

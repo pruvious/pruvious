@@ -35,7 +35,7 @@ export function getOverlayTransitionDuration(): number {
 export function resolveCollectionLayout(
   page: 'index' | 'create' | 'update',
   collection: {
-    name: keyof Omit<Collections, 'Cache' | 'Queue'>
+    name: keyof Collections
     definition: SerializableCollection
   },
 ): Component | string {

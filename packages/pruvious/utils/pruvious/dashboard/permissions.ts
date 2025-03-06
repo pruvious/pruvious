@@ -62,7 +62,7 @@ export type ResolvedCollectionRecordPermissions = Record<
  */
 export async function resolveCollectionRecordPermissions(
   id: number,
-  collection: { name: keyof Omit<Collections, 'Cache' | 'Queue'>; definition: SerializableCollection },
+  collection: { name: keyof Collections; definition: SerializableCollection },
 ): Promise<ResolvedCollectionRecordPermissions> {
   const translations: Partial<Record<LanguageCode, number | null>> = {}
   const results = {} as ResolvedCollectionRecordPermissions
