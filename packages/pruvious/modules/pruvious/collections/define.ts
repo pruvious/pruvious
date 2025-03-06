@@ -948,6 +948,25 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
 
       /**
        * Specifies how records should be sorted by default.
+       *
+       * You can provide an object with the following properties:
+       *
+       * - `field` - The field (column) name to order by.
+       * - `direction` - The direction to order by.
+       * - `nulls` - The order of null values.
+       *
+       * Alternatively, you can provide a string with the following format:
+       *
+       * - `{field}` - Uses the field in ascending order (null values are ordered first).
+       * - `{field}:asc` - Uses the field in ascending order (null values are ordered first).
+       * - `{field}:asc:nullsAuto` - Uses the field in ascending order (null values are ordered first).
+       * - `{field}:asc:nullsFirst` - Uses the field in ascending order (null values are ordered first).
+       * - `{field}:asc:nullsLast` - Uses the field in ascending order (null values are ordered last).
+       * - `{field}:desc` - Uses the field in descending order (null values are ordered last).
+       * - `{field}:desc:nullsAuto` - Uses the field in descending order (null values are ordered last).
+       * - `{field}:desc:nullsFirst` - Uses the field in descending order (null values are ordered first).
+       * - `{field}:desc:nullsLast` - Uses the field in descending order (null values are ordered last).
+       *
        * When no sorting order is provided:
        *
        * - Uses `createdAt` field in descending order if the field exists.
@@ -980,6 +999,15 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
              */
             nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
           }
+        | `${TFieldNames}`
+        | `${TFieldNames}:asc`
+        | `${TFieldNames}:asc:nullsAuto`
+        | `${TFieldNames}:asc:nullsFirst`
+        | `${TFieldNames}:asc:nullsLast`
+        | `${TFieldNames}:desc`
+        | `${TFieldNames}:desc:nullsAuto`
+        | `${TFieldNames}:desc:nullsFirst`
+        | `${TFieldNames}:desc:nullsLast`
         | undefined
 
       /**
@@ -1713,7 +1741,10 @@ export function defineCollection<
           hidden: false,
           label: undefined,
           menu: { hidden: false, group: 'collections', order: 10, icon: 'folder' as const },
-          indexPage: { layout: 'default' as const, table: { columns: undefined, orderBy: undefined, perPage: 50 } },
+          indexPage: {
+            layout: 'default' as const,
+            table: { columns: undefined, orderBy: undefined as any, perPage: 50 },
+          },
           createPage: { layout: 'auto', fields: undefined },
           updatePage: { layout: 'auto', fields: undefined },
         } satisfies Required<CollectionUIOptions>),

@@ -310,12 +310,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
   },
   defaultParams: {
     select: ['id', ...Object.keys(columns).filter((column) => !column.startsWith('$'))],
-    orderBy: [
-      collection.definition.ui.indexPage.table.orderBy ?? {
-        field: collection.definition.createdAtField ? 'createdAt' : 'id',
-        direction: 'desc',
-      },
-    ],
+    orderBy: resolveOrderBy(),
     page: 1,
     perPage: collection.definition.ui.indexPage.table.perPage,
   },
@@ -463,6 +458,25 @@ function resolveColumns(): PUIColumns {
   }
 
   return columns
+}
+
+function resolveOrderBy(): {
+  field: string
+  direction?: 'asc' | 'desc'
+  nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
+}[] {
+  const orderBy = collection.definition.ui.indexPage.table.orderBy
+
+  if (isDefined(orderBy)) {
+    if (isString(orderBy)) {
+      const [field, direction, nulls] = orderBy.split(':').map((p) => p.trim())
+      return [{ field, direction: direction ?? 'asc', nulls: nulls ?? 'nullsAuto' }] as any
+    } else {
+      return [orderBy]
+    }
+  }
+
+  return [{ field: collection.definition.createdAtField ? 'createdAt' : 'id', direction: 'desc' }]
 }
 
 function select(id: number | string) {
