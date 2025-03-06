@@ -117,7 +117,7 @@ export function resolveActionDefinitionFiles(): {
         ),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const actionName = [...pruviousDirNames, base].map(kebabCase).join(':')
+      const actionName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
       if (isDefined(duplicates[actionName]) && duplicates[actionName].layer === layer) {
         warnWithContext(`Two server-side action definition files resolving to the same name \`${actionName}\`:`, [
@@ -170,7 +170,7 @@ export function resolveFilterDefinitionFiles(): {
         ),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const filterName = [...pruviousDirNames, base].map(kebabCase).join(':')
+      const filterName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
       if (isDefined(duplicates[filterName]) && duplicates[filterName].layer === layer) {
         warnWithContext(`Two client-side filter definition files resolving to the same name \`${filterName}\`:`, [
@@ -207,7 +207,7 @@ export function resolveFilterDefinitionFiles(): {
         ),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const filterName = [...pruviousDirNames, base].map(kebabCase).join(':')
+      const filterName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
       if (isDefined(duplicates[filterName]) && duplicates[filterName].layer === layer) {
         warnWithContext(`Two server-side filter definition files resolving to the same name \`${filterName}\`:`, [
