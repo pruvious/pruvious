@@ -82,7 +82,7 @@
               "
               :disabled="
                 (!permissions[code].id && !permissions[code].canCreate) ||
-                (permissions[code].id && !permissions[code].canUpdate)
+                (!!permissions[code].id && !permissions[code].canUpdate)
               "
               :size="-2"
               :variant="
