@@ -1,4 +1,5 @@
 import { isDefined, kebabCase, uniqueArray } from '@pruvious/utils'
+import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
@@ -82,6 +83,13 @@ export function resolveActionDefinitionFiles(): {
       const { layer, file, base, pruviousDirNames } = location
       const actionName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
+      if (!actionName) {
+        warnWithContext(`The client-side action definition file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
+
       if (isDefined(duplicates[actionName]) && duplicates[actionName].layer === layer) {
         warnWithContext(`Two client-side action definition files resolving to the same name \`${actionName}\`:`, [
           file.relative,
@@ -118,6 +126,13 @@ export function resolveActionDefinitionFiles(): {
     })) {
       const { layer, file, base, pruviousDirNames } = location
       const actionName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
+
+      if (!actionName) {
+        warnWithContext(`The server-side action definition file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
 
       if (isDefined(duplicates[actionName]) && duplicates[actionName].layer === layer) {
         warnWithContext(`Two server-side action definition files resolving to the same name \`${actionName}\`:`, [
@@ -172,6 +187,13 @@ export function resolveFilterDefinitionFiles(): {
       const { layer, file, base, pruviousDirNames } = location
       const filterName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
 
+      if (!filterName) {
+        warnWithContext(`The client-side filter definition file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
+
       if (isDefined(duplicates[filterName]) && duplicates[filterName].layer === layer) {
         warnWithContext(`Two client-side filter definition files resolving to the same name \`${filterName}\`:`, [
           file.relative,
@@ -208,6 +230,13 @@ export function resolveFilterDefinitionFiles(): {
     })) {
       const { layer, file, base, pruviousDirNames } = location
       const filterName = reduceFileNameSegments(pruviousDirNames, base).map(kebabCase).join(':')
+
+      if (!filterName) {
+        warnWithContext(`The server-side filter definition file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
 
       if (isDefined(duplicates[filterName]) && duplicates[filterName].layer === layer) {
         warnWithContext(`Two server-side filter definition files resolving to the same name \`${filterName}\`:`, [

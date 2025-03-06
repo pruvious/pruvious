@@ -1,9 +1,10 @@
 import { isDefined, pascalCase } from '@pruvious/utils'
+import { colorize } from 'consola/utils'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { normalizeSegments, reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing template names and their definition file locations.
@@ -29,7 +30,14 @@ export function resolveTemplateFiles(): Record<string, ResolveFromLayersResult> 
         debug(`Resolving templates in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const templateName = pascalCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
+      const templateName = pascalCase(reduceFileNameSegments(pruviousDirNames, base).join(''))
+
+      if (!templateName) {
+        warnWithContext(`The template file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
 
       if (isDefined(duplicates[templateName]) && duplicates[templateName].layer === layer) {
         warnWithContext(`Two template files resolving to the same name \`${templateName}\`:`, [

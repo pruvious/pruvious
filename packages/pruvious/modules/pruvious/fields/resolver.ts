@@ -1,14 +1,10 @@
 import { camelCase, isDefined } from '@pruvious/utils'
+import { colorize } from 'consola/utils'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import {
-  normalizeSegments,
-  reduceFileNameSegments,
-  resolveFromLayers,
-  type ResolveFromLayersResult,
-} from '../utils/resolve'
+import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 type FieldComponents = Record<string, { regular?: ResolveFromLayersResult; table?: ResolveFromLayersResult }>
 
@@ -41,7 +37,14 @@ export function resolveFieldDefinitionFiles(): Record<string, ResolveFromLayersR
         debug(`Resolving field definitions in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const fieldName = camelCase(normalizeSegments(reduceFileNameSegments(pruviousDirNames, base)))
+      const fieldName = camelCase(reduceFileNameSegments(pruviousDirNames, base).join(''))
+
+      if (!fieldName) {
+        warnWithContext(`The field definition file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
 
       if (isDefined(duplicates[fieldName]) && duplicates[fieldName].layer === layer) {
         warnWithContext(`Two field definition files resolving to the same name \`${fieldName}\`:`, [
@@ -85,12 +88,18 @@ export function resolveFieldComponentFiles(): FieldComponents {
     })) {
       const { layer, file, base, pruviousDirNames } = location
       const type: 'regular' | 'table' = base.endsWith('.table') ? 'table' : 'regular'
-      const slug = normalizeSegments(reduceFileNameSegments(pruviousDirNames, base.replace(/\.(?:regular|table)$/, '')))
       const fieldName =
         pruviousDirNames[0] && ['collections', 'singletons'].includes(pruviousDirNames[0])
-          ? slug.replaceAll('-', '/')
-          : camelCase(slug)
+          ? pruviousDirNames.join('/') + '/' + base.replace(/\.(?:regular|table)$/, '')
+          : camelCase(reduceFileNameSegments(pruviousDirNames, base).join(''))
       const duplicate = duplicates[`${fieldName}.${type}`]
+
+      if (!fieldName) {
+        warnWithContext(`The field component file <${base}> does not have a valid name.`, [
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
 
       if (isDefined(duplicate) && duplicate.layer === layer) {
         warnWithContext(`Two field component files resolving to the same name \`${fieldName}\`:`, [
