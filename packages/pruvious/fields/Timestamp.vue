@@ -1,20 +1,11 @@
 <template>
-  <div v-if="!options.ui.hidden">
-    {{ label }}
-    <Icon
-      v-if="translatable && synced"
-      v-pui-tooltip="
-        __('pruvious-dashboard', 'Changes made to this field will automatically sync across all translations.')
-      "
-      mode="svg"
-      name="tabler:language"
-      class="pui-muted"
-    />
-  </div>
+  <PUIField v-if="!options.ui.hidden">
+    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+  </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
+import { maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({
@@ -86,6 +77,5 @@ defineEmits<{
 }>()
 
 const id = useId()
-const label = resolveFieldLabel(props.options.ui.label, props.name)
 const placeholder = maybeTranslate(props.options.ui.placeholder)
 </script>

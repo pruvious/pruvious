@@ -1,17 +1,6 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PUIFieldLabel :required="options.required">
-      <label :for="id">{{ label }}</label>
-      <Icon
-        v-if="translatable && synced"
-        v-pui-tooltip="
-          __('pruvious-dashboard', 'Changes made to this field will automatically sync across all translations.')
-        "
-        mode="svg"
-        name="tabler:language"
-        class="pui-muted"
-      />
-    </PUIFieldLabel>
+    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
 
     <PUISelect
       :choices="choices"
@@ -30,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
+import { maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
 
@@ -111,7 +100,6 @@ defineEmits<{
 }>()
 
 const id = useId()
-const label = resolveFieldLabel(props.options.ui.label, props.name)
 const placeholder = maybeTranslate(props.options.ui.placeholder)
 const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = props.options.choices.map((choice) =>
   'value' in choice
