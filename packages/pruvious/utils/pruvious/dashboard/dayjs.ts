@@ -9,11 +9,9 @@ import weekOfYear from 'dayjs/esm/plugin/weekOfYear'
 import 'dayjs/locale/de'
 
 // @ts-ignore
-import en from 'dayjs/locale/en'
-// @ts-ignore
 import de from 'dayjs/locale/de'
 
-const locales = { en, de }
+const locales = { de }
 
 let extended = false
 
@@ -35,9 +33,7 @@ function extend() {
  * @see https://day.js.org
  */
 export function dayjs(date?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
-  extend()
-  const language: keyof typeof locales = getUser()?.dashboardLanguage ?? 'en'
-  return _dayjs(date, format, strict).locale(locales[language] ?? en)
+  return getDayjs(false, date, format, strict)
 }
 
 /**
@@ -46,7 +42,13 @@ export function dayjs(date?: _dayjs.ConfigType, format?: string, strict?: boolea
  * @see https://day.js.org/docs/en/plugin/utc
  */
 export function dayjsUTC(config?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
+  return getDayjs(true, config, format, strict)
+}
+
+function getDayjs(utc: boolean, date?: _dayjs.ConfigType, format?: string, strict?: boolean) {
   extend()
-  const language: keyof typeof locales = getUser()?.dashboardLanguage ?? 'en'
-  return _dayjs.utc(config, format, strict).locale(locales[language] ?? en)
+  const language = (getUser()?.dashboardLanguage ?? 'en') as keyof typeof locales
+  return utc
+    ? _dayjs.utc(date, format, strict).locale(locales[language] ?? 'en')
+    : _dayjs(date, format, strict).locale(locales[language] ?? 'en')
 }

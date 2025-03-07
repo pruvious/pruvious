@@ -121,7 +121,7 @@ export default defineTemplate(() => ({
       },
     }),
     dateFormat: textField({
-      default: 'YYYY-MM-DD',
+      default: 'LL',
       validators: [nonEmptyValidator()],
       ui: {
         customComponent: resolvePruviousComponent('@/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
@@ -151,13 +151,17 @@ export default defineTemplate(() => ({
               '|`W`|' + __('pruvious-dashboard', 'dateFormat:W') + '|',
               '|`WW`|' + __('pruvious-dashboard', 'dateFormat:WW') + '|',
               '|`wo`|' + __('pruvious-dashboard', 'dateFormat:wo') + '|',
+              '|`L`|' + __('pruvious-dashboard', 'dateFormat:L') + '|',
+              '|`l`|' + __('pruvious-dashboard', 'dateFormat:l') + '|',
+              '|`LL`|' + __('pruvious-dashboard', 'dateFormat:LL') + '|',
+              '|`ll`|' + __('pruvious-dashboard', 'dateFormat:ll') + '|',
               '|`[...]`|' + __('pruvious-dashboard', 'dateFormat:[...]') + '|',
             ].join('\n'),
         },
       },
     }),
     timeFormat: textField({
-      default: 'HH:mm:ss',
+      default: 'LTS',
       validators: [nonEmptyValidator()],
       ui: {
         customComponent: resolvePruviousComponent('@/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
@@ -185,6 +189,8 @@ export default defineTemplate(() => ({
               '|`kk`|' + __('pruvious-dashboard', 'timeFormat:kk') + '|',
               '|`z`|' + __('pruvious-dashboard', 'timeFormat:z') + '|',
               '|`zzz`|' + __('pruvious-dashboard', 'timeFormat:zzz') + '|',
+              '|`LT`|' + __('pruvious-dashboard', 'timeFormat:LT') + '|',
+              '|`LTS`|' + __('pruvious-dashboard', 'timeFormat:LTS') + '|',
               '|`[...]`|' + __('pruvious-dashboard', 'timeFormat:[...]') + '|',
             ].join('\n'),
         },
