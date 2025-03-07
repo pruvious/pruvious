@@ -134,4 +134,10 @@ function updatePreview() {
   font-family: var(--pui-font-mono);
   font-size: 0.8125rem;
 }
+
+@media (max-width: 480px) {
+  .p-preview > :first-child {
+    display: none;
+  }
+}
 </style>

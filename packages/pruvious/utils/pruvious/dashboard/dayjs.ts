@@ -1,3 +1,4 @@
+import { getUser } from '#pruvious/client'
 import _dayjs from 'dayjs/esm'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import isoWeek from 'dayjs/esm/plugin/isoWeek'
@@ -5,6 +6,14 @@ import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
 import timezone from 'dayjs/esm/plugin/timezone'
 import utc from 'dayjs/esm/plugin/utc'
 import weekOfYear from 'dayjs/esm/plugin/weekOfYear'
+import 'dayjs/locale/de'
+
+// @ts-ignore
+import en from 'dayjs/locale/en'
+// @ts-ignore
+import de from 'dayjs/locale/de'
+
+const locales = { en, de }
 
 let extended = false
 
@@ -27,7 +36,8 @@ function extend() {
  */
 export function dayjs(date?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
   extend()
-  return _dayjs(date, format, strict)
+  const language: keyof typeof locales = getUser()?.dashboardLanguage ?? 'en'
+  return _dayjs(date, format, strict).locale(locales[language] ?? en)
 }
 
 /**
@@ -37,5 +47,6 @@ export function dayjs(date?: _dayjs.ConfigType, format?: string, strict?: boolea
  */
 export function dayjsUTC(config?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
   extend()
-  return _dayjs.utc(config, format, strict)
+  const language: keyof typeof locales = getUser()?.dashboardLanguage ?? 'en'
+  return _dayjs.utc(config, format, strict).locale(locales[language] ?? en)
 }
