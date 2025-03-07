@@ -61,6 +61,7 @@ export const translatableStrings = {
   'The field `$field` must be an array of strings': createPattern('The field `$field` must be an array of strings', {
     field: 'string',
   }),
+  'This field must have a value that is not empty': 'This field must have a value that is not empty',
 
   'The input must be an object': 'The input must be an object',
   'The input must be an object or an array of objects': 'The input must be an object or an array of objects',
@@ -214,6 +215,7 @@ export const translatableStringsDe = {
       field: 'string',
     },
   ),
+  'This field must have a value that is not empty': 'Dieses Feld muss einen Wert haben, der nicht leer ist',
 
   'The input must be an object': 'Die Eingabe muss ein Objekt sein',
   'The input must be an object or an array of objects': 'Die Eingabe muss ein Objekt oder ein Array von Objekten sein',

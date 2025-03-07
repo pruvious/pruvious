@@ -1,5 +1,6 @@
 export * from './email'
 export * from './meta'
+export * from './nonEmpty'
 export * from './timestamp'
 export * from './types'
 export * from './unique'
