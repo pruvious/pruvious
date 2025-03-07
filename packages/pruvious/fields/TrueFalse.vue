@@ -32,19 +32,14 @@
       "
     />
 
-    <PUIFieldMessage v-if="error" error>
-      <p>{{ error }}</p>
-    </PUIFieldMessage>
-    <PUIFieldMessage v-else-if="description">
-      <PUIProse v-html="description" />
-    </PUIFieldMessage>
+    <PruviousFieldMessage :error="error" :name="name" :options="options" />
   </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
+import { __, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isDefined, titleCase } from '@pruvious/utils'
+import { isDefined } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -123,18 +118,11 @@ defineEmits<{
 }>()
 
 const id = useId()
-const label = computed(() =>
-  isDefined(props.options.ui.label)
-    ? maybeTranslate(props.options.ui.label)
-    : __('pruvious-dashboard', titleCase(props.name, false) as any),
-)
-const noLabel = computed(() =>
-  isDefined(props.options.ui.noLabel) ? maybeTranslate(props.options.ui.noLabel) : __('pruvious-dashboard', 'No'),
-)
-const yesLabel = computed(() =>
-  isDefined(props.options.ui.yesLabel) ? maybeTranslate(props.options.ui.yesLabel) : __('pruvious-dashboard', 'Yes'),
-)
-const description = computed(() =>
-  puiMarkdown(maybeTranslate(props.options.ui.description) ?? '', { basePath: dashboardBasePath }),
-)
+const label = resolveFieldLabel(props.options.ui.label, props.name)
+const noLabel = isDefined(props.options.ui.noLabel)
+  ? maybeTranslate(props.options.ui.noLabel)
+  : __('pruvious-dashboard', 'No')
+const yesLabel = isDefined(props.options.ui.yesLabel)
+  ? maybeTranslate(props.options.ui.yesLabel)
+  : __('pruvious-dashboard', 'Yes')
 </script>

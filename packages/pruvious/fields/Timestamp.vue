@@ -14,9 +14,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
+import { __, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isDefined, titleCase } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -87,13 +86,6 @@ defineEmits<{
 }>()
 
 const id = useId()
-const label = computed(() =>
-  isDefined(props.options.ui.label)
-    ? maybeTranslate(props.options.ui.label)
-    : __('pruvious-dashboard', titleCase(props.name, false) as any),
-)
-const description = computed(() =>
-  puiMarkdown(maybeTranslate(props.options.ui.description) ?? '', { basePath: dashboardBasePath }),
-)
-const placeholder = computed(() => maybeTranslate(props.options.ui.placeholder))
+const label = resolveFieldLabel(props.options.ui.label, props.name)
+const placeholder = maybeTranslate(props.options.ui.placeholder)
 </script>

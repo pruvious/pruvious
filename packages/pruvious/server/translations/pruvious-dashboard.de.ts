@@ -108,6 +108,7 @@ export default defineTranslation({
   'Go to page': 'Gehe zu Seite',
 
   'Headers': 'Headers',
+  'Hide description': 'Beschreibung verbergen',
   'Hide password': 'Passwort verbergen',
   'HTTP Method': 'HTTP Methode',
 
@@ -216,6 +217,7 @@ export default defineTranslation({
   'Session expired': 'Sitzung abgelaufen',
   'SEO': 'SEO',
   'Severity': 'Schweregrad',
+  'Show description': 'Beschreibung anzeigen',
   'Show details': 'Details anzeigen',
   'Show password': 'Passwort anzeigen',
   'Sign in': 'Anmelden',

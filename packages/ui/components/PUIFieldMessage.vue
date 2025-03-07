@@ -58,11 +58,42 @@ defineProps({
   line-height: round(calc(1.25 * 1em), 1px);
 }
 
-.pui-field-message-inner code {
+.pui-field-message-inner .pui-prose {
+  font-size: 1em;
+  line-height: 1.25;
+  line-height: round(calc(1.25 * 1em), 1px);
+}
+
+.pui-field-message-inner .pui-prose :where(*) {
+  margin-top: 0;
+}
+
+.pui-field-message-inner .pui-prose :where(ul, ol) {
+  padding-inline-start: 1em;
+}
+
+.pui-field-message-inner .pui-prose :where(:not(pre)) :where(code) {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
   color: hsl(var(--pui-foreground));
-  font-family: var(--pui-font-mono);
-  font-weight: 500;
-  font-style: normal;
+  font-size: 1em;
+}
+
+.pui-field-message-inner .pui-prose :where(table) {
+  width: auto;
+}
+
+.pui-field-message-inner .pui-prose :where(tr) {
+  border-bottom-width: 0;
+}
+
+.pui-field-message-inner .pui-prose :where(th, td) {
+  padding: 0;
+}
+
+.pui-field-message-inner .pui-prose :where(th, td):not(:last-child) {
+  padding-right: 1em;
 }
 
 .pui-field-message svg {

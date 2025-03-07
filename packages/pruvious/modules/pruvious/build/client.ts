@@ -437,6 +437,7 @@ function getReExports() {
     `export { usePruviousLoginPopup } from '${resolve('../../../utils/pruvious/dashboard/login')}'`,
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
+    `export { resolveFieldLabel, resolveFieldDescription } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')
 }

@@ -475,9 +475,17 @@ export interface FieldUIOptions<
 
   /**
    * The description for the field.
+   * Supports basic markdown formatting.
    *
-   * You can either provide a string or a function that returns a string.
+   * For simple descriptions, you can either provide a string or a function that returns a string.
    * The function receives an object with `_` and `__` properties to access the translation functions.
+   *
+   * For expandable descriptions, use an object with:
+   *
+   * - `text` - The content that can be expanded or collapsed.
+   * - `showLabel` - The label text displayed in the 'Show description' button.
+   * - `hideLabel` - The label text displayed in the 'Hide description' button.
+   * - `expanded` - Boolean flag to set whether the content is initially expanded (defaults to `false`).
    *
    * Important: When using a function, only use simple anonymous functions without context binding,
    * since the option needs to be serialized for client-side use.
@@ -489,10 +497,56 @@ export interface FieldUIOptions<
    *
    * // Function (translatable)
    * description: ({ __ }) => __('pruvious-dashboard', 'The first name of the user')
+   *
+   * // Expandable description
+   * description: {
+   *   text: ({ __ }) => __('pruvious-dashboard', '...'),
+   * }
    * ```
    */
   description?: DefaultTrue<TDescription> extends true
-    ? string | ((context: TranslatableStringCallbackContext) => string) | undefined
+    ?
+        | string
+        | ((context: TranslatableStringCallbackContext) => string)
+        | undefined
+        | {
+            /**
+             * The content of the expandable description.
+             *
+             * You can either provide a string or a function that returns a string.
+             * The function receives an object with `_` and `__` properties to access the translation functions.
+             */
+            text: string | ((context: TranslatableStringCallbackContext) => string)
+
+            /**
+             * The label text displayed in the 'Show description' button.
+             *
+             * You can either provide a string or a function that returns a string.
+             * The function receives an object with `_` and `__` properties to access the translation functions.
+             *
+             * @default
+             * ({ __ }) => __('pruvious-dashboard', 'Show description')
+             */
+            showLabel?: string | ((context: TranslatableStringCallbackContext) => string)
+
+            /**
+             * The label text displayed in the 'Hide description' button.
+             *
+             * You can either provide a string or a function that returns a string.
+             * The function receives an object with `_` and `__` properties to access the translation functions.
+             *
+             * @default
+             * ({ __ }) => __('pruvious-dashboard', 'Hide description')
+             */
+            hideLabel?: string | ((context: TranslatableStringCallbackContext) => string)
+
+            /**
+             * Specifies whether the content is initially expanded.
+             *
+             * @default false
+             */
+            expanded?: boolean
+          }
     : never
 
   /**

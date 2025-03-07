@@ -109,6 +109,7 @@ export default defineTranslation({
   'Go to page': 'Go to page',
 
   'Headers': 'Headers',
+  'Hide description': 'Hide description',
   'Hide password': 'Hide password',
   'HTTP Method': 'HTTP Method',
 
@@ -216,6 +217,7 @@ export default defineTranslation({
   'SEO': 'SEO',
   'Session expired': 'Session expired',
   'Severity': 'Severity',
+  'Show description': 'Show description',
   'Show details': 'Show details',
   'Show password': 'Show password',
   'Sign in': 'Sign in',

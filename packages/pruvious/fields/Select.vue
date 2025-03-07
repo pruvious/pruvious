@@ -25,20 +25,14 @@
       @update:modelValue="$emit('update:modelValue', String($event))"
     />
 
-    <PUIFieldMessage v-if="error" error>
-      <p>{{ error }}</p>
-    </PUIFieldMessage>
-    <PUIFieldMessage v-else-if="description">
-      <PUIProse v-html="description" />
-    </PUIFieldMessage>
+    <PruviousFieldMessage :error="error" :name="name" :options="options" />
   </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
+import { __, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
-import { isDefined, titleCase } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -117,26 +111,17 @@ defineEmits<{
 }>()
 
 const id = useId()
-const label = computed(() =>
-  isDefined(props.options.ui.label)
-    ? maybeTranslate(props.options.ui.label)
-    : __('pruvious-dashboard', titleCase(props.name, false) as any),
-)
-const description = computed(() =>
-  puiMarkdown(maybeTranslate(props.options.ui.description) ?? '', { basePath: dashboardBasePath }),
-)
-const placeholder = computed(() => maybeTranslate(props.options.ui.placeholder))
-const choices = computed<(PUISelectChoiceModel | PUISelectChoiceGroupModel)[]>(() =>
-  props.options.choices.map((choice) =>
-    'value' in choice
-      ? { label: choice.label ? maybeTranslate(choice.label) : choice.value, value: choice.value }
-      : {
-          group: choice.group,
-          choices: choice.choices.map((subChoice) => ({
-            label: subChoice.label ? maybeTranslate(subChoice.label) : subChoice.value,
-            value: subChoice.value,
-          })),
-        },
-  ),
+const label = resolveFieldLabel(props.options.ui.label, props.name)
+const placeholder = maybeTranslate(props.options.ui.placeholder)
+const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = props.options.choices.map((choice) =>
+  'value' in choice
+    ? { label: choice.label ? maybeTranslate(choice.label) : choice.value, value: choice.value }
+    : {
+        group: choice.group,
+        choices: choice.choices.map((subChoice) => ({
+          label: subChoice.label ? maybeTranslate(subChoice.label) : subChoice.value,
+          value: subChoice.value,
+        })),
+      },
 )
 </script>
