@@ -160,9 +160,6 @@ importers:
       jose:
         specifier: 5.9.6
         version: 5.9.6
-      marked:
-        specifier: ^15.0.4
-        version: 15.0.4
       mime:
         specifier: ^4.0.6
         version: 4.0.6
@@ -286,8 +283,8 @@ importers:
         specifier: ^7.6.4
         version: 7.6.4
       marked:
-        specifier: ^15.0.4
-        version: 15.0.4
+        specifier: ^15.0.7
+        version: 15.0.7
       shiki:
         specifier: ^2.2.0
         version: 2.2.0
@@ -3349,8 +3346,8 @@ packages:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
     engines: {node: '>=8'}
 
-  marked@15.0.4:
-    resolution: {integrity: sha512-TCHvDqmb3ZJ4PWG7VEGVgtefA5/euFmsIhxtD0XsBxI39gUSKL81mIRFdt0AiNQozUahd4ke98ZdirExd/vSEw==}
+  marked@15.0.7:
+    resolution: {integrity: sha512-dgLIeKGLx5FwziAnsk4ONoGwHwGPJzselimvlVskE9XLN4Orv9u2VA3GWw/lYUqjfA0rUT/6fqKwfZJapP9BEg==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -9147,7 +9144,7 @@ snapshots:
     dependencies:
       semver: 6.3.1
 
-  marked@15.0.4: {}
+  marked@15.0.7: {}
 
   mdast-util-to-hast@13.2.0:
     dependencies:

@@ -1,7 +1,6 @@
 import { isString } from '@pruvious/utils'
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
 import { toast, type ExternalToast } from 'vue-sonner'
+import { puiMarkdown, puiSanitize } from './puiHTML'
 
 export type PUIToastOptions = ExternalToast & {
   /**
@@ -72,6 +71,6 @@ const html = (html: string, markdown = true) =>
     setup: () => () =>
       h('div', {
         class: 'pui-prose',
-        innerHTML: DOMPurify.sanitize(markdown ? (marked.parse(html) as string) : html),
+        innerHTML: markdown ? puiMarkdown(html) : puiSanitize(html),
       }),
   })

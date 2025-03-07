@@ -1,9 +1,8 @@
 import { defineNuxtPlugin } from '#imports'
 import { isArray, isObject, isString } from '@pruvious/utils'
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
 import tippy, { type Instance, type Props } from 'tippy.js'
 import type { Directive, DirectiveBinding } from 'vue'
+import { puiMarkdown, puiSanitize } from '../composables/puiHTML'
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -70,7 +69,7 @@ function prepareProps(
   ) as any
 
   const markdown = !binding.modifiers.nomd
-  let content = DOMPurify.sanitize(markdown ? (marked.parse(contentRaw) as string) : contentRaw)
+  let content = markdown ? puiMarkdown(contentRaw) : puiSanitize(contentRaw)
 
   if (content) {
     if (binding.modifiers.row) {

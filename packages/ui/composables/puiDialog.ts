@@ -1,5 +1,4 @@
-import DOMPurify from 'dompurify'
-import { marked } from 'marked'
+import { puiMarkdown, puiSanitize } from './puiHTML'
 
 export interface PUIDialogOptions<TActions extends PUIDialogAction[]> {
   /**
@@ -92,7 +91,9 @@ export async function puiDialog<const TActions extends PUIDialogAction[]>(
   return new Promise((resolve) => {
     usePUIDialog().value = {
       content: options.content
-        ? DOMPurify.sanitize(options.markdown === false ? options.content : (marked.parse(options.content) as string))
+        ? options.markdown === false
+          ? puiSanitize(options.content)
+          : puiMarkdown(options.content)
         : undefined,
       actions: options.actions.map((action) => ({
         ...action,

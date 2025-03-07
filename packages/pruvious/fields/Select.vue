@@ -29,17 +29,16 @@
       <p>{{ error }}</p>
     </PUIFieldMessage>
     <PUIFieldMessage v-else-if="description">
-      <div v-html="description"></div>
+      <PUIProse v-html="description" />
     </PUIFieldMessage>
   </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate } from '#pruvious/client'
+import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
 import { isDefined, titleCase } from '@pruvious/utils'
-import { marked } from 'marked'
 
 const props = defineProps({
   /**
@@ -123,7 +122,9 @@ const label = computed(() =>
     ? maybeTranslate(props.options.ui.label)
     : __('pruvious-dashboard', titleCase(props.name, false) as any),
 )
-const description = computed(() => marked.parse(maybeTranslate(props.options.ui.description) ?? ''))
+const description = computed(() =>
+  puiMarkdown(maybeTranslate(props.options.ui.description) ?? '', { basePath: dashboardBasePath }),
+)
 const placeholder = computed(() => maybeTranslate(props.options.ui.placeholder))
 const choices = computed<(PUISelectChoiceModel | PUISelectChoiceGroupModel)[]>(() =>
   props.options.choices.map((choice) =>
