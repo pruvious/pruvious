@@ -6,7 +6,15 @@ export interface MyAccountFields {
    * The fields that any active user can update on their own account when they have the `update-account` permission.
    *
    * @default
-   * ['firstName', 'lastName', 'contentLanguage', 'dashboardLanguage', 'password']
+   * [
+   *   'password',
+   *   'firstName',
+   *   'lastName',
+   *   'contentLanguage',
+   *   'dashboardLanguage',
+   *   'dateFormat',
+   *   'timeFormat',
+   * ]
    */
   fields: (keyof Collections['Users']['fields'])[]
 
@@ -18,6 +26,8 @@ export interface MyAccountFields {
    * [
    *   { row: ['firstName', 'lastName'] },
    *   { row: ['contentLanguage', 'dashboardLanguage'] },
+   *   { row: ['dateFormat', 'timeFormat'] },
+   *   '---',
    *   'password',
    * ]
    */
@@ -26,8 +36,14 @@ export interface MyAccountFields {
 
 export function defaultMyAccountFields(): MyAccountFields {
   return {
-    fields: ['firstName', 'lastName', 'contentLanguage', 'dashboardLanguage', 'password'],
-    layout: [{ row: ['firstName', 'lastName'] }, { row: ['contentLanguage', 'dashboardLanguage'] }, 'password'],
+    fields: ['password', 'firstName', 'lastName', 'contentLanguage', 'dashboardLanguage', 'dateFormat', 'timeFormat'],
+    layout: [
+      { row: ['firstName', 'lastName'] },
+      { row: ['contentLanguage', 'dashboardLanguage'] },
+      { row: ['dateFormat', 'timeFormat'] },
+      '---',
+      'password',
+    ],
   }
 }
 
