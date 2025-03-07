@@ -1,4 +1,4 @@
-import { isDefined } from '@pruvious/utils'
+import { isDefined, last, pascalCase } from '@pruvious/utils'
 import fs from 'node:fs'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
@@ -151,7 +151,9 @@ export interface ResolveFromLayersResult extends ResolveResult {
  */
 export function* resolve(options: ResolveOptions): Generator<ResolveResult> {
   if (fs.existsSync(options.dir)) {
-    for (const file of fs.readdirSync(options.dir, { recursive: true }) as string[]) {
+    for (const file of fs.readdirSync(options.dir, {
+      recursive: true,
+    }) as string[]) {
       if (fs.statSync(join(options.dir, file)).isDirectory()) {
         continue
       }
@@ -182,8 +184,16 @@ export function* resolve(options: ResolveOptions): Generator<ResolveResult> {
       const relativeDirPath = relative(workspaceDir, absoluteDirPath)
 
       yield {
-        file: { absolute: absoluteFilePath, relative: relativeFilePath, import: importFilePath },
-        dir: { absolute: absoluteDirPath, relative: relativeDirPath, import: absoluteDirPath },
+        file: {
+          absolute: absoluteFilePath,
+          relative: relativeFilePath,
+          import: importFilePath,
+        },
+        dir: {
+          absolute: absoluteDirPath,
+          relative: relativeDirPath,
+          import: absoluteDirPath,
+        },
         name: basename(file),
         base: basename(file, _ext),
         ext,
@@ -225,4 +235,42 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
       }
     }
   }
+}
+
+/**
+ * Processes an array of path `segments` to eliminate redundancy while preserving meaning.
+ *
+ * - Normalizes all arguments into a PascalCase string before processing.
+ * - Removes consecutive duplicate `segments`.
+ * - Removes the trailing segment if the `baseName` begins with it.
+ * - Handles the case where `baseName` is an index.
+ *
+ * @returns a reduced array of path `segments` in PascalCase.
+ */
+export function reduceFileNameSegments(segments: string[], baseName?: string): string[] {
+  const result: string[] = []
+
+  for (const segment of segments.map(pascalCase).filter(Boolean)) {
+    if (segment !== last(result)) {
+      result.push(segment)
+    }
+  }
+
+  const lastSegment = last(result)
+
+  if (baseName?.trim() && baseName.toLowerCase() !== 'index') {
+    const pascalBaseName = pascalCase(baseName)
+
+    if (
+      lastSegment &&
+      pascalBaseName.startsWith(lastSegment) &&
+      !/[^A-Z]/.test(lastSegment[pascalBaseName.length] ?? '')
+    ) {
+      result.pop()
+    }
+
+    result.push(pascalBaseName)
+  }
+
+  return result
 }
