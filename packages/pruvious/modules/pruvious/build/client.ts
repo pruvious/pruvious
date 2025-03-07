@@ -438,6 +438,7 @@ function getReExports() {
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
     `export { resolveFieldLabel, resolveFieldDescription } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
+    `export { dayjs, dayjsUTC } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')
 }

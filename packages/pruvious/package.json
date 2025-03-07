@@ -52,6 +52,7 @@
     "accept-language-parser": "^1.5.0",
     "bcrypt-edge": "^0.1.0",
     "consola": "^3.4.0",
+    "dayjs": "^1.11.13",
     "focus-trap": "^7.6.4",
     "ioredis": "^5.4.2",
     "jose": "5.9.6",
