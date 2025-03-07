@@ -422,12 +422,23 @@ function parseLayout(layout: FieldsLayout): Item[] {
   margin-top: calc(-1rem + 0.5em);
 }
 
+.p-fields-hr {
+  width: calc(100% + 1.5rem);
+  margin-right: -0.75rem;
+  margin-left: -0.75rem;
+}
+
+.p-fields-item + .p-fields-hr,
+.p-fields-hr + .p-fields-item {
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 480px) {
   .p-fields-row {
     flex-direction: column;
   }
 
-  .p-fields-item {
+  .p-fields-item:not(.p-fields-hr) {
     max-width: 100% !important;
   }
 }
