@@ -281,6 +281,7 @@ const initialized = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
 const { params, push, refresh } = useSelectQueryBuilderParams({
   callback: async ({ queryString, params }) => {
+    columns.value = resolveColumns()
     sort.value = params.orderBy?.[0]
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
       : null
@@ -288,7 +289,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     const query = queryBuilder
       .selectFrom(collection.name)
       .fromQueryString(queryString)
-      .select(['id', ...Object.keys(columns).filter((column) => !column.startsWith('$'))] as any)
+      .select(['id', ...Object.keys(columns.value).filter((column) => !column.startsWith('$'))] as any)
 
     if (collection.definition.translatable) {
       query.where('language', '=', contentLanguage.value)
@@ -309,7 +310,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     initialized.value = true
   },
   defaultParams: {
-    select: ['id', ...Object.keys(columns).filter((column) => !column.startsWith('$'))],
+    select: ['id', ...Object.keys(columns.value).filter((column) => !column.startsWith('$'))],
     orderBy: resolveOrderBy(),
     page: 1,
     perPage: collection.definition.ui.indexPage.table.perPage,
@@ -364,8 +365,11 @@ listen('delete', () => {
 
 function resolveColumns(): PUIColumns {
   const columns: PUIColumns = {}
+  const source = isEmpty(route.query.columns)
+    ? collection.definition.ui.indexPage.table.columns
+    : String(route.query.columns).split(',')
 
-  if (isUndefined(collection.definition.ui.indexPage.table.columns)) {
+  if (isUndefined(source)) {
     const filteredFieldEntries = Object.entries(collection.definition.fields).filter(([_, options]) =>
       'ui' in options ? !options.ui?.hidden : true,
     )
@@ -394,7 +398,7 @@ function resolveColumns(): PUIColumns {
     }
   } else {
     let i = 0
-    for (const column of collection.definition.ui.indexPage.table.columns) {
+    for (const column of source) {
       if (isString(column)) {
         const [field, width, minWidth] = column.split('|').map((p) => p.trim())
 

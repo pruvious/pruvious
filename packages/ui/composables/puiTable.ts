@@ -33,7 +33,7 @@ export interface IPUITable {
 }
 
 export interface PUITable<TColumns extends PUIColumns> extends IPUITable {
-  columns: TColumns
+  columns: Ref<TColumns>
   data: Ref<PUIRow<TColumns>[]>
   sort: Ref<PUITableSort<TColumns>>
   selectable: Ref<boolean>
@@ -41,7 +41,7 @@ export interface PUITable<TColumns extends PUIColumns> extends IPUITable {
 }
 
 export interface PUITableOptions<TColumns extends PUIColumns> extends Partial<IPUITable> {
-  columns: TColumns
+  columns: MaybeRef<TColumns>
   /** @default [] */
   data?: MaybeRef<PUIRow<TColumns>[]>
   /** @default null */
@@ -202,7 +202,7 @@ export function puiColumn<T = any>(definition: Omit<PUIColumn<T>, 'TType'>): PUI
  */
 export function puiTable<TColumns extends PUIColumns>(options: PUITableOptions<TColumns>): PUITable<TColumns> {
   return {
-    columns: options.columns,
+    columns: toRef(options.columns) as any,
     data: toRef(options.data ?? []) as any,
     sort: toRef(options.sort ?? null) as any,
     selectable: toRef(options.selectable ?? false),

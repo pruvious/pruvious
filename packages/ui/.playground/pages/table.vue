@@ -260,7 +260,7 @@ const { columns, data, sort } = puiTable({
 function sortData() {
   data.value.sort((a, b) => {
     const key = sort.value!.column
-    const column = columns[key]
+    const column = columns.value[key]
     const direction = sort.value!.direction === 'asc' ? 1 : -1
     const valueA = a[key]
     const valueB = b[key]

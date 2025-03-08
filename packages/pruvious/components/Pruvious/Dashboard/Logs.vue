@@ -290,7 +290,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     const response = await logsQueryBuilder
       .selectFrom(props.logCollection)
       .fromQueryString(queryString)
-      .select(['id', ...Object.keys(columns)] as any)
+      .select(['id', ...Object.keys(columns.value)] as any)
       .paginate()
 
     if (response.success) {
@@ -306,7 +306,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     initialized.value = true
   },
   defaultParams: {
-    select: ['id', ...Object.keys(columns)],
+    select: ['id', ...Object.keys(columns.value)],
     orderBy: props.orderBy,
     page: 1,
     perPage: 50,
