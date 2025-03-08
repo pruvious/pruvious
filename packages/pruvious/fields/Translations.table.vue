@@ -51,14 +51,6 @@ const props = defineProps({
   },
 
   /**
-   * The casted field value.
-   */
-  modelValue: {
-    type: [String, null],
-    required: true,
-  },
-
-  /**
    * The name of the current collection in PascalCase format.
    */
   collectionName: {
