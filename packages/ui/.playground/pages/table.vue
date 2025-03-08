@@ -34,21 +34,10 @@
         <template #cell="{ row, key }">
           <div v-if="key === 'name'" style="color: hsl(var(--pui-foreground))">{{ row.name }}</div>
           <div v-else-if="key === 'types'">
-            <!-- @todo PUIChip -->
             <div style="display: flex; gap: 0.375rem">
-              <div
-                v-for="type in row.types"
-                :key="type"
-                style="
-                  padding: 0.125em 0.5em;
-                  background-color: hsl(var(--pui-accent));
-                  border-radius: calc(var(--pui-radius) - 0.125rem);
-                  color: hsl(var(--pui-accent-foreground));
-                  font-size: calc(1em - 0.125rem);
-                "
-              >
+              <PUIBadge v-for="type in row.types" :key="type" :size="state.size - 1" color="accent">
                 {{ type }}
-              </div>
+              </PUIBadge>
             </div>
           </div>
           <div v-else-if="key === 'height'">{{ row.height }} m</div>
@@ -95,11 +84,11 @@ const selected = ref<Record<number, boolean>>({})
 const selectAllState = ref<boolean | 'indeterminate'>(false)
 const { columns, data, sort } = puiTable({
   columns: {
-    id: puiColumn<number>({ label: 'ID', sortable: 'numeric', width: '4rem' }),
-    name: puiColumn<string>({ label: 'Name', sortable: 'text', minWidth: '8rem' }),
-    types: puiColumn<string[]>({ label: 'Types', sortable: 'text', minWidth: '14rem' }),
-    height: puiColumn<number>({ label: 'Height', sortable: 'numeric', width: '8rem' }),
-    weight: puiColumn<number>({ label: 'Weight', sortable: 'numeric', width: '8rem' }),
+    id: puiColumn<number>({ label: 'ID', sortable: 'numeric', width: '4rem', minWidth: '4rem' }),
+    name: puiColumn<string>({ label: 'Name', sortable: 'text', width: '8rem', minWidth: '8rem' }),
+    types: puiColumn<string[]>({ label: 'Types', sortable: 'text', width: '14rem', minWidth: '14rem' }),
+    height: puiColumn<number>({ label: 'Height', sortable: 'numeric', width: '8rem', minWidth: '8rem' }),
+    weight: puiColumn<number>({ label: 'Weight', sortable: 'numeric', width: '8rem', minWidth: '8rem' }),
   },
   sort: { column: 'id', direction: 'asc' },
   data: [
