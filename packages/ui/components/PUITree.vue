@@ -1,6 +1,6 @@
 <template>
   <div
-    @click="isInteracted = true"
+    @click="hasInteracted = true"
     @mouseenter="setPreviouslyFocusedElement()"
     @mouseleave="revertFocus()"
     @mousemove="unpauseMouseDelayed()"
@@ -10,8 +10,9 @@
     class="pui-tree"
     :style="{
       '--pui-size': size,
-      '--pui-accent': focused && !isDragging ? undefined : 'var(--pui-secondary)',
-      '--pui-accent-foreground': focused && !isDragging ? undefined : 'var(--pui-secondary-foreground)',
+      '--pui-accent': (focused && !isDragging) || isTouchDragging ? undefined : 'var(--pui-secondary)',
+      '--pui-accent-foreground':
+        (focused && !isDragging) || isTouchDragging ? undefined : 'var(--pui-secondary-foreground)',
     }"
   >
     <PUIScrollable @scrollStep="scrollItems" ref="scrollable">
@@ -22,6 +23,7 @@
           v-if="i >= placeholder.start && i <= placeholder.end"
           v-model:dropTarget="dropTarget"
           v-model:isDragging="isDragging"
+          v-model:isTouchDragging="isTouchDragging"
           v-model:mousePaused="mousePaused"
           v-model:selectionOrigin="selectionOrigin"
           :activeIndex="i"
@@ -32,10 +34,12 @@
           :model="activeItem"
           :selectedItemIds="selectedItemIds"
           :selectedItems="selectedItems"
+          :touchDuration="touchDuration"
           :tree="modelValue"
           @drop="
             ({ item, zone }) => {
               isDragging = false
+              isTouchDragging = false
               dropTarget = null
 
               if (source) {
@@ -68,7 +72,7 @@
 
 <script generic="T, SourceIdProp extends string, SourceChildrenProp extends string" lang="ts" setup>
 import { deepClone, isDescendant, isUndefined, next, prev, randomIdentifier, remove } from '@pruvious/utils'
-import { useFocusWithin } from '@vueuse/core'
+import { onClickOutside, useFocusWithin } from '@vueuse/core'
 import type { PUITreeDropTarget, PUITreeExtendedItemModel, PUITreeItemModel } from './PUITreeItem.vue'
 
 export type PUITreeModel<T> = PUITreeItemModel<T>[]
@@ -150,6 +154,16 @@ const props = defineProps({
   },
 
   /**
+   * The duration in milliseconds to trigger dragging on touch devices.
+   *
+   * @default 500
+   */
+  touchDuration: {
+    type: Number,
+    default: 500,
+  },
+
+  /**
    * Adjusts the size of the component.
    *
    * Examples:
@@ -195,12 +209,13 @@ defineExpose({
 const root = useTemplateRef('root')
 const { focused } = useFocusWithin(root)
 const previouslyFocusedElement = ref<Element | null>(null)
-const isInteracted = ref(false)
+const hasInteracted = ref(false)
 const activeItems = computed(() => getActiveItems(props.modelValue))
 const placeholder = ref<PUITreePlaceholder>({ start: 0, end: 0 })
 const selectedItemIds = computed(() => Object.fromEntries(props.selectedItems.map((item) => [item.id, true])))
 const selectionOrigin: Ref<PUITreeItemModel<T> | null> = ref(null)
 const isDragging = ref(false)
+const isTouchDragging = ref(false)
 const dropTarget: Ref<PUITreeDropTarget<T> | null> = ref(null)
 const scrollable = useTemplateRef('scrollable')
 const mousePaused = ref(false)
@@ -363,6 +378,14 @@ onMounted(() => {
     },
     { immediate: true },
   )
+})
+
+/**
+ * Stops dragging when clicking outside the tree.
+ */
+onClickOutside(root, () => {
+  isDragging.value = false
+  isTouchDragging.value = false
 })
 
 /**
@@ -694,14 +717,14 @@ function unpauseMouseDelayed() {
  */
 function setPreviouslyFocusedElement() {
   previouslyFocusedElement.value = document.activeElement
-  isInteracted.value = false
+  hasInteracted.value = false
 }
 
 /**
  * Reverts the focus to the previously focused element.
  */
 function revertFocus() {
-  if (!isInteracted.value && previouslyFocusedElement.value instanceof HTMLElement) {
+  if (!hasInteracted.value && previouslyFocusedElement.value instanceof HTMLElement) {
     if (isDescendant(previouslyFocusedElement.value, root.value!)) {
       previouslyFocusedElement.value.focus()
     } else if (document.activeElement instanceof HTMLElement) {

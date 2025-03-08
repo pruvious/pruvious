@@ -83,6 +83,7 @@
           }
         }
       "
+      @touchstart="onTouchStart()"
       ref="button"
       type="button"
       class="pui-tree-item-button pui-raw"
@@ -122,7 +123,9 @@
       @mouseup="canDrop('before') && $emit('drop', { item: model.item, zone: 'before' })"
       class="pui-tree-item-zone-before"
       :class="{
-        'pui-tree-item-zone-visible': dropTarget?.item.id === model.item.id && dropTarget?.zone === 'before',
+        'pui-tree-item-zone-visible':
+          (dropTarget?.item.id === model.item.id && dropTarget?.zone === 'before') ||
+          (isTouchDragging && canDrop('before')),
         'pui-tree-item-zone-inset': activeIndex === 0,
       }"
       :style="{
@@ -150,7 +153,9 @@
       @mouseup="canDrop('after') && $emit('drop', { item: model.item, zone: 'after' })"
       class="pui-tree-item-zone-after"
       :class="{
-        'pui-tree-item-zone-visible': dropTarget?.item.id === model.item.id && dropTarget?.zone === 'after',
+        'pui-tree-item-zone-visible':
+          (dropTarget?.item.id === model.item.id && dropTarget?.zone === 'after') ||
+          (isTouchDragging && canDrop('after')),
         'pui-tree-item-zone-inset': activeIndex === activeItems.length - 1,
       }"
       :style="{
@@ -168,7 +173,9 @@
           @mouseup="canDrop('after', zone.item) && $emit('drop', { item: zone.item, zone: 'after' })"
           class="pui-tree-item-zone-after"
           :class="{
-            'pui-tree-item-zone-visible': dropTarget?.item.id === zone.item.id && dropTarget?.zone === 'after',
+            'pui-tree-item-zone-visible':
+              (dropTarget?.item.id === zone.item.id && dropTarget?.zone === 'after') ||
+              (isTouchDragging && canDrop('after', zone.item)),
             'pui-tree-item-zone-inset': activeIndex === activeItems.length - 1,
           }"
           :style="{
@@ -182,7 +189,7 @@
 </template>
 
 <script generic="T" lang="ts" setup>
-import { clearArray, isFunction, uniqueArrayByProp } from '@pruvious/utils'
+import { clearArray, deselectAll, isFunction, uniqueArrayByProp } from '@pruvious/utils'
 import { onKeyStroke, useEventListener } from '@vueuse/core'
 import type { PUITreeModel } from './PUITree.vue'
 
@@ -379,6 +386,14 @@ const props = defineProps({
   },
 
   /**
+   * Indicates whether the user is dragging items on touch devices.
+   */
+  isTouchDragging: {
+    type: Boolean,
+    required: true,
+  },
+
+  /**
    * The tree item that is the drop target.
    */
   dropTarget: {
@@ -393,6 +408,16 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+
+  /**
+   * The duration in milliseconds to trigger dragging on touch devices.
+   *
+   * @default 500
+   */
+  touchDuration: {
+    type: Number,
+    default: 500,
+  },
 })
 
 const emit = defineEmits<{
@@ -404,6 +429,7 @@ const emit = defineEmits<{
   'update:tree': [tree: PUITreeModel<T>]
   'update:selectionOrigin': [item: PUITreeItemModel<T> | null]
   'update:isDragging': [isDragging: boolean]
+  'update:isTouchDragging': [isTouchDragging: boolean]
   'update:dropTarget': [target: PUITreeDropTarget<T> | null]
   'update:mousePaused': [mousePaused: boolean]
 }>()
@@ -418,6 +444,8 @@ const allowedDropZones = ref<{ before: boolean; inside: boolean; after: Record<s
   inside: true,
   after: {},
 })
+
+let touchTimeout: NodeJS.Timeout | undefined = undefined
 
 /**
  * The parent tree items that can be drop targets after the current item.
@@ -443,6 +471,16 @@ const parentAfterDropZones = computed(() => {
 })
 
 /**
+ * Stops dragging on touch devices when the touch ends.
+ */
+useEventListener('touchend', () => {
+  clearTimeout(touchTimeout)
+  if (props.isDragging) {
+    setTimeout(deselectAll, 50)
+  }
+})
+
+/**
  * Handles the button focus when the item is highlighted.
  */
 watch(
@@ -465,6 +503,13 @@ watch(
     }
   },
 )
+
+/**
+ * Cleans up on unmount.
+ */
+onUnmounted(() => {
+  clearTimeout(touchTimeout)
+})
 
 /**
  * Handles the selection of the tree item.
@@ -543,6 +588,7 @@ function handleDrag(event: MouseEvent) {
   const stopMouseMove = useEventListener(document, 'mousemove', (event) => {
     if (Math.abs(event.clientX - x) > 5 || Math.abs(event.clientY - y) > 5) {
       emit('update:isDragging', true)
+      emit('update:isTouchDragging', false)
 
       if (!props.selectedItems.some(({ id }) => id === props.model.item.id)) {
         select(event)
@@ -565,8 +611,23 @@ function handleDrag(event: MouseEvent) {
  */
 function stopDragging() {
   emit('update:isDragging', false)
+  emit('update:isTouchDragging', false)
   emit('update:dropTarget', null)
   cleanupAfterDrag()
+}
+
+/**
+ * Starts the dragging of the selected tree items on touch devices.
+ */
+function onTouchStart() {
+  if (isDraggable.value || props.selectedItems.every(({ draggable }) => draggable)) {
+    touchTimeout = setTimeout(() => {
+      emit('select', [props.model.item])
+      emit('update:isDragging', true)
+      emit('update:isTouchDragging', true)
+      clearTimeout(touchTimeout)
+    }, props.touchDuration)
+  }
 }
 
 /**
