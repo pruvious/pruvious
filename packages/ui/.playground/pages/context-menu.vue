@@ -1,8 +1,13 @@
 <template>
   <Showcase>
-    <div @contextmenu.prevent="event = $event" class="area">
+    <div
+      @contextmenu="contextMenu?.onContextMenu"
+      @touchend="contextMenu?.onTouchEnd"
+      @touchstart="contextMenu?.onTouchStart"
+      class="area"
+    >
       <span>Right click here</span>
-      <PUIContextMenu v-model:event="event" :size="state.size" @click="event = null">
+      <PUIContextMenu v-model:event="event" :size="state.size" @click="event = null" ref="contextMenu">
         <PUIDropdownItem @click="puiToast('Clicked on `Action label`')">Action label</PUIDropdownItem>
         <hr />
         <PUIDropdownItem @click="puiToast('Clicked on `Copy`')">
@@ -30,7 +35,8 @@
 
 <script lang="ts" setup>
 const state = useShowcase()
-const event = ref<MouseEvent | null>(null)
+const event = ref<MouseEvent | TouchEvent | null>(null)
+const contextMenu = useTemplateRef('contextMenu')
 </script>
 
 <style scoped>
