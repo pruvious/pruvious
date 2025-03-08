@@ -18,6 +18,10 @@
   gap: 0.5rem;
 }
 
+.pui-wrap {
+  flex-wrap: wrap;
+}
+
 .pui-flex-1 {
   flex: 1;
 }

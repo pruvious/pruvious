@@ -305,6 +305,7 @@ export default defineTranslation({
   'Type': 'Typ',
 
   'Undo': 'Rückgängig',
+  'Updated': 'Aktualisiert',
   'Updated at': 'Aktualisiert am',
   'User': 'Benutzer',
   'Users': 'Benutzer',

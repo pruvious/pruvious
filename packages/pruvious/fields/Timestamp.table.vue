@@ -1,3 +1,33 @@
 <template>
-  <div>@todo timestamp field (in table)</div>
+  <div class="pui-truncate">
+    <span v-pui-tooltip.nomd="options.ui.relativeTime ? formattedDate : relativeTime">
+      {{ options.ui.relativeTime ? relativeTime : formattedDate }}
+    </span>
+  </div>
 </template>
+
+<script lang="ts" setup>
+import { dayjs, dayjsFormatDateTime, dayjsRelative } from '#pruvious/client'
+import type { SerializableFieldOptions } from '#pruvious/server'
+
+const props = defineProps({
+  /**
+   * The casted field value.
+   */
+  modelValue: {
+    type: Number,
+  },
+
+  /**
+   * The combined field options defined in a collection, singleton, or block.
+   */
+  options: {
+    type: Object as PropType<SerializableFieldOptions<'timestamp'>>,
+    required: true,
+  },
+})
+
+const date = dayjs(props.modelValue)
+const formattedDate = dayjsFormatDateTime(date)
+const relativeTime = dayjsRelative(date)
+</script>

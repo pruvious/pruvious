@@ -1,7 +1,7 @@
 import { defineField } from '#pruvious/server'
 import { numberFieldModel, timestampValidator } from '@pruvious/orm'
 
-const customOptions: {
+export interface TimestampFieldOptions {
   /**
    * The minimum allowed timestamp value in milliseconds.
    * The default value represents the earliest possible date in JavaScript.
@@ -27,9 +27,24 @@ const customOptions: {
    * ```
    */
   max?: number
-} = {
+
+  ui?: {
+    /**
+     * Controls whether timestamps should be shown as relative time expressions (like '2 hours ago' or 'in 3 days')
+     * instead of absolute dates throughout the user interface.
+     *
+     * @default false
+     */
+    relativeTime?: boolean
+  }
+}
+
+const customOptions: TimestampFieldOptions = {
   min: -8640000000000000,
   max: 8640000000000000,
+  ui: {
+    relativeTime: false,
+  },
 }
 
 export default defineField({

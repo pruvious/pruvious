@@ -538,7 +538,7 @@ export interface CollectionMetaOptions<
    * {
    *   index: true,
    *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Created at'),
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Created'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
    * }
    */
@@ -558,7 +558,7 @@ export interface CollectionMetaOptions<
    * {
    *   index: false,
    *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated at'),
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
    * }
    */

@@ -303,6 +303,7 @@ export default defineTranslation({
   'Type': 'Type',
 
   'Undo': 'Undo',
+  'Updated': 'Updated',
   'Updated at': 'Updated at',
   'User': 'User',
   'Users': 'Users',

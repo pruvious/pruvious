@@ -58,6 +58,10 @@
           {{ row[key] }}
         </PUIBadge>
 
+        <div v-else-if="key === 'createdAt'" v-pui-tooltip.nomd="dayjsRelative(row[key])" class="pui-truncate">
+          {{ dayjsFormatDateTime(row[key]) }}
+        </div>
+
         <span v-else :title="row[key] ? String(row[key]) : undefined" class="pui-truncate">
           {{ row[key] }}
         </span>
@@ -137,8 +141,10 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'Date') }}</span>
               </PUIFieldLabel>
-              <!-- @todo datetime preview -->
-              <div>{{ details.request.createdAt }}</div>
+              <div>
+                {{ dayjsFormatDateTime(details.request.createdAt) }}
+                <span class="pui-muted">({{ dayjsRelative(details.request.createdAt) }})</span>
+              </div>
             </div>
             <div v-if="details.request.user" class="p-details-field">
               <PUIFieldLabel>
@@ -219,8 +225,10 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'Date') }}</span>
               </PUIFieldLabel>
-              <!-- @todo datetime preview -->
-              <div>{{ details.response.createdAt }}</div>
+              <div>
+                {{ dayjsFormatDateTime(details.response.createdAt) }}
+                <span class="pui-muted">({{ dayjsRelative(details.response.createdAt) }})</span>
+              </div>
             </div>
             <div v-if="details.response.user" class="p-details-field">
               <PUIFieldLabel>
@@ -262,7 +270,14 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, hasPermission, usePruviousDashboard } from '#pruvious/client'
+import {
+  __,
+  dashboardBasePath,
+  dayjsFormatDateTime,
+  dayjsRelative,
+  hasPermission,
+  usePruviousDashboard,
+} from '#pruvious/client'
 import type { LogsDatabase } from '#pruvious/server'
 import { beautifyCode, beautifyQuery, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'

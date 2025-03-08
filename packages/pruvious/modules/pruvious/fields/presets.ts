@@ -11,6 +11,7 @@ import {
 } from '#pruvious/server'
 import { createdAtFieldBeforeQueryExecution, updatedAtFieldBeforeQueryExecution } from '@pruvious/orm'
 import { defu, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
+import type { TimestampFieldOptions } from '../../../server/fields/timestamp'
 
 export interface LanguageFieldPresetOptions {
   /**
@@ -47,11 +48,11 @@ export interface CreatedAtFieldPresetOptions {
    * @default
    * {
    *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Created at'),
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Created'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface UpdatedAtFieldPresetOptions {
@@ -61,11 +62,11 @@ export interface UpdatedAtFieldPresetOptions {
    * @default
    * {
    *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated at'),
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface AuthorFieldPresetOptions {
@@ -158,9 +159,10 @@ export function createdAtFieldPreset(options: CreatedAtFieldPresetOptions) {
     },
     ui: defu(options.ui ?? {}, {
       hidden: true,
-      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Created at'),
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Created'),
       description: ({ __ }: TranslatableStringCallbackContext) =>
         __('pruvious-dashboard', 'The date and time when the record was created.'),
+      relativeTime: true,
     } satisfies CreatedAtFieldPresetOptions['ui']),
   })
 }
@@ -176,9 +178,10 @@ export function updatedAtFieldPreset(options: UpdatedAtFieldPresetOptions) {
     },
     ui: defu(options.ui ?? {}, {
       hidden: true,
-      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Updated at'),
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Updated'),
       description: ({ __ }: TranslatableStringCallbackContext) =>
         __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+      relativeTime: true,
     } satisfies UpdatedAtFieldPresetOptions['ui']),
   })
 }

@@ -719,7 +719,7 @@ export interface DefineSingletonOptions<
    * @default
    * {
    *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated at'),
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
    * }
    */
