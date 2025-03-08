@@ -50,7 +50,7 @@
 
       <span v-if="!selectedChoice && placeholder" class="pui-select-placeholder">{{ placeholder }}</span>
 
-      <Icon mode="svg" name="tabler:selector" size="1.125em" />
+      <Icon mode="svg" name="tabler:selector" size="1.125em" class="pui-select-icon" />
 
       <div
         @click.stop
@@ -723,7 +723,7 @@ function unpauseMouseDelayed() {
   color: hsl(var(--pui-muted-foreground));
 }
 
-.pui-select svg {
+.pui-select-icon {
   flex-shrink: 0;
   margin-left: auto;
 }
