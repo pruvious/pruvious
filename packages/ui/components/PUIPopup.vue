@@ -14,8 +14,13 @@
         <div v-if="$slots.header" class="pui-popup-header">
           <slot :close="close" name="header" />
         </div>
+
         <div class="pui-popup-content">
           <slot :close="close" />
+        </div>
+
+        <div v-if="$slots.footer" class="pui-popup-footer">
+          <slot :close="close" name="footer" />
         </div>
       </div>
     </div>
@@ -188,6 +193,12 @@ function focus() {
 .pui-popup-content {
   padding: 0.75em;
   padding: round(0.75em, 1px);
+}
+
+.pui-popup-footer {
+  padding: 0.75em;
+  padding: round(0.75em, 1px);
+  border-top-width: 1px;
 }
 
 @media (max-width: 767px) {
