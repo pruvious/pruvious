@@ -83,7 +83,9 @@ function onTouchStart(e: TouchEvent) {
 
 function onTouchEnd() {
   clearTimeout(touchTimeout)
-  setTimeout(deselectAll, 50)
+  if (props.event) {
+    setTimeout(deselectAll, 50)
+  }
 }
 
 defineExpose({
