@@ -53,6 +53,7 @@ npm install @pruvious/utils
   - [retry](#retry)
 - [Misc](#misc)
   - [blurActiveElement](#bluractiveelement)
+  - [deselectAll](#deselectall)
   - [isDescendant](#isdescendant)
   - [resolveRelativeDotNotation](#resolverelativedotnotation)
   - [sleep](#sleep)
@@ -649,6 +650,10 @@ console.log(document.activeElement) // `<input>`
 blurActiveElement()
 console.log(document.activeElement) // `<body>`
 ```
+
+### <a id="deselectall">`deselectAll`</a>
+
+Deselects all text on the page.
 
 ### <a id="isdescendant">`isDescendant(element, ancestor)`</a>
 

@@ -42,3 +42,10 @@ export function blurActiveElement() {
     activeElement.blur()
   }
 }
+
+/**
+ * Deselects all text on the page.
+ */
+export function deselectAll() {
+  window.getSelection()?.removeAllRanges()
+}

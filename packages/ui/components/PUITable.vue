@@ -149,7 +149,7 @@
 </template>
 
 <script generic="TColumns extends PUIColumns" lang="ts" setup>
-import { isDefined, isNull } from '@pruvious/utils'
+import { deselectAll, isDefined, isNull } from '@pruvious/utils'
 import { useMagicKeys } from '@vueuse/core'
 import type { IPUITable, PUIColumns, PUIRow, PUITableSort } from '../composables/puiTable'
 
@@ -307,7 +307,7 @@ function toggleSort(columnKey: keyof TColumns) {
 }
 
 function onDoubleClick(row: PUIRow<TColumns>) {
-  window.getSelection()?.removeAllRanges()
+  deselectAll()
   emit('doubleClick', row)
 }
 
