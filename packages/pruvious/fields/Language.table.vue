@@ -11,13 +11,15 @@
 <script lang="ts" setup>
 import { PruviousTableFieldFallback } from '#components'
 import { languages } from '#pruvious/client'
+import type { LanguageCode } from '#pruvious/server'
 
 const props = defineProps({
   /**
    * The casted field value.
    */
   modelValue: {
-    type: null as unknown as PropType<any>,
+    type: String as PropType<LanguageCode>,
+    required: true,
   },
 })
 

@@ -54,7 +54,8 @@ const props = defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: null as unknown as PropType<any>,
+    type: [String, null],
+    required: true,
   },
 
   /**
