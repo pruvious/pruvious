@@ -88,10 +88,11 @@ export function resolveFieldComponentFiles(): FieldComponents {
     })) {
       const { layer, file, base, pruviousDirNames } = location
       const type: 'regular' | 'table' = base.endsWith('.table') ? 'table' : 'regular'
+      const cleanBase = base.replace(/\.(?:regular|table)$/, '')
       const fieldName =
         pruviousDirNames[0] && ['collections', 'singletons'].includes(pruviousDirNames[0])
-          ? pruviousDirNames.join('/') + '/' + base.replace(/\.(?:regular|table)$/, '')
-          : camelCase(reduceFileNameSegments(pruviousDirNames, base).join(''))
+          ? pruviousDirNames.join('/') + `/${cleanBase}`
+          : camelCase(reduceFileNameSegments(pruviousDirNames, cleanBase).join(''))
       const duplicate = duplicates[`${fieldName}.${type}`]
 
       if (!fieldName) {
