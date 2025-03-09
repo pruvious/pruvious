@@ -26,6 +26,7 @@
         { label: 'Popup', value: '/popup' },
         { label: 'Prose', value: '/prose' },
         { label: 'Select', value: '/select' },
+        { label: 'Structure', value: '/structure' },
         { label: 'Switch', value: '/switch' },
         { label: 'Table', value: '/table' },
         { label: 'Tabs', value: '/tabs' },
