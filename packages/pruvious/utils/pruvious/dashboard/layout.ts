@@ -26,7 +26,8 @@ export const usePruviousDashboardLayout = () =>
  * The duration is read from the `--pui-overlay-transition-duration` CSS variable.
  */
 export function getOverlayTransitionDuration(): number {
-  return parseInt(getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration') || '300')
+  const duration = getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration')
+  return duration.endsWith('ms') ? parseInt(duration) : duration.endsWith('s') ? parseFloat(duration) * 1000 : 300
 }
 
 /**
