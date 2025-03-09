@@ -185,19 +185,16 @@ function focus() {
 }
 
 .pui-popup-header {
-  padding: 0.75em;
-  padding: round(0.75em, 1px);
+  padding: 0.75rem;
   border-bottom-width: 1px;
 }
 
 .pui-popup-content {
-  padding: 0.75em;
-  padding: round(0.75em, 1px);
+  padding: 0.75rem;
 }
 
 .pui-popup-footer {
-  padding: 0.75em;
-  padding: round(0.75em, 1px);
+  padding: 0.75rem;
   border-top-width: 1px;
 }
 

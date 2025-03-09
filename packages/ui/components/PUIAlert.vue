@@ -62,8 +62,7 @@ defineProps({
   background-color: hsl(var(--pui-card));
   border-width: 1px;
   border-radius: var(--pui-radius);
-  padding: 0.75em;
-  padding: round(0.75em, 1px);
+  padding: 0.75rem;
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
 }
 

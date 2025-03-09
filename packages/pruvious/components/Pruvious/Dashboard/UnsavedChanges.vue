@@ -72,6 +72,6 @@ function leave() {
 <style scoped>
 .pui-row {
   justify-content: flex-end;
-  margin-top: round(0.75em, 1px);
+  margin-top: 0.75rem;
 }
 </style>

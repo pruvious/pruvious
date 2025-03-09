@@ -573,7 +573,6 @@ async function onDeleteSelection() {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  gap: round(0.75rem, 1px);
 }
 
 :deep(.p-details-title) {
@@ -593,8 +592,7 @@ async function onDeleteSelection() {
 }
 
 .p-details :deep(.pui-tabs-content:not(:first-child)) {
-  margin-top: 0.75em;
-  margin-top: round(0.75em, 1px);
+  margin-top: 0.75rem;
 }
 
 :deep(.p-details-field + .p-details-field) {
