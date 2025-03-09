@@ -88,7 +88,7 @@ const props = defineProps({
    */
   disabled: {
     type: Boolean,
-    required: false,
+    required: true,
   },
 
   /**
