@@ -201,6 +201,7 @@ interface PUITableProps extends Partial<IPUITable> {
    * @default
    * {
    *   actions: 'Actions',
+   *   noData: 'No data available',
    *   sortInAscendingOrder: 'Sort in ascending order',
    *   sortInDescendingOrder: 'Sort in descending order',
    * }
