@@ -159,7 +159,6 @@ onMounted(() => {
         }
       }),
       useEventListener(document.body, 'contextmenu', (event) => {
-        event.preventDefault()
         if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
           emit('close')
         }

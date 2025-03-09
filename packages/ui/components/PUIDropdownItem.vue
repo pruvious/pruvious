@@ -116,6 +116,7 @@ defineProps({
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
 }
 
 .pui-dropdown-item-inner > svg {
