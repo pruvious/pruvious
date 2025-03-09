@@ -4,7 +4,10 @@
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     class="pui-button pui-raw"
-    :class="[`pui-button-${variant}`, { 'pui-button-disabled': disabled }]"
+    :class="[
+      `pui-button-${variant}`,
+      { 'pui-button-destructive-hover': destructiveHover, 'pui-button-disabled': disabled },
+    ]"
     :style="{ '--pui-size': size }"
   >
     <span class="pui-button-inner">
@@ -59,6 +62,16 @@ defineProps({
   variant: {
     type: String as PropType<'primary' | 'secondary' | 'accent' | 'destructive' | 'outline' | 'ghost'>,
     default: 'primary',
+  },
+
+  /**
+   * Determines if the button should show a destructive hover state.
+   *
+   * @default false
+   */
+  destructiveHover: {
+    type: Boolean,
+    default: false,
   },
 
   /**
@@ -169,6 +182,16 @@ defineProps({
 .pui-button-ghost:hover {
   background-color: hsl(var(--pui-accent));
   color: hsl(var(--pui-accent-foreground));
+}
+
+.pui-button-destructive-hover {
+  --pui-ring: var(--pui-destructive);
+}
+
+.pui-button-destructive-hover:hover {
+  background-color: hsl(var(--pui-destructive) / 0.9);
+  border-color: hsl(var(--pui-destructive));
+  color: hsl(var(--pui-destructive-foreground));
 }
 
 .pui-button:focus-visible {
