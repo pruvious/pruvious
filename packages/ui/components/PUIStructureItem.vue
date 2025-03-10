@@ -222,13 +222,13 @@ function cleanupAfterDrag() {
 }
 
 .pui-structure-item-zone-before {
-  top: -0.75rem;
-  height: 1em;
+  top: calc(-1.25 * var(--pui-gap, 0.75rem) - 1px);
+  height: calc(1.5 * var(--pui-gap, 0.75rem));
 }
 
 .pui-structure-item-zone-after {
-  bottom: -0.75rem;
-  height: 1em;
+  bottom: calc(-1.25 * var(--pui-gap, 0.75rem) - 1px);
+  height: calc(1.5 * var(--pui-gap, 0.75rem));
 }
 
 .pui-structure-item-zone-before::after,

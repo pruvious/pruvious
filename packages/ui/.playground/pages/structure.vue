@@ -137,6 +137,7 @@ function addItem(type: 'image' | 'video'): Image | Video {
 
 <style scoped>
 .pui-structure {
+  --pui-gap: 0.5rem;
   width: 48rem;
   max-width: 100%;
 }

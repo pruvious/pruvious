@@ -217,9 +217,6 @@ function onDrop(index: number, position: 'before' | 'after') {
 <style>
 .pui-structure {
   --pui-base-size: var(--pui-size);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   width: 100%;
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
 }
@@ -227,7 +224,7 @@ function onDrop(index: number, position: 'before' | 'after') {
 .pui-structure-items {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--pui-gap, 0.75rem);
 }
 
 .pui-structure-empty-zone {
