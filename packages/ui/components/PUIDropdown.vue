@@ -23,8 +23,8 @@ import {
   shift,
   useFloating,
 } from '@floating-ui/vue'
-import { isDescendant } from '@pruvious/utils'
-import { onKeyDown, useEventListener } from '@vueuse/core'
+import { isDescendant, isString } from '@pruvious/utils'
+import { useEventListener } from '@vueuse/core'
 
 export interface PUIDropdownItemModel {
   /**
@@ -66,10 +66,15 @@ const props = defineProps({
   },
 
   /**
-   * Determines whether the dropdown should restore focus to the previously focused element when closed.
+   * Controls focus behavior when the dropdown closes.
+   *
+   * - If `true` - Returns focus to the element that was focused before opening.
+   * - If `false` - Does not restore any focus.
+   * - If `HTMLElement` - Focuses the specified element.
+   * - If `string` - Focuses the first element matching the CSS selector.
    */
   restoreFocus: {
-    type: Boolean,
+    type: [Boolean, Object, String] as PropType<boolean | string | HTMLElement>,
     default: true,
   },
 
@@ -102,6 +107,7 @@ const isMounted = ref(false)
 const stop: (() => void)[] = []
 const itemHeight = ref(0)
 const prevFocus = ref<HTMLElement>()
+const parentContainer = ref<HTMLElement | null | undefined>()
 const {
   floatingStyles,
   update,
@@ -130,35 +136,59 @@ const {
   whileElementsMounted: autoUpdate,
 })
 
+provide('parentContainer', parentContainer)
+
 defineExpose({
   update,
 })
 
-useEventListener(document, 'keydown', (event) => {
-  if (!['Enter', 'Escape', 'Space'].includes(event.code)) {
-    event.preventDefault()
-  }
-})
-
-onKeyDown('ArrowUp', focusPrevious)
-onKeyDown('ArrowDown', focusNext)
-onKeyDown('Tab', (event) => (event.shiftKey ? focusPrevious() : focusNext()))
-onKeyDown('Escape', () => emit('close'))
-
 onMounted(() => {
   document.body.classList.add('pui-no-click')
-
-  prevFocus.value = document.activeElement as HTMLElement
+  parentContainer.value = floating.value?.parentElement
   floating.value?.focus()
+
+  while (
+    parentContainer.value &&
+    parentContainer.value.nodeName !== 'BODY' &&
+    !parentContainer.value.classList.contains('pui-popup')
+  ) {
+    parentContainer.value = parentContainer.value?.parentElement
+  }
+
+  parentContainer.value?.classList.add('pui-always-clickable')
 
   setTimeout(() => {
     stop.push(
-      useEventListener(document.body, 'click', (event) => {
+      useEventListener(parentContainer.value, 'keydown', (event) => {
+        if (!['Enter', 'Escape', 'Space'].includes(event.code)) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        if (event.code === 'ArrowUp') {
+          focusPrevious()
+        } else if (event.code === 'ArrowDown') {
+          focusNext()
+        } else if (event.code === 'Tab') {
+          if (event.shiftKey) {
+            focusPrevious()
+          } else {
+            focusNext()
+          }
+        } else if (event.code === 'Escape') {
+          if (parentContainer.value?.nodeName !== 'BODY') {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          emit('close')
+        }
+      }),
+      useEventListener(parentContainer, 'click', (event) => {
         if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
           emit('close')
         }
       }),
-      useEventListener(document.body, 'contextmenu', (event) => {
+      useEventListener(parentContainer, 'contextmenu', (event) => {
         if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
           emit('close')
         }
@@ -173,9 +203,19 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.body.classList.remove('pui-no-click')
+  parentContainer.value?.classList.remove('pui-always-clickable')
   stop.forEach((s) => s())
   if (props.restoreFocus) {
-    setTimeout(() => prevFocus.value?.focus())
+    setTimeout(() => {
+      if (props.restoreFocus instanceof HTMLElement) {
+        props.restoreFocus.focus()
+      } else if (isString(props.restoreFocus)) {
+        const el = document.querySelector(props.restoreFocus) as HTMLElement | null
+        el?.focus()
+      } else {
+        prevFocus.value?.focus()
+      }
+    })
   }
 })
 

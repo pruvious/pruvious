@@ -69,6 +69,10 @@
   pointer-events: none !important;
 }
 
+.pui-no-click .pui-always-clickable {
+  pointer-events: auto !important;
+}
+
 .pui-stroke-2,
 .pui-stroke-2 [stroke] {
   stroke-width: 2 !important;

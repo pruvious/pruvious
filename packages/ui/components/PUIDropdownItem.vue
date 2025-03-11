@@ -4,7 +4,7 @@
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     @mouseenter="$el.focus()"
-    @mouseleave="blurActiveElement()"
+    @mouseleave="parentContainer && parentContainer.nodeName !== 'BODY' ? parentContainer.focus() : blurActiveElement()"
     class="pui-dropdown-item pui-raw"
     :class="{
       'pui-dropdown-item-destructive': destructive,
@@ -78,6 +78,8 @@ defineProps({
     default: false,
   },
 })
+
+const parentContainer = inject<HTMLElement | null | undefined>('parentContainer', null)
 </script>
 
 <style>

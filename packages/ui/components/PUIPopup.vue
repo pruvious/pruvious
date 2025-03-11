@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      @keydown.escape="!puiIsEditingText() && emit('close', close)"
+      @keydown.escape="onEscapeKey"
       @keydown.stop="$emit('keydown', $event)"
       ref="root"
       tabindex="-1"
@@ -109,6 +109,17 @@ onUnmounted(() => {
   }
   deactivate()
 })
+
+/**
+ * Handles the escape key event.
+ */
+function onEscapeKey(event: KeyboardEvent) {
+  setTimeout(() => {
+    if (!event.defaultPrevented && !puiIsEditingText()) {
+      emit('close', close)
+    }
+  })
+}
 
 /**
  * Closes the popup with a transition.
