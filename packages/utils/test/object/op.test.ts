@@ -12,6 +12,7 @@ import {
   pick,
   remap,
   setProperty,
+  walkObjects,
 } from '../../src'
 
 test('deep clone', () => {
@@ -151,4 +152,21 @@ test('remap', () => {
 test('filter object', () => {
   expect(filterObject({ a: 1, b: 2 }, (_, value) => value % 2 === 0)).toEqual({ b: 2 })
   expect(filterObject({ foo: 'bar', baz: 'qux' }, (key) => key === 'foo')).toEqual({ foo: 'bar' })
+})
+
+test('walk objects', () => {
+  expect([...walkObjects({ foo: 'bar' })]).toEqual([{ object: { foo: 'bar' }, parent: null, path: '' }])
+  expect([...walkObjects({ foo: { bar: 'baz' } })]).toEqual([
+    { object: { foo: { bar: 'baz' } }, parent: null, path: '' },
+    { object: { bar: 'baz' }, parent: { foo: { bar: 'baz' } }, path: 'foo' },
+  ])
+  expect([...walkObjects([['foo', [{ bar: 'baz' }]]])]).toEqual([
+    { object: { bar: 'baz' }, parent: [{ bar: 'baz' }], path: '0.1.0' },
+  ])
+  expect([...walkObjects({})]).toEqual([{ object: {}, parent: null, path: '' }])
+  expect([...walkObjects([])]).toEqual([])
+  expect([...walkObjects([1, 2, 3])]).toEqual([])
+  expect([...walkObjects('foo')]).toEqual([])
+  expect([...walkObjects(null)]).toEqual([])
+  expect([...walkObjects(undefined)]).toEqual([])
 })

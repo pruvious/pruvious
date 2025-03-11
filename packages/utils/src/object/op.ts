@@ -329,6 +329,67 @@ export function filterObject<T extends Record<string, any>>(
   return result
 }
 
+/**
+ * Walks through an `object` and yields each object, its parent, and its path.
+ * The path is a string that represents the path to reach the current object using dot notation.
+ * The parent is the direct parent container (object or array) of the current object.
+ *
+ * @example
+ * ```ts
+ * const object = { foo: { bar: 'baz' }}
+ *
+ * for (const { object, parent, path } of walkObjects(object)) {
+ *   console.log(object, parent, path)
+ * }
+ *
+ * // Output:
+ * // { foo: { bar: 'baz' }} null ''
+ * // { bar: 'baz' } { foo: { bar: 'baz' }} foo
+ * ```
+ */
+export function* walkObjects(value: any): Generator<{
+  /**
+   * The currently iterated object in the loop.
+   */
+  object: Record<string, any>
+
+  /**
+   * The direct parent container (object or array) of the current `object`.
+   * Will be `null` if there is no parent.
+   */
+  parent: Record<string, any> | any[] | null
+
+  /**
+   * The complete path to reach the current `object`, using dot notation (e.g. '0.items.2.name').
+   */
+  path: string
+}> {
+  function* walk(
+    value: any,
+    parent: Record<string, any> | any[] | null,
+    prevPath: string,
+  ): Generator<{
+    object: Record<string, any>
+    parent: Record<string, any> | any[] | null
+    path: string
+  }> {
+    if (isObject(value)) {
+      yield { object: value, parent, path: prevPath }
+
+      for (const key in value) {
+        yield* walk(value[key], value, prevPath ? `${prevPath}.${key}` : key)
+      }
+    } else if (isArray(value)) {
+      for (let i = 0; i < value.length; i++) {
+        const path = prevPath ? `${prevPath}.${i}` : i.toString()
+        yield* walk(value[i], value, path)
+      }
+    }
+  }
+
+  yield* walk(value, null, '')
+}
+
 function convertDotToBracket(path: string) {
   if (/^\d+$/.test(path)) {
     return `[${path}]`

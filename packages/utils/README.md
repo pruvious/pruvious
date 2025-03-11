@@ -89,6 +89,7 @@ npm install @pruvious/utils
   - [pick](#pick)
   - [remap](#remap)
   - [setProperty](#setproperty)
+  - [walkObjects](#walkobjects)
 - [String](#string)
   - [camelCase](#camelcase)
   - [capitalize](#capitalize)
@@ -1055,6 +1056,26 @@ Sets a property on an `object` to a specified `value` using a `path` in dot nota
 ```ts
 setProperty({ foo: {}}, 'foo.bar', { bar: 'baz' }) // { foo: { bar: 'baz' } }
 setProperty({ foo: ['bar']}, 'foo.1', 'baz)        // { foo: ['bar', 'baz'] }
+```
+
+### <a id="walkobjects">`walkObjects(value)`</a>
+
+Walks through an `object` and yields each object, its parent, and its path.
+The path is a string that represents the path to reach the current object using dot notation.
+The parent is the direct parent container (object or array) of the current object.
+
+**Example:**
+
+```ts
+const object = { foo: { bar: 'baz' }}
+
+for (const { object, parent, path } of walkObjects(object)) {
+console.log(object, parent, path)
+}
+
+// Output:
+// { foo: { bar: 'baz' }} null ''
+// { bar: 'baz' } { foo: { bar: 'baz' }} foo
 ```
 
 ## <a id="string">String</a>
