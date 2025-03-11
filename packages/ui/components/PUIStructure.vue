@@ -1,6 +1,13 @@
 <template>
-  <div class="pui-structure" :class="{ 'pui-structure-empty': !modelValue.length }" :style="{ '--pui-size': size }">
-    <div v-if="modelValue.length || droppable" ref="container">
+  <div
+    class="pui-structure"
+    :class="{
+      'pui-structure-empty': !modelValue.length,
+      'pui-structure-dropzone': !modelValue.length && droppable && !disabled,
+    }"
+    :style="{ '--pui-size': size }"
+  >
+    <div v-if="modelValue.length || (droppable && !disabled)" ref="container">
       <div v-if="modelValue.length" class="pui-structure-items">
         <PUIStructureItem
           v-for="(item, i) of modelValue"
@@ -8,7 +15,8 @@
           :droppable="droppable"
           :index="i"
           :isDraggable="isDraggable"
-          :modelValue="item"
+          :item="item"
+          :key="item._key ?? i"
           :structureId="id"
           :touchDuration="touchDuration"
           @draggable="
@@ -29,12 +37,6 @@
             }
           "
           @drop="onDrop(i, $event)"
-          @update:modelValue="
-            $emit(
-              'update:modelValue',
-              modelValue.map((item, j) => (i === j ? $event : item) as any),
-            )
-          "
         >
           <template v-if="$slots.header" #header="headerProps">
             <slot
@@ -69,6 +71,7 @@
 </template>
 
 <script generic="TItem extends Record<string, any>, TType extends string | undefined = undefined" lang="ts" setup>
+import { isDefined, isNull } from '@pruvious/utils'
 import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps({
@@ -174,12 +177,27 @@ const emit = defineEmits<{
 const id = useId()
 const container = useTemplateRef('container')
 const draggable = usePUIStructureDraggable()
-const droppable = computed(
-  () =>
-    !!draggable.value &&
-    (!draggable.value.structureId || draggable.value.structureId === id) &&
-    (!draggable.value.type || !props.types || props.types?.includes(draggable.value.type as any)),
-)
+const droppable = computed(() => {
+  if (draggable.value) {
+    if (isNull(draggable.value.structureId)) {
+      if (props.allowCrossDrop) {
+        if (
+          isDefined(props.types) &&
+          isDefined(draggable.value.type) &&
+          !props.types.includes(draggable.value.type as TType)
+        ) {
+          return false
+        }
+
+        return true
+      }
+    } else if (draggable.value.structureId && draggable.value.structureId === id) {
+      return true
+    }
+  }
+
+  return false
+})
 
 onClickOutside(container, () => {
   if (droppable.value) {
@@ -189,24 +207,23 @@ onClickOutside(container, () => {
 
 function onDrop(index: number, position: 'before' | 'after') {
   if (draggable.value) {
+    const { item, index: draggableIndex, remove } = draggable.value
+
     if (position === 'after') {
       index++
     }
 
-    const items = draggable.value.remove()
+    if (props.modelValue.includes(item as any)) {
+      const items = remove()
 
-    if (props.modelValue.includes(draggable.value.item as any)) {
-      if (index > draggable.value.index) {
+      if (index > draggableIndex) {
         index--
       }
 
-      emit('update:modelValue', [...items.slice(0, index), draggable.value.item as any, ...items.slice(index)])
+      emit('update:modelValue', [...items.slice(0, index), item as any, ...items.slice(index)])
     } else {
-      emit('update:modelValue', [
-        ...props.modelValue.slice(0, index),
-        draggable.value.item as any,
-        ...props.modelValue.slice(index),
-      ])
+      emit('update:modelValue', [...props.modelValue.slice(0, index), item as any, ...props.modelValue.slice(index)])
+      nextTick(remove)
     }
 
     draggable.value = null
@@ -231,8 +248,8 @@ function onDrop(index: number, position: 'before' | 'after') {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 3rem;
-  padding: 0.75rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
   background-color: hsl(var(--pui-card));
   border-width: 1px;
   border-radius: var(--pui-radius);

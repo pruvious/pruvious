@@ -1,5 +1,5 @@
 <template>
-  <PUICard class="pui-structure-item" :class="{ 'pui-structure-item-dragging': draggable?.item === modelValue }">
+  <PUICard class="pui-structure-item" :class="{ 'pui-structure-item-dragging': draggable?.item === item }">
     <div
       v-if="droppable"
       @mouseup="$emit('drop', 'before')"
@@ -18,11 +18,11 @@
       >
         <Icon mode="svg" name="tabler:grip-vertical" />
       </button>
-      <slot :index="index" :item="modelValue" name="header" />
+      <slot :index="index" :item="item" name="header" />
     </div>
 
     <div v-if="$slots.item" class="pui-structure-item-inner">
-      <slot :index="index" :item="modelValue" name="item" />
+      <slot :index="index" :item="item" name="item" />
     </div>
 
     <div
@@ -42,7 +42,7 @@ const props = defineProps({
   /**
    * The value of a structure item.
    */
-  modelValue: {
+  item: {
     type: Object as PropType<Record<string, any>>,
     required: true,
   },
@@ -103,9 +103,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  'update:modelValue': [value: Record<string, any>]
-  'draggable': [draggable: { item: Record<string, any>; touch: boolean } | null]
-  'drop': [position: 'before' | 'after']
+  draggable: [draggable: { item: Record<string, any>; touch: boolean } | null]
+  drop: [position: 'before' | 'after']
 }>()
 
 const draggable = usePUIStructureDraggable()
@@ -133,7 +132,7 @@ function handleDrag(event: MouseEvent) {
 
   const stopMouseMove = useEventListener(document, 'mousemove', (event) => {
     if (Math.abs(event.clientX - x) > 5 || Math.abs(event.clientY - y) > 5) {
-      emit('draggable', { item: props.modelValue as any, touch: false })
+      emit('draggable', { item: props.item as any, touch: false })
       stopMouseMove()
     }
   })
@@ -154,7 +153,7 @@ function stopDragging() {
 function onTouchStart() {
   if (props.isDraggable) {
     touchTimeout = setTimeout(() => {
-      emit('draggable', { item: props.modelValue as any, touch: true })
+      emit('draggable', { item: props.item as any, touch: true })
       clearTimeout(touchTimeout)
     }, props.touchDuration)
   }
@@ -204,6 +203,7 @@ function cleanupAfterDrag() {
 
 .pui-structure-item-dragging .pui-structure-item-inner {
   opacity: 0.36;
+  pointer-events: none;
 }
 
 .pui-structure-item-zone-before,
