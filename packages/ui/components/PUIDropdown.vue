@@ -144,6 +144,7 @@ defineExpose({
 
 onMounted(() => {
   document.body.classList.add('pui-no-click')
+  prevFocus.value = document.activeElement as HTMLElement
   parentContainer.value = floating.value?.parentElement
   floating.value?.focus()
 
@@ -214,6 +215,14 @@ onUnmounted(() => {
         el?.focus()
       } else {
         prevFocus.value?.focus()
+      }
+
+      if (
+        document.activeElement?.nodeName === 'BODY' &&
+        parentContainer.value &&
+        parentContainer.value.nodeName !== 'BODY'
+      ) {
+        parentContainer.value.focus()
       }
     })
   }

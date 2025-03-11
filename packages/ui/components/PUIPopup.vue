@@ -153,6 +153,7 @@ function focus() {
   left: 0;
   display: flex;
   padding: 1rem;
+  outline: none;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
