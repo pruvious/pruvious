@@ -370,7 +370,7 @@ function open(event?: Event) {
     isExpanded.value = true
 
     // Listen for keydown events for search
-    stopSearchListener = useEventListener('keydown', search)
+    stopSearchListener = useEventListener(root, 'keydown', search)
 
     // Close the choices list when the user clicks outside the select field
     stopOutsideClickListener = onClickOutside(root, () => close())
