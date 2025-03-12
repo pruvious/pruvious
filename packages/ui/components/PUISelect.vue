@@ -643,7 +643,7 @@ function search(event: KeyboardEvent) {
         scrollToHighlighted()
 
         mousePaused.value = true
-        keywordHiglight.value = [keywordIndex, keywordIndex + keyword.length - 1]
+        keywordHiglight.value = keywordIndex > -1 ? [keywordIndex, keywordIndex + keyword.length - 1] : [-1, -1]
       } else {
         keywordHiglight.value = [-1, -1]
       }
