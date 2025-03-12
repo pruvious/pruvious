@@ -49,7 +49,7 @@
 
     <span v-else>{{ choice.label ?? choice.value }}</span>
 
-    <Icon v-if="choice.value === selectedValue" mode="svg" name="tabler:check" size="1.125em" />
+    <Icon v-if="choice.value === selectedValue" mode="svg" name="tabler:check" size="1.125em" class="pui-select-icon" />
   </button>
 </template>
 
