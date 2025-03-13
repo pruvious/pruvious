@@ -81,6 +81,7 @@ npm install @pruvious/utils
   - [deleteProperty](#deleteproperty)
   - [filterObject](#filterobject)
   - [getProperty](#getproperty)
+  - [invertMap](#invertmap)
   - [isKeyOf](#iskeyof)
   - [isObject](#isobject)
   - [isSerializable](#isserializable)
@@ -964,6 +965,16 @@ getProperty({ foo: { bar: 'baz' }}, 'foo.bar') // 'baz'
 getProperty({ foo: ['bar', 'baz']}, 'foo.1')   // 'baz'
 getProperty({ foo: ['bar', 'baz']}, 'foo', 1)  // 'baz'
 getProperty({ foo: { bar: 'baz' }}, 'bar')     // undefined
+```
+
+### <a id="invertmap">`invertMap(object)`</a>
+
+Creates a new object by inverting the key-value pairs of the input `object`.
+
+**Example:**
+
+```ts
+invertMap({ foo: 'bar', baz: 'qux' }) // { bar: 'foo', qux: 'baz' }
 ```
 
 ### <a id="iskeyof">`isKeyOf(object, key)`</a>

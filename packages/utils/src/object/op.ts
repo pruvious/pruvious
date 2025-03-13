@@ -390,6 +390,21 @@ export function* walkObjects(value: any): Generator<{
   yield* walk(value, null, '')
 }
 
+/**
+ * Creates a new object by inverting the key-value pairs of the input `object`.
+ *
+ * @example
+ * ```ts
+ * invertMap({ foo: 'bar', baz: 'qux' }) // { bar: 'foo', qux: 'baz' }
+ * ```
+ */
+export function invertMap<K extends string | number | symbol, V extends string | number | symbol>(
+  object: Record<K, V>,
+): Record<V, K> {
+  const invertedEntries = Object.entries(object).map(([key, value]) => [value, key])
+  return Object.fromEntries(invertedEntries) as Record<V, K>
+}
+
 function convertDotToBracket(path: string) {
   if (/^\d+$/.test(path)) {
     return `[${path}]`

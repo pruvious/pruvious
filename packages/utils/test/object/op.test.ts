@@ -8,6 +8,7 @@ import {
   deleteProperty,
   filterObject,
   getProperty,
+  invertMap,
   omit,
   pick,
   remap,
@@ -169,4 +170,12 @@ test('walk objects', () => {
   expect([...walkObjects('foo')]).toEqual([])
   expect([...walkObjects(null)]).toEqual([])
   expect([...walkObjects(undefined)]).toEqual([])
+})
+
+test('invert map', () => {
+  expect(invertMap({ foo: 'bar', baz: 'qux' })).toEqual({ bar: 'foo', qux: 'baz' })
+  expect(invertMap({ foo: 1, bar: 2 })).toEqual({ 1: 'foo', 2: 'bar' })
+  expect(invertMap({ foo: 'bar', bar: 'baz' })).toEqual({ bar: 'foo', baz: 'bar' })
+  expect(invertMap({})).toEqual({})
+  expect(invertMap({ a: 'x', b: 'y', c: 'x' })).toEqual({ x: 'c', y: 'b' })
 })
