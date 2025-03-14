@@ -1,8 +1,6 @@
 <template>
   <component
-    :cell="cell"
     :collectionName="collectionName"
-    :data="data"
     :fields="fields"
     :is="component"
     :modelValue="modelValue"
@@ -11,28 +9,23 @@
     :synced="synced"
     :translatable="translatable"
     :type="type"
+    @commit="$emit('commit', $event)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   />
 </template>
 
 <script lang="ts" setup>
-import { customComponents, tableFieldComponents } from '#pruvious/client'
+import { customComponents, filterFieldComponents } from '#pruvious/client'
 import type { Collections, Fields, GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
+import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
 
 const props = defineProps({
   /**
-   * The table cell props containing the row data, column definition, and other cell-related information.
-   */
-  cell: {
-    type: Object as PropType<PUICell<PUIColumns>>,
-    required: true,
-  },
-
-  /**
-   * The field value.
+   * The current where condition.
    */
   modelValue: {
-    type: null as unknown as PropType<any>,
+    type: Object as PropType<WhereField>,
     required: true,
   },
 
@@ -69,14 +62,6 @@ const props = defineProps({
   },
 
   /**
-   * The current record data from a collection.
-   * Contains key-value pairs representing the record's fields and their values.
-   */
-  data: {
-    type: Object as PropType<Record<string, any>>,
-  },
-
-  /**
    * A key-value pair of field names and their combined options defined in a collection.
    */
   fields: {
@@ -104,14 +89,19 @@ const props = defineProps({
   },
 })
 
+defineEmits<{
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
+}>()
+
 const component = computed(() => {
   const path = `collections/${props.collectionName}/${props.name}`
 
-  if (tableFieldComponents[path]) {
-    return tableFieldComponents[path]()
+  if (filterFieldComponents[path]) {
+    return filterFieldComponents[path]()
   }
 
-  const customComponent = ((props.options as any).ui as GenericFieldUIOptions | undefined)?.customTableComponent
+  const customComponent = ((props.options as any).ui as GenericFieldUIOptions | undefined)?.customFilterComponent
 
   if (customComponent) {
     if (isDefined(customComponents[customComponent])) {
@@ -124,6 +114,6 @@ const component = computed(() => {
     }
   }
 
-  return tableFieldComponents[props.type]?.() ?? resolveComponent('PruviousTableFieldFallback')
+  return filterFieldComponents[props.type]?.() ?? resolveComponent('PruviousFilterFieldFallback')
 })
 </script>

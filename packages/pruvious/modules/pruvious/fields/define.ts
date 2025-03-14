@@ -369,6 +369,7 @@ export interface PickFieldUIOptions<
   TPlaceholder extends boolean | undefined,
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
+  TCustomFilterComponent extends boolean | undefined,
 > {
   /**
    * Specifies whether to include a hidden option for the field.
@@ -417,9 +418,18 @@ export interface PickFieldUIOptions<
    * @default true
    */
   customTableComponent?: TCustomTableComponent
+
+  /**
+   * Specifies whether to include a custom filter component option for the field.
+   * This option is used to define a custom component for rendering the field in data table filters.
+   *
+   * @default true
+   */
+  customFilterComponent?: TCustomFilterComponent
 }
 
 type GenericPickFieldUIOptions = PickFieldUIOptions<
+  boolean | undefined,
   boolean | undefined,
   boolean | undefined,
   boolean | undefined,
@@ -435,6 +445,7 @@ export interface FieldUIOptions<
   TPlaceholder extends boolean | undefined,
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
+  TCustomFilterComponent extends boolean | undefined,
 > {
   /**
    * Controls the visibility of the field in the user interface.
@@ -687,9 +698,74 @@ export interface FieldUIOptions<
    * ```
    */
   customTableComponent?: DefaultTrue<TCustomTableComponent> extends true ? string : never
+
+  /**
+   * Custom component to render the field in data table filters.
+   * The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
+   *
+   * The following rules apply:
+   *
+   * - The function name (`resolvePruviousComponent` or `resolveNamedPruviousComponent`) must remain unchanged and not be aliased.
+   * - The import `path` must be a literal string, not a variable.
+   * - The import `path` can be:
+   *   - A path starting with the alias `>/`.
+   *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
+   *   - A path starting with the Nuxt alias `@/` or `~/`.
+   *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
+   *   - A relative path to a `.vue` component.
+   *     - This path must be relative to the file where the function is called.
+   *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
+   *   - An absolute path to a `.vue` component.
+   *   - A path for an npm module.
+   *
+   * The final component displayed is resolved in the following order, with the first match being used:
+   *
+   * - It first attempts to render the component
+   *   `<srcDir>/<pruvious.dir.fields.components>/<dataContainerType>/<dataContainerName>/<fieldPath>.filter.vue`.
+   *   - For example, if the field name is `email` and it is defined in the `Users` collection,
+   *     it will try to render the component `app/fields/collections/Users/email.filter.vue`.
+   *   - In another example, for a nested field: if the field path is `variants.0.color` and it is defined in the `Products` collection,
+   *     it will attempt to render the component `app/fields/collections/Products/variants/0/color.filter.vue`,
+   *     followed by `app/fields/collections/Products/variants/[n]/color.filter.vue`.
+   *   - The directory structure must match the field path structure.
+   *     - For instance, the field path `variants.0.color` must correspond to the directory structure
+   *       `app/fields/collections/Products/variants/[n]/color.filter.vue`.
+   *       The structure `app/fields/collections/Products/variants[n].color.filter.vue` will not work.
+   *     - Use `[n]` as a placeholder for array indexes.
+   * - It then tries to render the `customfilterComponent` specified in this field's options.
+   * - Finally, it attempts to render the component `<srcDir>/<pruvious.dir.fields.components>/<fieldType>.filter.vue`.
+   *   - For example, if the field type is `text`, it will try to render the component `app/fields/text.filter.vue`.
+   *
+   * Custom filter components receive the following props:
+   *
+   * - @todo
+   *
+   * @example
+   * ```ts
+   * import { resolvePruviousComponent } from '#pruvious/server'
+   *
+   * // Correct
+   * resolvePruviousComponent('>/components/MyComponent.vue')
+   * resolvePruviousComponent('../../app/components/MyComponent.vue')
+   * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
+   *
+   * // Incorrect
+   * resolvePruviousComponent(`>/components/${name}.vue`)
+   * resolvePruviousComponent('MyComponent')
+   * ```
+   */
+  customFilterComponent?: DefaultTrue<TCustomFilterComponent> extends true ? string : never
 }
 
-export type GenericFieldUIOptions = FieldUIOptions<undefined, undefined, undefined, undefined, undefined, undefined>
+export type GenericFieldUIOptions = FieldUIOptions<
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined
+>
 
 export type ResolveFieldUIOptions<TUIOptions extends GenericPickFieldUIOptions | undefined | false> = [
   TUIOptions,
@@ -709,7 +785,8 @@ export type ResolveFieldUIOptions<TUIOptions extends GenericPickFieldUIOptions |
                 TUIOptions['description'],
                 TUIOptions['placeholder'],
                 TUIOptions['customComponent'],
-                TUIOptions['customTableComponent']
+                TUIOptions['customTableComponent'],
+                TUIOptions['customFilterComponent']
               >
             >
           : never
@@ -821,6 +898,7 @@ const warned: string[] = []
  * The components are auto-registered when you create a file with the field name inside the `app/fields/` directory.
  *
  * - For table view components, add `.table` to the filename (e.g., `app/fields/gallery.table.vue`).
+ * - For filter components, add `.filter` to the filename (e.g., `app/fields/gallery.filter.vue`).
  * - For regular view components, use no suffix or add `.regular` (e.g., `app/fields/gallery.vue` or `app/fields/gallery.regular.vue`)
  *
  * @see https://pruvious.com/docs/custom-fields (@todo set up this link)
@@ -984,6 +1062,22 @@ export function defineField<
           : ui.customTableComponent
       }
 
+      if (
+        ui.customFilterComponent &&
+        fieldTypeOptions.uiOptions !== false &&
+        fieldTypeOptions.uiOptions?.customFilterComponent !== false
+      ) {
+        ui.customFilterComponent = ui.customFilterComponent.includes('/')
+          ? hash(
+              resolveCustomComponentPath({
+                component: ui.customFilterComponent,
+                file: location.file.absolute,
+                srcDir: location.layer.config.srcDir,
+              }),
+            )
+          : ui.customFilterComponent
+      }
+
       const field = new Field({
         model,
         options: cleanMerge(
@@ -1002,6 +1096,7 @@ export function defineField<
                       fieldTypeOptions.uiOptions?.placeholder === true ? 'placeholder' : undefined,
                       fieldTypeOptions.uiOptions?.customComponent === false ? undefined : 'customComponent',
                       fieldTypeOptions.uiOptions?.customTableComponent === false ? undefined : 'customTableComponent',
+                      fieldTypeOptions.uiOptions?.customFilterComponent === false ? undefined : 'customFilterComponent',
                     ].filter(Boolean) as (keyof GenericFieldUIOptions)[],
                   ),
                   ...(defaultCustomOptions as any).ui,

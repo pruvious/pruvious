@@ -196,6 +196,7 @@ function cleanupAfterDrag() {
 }
 
 .pui-structure-item-inner {
+  container-type: inline-size;
   margin-top: 0.75rem;
   transition: var(--pui-transition);
   transition-property: opacity;

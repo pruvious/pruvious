@@ -6,7 +6,10 @@ import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
 import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
-type FieldComponents = Record<string, { regular?: ResolveFromLayersResult; table?: ResolveFromLayersResult }>
+type FieldComponents = Record<
+  string,
+  { regular?: ResolveFromLayersResult; table?: ResolveFromLayersResult; filter?: ResolveFromLayersResult }
+>
 
 /**
  * Key-value object containing field names and their definition file locations.
@@ -14,7 +17,7 @@ type FieldComponents = Record<string, { regular?: ResolveFromLayersResult; table
 let fieldDefinitions: Record<string, ResolveFromLayersResult> | undefined
 
 /**
- * Key-value object containing field names and their component file locations for both regular and table views.
+ * Key-value object containing field names and their component file locations for regular, table, and filter views.
  */
 let fieldComponents: FieldComponents | undefined
 
@@ -69,7 +72,7 @@ export function resolveFieldDefinitionFiles(): Record<string, ResolveFromLayersR
 }
 
 /**
- * Retrieves a key-value object containing field names and their component file locations for both regular and table views.
+ * Retrieves a key-value object containing field names and their component file locations for both regular, table, and filter views.
  * It scans the `<srcDir>/<pruvious.dir.fields.components>` directories across all Nuxt layers.
  */
 export function resolveFieldComponentFiles(): FieldComponents {
@@ -87,8 +90,12 @@ export function resolveFieldComponentFiles(): FieldComponents {
         debug(`Resolving field components in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`),
     })) {
       const { layer, file, base, pruviousDirNames } = location
-      const type: 'regular' | 'table' = base.endsWith('.table') ? 'table' : 'regular'
-      const cleanBase = base.replace(/\.(?:regular|table)$/, '')
+      const type: 'regular' | 'table' | 'filter' = base.endsWith('.table')
+        ? 'table'
+        : base.endsWith('.filter')
+          ? 'filter'
+          : 'regular'
+      const cleanBase = base.replace(/\.(?:regular|table|filter)$/, '')
       const fieldName =
         pruviousDirNames[0] && ['collections', 'singletons'].includes(pruviousDirNames[0])
           ? pruviousDirNames.join('/') + `/${cleanBase}`

@@ -86,7 +86,7 @@ const overlayCounter = usePUIOverlayCounter()
 let currentOverlay = -1
 let transitionDuration = 300
 
-defineExpose({ close, focus })
+defineExpose({ root, close, focus })
 
 provide('popup', root)
 

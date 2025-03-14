@@ -1,5 +1,6 @@
 import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
-import type { GenericFieldUIOptions } from '#pruvious/server'
+import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
+import type { Operator } from '@pruvious/orm'
 import { isDefined, isFunction, isObject, titleCase } from '@pruvious/utils'
 
 interface ResolvedFieldDescriptionBase {
@@ -44,6 +45,39 @@ interface ResolvedFieldDescriptionExpandable extends ResolvedFieldDescriptionBas
 
 type ResolvedFieldDescription = ResolvedFieldDescriptionSimple | ResolvedFieldDescriptionExpandable
 
+export type FilterOperator =
+  | 'eq'
+  | 'eqi'
+  | 'ne'
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'startsWith'
+  | 'startsWithI'
+  | 'endsWith'
+  | 'endsWithI'
+  | 'contains'
+  | 'containsI'
+  | 'notContains'
+
+export const filterOperatorsMap: Record<FilterOperator, Operator> = {
+  eq: '=',
+  eqi: 'ilike',
+  ne: '!=',
+  lt: '<',
+  lte: '<=',
+  gt: '>',
+  gte: '>=',
+  startsWith: 'like',
+  startsWithI: 'ilike',
+  endsWith: 'like',
+  endsWithI: 'ilike',
+  contains: 'like',
+  containsI: 'ilike',
+  notContains: 'notLike',
+}
+
 /**
  * Gets the final label text for a field by checking the `ui.label` option.
  *
@@ -56,8 +90,6 @@ export function resolveFieldLabel(label: GenericFieldUIOptions['label'], fieldNa
 
 /**
  * Processes and converts the `ui.description` field option into a formatted HTML string.
- *
- * @returns an object
  */
 export function resolveFieldDescription(
   description: GenericFieldUIOptions['description'],
@@ -78,4 +110,39 @@ export function resolveFieldDescription(
   }
 
   return null
+}
+
+/**
+ * Gets a list of valid filter operators that can be used with a field based on its options.
+ * The operators are determined by analyzing the field's data type.
+ */
+export function getValidFilterOperators({
+  __dataType,
+}: GenericSerializableFieldOptions): { value: FilterOperator; label: string }[] {
+  const allOperators: { value: FilterOperator; label: string }[] = [
+    { value: 'eq', label: __('pruvious-dashboard', 'Equals') },
+    { value: 'eqi', label: __('pruvious-dashboard', 'Equals (case-insensitive)') },
+    { value: 'ne', label: __('pruvious-dashboard', 'Does not equal') },
+    { value: 'lt', label: __('pruvious-dashboard', 'Less than') },
+    { value: 'lte', label: __('pruvious-dashboard', 'Less than or equal to') },
+    { value: 'gt', label: __('pruvious-dashboard', 'Greater than') },
+    { value: 'gte', label: __('pruvious-dashboard', 'Greater than or equal to') },
+    { value: 'startsWith', label: __('pruvious-dashboard', 'Starts with') },
+    { value: 'startsWithI', label: __('pruvious-dashboard', 'Starts with (case-insensitive)') },
+    { value: 'endsWith', label: __('pruvious-dashboard', 'Ends with') },
+    { value: 'endsWithI', label: __('pruvious-dashboard', 'Ends with (case-insensitive)') },
+    { value: 'contains', label: __('pruvious-dashboard', 'Contains') },
+    { value: 'containsI', label: __('pruvious-dashboard', 'Contains (case-insensitive)') },
+    { value: 'notContains', label: __('pruvious-dashboard', 'Does not contain') },
+  ]
+
+  if (__dataType === 'text') {
+    return allOperators.filter(({ value }) => !['lt', 'lte', 'gt', 'gte'].includes(value))
+  }
+
+  if (__dataType === 'boolean') {
+    return allOperators.filter(({ value }) => ['eq', 'ne'].includes(value))
+  }
+
+  return allOperators.filter(({ value }) => ['eq', 'ne', 'lt', 'lte', 'gt', 'gte'].includes(value))
 }

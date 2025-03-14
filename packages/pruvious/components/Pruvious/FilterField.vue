@@ -1,0 +1,103 @@
+<template>
+  <div class="p-field-filter pui-row">
+    <div class="p-field-filter-operator">
+      <PUISelect
+        :choices="filterOperatorChoices"
+        :modelValue="filterOperator"
+        :name="id"
+        @commit="
+          (value) => {
+            $emit('update:modelValue', { ...modelValue, operator: filterOperatorsMap[value as FilterOperator] })
+          }
+        "
+      />
+    </div>
+
+    <div class="p-field-filter-value">
+      <slot />
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { filterOperatorsMap, getValidFilterOperators, type FilterOperator } from '#pruvious/client'
+import type { GenericSerializableFieldOptions } from '#pruvious/server'
+import { invertMap, isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
+import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
+
+const props = defineProps({
+  /**
+   * The current where condition.
+   */
+  modelValue: {
+    type: Object as PropType<WhereField>,
+    required: true,
+  },
+
+  /**
+   * The combined field options defined in a collection.
+   */
+  options: {
+    type: Object as PropType<GenericSerializableFieldOptions>,
+    required: true,
+  },
+})
+
+const emit = defineEmits<{
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
+}>()
+
+const id = useId()
+const filterOperatorChoices = computed(() => getValidFilterOperators(props.options))
+const invertedFilterOperatorsMap = invertMap(filterOperatorsMap)
+const filterOperator = computed(() => invertedFilterOperatorsMap[props.modelValue.operator])
+
+watch(
+  () => props.modelValue,
+  (newValue, oldValue) => {
+    if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
+      const normalizedValue = { ...newValue }
+
+      if (!filterOperatorChoices.value.some(({ value }) => filterOperatorsMap[value] === normalizedValue.operator)) {
+        normalizedValue.operator = filterOperatorsMap[filterOperatorChoices.value[0]!.value]
+      }
+
+      if (
+        (oldValue && newValue.field !== oldValue?.field) ||
+        (isNull(normalizedValue.value) && !props.options.nullable) ||
+        ((props.options.__dataType === 'bigint' || props.options.__dataType === 'numeric') &&
+          !isNumber(normalizedValue.value)) ||
+        (props.options.__dataType === 'boolean' && !isBoolean(normalizedValue.value)) ||
+        (props.options.__dataType === 'text' && !isString(normalizedValue.value))
+      ) {
+        normalizedValue.value = props.options.default
+      }
+
+      setTimeout(() => emit('commit', normalizedValue))
+    }
+  },
+  { immediate: true },
+)
+</script>
+
+<style lang="postcss" scoped>
+.p-field-filter-operator {
+  width: 12rem;
+}
+
+.p-field-filter-value {
+  flex: 1;
+}
+
+@container (max-width: 640px) {
+  .p-field-filter {
+    flex-direction: column;
+  }
+
+  .p-field-filter-operator,
+  .p-field-filter-value {
+    width: 100%;
+  }
+}
+</style>

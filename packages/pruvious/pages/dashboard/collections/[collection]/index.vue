@@ -167,11 +167,13 @@
               <Icon mode="svg" name="tabler:trash-x" />
             </PUIButton>
 
-            <!-- @todo
-            <PUIButton v-pui-tooltip="'@todo'" variant="outline">
+            <PUIButton
+              v-pui-tooltip="__('pruvious-dashboard', 'Configure view')"
+              @click="isTableSettingsPopupVisible = true"
+              variant="outline"
+            >
               <Icon mode="svg" name="tabler:adjustments" />
             </PUIButton>
-            -->
 
             <PUIButton :to="dashboardBasePath + `collections/${route.params.collection}/new`" variant="primary">
               <span>{{ __('pruvious-dashboard', 'New') }}</span>
@@ -190,6 +192,16 @@
       :resolvedPermissions="resolvedPermissions"
       :size="-1"
       @close="$event().then(() => (isTranslationPopupVisible = false))"
+    />
+
+    <PruviousDashboardTableSettingsPopup
+      v-if="isTableSettingsPopupVisible"
+      v-model:params="params"
+      :collection="collection"
+      :size="-1"
+      @close="$event().then(() => (isTableSettingsPopupVisible = false))"
+      @update:params="push()"
+      width="64rem"
     />
   </component>
 </template>
@@ -270,6 +282,7 @@ const selectedCount = computed(() =>
 const selectAllState = ref<boolean | 'indeterminate'>(false)
 const resolvedPermissions = ref<ResolvedCollectionRecordPermissions | null>(null)
 const isTranslationPopupVisible = ref(false)
+const isTableSettingsPopupVisible = ref(false)
 const pagination = ref<Omit<Paginated<any>, 'records'>>({
   currentPage: 1,
   lastPage: 1,
@@ -412,7 +425,7 @@ function resolveColumns(): PUIColumns {
                   : __('pruvious-dashboard', titleCase(field, false) as any),
               sortable: options.__dataType === 'text' ? 'text' : 'numeric',
               width,
-              minWidth,
+              minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
             })
           } else {
             console.warn(
@@ -433,7 +446,7 @@ function resolveColumns(): PUIColumns {
                 : __('pruvious-dashboard', titleCase(column.field, false) as any),
             sortable: options.__dataType === 'text' ? 'text' : 'numeric',
             width: column.width,
-            minWidth: column.minWidth,
+            minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
           })
         } else {
           console.warn(
@@ -448,7 +461,7 @@ function resolveColumns(): PUIColumns {
           columns[key] = puiColumn({
             label: isDefined(column.label) ? maybeTranslate(column.label) : '',
             width: column.width,
-            minWidth: column.minWidth,
+            minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
           })
         } else {
           console.warn(
