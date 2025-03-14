@@ -111,11 +111,11 @@ test('insert query builder params to query string', () => {
 
   expect(insertQueryBuilderParamsToQueryString({ returning: [] })).toBe('returning=')
 
-  expect(insertQueryBuilderParamsToQueryString({ populate: true })).toBe('populate')
+  expect(insertQueryBuilderParamsToQueryString({ populate: true })).toBe('populate=1')
 
   expect(insertQueryBuilderParamsToQueryString({ populate: false })).toBe('populate=0')
 
-  expect(insertQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate')
+  expect(insertQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate=1')
 
   expect(insertQueryBuilderParamsToQueryString({ populate: true }, { populate: false })).toBe('')
 
@@ -572,11 +572,11 @@ test('select query builder params to query string', () => {
 
   expect(selectQueryBuilderParamsToQueryString({ perPage: 10 }, { limit: 5 })).toBe('page=1&perPage=5')
 
-  expect(selectQueryBuilderParamsToQueryString({ populate: true })).toBe('populate')
+  expect(selectQueryBuilderParamsToQueryString({ populate: true })).toBe('populate=1')
 
   expect(selectQueryBuilderParamsToQueryString({ populate: false })).toBe('populate=0')
 
-  expect(selectQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate')
+  expect(selectQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate=1')
 
   expect(selectQueryBuilderParamsToQueryString({ populate: true }, { populate: false })).toBe('')
 
@@ -679,11 +679,11 @@ test('update query builder params to query string', () => {
 
   expect(updateQueryBuilderParamsToQueryString({ returning: [] })).toBe('returning=')
 
-  expect(updateQueryBuilderParamsToQueryString({ populate: true })).toBe('populate')
+  expect(updateQueryBuilderParamsToQueryString({ populate: true })).toBe('populate=1')
 
   expect(updateQueryBuilderParamsToQueryString({ populate: false })).toBe('populate=0')
 
-  expect(updateQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate')
+  expect(updateQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate=1')
 
   expect(updateQueryBuilderParamsToQueryString({ populate: true }, { populate: false })).toBe('')
 
@@ -786,11 +786,11 @@ test('delete query builder params to query string', () => {
 
   expect(deleteQueryBuilderParamsToQueryString({ returning: [] })).toBe('returning=')
 
-  expect(deleteQueryBuilderParamsToQueryString({ populate: true })).toBe('populate')
+  expect(deleteQueryBuilderParamsToQueryString({ populate: true })).toBe('populate=1')
 
   expect(deleteQueryBuilderParamsToQueryString({ populate: false })).toBe('populate=0')
 
-  expect(deleteQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate')
+  expect(deleteQueryBuilderParamsToQueryString({ populate: true }, { populate: true })).toBe('populate=1')
 
   expect(deleteQueryBuilderParamsToQueryString({ populate: true }, { populate: false })).toBe('')
 

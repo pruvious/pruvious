@@ -115,7 +115,7 @@ export function insertQueryBuilderParamsToQueryString(
   }
 
   if (options?.populate !== false && isDefined(params.populate)) {
-    queryString.push(params.populate ? 'populate' : 'populate=0')
+    queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
   return queryString.map(encodeQueryString).join('&')
@@ -391,7 +391,7 @@ export function selectQueryBuilderParamsToQueryString(
   }
 
   if (options?.populate !== false && isDefined(params.populate)) {
-    queryString.push(params.populate ? 'populate' : 'populate=0')
+    queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
   return queryString.map(encodeQueryString).join('&')
@@ -499,7 +499,7 @@ export function updateQueryBuilderParamsToQueryString(
   }
 
   if (options?.populate !== false && isDefined(params.populate)) {
-    queryString.push(params.populate ? 'populate' : 'populate=0')
+    queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
   return queryString.map(encodeQueryString).join('&')
@@ -607,7 +607,7 @@ export function deleteQueryBuilderParamsToQueryString(
   }
 
   if (options?.populate !== false && isDefined(params.populate)) {
-    queryString.push(params.populate ? 'populate' : 'populate=0')
+    queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
   return queryString.map(encodeQueryString).join('&')
