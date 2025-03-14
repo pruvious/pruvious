@@ -108,9 +108,11 @@ onMounted(() => {
 })
 
 watch(activeElement, () => {
-  if (activeElement.value?.nodeName === 'BODY' && overlayCounter.value === currentOverlay) {
-    root.value?.focus()
-  }
+  nextTick(() => {
+    if (activeElement.value?.nodeName === 'BODY' && overlayCounter.value === currentOverlay) {
+      root.value?.focus()
+    }
+  })
 })
 
 onUnmounted(() => {
