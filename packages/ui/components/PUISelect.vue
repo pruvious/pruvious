@@ -1,5 +1,8 @@
 <template>
-  <div class="pui-select-wrapper">
+  <div
+    :title="!selectedChoice || isExpanded ? undefined : (selectedChoice.label ?? String(selectedChoice.value))"
+    class="pui-select-wrapper"
+  >
     <div
       :aria-expanded="isExpanded"
       :tabindex="disabled ? -1 : 0"
