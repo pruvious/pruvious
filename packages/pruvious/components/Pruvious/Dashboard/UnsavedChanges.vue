@@ -23,12 +23,39 @@ const isVisible = ref(false)
 const destination = ref<RouteLocationNormalized>()
 const leaveCount = ref(0)
 
+let stop: (() => void) | undefined
+
 unsavedChanges.prompt = async () => {
   isVisible.value = true
   return new Promise<boolean>((resolve) => {
     watchOnce(leaveCount, (newValue, oldValue) => resolve(newValue > oldValue))
   })
 }
+
+watch(isVisible, () => {
+  if (isVisible.value) {
+    stop = useEventListener(
+      'keydown',
+      (event) => {
+        const mac = puiIsMac()
+        const letter = event.key?.toLowerCase() ?? ''
+
+        if (mac && (!event.metaKey || event.altKey || event.ctrlKey)) {
+          return
+        } else if (!mac && (!event.ctrlKey || event.altKey || event.metaKey)) {
+          return
+        }
+
+        if ((letter === 'y' && !event.shiftKey) || (letter === 'z' && (mac || !event.shiftKey))) {
+          event.preventDefault()
+        }
+      },
+      { capture: true },
+    )
+  } else {
+    stop?.()
+  }
+})
 
 onBeforeRouteLeave(leaveGuard)
 onBeforeRouteUpdate(leaveGuard)
