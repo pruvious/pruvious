@@ -29,7 +29,7 @@
 
 <script lang="ts" setup>
 import { sleep } from '@pruvious/utils'
-import { useEventListener } from '@vueuse/core'
+import { useActiveElement, useEventListener } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 
 defineProps({
@@ -74,6 +74,7 @@ const emit = defineEmits<{
 }>()
 
 const root = useTemplateRef('root')
+const activeElement = useActiveElement()
 const { activate, deactivate } = useFocusTrap(root, {
   escapeDeactivates: false,
   initialFocus: false,
@@ -100,6 +101,12 @@ onMounted(() => {
     nextTick(activate)
     setTimeout(() => root.value!.focus())
   })
+})
+
+watch(activeElement, () => {
+  if (activeElement.value?.nodeName === 'BODY') {
+    root.value?.focus()
+  }
 })
 
 onUnmounted(() => {
