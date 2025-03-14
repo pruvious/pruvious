@@ -65,11 +65,11 @@
   transition: none !important;
 }
 
-.pui-no-click * {
+.pui-no-interaction * {
   pointer-events: none !important;
 }
 
-.pui-no-click .pui-always-clickable {
+.pui-no-interaction .pui-allow-interaction {
   pointer-events: auto !important;
 }
 

@@ -79,6 +79,14 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
   const overlayCounter = usePUIOverlayCounter()
   const allowInOverlay = ref(false)
 
+  let currentOverlay = -1
+
+  nextTick(() => {
+    setTimeout(() => {
+      currentOverlay = overlayCounter.value
+    })
+  })
+
   /**
    * The function to stop listening for keyboard shortcuts.
    */
@@ -108,7 +116,9 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     }
 
     const letter = event.key?.toLowerCase() ?? ''
-    const disabled = !!overlayCounter.value && !allowInOverlay.value
+    const disabled =
+      document.body.classList.contains('pui-no-interaction') ||
+      (overlayCounter.value > 0 && (!allowInOverlay.value || overlayCounter.value !== currentOverlay))
 
     if (
       !puiIsEditingText() &&

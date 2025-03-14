@@ -143,7 +143,7 @@ defineExpose({
 })
 
 onMounted(() => {
-  document.body.classList.add('pui-no-click')
+  document.body.classList.add('pui-no-interaction')
   prevFocus.value = document.activeElement as HTMLElement
   parentContainer.value = floating.value?.parentElement
   floating.value?.focus()
@@ -156,7 +156,7 @@ onMounted(() => {
     parentContainer.value = parentContainer.value?.parentElement
   }
 
-  parentContainer.value?.classList.add('pui-always-clickable')
+  parentContainer.value?.classList.add('pui-allow-interaction')
 
   setTimeout(() => {
     stop.push(
@@ -203,8 +203,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  document.body.classList.remove('pui-no-click')
-  parentContainer.value?.classList.remove('pui-always-clickable')
+  document.body.classList.remove('pui-no-interaction')
+  parentContainer.value?.classList.remove('pui-allow-interaction')
   stop.forEach((s) => s())
   if (props.restoreFocus) {
     setTimeout(() => {
@@ -281,8 +281,8 @@ function calcItemSizes() {
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
 }
 
-.pui-no-click .pui-dropdown,
-.pui-no-click .pui-dropdown * {
+.pui-no-interaction .pui-dropdown,
+.pui-no-interaction .pui-dropdown * {
   pointer-events: all !important;
 }
 
