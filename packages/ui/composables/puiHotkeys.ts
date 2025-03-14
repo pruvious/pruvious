@@ -1,4 +1,4 @@
-import { remove } from '@pruvious/utils'
+import { isFunction, remove } from '@pruvious/utils'
 import { useEventListener } from '@vueuse/core'
 
 export type PUIHotkeyAction =
@@ -28,7 +28,7 @@ export interface PUIHotkeys {
    *
    * @default false
    */
-  allowInOverlay: Ref<boolean>
+  allowInOverlays: Ref<boolean>
 
   /**
    * Registers a callback for a keyboard shortcut.
@@ -62,22 +62,44 @@ export interface PUIHotkeys {
   resume: () => void
 }
 
+export interface PUIHotkeysOptions {
+  /**
+   * Whether hotkeys are allowed when an overlay is active.
+   *
+   * @default false
+   */
+  allowInOverlays?: boolean
+
+  /**
+   * Whether to start listening for keyboard shortcuts immediately.
+   *
+   * @default true
+   */
+  listen?: boolean
+
+  /**
+   * The target element to listen for keyboard events.
+   *
+   * @default
+   * inject('popup', document)
+   */
+  target?: EventTarget | Ref<EventTarget> | null | (() => EventTarget | Ref<EventTarget> | null | undefined)
+}
+
 /**
  * Composable for managing keyboard shortcuts.
- *
- * @param listen - Whether to start listening for keyboard shortcuts immediately (default: `true`).
  *
  * @example
  * ```ts
  * const { listen } = usePUIHotkeys()
  * ```
  */
-export function usePUIHotkeys(listen = true): PUIHotkeys {
-  const isListening = ref(listen)
+export function usePUIHotkeys(options?: PUIHotkeysOptions): PUIHotkeys {
+  const isListening = ref(options?.listen ?? true)
   const listeners = new Map<PUIHotkeyAction, ((event: KeyboardEvent) => void)[]>()
   const mac = puiIsMac()
   const overlayCounter = usePUIOverlayCounter()
-  const allowInOverlay = ref(false)
+  const allowInOverlays = ref(options?.allowInOverlays ?? false)
 
   let currentOverlay = -1
 
@@ -99,7 +121,8 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     isListening,
     (value) => {
       if (value) {
-        stop = useEventListener(inject('popup', document), 'keydown', onKeyDown)
+        const target = isFunction(options?.target) ? options?.target() : options?.target
+        stop = useEventListener(target ?? inject('popup', document), 'keydown', onKeyDown)
       } else {
         stop?.()
       }
@@ -118,7 +141,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     const letter = event.key?.toLowerCase() ?? ''
     const disabled =
       document.body.classList.contains('pui-no-interaction') ||
-      (overlayCounter.value > 0 && (!allowInOverlay.value || overlayCounter.value !== currentOverlay))
+      (overlayCounter.value > 0 && (!allowInOverlays.value || overlayCounter.value !== currentOverlay))
 
     if (
       !puiIsEditingText() &&
@@ -194,7 +217,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
 
   return {
     isListening,
-    allowInOverlay,
+    allowInOverlays,
     listen: (action, callback) => {
       if (!listeners.has(action)) {
         listeners.set(action, [])
