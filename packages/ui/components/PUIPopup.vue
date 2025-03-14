@@ -83,6 +83,7 @@ const { activate, deactivate } = useFocusTrap(root, {
 const visible = ref(false)
 const overlayCounter = usePUIOverlayCounter()
 
+let currentOverlay = -1
 let transitionDuration = 300
 
 defineExpose({ close, focus })
@@ -94,6 +95,7 @@ useEventListener('keydown', (event) => emit('keydown', event))
 onMounted(() => {
   setTimeout(() => {
     overlayCounter.value++
+    currentOverlay = overlayCounter.value
     document.body.classList.add('pui-overlay-active')
     transitionDuration = parseInt(
       getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration') || '300',
@@ -106,7 +108,7 @@ onMounted(() => {
 })
 
 watch(activeElement, () => {
-  if (activeElement.value?.nodeName === 'BODY') {
+  if (activeElement.value?.nodeName === 'BODY' && overlayCounter.value === currentOverlay) {
     root.value?.focus()
   }
 })
