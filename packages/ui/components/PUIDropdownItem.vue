@@ -3,6 +3,7 @@
     :is="is ?? (to ? NuxtLink : 'button')"
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
+    @keydown.space="$el.click()"
     @mouseenter="$el.focus()"
     @mouseleave="parentContainer && parentContainer.nodeName !== 'BODY' ? parentContainer.focus() : blurActiveElement()"
     class="pui-dropdown-item pui-raw"
