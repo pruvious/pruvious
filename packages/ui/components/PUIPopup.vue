@@ -87,6 +87,8 @@ let transitionDuration = 300
 
 defineExpose({ close, focus })
 
+provide('popup', root)
+
 useEventListener('keydown', (event) => emit('keydown', event))
 
 onMounted(() => {

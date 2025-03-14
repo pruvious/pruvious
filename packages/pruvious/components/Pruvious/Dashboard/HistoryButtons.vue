@@ -49,8 +49,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: T]
 }>()
 
-const { listen } = usePUIHotkeys()
+const { listen, allowInOverlay } = usePUIHotkeys()
 
+allowInOverlay.value = true
 listen('undo', undo)
 listen('redo', redo)
 

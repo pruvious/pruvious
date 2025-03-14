@@ -24,6 +24,13 @@ export interface PUIHotkeys {
   isListening: Ref<boolean>
 
   /**
+   * Specifies whether hotkeys are allowed when an overlay is active.
+   *
+   * @default false
+   */
+  allowInOverlay: Ref<boolean>
+
+  /**
    * Registers a callback for a keyboard shortcut.
    * The listener is automatically removed in Vue components when they are unmounted.
    *
@@ -70,6 +77,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
   const listeners = new Map<PUIHotkeyAction, ((event: KeyboardEvent) => void)[]>()
   const mac = puiIsMac()
   const overlayCounter = usePUIOverlayCounter()
+  const allowInOverlay = ref(false)
 
   /**
    * The function to stop listening for keyboard shortcuts.
@@ -83,7 +91,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     isListening,
     (value) => {
       if (value) {
-        stop = useEventListener(document, 'keydown', onKeyDown)
+        stop = useEventListener(inject('popup', document), 'keydown', onKeyDown)
       } else {
         stop?.()
       }
@@ -100,10 +108,11 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     }
 
     const letter = event.key?.toLowerCase() ?? ''
+    const disabled = !!overlayCounter.value && !allowInOverlay.value
 
     if (
       !puiIsEditingText() &&
-      !overlayCounter.value &&
+      !disabled &&
       (((event.key === 'Delete' || event.key === 'Backspace') &&
         !event.metaKey &&
         !event.altKey &&
@@ -114,7 +123,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
       return listeners.get('delete')?.forEach((callback) => callback(event))
     } else if (
       !puiIsEditingText() &&
-      !overlayCounter.value &&
+      !disabled &&
       event.key === 'Escape' &&
       !event.metaKey &&
       !event.altKey &&
@@ -129,11 +138,11 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
     }
 
     if (letter === 'y') {
-      return event.shiftKey || puiIsEditingText() || overlayCounter.value
+      return event.shiftKey || puiIsEditingText() || disabled
         ? undefined
         : listeners.get('redo')?.forEach((callback) => callback(event))
     } else if (letter === 'z') {
-      if (puiIsEditingText() || overlayCounter.value) {
+      if (puiIsEditingText() || disabled) {
         return
       } else {
         return mac && event.shiftKey
@@ -143,23 +152,23 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
             : listeners.get('undo')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'a') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('selectAll')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'd') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('duplicate')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'c') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('copy')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'x') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('cut')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'v') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('paste')?.forEach((callback) => callback(event))
       }
     } else if (letter === 's') {
@@ -167,7 +176,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
         return listeners.get('save')?.forEach((callback) => callback(event))
       }
     } else if (letter === 'arrowup' || letter === 'arrowdown') {
-      if (!event.shiftKey && !puiIsEditingText() && !overlayCounter.value) {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get(letter === 'arrowup' ? 'moveUp' : 'moveDown')?.forEach((callback) => callback(event))
       }
     }
@@ -175,6 +184,7 @@ export function usePUIHotkeys(listen = true): PUIHotkeys {
 
   return {
     isListening,
+    allowInOverlay,
     listen: (action, callback) => {
       if (!listeners.has(action)) {
         listeners.set(action, [])
