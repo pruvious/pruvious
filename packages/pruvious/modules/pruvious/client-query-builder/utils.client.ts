@@ -395,7 +395,10 @@ export function useSelectQueryBuilderParams(options: {
   /**
    * Function that gets called whenever the URL query parameters change.
    */
-  callback: (context: { queryString: string; params: Omit<SelectQueryBuilderParams, 'offset' | 'limit'> }) => any
+  callback: (context: {
+    queryString: string
+    params: Omit<SelectQueryBuilderParams, 'select' | 'groupBy' | 'offset' | 'limit' | 'populate'>
+  }) => any
 
   /**
    * Default parameters to use when the URL query parameters are not set.
@@ -406,7 +409,7 @@ export function useSelectQueryBuilderParams(options: {
    *   perPage: 50,
    * }
    */
-  defaultParams?: Omit<SelectQueryBuilderParams, 'offset' | 'limit'>
+  defaultParams?: Omit<SelectQueryBuilderParams, 'select' | 'groupBy' | 'offset' | 'limit' | 'populate'>
 
   /**
    * Determines whether parameters with default values should be hidden in the URL query string.
@@ -432,7 +435,7 @@ export function useSelectQueryBuilderParams(options: {
   /**
    * Ref that contains the current `SelectQueryBuilderParams`.
    */
-  params: Ref<Omit<SelectQueryBuilderParams, 'offset' | 'limit'>>
+  params: Ref<Omit<SelectQueryBuilderParams, 'select' | 'groupBy' | 'offset' | 'limit' | 'populate'>>
 
   /**
    * Synchronizes the current `params` with the URL query parameters by updating the browser's URL.
@@ -469,8 +472,14 @@ export function useSelectQueryBuilderParams(options: {
   let prevQueryString: string | undefined
 
   function push(replace = false) {
-    const p: Record<string, any> = omit({ ...defaultParams, ...route.query, ...params.value }, ['offset', 'limit'])
-    const selectParams = ['select', 'where', 'groupBy', 'orderBy', 'perPage', 'page', 'populate']
+    const p: Record<string, any> = omit({ ...defaultParams, ...route.query, ...params.value }, [
+      'select',
+      'groupBy',
+      'offset',
+      'limit',
+      'populate',
+    ])
+    const selectParams = ['where', 'orderBy', 'perPage', 'page']
 
     const pOther = omit(p, selectParams)
     const pSelect = Object.fromEntries(
@@ -508,7 +517,15 @@ export function useSelectQueryBuilderParams(options: {
       () => route.query,
       async () => {
         params.value = queryStringToSelectQueryBuilderParams(
-          Object.entries(omit({ ...stringifiedDefaultParams, ...(route.query as any) }, ['offset', 'limit']))
+          Object.entries(
+            omit({ ...stringifiedDefaultParams, ...(route.query as any) }, [
+              'select',
+              'groupBy',
+              'offset',
+              'limit',
+              'populate',
+            ]),
+          )
             .map(([key, value]) => `${key}=${value}`)
             .join('&'),
         )

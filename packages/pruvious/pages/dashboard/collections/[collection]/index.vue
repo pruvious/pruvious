@@ -310,7 +310,6 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     initialized.value = true
   },
   defaultParams: {
-    select: ['id', ...Object.keys(columns.value).filter((column) => !column.startsWith('$'))],
     orderBy: resolveOrderBy(),
     page: 1,
     perPage: collection.definition.ui.indexPage.table.perPage,

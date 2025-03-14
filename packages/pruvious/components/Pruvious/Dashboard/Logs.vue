@@ -306,7 +306,6 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     initialized.value = true
   },
   defaultParams: {
-    select: ['id', ...Object.keys(columns.value)],
     orderBy: props.orderBy,
     page: 1,
     perPage: 50,
