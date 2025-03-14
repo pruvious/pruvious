@@ -50,6 +50,7 @@ defineProps({
 .p-page-container {
   flex: 1;
   overflow-y: auto;
+  outline: none;
 }
 
 .p-page-header {

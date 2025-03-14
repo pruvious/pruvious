@@ -129,6 +129,7 @@ async function toggleSidebar() {
   height: 100dvh;
   margin: 0 -1rem;
   padding: 0.5rem 1.5rem 1.5rem;
+  outline: none;
 }
 
 .p-layout-sm {
@@ -191,6 +192,7 @@ async function toggleSidebar() {
   margin: -0.5rem;
   padding: 0.5rem;
   overflow-y: auto;
+  outline: none;
 }
 
 .p-main-no-padding {

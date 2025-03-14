@@ -28,6 +28,7 @@ defineExpose({ scroller })
 
 .p-table-scroller {
   overflow: auto;
+  outline: none;
 }
 
 .p-footer {
