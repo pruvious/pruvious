@@ -4,8 +4,10 @@
       <p>{{ __('pruvious-dashboard', 'Changes that you made may not be saved.') }}</p>
     </PUIProse>
     <div class="pui-row">
-      <PUIButton @click="cancel()" variant="outline">{{ __('pruvious-dashboard', 'Cancel') }}</PUIButton>
-      <PUIButton @click="leave()" variant="primary">{{ __('pruvious-dashboard', 'OK') }}</PUIButton>
+      <PUIButton @click="popup?.close().then(cancel)" variant="outline">
+        {{ __('pruvious-dashboard', 'Cancel') }}
+      </PUIButton>
+      <PUIButton @click="popup?.close().then(leave)" variant="primary">{{ __('pruvious-dashboard', 'OK') }}</PUIButton>
     </div>
   </PUIPopup>
 </template>
@@ -16,6 +18,7 @@ import { blurActiveElement, isDefined } from '@pruvious/utils'
 import { useEventListener, watchOnce } from '@vueuse/core'
 import { onBeforeRouteLeave, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'
 
+const popup = useTemplateRef('popup')
 const isVisible = ref(false)
 const destination = ref<RouteLocationNormalized>()
 const leaveCount = ref(0)

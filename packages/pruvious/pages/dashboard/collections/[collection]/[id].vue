@@ -311,13 +311,9 @@ onMounted(() => {
             })
             contentLanguage.value = oldContentLanguage
           } else if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
-            setTimeout(
-              () =>
-                navigateTo(
-                  dashboardBasePath +
-                    `collections/${route.params.collection}/${resolvedPermissions[newContentLanguage].id}`,
-                ),
-              getOverlayTransitionDuration(),
+            navigateTo(
+              dashboardBasePath +
+                `collections/${route.params.collection}/${resolvedPermissions[newContentLanguage].id}`,
             )
           } else {
             contentLanguage.value = oldContentLanguage
@@ -344,13 +340,9 @@ onMounted(() => {
           if (action === 'create') {
             setTimeout(async () => {
               if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
-                setTimeout(
-                  () =>
-                    navigateTo(
-                      dashboardBasePath +
-                        `collections/${route.params.collection}/new?translationOf=${id}&language=${newContentLanguage}`,
-                    ),
-                  getOverlayTransitionDuration(),
+                navigateTo(
+                  dashboardBasePath +
+                    `collections/${route.params.collection}/new?translationOf=${id}&language=${newContentLanguage}`,
                 )
               } else {
                 contentLanguage.value = oldContentLanguage
