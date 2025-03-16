@@ -7,6 +7,7 @@
       :choices="[
         { label: 'Alert', value: '/alert' },
         { label: 'Badge', value: '/badge' },
+        { label: 'Bubble', value: '/bubble' },
         { label: 'Button', value: '/button' },
         { label: 'Button group', value: '/button-group' },
         { label: 'Card', value: '/card' },

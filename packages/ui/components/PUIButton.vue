@@ -13,6 +13,10 @@
     <span class="pui-button-inner">
       <slot />
     </span>
+
+    <div v-if="$slots.bubble" class="pui-button-bubble">
+      <slot name="bubble" />
+    </div>
   </component>
 </template>
 
@@ -113,7 +117,6 @@ defineProps({
   max-width: 100%;
   min-width: calc(2em + 0.25rem);
   height: calc(2em + 0.25rem);
-  overflow: hidden;
   border: 1px solid transparent;
   border-radius: calc(var(--pui-radius) - 0.125rem);
   color: hsl(var(--pui-foreground));
@@ -245,5 +248,14 @@ defineProps({
 .pui-button-inner > span {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pui-button-bubble {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  display: flex;
+  transform: translate(50%, -50%);
 }
 </style>

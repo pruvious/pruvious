@@ -25,12 +25,12 @@
     :style="{ '--pui-size': size }"
   >
     <span
-      v-for="{ value, label } of choices"
+      v-for="({ value, label }, i) of choices"
       @click="$emit('update:modelValue', value)"
       class="pui-button-group-item"
       :class="{ 'pui-button-group-item-active': value === modelValue }"
     >
-      {{ label }}
+      <slot :index="i" :label="label" :value="value">{{ label }}</slot>
     </span>
 
     <input :id="id" :name="name" :value="modelValue" hidden />
@@ -216,6 +216,7 @@ watch(
   flex: 1;
   display: flex;
   align-items: center;
+  gap: 0.5em;
   min-width: min-content;
   height: 100%;
   padding: 0 0.5em;

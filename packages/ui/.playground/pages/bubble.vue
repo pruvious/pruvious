@@ -1,22 +1,24 @@
 <template>
   <Showcase>
-    <PUIBadge :color="color" :size="state.size">Badge</PUIBadge>
+    <div class="pui-bubble-wrapper">
+      <PUIBubble :size="state.size" :variant="variant">64</PUIBubble>
+    </div>
 
     <template #config>
       <ShowcaseConfig>
         <PUIField>
           <PUIFieldLabel>
-            <label for="color">Color</label>
+            <label for="variant">Variant</label>
           </PUIFieldLabel>
           <PUIButtonGroup
-            v-model="color"
+            v-model="variant"
             :choices="[
               { label: 'Primary', value: 'primary' },
               { label: 'Secondary', value: 'secondary' },
               { label: 'Accent', value: 'accent' },
               { label: 'Destructive', value: 'destructive' },
             ]"
-            id="color"
+            id="variant"
           />
         </PUIField>
 
@@ -27,10 +29,16 @@
 </template>
 
 <script lang="ts" setup>
-import type PUIBadge from '../../components/PUIBadge.vue'
+import type PUIBubble from '../../components/PUIBubble.vue'
 
-type Props = InstanceType<typeof PUIBadge>['$props']
+type Props = InstanceType<typeof PUIBubble>['$props']
 
 const state = useShowcase()
-const color = ref<Props['color']>('primary')
+const variant = ref<Props['variant']>('primary')
 </script>
+
+<style scoped>
+.pui-bubble-wrapper {
+  display: flex;
+}
+</style>

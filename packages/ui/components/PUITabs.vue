@@ -13,7 +13,18 @@
         }
       "
       class="pui-tabs-list"
-    />
+    >
+      <template #default="{ label, index }">
+        <span>{{ label }}</span>
+        <PUIBubble
+          v-if="list[index]?.bubble"
+          v-pui-tooltip="list[index].bubble?.tooltip"
+          :variant="list[index].bubble?.variant"
+        >
+          {{ list[index].bubble.content }}
+        </PUIBubble>
+      </template>
+    </PUIButtonGroup>
     <div class="pui-tabs-content" :style="{ minHeight: contentMinHeight ? `${contentMinHeight}px` : undefined }">
       <div ref="contentContainer">
         <slot />
@@ -37,6 +48,28 @@ export interface PUITabListItem<T extends number | string> {
    * If not provided, the `name` property is used instead.
    */
   label?: string | Ref<string>
+
+  /**
+   * An optional bubble to display next to the tab label.
+   */
+  bubble?: {
+    /**
+     * The content of the bubble.
+     */
+    content: string | Ref<string>
+
+    /**
+     * Defines the visual style variant of the bubble.
+     *
+     * @default 'primary'
+     */
+    variant?: 'primary' | 'secondary' | 'accent' | 'destructive'
+
+    /**
+     * A tooltip to display when hovering over the bubble.
+     */
+    tooltip?: string
+  }
 }
 
 const props = defineProps({
@@ -140,6 +173,10 @@ function setContentMinHeight(minHeight: number | undefined) {
 .pui-tabs-list .pui-button-group-item {
   flex-grow: 1;
   justify-content: center;
+}
+
+.pui-tabs-list .pui-bubble {
+  border: none;
 }
 
 .pui-tabs-content:not(:first-child) {

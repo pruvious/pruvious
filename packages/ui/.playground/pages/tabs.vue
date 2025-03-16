@@ -41,8 +41,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { PUITabListItem } from '../../components/PUITabs.vue'
+
 const state = useShowcase()
-const list = [
+const list: PUITabListItem<number>[] = [
   { label: 'Tab 1', name: 1 },
   { label: 'Tab 2', name: 2 },
   { label: 'Tab 3', name: 3 },

@@ -7,6 +7,9 @@
 
       <PUIButton :destructiveHover="destructiveHover" :disabled="disabled" :size="state.size" :variant="variant">
         <Icon mode="svg" name="tabler:power" />
+        <template v-if="bubble" #bubble>
+          <PUIBubble :size="state.size" :variant="variant === 'primary' ? 'destructive' : 'primary'"></PUIBubble>
+        </template>
       </PUIButton>
     </div>
 
@@ -44,6 +47,20 @@
           />
         </PUIField>
 
+        <PUIField>
+          <PUIFieldLabel>
+            <label for="bubble">Bubble</label>
+          </PUIFieldLabel>
+          <PUIButtonGroup
+            v-model="bubble"
+            :choices="[
+              { label: 'Hide', value: false },
+              { label: 'Show', value: true },
+            ]"
+            id="bubble"
+          />
+        </PUIField>
+
         <ShowcaseSize />
         <ShowcaseDisabled v-model="disabled" />
       </ShowcaseConfig>
@@ -59,6 +76,7 @@ type Props = InstanceType<typeof PUIButton>['$props']
 const state = useShowcase()
 const variant = ref<Props['variant']>('primary')
 const destructiveHover = ref(false)
+const bubble = ref(false)
 const disabled = ref(false)
 </script>
 
