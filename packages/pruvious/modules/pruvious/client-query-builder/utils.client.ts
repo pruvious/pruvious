@@ -5,7 +5,7 @@ import {
   queryStringToSelectQueryBuilderParams,
   selectQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
-import { deepClone, omit } from '@pruvious/utils'
+import { deepClone, isDefined, omit } from '@pruvious/utils'
 import type { DeleteQueryBuilder } from './DeleteQueryBuilder'
 import type { InsertQueryBuilder } from './InsertQueryBuilder'
 import { QueryBuilder } from './QueryBuilder'
@@ -455,6 +455,11 @@ export function useSelectQueryBuilderParams(options: {
    * @returns a `Promise` that resolves when the refresh operation is complete.
    */
   refresh: (force?: boolean) => Promise<void>
+
+  /**
+   * Indicates whether the URL query parameters are different from their default values.
+   */
+  isDirty: Ref<boolean>
 } {
   const route = useRoute()
   const defaultParams = options.defaultParams ?? { page: 1, perPage: 50 }
@@ -469,6 +474,8 @@ export function useSelectQueryBuilderParams(options: {
   )
   const params = ref<SelectQueryBuilderParams>(deepClone(defaultParams))
   const hideDefaultParams = options.hideDefaultParams ?? true
+  const isDirty = ref(false)
+
   let prevQueryString: string | undefined
 
   function push(replace = false) {
@@ -500,6 +507,13 @@ export function useSelectQueryBuilderParams(options: {
         }
       }
     }
+
+    isDirty.value = ['where', 'orderBy', 'perPage'].some((param) => {
+      if (isDefined(stringifiedDefaultParams[param])) {
+        return hideDefaultParams ? isDefined(query[param]) : query[param] !== stringifiedDefaultParams[param]
+      }
+      return query[param]?.length
+    })
 
     nextTick(() => navigateTo({ query, replace }))
   }
@@ -540,5 +554,5 @@ export function useSelectQueryBuilderParams(options: {
     push(true)
   }
 
-  return { params, push, refresh }
+  return { params, push, refresh, isDirty }
 }

@@ -169,10 +169,13 @@
 
             <PUIButton
               v-pui-tooltip="__('pruvious-dashboard', 'Configure view')"
+              :variant="isDirty || columnsDirty ? 'accent' : 'outline'"
               @click="isTableSettingsPopupVisible = true"
-              variant="outline"
             >
               <Icon mode="svg" name="tabler:adjustments" />
+              <template v-if="isDirty || columnsDirty" #bubble>
+                <PUIBubble></PUIBubble>
+              </template>
             </PUIButton>
 
             <PUIButton :to="dashboardBasePath + `collections/${route.params.collection}/new`" variant="primary">
@@ -222,9 +225,19 @@ import {
   useSelectQueryBuilderParams,
   type ResolvedCollectionRecordPermissions,
 } from '#pruvious/client'
-import type { Permission } from '#pruvious/server'
+import type { CollectionUIOptions, Permission } from '#pruvious/server'
 import type { Paginated, QueryBuilderResult } from '@pruvious/orm'
-import { isDefined, isEmpty, isString, isUndefined, nanoid, omit, titleCase } from '@pruvious/utils'
+import {
+  deepCompare,
+  isDefined,
+  isEmpty,
+  isNull,
+  isString,
+  isUndefined,
+  nanoid,
+  omit,
+  titleCase,
+} from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
 
@@ -291,10 +304,14 @@ const pagination = ref<Omit<Paginated<any>, 'records'>>({
 })
 const resolvedCustomComponents: Record<string, Component | string> = {}
 const initialized = ref(false)
+const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.columns)
+const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
-const { params, push, refresh } = useSelectQueryBuilderParams({
+const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   callback: async ({ queryString, params }) => {
     columns.value = resolveColumns()
+    columnsDirty.value = !deepCompare(columns.value, defaultColumns)
+
     sort.value = params.orderBy?.[0]
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
       : null
@@ -375,13 +392,20 @@ listen('delete', () => {
   }
 })
 
-function resolveColumns(): PUIColumns {
+function resolveColumns(
+  from: 'auto' | string | CollectionUIOptions['indexPage']['table']['columns'] | null = 'auto',
+): PUIColumns {
   const columns: PUIColumns = {}
-  const source = isEmpty(route.query.columns)
-    ? collection.definition.ui.indexPage.table.columns
-    : String(route.query.columns).split(',')
+  const source =
+    from === 'auto'
+      ? isEmpty(route.query.columns)
+        ? collection.definition.ui.indexPage.table.columns
+        : String(route.query.columns).split(',')
+      : isString(from)
+        ? from.split(',')
+        : from
 
-  if (isUndefined(source)) {
+  if (isUndefined(source) || isNull(source)) {
     const filteredFieldEntries = Object.entries(collection.definition.fields).filter(([_, options]) =>
       'ui' in options ? !options.ui?.hidden : true,
     )
