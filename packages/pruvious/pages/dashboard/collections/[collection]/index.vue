@@ -312,6 +312,10 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     columns.value = resolveColumns()
     columnsDirty.value = !deepCompare(columns.value, defaultColumns)
 
+    if (isDefined(route.query.columns) && isEmpty(route.query.columns)) {
+      setTimeout(async () => console.log(await navigateTo({ query: omit(route.query, ['columns']), replace: true })))
+    }
+
     sort.value = params.orderBy?.[0]
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
       : null
@@ -495,6 +499,12 @@ function resolveColumns(
         }
       }
     }
+  }
+
+  if (isEmpty(columns)) {
+    Object.assign(columns, {
+      id: puiColumn({ label: maybeTranslate(collection.definition.fields.id!.ui.label), sortable: 'numeric' }),
+    })
   }
 
   return columns

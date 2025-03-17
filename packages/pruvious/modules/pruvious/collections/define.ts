@@ -859,7 +859,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                     /**
                      * The field (column) to display.
                      */
-                    field: TFieldNames
+                    field: TFieldNames | 'id'
                   }
                 | {
                     /**
@@ -942,7 +942,8 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                 minWidth?: string
               })
             | TFieldNames
-            | `${TFieldNames} | ${string}`
+            | 'id'
+            | `${TFieldNames | 'id'} | ${string}`
           )[]
         | undefined
 
@@ -979,7 +980,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
             /**
              * The field (column) name to order by.
              */
-            field: TFieldNames
+            field: TFieldNames | 'id'
 
             /**
              * The direction to order by.
@@ -999,15 +1000,15 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
              */
             nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
           }
-        | `${TFieldNames}`
-        | `${TFieldNames}:asc`
-        | `${TFieldNames}:asc:nullsAuto`
-        | `${TFieldNames}:asc:nullsFirst`
-        | `${TFieldNames}:asc:nullsLast`
-        | `${TFieldNames}:desc`
-        | `${TFieldNames}:desc:nullsAuto`
-        | `${TFieldNames}:desc:nullsFirst`
-        | `${TFieldNames}:desc:nullsLast`
+        | `${TFieldNames | 'id'}`
+        | `${TFieldNames | 'id'}:asc`
+        | `${TFieldNames | 'id'}:asc:nullsAuto`
+        | `${TFieldNames | 'id'}:asc:nullsFirst`
+        | `${TFieldNames | 'id'}:asc:nullsLast`
+        | `${TFieldNames | 'id'}:desc`
+        | `${TFieldNames | 'id'}:desc:nullsAuto`
+        | `${TFieldNames | 'id'}:desc:nullsFirst`
+        | `${TFieldNames | 'id'}:desc:nullsLast`
         | undefined
 
       /**

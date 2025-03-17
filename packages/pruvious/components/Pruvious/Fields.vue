@@ -316,8 +316,10 @@ function parseLayout(layout: FieldsLayout): Item[] {
           style: { maxWidth: x.split('|')[1]?.trim() },
         })
       } else {
-        // Unable to resolve field \`${name}\` in \`${props.dataContainerName}\` ${props.dataContainerType} layout. Available fields:
-        console.warn(`Field \`${name}\` not found in`, toRaw(props.fields))
+        console.warn(
+          `Unable to resolve field \`${name}\` in \`${props.dataContainerName}\` ${props.dataContainerType} layout. Available fields:`,
+          toRaw(props.fields),
+        )
       }
     } else if (isObject(x)) {
       for (const key of Object.keys(x) as (keyof typeof x)[]) {

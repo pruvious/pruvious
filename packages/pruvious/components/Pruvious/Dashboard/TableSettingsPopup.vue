@@ -118,13 +118,10 @@ const activeTab = ref<'general' | 'columns' | 'filters'>('general')
 const data = ref<TableSettings>(deepClone({ where: props.params.where ?? [], activeTab: activeTab.value }))
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
-    [
-      { value: 'id', label: __('pruvious-dashboard', 'ID') },
-      ...Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
-        value: fieldName,
-        label: resolveFieldLabel(definition.ui?.label, fieldName),
-      })),
-    ],
+    Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
+      value: fieldName,
+      label: resolveFieldLabel(definition.ui?.label, fieldName),
+    })),
     'label',
   ),
 )
