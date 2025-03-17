@@ -115,9 +115,7 @@ const emit = defineEmits<{
 
 const popup = useTemplateRef('popup')
 const activeTab = ref<'general' | 'columns' | 'filters'>('general')
-const data = ref<TableSettings>(
-  deepClone({ where: castWhereCondition(props.params.where ?? []), activeTab: activeTab.value }),
-)
+const data = ref<TableSettings>({ where: [], activeTab: activeTab.value })
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
@@ -130,6 +128,15 @@ const fieldChoices = computed(() =>
 const history = new History({ omit: ['activeTab'] })
 const whereFiltersComponent = useTemplateRef('whereFiltersComponent')
 const { listen, isListening } = usePUIHotkeys({ allowInOverlays: true, target: () => popup.value?.root, listen: false })
+
+watch(
+  () => props.params,
+  () => {
+    data.value.where = castWhereCondition(props.params.where ?? [])
+    nextTick(whereFiltersComponent.value?.refresh)
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   setTimeout(() => {
