@@ -39,8 +39,8 @@
           :collection="collection"
           :fieldChoices="fieldChoices"
           @commit="
-            (value) => {
-              data = { ...data, where: value, activeTab }
+            (where) => {
+              data = { ...data, where, activeTab }
               if (history.size) {
                 history.push(data)
               }
@@ -78,7 +78,7 @@
 import { __, History, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField, SelectQueryBuilderParams } from '@pruvious/orm'
-import { blurActiveElement, deepClone, sortNaturallyByProp } from '@pruvious/utils'
+import { blurActiveElement, castToBoolean, castToNumber, deepClone, sortNaturallyByProp } from '@pruvious/utils'
 
 export interface WhereOrGroupSimplified {
   or: (_WhereField | WhereOrGroupSimplified)[][]
@@ -115,7 +115,9 @@ const emit = defineEmits<{
 
 const popup = useTemplateRef('popup')
 const activeTab = ref<'general' | 'columns' | 'filters'>('general')
-const data = ref<TableSettings>(deepClone({ where: props.params.where ?? [], activeTab: activeTab.value }))
+const data = ref<TableSettings>(
+  deepClone({ where: castWhereCondition(props.params.where ?? []), activeTab: activeTab.value }),
+)
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
@@ -151,6 +153,35 @@ async function close() {
   if (!history.isDirty.value || (await unsavedChanges.prompt?.())) {
     emit('close', popup.value!.close)
   }
+}
+
+function castWhereCondition(
+  whereCondition: (_WhereField | WhereOrGroupSimplified)[],
+): (_WhereField | WhereOrGroupSimplified)[] {
+  const casted: (_WhereField | WhereOrGroupSimplified)[] = deepClone(whereCondition)
+
+  for (const [i, condition] of casted.entries()) {
+    if ('field' in condition) {
+      const dataType = props.collection.definition.fields[condition.field]?.__dataType
+      condition.value = (
+        dataType === 'bigint' || dataType === 'numeric'
+          ? castToNumber(condition.value)
+          : dataType === 'boolean'
+            ? castToBoolean(condition.value)
+            : condition.value
+      ) as any
+    } else if ('or' in condition) {
+      const orGroups: (_WhereField | WhereOrGroupSimplified)[][] = []
+
+      for (const orGroup of condition.or) {
+        orGroups.push(castWhereCondition(orGroup))
+      }
+
+      casted[i] = { or: orGroups }
+    }
+  }
+
+  return casted
 }
 </script>
 
