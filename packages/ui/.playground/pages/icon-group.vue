@@ -5,8 +5,8 @@
       :choices="choices"
       :disabled="disabled"
       :error="state.hasErrors"
+      :showTooltips="showTooltips"
       :size="state.size"
-      :tooltips="tooltips"
       :variant="variant"
       id="icon-group"
     />
@@ -32,15 +32,15 @@
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="tooltips">Tooltips</label>
+            <label for="showTooltips">Show tooltips</label>
           </PUIFieldLabel>
           <PUIButtonGroup
-            v-model="tooltips"
+            v-model="showTooltips"
             :choices="[
               { label: 'No', value: false },
               { label: 'Yes', value: true },
             ]"
-            id="tooltips"
+            id="showTooltips"
           />
         </PUIField>
 
@@ -66,6 +66,6 @@ const choices: Props['choices'] = [
 const state = useShowcase()
 const value = ref(1337)
 const variant = ref<Props['variant']>('primary')
-const tooltips = ref(false)
+const showTooltips = ref(false)
 const disabled = ref(false)
 </script>

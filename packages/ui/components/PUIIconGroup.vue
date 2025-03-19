@@ -26,8 +26,8 @@
   >
     <span
       v-for="{ value, icon, title } of localChoices"
-      v-pui-tooltip="tooltips ? title : undefined"
-      :title="!tooltips ? title : undefined"
+      v-pui-tooltip="showTooltips ? title : undefined"
+      :title="!showTooltips ? title : undefined"
       @click="$emit('update:modelValue', value)"
       class="pui-icon-group-item"
       :class="{ 'pui-icon-group-item-active': value === modelValue }"
@@ -68,7 +68,7 @@ export interface PUIIconGroupChoiceModel {
 
   /**
    * Text set as the `title` HTML attribute of the choice element.
-   * If `tooltips` are enabled, this text appears as a tooltip on hover.
+   * If `showTooltips` are enabled, this text appears as a tooltip on hover.
    */
   title?: string
 }
@@ -132,7 +132,7 @@ const props = defineProps({
    *
    * @default false
    */
-  tooltips: {
+  showTooltips: {
     type: Boolean,
     default: false,
   },

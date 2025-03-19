@@ -5,8 +5,8 @@
     :id="id"
     :modelValue="value"
     :name="name"
+    :showTooltips="showTooltips"
     :size="size"
-    :tooltips="tooltips"
     :variant="variant"
     @update:modelValue="change($event as PUIColorMode)"
   />
@@ -35,7 +35,7 @@ const props = defineProps({
    *
    * @default false
    */
-  tooltips: {
+  showTooltips: {
     type: Boolean,
     default: false,
   },
