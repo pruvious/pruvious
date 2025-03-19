@@ -32,8 +32,8 @@
       :placeholder="placeholder"
       @blur="onBlur()"
       @input="maybeEmit()"
-      @keydown.down.prevent.stop="(add($event.shiftKey ? -10 * increment : -increment), normalize(), maybeEmit())"
-      @keydown.up.prevent.stop="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit())"
+      @keydown.down.prevent.stop="(add($event.shiftKey ? -10 * increment : -increment), normalize(), maybeEmit(true))"
+      @keydown.up.prevent.stop="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit(true))"
       type="text"
       class="pui-number-input"
       :style="{ width: autoWidth ? `${inputWidth}px` : undefined }"
@@ -46,7 +46,7 @@
     <span v-if="showSteppers" class="pui-number-steppers">
       <button
         :disabled="max !== undefined && modelValue >= max"
-        @click="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit())"
+        @click="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit(true))"
         tabindex="-1"
         type="button"
         class="pui-raw"
@@ -55,7 +55,7 @@
       </button>
       <button
         :disabled="min !== undefined && modelValue <= min"
-        @click="(add($event.shiftKey ? -10 * increment : -increment), normalize(), maybeEmit())"
+        @click="(add($event.shiftKey ? -10 * increment : -increment), normalize(), maybeEmit(true))"
         tabindex="-1"
         type="button"
         class="pui-raw"
@@ -241,6 +241,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
+  'commit': [value: number]
   'update:modelValue': [value: number]
 }>()
 
@@ -263,9 +264,13 @@ watch(
 /**
  * Emits the `update:modelValue` event with the input value if it is a valid number.
  */
-function maybeEmit() {
+function maybeEmit(commit = false) {
   if (stringified.value.trim() && isRealNumber(+stringified.value)) {
     emit('update:modelValue', +stringified.value)
+
+    if (commit) {
+      emit('commit', +stringified.value)
+    }
   }
 }
 
@@ -320,7 +325,7 @@ function add(amount: number) {
  */
 function onBlur() {
   if (normalize()) {
-    maybeEmit()
+    maybeEmit(true)
   } else {
     stringified.value = props.modelValue.toString()
   }
@@ -373,6 +378,8 @@ function handleDrag(event: MouseEvent | TouchEvent) {
 function stopDragging() {
   dragEventListeners.forEach((stop) => stop())
   clearArray(dragEventListeners)
+  normalize()
+  maybeEmit(true)
 }
 </script>
 
