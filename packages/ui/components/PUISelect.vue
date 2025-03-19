@@ -123,6 +123,13 @@ export interface PUISelectChoiceModel {
    * It must be unique among the choices in the group.
    */
   value: Primitive
+
+  /**
+   * Indicates whether the choice is disabled.
+   *
+   * @default false
+   */
+  disabled?: boolean
 }
 
 export interface PUISelectChoiceGroupModel {
@@ -472,9 +479,10 @@ function toggle(event?: Event) {
  */
 function focusPrevious(event?: Event) {
   open(event)
+  const choices = flatChoices().filter(({ disabled }) => !disabled)
   highlightedChoice.value = highlightedChoice.value
-    ? prev(highlightedChoice.value, flatChoices(), { prop: 'value' })
-    : last(flatChoices())
+    ? prev(highlightedChoice.value, choices, { prop: 'value' })
+    : last(choices)
   mousePaused.value = true
   scrollToHighlighted()
 }
@@ -486,9 +494,10 @@ function focusPrevious(event?: Event) {
  */
 function focusNext(event?: Event) {
   open(event)
+  const choices = flatChoices().filter(({ disabled }) => !disabled)
   highlightedChoice.value = highlightedChoice.value
-    ? next(highlightedChoice.value, flatChoices(), { prop: 'value' })
-    : flatChoices()[0]
+    ? next(highlightedChoice.value, choices, { prop: 'value' })
+    : choices[0]
   mousePaused.value = true
   scrollToHighlighted()
 }
@@ -498,7 +507,7 @@ function focusNext(event?: Event) {
  */
 function focusFirst(event?: Event) {
   if (isExpanded.value) {
-    highlightedChoice.value = flatChoices()[0]
+    highlightedChoice.value = flatChoices().filter(({ disabled }) => !disabled)[0]
     mousePaused.value = true
     scrollToHighlighted()
     event?.preventDefault()
@@ -509,7 +518,7 @@ function focusFirst(event?: Event) {
  * Selects the highlighted choice and closes the choices list.
  */
 function selectHighlighted(event?: Event) {
-  if (isExpanded.value && highlightedChoice.value) {
+  if (isExpanded.value && highlightedChoice.value && !highlightedChoice.value.disabled) {
     emitValue(highlightedChoice.value.value)
     close(event)
   }
@@ -634,7 +643,8 @@ function search(event: KeyboardEvent) {
       keyword += event.key
 
       // Find and focus the choice that matches the entered keyword
-      const choice = searchByKeywords(flatChoices(), keyword, ['label', 'value'])[0]
+      const choices = flatChoices().filter(({ disabled }) => !disabled)
+      const choice = searchByKeywords(choices, keyword, ['label', 'value'])[0]
 
       if (choice) {
         highlightedChoice.value = choice
@@ -790,6 +800,10 @@ function unpauseMouseDelayed() {
 .pui-select-choice-highlighted {
   background-color: hsl(var(--pui-accent));
   color: hsl(var(--pui-accent-foreground));
+}
+
+.pui-select-choice-disabled {
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-select-group .pui-select-choice {

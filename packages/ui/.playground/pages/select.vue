@@ -42,6 +42,7 @@
 const choicesFew = [
   { label: 'Cat', value: 'cat' },
   { label: 'Dog', value: 'dog' },
+  { label: 'Gastly', value: 'gastly', disabled: true },
   { label: 'Hamster', value: 'hamster' },
   { label: 'Parrot', value: 'parrot' },
   { label: 'Rabbit', value: 'rabbit' },

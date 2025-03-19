@@ -2,27 +2,29 @@
   <button
     @click.prevent="
       () => {
-        $emit('select', choice)
-        $emit('close')
+        if (!choice.disabled) {
+          $emit('select', choice)
+          $emit('close')
+        }
       }
     "
     @mouseenter="
       () => {
-        if (!mousePaused) {
+        if (!mousePaused && !choice.disabled) {
           $emit('update:highlightedChoice', choice)
         }
       }
     "
     @mouseleave="
       () => {
-        if (!mousePaused) {
+        if (!mousePaused && !choice.disabled) {
           $emit('update:highlightedChoice', undefined)
         }
       }
     "
     @mousemove="
       () => {
-        if (choice.value !== highlightedChoice?.value) {
+        if (choice.value !== highlightedChoice?.value && !choice.disabled) {
           $emit('update:highlightedChoice', choice)
         }
 
@@ -36,6 +38,7 @@
     :class="{
       'pui-select-choice-selected': choice.value === selectedValue,
       'pui-select-choice-highlighted': choice.value === highlightedChoice?.value,
+      'pui-select-choice-disabled': choice.disabled,
     }"
   >
     <span v-if="choice.value === highlightedChoice?.value && choice.label && keywordTimeout.isPending.value">
