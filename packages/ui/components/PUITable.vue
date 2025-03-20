@@ -394,6 +394,9 @@ function onShiftSelect(id: number | string, value: boolean) {
 .pui-table-has-actions :where(th, td):last-child {
   position: sticky;
   right: 0;
+}
+
+.pui-table-has-actions :where(td):last-child {
   background-color: transparent;
 }
 
