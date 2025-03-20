@@ -49,6 +49,7 @@
             v-model:sort="sort"
             :cell="cellProps"
             :collectionName="collection.name"
+            :columns="columns"
             :data="cellProps.row"
             :fields="collection.definition.fields"
             :is="resolvedCustomComponents[cellProps.key]"
@@ -60,6 +61,7 @@
             v-else
             :cell="cellProps"
             :collectionName="collection.name"
+            :columns="columns"
             :data="cellProps.row"
             :fields="collection.definition.fields"
             :modelValue="cellProps.row[cellProps.key]"
@@ -199,10 +201,22 @@
 
     <PruviousDashboardTableSettingsPopup
       v-if="isTableSettingsPopupVisible"
+      v-model:columns="columns"
       v-model:params="params"
       :collection="collection"
       :size="-1"
       @close="$event().then(() => (isTableSettingsPopupVisible = false))"
+      @update:columns="
+        (columns) => {
+          if (compareColumns(columns, defaultColumns)) {
+            route.query._columns = null
+          } else {
+            route.query._columns = Object.entries(columns)
+              .map(([fieldName, { width, minWidth }]) => [fieldName, width, minWidth].filter(isDefined).join('|'))
+              .join(',')
+          }
+        }
+      "
       @update:params="push()"
       width="64rem"
     />
@@ -232,6 +246,7 @@ import {
   isDefined,
   isEmpty,
   isNull,
+  isObject,
   isString,
   isUndefined,
   nanoid,
@@ -307,14 +322,13 @@ const initialized = ref(false)
 const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.columns)
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
+const refreshing = ref(false)
 const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
+  watch: ['columns'],
   callback: async ({ queryString, params }) => {
+    refreshing.value = true
     columns.value = resolveColumns()
-    columnsDirty.value = !deepCompare(columns.value, defaultColumns)
-
-    if (isDefined(route.query.columns) && isEmpty(route.query.columns)) {
-      setTimeout(async () => console.log(await navigateTo({ query: omit(route.query, ['columns']), replace: true })))
-    }
+    columnsDirty.value = !compareColumns(columns.value, defaultColumns)
 
     sort.value = params.orderBy?.[0]
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
@@ -342,6 +356,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     }
 
     initialized.value = true
+    refreshing.value = false
   },
   defaultParams: {
     orderBy: resolveOrderBy(),
@@ -437,12 +452,30 @@ function resolveColumns(
       })
     }
   } else {
-    let i = 0
     for (const column of source) {
       if (isString(column)) {
         const [field, width, minWidth] = column.split('|').map((p) => p.trim())
 
-        if (field) {
+        if (field?.startsWith('$')) {
+          const column: any = collection.definition.ui.indexPage.table.columns?.find(
+            (column) => isObject(column) && 'component' in column && column.key === field,
+          )
+
+          if (isDefined(column)) {
+            resolvedCustomComponents[column.key] = customComponents[column.component]!()
+            columns[column.key] = puiColumn({
+              label: isDefined(column.label)
+                ? maybeTranslate(column.label)
+                : __('pruvious-dashboard', titleCase(column.key.slice(1), false) as any),
+              width,
+              minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
+            })
+          } else {
+            console.warn(
+              `Unable to resolve custom column \`${field}\` in \`${collection.name}\` collection table columns.`,
+            )
+          }
+        } else if (field) {
           const options = collection.definition.fields[field]
 
           if (options) {
@@ -484,10 +517,11 @@ function resolveColumns(
         }
       } else {
         if (isDefined(customComponents[column.component])) {
-          const key = `$${++i}`
-          resolvedCustomComponents[key] = customComponents[column.component]!()
-          columns[key] = puiColumn({
-            label: isDefined(column.label) ? maybeTranslate(column.label) : '',
+          resolvedCustomComponents[column.key] = customComponents[column.component]!()
+          columns[column.key] = puiColumn({
+            label: isDefined(column.label)
+              ? maybeTranslate(column.label)
+              : __('pruvious-dashboard', titleCase(column.key.slice(1), false) as any),
             width: column.width,
             minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
           })
@@ -508,6 +542,18 @@ function resolveColumns(
   }
 
   return columns
+}
+
+function compareColumns(a: PUIColumns, b: PUIColumns): boolean {
+  return (
+    deepCompare(Object.keys(a), Object.keys(b)) &&
+    Object.entries(a).every(([key, A]) => {
+      const B = b[key]
+      const AMinWidth = A.minWidth ?? (isUndefined(A.width) ? '16rem' : undefined)
+      const BMinWidth = B ? (B.minWidth ?? (isUndefined(B.width) ? '16rem' : undefined)) : undefined
+      return B && A.label === B.label && A.width === B.width && A.sortable === B.sortable && AMinWidth === BMinWidth
+    })
+  )
 }
 
 function resolveOrderBy(): {

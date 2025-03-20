@@ -148,7 +148,7 @@
 import { __ } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
-import { deepClone, nanoid, omit, walkObjects } from '@pruvious/utils'
+import { deepClone, isEmpty, nanoid, omit, walkObjects } from '@pruvious/utils'
 import type { WhereOrGroupSimplified } from './TableSettingsPopup.vue'
 import type { WhereAndGroup, WhereField, WhereOrGroup } from './WhereFiltersGroup.vue'
 
@@ -279,10 +279,12 @@ function toModelValue(where: (WhereField | WhereAndGroup | WhereOrGroup)[]): (_W
     if ('and' in item) {
       prepared.push(...toModelValue(item.and.flat()))
     } else if ('or' in item) {
-      if (item.or.length === 1) {
-        prepared.push(...toModelValue(item.or[0]!))
-      } else {
-        prepared.push({ or: item.or.map((orGroup) => toModelValue(orGroup)) })
+      if (!isEmpty(item.or)) {
+        if (item.or.length === 1) {
+          prepared.push(...toModelValue(item.or[0]!))
+        } else {
+          prepared.push({ or: item.or.map((orGroup) => toModelValue(orGroup)) })
+        }
       }
     } else {
       prepared.push(omit(item, ['_key']))
@@ -319,7 +321,6 @@ function refresh() {
   margin-left: auto;
 }
 
-.p-where-filters :deep(.p-where-filter-actions-visible),
 .p-where-filters :deep(.pui-structure-item:hover > .pui-structure-item-header > .p-where-filter-actions) {
   display: flex;
 }

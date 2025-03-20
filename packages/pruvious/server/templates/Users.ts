@@ -274,7 +274,7 @@ export default defineTemplate(() => ({
     menu: { group: 'management', icon: 'users', order: 1 },
     indexPage: {
       table: {
-        columns: ['email', 'roles', 'isActive | 8rem', 'isAdmin | 8rem', 'createdAt | 12rem'],
+        columns: ['email', 'roles', 'isActive | 150px', 'isAdmin | 150px', 'createdAt | 150px'],
         orderBy: 'email:asc',
       },
     },

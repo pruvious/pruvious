@@ -5,7 +5,7 @@ import {
   queryStringToSelectQueryBuilderParams,
   selectQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
-import { deepClone, isDefined, omit } from '@pruvious/utils'
+import { deepClone, isArray, isNull, omit, pick } from '@pruvious/utils'
 import type { DeleteQueryBuilder } from './DeleteQueryBuilder'
 import type { InsertQueryBuilder } from './InsertQueryBuilder'
 import { QueryBuilder } from './QueryBuilder'
@@ -427,10 +427,11 @@ export function useSelectQueryBuilderParams(options: {
 
   /**
    * Controls if the composable should monitor URL parameter changes and execute the callback function on detection.
+   * You can also provide an array of additional query parameters to monitor for changes, e.g. `['columns']`.
    *
    * @default true
    */
-  watch?: boolean
+  watch?: boolean | string[]
 }): {
   /**
    * Ref that contains the current `SelectQueryBuilderParams`.
@@ -474,6 +475,7 @@ export function useSelectQueryBuilderParams(options: {
   )
   const params = ref<SelectQueryBuilderParams>(deepClone(defaultParams))
   const hideDefaultParams = options.hideDefaultParams ?? true
+  const usedParams = ['where', 'orderBy', 'perPage', 'page']
   const isDirty = ref(false)
 
   let prevQueryString: string | undefined
@@ -486,9 +488,7 @@ export function useSelectQueryBuilderParams(options: {
       'limit',
       'populate',
     ])
-    const selectParams = ['where', 'orderBy', 'perPage', 'page']
-
-    const pOther = omit(p, selectParams)
+    const pOther = omit(p, usedParams)
     const pSelect = Object.fromEntries(
       selectQueryBuilderParamsToQueryString(p)
         .split('&')
@@ -508,28 +508,51 @@ export function useSelectQueryBuilderParams(options: {
       }
     }
 
-    isDirty.value = ['where', 'orderBy', 'perPage'].some((param) => {
-      if (isDefined(stringifiedDefaultParams[param])) {
-        return hideDefaultParams ? isDefined(query[param]) : query[param] !== stringifiedDefaultParams[param]
+    for (const key in query) {
+      if (key.startsWith('_')) {
+        query[key.slice(1)] = query[key]
+        delete query[key]
       }
-      return query[param]?.length
-    })
+    }
+
+    for (const key in query) {
+      if (isNull(query[key])) {
+        delete query[key]
+      }
+    }
 
     nextTick(() => navigateTo({ query, replace }))
   }
 
   async function refresh(force = false) {
     const queryString = selectQueryBuilderParamsToQueryString(params.value)
+    refreshDirty()
     if (prevQueryString !== queryString || force) {
       prevQueryString = queryString
       await options.callback({ queryString, params: params.value })
     }
   }
 
+  function refreshDirty() {
+    const checkParams = ['where', 'orderBy', 'perPage']
+    const stringifiedParams = Object.fromEntries(
+      selectQueryBuilderParamsToQueryString(
+        pick({ ...defaultParams, ...route.query, ...params.value }, checkParams as any),
+      )
+        .split('&')
+        .filter(Boolean)
+        .map((param) => {
+          const parts = param.split('=')
+          return [parts.shift()!, decodeQueryString(parts.join('='))].map(decodeQueryString)
+        }),
+    )
+    isDirty.value = checkParams.some((param) => stringifiedParams[param] !== stringifiedDefaultParams[param])
+  }
+
   if (options.watch !== false) {
     watch(
       () => route.query,
-      async () => {
+      async (newValue, oldValue) => {
         params.value = queryStringToSelectQueryBuilderParams(
           Object.entries(
             omit({ ...stringifiedDefaultParams, ...(route.query as any) }, [
@@ -544,7 +567,11 @@ export function useSelectQueryBuilderParams(options: {
             .join('&'),
         )
 
-        await refresh()
+        if (isArray(options.watch) && options.watch.some((key) => newValue[key] !== oldValue?.[key])) {
+          await refresh(true)
+        } else {
+          await refresh()
+        }
       },
       { immediate: options.init !== false },
     )

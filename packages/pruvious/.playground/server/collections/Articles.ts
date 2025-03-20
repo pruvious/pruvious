@@ -12,7 +12,7 @@ export default defineCollection({
   ui: {
     indexPage: {
       table: {
-        columns: [{ field: 'name' }, { field: 'translations' }],
+        columns: ['name', 'language', 'translations', 'createdAt'],
       },
     },
   },

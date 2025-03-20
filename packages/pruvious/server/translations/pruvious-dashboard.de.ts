@@ -30,6 +30,7 @@ export default defineTranslation({
   'At least one of the following conditions must be met': 'Mindestens eine der folgenden Bedingungen muss erfüllt sein',
   'Attempts': 'Versuche',
   'Author': 'Autor',
+  'Auto width': 'Automatische Breite',
 
   'Base URL': 'Basis-URL',
   'Body': 'Body',
@@ -55,6 +56,7 @@ export default defineTranslation({
   'Close': 'Schließen',
   'Collapse': 'Einklappen',
   'Collections': 'Collections',
+  'Column': 'Spalte',
   'Columns': 'Spalten',
   'Completed at': 'Abgeschlossen am',
   'Condition': 'Bedingung',
@@ -143,6 +145,7 @@ export default defineTranslation({
   'False': 'Falsch',
   'Filters': 'Filter',
   'First name': 'Vorname',
+  'Fixed width': 'Feste Breite',
   'Forgot password?': 'Passwort vergessen?',
   'Found $count $errors': createPattern(
     '$count $errors gefunden',

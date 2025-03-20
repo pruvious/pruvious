@@ -30,7 +30,19 @@
       </PUITab>
 
       <PUITab name="columns">
-        <div>@todo columns</div>
+        <PruviousDashboardTableColumnsConfigurator
+          v-model="data.columns"
+          :collection="collection"
+          :columnChoices="columnChoices"
+          @commit="
+            (columns) => {
+              data = { ...data, columns, activeTab }
+              if (history.size) {
+                nextTick(() => history.push(data))
+              }
+            }
+          "
+        />
       </PUITab>
 
       <PUITab name="filters">
@@ -42,7 +54,7 @@
             (where) => {
               data = { ...data, where, activeTab }
               if (history.size) {
-                history.push(data)
+                nextTick(() => history.push(data))
               }
             }
           "
@@ -56,12 +68,7 @@
         <PruviousDashboardHistoryButtons
           v-model="data"
           :history="history"
-          @update:modelValue="
-            () => {
-              $nextTick(whereFiltersComponent?.refresh)
-              activeTab = data.activeTab
-            }
-          "
+          @update:modelValue="nextTick(whereFiltersComponent?.refresh)"
         />
 
         <div class="pui-row">
@@ -75,10 +82,22 @@
 </template>
 
 <script lang="ts" setup>
-import { __, History, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
+import { __, History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField, SelectQueryBuilderParams } from '@pruvious/orm'
-import { blurActiveElement, castToBoolean, castToNumber, deepClone, sortNaturallyByProp } from '@pruvious/utils'
+import {
+  blurActiveElement,
+  castToBoolean,
+  castToNumber,
+  deepClone,
+  isDefined,
+  isEmpty,
+  isObject,
+  isUndefined,
+  remap,
+  sortNaturallyByProp,
+  titleCase,
+} from '@pruvious/utils'
 
 export interface WhereOrGroupSimplified {
   or: (_WhereField | WhereOrGroupSimplified)[][]
@@ -86,6 +105,7 @@ export interface WhereOrGroupSimplified {
 
 interface TableSettings {
   where: (_WhereField | WhereOrGroupSimplified)[]
+  columns: PUIColumns
   activeTab: 'general' | 'columns' | 'filters'
 }
 
@@ -95,6 +115,14 @@ const props = defineProps({
    */
   params: {
     type: Object as PropType<SelectQueryBuilderParams>,
+    required: true,
+  },
+
+  /**
+   * The current columns configuration.
+   */
+  columns: {
+    type: Object as PropType<PUIColumns>,
     required: true,
   },
 
@@ -109,13 +137,15 @@ const props = defineProps({
 
 const emit = defineEmits<{
   'update:params': [params: SelectQueryBuilderParams]
+  'update:columns': [columns: PUIColumns]
   'close': [close: () => Promise<void>]
   'keydown': [event: KeyboardEvent]
 }>()
 
+const route = useRoute()
 const popup = useTemplateRef('popup')
 const activeTab = ref<'general' | 'columns' | 'filters'>('general')
-const data = ref<TableSettings>({ where: [], activeTab: activeTab.value })
+const data = ref<TableSettings>({ where: [], columns: {}, activeTab: activeTab.value })
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
@@ -125,15 +155,50 @@ const fieldChoices = computed(() =>
     'label',
   ),
 )
+const columnChoices = computed(() =>
+  sortNaturallyByProp(
+    [
+      ...Object.entries(props.collection.definition.fields).map(([columnName, definition]) => ({
+        value: columnName,
+        label: resolveFieldLabel(definition.ui?.label, columnName),
+      })),
+      ...(props.collection.definition.ui.indexPage.table.columns ?? [])
+        .filter((column) => isObject(column) && 'component' in column)
+        .map((column) => ({
+          value: column.key,
+          label: isDefined(column.label)
+            ? maybeTranslate(column.label)
+            : __('pruvious-dashboard', titleCase(column.key.slice(1), false) as any),
+        })),
+    ],
+    'label',
+  ),
+)
 const history = new History({ omit: ['activeTab'] })
 const whereFiltersComponent = useTemplateRef('whereFiltersComponent')
 const { listen, isListening } = usePUIHotkeys({ allowInOverlays: true, target: () => popup.value?.root, listen: false })
+
+watch(
+  () => route.query,
+  () => {
+    setTimeout(() => history.clear().push(data.value))
+  },
+  { immediate: true },
+)
 
 watch(
   () => props.params,
   () => {
     data.value.where = castWhereCondition(props.params.where ?? [])
     nextTick(whereFiltersComponent.value?.refresh)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => props.columns,
+  () => {
+    data.value.columns = deepClone(props.columns)
   },
   { immediate: true },
 )
@@ -151,7 +216,19 @@ onMounted(() => {
 })
 
 function apply() {
-  emit('update:params', { ...props.params, where: data.value.where })
+  if (isEmpty(data.value.columns)) {
+    const options = props.collection.definition.fields.createdAt!
+    emit('update:columns', { id: puiColumn({ label: maybeTranslate(options.ui.label), sortable: 'numeric' }) })
+  } else {
+    const remapped = remap(data.value.columns, (key, value) => [
+      String(key),
+      { ...value, minWidth: isUndefined(value.width) && value.minWidth === '16rem' ? undefined : value.minWidth },
+    ])
+    emit('update:columns', remapped)
+  }
+
+  emit('update:params', { ...props.params, where: isEmpty(data.value.where) ? undefined : data.value.where })
+
   history.clear()
   emit('close', popup.value!.close)
 }

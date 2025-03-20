@@ -846,7 +846,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        * @example
        * ```ts
        * [
-       *   'firstName | 20rem | 16rem',
+       *   'firstName | 320px',
        *   'lastName',
        *   { field: 'isActive', label: ({ __ }) => __('pruvious-dashboard', 'Active') },
        * ]
@@ -900,6 +900,12 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                      * ```
                      */
                     component: string
+
+                    /**
+                     * A unique key to identify the custom column component.
+                     * It must start with the `$` character.
+                     */
+                    key: `$${string}`
                   }
               ) & {
                 /**

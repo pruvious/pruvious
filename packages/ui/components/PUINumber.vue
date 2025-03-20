@@ -4,6 +4,7 @@
     class="pui-number"
     :class="{
       'pui-number-has-drag-button': showDragButton,
+      'pui-number-auto-width': autoWidth,
       'pui-number-has-errors': error,
       'pui-number-disabled': disabled,
     }"
@@ -505,5 +506,10 @@ function stopDragging() {
   color: hsl(var(--pui-muted-foreground));
   font-size: calc(0.875rem + var(--pui-size) * 0.125rem);
   white-space: nowrap;
+}
+
+.pui-number-auto-width .pui-number-suffix {
+  margin-bottom: -0.1625em;
+  margin-bottom: round(-0.1625em, 1px);
 }
 </style>
