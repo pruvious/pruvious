@@ -943,6 +943,8 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                  *
                  * The `minWidth` property is useful for specifying `width` in percentages while ensuring a minimum width for the column.
                  *
+                 * The default value (16rem) is only used when the `width` property is not specified.
+                 *
                  * @default '16rem'
                  */
                 minWidth?: string
