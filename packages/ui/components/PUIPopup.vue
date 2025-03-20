@@ -21,7 +21,7 @@
           <slot :close="close" name="header" />
         </div>
 
-        <div :tabindex="fullHeight ? -1 : undefined" class="pui-popup-content">
+        <div :tabindex="fullHeight ? -1 : undefined" ref="content" class="pui-popup-content">
           <slot :close="close" />
         </div>
 
@@ -90,6 +90,7 @@ const emit = defineEmits<{
 }>()
 
 const root = useTemplateRef('root')
+const content = useTemplateRef('content')
 const activeElement = useActiveElement()
 const { activate, deactivate } = useFocusTrap(root, {
   escapeDeactivates: false,
@@ -102,7 +103,7 @@ const overlayCounter = usePUIOverlayCounter()
 let currentOverlay = -1
 let transitionDuration = 300
 
-defineExpose({ root, close, focus })
+defineExpose({ root, content, close, focus })
 
 provide('popup', root)
 

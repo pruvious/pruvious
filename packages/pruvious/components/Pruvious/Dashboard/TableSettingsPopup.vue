@@ -22,7 +22,12 @@
         { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
         { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
       ]"
-      @change="activeTab = $event"
+      @change="
+        (tab) => {
+          activeTab = tab
+          popup?.content?.scrollTo({ top: 0, behavior: 'instant' })
+        }
+      "
       class="p-tabs"
     >
       <PUITab name="general">
