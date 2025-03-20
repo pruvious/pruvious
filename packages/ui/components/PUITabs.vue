@@ -34,6 +34,7 @@
 </template>
 
 <script generic="T extends number | string" lang="ts" setup>
+import { deepCompare } from '@pruvious/utils'
 import { useElementSize } from '@vueuse/core'
 
 export interface PUITabListItem<T extends number | string> {
@@ -136,8 +137,10 @@ provide('active', active)
 
 watch(
   () => [props.list, props.active],
-  () => {
-    active.value = (props.active as T) ?? props.list[0]?.name
+  (newValues, oldValues) => {
+    if (!deepCompare(newValues, oldValues)) {
+      active.value = (props.active as T) ?? props.list[0]?.name
+    }
   },
   { immediate: true },
 )
