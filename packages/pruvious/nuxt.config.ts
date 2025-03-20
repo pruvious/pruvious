@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-03',
+  compatibilityDate: '2025-03-20',
   extends: ['@pruvious/ui'],
   future: { compatibilityVersion: 4 },
   nitro: {
