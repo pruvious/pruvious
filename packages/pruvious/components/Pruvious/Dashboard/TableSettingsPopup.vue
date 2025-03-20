@@ -1,6 +1,5 @@
 <template>
-  <!-- @todo use sticky popup here (header and footer sticky, inner content scrollable) -->
-  <PUIPopup @close="close()" @keydown="$emit('keydown', $event)" ref="popup">
+  <PUIPopup @close="close()" @keydown="$emit('keydown', $event)" fullHeight ref="popup">
     <template #header>
       <div class="pui-row">
         <span class="p-title">{{ __('pruvious-dashboard', 'View configuration') }}</span>
@@ -24,6 +23,7 @@
         { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
       ]"
       @change="activeTab = $event"
+      class="p-tabs"
     >
       <PUITab name="general">
         <div>general (@todo stored configurations here; read from users.tableSettings)</div>
@@ -274,7 +274,25 @@ function castWhereCondition(
   font-weight: 500;
 }
 
-:deep(.pui-tabs-content:not(:first-child)) {
+.p-tabs::before {
+  content: '';
+  position: sticky;
+  z-index: 1;
+  top: -0.75rem;
+  display: block;
+  width: 100%;
+  height: 0.75rem;
+  margin-bottom: -0.75rem;
+  background-color: hsl(var(--pui-background));
+}
+
+.p-tabs :deep(.pui-tabs-list) {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+}
+
+.p-tabs :deep(.pui-tabs-content:not(:first-child)) {
   margin-top: 0.75rem;
 }
 </style>

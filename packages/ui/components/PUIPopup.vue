@@ -6,7 +6,13 @@
       ref="root"
       tabindex="-1"
       class="pui-popup"
-      :class="[{ 'pui-popup-visible': visible }, additionalClasses]"
+      :class="[
+        {
+          'pui-popup-visible': visible,
+          'pui-popup-full-height': fullHeight,
+        },
+        additionalClasses,
+      ]"
       :style="{ '--pui-size': size }"
     >
       <div @click="$emit('close', close)" class="pui-popup-overlay"></div>
@@ -15,7 +21,7 @@
           <slot :close="close" name="header" />
         </div>
 
-        <div class="pui-popup-content">
+        <div :tabindex="fullHeight ? -1 : undefined" class="pui-popup-content">
           <slot :close="close" />
         </div>
 
@@ -41,6 +47,16 @@ defineProps({
   width: {
     type: String,
     default: '50rem',
+  },
+
+  /**
+   * Controls whether the popup expands to full height with sticky header and footer.
+   *
+   * @default false
+   */
+  fullHeight: {
+    type: Boolean,
+    default: false,
   },
 
   /**
@@ -209,18 +225,44 @@ function focus() {
   transform: translate3d(0, 1.5rem, 0) scale(0.97);
 }
 
+.pui-popup-full-height .pui-popup-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .pui-popup-header {
   padding: 0.75rem;
   border-bottom-width: 1px;
+}
+
+.pui-popup-full-height .pui-popup-header {
+  position: sticky;
+  top: 0;
 }
 
 .pui-popup-content {
   padding: 0.75rem;
 }
 
+.pui-popup-full-height .pui-popup-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  outline: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
+}
+
 .pui-popup-footer {
   padding: 0.75rem;
   border-top-width: 1px;
+}
+
+.pui-popup-full-height .pui-popup-footer {
+  position: sticky;
+  bottom: 0;
 }
 
 @media (max-width: 767px) {
