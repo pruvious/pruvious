@@ -180,7 +180,18 @@ async function initPlayground() {
 
   await execa(
     'npx',
-    ['--yes', 'nuxi@latest', 'init', '.', '--packageManager', 'pnpm', '--gitInit', 'false', '--force'],
+    [
+      '--yes',
+      'nuxi@latest',
+      'init',
+      '.',
+      '--packageManager',
+      'pnpm',
+      '--gitInit',
+      'false',
+      '--preferOffline',
+      '--force',
+    ],
     execaPlaygroundOptions,
   )
 
