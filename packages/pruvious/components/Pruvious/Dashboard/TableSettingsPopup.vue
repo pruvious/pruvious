@@ -21,12 +21,25 @@
         { name: 'general', label: __('pruvious-dashboard', 'General') },
         { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
         { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
+        { name: 'sorting', label: __('pruvious-dashboard', 'Sorting') },
       ]"
       @change="onTabChange"
       class="p-tabs"
     >
       <PUITab name="general">
-        <div>general (@todo stored configurations here; read from users.tableSettings)</div>
+        <PruviousDashboardGeneralTableSettings
+          v-model="data"
+          :collection="collection"
+          :columnChoices="columnChoices"
+          @commit="
+            (newData) => {
+              data = newData
+              if (history.size) {
+                nextTick(() => history.push(data))
+              }
+            }
+          "
+        />
       </PUITab>
 
       <PUITab name="columns">
@@ -61,6 +74,22 @@
           ref="whereFiltersComponent"
         />
       </PUITab>
+
+      <PUITab name="sorting">
+        <PruviousDashboardOrderBy
+          v-model="data.orderBy"
+          :collection="collection"
+          :columnChoices="columnChoices"
+          @commit="
+            (orderBy) => {
+              data = { ...data, orderBy, activeTab }
+              if (history.size) {
+                nextTick(() => history.push(data))
+              }
+            }
+          "
+        />
+      </PUITab>
     </PUITabs>
 
     <template #footer>
@@ -84,7 +113,7 @@
 <script lang="ts" setup>
 import { __, History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
-import type { WhereField as _WhereField, SelectQueryBuilderParams } from '@pruvious/orm'
+import type { WhereField as _WhereField, Paginated, SelectQueryBuilderParams } from '@pruvious/orm'
 import {
   blurActiveElement,
   castToBoolean,
@@ -103,11 +132,19 @@ export interface WhereOrGroupSimplified {
   or: (_WhereField | WhereOrGroupSimplified)[][]
 }
 
-interface TableSettings {
+export interface TableSettings {
   where: (_WhereField | WhereOrGroupSimplified)[]
   columns: PUIColumns
-  activeTab: 'general' | 'columns' | 'filters'
+  orderBy: {
+    field: string
+    direction?: 'asc' | 'desc'
+    nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
+  }[]
+  perPage: number
+  activeTab: Tab
 }
+
+type Tab = 'general' | 'columns' | 'filters' | 'sorting'
 
 const props = defineProps({
   /**
@@ -133,6 +170,14 @@ const props = defineProps({
     type: Object as PropType<{ name: keyof Collections; definition: SerializableCollection }>,
     required: true,
   },
+
+  /**
+   * The paginated records metadata.
+   */
+  paginated: {
+    type: Object as PropType<Omit<Paginated<any>, 'records'>>,
+    required: true,
+  },
 })
 
 const emit = defineEmits<{
@@ -144,8 +189,8 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const popup = useTemplateRef('popup')
-const activeTab = ref<'general' | 'columns' | 'filters'>('general')
-const data = ref<TableSettings>({ where: [], columns: {}, activeTab: activeTab.value })
+const activeTab = ref<Tab>('general')
+const data = ref<TableSettings>({ where: [], columns: {}, orderBy: [], perPage: 0, activeTab: activeTab.value })
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
@@ -194,6 +239,8 @@ watch(
   () => props.params,
   () => {
     data.value.where = castWhereCondition(props.params.where ?? [])
+    data.value.orderBy = props.params.orderBy ?? []
+    data.value.perPage = props.params.limit ?? 0
     nextTick(whereFiltersComponent.value?.refresh)
   },
   { immediate: true },
@@ -219,7 +266,7 @@ onMounted(() => {
   })
 })
 
-function onTabChange(tab: 'general' | 'columns' | 'filters') {
+function onTabChange(tab: Tab) {
   activeTab.value = tab
 
   if (popup.value?.content instanceof HTMLElement) {
@@ -241,7 +288,12 @@ function apply() {
     emit('update:columns', remapped)
   }
 
-  emit('update:params', { ...props.params, where: isEmpty(data.value.where) ? undefined : data.value.where })
+  emit('update:params', {
+    ...props.params,
+    where: isEmpty(data.value.where) ? undefined : data.value.where,
+    orderBy: data.value.orderBy,
+    limit: data.value.perPage,
+  })
 
   history.clear()
   emit('close', popup.value!.close)

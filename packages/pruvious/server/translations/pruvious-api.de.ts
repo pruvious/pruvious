@@ -76,6 +76,14 @@ export default defineTranslation({
     'Das Feld `$field` kann nicht zum Filtern verwendet werden',
     { field: 'string' },
   ),
+  'The field `$field` cannot be used for grouping': createPattern(
+    'Das Feld `$field` kann nicht zum Gruppieren verwendet werden',
+    { field: 'string' },
+  ),
+  'The field `$field` cannot be used for sorting': createPattern(
+    'Das Feld `$field` kann nicht zum Sortieren verwendet werden',
+    { field: 'string' },
+  ),
   'The ID must be a positive integer': 'Die ID muss eine positive Ganzzahl sein',
   'The language `$language` is not supported': createPattern('Die Sprache `$language` wird nicht unterstützt', {
     language: 'string',

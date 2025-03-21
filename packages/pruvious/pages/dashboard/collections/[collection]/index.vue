@@ -7,7 +7,7 @@
     noMainPadding
     noMainScroll
   >
-    <PruviousDashboardTableWrapper ref="tableWrapper" :class="{ 'p-empty': !pagination.total }">
+    <PruviousDashboardTableWrapper ref="tableWrapper" :class="{ 'p-empty': !paginated.total }">
       <PUITable
         v-model:selected="selected"
         v-model:sort="sort"
@@ -18,11 +18,11 @@
           sortInAscendingOrder: __('pruvious-dashboard', 'Sort in ascending order'),
           sortInDescendingOrder: __('pruvious-dashboard', 'Sort in descending order'),
           selectAll:
-            pagination.lastPage === 1
+            paginated.lastPage === 1
               ? __('pruvious-dashboard', 'Selected $count $entries', { count: selectedCount })
               : __('pruvious-dashboard', 'Selected $entryCount $entries across $pageCount $pages', {
                   entryCount: selectedCount,
-                  pageCount: pagination.lastPage,
+                  pageCount: paginated.lastPage,
                 }),
           selectAllIndeterminate: __('pruvious-dashboard', 'Selected $count $entries on this page', {
             count: selectedCount,
@@ -152,9 +152,9 @@
       <template #footer>
         <div class="pui-justify-between">
           <PUIPagination
-            :currentPage="pagination.currentPage"
+            :currentPage="paginated.currentPage"
             :goToPageTitle="__('pruvious-dashboard', 'Go to page')"
-            :lastPage="pagination.lastPage"
+            :lastPage="paginated.lastPage"
             :nextPageTitle="__('pruvious-dashboard', 'Next page')"
             :pageLabel="__('pruvious-dashboard', 'Page')"
             :previousPageTitle="__('pruvious-dashboard', 'Previous page')"
@@ -211,6 +211,7 @@
       v-model:columns="columns"
       v-model:params="params"
       :collection="collection"
+      :paginated="paginated"
       :size="-1"
       @close="$event().then(() => (isTableSettingsPopupVisible = false))"
       @update:columns="
@@ -312,13 +313,13 @@ const selectable = ref(false)
 const selected = ref<Record<number | string, boolean>>({})
 const allSelected = ref(false)
 const selectedCount = computed(() =>
-  allSelected.value ? pagination.value.total : Object.values(selected.value).filter(Boolean).length,
+  allSelected.value ? paginated.value.total : Object.values(selected.value).filter(Boolean).length,
 )
 const selectAllState = ref<boolean | 'indeterminate'>(false)
 const resolvedPermissions = ref<ResolvedCollectionRecordPermissions | null>(null)
 const isTranslationPopupVisible = ref(false)
 const isTableSettingsPopupVisible = ref(false)
-const pagination = ref<Omit<Paginated<any>, 'records'>>({
+const paginated = ref<Omit<Paginated<any>, 'records'>>({
   currentPage: 1,
   lastPage: 1,
   perPage: collection.definition.ui.indexPage.table.perPage,
@@ -354,10 +355,10 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
 
     if (response.success) {
       data.value = response.data.records as any
-      pagination.value = omit(response.data, ['records'])
+      paginated.value = omit(response.data, ['records'])
 
-      if (pagination.value.currentPage > pagination.value.lastPage) {
-        params.page = pagination.value.lastPage || 1
+      if (paginated.value.currentPage > paginated.value.lastPage) {
+        params.page = paginated.value.lastPage || 1
         push(true)
       }
     }
@@ -385,9 +386,9 @@ watch(data, () => {
 watch(contentLanguage, () => refresh(true))
 
 onKeyStroke('ArrowLeft', (e) => {
-  if (!puiHasModifierKey(e) && !puiIsEditingText() && !overlayCounter.value && pagination.value.currentPage > 1) {
+  if (!puiHasModifierKey(e) && !puiIsEditingText() && !overlayCounter.value && paginated.value.currentPage > 1) {
     e.preventDefault()
-    params.value.page = pagination.value.currentPage - 1
+    params.value.page = paginated.value.currentPage - 1
     push()
   }
 })
@@ -397,16 +398,16 @@ onKeyStroke('ArrowRight', (e) => {
     !puiHasModifierKey(e) &&
     !puiIsEditingText() &&
     !overlayCounter.value &&
-    pagination.value.currentPage < pagination.value.lastPage
+    paginated.value.currentPage < paginated.value.lastPage
   ) {
     e.preventDefault()
-    params.value.page = pagination.value.currentPage + 1
+    params.value.page = paginated.value.currentPage + 1
     push()
   }
 })
 
 listen('selectAll', (event) => {
-  if (canDelete && pagination.value.total && (!isManaged || canManage)) {
+  if (canDelete && paginated.value.total && (!isManaged || canManage)) {
     event.preventDefault()
     onSelectAll()
   }
@@ -593,14 +594,14 @@ async function onSelectAll() {
     selected.value = {}
     allSelected.value = false
     refreshSelectable()
-  } else if (pagination.value.lastPage > 1) {
+  } else if (paginated.value.lastPage > 1) {
     const action = await puiDialog({
       content: __(
         'pruvious-dashboard',
         'Would you like to select $perPage $perPageEntries on this page or all $total entries?',
         {
           perPage: data.value.length,
-          total: pagination.value.total,
+          total: paginated.value.total,
         },
       ),
       actions: [
@@ -615,7 +616,7 @@ async function onSelectAll() {
         },
         {
           name: 'all',
-          label: __('pruvious-dashboard', 'All ($count)', { count: pagination.value.total }),
+          label: __('pruvious-dashboard', 'All ($count)', { count: paginated.value.total }),
           variant: 'primary',
         },
       ],
@@ -654,7 +655,7 @@ function refreshSelectable() {
     selectAllState.value = allSelected.value
       ? true
       : data.value.every((row) => selected.value[row.id])
-        ? pagination.value.lastPage === 1
+        ? paginated.value.lastPage === 1
           ? true
           : 'indeterminate'
         : false
@@ -803,7 +804,7 @@ async function onDeleteSelection() {
         .selectFrom(collection.name)
         .select('id')
         .orderBy('id', 'desc')
-        .limit(pagination.value.total)
+        .limit(paginated.value.total)
         .first()
 
       if (lastId.success && lastId.data) {

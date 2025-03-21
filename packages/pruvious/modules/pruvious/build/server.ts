@@ -1763,7 +1763,7 @@ function getReExports() {
   return [
     `export { defineCollection, defineCollectionFromTemplate, type DefineCollectionOptions, type CollectionMetaOptions, type CollectionGuard, type CollectionUIOptions, type CollectionMeta, type GenericMetaCollection, type MetaContext } from '${resolve('../collections/define')}'`,
     `export { collectionGuards } from '${resolve('../collections/guards')}'`,
-    `export { removeWhere, denyWhere, excludeFields, maskFields, resetFields } from '${resolve('../collections/hooks')}'`,
+    `export { removeWhere, denyWhere, removeOrderBy, denyOrderBy, removeGroupBy, denyGroupBy, excludeFields, maskFields, resetFields } from '${resolve('../collections/hooks')}'`,
     `export { getCollectionBySlug, getCollectionFromEvent } from '${resolve('../collections/utils.server')}'`,
     `export type { SerializableCollection } from '${resolve('../collections/utils.client')}'`,
     `export { defineSingleton, type SingletonUIOptions, type Singleton, type GenericSingleton, type DefineSingletonOptions, type SingletonContext, type SingletonHooks, type SingletonGuard } from '${resolve('../singletons/define')}'`,

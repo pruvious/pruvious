@@ -204,6 +204,7 @@ export default defineTranslation({
   'No conditions set': 'No conditions set',
   'No data available': 'No data available',
   'No entries were deleted': 'No entries were deleted',
+  'No sorting applied': 'No sorting applied',
   'None': 'None',
 
   'OK': 'OK',
@@ -285,6 +286,9 @@ export default defineTranslation({
   'Singleton not found': 'Singleton not found',
   'Sort in ascending order': 'Sort in ascending order',
   'Sort in descending order': 'Sort in descending order',
+  'Sort NULL values first': 'Sort NULL values first',
+  'Sort NULL values last': 'Sort NULL values last',
+  'Sorting': 'Sorting',
   'SQL': 'SQL',
   'Starts with': 'Starts with',
   'Starts with (case-insensitive)': 'Starts with (case-insensitive)',

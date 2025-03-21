@@ -21,6 +21,10 @@ import { httpStatusCodeMessages } from '../api/utils.server'
  * Related hooks:
  *
  * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
  * - `excludeFields` - Removes fields from the query builder results.
  * - `maskFields` - Replaces field values with default empty values based on type.
  * - `resetFields` - Replaces field values with its defined default value.
@@ -83,6 +87,10 @@ export function removeWhere(
  * Related hooks:
  *
  * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
  * - `excludeFields` - Removes fields from the query builder results.
  * - `maskFields` - Replaces field values with default empty values based on type.
  * - `resetFields` - Replaces field values with its defined default value.
@@ -134,6 +142,256 @@ export function denyWhere(
 }
 
 /**
+ * A collection hook that removes specified `fields` from the ORDER BY clause of the query builder before preparing the query.
+ * This hook is useful for excluding sensitive fields from query ordering.
+ *
+ * This hook will not be applied if the `__ignoreRemoveOrderByHook` flag is set to `true` in the `customData` object of the context.
+ *
+ * Related hooks:
+ *
+ * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
+ * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
+ * - `excludeFields` - Removes fields from the query builder results.
+ * - `maskFields` - Replaces field values with default empty values based on type.
+ * - `resetFields` - Replaces field values with its defined default value.
+ *
+ * @example
+ * ```ts
+ * // server/collections/MyCollection.ts
+ * import { defineCollection, removeOrderBy, textField } from '#pruvious/server'
+ *
+ * export default defineCollection({
+ *   fields: {
+ *     secret: textField({}),
+ *     // ...
+ *   },
+ *   hooks: {
+ *     beforeQueryPreparation: [removeOrderBy(['secret'])],
+ *     // secret will be excluded from query ordering
+ *   },
+ * })
+ * ```
+ *
+ * @todo test
+ */
+export function removeOrderBy(
+  fields: string[] | string,
+): (
+  context:
+    | SanitizedInsertContext<GenericDatabase>
+    | SelectContext<GenericDatabase>
+    | SanitizedUpdateContext<GenericDatabase>
+    | DeleteContext<GenericDatabase>,
+) => any {
+  const fieldsArray = toArray(fields)
+
+  return ({ operation, queryBuilder, customData }) => {
+    if (!queryBuilder || customData.__ignoreRemoveOrderByHook === true || operation !== 'select') {
+      return
+    }
+
+    const orderBy = (queryBuilder as any).orderByClauses
+
+    for (let i = orderBy.length - 1; i >= 0; i--) {
+      if (fieldsArray.includes(orderBy[i].field)) {
+        orderBy.splice(i, 1)
+      }
+    }
+  }
+}
+
+/**
+ * A collection hook that throws an error if specified `fields` are present in the ORDER BY clause of the query builder before preparing the query.
+ * This hook is useful for preventing sensitive fields from query ordering.
+ *
+ * This hook will not be applied if the `__ignoreDenyOrderByHook` flag is set to `true` in the `customData` object of the context.
+ *
+ * Related hooks:
+ *
+ * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
+ * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
+ * - `excludeFields` - Removes fields from the query builder results.
+ * - `maskFields` - Replaces field values with default empty values based on type.
+ * - `resetFields` - Replaces field values with its defined default value.
+ *
+ * @example
+ * ```ts
+ * // server/collections/MyCollection.ts
+ * import { defineCollection, denyOrderBy, textField } from '#pruvious/server'
+ *
+ * export default defineCollection({
+ *   fields: {
+ *     secret: textField({}),
+ *     // ...
+ *   },
+ *   hooks: {
+ *     beforeQueryPreparation: [denyOrderBy(['secret'])],
+ *     // throws an error if secret is present in the ORDER BY clause
+ *   },
+ * })
+ * ```
+ *
+ * @todo test
+ */
+export function denyOrderBy(
+  fields: string[] | string,
+): (
+  context:
+    | SanitizedInsertContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | SelectContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | SanitizedUpdateContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | DeleteContext<Database<Record<string, GenericCollection>, typeof i18n>>,
+) => any {
+  const fieldsArray = toArray(fields)
+
+  return ({ __, operation, queryBuilder, customData }) => {
+    if (!queryBuilder || customData.__ignoreDenyOrderByHook === true || operation !== 'select') {
+      return
+    }
+
+    const orderBy = (queryBuilder as any).orderByClauses
+
+    for (const clause of orderBy) {
+      if (fieldsArray.includes(clause.field)) {
+        setResponseStatus(useEvent(), 403, httpStatusCodeMessages[403])
+        throw new Error(__('pruvious-api', 'The field `$field` cannot be used for sorting', { field: clause.field }))
+      }
+    }
+  }
+}
+
+/**
+ * A collection hook that removes specified `fields` from the GROUP BY clause of the query builder before preparing the query.
+ * This hook is useful for excluding sensitive fields from query grouping.
+ *
+ * This hook will not be applied if the `__ignoreRemoveGroupByHook` flag is set to `true` in the `customData` object of the context.
+ *
+ * Related hooks:
+ *
+ * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
+ * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
+ * - `excludeFields` - Removes fields from the query builder results.
+ * - `maskFields` - Replaces field values with default empty values based on type.
+ * - `resetFields` - Replaces field values with its defined default value.
+ *
+ * @example
+ * ```ts
+ * // server/collections/MyCollection.ts
+ * import { defineCollection, removeGroupBy, textField } from '#pruvious/server'
+ *
+ * export default defineCollection({
+ *   fields: {
+ *     secret: textField({}),
+ *     // ...
+ *   },
+ *   hooks: {
+ *     beforeQueryPreparation: [removeGroupBy(['secret'])],
+ *     // secret will be excluded from query grouping
+ *   },
+ * })
+ * ```
+ *
+ * @todo test
+ */
+export function removeGroupBy(
+  fields: string[] | string,
+): (
+  context:
+    | SanitizedInsertContext<GenericDatabase>
+    | SelectContext<GenericDatabase>
+    | SanitizedUpdateContext<GenericDatabase>
+    | DeleteContext<GenericDatabase>,
+) => any {
+  const fieldsArray = toArray(fields)
+
+  return ({ operation, queryBuilder, customData }) => {
+    if (!queryBuilder || customData.__ignoreRemoveGroupByHook === true || operation !== 'select') {
+      return
+    }
+
+    const groupBy = (queryBuilder as any).groupByFields
+
+    for (let i = groupBy.length - 1; i >= 0; i--) {
+      if (fieldsArray.includes(groupBy[i])) {
+        groupBy.splice(i, 1)
+      }
+    }
+  }
+}
+
+/**
+ * A collection hook that throws an error if specified `fields` are present in the GROUP BY clause of the query builder before preparing the query.
+ * This hook is useful for preventing sensitive fields from query grouping.
+ *
+ * This hook will not be applied if the `__ignoreDenyGroupByHook` flag is set to `true` in the `customData` object of the context.
+ *
+ * Related hooks:
+ *
+ * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
+ * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `excludeFields` - Removes fields from the query builder results.
+ * - `maskFields` - Replaces field values with default empty values based on type.
+ * - `resetFields` - Replaces field values with its defined default value.
+ *
+ * @example
+ * ```ts
+ * // server/collections/MyCollection.ts
+ * import { defineCollection, denyGroupBy, textField } from '#pruvious/server'
+ *
+ * export default defineCollection({
+ *   fields: {
+ *     secret: textField({}),
+ *     // ...
+ *   },
+ *   hooks: {
+ *     beforeQueryPreparation: [denyGroupBy(['secret'])],
+ *     // throws an error if secret is present in the GROUP BY clause
+ *   },
+ * })
+ * ```
+ *
+ * @todo test
+ */
+export function denyGroupBy(
+  fields: string[] | string,
+): (
+  context:
+    | SanitizedInsertContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | SelectContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | SanitizedUpdateContext<Database<Record<string, GenericCollection>, typeof i18n>>
+    | DeleteContext<Database<Record<string, GenericCollection>, typeof i18n>>,
+) => any {
+  const fieldsArray = toArray(fields)
+
+  return ({ __, operation, queryBuilder, customData }) => {
+    if (!queryBuilder || customData.__ignoreDenyGroupByHook === true || operation !== 'select') {
+      return
+    }
+
+    const groupBy = (queryBuilder as any).groupByFields
+
+    for (const field of groupBy) {
+      if (fieldsArray.includes(field)) {
+        setResponseStatus(useEvent(), 403, httpStatusCodeMessages[403])
+        throw new Error(__('pruvious-api', 'The field `$field` cannot be used for grouping', { field }))
+      }
+    }
+  }
+}
+
+/**
  * A collection hook that removes specified `fields` from the query builder results after executing the query.
  * This hook is useful for excluding sensitive fields from HTTP responses.
  *
@@ -143,6 +401,10 @@ export function denyWhere(
  *
  * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
  * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
  * - `maskFields` - Replaces field values with default empty values based on type.
  * - `resetFields` - Replaces field values with its defined default value.
  *
@@ -226,6 +488,10 @@ export function excludeFields(
  *
  * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
  * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
  * - `excludeFields` - Removes fields from the query builder results.
  * - `resetFields` - Replaces field values with its defined default value.
  *
@@ -302,6 +568,10 @@ export function maskFields(
  *
  * - `removeWhere` - Removes fields from the WHERE clause of the query builder.
  * - `denyWhere` - Throws an error if specified fields are present in the WHERE clause of the query builder.
+ * - `removeOrderBy` - Removes fields from the ORDER BY clause of the query builder.
+ * - `denyOrderBy` - Throws an error if specified fields are present in the ORDER BY clause of the query builder.
+ * - `removeGroupBy` - Removes fields from the GROUP BY clause of the query builder.
+ * - `denyGroupBy` - Throws an error if specified fields are present in the GROUP BY clause of the query builder.
  * - `excludeFields` - Removes fields from the query builder results.
  * - `maskFields` - Replaces field values with default empty values based on type.
  *

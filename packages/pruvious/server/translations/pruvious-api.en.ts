@@ -73,6 +73,12 @@ export default defineTranslation({
   'The field `$field` cannot be used for filtering': createPattern('The field `$field` cannot be used for filtering', {
     field: 'string',
   }),
+  'The field `$field` cannot be used for grouping': createPattern('The field `$field` cannot be used for grouping', {
+    field: 'string',
+  }),
+  'The field `$field` cannot be used for sorting': createPattern('The field `$field` cannot be used for sorting', {
+    field: 'string',
+  }),
   'The ID must be a positive integer': 'The ID must be a positive integer',
   'The language `$language` is not supported': createPattern('The language `$language` is not supported', {
     language: 'string',

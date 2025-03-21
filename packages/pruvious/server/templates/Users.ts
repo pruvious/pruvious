@@ -2,6 +2,8 @@ import {
   __,
   dashboardLanguages,
   defineTemplate,
+  denyGroupBy,
+  denyOrderBy,
   denyWhere,
   emailValidator,
   hashPassword,
@@ -202,7 +204,11 @@ export default defineTemplate(() => ({
   },
   indexes: [{ fields: ['email'], unique: true }, { fields: ['tokenSubject'], unique: true }, { fields: ['isActive'] }],
   hooks: {
-    beforeQueryPreparation: [denyWhere(['password', 'tokenSubject'])],
+    beforeQueryPreparation: [
+      denyWhere(['password', 'tokenSubject']),
+      denyOrderBy(['password', 'tokenSubject']),
+      denyGroupBy(['password', 'tokenSubject']),
+    ],
     afterQueryExecution: [maskFields(['password', 'tokenSubject'])],
   },
   guards: [
