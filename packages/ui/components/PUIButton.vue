@@ -1,6 +1,7 @@
 <template>
   <component
     :is="is ?? (to ? NuxtLink : 'button')"
+    :tabindex="disabled ? -1 : undefined"
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     class="pui-button pui-raw"

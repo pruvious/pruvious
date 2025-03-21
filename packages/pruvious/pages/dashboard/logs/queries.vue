@@ -1,5 +1,5 @@
 <template>
-  <PruviousDashboardPage noMainPadding>
+  <PruviousDashboardPage noMainPadding noMainScroll>
     <PruviousDashboardLogs
       v-model:details="details"
       v-model:detailsId="detailsId"

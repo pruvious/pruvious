@@ -86,6 +86,7 @@
       :size="-1"
       @close="$event().then(() => $emit('update:detailsId', null))"
       @keydown="onPopupKeyDown"
+      fullHeight
       ref="detailsPopup"
     >
       <template v-if="$slots.detailsHeader" #header>
@@ -105,6 +106,9 @@
 
       <div class="p-details">
         <slot name="details" />
+      </div>
+
+      <template #footer>
         <div class="pui-row">
           <div class="pui-row pui-mr-auto">
             <PUIButton
@@ -157,7 +161,7 @@
             <Icon mode="svg" name="tabler:trash-x" />
           </PUIButton>
         </div>
-      </div>
+      </template>
     </PUIPopup>
 
     <template #footer>
@@ -588,6 +592,24 @@ async function onDeleteSelection() {
 
 .p-details :deep(.pui-field-label) {
   margin-bottom: 0.5em;
+}
+
+.p-details :deep(.pui-tabs::before) {
+  content: '';
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  margin-bottom: -1.5rem;
+  background-color: hsl(var(--pui-background));
+}
+
+.p-details :deep(.pui-tabs-list) {
+  position: sticky;
+  z-index: 3;
+  top: 0.75rem;
 }
 
 .p-details :deep(.pui-tabs-content:not(:first-child)) {

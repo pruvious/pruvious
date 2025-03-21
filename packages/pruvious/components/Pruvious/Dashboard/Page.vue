@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="pruvious-dashboard-default-layout" noMainPadding>
+  <NuxtLayout name="pruvious-dashboard-default-layout" noMainPadding noMainScroll>
     <template #header>
       <PruviousDashboardHeader />
     </template>
@@ -9,7 +9,7 @@
     </template>
 
     <div class="p-page-wrapper">
-      <div tabindex="-1" class="p-page-container p-scrollbar">
+      <PUIContainer class="pui-flex-1" :class="{ 'p-page-container-no-scroll': noMainScroll }">
         <div v-if="$slots.header" class="p-page-header">
           <slot name="header" />
         </div>
@@ -17,7 +17,7 @@
         <div class="p-page-main" :class="{ 'p-page-main-no-padding': noMainPadding }">
           <slot />
         </div>
-      </div>
+      </PUIContainer>
 
       <div v-if="$slots.footer" class="p-page-footer">
         <slot name="footer" />
@@ -37,6 +37,16 @@ defineProps({
     type: Boolean,
     default: false,
   },
+
+  /**
+   * Whether to disable scrolling on the `main` slot.
+   *
+   * @default false
+   */
+  noMainScroll: {
+    type: Boolean,
+    default: false,
+  },
 })
 </script>
 
@@ -47,10 +57,8 @@ defineProps({
   height: 100%;
 }
 
-.p-page-container {
-  flex: 1;
-  overflow-y: auto;
-  outline: none;
+.p-page-container-no-scroll > :deep(.pui-container-content) {
+  height: 100%;
 }
 
 .p-page-header {
@@ -82,8 +90,6 @@ defineProps({
 }
 
 .p-page-footer {
-  position: sticky;
-  bottom: 0;
   border-top-width: 1px;
   padding: 0.75rem;
 }

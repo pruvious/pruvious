@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
-    <div
+    <component
+      :is="fullHeight ? 'div' : PUIContainer"
       @keydown.escape="onEscapeKey"
       @keydown.stop="$emit('keydown', $event)"
       ref="root"
@@ -21,15 +22,20 @@
           <slot :close="close" name="header" />
         </div>
 
-        <div :tabindex="fullHeight ? -1 : undefined" ref="content" class="pui-popup-content">
+        <component
+          :is="fullHeight ? PUIContainer : 'div'"
+          :tabindex="fullHeight ? -1 : undefined"
+          ref="content"
+          class="pui-popup-content"
+        >
           <slot :close="close" />
-        </div>
+        </component>
 
         <div v-if="$slots.footer" class="pui-popup-footer">
           <slot :close="close" name="footer" />
         </div>
       </div>
-    </div>
+    </component>
   </Teleport>
 </template>
 
@@ -37,6 +43,7 @@
 import { sleep } from '@pruvious/utils'
 import { useActiveElement, useEventListener } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
+import PUIContainer from './PUIContainer.vue'
 
 defineProps({
   /**
@@ -89,10 +96,10 @@ const emit = defineEmits<{
   keydown: [event: KeyboardEvent]
 }>()
 
-const root = useTemplateRef('root')
-const content = useTemplateRef('content')
+const root = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('root')
+const content = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('content')
 const activeElement = useActiveElement()
-const { activate, deactivate } = useFocusTrap(root, {
+const { activate, deactivate } = useFocusTrap(root as any, {
   escapeDeactivates: false,
   initialFocus: false,
   returnFocusOnDeactivate: false,
@@ -118,16 +125,16 @@ onMounted(() => {
       getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration') || '300',
     )
     visible.value = true
-    root.value!.focus()
+    focus()
     nextTick(activate)
-    setTimeout(() => root.value!.focus())
+    setTimeout(focus)
   })
 })
 
 watch(activeElement, () => {
   nextTick(() => {
     if (activeElement.value?.nodeName === 'BODY' && overlayCounter.value === currentOverlay) {
-      root.value?.focus()
+      focus()
     }
   })
 })
@@ -168,8 +175,9 @@ async function close() {
  * Focuses the root element of the popup.
  */
 function focus() {
-  root.value?.focus()
-  setTimeout(() => root.value?.focus(), transitionDuration)
+  const el = root.value instanceof HTMLElement ? root.value : root.value?.$el
+  el?.focus()
+  setTimeout(() => el?.focus(), transitionDuration)
 }
 </script>
 
@@ -184,9 +192,10 @@ function focus() {
   display: flex;
   padding: 1rem;
   outline: none;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
+}
+
+.pui-popup:not(.pui-popup-full-height) .pui-container-content {
+  display: flex;
 }
 
 .pui-popup-overlay {
@@ -242,7 +251,8 @@ function focus() {
   top: 0;
 }
 
-.pui-popup-content {
+.pui-popup:not(.pui-popup-full-height) .pui-popup-content,
+.pui-popup-content .pui-container-content {
   padding: 0.75rem;
 }
 
@@ -251,9 +261,6 @@ function focus() {
   z-index: 1;
   flex: 1;
   outline: none;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
 }
 
 .pui-popup-footer {

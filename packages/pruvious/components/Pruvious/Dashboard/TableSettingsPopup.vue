@@ -22,12 +22,7 @@
         { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
         { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
       ]"
-      @change="
-        (tab) => {
-          activeTab = tab
-          popup?.content?.scrollTo({ top: 0, behavior: 'instant' })
-        }
-      "
+      @change="onTabChange"
       class="p-tabs"
     >
       <PUITab name="general">
@@ -181,7 +176,11 @@ const columnChoices = computed(() =>
 )
 const history = new History({ omit: ['activeTab'] })
 const whereFiltersComponent = useTemplateRef('whereFiltersComponent')
-const { listen, isListening } = usePUIHotkeys({ allowInOverlays: true, target: () => popup.value?.root, listen: false })
+const { listen, isListening } = usePUIHotkeys({
+  allowInOverlays: true,
+  target: () => (popup.value?.root instanceof HTMLDivElement ? popup.value.root : popup.value?.$el),
+  listen: false,
+})
 
 watch(
   () => route.query,
@@ -219,6 +218,16 @@ onMounted(() => {
     })
   })
 })
+
+function onTabChange(tab: 'general' | 'columns' | 'filters') {
+  activeTab.value = tab
+
+  if (popup.value?.content instanceof HTMLElement) {
+    popup.value.content.scrollTo({ top: 0, behavior: 'instant' })
+  } else {
+    popup.value?.content?.$el.scrollTo({ top: 0, behavior: 'instant' })
+  }
+}
 
 function apply() {
   if (isEmpty(data.value.columns)) {
@@ -282,19 +291,19 @@ function castWhereCondition(
 .p-tabs::before {
   content: '';
   position: sticky;
-  z-index: 1;
-  top: -0.75rem;
+  z-index: 3;
+  top: 0;
   display: block;
   width: 100%;
-  height: 0.75rem;
-  margin-bottom: -0.75rem;
+  height: 1.5rem;
+  margin-bottom: -1.5rem;
   background-color: hsl(var(--pui-background));
 }
 
 .p-tabs :deep(.pui-tabs-list) {
   position: sticky;
-  z-index: 1;
-  top: 0;
+  z-index: 3;
+  top: 0.75rem;
 }
 
 .p-tabs :deep(.pui-tabs-content:not(:first-child)) {

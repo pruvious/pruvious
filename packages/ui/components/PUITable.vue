@@ -396,6 +396,10 @@ function onShiftSelect(id: number | string, value: boolean) {
   right: 0;
 }
 
+.pui-table-has-actions :where(th):not(:last-child) {
+  z-index: 12;
+}
+
 .pui-table-has-actions :where(td):last-child {
   background-color: transparent;
 }

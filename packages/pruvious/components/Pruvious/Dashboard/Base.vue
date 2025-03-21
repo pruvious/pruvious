@@ -55,24 +55,28 @@ body {
   -webkit-overflow-scrolling: auto;
 }
 
-.p-scrollbar {
+.p-scrollbar,
+.pui-container {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
 }
 
-.p-scrollbar::-webkit-scrollbar {
+.p-scrollbar::-webkit-scrollbar,
+.pui-container::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
-.p-scrollbar::-webkit-scrollbar-thumb {
+.p-scrollbar::-webkit-scrollbar-thumb,
+.pui-container::-webkit-scrollbar-thumb {
   background-color: hsl(var(--pui-foreground) / 0.25);
   background-clip: padding-box;
   border-radius: 6px;
   border: 2px solid transparent;
 }
 
-.p-scrollbar::-webkit-scrollbar-track {
+.p-scrollbar::-webkit-scrollbar-track,
+.pui-container::-webkit-scrollbar-track {
   background-color: transparent;
 }
 </style>

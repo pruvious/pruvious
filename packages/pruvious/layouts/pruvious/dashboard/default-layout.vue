@@ -13,29 +13,28 @@
         <slot name="header" />
       </div>
 
-      <div v-if="$slots.sidebar" ref="sidebar" tabindex="-1" class="p-sidebar p-scrollbar">
+      <PUIContainer v-if="$slots.sidebar" ref="sidebar" class="p-sidebar">
         <div ref="sidebarContent" class="p-sidebar-content">
           <slot name="sidebar" />
         </div>
-      </div>
+      </PUIContainer>
 
-      <div
+      <PUIContainer
         @click="dashboardLayout.sidebarExpanded && toggleSidebar()"
-        tabindex="-1"
-        class="p-main p-scrollbar"
-        :class="{ 'p-main-no-padding': noMainPadding }"
+        class="p-main"
+        :class="{ 'p-main-no-padding': noMainPadding, 'p-main-no-scroll': noMainScroll }"
       >
         <div class="p-main-content">
           <slot />
         </div>
-      </div>
+      </PUIContainer>
     </div>
   </PruviousDashboardBase>
 </template>
 
 <script lang="ts" setup>
 import { getOverlayTransitionDuration, usePruviousDashboardLayout } from '#pruvious/client'
-import { useElementSize, useScroll } from '@vueuse/core'
+import { useElementSize } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 
 defineProps({
@@ -48,12 +47,21 @@ defineProps({
     type: Boolean,
     default: false,
   },
+
+  /**
+   * Whether to disable scrolling on the `main` slot.
+   *
+   * @default false
+   */
+  noMainScroll: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const dashboardLayout = usePruviousDashboardLayout()
 const header = useTemplateRef('header')
 const sidebar = useTemplateRef('sidebar')
-const { y: sidebarScrollY } = useScroll(sidebar)
 const sidebarContent = useTemplateRef('sidebarContent')
 const { height: sidebarContentHeight } = useElementSize(sidebarContent)
 const transition = ref(false)
@@ -70,9 +78,9 @@ let transitionTimeout: NodeJS.Timeout | undefined
 provide('sidebar', { el: sidebar, toggle: toggleSidebar })
 
 onMounted(() => {
-  if (sidebar.value) {
-    nextTick(() => {
-      sidebarScrollY.value = dashboardLayout.value.sidebarScrollY
+  nextTick(() => {
+    if (sidebar.value) {
+      sidebar.value.scroll.y.value = dashboardLayout.value.sidebarScrollY
       sidebarContentHeight.value = dashboardLayout.value.sidebarContentHeight
 
       nextTick(() => {
@@ -80,13 +88,13 @@ onMounted(() => {
           toggleSidebar()
         }
       })
-    })
-  }
+    }
+  })
 })
 
 onBeforeUnmount(() => {
   if (sidebar.value) {
-    dashboardLayout.value.sidebarScrollY = sidebarScrollY.value
+    dashboardLayout.value.sidebarScrollY = sidebar.value.scroll.y.value
     dashboardLayout.value.sidebarContentHeight = sidebarContentHeight.value
   }
   clearTimeout(transitionTimeout)
@@ -177,13 +185,12 @@ async function toggleSidebar() {
   display: flex;
   flex-direction: column;
   margin: -0.5rem;
-  padding: 0.5rem;
   border-right: 1px solid hsl(var(--pui-border));
-  overflow-y: auto;
 }
 
 .p-sidebar-content {
   width: 100%;
+  padding: 0.5rem;
 }
 
 .p-main {
@@ -191,12 +198,14 @@ async function toggleSidebar() {
   position: relative;
   margin: -0.5rem;
   padding: 0.5rem;
-  overflow-y: auto;
-  outline: none;
 }
 
 .p-main-no-padding {
   padding: 0;
+}
+
+.p-main-no-scroll > :deep(.pui-container-content) {
+  height: 100%;
 }
 
 .p-main-content {
@@ -235,7 +244,6 @@ async function toggleSidebar() {
     width: 17rem;
     max-width: 100%;
     margin: 0;
-    padding: 0.5rem;
     background-color: hsl(var(--pui-background));
     visibility: hidden;
     transform: translateX(-100%);

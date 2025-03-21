@@ -298,6 +298,7 @@ const scrollable = ref<InstanceType<typeof PUIScrollable>>()
 const mousePaused = ref(false)
 const keywordHiglight = ref<[number, number]>([-1, -1])
 const keywordTimeout = useTimeout(750, { controls: true })
+const container = inject<Ref<HTMLDivElement> | null>('root', null)
 
 /**
  * Timeout to unpause mouse events after a delay following mouse movement.
@@ -332,7 +333,8 @@ let stopResizeListener: (() => void) | undefined
 /**
  * Locks the scroll when the choices list is expanded.
  */
-const scrollLock = isDefined(window) ? useScrollLock(window) : undefined
+const scrollLockWindow = isDefined(window) ? useScrollLock(window) : undefined
+const scrollLockContainer = useScrollLock(container)
 
 /**
  * Updates the `selectedChoice`.
@@ -388,21 +390,25 @@ function open(event?: Event) {
     // Close the choices list when the window is resized
     stopResizeListener = useEventListener('resize', () => close())
 
-    // Lock window scroll
-    scrollLock!.value = true
+    // Lock parent scroll
+    scrollLockWindow!.value = true
+    scrollLockContainer.value = true
 
-    // Calculate the top offset of the choices list
+    // Calculate height and offsets
     const items = props.choices.reduce((acc, choice) => acc + ('group' in choice ? choice.choices.length + 1 : 1), 0)
     const { itemHeight } = calcItemSizes()
-    const rootBottom = window.innerHeight - root.value!.getBoundingClientRect().top
+    const rootRect = root.value!.getBoundingClientRect()
+    const parentHeight = container ? container.value.offsetHeight : window.innerHeight
+    const rootTop = container ? rootRect.top - container.value.getBoundingClientRect().top : rootRect.top
+    const rootBottom = parentHeight - rootTop
 
     let height = 0
 
     for (let i = 1; i <= Math.min(items, 12); i++) {
       height += itemHeight
 
-      if (height + 4 > window.innerHeight) {
-        height = window.innerHeight - 6
+      if (height + 4 > parentHeight) {
+        height = parentHeight - 6
         break
       }
     }
@@ -450,7 +456,8 @@ function close(event?: Event) {
     stopResizeListener?.()
 
     // Unlock window scroll
-    scrollLock!.value = false
+    scrollLockWindow!.value = false
+    scrollLockContainer.value = false
 
     // Reset the choices list height and top offset
     choicesHeight.value = undefined

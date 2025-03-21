@@ -1,5 +1,12 @@
 <template>
-  <component :collection="collection" :is="layout" :label="label" :queryBuilder="queryBuilder" noMainPadding>
+  <component
+    :collection="collection"
+    :is="layout"
+    :label="label"
+    :queryBuilder="queryBuilder"
+    noMainPadding
+    noMainScroll
+  >
     <PruviousDashboardTableWrapper ref="tableWrapper" :class="{ 'p-empty': !pagination.total }">
       <PUITable
         v-model:selected="selected"
