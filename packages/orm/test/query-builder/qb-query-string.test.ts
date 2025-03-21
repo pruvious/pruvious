@@ -155,6 +155,18 @@ test('query string to select query builder params', () => {
     where: [{ field: 'firstName', operator: '=', value: 'Harry' }],
   })
 
+  expect(queryStringToSelectQueryBuilderParams('where=firstName[=][]')).toEqual({
+    where: [{ field: 'firstName', operator: '=', value: '' }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('where=firstName[!=][]')).toEqual({
+    where: [{ field: 'firstName', operator: '!=', value: '' }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('where=firstName[like][]')).toEqual({
+    where: [],
+  })
+
   expect(queryStringToSelectQueryBuilderParams('select')).toEqual({
     select: [],
   })
