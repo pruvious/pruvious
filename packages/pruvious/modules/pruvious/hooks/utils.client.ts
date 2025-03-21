@@ -1,4 +1,5 @@
-import { actions, filters, type Actions, type Filters } from '#pruvious/client'
+import type { Actions, Filters } from '#pruvious/client'
+import { actions, filters } from '#pruvious/client/hooks'
 
 /**
  * Registers a new client-side action function for a given action `name`.

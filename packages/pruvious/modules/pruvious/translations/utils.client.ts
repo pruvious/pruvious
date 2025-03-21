@@ -1,4 +1,4 @@
-import { _, __, languages } from '#pruvious/client'
+import { _, __, languages } from '#pruvious/client/i18n'
 import type { LanguageCode, TranslatableStringCallbackContext } from '#pruvious/server'
 import type {
   ExtractDomains,

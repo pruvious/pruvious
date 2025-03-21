@@ -1,6 +1,8 @@
-import { getUser, hasPermission, languages, selectFrom } from '#pruvious/client'
+import { languages } from '#pruvious/client/i18n'
 import type { Collections, LanguageCode, Permission, SerializableCollection } from '#pruvious/server'
 import { isNumber, kebabCase } from '@pruvious/utils'
+import { getUser, hasPermission } from '../../../modules/pruvious/auth/utils.client'
+import { selectFrom } from '../../../modules/pruvious/client-query-builder/utils.client'
 
 export type ResolvedCollectionRecordPermissions = Record<
   LanguageCode,

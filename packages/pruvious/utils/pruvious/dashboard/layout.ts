@@ -1,4 +1,4 @@
-import { customComponents } from '#pruvious/client'
+import { customComponents } from '#pruvious/client/custom-components'
 import type { Collections, SerializableCollection, SerializableSingleton, Singletons } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
 import type { Component } from 'vue'

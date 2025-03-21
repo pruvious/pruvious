@@ -1,4 +1,4 @@
-import { primaryLanguage, pruviousPatch } from '#pruvious/client'
+import { primaryLanguage } from '#pruvious/client/i18n'
 import type { LanguageCode, Singletons } from '#pruvious/server'
 import type {
   DefaultQueryBuilderParamsOptions,
@@ -14,6 +14,7 @@ import {
   updateQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
 import { deepClone, defu, isDefined, slugify, toArray, uniqueArray, type NonEmptyArray } from '@pruvious/utils'
+import { pruviousPatch } from '../api/utils.client'
 import type { SingletonQueryBuilderParamsOptions } from '../singletons/SingletonBaseQueryBuilder'
 import type { QueryBuilderOptions } from './QueryBuilder'
 

@@ -1,7 +1,9 @@
-import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
+import { dashboardBasePath } from '#pruvious/client/base'
+import { __ } from '#pruvious/client/i18n'
 import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { Operator } from '@pruvious/orm'
 import { isDefined, isFunction, isObject, titleCase } from '@pruvious/utils'
+import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'
 
 interface ResolvedFieldDescriptionBase {
   /**

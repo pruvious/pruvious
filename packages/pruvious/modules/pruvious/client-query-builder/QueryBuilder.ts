@@ -1,6 +1,7 @@
-import { pruviousPost, type PruviousFetchResponse } from '#pruvious/client'
+import type { PruviousFetchResponse } from '#pruvious/client'
 import type { Collection } from '@pruvious/orm'
 import { defu, slugify } from '@pruvious/utils'
+import { pruviousPost } from '../api/utils.client'
 import { DeleteQueryBuilder } from './DeleteQueryBuilder'
 import { InsertQueryBuilder } from './InsertQueryBuilder'
 import { SelectQueryBuilder } from './SelectQueryBuilder'

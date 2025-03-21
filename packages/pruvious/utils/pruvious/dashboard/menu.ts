@@ -1,4 +1,5 @@
-import { __, dashboardBasePath, maybeTranslate } from '#pruvious/client'
+import { dashboardBasePath } from '#pruvious/client/base'
+import { __ } from '#pruvious/client/i18n'
 import type { SerializableCollection, SerializableSingleton } from '#pruvious/server'
 import type { PUIVerticalMenuItemModel } from '@pruvious/ui/components/PUIVerticalMenuItem.vue'
 import { isDefined, isString, slugify, titleCase, withTrailingSlash } from '@pruvious/utils'
@@ -9,6 +10,7 @@ import type {
 } from 'vue-router'
 import type { CollectionUIOptions } from '../../../modules/pruvious/collections/define'
 import type { SingletonUIOptions } from '../../../modules/pruvious/singletons/define'
+import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'
 
 export type DashboardMenuItem = Pick<PUIVerticalMenuItemModel, 'action' | 'label' | 'icon' | 'submenu'> & {
   /**

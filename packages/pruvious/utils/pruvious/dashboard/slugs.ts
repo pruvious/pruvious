@@ -1,6 +1,6 @@
-import { usePruviousDashboard } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableSingleton, Singletons } from '#pruvious/server'
 import { slugify } from '@pruvious/utils'
+import { usePruviousDashboard } from '../../../modules/pruvious/pruvious/utils.client'
 
 /**
  * Retrieves a collection object containing its name and serializable definition using its URL path identifier (`slug`).

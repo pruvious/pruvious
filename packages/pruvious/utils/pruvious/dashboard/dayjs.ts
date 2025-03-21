@@ -1,4 +1,3 @@
-import { getUser } from '#pruvious/client'
 import _dayjs from 'dayjs/esm'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import isoWeek from 'dayjs/esm/plugin/isoWeek'
@@ -7,6 +6,7 @@ import relativeTime from 'dayjs/esm/plugin/relativeTime'
 import timezone from 'dayjs/esm/plugin/timezone'
 import utc from 'dayjs/esm/plugin/utc'
 import weekOfYear from 'dayjs/esm/plugin/weekOfYear'
+import { getUser } from '../../../modules/pruvious/auth/utils.client'
 
 let extended = false
 
