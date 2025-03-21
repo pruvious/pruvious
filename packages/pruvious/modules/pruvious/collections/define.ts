@@ -1010,13 +1010,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
           }
         | `${TFieldNames | 'id'}`
         | `${TFieldNames | 'id'}:asc`
-        | `${TFieldNames | 'id'}:asc:nullsAuto`
-        | `${TFieldNames | 'id'}:asc:nullsFirst`
-        | `${TFieldNames | 'id'}:asc:nullsLast`
         | `${TFieldNames | 'id'}:desc`
-        | `${TFieldNames | 'id'}:desc:nullsAuto`
-        | `${TFieldNames | 'id'}:desc:nullsFirst`
-        | `${TFieldNames | 'id'}:desc:nullsLast`
         | undefined
 
       /**
