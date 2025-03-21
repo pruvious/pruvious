@@ -1,7 +1,7 @@
-import { defineSingleton, resolvePruviousComponent } from '#pruvious/server'
+import { defineSingleton, languages, resolvePruviousComponent } from '#pruvious/server'
 
 export default defineSingleton({
-  translatable: true,
+  translatable: languages.length > 1,
   syncedFields: [],
   fields: {},
   ui: {
