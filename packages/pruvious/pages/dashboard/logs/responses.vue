@@ -94,13 +94,14 @@
         </span>
       </template>
 
-      <template v-if="details" #details>
+      <template v-if="details" #details="{ scrollToTop }">
         <PUITabs
           :list="[
             ...(details.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
             { name: 'response', label: __('pruvious-dashboard', 'Response') },
             ...(details.queries?.length ? [{ name: 'queries', label: __('pruvious-dashboard', 'Queries') }] : []),
           ]"
+          @change="scrollToTop()"
           active="response"
         >
           <PUITab v-if="details.request" name="request">

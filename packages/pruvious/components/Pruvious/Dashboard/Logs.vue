@@ -105,7 +105,7 @@
       </template>
 
       <div class="p-details">
-        <slot name="details" />
+        <slot :scrollToTop="scrollToTop" name="details" />
       </div>
 
       <template #footer>
@@ -545,6 +545,14 @@ async function onDeleteSelection() {
     } else {
       puiQueueToast(__('pruvious-dashboard', 'No entries were deleted'))
     }
+  }
+}
+
+function scrollToTop() {
+  if (detailsPopup.value?.content instanceof HTMLElement) {
+    detailsPopup.value.content.scrollTo({ top: 0, behavior: 'instant' })
+  } else {
+    detailsPopup.value?.content?.$el.scrollTo({ top: 0, behavior: 'instant' })
   }
 }
 </script>
