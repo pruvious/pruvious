@@ -1,10 +1,11 @@
 <template>
   <div class="p-table-columns-configurator">
-    <PUIStructure v-model="columns" @update:modelValue="emitCommit()" allowCrossDrop>
+    <PUIStructure v-model="columns" @update:modelValue="emitCommit()">
       <template #header="{ index }">
         <span class="pui-muted pui-truncate">{{ index + 1 }}. {{ __('pruvious-dashboard', 'Column') }}</span>
         <div class="p-table-columns-configurator-actions">
           <PUIButton
+            v-if="columns.length > 1"
             v-pui-tooltip="__('pruvious-dashboard', 'Delete')"
             :size="-2"
             @click="
@@ -167,10 +168,6 @@ function resolveSortable(columnName: string): 'text' | 'numeric' | false {
 
 function emitCommit() {
   emit('commit', toModelValue())
-}
-
-function emitModelValue() {
-  emit('update:modelValue', toModelValue())
 }
 
 function fromModelValue(): Column[] {
