@@ -875,6 +875,14 @@ function buildWhereCondition(
 
             whereCondition.push({ field, operator, value })
           }
+        } else if (
+          token.length === 0 &&
+          isDefined(current.operator) &&
+          isUndefined(current.value) &&
+          ['=', '!='].includes(current.operator)
+        ) {
+          whereCondition.push({ field: current.field, operator: current.operator, value: '' })
+          current = undefined
         } else {
           current = undefined
         }
