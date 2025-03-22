@@ -389,6 +389,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     page: 1,
     perPage: collection.definition.ui.indexPage.table.perPage,
   },
+  checkDirty: ['where', 'orderBy'],
 })
 
 let scrollTop = false

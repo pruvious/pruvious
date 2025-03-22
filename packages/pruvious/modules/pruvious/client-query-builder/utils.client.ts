@@ -432,6 +432,14 @@ export function useSelectQueryBuilderParams(options: {
    * @default true
    */
   watch?: boolean | string[]
+
+  /**
+   * Specifies which query parameters to check for changes when determining if the URL query parameters are different from their default values.
+   *
+   * @default
+   * ['where', 'orderBy', 'perPage']
+   */
+  checkDirty?: ('where' | 'orderBy' | 'perPage' | 'page')[]
 }): {
   /**
    * Ref that contains the current `SelectQueryBuilderParams`.
@@ -534,7 +542,7 @@ export function useSelectQueryBuilderParams(options: {
   }
 
   function refreshDirty() {
-    const checkParams = ['where', 'orderBy', 'perPage']
+    const checkParams = options.checkDirty ?? ['where', 'orderBy', 'perPage']
     const stringifiedParams = Object.fromEntries(
       selectQueryBuilderParamsToQueryString(
         pick({ ...defaultParams, ...route.query, ...params.value }, checkParams as any),
