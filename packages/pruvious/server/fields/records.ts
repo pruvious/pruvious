@@ -13,7 +13,7 @@ import {
   type FieldModel,
   type MatrixFieldModelOptions,
 } from '@pruvious/orm'
-import { isPositiveInteger, type DefaultFalse, type NonEmptyArray } from '@pruvious/utils'
+import { isEmpty, isPositiveInteger, type DefaultFalse, type NonEmptyArray } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
 interface CustomOptions<
@@ -131,28 +131,45 @@ export default {
         async (value, { definition, context, path }, errors) => {
           let hasErrors = false
 
-          for (const [i, id] of value.entries()) {
-            const count = await context.database
-              .queryBuilder()
-              .selectFrom(definition.options.collection)
-              .where('id', '=', id)
-              .useCache(context.cache)
-              .count()
+          if (!isEmpty(value)) {
+            const chunks: number[][] = []
 
-            if (!count.success) {
-              if (count.runtimeError) {
-                errors[`${path}.${i}`] = count.runtimeError
-              } else {
-                errors[`${path}.${i}`] =
-                  `Failed to verify existence of ID \`${id}\` in collection \`${definition.options.collection}\``
-              }
-
-              hasErrors = true
+            for (let i = 0; i < value.length; i += 80) {
+              chunks.push(value.slice(i, i + 80))
             }
 
-            if (count.data === 0) {
-              errors[`${path}.${i}`] = context.__('pruvious-api', 'Record does not exist')
-              hasErrors = true
+            const queries = await Promise.all(
+              chunks.map((chunk) =>
+                context.database
+                  .queryBuilder()
+                  .selectFrom(definition.options.collection)
+                  .select('id')
+                  .where('id', 'in', chunk)
+                  .select(definition.options.fields)
+                  .useCache(context.cache)
+                  .all(),
+              ),
+            )
+
+            if (queries.every((query) => query.success)) {
+              const ids: number[] = queries.flatMap((query) => query.data.map((record) => record.id))
+
+              for (const [i, id] of value.entries()) {
+                if (!ids.includes(id)) {
+                  errors[`${path}.${i}`] = context.__('pruvious-api', 'Record does not exist')
+                  hasErrors = true
+                }
+              }
+            } else {
+              const runtimeError = queries.find((query) => query.runtimeError)?.runtimeError
+
+              if (runtimeError) {
+                errors[path] = runtimeError
+                hasErrors = true
+              } else {
+                errors[path] = context.__('pruvious-orm', 'An unknown error occurred')
+                hasErrors = true
+              }
             }
           }
 
@@ -164,30 +181,38 @@ export default {
         },
       ],
       populator: async (value, contextField) => {
-        const { definition, context } = contextField
-        const deepPopulate = definition.options.populate
+        if (!isEmpty(value)) {
+          const { definition, context } = contextField
+          const deepPopulate = definition.options.populate
 
-        if (deepPopulate) {
-          limitPopulation(value, contextField)
-        }
+          if (deepPopulate) {
+            limitPopulation(value, contextField)
+          }
 
-        const populated: (Record<string, any> | null | string)[] = []
+          const chunks: number[][] = []
 
-        for (const id of value) {
-          const queryBuilder = context.database
-            .queryBuilder()
-            .selectFrom(definition.options.collection)
-            .where('id', '=', id)
-            .select(definition.options.fields)
-            .useCache(context.cache)
-          const query = deepPopulate ? await queryBuilder.populate().first() : await queryBuilder.first()
+          for (let i = 0; i < value.length; i += 80) {
+            chunks.push(value.slice(i, i + 80))
+          }
 
-          if (query.success) {
-            populated.push(query.data)
+          const queries = await Promise.all(
+            chunks.map((chunk) => {
+              const queryBuilder = context.database
+                .queryBuilder()
+                .selectFrom(definition.options.collection)
+                .where('id', 'in', chunk)
+                .select(definition.options.fields)
+                .useCache(context.cache)
+              return deepPopulate ? queryBuilder.populate().all() : queryBuilder.all()
+            }),
+          )
+
+          if (queries.every((query) => query.success)) {
+            return queries.flatMap((query) => query.data) as any
           }
         }
 
-        return populated as any
+        return []
       },
       castedTypeFn: () => 'number[]',
       populatedTypeFn: ({ options }) =>
