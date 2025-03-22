@@ -62,6 +62,7 @@ export type FilterOperator =
   | 'contains'
   | 'containsI'
   | 'notContains'
+  | 'notContainsI'
 
 export const filterOperatorsMap: Record<FilterOperator, Operator> = {
   eq: '=',
@@ -78,6 +79,7 @@ export const filterOperatorsMap: Record<FilterOperator, Operator> = {
   contains: 'like',
   containsI: 'ilike',
   notContains: 'notLike',
+  notContainsI: 'notIlike',
 }
 
 /**
@@ -136,6 +138,7 @@ export function getValidFilterOperators({
     { value: 'contains', label: __('pruvious-dashboard', 'Contains') },
     { value: 'containsI', label: __('pruvious-dashboard', 'Contains (case-insensitive)') },
     { value: 'notContains', label: __('pruvious-dashboard', 'Does not contain') },
+    { value: 'notContainsI', label: __('pruvious-dashboard', 'Does not contain (case-insensitive)') },
   ]
 
   if (__dataType === 'text') {

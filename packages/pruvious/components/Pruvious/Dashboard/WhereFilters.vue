@@ -145,10 +145,10 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __, filterOperatorsMap } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
-import { deepClone, isEmpty, nanoid, omit, walkObjects } from '@pruvious/utils'
+import { deepClone, invertMap, isEmpty, isString, nanoid, omit, walkObjects } from '@pruvious/utils'
 import type { WhereOrGroupSimplified } from './TableSettingsPopup.vue'
 import type { WhereAndGroup, WhereField, WhereOrGroup } from './WhereFiltersGroup.vue'
 
@@ -185,11 +185,12 @@ const emit = defineEmits<{
 
 defineExpose({ refresh })
 
+const invertedFilterOperatorsMap = invertMap(filterOperatorsMap)
 const relation = ref<'and' | 'or'>('and')
 const where = ref<(WhereField | WhereAndGroup | WhereOrGroup)[]>(fromModelValue(props.modelValue))
 
 function addCondition() {
-  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: '=', value: '' }
+  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
   where.value.push(newCondition)
   emitModelValue()
 }
@@ -197,7 +198,7 @@ function addCondition() {
 function addOrGroup() {
   const newCondition: WhereOrGroup = {
     _key: nanoid(),
-    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: '=', value: '' }]],
+    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
   }
   where.value.push(newCondition)
   emitModelValue()
@@ -265,7 +266,35 @@ function _fromModelValue(
         result.push(orGroup)
       }
     } else {
-      result.push({ ...item, _key: nanoid() })
+      let operator = invertedFilterOperatorsMap[item.operator]
+      let value = item.value
+
+      if (!operator) {
+        // @todo handle "includes" | "includesAny" | "excludes" | "excludesAny" | "in" | "notIn" | "between" | "notBetween"
+      }
+
+      if (operator) {
+        if (isString(value)) {
+          if (item.operator === 'like' || item.operator === 'ilike') {
+            if (value.startsWith('%') && value.endsWith('%')) {
+              operator = item.operator === 'like' ? 'contains' : 'containsI'
+              value = value.slice(1, -1)
+            } else if (value.startsWith('%')) {
+              operator = item.operator === 'like' ? 'endsWith' : 'endsWithI'
+              value = value.slice(1)
+            } else if (value.endsWith('%')) {
+              operator = item.operator === 'like' ? 'startsWith' : 'startsWithI'
+              value = value.slice(0, -1)
+            } else {
+              operator = item.operator === 'like' ? 'eq' : 'eqi'
+            }
+          } else if (item.operator === 'notLike' || item.operator === 'notIlike') {
+            value = value.slice(1, -1)
+          }
+        }
+
+        result.push({ ...item, _key: nanoid(), operator, value })
+      }
     }
   }
 
@@ -287,7 +316,44 @@ function toModelValue(where: (WhereField | WhereAndGroup | WhereOrGroup)[]): (_W
         }
       }
     } else {
-      prepared.push(omit(item, ['_key']))
+      let operator = filterOperatorsMap[item.operator]
+      let value = item.value
+
+      if (value === '' && operator !== '=' && operator !== '!=') {
+        continue
+      }
+
+      if (isString(value)) {
+        if (item.operator === 'contains') {
+          operator = 'like'
+          value = `%${value}%`
+        } else if (item.operator === 'containsI') {
+          operator = 'ilike'
+          value = `%${value}%`
+        } else if (item.operator === 'startsWith') {
+          operator = 'like'
+          value = `${value}%`
+        } else if (item.operator === 'startsWithI') {
+          operator = 'ilike'
+          value = `${value}%`
+        } else if (item.operator === 'endsWith') {
+          operator = 'like'
+          value = `%${value}`
+        } else if (item.operator === 'endsWithI') {
+          operator = 'ilike'
+          value = `%${value}`
+        } else if (item.operator === 'eqi') {
+          operator = 'ilike'
+        } else if (item.operator === 'notContains') {
+          operator = 'notLike'
+          value = `%${value}%`
+        } else if (item.operator === 'notContainsI') {
+          operator = 'notIlike'
+          value = `%${value}%`
+        }
+      }
+
+      prepared.push({ ...omit(item, ['_key']), operator, value })
     }
   }
 

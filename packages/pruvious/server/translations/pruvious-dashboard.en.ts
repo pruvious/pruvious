@@ -125,6 +125,7 @@ export default defineTranslation({
   ),
   'Deselect': 'Deselect',
   'Does not contain': 'Does not contain',
+  'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',
   'Does not equal': 'Does not equal',
   'Drop items here': 'Drop items here',
   'Duplicate': 'Duplicate',

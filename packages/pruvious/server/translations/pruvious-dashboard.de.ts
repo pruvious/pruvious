@@ -124,6 +124,7 @@ export default defineTranslation({
   ),
   'Deselect': 'Abwählen',
   'Does not contain': 'Enthält nicht',
+  'Does not contain (case-insensitive)': 'Enthält nicht (Groß-/Kleinschreibung ignorieren)',
   'Does not equal': 'Ungleich',
   'Drop items here': 'Hier einfügen',
   'Duplicate': 'Duplizieren',

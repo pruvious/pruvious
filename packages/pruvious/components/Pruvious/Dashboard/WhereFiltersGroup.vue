@@ -159,12 +159,12 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __, type FilterOperator } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
 import { deepClone, nanoid, walkObjects } from '@pruvious/utils'
 
-export type WhereField = _WhereField & { _key: string }
+export type WhereField = Omit<_WhereField, 'operator'> & { _key: string; operator: FilterOperator }
 
 export interface WhereAndGroup {
   _key: string
@@ -208,7 +208,7 @@ const emit = defineEmits<{
 }>()
 
 function addCondition() {
-  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: '=', value: '' }
+  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
   const newValue =
     'and' in props.modelValue
       ? { _key: props.modelValue._key, and: [...props.modelValue.and, [newCondition]] }
@@ -220,7 +220,7 @@ function addCondition() {
 function addOrGroup() {
   const newCondition: WhereOrGroup = {
     _key: nanoid(),
-    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: '=', value: '' }]],
+    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
   }
   const newValue =
     'and' in props.modelValue

@@ -3,11 +3,11 @@
     <div class="p-field-filter-operator">
       <PUISelect
         :choices="filterOperatorChoices"
-        :modelValue="filterOperator"
+        :modelValue="modelValue.operator"
         :name="id"
         @commit="
           (value) => {
-            $emit('update:modelValue', { ...modelValue, operator: filterOperatorsMap[value as FilterOperator] })
+            $emit('update:modelValue', { ...modelValue, operator: value as FilterOperator })
           }
         "
       />
@@ -20,9 +20,9 @@
 </template>
 
 <script lang="ts" setup>
-import { filterOperatorsMap, getValidFilterOperators, type FilterOperator } from '#pruvious/client'
+import { getValidFilterOperators, type FilterOperator } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import { invertMap, isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
+import { isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
 import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
 
 const props = defineProps({
@@ -50,8 +50,6 @@ const emit = defineEmits<{
 
 const id = useId()
 const filterOperatorChoices = computed(() => getValidFilterOperators(props.options))
-const invertedFilterOperatorsMap = invertMap(filterOperatorsMap)
-const filterOperator = computed(() => invertedFilterOperatorsMap[props.modelValue.operator])
 
 watch(
   () => props.modelValue,
@@ -59,8 +57,8 @@ watch(
     if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
       const normalizedValue = { ...newValue }
 
-      if (!filterOperatorChoices.value.some(({ value }) => filterOperatorsMap[value] === normalizedValue.operator)) {
-        normalizedValue.operator = filterOperatorsMap[filterOperatorChoices.value[0]!.value]
+      if (!filterOperatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
+        normalizedValue.operator = filterOperatorChoices.value[0]!.value
       }
 
       if (

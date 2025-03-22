@@ -67,7 +67,14 @@
             (where) => {
               data = { ...data, where, activeTab }
               if (history.size) {
-                nextTick(() => history.push(data))
+                if (rewriteHistory && !filtersInitialized) {
+                  const newStates = history.getAllStates().map((state) => ({ ...state, where }))
+                  ;(history as any).states = newStates
+                  history.setOriginalState(newStates[0]!)
+                  filtersInitialized = true
+                } else {
+                  nextTick(() => history.push(data))
+                }
               }
             }
           "
@@ -220,6 +227,8 @@ const columnChoices = computed(() =>
   ),
 )
 const history = new History({ omit: ['activeTab'] })
+const rewriteHistory = ref(false)
+const filtersInitialized = ref(false)
 const whereFiltersComponent = useTemplateRef('whereFiltersComponent')
 const { listen, isListening } = usePUIHotkeys({
   allowInOverlays: true,
@@ -230,7 +239,11 @@ const { listen, isListening } = usePUIHotkeys({
 watch(
   () => route.query,
   () => {
-    setTimeout(() => history.clear().push(data.value))
+    setTimeout(() => {
+      history.clear().push(data.value)
+      filtersInitialized.value = false
+      activeTab.value = 'general'
+    })
   },
   { immediate: true },
 )
@@ -268,6 +281,8 @@ onMounted(() => {
 
 function onTabChange(tab: Tab) {
   activeTab.value = tab
+  rewriteHistory.value = true
+  setTimeout(() => setTimeout(() => (rewriteHistory.value = false)))
 
   if (popup.value?.content instanceof HTMLElement) {
     popup.value.content.scrollTo({ top: 0, behavior: 'instant' })
