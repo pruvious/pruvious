@@ -86,6 +86,21 @@ export class History<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
+   * Rewrites the current state with a new state.
+   * The `remove` parameter specifies the number of states to remove from the history stack.
+   */
+  rewrite(state: T, remove = 1): this {
+    const removeCount = Math.min(Math.max(1, remove), this.currentIndex + 1)
+
+    if (removeCount > 0) {
+      this.states.splice(this.currentIndex - removeCount + 1, removeCount)
+      this.currentIndex -= removeCount
+    }
+
+    return this.push(state)
+  }
+
+  /**
    * Moves backward in history by one step and returns the previous state.
    * Returns `undefined` if there are no states to undo.
    */
