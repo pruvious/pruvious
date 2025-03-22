@@ -248,8 +248,10 @@ const emit = defineEmits<{
 
 const stringified = ref('')
 const inputShadow = useTemplateRef('inputShadow')
-const { width: inputWidth } = useElementBounding(inputShadow)
+const { width: inputWidth, update: updateInputWidth } = useElementBounding(inputShadow)
 const dragEventListeners: (() => void)[] = []
+
+useEventListener('pui-overlay-animated' as any, updateInputWidth)
 
 /**
  * Updates the `stringified` value when the `modelValue` changes.

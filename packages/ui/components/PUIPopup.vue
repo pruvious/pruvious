@@ -128,6 +128,7 @@ onMounted(() => {
     focus()
     nextTick(activate)
     setTimeout(focus)
+    setTimeout(() => dispatchEvent(new CustomEvent('pui-overlay-animated')), transitionDuration)
   })
 })
 
