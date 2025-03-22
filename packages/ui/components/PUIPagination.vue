@@ -13,16 +13,24 @@
 
       <template v-for="i of pages">
         <span v-if="i === '...'" class="pui-pagination-button pui-pagination-ellipsis">...</span>
-        <button
+        <slot
           v-else
-          :title="`${goToPageTitle} ${i}`"
-          @click="currentPage !== i && $emit('change', i)"
-          type="button"
-          class="pui-pagination-button pui-raw"
-          :class="{ 'pui-pagination-button-active': currentPage === i }"
+          :currentPage="currentPage"
+          :index="i"
+          :lastPage="lastPage"
+          :onClick="() => currentPage !== i && $emit('change', i)"
+          name="button"
         >
-          {{ i }}
-        </button>
+          <button
+            :title="`${goToPageTitle} ${i}`"
+            @click="currentPage !== i && $emit('change', i)"
+            type="button"
+            class="pui-pagination-button pui-raw"
+            :class="{ 'pui-pagination-button-active': currentPage === i }"
+          >
+            {{ i }}
+          </button>
+        </slot>
       </template>
 
       <button

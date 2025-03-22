@@ -164,7 +164,25 @@
                 push()
               }
             "
-          />
+          >
+            <template #button="{ currentPage, index, onClick }">
+              <button
+                v-pui-tooltip="
+                  __('pruvious-dashboard', 'Showing entries $from to $to', {
+                    from: (index - 1) * paginated.perPage + 1,
+                    to: Math.min(index * paginated.perPage, paginated.total),
+                    total: paginated.total,
+                  })
+                "
+                @click="onClick()"
+                type="button"
+                class="pui-pagination-button pui-raw"
+                :class="{ 'pui-pagination-button-active': currentPage === index }"
+              >
+                {{ index }}
+              </button>
+            </template>
+          </PUIPagination>
 
           <div class="pui-row pui-ml-auto">
             <PUIButton

@@ -279,6 +279,7 @@ export default defineTranslation({
   'Show description': 'Beschreibung anzeigen',
   'Show details': 'Details anzeigen',
   'Show password': 'Passwort anzeigen',
+  'Showing entries $from to $to': createPattern('Einträge $from bis $to anzeigen', { from: 'number', to: 'number' }),
   'Sign in': 'Anmelden',
   'Sign out': 'Abmelden',
   'Sign out from all other devices': 'Von allen anderen Geräten abmelden',
