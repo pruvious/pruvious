@@ -76,7 +76,7 @@
                 }
               "
             >
-              <Icon mode="svg" name="tabler:note" />
+              <Icon mode="svg" name="tabler:restore" />
               <span>{{ __('pruvious-dashboard', 'Restore defaults') }}</span>
             </PUIDropdownItem>
 

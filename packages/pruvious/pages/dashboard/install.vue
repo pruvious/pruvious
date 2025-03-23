@@ -16,7 +16,7 @@
           <PUIFieldLabel>
             <label for="firstName">{{ __('pruvious-dashboard', 'First name') }}</label>
           </PUIFieldLabel>
-          <PUIInput v-model="body.firstName" autocomplete="given-name" id="firstName" name="firstName" />
+          <PUIInput v-model="body.firstName" autocomplete="given-name" autofocus id="firstName" name="firstName" />
           <PUIFieldMessage v-if="errors.firstName" error>{{ errors.firstName }}</PUIFieldMessage>
         </PUIField>
 

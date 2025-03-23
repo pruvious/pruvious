@@ -222,7 +222,7 @@ function pruviousDashboardFetch(
             usePruviousLoginPopup().value = true
           }
         } else if (payload.response.status !== 422) {
-          puiQueueToast(data.message, { type: 'warning' })
+          puiQueueToast(data.message, { type: 'error' })
         }
       }
     },
@@ -268,7 +268,7 @@ export async function pfetchDashboard<
             usePruviousLoginPopup().value = true
           }
         } else if (payload.response.status !== 422) {
-          puiQueueToast(data.message, { type: 'warning' })
+          puiQueueToast(data.message, { type: 'error' })
         }
       }
     },

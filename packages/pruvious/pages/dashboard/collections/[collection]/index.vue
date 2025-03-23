@@ -229,6 +229,8 @@
       v-model:columns="columns"
       v-model:params="params"
       :collection="collection"
+      :defaultColumns="defaultColumns"
+      :defaultOrderBy="defaultOrderBy"
       :paginated="paginated"
       :size="-1"
       @close="$event().then(() => (isTableSettingsPopupVisible = false))"
@@ -238,7 +240,15 @@
             route.query._columns = null
           } else {
             route.query._columns = Object.entries(columns)
-              .map(([fieldName, { width, minWidth }]) => [fieldName, width, minWidth].filter(isDefined).join('|'))
+              .map(([fieldName, { width, minWidth }]) => {
+                const parts = [fieldName]
+                if (isDefined(width)) {
+                  parts.push(width)
+                } else if (isDefined(minWidth) && minWidth !== '16rem') {
+                  parts.push(minWidth)
+                }
+                return parts.join('|')
+              })
               .join(',')
           }
         }
@@ -278,6 +288,7 @@ import {
   nanoid,
   omit,
   titleCase,
+  toArray,
 } from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
@@ -349,6 +360,7 @@ const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.c
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
 const refreshing = ref(false)
+const defaultOrderBy = resolveOrderBy()
 const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   watch: ['columns'],
   callback: async ({ queryString, params }) => {
@@ -385,7 +397,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     refreshing.value = false
   },
   defaultParams: {
-    orderBy: resolveOrderBy(),
+    orderBy: defaultOrderBy,
     page: 1,
     perPage: collection.definition.ui.indexPage.table.perPage,
   },
@@ -591,12 +603,14 @@ function resolveOrderBy(): {
   const orderBy = collection.definition.ui.indexPage.table.orderBy
 
   if (isDefined(orderBy)) {
-    if (isString(orderBy)) {
-      const [field, direction, nulls] = orderBy.split(':').map((p) => p.trim())
-      return [{ field, direction: direction ?? 'asc', nulls: nulls ?? 'nullsAuto' }] as any
-    } else {
-      return [orderBy]
-    }
+    return toArray(orderBy).map((orderBy) => {
+      if (isString(orderBy)) {
+        const [field, direction, nulls] = orderBy.split(':').map((p) => p.trim())
+        return { field, direction: direction ?? 'asc', nulls: nulls ?? 'nullsAuto' } as any
+      } else {
+        return orderBy
+      }
+    })
   }
 
   return [{ field: collection.definition.createdAtField ? 'createdAt' : 'id', direction: 'desc' }]
@@ -693,14 +707,12 @@ async function onDuplicate(id: number | string) {
 
       if (query.success && query.data > 0) {
         puiToast(__('pruvious-dashboard', 'Duplicated'), { type: 'success' })
-      } else if (query.runtimeError) {
-        puiToast(query.runtimeError)
       } else if (!isEmpty(query.inputErrors)) {
         puiToast(__('pruvious-dashboard', 'Error'), {
           type: 'error',
           description: '```\n' + JSON.stringify(query.inputErrors, null, 2) + '\n```',
         })
-      } else {
+      } else if (!query.runtimeError) {
         puiToast(__('pruvious-dashboard', 'An error occurred during duplication'), { type: 'error' })
       }
     } else {

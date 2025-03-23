@@ -70,7 +70,7 @@ export default {
     TPopulatedType = Pick<
       DynamicCollectionFieldTypes[DefaultFalse<TPopulate> extends true ? 'Populated' : 'Casted'][TCollection],
       TFields
-    >,
+    > | null,
   >(
     options: Omit<
       CombinedFieldOptions<
@@ -167,7 +167,7 @@ export default {
       omitOptions: ['decimalPlaces', 'min', 'max'],
       castedTypeFn: () => 'number',
       populatedTypeFn: ({ options }) =>
-        `Pick<DynamicCollectionFieldTypes[${options.populate ? "'Populated'" : "'Casted'"}]['${options.collection}'], ${(options.fields ?? ['id']).map((field) => `'${field}'`).join(' | ')}>`,
+        `Pick<DynamicCollectionFieldTypes[${options.populate ? "'Populated'" : "'Casted'"}]['${options.collection}'], ${(options.fields ?? ['id']).map((field) => `'${field}'`).join(' | ')}> | null`,
     }).serverFn.bind(this)
     return bound(options as any) as any
   },
@@ -189,7 +189,7 @@ export default {
     TPopulatedType = Pick<
       DynamicCollectionFieldTypes[DefaultFalse<TPopulate> extends true ? 'Populated' : 'Casted'][TCollection],
       TFields
-    >,
+    > | null,
   >(
     options: Omit<
       CombinedFieldOptions<

@@ -58,6 +58,16 @@ const props = defineProps({
   },
 
   /**
+   * The type of CSS position property to use.
+   *
+   * @default 'fixed'
+   */
+  strategy: {
+    type: String as PropType<'fixed' | 'absolute'>,
+    default: 'fixed',
+  },
+
+  /**
    * The distance between the dropdown menu and its `reference` element, measured in pixels.
    */
   offset: {
@@ -132,7 +142,7 @@ const {
     shift(),
   ],
   placement: props.placement === 'start' ? 'bottom-start' : 'bottom-end',
-  strategy: 'fixed',
+  strategy: props.strategy,
   whileElementsMounted: autoUpdate,
 })
 

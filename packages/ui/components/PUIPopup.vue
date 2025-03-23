@@ -125,9 +125,9 @@ onMounted(() => {
       getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration') || '300',
     )
     visible.value = true
-    focus()
+    autofocus()
     nextTick(activate)
-    setTimeout(focus)
+    setTimeout(autofocus)
     setTimeout(() => dispatchEvent(new CustomEvent('pui-overlay-animated')), transitionDuration)
   })
 })
@@ -135,7 +135,7 @@ onMounted(() => {
 watch(activeElement, () => {
   nextTick(() => {
     if (activeElement.value?.nodeName === 'BODY' && overlayCounter.value === currentOverlay) {
-      focus()
+      focusRoot()
     }
   })
 })
@@ -173,9 +173,24 @@ async function close() {
 }
 
 /**
+ * Focuses the first element with the `autofocus` attribute.
+ * If no such element is found, the root element is focused.
+ */
+function autofocus() {
+  const rootEl = root.value instanceof HTMLElement ? root.value : root.value?.$el
+  const el = rootEl?.querySelector('[autofocus], [data-autofocus]')
+  if (el instanceof HTMLElement) {
+    el.focus()
+    setTimeout(() => el.focus(), transitionDuration)
+  } else {
+    focusRoot()
+  }
+}
+
+/**
  * Focuses the root element of the popup.
  */
-function focus() {
+function focusRoot() {
   const el = root.value instanceof HTMLElement ? root.value : root.value?.$el
   el?.focus()
   setTimeout(() => el?.focus(), transitionDuration)

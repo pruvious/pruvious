@@ -707,6 +707,31 @@ type CollectionDuplicateFunction<
   ? Omit<TInsertInput, 'language' | 'translations'> | Promise<Omit<TInsertInput, 'language' | 'translations'>>
   : TInsertInput | Promise<TInsertInput>
 
+interface OrderBy<TFieldNames extends string> {
+  /**
+   * The field (column) name to order by.
+   */
+  field: TFieldNames | 'id'
+
+  /**
+   * The direction to order by.
+   *
+   * @default 'asc'
+   */
+  direction?: 'asc' | 'desc'
+
+  /**
+   * The order of null values.
+   *
+   * - `nullsAuto` - Null values are ordered based on the specified direction (`nullsFirst` for `asc`, `nullsLast` for `desc`).
+   * - `nullsFirst` - Null values are ordered first.
+   * - `nullsLast` - Null values are ordered last.
+   *
+   * @default 'nullsAuto'
+   */
+  nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
+}
+
 export interface CollectionUIOptions<TFieldNames extends string = string> {
   /**
    * Controls if the collection should be hidden in the admin dashboard.
@@ -984,33 +1009,16 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        * @default undefined
        */
       orderBy:
-        | {
-            /**
-             * The field (column) name to order by.
-             */
-            field: TFieldNames | 'id'
-
-            /**
-             * The direction to order by.
-             *
-             * @default 'asc'
-             */
-            direction?: 'asc' | 'desc'
-
-            /**
-             * The order of null values.
-             *
-             * - `nullsAuto` - Null values are ordered based on the specified direction (`nullsFirst` for `asc`, `nullsLast` for `desc`).
-             * - `nullsFirst` - Null values are ordered first.
-             * - `nullsLast` - Null values are ordered last.
-             *
-             * @default 'nullsAuto'
-             */
-            nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
-          }
+        | OrderBy<TFieldNames>
         | `${TFieldNames | 'id'}`
         | `${TFieldNames | 'id'}:asc`
         | `${TFieldNames | 'id'}:desc`
+        | (
+            | OrderBy<TFieldNames>
+            | `${TFieldNames | 'id'}`
+            | `${TFieldNames | 'id'}:asc`
+            | `${TFieldNames | 'id'}:desc`
+          )[]
         | undefined
 
       /**

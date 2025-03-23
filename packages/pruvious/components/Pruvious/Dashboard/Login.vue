@@ -6,7 +6,7 @@
       <PUIFieldLabel>
         <label for="email">{{ __('pruvious-dashboard', 'Email') }}</label>
       </PUIFieldLabel>
-      <PUIInput v-model="body.email" autocomplete="email" id="email" name="email" />
+      <PUIInput v-model="body.email" autocomplete="email" autofocus id="email" name="email" />
       <PUIFieldMessage v-if="errors.email" error>{{ errors.email }}</PUIFieldMessage>
     </PUIField>
 

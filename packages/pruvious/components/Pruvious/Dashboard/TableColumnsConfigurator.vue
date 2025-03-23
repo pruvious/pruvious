@@ -81,6 +81,7 @@
               }
             "
             showTooltips
+            variant="accent"
           />
         </div>
       </template>
@@ -97,6 +98,7 @@
 import { __ } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import { isNull, isNumber, isUndefined } from '@pruvious/utils'
+import type { TableSettings } from './TableSettingsPopup.vue'
 
 interface Column {
   name: string
@@ -111,7 +113,7 @@ const props = defineProps({
    * The columns configuration.
    */
   modelValue: {
-    type: Object as PropType<PUIColumns>,
+    type: Object as PropType<TableSettings['columns']>,
     required: true,
   },
 
@@ -184,12 +186,11 @@ function fromModelValue(): Column[] {
 }
 
 function toModelValue(): PUIColumns {
-  return columns.value.reduce<PUIColumns>((acc, { name, label, width, _width, _minWidth }) => {
+  return columns.value.reduce<PUIColumns>((acc, { name, width, _width, _minWidth }) => {
     acc[name] = {
-      label,
-      width: isNumber(width) ? `${width}px` : isNull(width) ? undefined : _width,
-      minWidth: isNumber(width) ? undefined : _minWidth,
       sortable: resolveSortable(name),
+      width: isNumber(width) ? `${width}px` : isNull(width) ? undefined : _width,
+      minWidth: isNumber(width) ? undefined : (_minWidth ?? '16rem'),
       TType: undefined,
     }
     return acc

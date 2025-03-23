@@ -17,11 +17,7 @@
   >
     <template #header>
       <div class="pui-row">
-        <PUIButton
-          v-pui-tooltip="__('pruvious-dashboard', 'All items')"
-          :to="dashboardBasePath + `collections/${route.params.collection}`"
-          variant="outline"
-        >
+        <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'All items')" :to="allItemsLink" variant="outline">
           <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
         </PUIButton>
         <span class="pui-shrink-0">{{ label }}</span>
@@ -108,6 +104,7 @@ import {
 } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
+import { collectionsToMenuItems } from '../../../../utils/pruvious/dashboard/menu'
 
 definePageMeta({
   path: dashboardBasePath + 'collections/:collection/new',
@@ -246,6 +243,7 @@ const fieldLayout =
       ? undefined
       : collection.definition.ui.updatePage.fields
     : collection.definition.ui.createPage.fields
+const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
 
 await loadFilters('dashboard:collections:new:footer:buttons')
 const footerButtonsContext = { collection, data, conditionalLogicResolver, conditionalLogic, errors }

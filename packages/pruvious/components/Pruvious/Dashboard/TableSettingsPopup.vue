@@ -15,49 +15,7 @@
       </div>
     </template>
 
-    <PUITabs
-      :active="activeTab"
-      :list="[
-        { name: 'general', label: __('pruvious-dashboard', 'General') },
-        { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
-        { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
-        { name: 'sorting', label: __('pruvious-dashboard', 'Sorting') },
-      ]"
-      @change="onTabChange"
-      class="p-tabs"
-    >
-      <PUITab name="general">
-        <PruviousDashboardGeneralTableSettings
-          v-model="data"
-          :collection="collection"
-          :columnChoices="columnChoices"
-          @commit="
-            (newData) => {
-              data = newData
-              if (history.size) {
-                nextTick(() => history.push(data))
-              }
-            }
-          "
-        />
-      </PUITab>
-
-      <PUITab name="columns">
-        <PruviousDashboardTableColumnsConfigurator
-          v-model="data.columns"
-          :collection="collection"
-          :columnChoices="columnChoices"
-          @commit="
-            (columns) => {
-              data = { ...data, columns, activeTab }
-              if (history.size) {
-                nextTick(() => history.push(data))
-              }
-            }
-          "
-        />
-      </PUITab>
-
+    <PUITabs :active="activeTab" :list="tabsList" @change="onTabChange" class="p-tabs">
       <PUITab name="filters">
         <PruviousDashboardWhereFilters
           v-model="data.where"
@@ -82,6 +40,22 @@
         />
       </PUITab>
 
+      <PUITab name="columns">
+        <PruviousDashboardTableColumnsConfigurator
+          v-model="data.columns"
+          :collection="collection"
+          :columnChoices="columnChoices"
+          @commit="
+            (columns) => {
+              data = { ...data, columns, activeTab }
+              if (history.size) {
+                nextTick(() => history.push(data))
+              }
+            }
+          "
+        />
+      </PUITab>
+
       <PUITab name="sorting">
         <PruviousDashboardOrderBy
           v-model="data.orderBy"
@@ -97,6 +71,33 @@
           "
         />
       </PUITab>
+
+      <PUITab name="bookmarks">
+        <PruviousDashboardTableSettingsBookmarks
+          v-model="data"
+          :appliedSettings="appliedData"
+          :collection="collection"
+          :isDefault="isDefault"
+          :isDefaultApplied="isDefaultApplied"
+          @apply="apply()"
+          @restore="
+            (apply) => {
+              if (apply) {
+                restore()
+              } else {
+                data = {
+                  where: [],
+                  columns: deepClone(props.defaultColumns),
+                  orderBy: deepClone(props.defaultOrderBy),
+                  activeTab,
+                }
+                nextTick(() => history.push(data))
+              }
+            }
+          "
+          @update:modelValue="nextTick(() => history.push(data))"
+        />
+      </PUITab>
     </PUITabs>
 
     <template #footer>
@@ -108,6 +109,15 @@
         />
 
         <div class="pui-row">
+          <PUIButton
+            v-if="!isDefault"
+            v-pui-tooltip="__('pruvious-dashboard', 'Restore defaults')"
+            @click="restore()"
+            variant="outline"
+          >
+            <Icon mode="svg" name="tabler:restore" />
+          </PUIButton>
+
           <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="apply()">
             {{ __('pruvious-dashboard', 'Apply') }}
           </PUIButton>
@@ -118,18 +128,20 @@
 </template>
 
 <script lang="ts" setup>
-import { __, History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
+import { __, hasPermission, History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField, Paginated, SelectQueryBuilderParams } from '@pruvious/orm'
+import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'
 import {
   blurActiveElement,
   castToBoolean,
   castToNumber,
   deepClone,
+  deepCompare,
   isDefined,
   isEmpty,
   isObject,
-  isUndefined,
+  omit,
   remap,
   sortNaturallyByProp,
   titleCase,
@@ -141,17 +153,18 @@ export interface WhereOrGroupSimplified {
 
 export interface TableSettings {
   where: (_WhereField | WhereOrGroupSimplified)[]
-  columns: PUIColumns
+  columns: {
+    [key: string]: Omit<PUIColumn, 'label' | 'TType'>
+  }
   orderBy: {
     field: string
     direction?: 'asc' | 'desc'
     nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
   }[]
-  perPage: number
   activeTab: Tab
 }
 
-type Tab = 'general' | 'columns' | 'filters' | 'sorting'
+type Tab = 'filters' | 'columns' | 'sorting' | 'bookmarks'
 
 const props = defineProps({
   /**
@@ -185,6 +198,22 @@ const props = defineProps({
     type: Object as PropType<Omit<Paginated<any>, 'records'>>,
     required: true,
   },
+
+  /**
+   * The default `columns` configuration.
+   */
+  defaultColumns: {
+    type: Object as PropType<PUIColumns>,
+    required: true,
+  },
+
+  /**
+   * The default `params.orderBy` configuration.
+   */
+  defaultOrderBy: {
+    type: Array as PropType<TableSettings['orderBy']>,
+    required: true,
+  },
 })
 
 const emit = defineEmits<{
@@ -196,8 +225,21 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const popup = useTemplateRef('popup')
-const activeTab = ref<Tab>('general')
-const data = ref<TableSettings>({ where: [], columns: {}, orderBy: [], perPage: 0, activeTab: activeTab.value })
+const activeTab = ref<Tab>('filters')
+const tabsList = computed<PUITabListItem<Tab>[]>(() => {
+  const list: PUITabListItem<Tab>[] = [
+    { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
+    { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
+    { name: 'sorting', label: __('pruvious-dashboard', 'Sorting') },
+  ]
+  if (hasPermission('collection:bookmarks:read')) {
+    list.push({ name: 'bookmarks', label: __('pruvious-dashboard', 'Bookmarks') })
+  }
+  return list
+})
+const data = ref<TableSettings>({ where: [], columns: {}, orderBy: [], activeTab: activeTab.value })
+const appliedData = ref<TableSettings>(deepClone(data.value))
+const initialized = ref(false)
 const fieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
@@ -235,6 +277,24 @@ const { listen, isListening } = usePUIHotkeys({
   target: () => (popup.value?.root instanceof HTMLDivElement ? popup.value.root : popup.value?.$el),
   listen: false,
 })
+const isDefault = computed(
+  () =>
+    isEmpty(data.value.where) &&
+    Object.keys(data.value.columns).length === Object.keys(props.defaultColumns).length &&
+    Object.entries(data.value.columns).every(
+      ([key, { width }]) => props.defaultColumns[key] && props.defaultColumns[key].width === width,
+    ) &&
+    deepCompare(data.value.orderBy, props.defaultOrderBy),
+)
+const isDefaultApplied = computed(
+  () =>
+    isEmpty(appliedData.value.where) &&
+    Object.keys(appliedData.value.columns).length === Object.keys(props.defaultColumns).length &&
+    Object.entries(appliedData.value.columns).every(
+      ([key, { width }]) => props.defaultColumns[key] && props.defaultColumns[key].width === width,
+    ) &&
+    deepCompare(appliedData.value.orderBy, props.defaultOrderBy),
+)
 
 watch(
   () => route.query,
@@ -242,19 +302,21 @@ watch(
     setTimeout(() => {
       history.clear().push(data.value)
       filtersInitialized.value = false
-      activeTab.value = 'general'
+      activeTab.value = 'columns'
     })
   },
-  { immediate: true },
 )
 
 watch(
   () => props.params,
-  () => {
+  async () => {
     data.value.where = castWhereCondition(props.params.where ?? [])
     data.value.orderBy = props.params.orderBy ?? []
-    data.value.perPage = props.params.limit ?? 0
-    nextTick(whereFiltersComponent.value?.refresh)
+    await nextTick(whereFiltersComponent.value?.refresh)
+    if (!initialized.value) {
+      appliedData.value = deepClone(data.value)
+    }
+    initialized.value = true
   },
   { immediate: true },
 )
@@ -262,7 +324,10 @@ watch(
 watch(
   () => props.columns,
   () => {
-    data.value.columns = deepClone(props.columns)
+    data.value.columns = remap(deepClone(props.columns), (name, column) => [
+      String(name),
+      omit(column, ['label', 'TType']),
+    ])
   },
   { immediate: true },
 )
@@ -296,20 +361,33 @@ function apply() {
     const options = props.collection.definition.fields.createdAt!
     emit('update:columns', { id: puiColumn({ label: maybeTranslate(options.ui.label), sortable: 'numeric' }) })
   } else {
-    const remapped = remap(data.value.columns, (key, value) => [
-      String(key),
-      { ...value, minWidth: isUndefined(value.width) && value.minWidth === '16rem' ? undefined : value.minWidth },
-    ])
-    emit('update:columns', remapped)
+    emit(
+      'update:columns',
+      remap(data.value.columns, (name, column) => {
+        const columnChoice = columnChoices.value.find(({ value }) => value === name)
+        return [String(name), { ...column, label: columnChoice?.label, TType: undefined }]
+      }),
+    )
   }
 
   emit('update:params', {
     ...props.params,
     where: isEmpty(data.value.where) ? undefined : data.value.where,
     orderBy: data.value.orderBy,
-    limit: data.value.perPage,
   })
 
+  history.clear()
+  emit('close', popup.value!.close)
+}
+
+function restore() {
+  emit('update:columns', props.defaultColumns)
+  emit('update:params', {
+    ...props.params,
+    where: undefined,
+    orderBy: props.defaultOrderBy,
+    perPage: props.collection.definition.ui.indexPage.table.perPage,
+  })
   history.clear()
   emit('close', popup.value!.close)
 }

@@ -5,7 +5,7 @@ import {
   queryStringToSelectQueryBuilderParams,
   selectQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
-import { deepClone, isArray, isNull, omit, pick } from '@pruvious/utils'
+import { deepClone, isArray, isEmpty, isNull, omit, pick } from '@pruvious/utils'
 import type { DeleteQueryBuilder } from './DeleteQueryBuilder'
 import type { InsertQueryBuilder } from './InsertQueryBuilder'
 import { QueryBuilder } from './QueryBuilder'
@@ -548,7 +548,7 @@ export function useSelectQueryBuilderParams(options: {
         pick({ ...defaultParams, ...route.query, ...params.value }, checkParams as any),
       )
         .split('&')
-        .filter(Boolean)
+        .filter((param) => !isEmpty(param) && param !== 'where=')
         .map((param) => {
           const parts = param.split('=')
           return [parts.shift()!, decodeQueryString(parts.join('='))].map(decodeQueryString)

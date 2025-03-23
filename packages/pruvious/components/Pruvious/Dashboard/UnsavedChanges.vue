@@ -3,11 +3,15 @@
     <PUIProse>
       <p>{{ __('pruvious-dashboard', 'Changes that you made may not be saved.') }}</p>
     </PUIProse>
+
     <div class="pui-row">
       <PUIButton @click="popup?.close().then(cancel)" variant="outline">
         {{ __('pruvious-dashboard', 'Cancel') }}
       </PUIButton>
-      <PUIButton @click="popup?.close().then(leave)" variant="primary">{{ __('pruvious-dashboard', 'OK') }}</PUIButton>
+
+      <PUIButton @click="popup?.close().then(leave)" variant="primary">
+        {{ __('pruvious-dashboard', 'OK') }}
+      </PUIButton>
     </div>
   </PUIPopup>
 </template>

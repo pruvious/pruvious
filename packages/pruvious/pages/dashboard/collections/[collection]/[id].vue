@@ -22,11 +22,7 @@
   >
     <template #header>
       <div class="pui-row">
-        <PUIButton
-          v-pui-tooltip="__('pruvious-dashboard', 'All items')"
-          :to="dashboardBasePath + `collections/${route.params.collection}`"
-          variant="outline"
-        >
+        <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'All items')" :to="allItemsLink" variant="outline">
           <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
         </PUIButton>
         <span class="pui-shrink-0">{{ label }}</span>
@@ -169,6 +165,7 @@ import {
 } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
+import { collectionsToMenuItems } from '../../../../utils/pruvious/dashboard/menu'
 
 definePageMeta({
   path: dashboardBasePath + 'collections/:collection/:id',
@@ -291,6 +288,7 @@ const fieldLayout =
 const isRecordMenuVisible = ref(false)
 const recordMenuButton = useTemplateRef('recordMenuButton')
 const isTranslationPopupVisible = ref(false)
+const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
 
 await loadFilters('dashboard:collections:edit:footer:buttons')
 const footerButtonsContext = { collection, data, id, conditionalLogicResolver, conditionalLogic, errors }
@@ -444,14 +442,12 @@ async function duplicateRecord() {
               navigateTo(dashboardBasePath + `collections/${route.params.collection}/${query.data[0]!.id}`),
           },
         })
-      } else if (query.runtimeError) {
-        puiToast(query.runtimeError)
       } else if (!isEmpty(query.inputErrors)) {
         puiToast(__('pruvious-dashboard', 'Error'), {
           type: 'error',
           description: '```\n' + JSON.stringify(query.inputErrors, null, 2) + '\n```',
         })
-      } else {
+      } else if (!query.runtimeError) {
         puiToast(__('pruvious-dashboard', 'An error occurred during duplication'), { type: 'error' })
       }
     } else {

@@ -1,8 +1,10 @@
+import { getUser } from '#pruvious/client'
 import { dashboardBasePath } from '#pruvious/client/base'
 import { __ } from '#pruvious/client/i18n'
 import type { SerializableCollection, SerializableSingleton } from '#pruvious/server'
+import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
 import type { PUIVerticalMenuItemModel } from '@pruvious/ui/components/PUIVerticalMenuItem.vue'
-import { isDefined, isString, slugify, titleCase, withTrailingSlash } from '@pruvious/utils'
+import { isDefined, isEmpty, isString, slugify, titleCase, withTrailingSlash } from '@pruvious/utils'
 import type {
   RouteLocationAsPathGeneric,
   RouteLocationAsRelativeGeneric,
@@ -70,7 +72,7 @@ export function prepareDashboardMenu(
     active:
       item.active ??
       (isString(item.to)
-        ? withTrailingSlash(route.path).startsWith(withTrailingSlash(dashboardBasePath + item.to))
+        ? withTrailingSlash(route.path).startsWith(withTrailingSlash(dashboardBasePath + item.to.split('?')[0]))
         : undefined),
     submenu: item.submenu ? prepareDashboardMenu(item.submenu, route) : undefined,
     expanded: true,
@@ -85,15 +87,48 @@ export function collectionsToMenuItems(
 ): (DashboardMenuItem & Pick<CollectionUIOptions['menu'], 'group' | 'order'>)[] {
   return Object.entries(collections ?? {})
     .filter(([_, definition]) => !definition.ui.hidden && !definition.ui.menu.hidden)
-    .map(([name, definition]) => ({
-      to: `collections/${slugify(name)}`,
-      label: isDefined(definition.ui.label)
-        ? maybeTranslate(definition.ui.label)
-        : __('pruvious-dashboard', titleCase(name, false) as any),
-      icon: definition.ui.menu.icon,
-      group: definition.ui.menu.group as any,
-      order: definition.ui.menu.order,
-    }))
+    .map(([name, definition]) => {
+      const _bookmark = getUser()?.bookmarks.find(({ collection }) => collection === name)
+      const bookmark = _bookmark ? { ..._bookmark, data: JSON.parse(_bookmark.data) } : undefined
+      const queryParams: string[] = isEmpty(bookmark?.data?.columns)
+        ? []
+        : [
+            'columns=' +
+              Object.entries(bookmark!.data!.columns)
+                .map(([columnName, { width, minWidth }]: any) => {
+                  const parts = [columnName]
+                  if (!isEmpty(width)) {
+                    parts.push(width)
+                  } else if (!isEmpty(minWidth) && minWidth !== '16rem') {
+                    parts.push(minWidth)
+                  }
+                  return parts.join('|')
+                })
+                .join(','),
+          ]
+
+      if (bookmark?.data) {
+        queryParams.push(
+          ...selectQueryBuilderParamsToQueryString(bookmark.data)
+            .split('&')
+            .filter(Boolean)
+            .map((param) => {
+              const parts = param.split('=')
+              return [parts.shift()!, decodeQueryString(parts.join('='))].map(decodeQueryString).join('=')
+            }),
+        )
+      }
+
+      return {
+        to: `collections/${slugify(name)}` + (isEmpty(queryParams) ? '' : `?${queryParams.join('&')}`),
+        label: isDefined(definition.ui.label)
+          ? maybeTranslate(definition.ui.label)
+          : __('pruvious-dashboard', titleCase(name, false) as any),
+        icon: definition.ui.menu.icon,
+        group: definition.ui.menu.group as any,
+        order: definition.ui.menu.order,
+      }
+    })
 }
 
 /**

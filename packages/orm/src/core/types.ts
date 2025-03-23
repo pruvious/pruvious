@@ -11,7 +11,7 @@ export type ExtractCastedTypes<TFields extends Record<string, GenericField>> = {
 }
 
 export type ExtractPopulatedTypes<TFields extends Record<string, GenericField>> = {
-  [K in keyof TFields]: TFields[K]['model']['TPopulatedType']
+  [K in keyof TFields]: TFields[K]['model']['TPopulatedType'] | (TFields[K]['nullable'] extends false ? never : null)
 }
 
 export type ExtractInputTypes<TFields extends Record<string, GenericField>> = {

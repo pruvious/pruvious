@@ -65,6 +65,7 @@
             :name="`${id}-${item.field}-direction`"
             @update:modelValue="emitCommit()"
             showTooltips
+            variant="accent"
           />
 
           <PUIIconGroup
@@ -86,6 +87,7 @@
             :name="`${id}-${item.field}-nulls`"
             @update:modelValue="emitCommit()"
             showTooltips
+            variant="accent"
           />
         </div>
       </template>
@@ -206,11 +208,11 @@ function fromModelValue(): OrderBy[] {
 function toModelValue(): TableSettings['orderBy'] {
   return orderBy.value.map(({ field, direction, nulls }) => ({
     field,
-    direction: direction === 'asc' ? undefined : direction,
+    direction,
     nulls:
       (nulls === 'nullsFirst' && direction === 'asc') || (nulls === 'nullsLast' && direction === 'desc')
-        ? undefined
-        : nulls,
+        ? 'nullsAuto'
+        : (nulls ?? 'nullsAuto'),
   }))
 }
 </script>

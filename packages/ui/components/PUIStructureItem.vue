@@ -197,9 +197,12 @@ function cleanupAfterDrag() {
 
 .pui-structure-item-inner {
   container-type: inline-size;
-  margin-top: 0.75rem;
   transition: var(--pui-transition);
   transition-property: opacity;
+}
+
+.pui-structure-item-inner:not(:first-child) {
+  margin-top: 0.75rem;
 }
 
 .pui-structure-item-dragging .pui-structure-item-inner {

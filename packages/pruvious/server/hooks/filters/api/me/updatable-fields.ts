@@ -14,6 +14,7 @@ export interface MyAccountFields {
    *   'dashboardLanguage',
    *   'dateFormat',
    *   'timeFormat',
+   *   'bookmarks',
    * ]
    */
   fields: (keyof Collections['Users']['fields'])[]
@@ -36,7 +37,16 @@ export interface MyAccountFields {
 
 export function defaultMyAccountFields(): MyAccountFields {
   return {
-    fields: ['password', 'firstName', 'lastName', 'contentLanguage', 'dashboardLanguage', 'dateFormat', 'timeFormat'],
+    fields: [
+      'password',
+      'firstName',
+      'lastName',
+      'contentLanguage',
+      'dashboardLanguage',
+      'dateFormat',
+      'timeFormat',
+      'bookmarks',
+    ],
     layout: [
       { row: ['firstName', 'lastName'] },
       { row: ['contentLanguage', 'dashboardLanguage'] },

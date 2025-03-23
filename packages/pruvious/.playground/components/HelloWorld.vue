@@ -12,11 +12,26 @@
         {{ repeater[0]?.records[0]?.roles[0]?.permissions }}
       </li>
     </ul>
+    <p>{{ nullableObject?.foo }}</p>
+    <p>{{ nullableObject?.bar.x?.baz }}</p>
+    <p>{{ nullableObject?.bar.y?.baz }}</p>
+    <p v-if="structure[0]?._key === 'image'">{{ structure[0].alt }}</p>
+    <p v-if="structure[0]?._key === 'video'">{{ structure[0].autoplay }}</p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { buttonGroupField, chipsField, recordsField, repeaterField, textField } from '#pruvious/client'
+import {
+  buttonGroupField,
+  chipsField,
+  mapField,
+  nullableObjectField,
+  recordsField,
+  repeaterField,
+  structureField,
+  switchField,
+  textField,
+} from '#pruvious/client'
 
 defineProps({
   text: textField({ required: true }),
@@ -37,6 +52,28 @@ defineProps({
           }),
         },
       }),
+    },
+  }),
+  nullableObject: nullableObjectField({
+    subfields: {
+      foo: textField({}),
+      bar: mapField({
+        subfields: {
+          baz: textField({}),
+        },
+      }),
+    },
+  }),
+  structure: structureField({
+    items: {
+      image: {
+        src: textField({}),
+        alt: textField({}),
+      },
+      video: {
+        src: textField({}),
+        autoplay: switchField({}),
+      },
     },
   }),
 })

@@ -184,14 +184,12 @@ const copyTranslation = lockAndLoad(lock, async (targetLanguage: LanguageCode) =
     if (query.success) {
       permissions.value = await resolveCollectionRecordPermissions(props.id, props.collection)
       puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
-    } else if (query.runtimeError) {
-      puiToast(query.runtimeError)
     } else if (!isEmpty(query.inputErrors)) {
       puiToast(__('pruvious-dashboard', 'Error'), {
         type: 'error',
         description: '```\n' + JSON.stringify(query.inputErrors, null, 2) + '\n```',
       })
-    } else {
+    } else if (!query.runtimeError) {
       puiToast(__('pruvious-dashboard', 'An error occurred while copying the translation'), { type: 'error' })
     }
   } else {

@@ -198,6 +198,11 @@ export default defineTemplate(() => ({
         },
       },
     }),
+    bookmarks: recordsField({
+      collection: 'Bookmarks',
+      fields: ['id', 'name', 'data', 'collection', 'user', 'shared'],
+      populate: true,
+    }),
   },
   logs: {
     exposeData: false,
