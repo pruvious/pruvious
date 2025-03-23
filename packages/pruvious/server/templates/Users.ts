@@ -49,6 +49,7 @@ export default defineTemplate(() => ({
           }
         },
       },
+      ui: { dataTable: false },
     }),
     tokenSubject: textField({
       inputFilters: {
@@ -72,7 +73,7 @@ export default defineTemplate(() => ({
           }
         },
       },
-      ui: { hidden: true },
+      ui: { hidden: true, dataTable: false },
     }),
     isActive: trueFalseField({
       default: true,

@@ -1,9 +1,4 @@
-import {
-  defineField,
-  type CombinedFieldOptions,
-  type GenericDatabase,
-  type ResolveFieldUIOptions,
-} from '#pruvious/server'
+import { defineField, type CombinedFieldOptions, type GenericDatabase } from '#pruvious/server'
 import {
   Field,
   repeaterFieldModel,
@@ -75,9 +70,7 @@ export default {
         SubfieldsInput<TSubfields>[],
         TSubfields
       >,
-      RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
-        CustomOptions<TSubfields> &
-        ResolveFieldUIOptions<undefined>,
+      RepeaterFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -94,9 +87,7 @@ export default {
       SubfieldsInput<TSubfields>[],
       TSubfields
     >,
-    RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
-      CustomOptions<TSubfields> &
-      ResolveFieldUIOptions<undefined>,
+    RepeaterFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
     false,
     TRequired,
     TImmutable,
@@ -106,7 +97,7 @@ export default {
   > {
     const bound = defineField({
       model: repeaterFieldModel(options.subfields),
-      customOptions,
+      customOptions: { ...customOptions, ui: { dataTable: false } },
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)
@@ -146,8 +137,7 @@ export default {
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClientSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -167,8 +157,7 @@ export default {
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClientSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -194,9 +183,7 @@ export default {
       SubfieldsInput<Record<string, GenericField>>[],
       Record<string, GenericField>
     >,
-    RepeaterFieldModelOptions<Record<string, any>, Record<string, any>> &
-      CustomOptions<Record<string, GenericField>> &
-      ResolveFieldUIOptions<undefined>,
+    RepeaterFieldModelOptions<Record<string, any>, Record<string, any>> & CustomOptions<Record<string, GenericField>>,
     false,
     boolean,
     boolean,

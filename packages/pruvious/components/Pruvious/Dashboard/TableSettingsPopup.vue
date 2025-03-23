@@ -20,7 +20,7 @@
         <PruviousDashboardWhereFilters
           v-model="data.where"
           :collection="collection"
-          :fieldChoices="fieldChoices"
+          :fieldChoices="whereFieldChoices"
           @commit="
             (where) => {
               data = { ...data, where, activeTab }
@@ -44,7 +44,7 @@
         <PruviousDashboardTableColumnsConfigurator
           v-model="data.columns"
           :collection="collection"
-          :columnChoices="columnChoices"
+          :fieldChoices="columnFieldChoices"
           @commit="
             (columns) => {
               data = { ...data, columns, activeTab }
@@ -60,7 +60,7 @@
         <PruviousDashboardOrderBy
           v-model="data.orderBy"
           :collection="collection"
-          :columnChoices="columnChoices"
+          :fieldChoices="orderByFieldChoices"
           @commit="
             (orderBy) => {
               data = { ...data, orderBy, activeTab }
@@ -240,22 +240,40 @@ const tabsList = computed<PUITabListItem<Tab>[]>(() => {
 const data = ref<TableSettings>({ where: [], columns: {}, orderBy: [], activeTab: activeTab.value })
 const appliedData = ref<TableSettings>(deepClone(data.value))
 const initialized = ref(false)
-const fieldChoices = computed(() =>
+const whereFieldChoices = computed(() =>
   sortNaturallyByProp(
-    Object.entries(props.collection.definition.fields).map(([fieldName, definition]) => ({
-      value: fieldName,
-      label: resolveFieldLabel(definition.ui?.label, fieldName),
-    })),
+    Object.entries(props.collection.definition.fields)
+      .filter(
+        ([_, definition]) =>
+          !(
+            isObject(definition.ui) &&
+            (definition.ui.dataTable === false ||
+              (isObject(definition.ui.dataTable) && definition.ui.dataTable.filterable === false))
+          ),
+      )
+      .map(([fieldName, definition]) => ({
+        value: fieldName,
+        label: resolveFieldLabel(definition.ui?.label, fieldName),
+      })),
     'label',
   ),
 )
-const columnChoices = computed(() =>
+const columnFieldChoices = computed(() =>
   sortNaturallyByProp(
     [
-      ...Object.entries(props.collection.definition.fields).map(([columnName, definition]) => ({
-        value: columnName,
-        label: resolveFieldLabel(definition.ui?.label, columnName),
-      })),
+      ...Object.entries(props.collection.definition.fields)
+        .filter(
+          ([_, definition]) =>
+            !(
+              isObject(definition.ui) &&
+              (definition.ui.dataTable === false ||
+                (isObject(definition.ui.dataTable) && definition.ui.dataTable.visible === false))
+            ),
+        )
+        .map(([columnName, definition]) => ({
+          value: columnName,
+          label: resolveFieldLabel(definition.ui?.label, columnName),
+        })),
       ...(props.collection.definition.ui.indexPage.table.columns ?? [])
         .filter((column) => isObject(column) && 'component' in column)
         .map((column) => ({
@@ -265,6 +283,24 @@ const columnChoices = computed(() =>
             : __('pruvious-dashboard', titleCase(column.key.slice(1), false) as any),
         })),
     ],
+    'label',
+  ),
+)
+const orderByFieldChoices = computed(() =>
+  sortNaturallyByProp(
+    Object.entries(props.collection.definition.fields)
+      .filter(
+        ([_, definition]) =>
+          !(
+            isObject(definition.ui) &&
+            (definition.ui.dataTable === false ||
+              (isObject(definition.ui.dataTable) && definition.ui.dataTable.sortable === false))
+          ),
+      )
+      .map(([fieldName, definition]) => ({
+        value: fieldName,
+        label: resolveFieldLabel(definition.ui?.label, fieldName),
+      })),
     'label',
   ),
 )
@@ -364,7 +400,7 @@ function apply() {
     emit(
       'update:columns',
       remap(data.value.columns, (name, column) => {
-        const columnChoice = columnChoices.value.find(({ value }) => value === name)
+        const columnChoice = columnFieldChoices.value.find(({ value }) => value === name)
         return [String(name), { ...column, label: columnChoice?.label, TType: undefined }]
       }),
     )

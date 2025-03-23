@@ -1,10 +1,17 @@
-import { defineCollection, textField } from '#pruvious/server'
+import { defineCollection, repeaterField, textField } from '#pruvious/server'
 
 export default defineCollection({
   translatable: true,
   fields: {
     name: textField({
       required: true,
+    }),
+    variants: repeaterField({
+      subfields: {
+        name: textField({
+          required: true,
+        }),
+      },
     }),
   },
   author: { strict: true },

@@ -26,7 +26,7 @@
         <div class="pui-row">
           <PUISelect
             :choices="
-              columnChoices.map((choice) =>
+              fieldChoices.map((choice) =>
                 choice.value === item.name || columns.every(({ name }) => name !== choice.value)
                   ? choice
                   : { ...choice, disabled: true },
@@ -87,7 +87,7 @@
       </template>
     </PUIStructure>
 
-    <PUIButton :disabled="columnChoices.length === columns.length" @click="addColumn()" variant="outline">
+    <PUIButton :disabled="fieldChoices.length === columns.length" @click="addColumn()" variant="outline">
       <Icon mode="svg" name="tabler:plus" />
       <span>{{ __('pruvious-dashboard', 'Column') }}</span>
     </PUIButton>
@@ -126,9 +126,9 @@ const props = defineProps({
   },
 
   /**
-   * The available column choices.
+   * The available field choices.
    */
-  columnChoices: {
+  fieldChoices: {
     type: Array as PropType<{ label: string; value: string }[]>,
     required: true,
   },
@@ -151,7 +151,7 @@ watch(
 )
 
 function addColumn() {
-  const columnChoice = props.columnChoices.find(({ value }) => columns.value.every(({ name }) => name !== value))
+  const columnChoice = props.fieldChoices.find(({ value }) => columns.value.every(({ name }) => name !== value))
 
   if (columnChoice) {
     columns.value.push({
@@ -174,10 +174,10 @@ function emitCommit() {
 
 function fromModelValue(): Column[] {
   return Object.entries(props.modelValue)
-    .filter(([name]) => props.columnChoices.some(({ value }) => value === name))
+    .filter(([name]) => props.fieldChoices.some(({ value }) => value === name))
     .map(([name, column]) => ({
       name,
-      label: props.columnChoices.find(({ value }) => value === name)!.label,
+      label: props.fieldChoices.find(({ value }) => value === name)!.label,
       width: isUndefined(column.width) ? null : /[1-9][0-9]*px/.test(column.width) ? +column.width.slice(0, -2) : false,
       _width: column.width,
       _minWidth: column.minWidth,

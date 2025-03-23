@@ -1,9 +1,4 @@
-import {
-  defineField,
-  type CombinedFieldOptions,
-  type GenericDatabase,
-  type ResolveFieldUIOptions,
-} from '#pruvious/server'
+import { defineField, type CombinedFieldOptions, type GenericDatabase } from '#pruvious/server'
 import {
   arrayFieldModel,
   Field,
@@ -95,7 +90,7 @@ export default {
         ExtractInput<TItems>,
         undefined
       >,
-      ArrayFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TItems> & ResolveFieldUIOptions<undefined>,
+      ArrayFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TItems>,
       false,
       TRequired,
       TImmutable,
@@ -112,7 +107,7 @@ export default {
       ExtractInput<TItems>,
       undefined
     >,
-    ArrayFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TItems> & ResolveFieldUIOptions<undefined>,
+    ArrayFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TItems>,
     false,
     TRequired,
     TImmutable,
@@ -126,7 +121,7 @@ export default {
       // @todo validators (check repeaterFieldModel)
       // @todo inputFilters (check repeaterFieldModel)
       // @todo populator (check repeaterFieldModel)
-      customOptions,
+      customOptions: { ...customOptions, ui: { dataTable: false } },
       castedTypeFn: () =>
         `(${Object.entries(options.items)
           .map(
@@ -176,8 +171,7 @@ export default {
       >,
       ArrayFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClienTItems> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClienTItems>,
       false,
       TRequired,
       TImmutable,
@@ -197,8 +191,7 @@ export default {
       >,
       ArrayFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClienTItems> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClienTItems>,
       false,
       TRequired,
       TImmutable,
@@ -225,8 +218,7 @@ export default {
       Record<string, GenericField>
     >,
     ArrayFieldModelOptions<Record<string, any>, Record<string, any>> &
-      CustomOptions<{ [$key: string]: Record<string, GenericField> }> &
-      ResolveFieldUIOptions<undefined>,
+      CustomOptions<{ [$key: string]: Record<string, GenericField> }>,
     false,
     boolean,
     boolean,

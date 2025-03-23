@@ -24,7 +24,7 @@ export interface LanguageFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The content language.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
 }
 
 export interface TranslationsFieldPresetOptions {
@@ -38,7 +38,7 @@ export interface TranslationsFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The unique identifier for translations.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
 }
 
 export interface CreatedAtFieldPresetOptions {
@@ -52,7 +52,7 @@ export interface CreatedAtFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface UpdatedAtFieldPresetOptions {
@@ -66,7 +66,7 @@ export interface UpdatedAtFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface AuthorFieldPresetOptions {
@@ -87,7 +87,7 @@ export interface AuthorFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The user who created the record.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
 }
 
 export interface EditorsFieldPresetOptions {
@@ -108,7 +108,7 @@ export interface EditorsFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The users who can edit the record.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
 }
 
 /**

@@ -335,6 +335,7 @@ export interface DefineFieldOptions<
    *   label: true,
    *   description: true,
    *   placeholder: false,
+   *   dataTable: true,
    *   customComponent: true,
    *   customTableComponent: true,
    * }
@@ -367,6 +368,7 @@ export interface PickFieldUIOptions<
   TLabel extends boolean | undefined,
   TDescription extends boolean | undefined,
   TPlaceholder extends boolean | undefined,
+  TDataTable extends boolean | undefined,
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
   TCustomFilterComponent extends boolean | undefined,
@@ -404,6 +406,14 @@ export interface PickFieldUIOptions<
   placeholder?: TPlaceholder
 
   /**
+   * Specifies whether to include a data table option for the field.
+   * This option is used to configure how the field behaves when displayed in a data table.
+   *
+   * @default true
+   */
+  dataTable?: TDataTable
+
+  /**
    * Specifies whether to include a custom component option for the field.
    * This option is used to define a custom component for rendering the field in the user interface.
    *
@@ -435,6 +445,7 @@ type GenericPickFieldUIOptions = PickFieldUIOptions<
   boolean | undefined,
   boolean | undefined,
   boolean | undefined,
+  boolean | undefined,
   boolean | undefined
 >
 
@@ -443,6 +454,7 @@ export interface FieldUIOptions<
   TLabel extends boolean | undefined,
   TDescription extends boolean | undefined,
   TPlaceholder extends boolean | undefined,
+  TDataTable extends boolean | undefined,
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
   TCustomFilterComponent extends boolean | undefined,
@@ -450,6 +462,8 @@ export interface FieldUIOptions<
   /**
    * Controls the visibility of the field in the user interface.
    * When set to `true`, the field is hidden in forms but remains visible in data tables and accessible via the API.
+   *
+   * To exclude the field from specific data table views, use the `dataTable` UI option, if available for this field type.
    *
    * @default false
    */
@@ -580,6 +594,50 @@ export interface FieldUIOptions<
    */
   placeholder?: DefaultFalse<TPlaceholder> extends true
     ? string | ((context: TranslatableStringCallbackContext) => string) | undefined
+    : never
+
+  /**
+   * Configuration options for how this field behaves when displayed in a data table.
+   * Controls visibility, sorting, and filtering capabilities.
+   *
+   * You can provide either an object with specific settings or a boolean to enable/disable all options at once.
+   *
+   * @default
+   * {
+   *   visible: true,
+   *   sortable: true,
+   *   filterable: true
+   * }
+   */
+  dataTable?: DefaultTrue<TDataTable> extends true
+    ?
+        | {
+            /**
+             * Whether this field should be visible as a column in the data table.
+             * @todo omit in repeater, object, nullableObject, map, and structure fields
+             *
+             * @default true
+             */
+            visible?: boolean
+
+            /**
+             * Whether this field can be sorted in the data table.
+             * @todo omit in repeater, object, nullableObject, map, and structure fields
+             *
+             * @default true
+             */
+            sortable?: boolean
+
+            /**
+             * Whether this field can be filtered in the data table.
+             * @todo omit in repeater, object, nullableObject, map, and structure fields
+             *
+             * @default true
+             */
+            filterable?: boolean
+          }
+        | boolean
+        | undefined
     : never
 
   /**
@@ -764,6 +822,7 @@ export type GenericFieldUIOptions = FieldUIOptions<
   undefined,
   undefined,
   undefined,
+  undefined,
   undefined
 >
 
@@ -784,6 +843,7 @@ export type ResolveFieldUIOptions<TUIOptions extends GenericPickFieldUIOptions |
                 TUIOptions['label'],
                 TUIOptions['description'],
                 TUIOptions['placeholder'],
+                TUIOptions['dataTable'],
                 TUIOptions['customComponent'],
                 TUIOptions['customTableComponent'],
                 TUIOptions['customFilterComponent']
@@ -1094,6 +1154,7 @@ export function defineField<
                       fieldTypeOptions.uiOptions?.label === false ? undefined : 'label',
                       fieldTypeOptions.uiOptions?.description === false ? undefined : 'description',
                       fieldTypeOptions.uiOptions?.placeholder === true ? 'placeholder' : undefined,
+                      fieldTypeOptions.uiOptions?.dataTable === false ? undefined : 'dataTable',
                       fieldTypeOptions.uiOptions?.customComponent === false ? undefined : 'customComponent',
                       fieldTypeOptions.uiOptions?.customTableComponent === false ? undefined : 'customTableComponent',
                       fieldTypeOptions.uiOptions?.customFilterComponent === false ? undefined : 'customFilterComponent',

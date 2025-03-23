@@ -1,9 +1,4 @@
-import {
-  defineField,
-  type CombinedFieldOptions,
-  type GenericDatabase,
-  type ResolveFieldUIOptions,
-} from '#pruvious/server'
+import { defineField, type CombinedFieldOptions, type GenericDatabase } from '#pruvious/server'
 import {
   Field,
   objectFieldModel,
@@ -76,9 +71,7 @@ export default {
         Record<string, SubfieldsInput<TSubfields>>,
         TSubfields
       >,
-      ObjectFieldModelOptions<TCastedType, TPopulatedType> &
-        CustomOptions<TSubfields> &
-        ResolveFieldUIOptions<undefined>,
+      ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -95,7 +88,7 @@ export default {
       Record<string, SubfieldsInput<TSubfields>>,
       TSubfields
     >,
-    ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields> & ResolveFieldUIOptions<undefined>,
+    ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
     false,
     TRequired,
     TImmutable,
@@ -109,7 +102,7 @@ export default {
       // @todo validators (check repeaterFieldModel)
       // @todo inputFilters (check repeaterFieldModel)
       // @todo populator (check repeaterFieldModel)
-      customOptions,
+      customOptions: { ...customOptions, ui: { dataTable: false } },
       castedTypeFn: () =>
         `Record<string, { ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)
@@ -149,8 +142,7 @@ export default {
       >,
       ObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClientSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -170,8 +162,7 @@ export default {
       >,
       ObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields> &
-        ResolveFieldUIOptions<undefined>,
+        CustomOptions<TClientSubfields>,
       false,
       TRequired,
       TImmutable,
@@ -197,9 +188,7 @@ export default {
       SubfieldsInput<Record<string, GenericField>>,
       Record<string, GenericField>
     >,
-    ObjectFieldModelOptions<Record<string, any>, Record<string, any>> &
-      CustomOptions<Record<string, GenericField>> &
-      ResolveFieldUIOptions<undefined>,
+    ObjectFieldModelOptions<Record<string, any>, Record<string, any>> & CustomOptions<Record<string, GenericField>>,
     boolean,
     boolean,
     boolean,

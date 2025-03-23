@@ -25,7 +25,7 @@
         <div class="pui-row">
           <PUISelect
             :choices="
-              columnChoices.map((choice) =>
+              fieldChoices.map((choice) =>
                 choice.value === item.field || orderBy.every(({ field }) => field !== choice.value)
                   ? choice
                   : { ...choice, disabled: true },
@@ -97,7 +97,7 @@
       {{ __('pruvious-dashboard', 'No sorting applied') }}
     </div>
 
-    <PUIButton :disabled="columnChoices.length === orderBy.length" @click="addColumn()" variant="outline">
+    <PUIButton :disabled="fieldChoices.length === orderBy.length" @click="addColumn()" variant="outline">
       <Icon mode="svg" name="tabler:plus" />
       <span>{{ __('pruvious-dashboard', 'Sorting') }}</span>
     </PUIButton>
@@ -134,9 +134,9 @@ const props = defineProps({
   },
 
   /**
-   * The available column choices.
+   * The available field choices.
    */
-  columnChoices: {
+  fieldChoices: {
     type: Array as PropType<{ label: string; value: string }[]>,
     required: true,
   },
@@ -159,7 +159,7 @@ watch(
 )
 
 function addColumn() {
-  const columnChoice = props.columnChoices.find(({ value }) => orderBy.value.every(({ field }) => field !== value))
+  const columnChoice = props.fieldChoices.find(({ value }) => orderBy.value.every(({ field }) => field !== value))
 
   if (columnChoice) {
     orderBy.value.push(resolveOrderBy(columnChoice.value))
@@ -184,7 +184,7 @@ function emitCommit() {
 
 function fromModelValue(): OrderBy[] {
   return props.modelValue
-    .filter(({ field }) => props.columnChoices.some(({ value }) => value === field))
+    .filter(({ field }) => props.fieldChoices.some(({ value }) => value === field))
     .map(({ field, direction, nulls }) => {
       const fieldDefinition = props.collection.definition.fields[field]!
       const _direction = direction ?? 'asc'
