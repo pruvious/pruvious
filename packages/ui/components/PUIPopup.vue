@@ -121,9 +121,8 @@ onMounted(() => {
     overlayCounter.value++
     currentOverlay = overlayCounter.value
     document.body.classList.add('pui-overlay-active')
-    transitionDuration = parseInt(
-      getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration') || '300',
-    )
+    const potd = getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration')
+    transitionDuration = potd.endsWith('ms') ? parseInt(potd) : potd.endsWith('s') ? parseFloat(potd) * 1000 : 300
     visible.value = true
     autofocus()
     nextTick(activate)
