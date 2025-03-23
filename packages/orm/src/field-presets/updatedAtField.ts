@@ -30,17 +30,17 @@ export function updatedAtField(): Field<
  * Sets the `updatedAt` field to the current timestamp before query execution.
  */
 export const updatedAtFieldBeforeQueryExecution: GenericSanitizedInputFilter = (_, { context }) => {
-  if (!isObject(context.cache['__tmp'])) {
-    context.cache['__tmp'] = {}
+  if (!isObject(context.cache['_tmp'])) {
+    context.cache['_tmp'] = {}
   }
 
   if (
-    !isInteger(context.cache['__tmp']['__timestamp']) ||
-    context.cache['__tmp']['__timestamp'] < -8640000000000000 ||
-    context.cache['__tmp']['__timestamp'] > 8640000000000000
+    !isInteger(context.cache['_tmp']['_timestamp']) ||
+    context.cache['_tmp']['_timestamp'] < -8640000000000000 ||
+    context.cache['_tmp']['_timestamp'] > 8640000000000000
   ) {
-    context.cache['__tmp']['__timestamp'] = Date.now()
+    context.cache['_tmp']['_timestamp'] = Date.now()
   }
 
-  return context.cache['__tmp']['__timestamp']
+  return context.cache['_tmp']['_timestamp']
 }

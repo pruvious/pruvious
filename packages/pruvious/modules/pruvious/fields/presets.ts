@@ -195,7 +195,7 @@ export function authorFieldPreset(options: AuthorFieldPresetOptions) {
     fields: ['id', 'firstName', 'lastName'],
     validators: [
       async (value, { context, path, isSubfield }) => {
-        if (context.customData.__guarded && context.operation === 'update' && !isSubfield) {
+        if (context.customData._guarded && context.operation === 'update' && !isSubfield) {
           const { auth } = useEvent().context.pruvious
 
           if (
@@ -222,7 +222,7 @@ export function authorFieldPreset(options: AuthorFieldPresetOptions) {
     ],
     inputFilters: {
       beforeInputSanitization: (value, { context }) => {
-        if (context.customData.__guarded && context.operation === 'insert' && isUndefined(value)) {
+        if (context.customData._guarded && context.operation === 'insert' && isUndefined(value)) {
           const { isLoggedIn, user } = useEvent().context.pruvious.auth
           return isLoggedIn ? user.id : null
         }

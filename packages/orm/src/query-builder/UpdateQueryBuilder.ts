@@ -970,7 +970,7 @@ export class UpdateQueryBuilder<
                 errors,
               )
             } catch (error: any) {
-              if (error.message !== '__ignore') {
+              if (error.message !== '_ignore') {
                 errors[column] = error.message || this._('Invalid input')
               }
               break

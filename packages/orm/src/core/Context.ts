@@ -57,7 +57,7 @@ export interface BaseContextOptions<TDatabase extends GenericDatabase> {
    * For example, you can use the `useCache(cache)` method in the `SelectQueryBuilder` class to automatically
    * cache query results and reuse them in subsequent hooks.
    *
-   * The `__tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
+   * The `_tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
    * This can be used as a runtime store, for example, to synchronize timestamps across multiple collection fields.
    */
   cache: Record<string, any>
@@ -283,7 +283,7 @@ export class BaseContext<TDatabase extends GenericDatabase> {
    * For example, you can use the `useCache(cache)` method in the `SelectQueryBuilder` class to automatically
    * cache query results and reuse them in subsequent hooks.
    *
-   * The `__tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
+   * The `_tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
    * This can be used as a runtime store, for example, to synchronize timestamps across multiple collection fields.
    */
   readonly cache: Record<string, any>

@@ -78,7 +78,7 @@
               collection.definition.translatable && collection.definition.syncedFields.includes(String(cellProps.key))
             "
             :translatable="collection.definition.translatable"
-            :type="collection.definition.fields[cellProps.key]!.__fieldType"
+            :type="collection.definition.fields[cellProps.key]!._fieldType"
           />
         </template>
 
@@ -474,7 +474,7 @@ function resolveColumns(
           'ui' in options && isDefined(options.ui?.label)
             ? maybeTranslate(options.ui.label)
             : __('pruvious-dashboard', titleCase(fieldName, false) as any),
-        sortable: options.__dataType === 'text' ? 'text' : 'numeric',
+        sortable: options._dataType === 'text' ? 'text' : 'numeric',
         minWidth: '16rem',
       })
     }
@@ -523,7 +523,7 @@ function resolveColumns(
                 'ui' in options && isDefined(options.ui?.label)
                   ? maybeTranslate(options.ui.label)
                   : __('pruvious-dashboard', titleCase(field, false) as any),
-              sortable: options.__dataType === 'text' ? 'text' : 'numeric',
+              sortable: options._dataType === 'text' ? 'text' : 'numeric',
               width,
               minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
             })
@@ -544,7 +544,7 @@ function resolveColumns(
               : 'ui' in options && isDefined(options.ui?.label)
                 ? maybeTranslate(options.ui.label)
                 : __('pruvious-dashboard', titleCase(column.field, false) as any),
-            sortable: options.__dataType === 'text' ? 'text' : 'numeric',
+            sortable: options._dataType === 'text' ? 'text' : 'numeric',
             width: column.width,
             minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
           })

@@ -66,22 +66,22 @@ export default defineTemplate(() => ({
             let path = value
             let index = 0
 
-            if (!isObject(context.cache['__tmp'])) {
-              context.cache['__tmp'] = {}
+            if (!isObject(context.cache['_tmp'])) {
+              context.cache['_tmp'] = {}
             }
 
-            if (!isArray(context.cache['__tmp']['__resolvedUploadsPaths'])) {
-              context.cache['__tmp']['__resolvedUploadsPaths'] = []
+            if (!isArray(context.cache['_tmp']['_resolvedUploadsPaths'])) {
+              context.cache['_tmp']['_resolvedUploadsPaths'] = []
             }
 
             while (true) {
               const uploadsCountQuery = await selectFrom('Uploads').where('path', '=', path).count()
-              const existsInCache = context.cache['__tmp']['__resolvedUploadsPaths'].includes(path)
+              const existsInCache = context.cache['_tmp']['_resolvedUploadsPaths'].includes(path)
               if ((!uploadsCountQuery.success || uploadsCountQuery.data === 0) && !existsInCache) break
               path = (ext ? value.slice(0, -ext.length) : value) + `-${++index}` + ext
             }
 
-            context.cache['__tmp']['__resolvedUploadsPaths'].push(path)
+            context.cache['_tmp']['_resolvedUploadsPaths'].push(path)
 
             return path
           }
@@ -178,7 +178,7 @@ export default defineTemplate(() => ({
   hooks: {
     beforeQueryExecution: [
       async ({ operation, customData }) => {
-        if (operation !== 'select' && !customData.__allowUploadsQueries) {
+        if (operation !== 'select' && !customData._allowUploadsQueries) {
           throw new Error(
             'The `Uploads` collection should not be modified directly. Instead, use these functions to handle uploads: `putUpload`, `moveUpload`, `updateUpload`, `deleteUpload`',
           )
@@ -197,7 +197,7 @@ export default defineTemplate(() => ({
               while (parts.pop() && parts.length) {
                 await insertInto('Uploads')
                   .values({ path: `/${parts.join('/')}`, type: 'directory' })
-                  .withCustomContextData({ __allowUploadsQueries: true })
+                  .withCustomContextData({ _allowUploadsQueries: true })
                   .run()
               }
             }

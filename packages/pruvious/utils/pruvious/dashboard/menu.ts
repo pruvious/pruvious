@@ -1,4 +1,3 @@
-import { getUser } from '#pruvious/client'
 import { dashboardBasePath } from '#pruvious/client/base'
 import { __ } from '#pruvious/client/i18n'
 import type { SerializableCollection, SerializableSingleton } from '#pruvious/server'
@@ -10,6 +9,7 @@ import type {
   RouteLocationAsRelativeGeneric,
   RouteLocationNormalizedLoadedGeneric,
 } from 'vue-router'
+import { getUser } from '../../../modules/pruvious/auth/utils.client'
 import type { CollectionUIOptions } from '../../../modules/pruvious/collections/define'
 import type { SingletonUIOptions } from '../../../modules/pruvious/singletons/define'
 import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'

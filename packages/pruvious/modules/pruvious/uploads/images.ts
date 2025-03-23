@@ -415,7 +415,7 @@ export async function optimizeImage(
         }
       }
 
-      imageURL += (imageURL.includes('?') ? '&' : '?') + `__nocache=${Date.now()}`
+      imageURL += (imageURL.includes('?') ? '&' : '?') + `_nocache=${Date.now()}`
 
       const cf = {
         image: {

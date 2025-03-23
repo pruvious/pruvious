@@ -6,7 +6,7 @@
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <PUIButtonGroup
-      v-if="options.__dataType === 'boolean'"
+      v-if="options._dataType === 'boolean'"
       :choices="[
         { value: false, label: __('pruvious-dashboard', 'False') },
         { value: true, label: __('pruvious-dashboard', 'True') },
@@ -24,7 +24,7 @@
     />
 
     <PUIInput
-      v-else-if="options.__dataType === 'text'"
+      v-else-if="options._dataType === 'text'"
       :id="id"
       :modelValue="String(modelValue.value)"
       :name="id"

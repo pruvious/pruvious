@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     .select(['password', 'tokenSubject'])
     .where('email', '=', email)
     .where('isActive', '=', true)
-    .withCustomContextData({ __ignoreMaskFieldsHook: true })
+    .withCustomContextData({ _ignoreMaskFieldsHook: true })
     .first()
 
   const isPasswordValid = await verifyPassword(password, userQuery)

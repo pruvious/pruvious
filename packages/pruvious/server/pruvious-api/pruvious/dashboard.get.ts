@@ -52,8 +52,8 @@ export default defineEventHandler(() => {
           max: Number.MAX_SAFE_INTEGER,
           min: 1,
           ui: { hidden: true, label: 'EVAL::({ __ }) => __("pruvious-dashboard", "ID")' },
-          __fieldType: 'number',
-          __dataType: 'numeric',
+          _fieldType: 'number',
+          _dataType: 'numeric',
         }
 
         for (const [fieldName, field] of Object.entries(collection.fields)) {

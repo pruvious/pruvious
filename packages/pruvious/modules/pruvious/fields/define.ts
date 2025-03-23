@@ -1105,7 +1105,7 @@ export function defineField<
               }
             : ({} as any),
           { populator: fieldTypeOptions.populator },
-          { __fieldType: fieldType, __dataType: model.dataType },
+          { _fieldType: fieldType, _dataType: model.dataType },
         ) as any,
         nullable: fieldTypeOptions.nullable ?? false,
         default: fieldTypeOptions.default,

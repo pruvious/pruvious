@@ -18,7 +18,7 @@
       :options="collection.definition.fields[modelValue.field]!"
       :synced="collection.definition.syncedFields.includes(modelValue.field)"
       :translatable="collection.definition.translatable"
-      :type="collection.definition.fields[modelValue.field]!.__fieldType"
+      :type="collection.definition.fields[modelValue.field]!._fieldType"
       @commit="$emit('commit', $event)"
       @update:modelValue="$emit('update:modelValue', $event)"
       class="pui-flex-1"

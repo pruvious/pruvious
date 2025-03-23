@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     const query = await guardedInsertInto('Uploads')
       .fromQueryString(event.path)
       .values(preparedInput.items)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     assertQuery(query)

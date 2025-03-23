@@ -190,15 +190,15 @@ const relation = ref<'and' | 'or'>('and')
 const where = ref<(WhereField | WhereAndGroup | WhereOrGroup)[]>(fromModelValue(props.modelValue))
 
 function addCondition() {
-  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
+  const newCondition: WhereField = { $key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
   where.value.push(newCondition)
   emitModelValue()
 }
 
 function addOrGroup() {
   const newCondition: WhereOrGroup = {
-    _key: nanoid(),
-    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
+    $key: nanoid(),
+    or: [[{ $key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
   }
   where.value.push(newCondition)
   emitModelValue()
@@ -214,8 +214,8 @@ function duplicate(index: number) {
   const clone = deepClone(item)!
 
   for (const { object } of walkObjects(clone)) {
-    if ('_key' in object) {
-      object._key = nanoid()
+    if ('$key' in object) {
+      object.$key = nanoid()
     }
   }
 
@@ -253,13 +253,13 @@ function _fromModelValue(
       if (item.or.length === 1) {
         result.push(..._fromModelValue(item.or[0]!))
       } else {
-        const orGroup: WhereOrGroup = { _key: nanoid(), or: [] }
+        const orGroup: WhereOrGroup = { $key: nanoid(), or: [] }
 
         for (const andGroup of item.or) {
           if (andGroup.length === 1) {
             orGroup.or.push(_fromModelValue([andGroup[0]!]))
           } else {
-            orGroup.or.push([{ _key: nanoid(), and: andGroup.map((andItem) => _fromModelValue([andItem])) }])
+            orGroup.or.push([{ $key: nanoid(), and: andGroup.map((andItem) => _fromModelValue([andItem])) }])
           }
         }
 
@@ -293,7 +293,7 @@ function _fromModelValue(
           }
         }
 
-        result.push({ ...item, _key: nanoid(), operator, value })
+        result.push({ ...item, $key: nanoid(), operator, value })
       }
     }
   }
@@ -353,7 +353,7 @@ function toModelValue(where: (WhereField | WhereAndGroup | WhereOrGroup)[]): (_W
         }
       }
 
-      prepared.push({ ...omit(item, ['_key']), operator, value })
+      prepared.push({ ...omit(item, ['$key']), operator, value })
     }
   }
 

@@ -58,7 +58,7 @@ export default defineTemplate(() => ({
               const tokenSubject = generateSecureRandomString()
               const { success, data, runtimeError } = await selectFrom('Users')
                 .where('tokenSubject', '=', tokenSubject)
-                .withCustomContextData({ __ignoreDenyWhereHook: true })
+                .withCustomContextData({ _ignoreDenyWhereHook: true })
                 .count()
 
               if (success) {

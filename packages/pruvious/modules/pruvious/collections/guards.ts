@@ -42,7 +42,7 @@ export function collectionPermissionGuard({ collection, collectionName, operatio
 
 /**
  * Runs collection guards prior to query builder execution methods like `first()`, `run()`, `validate()` and others.
- * Additionally, it sets a `__guarded` flag on the context to enable field guards and other collection-specific filters.
+ * Additionally, it sets a `_guarded` flag on the context to enable field guards and other collection-specific filters.
  *
  * @see https://pruvious.com/docs/collections/guards (@todo set up this link)
  */
@@ -51,7 +51,7 @@ export function collectionGuards(): QueryBuilderPrepareCallback {
     const meta = context.collection?.meta as CollectionMeta | undefined
 
     if (meta) {
-      context.customData.__guarded = true
+      context.customData._guarded = true
 
       for (const guard of meta.guards as CollectionMeta['guards']) {
         await guard(context as any)

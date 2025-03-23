@@ -820,7 +820,7 @@ export async function putUpload<
   const insertQuery = await insertQueryBuilder
     .values({ ...input, path: normalizedPath as any, type: 'file', isLocked: true })
     .returning(['id', 'path'])
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!insertQuery.success) {
@@ -837,7 +837,7 @@ export async function putUpload<
   const putResult = await putFile(file, path)
 
   if (!putResult.success) {
-    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ __allowUploadsQueries: true }).run()
+    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ _allowUploadsQueries: true }).run()
 
     return {
       success: false,
@@ -857,11 +857,11 @@ export async function putUpload<
     updateQueryBuilder.populate()
   }
 
-  const updateQuery = await updateQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).run()
+  const updateQuery = await updateQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run()
 
   if (!updateQuery.success) {
     await deleteFile(path)
-    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ __allowUploadsQueries: true }).run()
+    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ _allowUploadsQueries: true }).run()
 
     return {
       ...updateQuery,
@@ -974,7 +974,7 @@ export async function moveUpload<
 
   const lockQuery = await lockQueryBuilder
     .returning(['id', 'path', 'type', 'level', 'images'])
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!lockQuery.success) {
@@ -1003,7 +1003,7 @@ export async function moveUpload<
     await update('Uploads')
       .set({ isLocked: false })
       .where('id', '=', id)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     if (!newPathValidation.success) {
@@ -1047,14 +1047,14 @@ export async function moveUpload<
     const updatePathQuery = await update('Uploads')
       .set({ path: newPath })
       .where('id', '=', id)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     if (!updatePathQuery.success) {
       await update('Uploads')
         .set({ isLocked: false })
         .where('id', '=', id)
-        .withCustomContextData({ __allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true })
         .run()
 
       return [{ ...updatePathQuery, details: { id, path, newPath, type } }]
@@ -1066,7 +1066,7 @@ export async function moveUpload<
       await update('Uploads')
         .set({ path, isLocked: false })
         .where('id', '=', id)
-        .withCustomContextData({ __allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true })
         .run()
 
       return [
@@ -1095,7 +1095,7 @@ export async function moveUpload<
       .select(['id', 'path'])
       .where('path', 'like', `${path}/%`)
       .where('level', '=', level + 1)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .all()
 
     if (selectQuery.success) {
@@ -1119,14 +1119,14 @@ export async function moveUpload<
     updateQueryBuilder.populate()
   }
 
-  let updateQuery = await updateQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).run()
+  let updateQuery = await updateQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run()
 
   if (!updateQuery.success && type === 'directory') {
     const deleteQuery = await deleteFrom('Uploads')
       .where('id', '=', id)
       .whereRaw('not exists(select 1 from "Uploads" where "path" like $path)', { path: `${path}/%` })
       .whereRaw('exists(select 1 from "Uploads" where "path" = $newPath)', { newPath })
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     if (deleteQuery.success && !isEmpty(deleteQuery.data)) {
@@ -1138,7 +1138,7 @@ export async function moveUpload<
 
       updateQuery = await updateQueryBuilder
         .returning(returning)
-        .withCustomContextData({ __allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true })
         .run()
     }
   }
@@ -1155,7 +1155,7 @@ export async function moveUpload<
     await update('Uploads')
       .set({ isLocked: false })
       .where('id', '=', id)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     if (updateQuery.success) {
@@ -1272,7 +1272,7 @@ export async function updateUpload<
       const uploadQuery = await selectFrom('Uploads')
         .select('path')
         .where('id', '=', pathOrId)
-        .withCustomContextData({ __allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true })
         .first()
 
       if (!uploadQuery.success || isEmpty(uploadQuery.data)) {
@@ -1306,7 +1306,7 @@ export async function updateUpload<
     updateQueryBuilder.populate()
   }
 
-  return updateQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).run() as any
+  return updateQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run() as any
 }
 
 /**
@@ -1401,7 +1401,7 @@ export async function deleteUpload<
 
   const lockQuery = await lockQueryBuilder
     .returning(['id', 'path', 'type', 'level', 'images'])
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!lockQuery.success) {
@@ -1436,7 +1436,7 @@ export async function deleteUpload<
       await update('Uploads')
         .set({ isLocked: false })
         .where('id', '=', id)
-        .withCustomContextData({ __allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true })
         .run()
 
       return [
@@ -1454,7 +1454,7 @@ export async function deleteUpload<
       .select('id')
       .where('path', 'like', `${path}/%`)
       .where('level', '=', level + 1)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .all()
 
     if (selectQuery.success) {
@@ -1474,7 +1474,7 @@ export async function deleteUpload<
     deleteQueryBuilder.populate()
   }
 
-  const deleteQuery = await deleteQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).run()
+  const deleteQuery = await deleteQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run()
 
   if (deleteQuery.success && !isEmpty(deleteQuery.data)) {
     results.push({
@@ -1488,7 +1488,7 @@ export async function deleteUpload<
     await update('Uploads')
       .set({ isLocked: false })
       .where('id', '=', id)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
     if (deleteQuery.success) {
@@ -1590,7 +1590,7 @@ export async function createMultipartUpload(
   const insertQuery = await insertQueryBuilder
     .values({ path: normalizedPath as any, type: 'file', isLocked: true })
     .returning(['id', 'path'])
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!insertQuery.success) {
@@ -1604,7 +1604,7 @@ export async function createMultipartUpload(
   const storageResult = await storage().createMultipartUpload(path)
 
   if (!storageResult.success) {
-    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ __allowUploadsQueries: true }).run()
+    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ _allowUploadsQueries: true }).run()
 
     return {
       success: false,
@@ -1616,12 +1616,12 @@ export async function createMultipartUpload(
   const updateQuery = await update('Uploads')
     .where('id', '=', id)
     .set({ multipart: { key, parts: [] } })
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!updateQuery.success) {
     await storage().abortMultipartUpload(path, key)
-    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ __allowUploadsQueries: true }).run()
+    await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ _allowUploadsQueries: true }).run()
 
     return {
       success: false,
@@ -1725,7 +1725,7 @@ export async function getMultipartUpload(
     ])
   }
 
-  const selectQuery = await selectQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).first()
+  const selectQuery = await selectQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).first()
 
   if (!selectQuery.success || isEmpty(selectQuery.data)) {
     setResponseStatus(event, 404, httpStatusCodeMessages[404])
@@ -1841,7 +1841,7 @@ export async function resumeMultipartUpload(
   const updateQuery = await update('Uploads')
     .where('path', '=', mpu.path)
     .set({ multipart: { key, parts: [...mpu.parts, { partNumber, etag: storageResult.data.etag }] } })
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!updateQuery.success) {
@@ -1993,7 +1993,7 @@ export async function completeMultipartUpload<
     updateQueryBuilder.populate()
   }
 
-  const updateQuery = await updateQueryBuilder.withCustomContextData({ __allowUploadsQueries: true }).run()
+  const updateQuery = await updateQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run()
 
   if (!updateQuery.success) {
     await abortMultipartUpload(key, { guarded: false })
@@ -2088,7 +2088,7 @@ export async function abortMultipartUpload(
   const storageResult = await storage().abortMultipartUpload(mpu.path, key)
   const deleteQuery = await deleteFrom('Uploads')
     .where('path', '=', mpu.path)
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!storageResult.success) {
@@ -2161,7 +2161,7 @@ async function _updateUploadImages(
     update('Uploads')
       .set({ isLocked: false })
       .where('id', '=', uploadId)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
   let upload: { id: number } & Collections['Uploads']['TCastedTypes']
@@ -2171,7 +2171,7 @@ async function _updateUploadImages(
     const query = await update('Uploads')
       .set({ isLocked: true })
       .where('id', '=', uploadId)
-      .withCustomContextData({ __allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true })
       .returningAll()
       .run()
 
@@ -2201,7 +2201,7 @@ async function _updateUploadImages(
   const updateQuery = await update('Uploads')
     .set({ images: result.images, isLocked: false })
     .where('id', '=', uploadId)
-    .withCustomContextData({ __allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
   if (!updateQuery.success) {

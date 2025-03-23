@@ -121,7 +121,7 @@ export function resolveFieldDescription(
  * The operators are determined by analyzing the field's data type.
  */
 export function getValidFilterOperators({
-  __dataType,
+  _dataType,
 }: GenericSerializableFieldOptions): { value: FilterOperator; label: string }[] {
   const allOperators: { value: FilterOperator; label: string }[] = [
     { value: 'eq', label: __('pruvious-dashboard', 'Equals') },
@@ -141,11 +141,11 @@ export function getValidFilterOperators({
     { value: 'notContainsI', label: __('pruvious-dashboard', 'Does not contain (case-insensitive)') },
   ]
 
-  if (__dataType === 'text') {
+  if (_dataType === 'text') {
     return allOperators.filter(({ value }) => !['lt', 'lte', 'gt', 'gte'].includes(value))
   }
 
-  if (__dataType === 'boolean') {
+  if (_dataType === 'boolean') {
     return allOperators.filter(({ value }) => ['eq', 'ne'].includes(value))
   }
 

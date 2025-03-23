@@ -21,10 +21,10 @@ export const beforeQueryExecutionDebugHook: Required<CollectionHooks>['beforeQue
     runtimeConfig.pruvious.debug.verbose ||
     (runtimeConfig.pruvious.debug.logs.queries.enabled && collection?.meta.logs.enabled)
   ) {
-    cache.__queryDebugId ||= randomIdentifier()
+    cache._queryDebugId ||= randomIdentifier()
 
     if (runtimeConfig.pruvious.debug.verbose) {
-      debug(`Executing query ${colorize('dim', cache.__queryDebugId)}`)
+      debug(`Executing query ${colorize('dim', cache._queryDebugId)}`)
     }
   }
 }
@@ -46,7 +46,7 @@ export const afterQueryExecutionDebugHook: Required<CollectionHooks>['afterQuery
     runtimeConfig.pruvious.debug.logs.queries.enabled &&
     meta?.logs.enabled &&
     meta.logs.operations[query.operation] &&
-    !customData.__skipLogging &&
+    !customData._skipLogging &&
     (collectionName !== 'Cache' || runtimeConfig.pruvious.cache.driver !== 'mainDatabase') &&
     (collectionName !== 'Queue' || runtimeConfig.pruvious.queue.driver !== 'mainDatabase') &&
     matchRoute(path)
@@ -59,9 +59,9 @@ export const afterQueryExecutionDebugHook: Required<CollectionHooks>['afterQuery
         .queryBuilder()
         .insertInto('Queries')
         .values({
-          queryDebugId: cache.__queryDebugId,
-          requestDebugId: isString(customData.__requestDebugId)
-            ? customData.__requestDebugId
+          queryDebugId: cache._queryDebugId,
+          requestDebugId: isString(customData._requestDebugId)
+            ? customData._requestDebugId
             : event.context.pruvious.requestDebugId,
           method: event.method,
           path,
@@ -82,11 +82,9 @@ export const afterQueryExecutionDebugHook: Required<CollectionHooks>['afterQuery
 
   if (runtimeConfig.pruvious.debug.verbose) {
     if (result.success) {
-      debug(
-        `Query ${colorize('dim', cache.__queryDebugId)} executed in ${Math.round(queryExecutionTime * 100) / 100}ms`,
-      )
+      debug(`Query ${colorize('dim', cache._queryDebugId)} executed in ${Math.round(queryExecutionTime * 100) / 100}ms`)
     } else {
-      debug(`Query ${colorize('dim', cache.__queryDebugId)} failed`)
+      debug(`Query ${colorize('dim', cache._queryDebugId)} failed`)
     }
   }
 }

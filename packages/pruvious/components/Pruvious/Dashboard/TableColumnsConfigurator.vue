@@ -165,7 +165,7 @@ function addColumn() {
 
 function resolveSortable(columnName: string): 'text' | 'numeric' | false {
   const field = props.collection.definition.fields[columnName]
-  return field ? (field.__dataType === 'text' ? 'text' : 'numeric') : false
+  return field ? (field._dataType === 'text' ? 'text' : 'numeric') : false
 }
 
 function emitCommit() {
@@ -181,7 +181,7 @@ function fromModelValue(): Column[] {
       width: isUndefined(column.width) ? null : /[1-9][0-9]*px/.test(column.width) ? +column.width.slice(0, -2) : false,
       _width: column.width,
       _minWidth: column.minWidth,
-      _key: name,
+      $key: name,
     }))
 }
 

@@ -341,7 +341,7 @@ export function repeaterFieldModel<
                           errors,
                         )
                       } catch (error: any) {
-                        if (error.message !== '__ignore') {
+                        if (error.message !== '_ignore') {
                           errors[`${path}.${i}.${subfieldName}`] =
                             error.message || context.__('pruvious-orm', 'Invalid input')
                         }
@@ -364,7 +364,7 @@ export function repeaterFieldModel<
           await Promise.all(promises)
 
           if (hasErrors) {
-            throw new Error('__ignore') // Break the top-level loop
+            throw new Error('_ignore') // Break the top-level loop
           }
         }
       },

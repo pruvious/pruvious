@@ -1547,7 +1547,7 @@ export function defineCollection<
       if (syncedFields.length) {
         hooks.afterQueryExecution.push(async (context, { result }) => {
           if (
-            !context.customData.__syncingFields &&
+            !context.customData._syncingFields &&
             context.operation === 'update' &&
             result.success &&
             syncedFields.some((syncedField: any) => isDefined(context.sanitizedInput[syncedField])) &&
@@ -1583,7 +1583,7 @@ export function defineCollection<
                   ),
                 )
                 .where('translations', 'in', filteredTranslationKeys)
-                .withCustomContextData({ __syncingFields: true })
+                .withCustomContextData({ _syncingFields: true })
                 .run()
             }
           }
@@ -1593,7 +1593,7 @@ export function defineCollection<
 
     if (author.enabled || editors.enabled) {
       hooks.beforeQueryPreparation.push(({ collectionName, operation, queryBuilder, customData }) => {
-        if (!customData.__guarded) {
+        if (!customData._guarded) {
           return
         }
 

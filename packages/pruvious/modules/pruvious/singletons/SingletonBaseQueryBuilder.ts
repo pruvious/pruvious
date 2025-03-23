@@ -272,7 +272,7 @@ export class SingletonBaseQueryBuilder {
    * Creates a `QueryBuilderOutput` object to return if the query is successful.
    */
   protected prepareOutput<T>(data: T): QueryBuilderOutput<T> {
-    delete this.cache['__tmp']
+    delete this.cache['_tmp']
 
     return {
       success: true,
@@ -290,7 +290,7 @@ export class SingletonBaseQueryBuilder {
   protected prepareError<T extends 'allInputErrors' | 'firstInputError' | 'noInputErrors' = 'allInputErrors'>(
     inputErrorsReturnMode?: T,
   ) {
-    delete this.cache['__tmp']
+    delete this.cache['_tmp']
 
     return {
       success: false,

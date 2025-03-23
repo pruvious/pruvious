@@ -77,7 +77,7 @@ export class DerivedQueryBuilder<
    * ```ts
    * await this.selectFrom('Users')
    *   .select(['email', 'password'])
-   *   .withCustomContextData({ __ignoreMaskFieldsHook: true })
+   *   .withCustomContextData({ _ignoreMaskFieldsHook: true })
    *   .all()
    * ```
    */

@@ -972,7 +972,7 @@ export class InsertQueryBuilder<
                       errors,
                     )
                   } catch (error: any) {
-                    if (error.message !== '__ignore') {
+                    if (error.message !== '_ignore') {
                       errors[fieldName] = error.message || this._('Invalid input')
                     }
                     break

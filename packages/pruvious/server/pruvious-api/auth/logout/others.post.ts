@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     .set({ tokenSubject: 'true' })
     .where('id', '=', event.context.pruvious.auth.user.id)
     .returning('tokenSubject')
-    .withCustomContextData({ __ignoreMaskFieldsHook: true })
+    .withCustomContextData({ _ignoreMaskFieldsHook: true })
     .run()
 
   assertQuery(query)

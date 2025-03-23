@@ -21,7 +21,7 @@ type BaseSerializableFieldOptions = Required<
     /**
      * The registered field type.
      */
-    __fieldType: keyof Fields
+    _fieldType: keyof Fields
 
     /**
      * The primitive data type of the field.
@@ -34,7 +34,7 @@ type BaseSerializableFieldOptions = Required<
      * - `numeric`
      * - `text`
      */
-    __dataType: DataType
+    _dataType: DataType
   }
 
 export type SerializableFieldOptions<TField extends keyof Fields> = Readonly<
@@ -54,15 +54,15 @@ export function limitPopulation(
   { definition, context, path }: { definition: GenericField; context: Context<GenericDatabase>; path: string },
   limit = 32,
 ) {
-  if (!isObject(context.cache['__tmp'])) {
-    context.cache['__tmp'] = {}
+  if (!isObject(context.cache['_tmp'])) {
+    context.cache['_tmp'] = {}
   }
 
-  if (!(context.cache['__tmp']['__populationLimit'] instanceof Map)) {
-    context.cache['__tmp']['__populationLimit'] = new Map()
+  if (!(context.cache['_tmp']['_populationLimit'] instanceof Map)) {
+    context.cache['_tmp']['_populationLimit'] = new Map()
   }
 
-  const map = context.cache['__tmp']['__populationLimit'] as Map<any, number>
+  const map = context.cache['_tmp']['_populationLimit'] as Map<any, number>
   const entry = hash({ value, definition, path })
 
   if (!map.has(entry)) {

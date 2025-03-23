@@ -16,7 +16,7 @@ import { httpStatusCodeMessages } from '../api/utils.server'
  * A collection hook that removes specified `fields` from the WHERE clause of the query builder before preparing the query.
  * This hook is useful for excluding sensitive fields from query filtering.
  *
- * This hook will not be applied if the `__ignoreRemoveWhereHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreRemoveWhereHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -60,7 +60,7 @@ export function removeWhere(
   const fieldsArray = toArray(fields)
 
   return ({ operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreRemoveWhereHook === true || operation === 'insert') {
+    if (!queryBuilder || customData._ignoreRemoveWhereHook === true || operation === 'insert') {
       return
     }
 
@@ -82,7 +82,7 @@ export function removeWhere(
  * A collection hook that throws an error if specified `fields` are present in the WHERE clause of the query builder before preparing the query.
  * This hook is useful for preventing sensitive fields from query filtering.
  *
- * This hook will not be applied if the `__ignoreDenyWhereHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreDenyWhereHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -126,7 +126,7 @@ export function denyWhere(
   const fieldsArray = toArray(fields)
 
   return ({ __, operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreDenyWhereHook === true || operation === 'insert') {
+    if (!queryBuilder || customData._ignoreDenyWhereHook === true || operation === 'insert') {
       return
     }
 
@@ -145,7 +145,7 @@ export function denyWhere(
  * A collection hook that removes specified `fields` from the ORDER BY clause of the query builder before preparing the query.
  * This hook is useful for excluding sensitive fields from query ordering.
  *
- * This hook will not be applied if the `__ignoreRemoveOrderByHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreRemoveOrderByHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -189,7 +189,7 @@ export function removeOrderBy(
   const fieldsArray = toArray(fields)
 
   return ({ operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreRemoveOrderByHook === true || operation !== 'select') {
+    if (!queryBuilder || customData._ignoreRemoveOrderByHook === true || operation !== 'select') {
       return
     }
 
@@ -207,7 +207,7 @@ export function removeOrderBy(
  * A collection hook that throws an error if specified `fields` are present in the ORDER BY clause of the query builder before preparing the query.
  * This hook is useful for preventing sensitive fields from query ordering.
  *
- * This hook will not be applied if the `__ignoreDenyOrderByHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreDenyOrderByHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -251,7 +251,7 @@ export function denyOrderBy(
   const fieldsArray = toArray(fields)
 
   return ({ __, operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreDenyOrderByHook === true || operation !== 'select') {
+    if (!queryBuilder || customData._ignoreDenyOrderByHook === true || operation !== 'select') {
       return
     }
 
@@ -270,7 +270,7 @@ export function denyOrderBy(
  * A collection hook that removes specified `fields` from the GROUP BY clause of the query builder before preparing the query.
  * This hook is useful for excluding sensitive fields from query grouping.
  *
- * This hook will not be applied if the `__ignoreRemoveGroupByHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreRemoveGroupByHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -314,7 +314,7 @@ export function removeGroupBy(
   const fieldsArray = toArray(fields)
 
   return ({ operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreRemoveGroupByHook === true || operation !== 'select') {
+    if (!queryBuilder || customData._ignoreRemoveGroupByHook === true || operation !== 'select') {
       return
     }
 
@@ -332,7 +332,7 @@ export function removeGroupBy(
  * A collection hook that throws an error if specified `fields` are present in the GROUP BY clause of the query builder before preparing the query.
  * This hook is useful for preventing sensitive fields from query grouping.
  *
- * This hook will not be applied if the `__ignoreDenyGroupByHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreDenyGroupByHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -376,7 +376,7 @@ export function denyGroupBy(
   const fieldsArray = toArray(fields)
 
   return ({ __, operation, queryBuilder, customData }) => {
-    if (!queryBuilder || customData.__ignoreDenyGroupByHook === true || operation !== 'select') {
+    if (!queryBuilder || customData._ignoreDenyGroupByHook === true || operation !== 'select') {
       return
     }
 
@@ -395,7 +395,7 @@ export function denyGroupBy(
  * A collection hook that removes specified `fields` from the query builder results after executing the query.
  * This hook is useful for excluding sensitive fields from HTTP responses.
  *
- * This hook will not be applied if the `__ignoreExcludeFieldsHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreExcludeFieldsHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -440,7 +440,7 @@ export function excludeFields(
   const fieldsArray = toArray(fields)
 
   return ({ customData }, { result }) => {
-    if (customData.__ignoreExcludeFieldsHook === true) {
+    if (customData._ignoreExcludeFieldsHook === true) {
       return
     }
 
@@ -482,7 +482,7 @@ export function excludeFields(
  * - `object` - `{}`
  * - `array` - `[]`
  *
- * This hook will not be applied if the `__ignoreMaskFieldsHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreMaskFieldsHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -527,7 +527,7 @@ export function maskFields(
   const fieldsArray = toArray(fields)
 
   return ({ customData }, { result }) => {
-    if (customData.__ignoreMaskFieldsHook === true) {
+    if (customData._ignoreMaskFieldsHook === true) {
       return
     }
 
@@ -562,7 +562,7 @@ export function maskFields(
  * This hook is useful for hiding sensitive fields from HTTP responses.
  * It replaces field values with its defined default value.
  *
- * This hook will not be applied if the `__ignoreResetFieldsHook` flag is set to `true` in the `customData` object of the context.
+ * This hook will not be applied if the `_ignoreResetFieldsHook` flag is set to `true` in the `customData` object of the context.
  *
  * Related hooks:
  *
@@ -607,7 +607,7 @@ export function resetFields(
   const fieldsArray = toArray(fields)
 
   return ({ collection, customData }, { result }) => {
-    if (!collection || customData.__ignoreResetFieldsHook === true) {
+    if (!collection || customData._ignoreResetFieldsHook === true) {
       return
     }
 

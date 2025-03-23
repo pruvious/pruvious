@@ -16,7 +16,7 @@
           :index="i"
           :isDraggable="isDraggable"
           :item="item"
-          :key="item._key ?? i"
+          :key="item.$key ?? i"
           :structureId="id"
           :touchDuration="touchDuration"
           @draggable="

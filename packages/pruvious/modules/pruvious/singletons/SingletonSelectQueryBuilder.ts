@@ -370,7 +370,7 @@ export class SingletonSelectQueryBuilder<
    * Cached results can be reused in subsequent hook executions.
    * The same `cache` object can be shared across multiple query builders.
    *
-   * Note: The `__tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
+   * Note: The `_tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
    */
   useCache(cache: Record<string, any>): this {
     this.cache = cache
@@ -435,7 +435,7 @@ export class SingletonSelectQueryBuilder<
     }
 
     if (this.cacheResults) {
-      const cacheKey = `__singleton:${this.hash()}`
+      const cacheKey = `_singleton:${this.hash()}`
 
       if (this.cache[cacheKey]) {
         return this.cache[cacheKey]
@@ -445,14 +445,14 @@ export class SingletonSelectQueryBuilder<
     this.validateParams()
 
     if (this.hasErrors()) {
-      return this.cacheFilter('__singleton', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_singleton', this.prepareError('noInputErrors'))
     }
 
     try {
       await this.runHooksBeforeQueryPreparation()
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__singleton', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_singleton', this.prepareError('noInputErrors'))
     }
 
     const { sql, params } = this.toSQL()
@@ -465,7 +465,7 @@ export class SingletonSelectQueryBuilder<
       await this.runHooksBeforeQueryExecution(baseQueryDetails)
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__singleton', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_singleton', this.prepareError('noInputErrors'))
     }
 
     try {
@@ -475,7 +475,7 @@ export class SingletonSelectQueryBuilder<
       const populatedRows = this.populateFields ? await this.populateFieldValues(filledRows) : filledRows
       const result = this.prepareOutput(populatedRows[0])
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
-      return this.cacheFilter('__singleton', result)
+      return this.cacheFilter('_singleton', result)
     } catch (error: any) {
       this.setRuntimeError(error.message)
       const result = this.prepareError('noInputErrors', true)
@@ -485,7 +485,7 @@ export class SingletonSelectQueryBuilder<
         queryExecutionTime: 0,
         result,
       })
-      return this.cacheFilter('__singleton', result)
+      return this.cacheFilter('_singleton', result)
     }
   }
 

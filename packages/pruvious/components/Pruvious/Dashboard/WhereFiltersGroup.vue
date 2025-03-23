@@ -28,8 +28,8 @@
             (value) => {
               const newValue =
                 'and' in modelValue
-                  ? { _key: props.modelValue._key, and: value.map((v) => [v]) }
-                  : { _key: props.modelValue._key, or: value.map((v) => [v]) }
+                  ? { $key: props.modelValue.$key, and: value.map((v) => [v]) }
+                  : { $key: props.modelValue.$key, or: value.map((v) => [v]) }
               emit('commit', newValue)
             }
           "
@@ -58,8 +58,8 @@
                   () => {
                     const newValue =
                       'and' in modelValue
-                        ? { _key: props.modelValue._key, and: modelValue.and.filter((_, i) => i !== index) }
-                        : { _key: props.modelValue._key, or: modelValue.or.filter((_, i) => i !== index) }
+                        ? { $key: props.modelValue.$key, and: modelValue.and.filter((_, i) => i !== index) }
+                        : { $key: props.modelValue.$key, or: modelValue.or.filter((_, i) => i !== index) }
                     emit('commit', newValue)
                   }
                 "
@@ -81,8 +81,8 @@
                 (value) => {
                   const newValue =
                     'and' in modelValue
-                      ? { _key: props.modelValue._key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
-                      : { _key: props.modelValue._key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
+                      ? { $key: props.modelValue.$key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
+                      : { $key: props.modelValue.$key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
                   emit('commit', newValue)
                 }
               "
@@ -90,8 +90,8 @@
                 (value) => {
                   const newValue =
                     'and' in modelValue
-                      ? { _key: props.modelValue._key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
-                      : { _key: props.modelValue._key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
+                      ? { $key: props.modelValue.$key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
+                      : { $key: props.modelValue.$key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
                   emit('update:modelValue', newValue)
                 }
               "
@@ -106,8 +106,8 @@
                 (value) => {
                   const newValue =
                     'and' in modelValue
-                      ? { _key: props.modelValue._key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
-                      : { _key: props.modelValue._key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
+                      ? { $key: props.modelValue.$key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
+                      : { $key: props.modelValue.$key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
                   emit('commit', newValue)
                 }
               "
@@ -115,8 +115,8 @@
                 (value) => {
                   const newValue =
                     'and' in modelValue
-                      ? { _key: props.modelValue._key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
-                      : { _key: props.modelValue._key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
+                      ? { $key: props.modelValue.$key, and: modelValue.and.map((v, i) => (i === index ? [value] : v)) }
+                      : { $key: props.modelValue.$key, or: modelValue.or.map((v, i) => (i === index ? [value] : v)) }
                   emit('update:modelValue', newValue)
                 }
               "
@@ -164,15 +164,15 @@ import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
 import { deepClone, nanoid, walkObjects } from '@pruvious/utils'
 
-export type WhereField = Omit<_WhereField, 'operator'> & { _key: string; operator: FilterOperator }
+export type WhereField = Omit<_WhereField, 'operator'> & { $key: string; operator: FilterOperator }
 
 export interface WhereAndGroup {
-  _key: string
+  $key: string
   and: (WhereField | WhereOrGroup | WhereAndGroup)[][]
 }
 
 export interface WhereOrGroup {
-  _key: string
+  $key: string
   or: (WhereField | WhereOrGroup | WhereAndGroup)[][]
 }
 
@@ -208,24 +208,24 @@ const emit = defineEmits<{
 }>()
 
 function addCondition() {
-  const newCondition: WhereField = { _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
+  const newCondition: WhereField = { $key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }
   const newValue =
     'and' in props.modelValue
-      ? { _key: props.modelValue._key, and: [...props.modelValue.and, [newCondition]] }
-      : { _key: props.modelValue._key, or: [...props.modelValue.or, [newCondition]] }
+      ? { $key: props.modelValue.$key, and: [...props.modelValue.and, [newCondition]] }
+      : { $key: props.modelValue.$key, or: [...props.modelValue.or, [newCondition]] }
 
   emit('update:modelValue', newValue)
 }
 
 function addOrGroup() {
   const newCondition: WhereOrGroup = {
-    _key: nanoid(),
-    or: [[{ _key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
+    $key: nanoid(),
+    or: [[{ $key: nanoid(), field: props.fieldChoices[0]!.value, operator: 'eq', value: '' }]],
   }
   const newValue =
     'and' in props.modelValue
-      ? { _key: props.modelValue._key, and: [...props.modelValue.and, [newCondition]] }
-      : { _key: props.modelValue._key, or: [...props.modelValue.or, [newCondition]] }
+      ? { $key: props.modelValue.$key, and: [...props.modelValue.and, [newCondition]] }
+      : { $key: props.modelValue.$key, or: [...props.modelValue.or, [newCondition]] }
 
   emit('update:modelValue', newValue)
 }
@@ -233,8 +233,8 @@ function addOrGroup() {
 function toggleRelation() {
   const newValue =
     'and' in props.modelValue
-      ? { _key: props.modelValue._key, or: props.modelValue.and }
-      : { _key: props.modelValue._key, and: props.modelValue.or }
+      ? { $key: props.modelValue.$key, or: props.modelValue.and }
+      : { $key: props.modelValue.$key, and: props.modelValue.or }
 
   emit('commit', newValue)
 }
@@ -244,19 +244,19 @@ function duplicate(index: number) {
   const clone = deepClone(item)!
 
   for (const { object } of walkObjects(clone)) {
-    if ('_key' in object) {
-      object._key = nanoid()
+    if ('$key' in object) {
+      object.$key = nanoid()
     }
   }
 
   const newValue =
     'and' in props.modelValue
       ? {
-          _key: props.modelValue._key,
+          $key: props.modelValue.$key,
           and: [...props.modelValue.and.slice(0, index), clone, ...props.modelValue.and.slice(index)],
         }
       : {
-          _key: props.modelValue._key,
+          $key: props.modelValue.$key,
           or: [...props.modelValue.or.slice(0, index), clone, ...props.modelValue.or.slice(index)],
         }
 

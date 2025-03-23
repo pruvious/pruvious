@@ -392,7 +392,7 @@ const allBookmarks = sortNaturallyByProp(
     .all()
     .then((res) => res.data ?? [])) as Bookmark[],
   'name',
-).map((bookmark) => ({ ...bookmark, _key: bookmark.id }))
+).map((bookmark) => ({ ...bookmark, $key: bookmark.id }))
 const myBookmarks = ref(allBookmarks.filter((bookmark) => bookmark.user === auth.value.user?.id))
 const sharedBookmarks = ref(allBookmarks.filter((bookmark) => bookmark.user !== auth.value.user?.id))
 const defaultBookmarkId = computed(
@@ -434,7 +434,7 @@ async function createBookmark() {
     .run()
 
   if (query.success) {
-    myBookmarks.value.push({ ...query.data[0], _key: query.data[0]!.id } as any)
+    myBookmarks.value.push({ ...query.data[0], $key: query.data[0]!.id } as any)
     sortNaturallyByProp(myBookmarks.value, 'name')
     bookmarkPopupState.value = false
     puiToast(__('pruvious-dashboard', 'Created'), { type: 'success' })
@@ -460,7 +460,7 @@ async function renameBookmark(id: number) {
 
   if (query.success) {
     const index = myBookmarks.value.findIndex((bookmark) => bookmark.id === id)
-    myBookmarks.value.splice(index, 1, { ...query.data[0], _key: query.data[0]!.id } as any)
+    myBookmarks.value.splice(index, 1, { ...query.data[0], $key: query.data[0]!.id } as any)
     sortNaturallyByProp(myBookmarks.value, 'name')
     bookmarkPopupState.value = false
     puiToast(__('pruvious-dashboard', 'Updated'), { type: 'success' })
@@ -482,7 +482,7 @@ async function syncBookmark(id: number) {
 
   if (query.success) {
     const index = myBookmarks.value.findIndex((bookmark) => bookmark.id === id)
-    myBookmarks.value.splice(index, 1, { ...query.data[0], _key: query.data[0]!.id } as any)
+    myBookmarks.value.splice(index, 1, { ...query.data[0], $key: query.data[0]!.id } as any)
     puiToast(__('pruvious-dashboard', 'Updated'), { type: 'success' })
     await refreshAuthState(true)
   } else if (query.inputErrors) {
@@ -503,7 +503,7 @@ async function updateBookmarkSharing(id: number, shared: boolean) {
 
   if (query.success) {
     const index = myBookmarks.value.findIndex((bookmark) => bookmark.id === id)
-    myBookmarks.value.splice(index, 1, { ...query.data[0], _key: query.data[0]!.id } as any)
+    myBookmarks.value.splice(index, 1, { ...query.data[0], $key: query.data[0]!.id } as any)
     puiToast(__('pruvious-dashboard', 'Updated'), { type: 'success' })
   } else if (query.inputErrors) {
     puiToast(__('pruvious-dashboard', 'Error'), {

@@ -64,10 +64,10 @@ watch(
       if (
         (oldValue && newValue.field !== oldValue?.field) ||
         (isNull(normalizedValue.value) && !props.options.nullable) ||
-        ((props.options.__dataType === 'bigint' || props.options.__dataType === 'numeric') &&
+        ((props.options._dataType === 'bigint' || props.options._dataType === 'numeric') &&
           !isNumber(normalizedValue.value)) ||
-        (props.options.__dataType === 'boolean' && !isBoolean(normalizedValue.value)) ||
-        (props.options.__dataType === 'text' && !isString(normalizedValue.value))
+        (props.options._dataType === 'boolean' && !isBoolean(normalizedValue.value)) ||
+        (props.options._dataType === 'text' && !isString(normalizedValue.value))
       ) {
         normalizedValue.value = props.options.default
       }

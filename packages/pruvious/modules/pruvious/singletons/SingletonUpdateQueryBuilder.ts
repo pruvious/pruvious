@@ -908,7 +908,7 @@ export class SingletonUpdateQueryBuilder<
                 errors,
               )
             } catch (error: any) {
-              if (error.message !== '__ignore') {
+              if (error.message !== '_ignore') {
                 errors[fieldName] = error.message || __('pruvious-orm', 'Invalid input')
               }
               break

@@ -198,7 +198,7 @@ export async function verifyToken(
           .where('tokenSubject', '=', payload.sub)
           .where('isActive', '=', true)
           .populate()
-          .withCustomContextData({ __ignoreDenyWhereHook: true, __ignoreMaskFieldsHook: true })
+          .withCustomContextData({ _ignoreDenyWhereHook: true, _ignoreMaskFieldsHook: true })
           .first(),
         isInvalidatedToken(token),
       ])

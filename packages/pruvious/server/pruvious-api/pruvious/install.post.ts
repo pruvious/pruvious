@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   const createFirstUserQuery = await insertInto('Users')
     .values({ firstName, lastName, email, password, isActive: true, isAdmin: true })
     .returningAll()
-    .withCustomContextData({ __ignoreMaskFieldsHook: true })
+    .withCustomContextData({ _ignoreMaskFieldsHook: true })
     .run()
 
   if (!createFirstUserQuery.success) {

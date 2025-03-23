@@ -19,7 +19,7 @@
       :path="item.field.path"
       :synced="translatable && !rootPath && syncedFields.includes(item.field.name)"
       :translatable="translatable"
-      :type="item.field.options.__fieldType"
+      :type="item.field.options._fieldType"
       @commit="$emit('commit', { ...data, [item.field.name]: $event }, item.field.path)"
       @update:conditionalLogic="$emit('update:conditionalLogic', $event, item.field.path)"
       @update:modelValue="$emit('update:data', { ...data, [item.field.name]: $event }, item.field.path)"

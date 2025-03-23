@@ -27,7 +27,7 @@ export function transformFieldGuardsToValidators(
   >[],
 ): GenericValidator[] {
   return guards.map((guard) => async (value, sanitizedContextField, errors) => {
-    if (sanitizedContextField.context.customData.__guarded) {
+    if (sanitizedContextField.context.customData._guarded) {
       await guard(value, sanitizedContextField, errors)
     }
   })

@@ -405,7 +405,7 @@ function castWhereCondition(
 
   for (const [i, condition] of casted.entries()) {
     if ('field' in condition) {
-      const dataType = props.collection.definition.fields[condition.field]?.__dataType
+      const dataType = props.collection.definition.fields[condition.field]?._dataType
       condition.value = (
         dataType === 'bigint' || dataType === 'numeric'
           ? castToNumber(condition.value)

@@ -917,7 +917,7 @@ export function defineSingleton<
     if (translatable && syncedFields.length) {
       hooks.afterQueryExecution.push(async (context, { result }) => {
         if (
-          !context.customData.__syncingFields &&
+          !context.customData._syncingFields &&
           context.operation === 'update' &&
           result.success &&
           syncedFields.some((syncedField: any) => isDefined(context.sanitizedInput[syncedField]))
@@ -934,7 +934,7 @@ export function defineSingleton<
                 updateSingleton(context.singletonName)
                   .set(syncInput)
                   .language(code as never)
-                  .withCustomContextData({ __syncingFields: true })
+                  .withCustomContextData({ _syncingFields: true })
                   .run(),
               ),
           )

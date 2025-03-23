@@ -172,7 +172,7 @@ function resolveOrderBy(field: string): OrderBy {
 
   return {
     field,
-    type: fieldDefinition.__dataType === 'text' ? 'text' : 'numeric',
+    type: fieldDefinition._dataType === 'text' ? 'text' : 'numeric',
     direction: 'asc',
     nulls: fieldDefinition.nullable ? 'nullsFirst' : undefined,
   }
@@ -198,7 +198,7 @@ function fromModelValue(): OrderBy[] {
 
       return {
         field,
-        type: fieldDefinition.__dataType === 'text' ? 'text' : 'numeric',
+        type: fieldDefinition._dataType === 'text' ? 'text' : 'numeric',
         direction: _direction,
         nulls: _nulls,
       }

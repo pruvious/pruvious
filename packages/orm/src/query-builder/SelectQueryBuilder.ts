@@ -522,7 +522,7 @@ export class SelectQueryBuilder<
     }
 
     if (this.cacheResults) {
-      const cacheKey = `__count:${this.hash()}`
+      const cacheKey = `_count:${this.hash()}`
 
       if (this.cache[cacheKey]) {
         return this.cache[cacheKey]
@@ -532,14 +532,14 @@ export class SelectQueryBuilder<
     this.validateParams()
 
     if (this.hasErrors()) {
-      return this.cacheFilter('__count', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_count', this.prepareError('noInputErrors'))
     }
 
     try {
       await this.runHooksBeforeQueryPreparation()
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__count', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_count', this.prepareError('noInputErrors'))
     }
 
     const { sql, params } = this.toSQL({ select: 'count(*) as count' })
@@ -552,7 +552,7 @@ export class SelectQueryBuilder<
       await this.runHooksBeforeQueryExecution(baseQueryDetails)
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__count', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_count', this.prepareError('noInputErrors'))
     }
 
     try {
@@ -560,7 +560,7 @@ export class SelectQueryBuilder<
       const count = Number(rows[0]['count'])
       const result = this.prepareOutput(count as any)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
-      return this.cacheFilter('__count', result)
+      return this.cacheFilter('_count', result)
     } catch (error: any) {
       this.setRuntimeError(error.message)
       const result = this.prepareError('noInputErrors', true)
@@ -570,7 +570,7 @@ export class SelectQueryBuilder<
         queryExecutionTime: 0,
         result,
       })
-      return this.cacheFilter('__count', result)
+      return this.cacheFilter('_count', result)
     }
   }
 
@@ -1166,7 +1166,7 @@ export class SelectQueryBuilder<
    * Cached results can be reused in subsequent hook executions.
    * The same `cache` object can be shared across multiple query builders.
    *
-   * Note: The `__tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
+   * Note: The `_tmp` cache key is removed before executing `afterQueryExecution` hooks and returning query results.
    * This can be used as a runtime store, for example, to synchronize timestamps across multiple collection fields.
    */
   useCache(cache: Record<string, any>): this {
@@ -1250,7 +1250,7 @@ export class SelectQueryBuilder<
     }
 
     if (this.cacheResults) {
-      const cacheKey = `__all:${this.hash()}`
+      const cacheKey = `_all:${this.hash()}`
 
       if (this.cache[cacheKey]) {
         return this.cache[cacheKey]
@@ -1260,14 +1260,14 @@ export class SelectQueryBuilder<
     this.validateParams()
 
     if (this.hasErrors()) {
-      return this.cacheFilter('__all', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_all', this.prepareError('noInputErrors'))
     }
 
     try {
       await this.runHooksBeforeQueryPreparation()
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__all', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_all', this.prepareError('noInputErrors'))
     }
 
     const { sql, params } = this.toSQL()
@@ -1280,7 +1280,7 @@ export class SelectQueryBuilder<
       await this.runHooksBeforeQueryExecution(baseQueryDetails)
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__all', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_all', this.prepareError('noInputErrors'))
     }
 
     try {
@@ -1289,7 +1289,7 @@ export class SelectQueryBuilder<
       const populatedRows = this.populateFields ? await this.populateFieldValues(deserializedRows) : deserializedRows
       const result = this.prepareOutput(populatedRows)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
-      return this.cacheFilter('__all', result)
+      return this.cacheFilter('_all', result)
     } catch (error: any) {
       this.setRuntimeError(error.message)
       const result = this.prepareError('noInputErrors', true)
@@ -1299,7 +1299,7 @@ export class SelectQueryBuilder<
         queryExecutionTime: 0,
         result,
       })
-      return this.cacheFilter('__all', result)
+      return this.cacheFilter('_all', result)
     }
   }
 
@@ -1370,7 +1370,7 @@ export class SelectQueryBuilder<
     }
 
     if (this.cacheResults) {
-      const cacheKey = `__paginate:${this.hash()}`
+      const cacheKey = `_paginate:${this.hash()}`
 
       if (this.cache[cacheKey]) {
         return this.cache[cacheKey]
@@ -1380,14 +1380,14 @@ export class SelectQueryBuilder<
     this.validateParams()
 
     if (this.hasErrors()) {
-      return this.cacheFilter('__paginate', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_paginate', this.prepareError('noInputErrors'))
     }
 
     try {
       await this.runHooksBeforeQueryPreparation()
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__paginate', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_paginate', this.prepareError('noInputErrors'))
     }
 
     const { sql, params } = this.toSQL()
@@ -1400,7 +1400,7 @@ export class SelectQueryBuilder<
       await this.runHooksBeforeQueryExecution(baseQueryDetails)
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__paginate', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_paginate', this.prepareError('noInputErrors'))
     }
 
     try {
@@ -1426,7 +1426,7 @@ export class SelectQueryBuilder<
 
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
 
-      return this.cacheFilter('__paginate', result)
+      return this.cacheFilter('_paginate', result)
     } catch (error: any) {
       this.setRuntimeError(error.message)
       const result = this.prepareError('noInputErrors', true)
@@ -1436,7 +1436,7 @@ export class SelectQueryBuilder<
         queryExecutionTime: 0,
         result,
       })
-      return this.cacheFilter('__paginate', result)
+      return this.cacheFilter('_paginate', result)
     }
   }
 
@@ -1485,7 +1485,7 @@ export class SelectQueryBuilder<
     }
 
     if (this.cacheResults) {
-      const cacheKey = `__first:${this.hash()}`
+      const cacheKey = `_first:${this.hash()}`
 
       if (this.cache[cacheKey]) {
         return this.cache[cacheKey]
@@ -1495,14 +1495,14 @@ export class SelectQueryBuilder<
     this.validateParams()
 
     if (this.hasErrors()) {
-      return this.cacheFilter('__first', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_first', this.prepareError('noInputErrors'))
     }
 
     try {
       await this.runHooksBeforeQueryPreparation()
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__first', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_first', this.prepareError('noInputErrors'))
     }
 
     const { sql, params } = this.toSQL({ limit: 1 })
@@ -1515,7 +1515,7 @@ export class SelectQueryBuilder<
       await this.runHooksBeforeQueryExecution(baseQueryDetails)
     } catch (error: any) {
       this.setRuntimeError(error.message)
-      return this.cacheFilter('__first', this.prepareError('noInputErrors'))
+      return this.cacheFilter('_first', this.prepareError('noInputErrors'))
     }
 
     try {
@@ -1524,7 +1524,7 @@ export class SelectQueryBuilder<
       const populatedRows = this.populateFields ? await this.populateFieldValues(deserializedRows) : deserializedRows
       const result = this.prepareOutput(populatedRows[0] ?? null)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
-      return this.cacheFilter('__first', result)
+      return this.cacheFilter('_first', result)
     } catch (error: any) {
       this.setRuntimeError(error.message)
       const result = this.prepareError('noInputErrors', true)
@@ -1534,7 +1534,7 @@ export class SelectQueryBuilder<
         queryExecutionTime: 0,
         result,
       })
-      return this.cacheFilter('__first', result)
+      return this.cacheFilter('_first', result)
     }
   }
 
