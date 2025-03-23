@@ -159,12 +159,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, type FilterOperator } from '#pruvious/client'
+import { __, type WhereField } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
-import type { WhereField as _WhereField } from '@pruvious/orm'
 import { deepClone, nanoid, walkObjects } from '@pruvious/utils'
-
-export type WhereField = Omit<_WhereField, 'operator'> & { $key: string; operator: FilterOperator }
 
 export interface WhereAndGroup {
   $key: string

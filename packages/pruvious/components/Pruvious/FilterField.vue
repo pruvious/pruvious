@@ -2,7 +2,7 @@
   <div class="p-field-filter pui-row">
     <div class="p-field-filter-operator">
       <PUISelect
-        :choices="filterOperatorChoices"
+        :choices="operatorChoices"
         :modelValue="modelValue.operator"
         :name="id"
         @commit="
@@ -20,10 +20,9 @@
 </template>
 
 <script lang="ts" setup>
-import { getValidFilterOperators, type FilterOperator } from '#pruvious/client'
+import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import { isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
-import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
+import { isArray, isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -41,6 +40,13 @@ const props = defineProps({
     type: Object as PropType<GenericSerializableFieldOptions>,
     required: true,
   },
+
+  /**
+   * The filter operator choices.
+   */
+  operatorChoices: {
+    type: Array as PropType<{ value: FilterOperator; label: string }[]>,
+  },
 })
 
 const emit = defineEmits<{
@@ -49,16 +55,17 @@ const emit = defineEmits<{
 }>()
 
 const id = useId()
-const filterOperatorChoices = computed(() => getValidFilterOperators(props.options))
+const operatorChoices = computed(() => props.operatorChoices ?? getValidFilterOperators(props.options))
 
 watch(
   () => props.modelValue,
   (newValue, oldValue) => {
     if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
       const normalizedValue = { ...newValue }
+      const matrixOperators: FilterOperator[] = ['includes', 'includesAny', 'excludes', 'excludesAny']
 
-      if (!filterOperatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
-        normalizedValue.operator = filterOperatorChoices.value[0]!.value
+      if (!operatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
+        normalizedValue.operator = operatorChoices.value[0]!.value
       }
 
       if (
@@ -67,7 +74,12 @@ watch(
         ((props.options._dataType === 'bigint' || props.options._dataType === 'numeric') &&
           !isNumber(normalizedValue.value)) ||
         (props.options._dataType === 'boolean' && !isBoolean(normalizedValue.value)) ||
-        (props.options._dataType === 'text' && !isString(normalizedValue.value))
+        (props.options._dataType === 'text' &&
+          !matrixOperators.includes(normalizedValue.operator) &&
+          !isString(normalizedValue.value)) ||
+        (props.options._dataType === 'text' &&
+          matrixOperators.includes(normalizedValue.operator) &&
+          !isArray(normalizedValue.value))
       ) {
         normalizedValue.value = props.options.default
       }

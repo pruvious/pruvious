@@ -147,6 +147,8 @@ export default defineTranslation({
   'Equals': 'Gleich',
   'Equals (case-insensitive)': 'Gleich (Groß-/Kleinschreibung ignorieren)',
   'Error': 'Fehler',
+  'Excludes all': 'Schließt alle aus',
+  'Excludes any': 'Schließt mindestens eines aus',
   'Execution time': 'Ausführungszeit',
   'Expand': 'Ausklappen',
 
@@ -174,6 +176,8 @@ export default defineTranslation({
 
   'ID': 'ID',
   'Inactive': 'Inaktiv',
+  'Includes all': 'Enthält alle',
+  'Includes any': 'Enthält mindestens eines',
   'Installation': 'Installation',
   'installWelcomeMessage':
     'Willkommen bei Pruvious! Geben Sie Ihre Daten ein, um Ihr Hauptadministrator-Konto zu erstellen.',

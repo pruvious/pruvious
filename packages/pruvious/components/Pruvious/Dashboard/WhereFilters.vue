@@ -145,12 +145,12 @@
 </template>
 
 <script lang="ts" setup>
-import { __, filterOperatorsMap } from '#pruvious/client'
+import { __, filterOperatorsMap, type WhereField } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
-import { deepClone, invertMap, isEmpty, isString, nanoid, omit, walkObjects } from '@pruvious/utils'
+import { deepClone, invertMap, isArray, isEmpty, isString, nanoid, omit, walkObjects } from '@pruvious/utils'
 import type { WhereOrGroupSimplified } from './TableSettingsPopup.vue'
-import type { WhereAndGroup, WhereField, WhereOrGroup } from './WhereFiltersGroup.vue'
+import type { WhereAndGroup, WhereOrGroup } from './WhereFiltersGroup.vue'
 
 const props = defineProps({
   /**
@@ -269,10 +269,6 @@ function _fromModelValue(
       let operator = invertedFilterOperatorsMap[item.operator]
       let value = item.value
 
-      if (!operator) {
-        // @todo handle "includes" | "includesAny" | "excludes" | "excludesAny" | "in" | "notIn" | "between" | "notBetween"
-      }
-
       if (operator) {
         if (isString(value)) {
           if (item.operator === 'like' || item.operator === 'ilike') {
@@ -294,6 +290,32 @@ function _fromModelValue(
         }
 
         result.push({ ...item, $key: nanoid(), operator, value })
+      } else {
+        if (item.operator === 'between' && isArray(value) && value.length === 2) {
+          result.push({
+            $key: nanoid(),
+            and: [
+              [{ ...item, $key: nanoid(), operator: 'gte', value: value[0] }],
+              [{ ...item, $key: nanoid(), operator: 'lte', value: value[1] }],
+            ],
+          })
+        } else if (item.operator === 'notBetween' && isArray(value) && value.length === 2) {
+          result.push({
+            $key: nanoid(),
+            and: [
+              [{ ...item, $key: nanoid(), operator: 'lt', value: value[0] }],
+              [{ ...item, $key: nanoid(), operator: 'gt', value: value[1] }],
+            ],
+          })
+        } else if ((item.operator === 'in' || item.operator === 'notIn') && isArray(value)) {
+          const andGroup: WhereAndGroup = { $key: nanoid(), and: [] }
+
+          for (const v of value) {
+            andGroup.and.push([{ ...item, $key: nanoid(), operator: item.operator === 'in' ? 'eq' : 'ne', value: v }])
+          }
+
+          result.push(andGroup)
+        }
       }
     }
   }

@@ -15,10 +15,9 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, filterFieldComponents } from '#pruvious/client'
+import { customComponents, filterFieldComponents, type WhereField } from '#pruvious/client'
 import type { Collections, Fields, GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
-import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
 
 const props = defineProps({
   /**

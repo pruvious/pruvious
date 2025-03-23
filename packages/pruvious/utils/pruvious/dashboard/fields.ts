@@ -1,7 +1,7 @@
 import { dashboardBasePath } from '#pruvious/client/base'
 import { __ } from '#pruvious/client/i18n'
 import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
-import type { Operator } from '@pruvious/orm'
+import type { WhereField as _WhereField, Operator } from '@pruvious/orm'
 import { isDefined, isFunction, isObject, titleCase } from '@pruvious/utils'
 import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'
 
@@ -47,6 +47,8 @@ interface ResolvedFieldDescriptionExpandable extends ResolvedFieldDescriptionBas
 
 type ResolvedFieldDescription = ResolvedFieldDescriptionSimple | ResolvedFieldDescriptionExpandable
 
+export type WhereField = Omit<_WhereField, 'operator'> & { $key: string; operator: FilterOperator }
+
 export type FilterOperator =
   | 'eq'
   | 'eqi'
@@ -63,6 +65,10 @@ export type FilterOperator =
   | 'containsI'
   | 'notContains'
   | 'notContainsI'
+  | 'includes'
+  | 'includesAny'
+  | 'excludes'
+  | 'excludesAny'
 
 export const filterOperatorsMap: Record<FilterOperator, Operator> = {
   eq: '=',
@@ -80,6 +86,10 @@ export const filterOperatorsMap: Record<FilterOperator, Operator> = {
   containsI: 'ilike',
   notContains: 'notLike',
   notContainsI: 'notIlike',
+  includes: 'includes',
+  includesAny: 'includesAny',
+  excludes: 'excludes',
+  excludesAny: 'excludesAny',
 }
 
 /**
@@ -123,7 +133,7 @@ export function resolveFieldDescription(
 export function getValidFilterOperators({
   _dataType,
 }: GenericSerializableFieldOptions): { value: FilterOperator; label: string }[] {
-  const allOperators: { value: FilterOperator; label: string }[] = [
+  const choices: { value: FilterOperator; label: string }[] = [
     { value: 'eq', label: __('pruvious-dashboard', 'Equals') },
     { value: 'eqi', label: __('pruvious-dashboard', 'Equals (case-insensitive)') },
     { value: 'ne', label: __('pruvious-dashboard', 'Does not equal') },
@@ -142,12 +152,14 @@ export function getValidFilterOperators({
   ]
 
   if (_dataType === 'text') {
-    return allOperators.filter(({ value }) => !['lt', 'lte', 'gt', 'gte'].includes(value))
+    return choices.filter(
+      ({ value }) => !['lt', 'lte', 'gt', 'gte', 'includes', 'includesAny', 'excludes', 'excludesAny'].includes(value),
+    )
   }
 
   if (_dataType === 'boolean') {
-    return allOperators.filter(({ value }) => ['eq', 'ne'].includes(value))
+    return choices.filter(({ value }) => ['eq', 'ne'].includes(value))
   }
 
-  return allOperators.filter(({ value }) => ['eq', 'ne', 'lt', 'lte', 'gt', 'gte'].includes(value))
+  return choices.filter(({ value }) => ['eq', 'ne', 'lt', 'lte', 'gt', 'gte'].includes(value))
 }

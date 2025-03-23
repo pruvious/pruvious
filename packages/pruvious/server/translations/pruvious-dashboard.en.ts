@@ -148,6 +148,8 @@ export default defineTranslation({
   'Equals': 'Equals',
   'Equals (case-insensitive)': 'Equals (case-insensitive)',
   'Error': 'Error',
+  'Excludes all': 'Excludes all',
+  'Excludes any': 'Excludes any',
   'Execution time': 'Execution time',
   'Expand': 'Expand',
 
@@ -175,6 +177,8 @@ export default defineTranslation({
 
   'ID': 'ID',
   'Inactive': 'Inactive',
+  'Includes all': 'Includes all',
+  'Includes any': 'Includes any',
   'Installation': 'Installation',
   'installWelcomeMessage': 'Welcome to Pruvious! Enter your details to create your primary administrator account.',
   'Invalid `$param` parameter': createPattern('Invalid `$param` parameter', { param: 'string' }),

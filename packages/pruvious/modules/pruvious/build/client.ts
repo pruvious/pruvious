@@ -497,7 +497,7 @@ function getReExports() {
     `export { usePruviousLoginPopup } from '${resolve('../../../utils/pruvious/dashboard/login')}'`,
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
-    `export { type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
+    `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
     `export { dayjs, dayjsUTC, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')

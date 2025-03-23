@@ -37,9 +37,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __, type WhereField } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import type { WhereField } from './Dashboard/WhereFiltersGroup.vue'
 
 defineProps({
   /**
