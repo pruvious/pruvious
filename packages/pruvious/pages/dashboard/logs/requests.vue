@@ -4,54 +4,9 @@
       v-model:details="details"
       v-model:detailsId="detailsId"
       :canDeleteLogs="canDeleteLogs"
-      :columns="columns"
-      logCollection="Requests"
+      :logCollectionDefinition="logCollectionDefinition"
+      logCollectionName="Requests"
     >
-      <template #cell="{ row, key }">
-        <PUIBadge
-          v-if="key === 'method'"
-          :color="
-            row[key] === 'GET'
-              ? 'hsl(var(--p-green))'
-              : row[key] === 'POST'
-                ? 'hsl(var(--p-purple))'
-                : row[key] === 'PUT'
-                  ? 'hsl(var(--p-yellow))'
-                  : row[key] === 'PATCH'
-                    ? 'hsl(var(--p-orange))'
-                    : row[key] === 'DELETE'
-                      ? 'destructive'
-                      : 'secondary'
-          "
-        >
-          {{ row[key] }}
-        </PUIBadge>
-
-        <code
-          v-else-if="key === 'path'"
-          :title="row[key] ? String(row[key]) : undefined"
-          class="pui-truncate p-cell-foreground"
-        >
-          {{ row[key] }}
-        </code>
-
-        <code
-          v-else-if="key === 'queryString'"
-          :title="row[key] ? '?' + String(row[key]) : undefined"
-          class="pui-truncate"
-        >
-          {{ row[key] ? '?' + row[key] : '' }}
-        </code>
-
-        <div v-else-if="key === 'createdAt'" v-pui-tooltip.nomd="dayjsRelative(row[key])" class="pui-truncate">
-          {{ dayjsFormatDateTime(row[key]) }}
-        </div>
-
-        <span v-else :title="row[key] ? String(row[key]) : undefined" class="pui-truncate">
-          {{ row[key] }}
-        </span>
-      </template>
-
       <template v-if="details" #detailsHeader>
         <PUIBadge
           :color="
@@ -264,7 +219,7 @@ import {
   hasPermission,
   usePruviousDashboard,
 } from '#pruvious/client'
-import type { LogsDatabase } from '#pruvious/server'
+import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import { beautifyCode, beautifyQuery, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
 
@@ -301,17 +256,89 @@ const details = ref<{
   response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
   queries?: ({ id: number } & LogsDatabase['collections']['Queries']['TCastedTypes'])[]
 } | null>(null)
-const columns: PUIColumns = {
-  method: puiColumn<string>({ label: __('pruvious-dashboard', 'HTTP Method'), width: '10rem', sortable: 'text' }),
-  path: puiColumn<string>({ label: __('pruvious-dashboard', 'Path'), width: '16rem', sortable: 'text' }),
-  queryString: puiColumn<string>({
-    label: __('pruvious-dashboard', 'Query string'),
-    width: '10rem',
-    sortable: 'text',
-  }),
-  user: puiColumn<number | null>({ label: __('pruvious-dashboard', 'User'), width: '10rem', sortable: 'numeric' }),
-  createdAt: puiColumn<number>({ label: __('pruvious-dashboard', 'Date'), width: '10rem', sortable: 'numeric' }),
-}
+const logCollectionDefinition = {
+  translatable: false,
+  syncedFields: [] as any,
+  fields: {
+    id: {
+      nullable: false,
+      default: 1,
+      decimalPlaces: 0,
+      max: Number.MAX_SAFE_INTEGER,
+      min: 1,
+      ui: { label: __('pruvious-dashboard', 'ID') },
+      _fieldType: 'number',
+      _dataType: 'bigint',
+    },
+    requestDebugId: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Request debug ID') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    method: {
+      nullable: false,
+      default: '',
+      choices: [{ value: 'GET' }, { value: 'POST' }, { value: 'PUT' }, { value: 'PATCH' }, { value: 'DELETE' }],
+      ui: { label: __('pruvious-dashboard', 'HTTP Method') },
+      _fieldType: 'select',
+      _dataType: 'text',
+    },
+    path: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Path') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    headers: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Headers') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    queryString: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Query string') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    body: {
+      nullable: true,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Body') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    user: {
+      nullable: true,
+      default: null,
+      collection: 'Users',
+      fields: ['id', 'email', 'firstName', 'lastName'],
+      ui: { label: __('pruvious-dashboard', 'User') },
+      _fieldType: 'record',
+      _dataType: 'text',
+    },
+    createdAt: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Date') },
+      _fieldType: 'timestamp',
+      _dataType: 'numeric',
+    },
+  } as Record<string, Partial<GenericSerializableFieldOptions>>,
+  ui: {
+    indexPage: {
+      table: {
+        columns: ['method | 150px', 'path', 'queryString | 150px', 'user | 150px', 'createdAt | 220px'],
+        orderBy: 'createdAt:desc',
+      },
+    },
+  },
+} as SerializableCollection
 
 watch(detailsId, async () => {
   let query = { ...route.query }

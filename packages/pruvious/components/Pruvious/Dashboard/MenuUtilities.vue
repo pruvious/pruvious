@@ -16,16 +16,19 @@ import {
   applyFilters,
   loadFilters,
   prepareDashboardMenu,
+  useAuth,
   usePruviousDashboard,
   usePruviousDashboardMenuExpanded,
   type DashboardMenuItem,
 } from '#pruvious/client'
-import { collator, isEmpty } from '@pruvious/utils'
+import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
+import { collator, isEmpty, slugify } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await loadFilters('dashboard:menu:utilities')
 
 const route = useRoute()
+const auth = useAuth()
 const dashboard = usePruviousDashboard()
 const expanded = usePruviousDashboardMenuExpanded()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
@@ -38,21 +41,21 @@ if (dashboard.value?.logs) {
 
   if (dashboard.value.logs.api) {
     logItems.push(
-      { to: 'logs/requests', label: __('pruvious-dashboard', 'Requests') },
-      { to: 'logs/responses', label: __('pruvious-dashboard', 'Responses') },
+      { to: resolveLogRoute('Requests'), label: __('pruvious-dashboard', 'Requests') },
+      { to: resolveLogRoute('Responses'), label: __('pruvious-dashboard', 'Responses') },
     )
   }
 
   if (dashboard.value.logs.queries) {
-    logItems.push({ to: 'logs/queries', label: __('pruvious-dashboard', 'Queries') })
+    logItems.push({ to: resolveLogRoute('Queries'), label: __('pruvious-dashboard', 'Queries') })
   }
 
   if (dashboard.value.logs.queue) {
-    logItems.push({ to: 'logs/queue', label: __('pruvious-dashboard', 'Queue') })
+    logItems.push({ to: resolveLogRoute('Queue'), label: __('pruvious-dashboard', 'Queue') })
   }
 
   if (dashboard.value.logs.custom) {
-    logItems.push({ to: 'logs/custom', label: __('pruvious-dashboard', 'Custom') })
+    logItems.push({ to: resolveLogRoute('Custom'), label: __('pruvious-dashboard', 'Custom') })
   }
 
   if (!isEmpty(logItems)) {
@@ -65,4 +68,39 @@ const items = await applyFilters(
   orderedItems.sort((a, b) => a.order - b.order || collator.compare(a.label, b.label)),
   {},
 ).then((orderedItems) => prepareDashboardMenu(orderedItems, route))
+
+function resolveLogRoute(logCollectionName: string) {
+  const _bookmark = auth.value.user?.bookmarks.find(({ collection }) => collection === `logs:${logCollectionName}`)
+  const bookmark = _bookmark ? { ..._bookmark, data: JSON.parse(_bookmark.data) } : undefined
+  const queryParams: string[] = isEmpty(bookmark?.data?.columns)
+    ? []
+    : [
+        'columns=' +
+          Object.entries(bookmark!.data!.columns)
+            .map(([columnName, { width, minWidth }]: any) => {
+              const parts = [columnName]
+              if (!isEmpty(width)) {
+                parts.push(width)
+              } else if (!isEmpty(minWidth) && minWidth !== '16rem') {
+                parts.push(minWidth)
+              }
+              return parts.join('|')
+            })
+            .join(','),
+      ]
+
+  if (bookmark?.data) {
+    queryParams.push(
+      ...selectQueryBuilderParamsToQueryString(bookmark.data)
+        .split('&')
+        .filter(Boolean)
+        .map((param) => {
+          const parts = param.split('=')
+          return [parts.shift()!, decodeQueryString(parts.join('='))].map(decodeQueryString).join('=')
+        }),
+    )
+  }
+
+  return `logs/${slugify(logCollectionName)}` + (isEmpty(queryParams) ? '' : `?${queryParams.join('&')}`)
+}
 </script>

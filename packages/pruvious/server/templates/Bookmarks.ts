@@ -1,5 +1,6 @@
 import { collections, defineTemplate, recordField, switchField, textField, type Collections } from '#pruvious/server'
 import { isUndefined } from '@pruvious/utils'
+import { logsCollections } from '../../modules/pruvious/debug/logs'
 
 export default defineTemplate(() => ({
   fields: {
@@ -13,7 +14,10 @@ export default defineTemplate(() => ({
       required: true,
       validators: [
         (value, { context }) => {
-          if (!collections[value as keyof Collections]) {
+          if (
+            !collections[value as keyof Collections] &&
+            !logsCollections[value.replace(/^logs:/, '') as keyof typeof logsCollections]
+          ) {
             throw new Error(context.__('pruvious-api', 'Collection not found'))
           } else if (value === 'Bookmarks') {
             throw new Error(context.__('pruvious-api', 'Invalid input'))

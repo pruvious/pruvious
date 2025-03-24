@@ -36,9 +36,131 @@
       "
       ref="table"
     >
-      <template #cell="cellProps">
+      <template #cell="{ row, key }">
         <div class="p-cell">
-          <slot v-bind="cellProps" name="cell" />
+          <slot v-bind="{ row, key }" name="cell">
+            <PUIBadge
+              v-if="key === 'method'"
+              :color="
+                row[key] === 'GET'
+                  ? 'hsl(var(--p-green))'
+                  : row[key] === 'POST'
+                    ? 'hsl(var(--p-purple))'
+                    : row[key] === 'PUT'
+                      ? 'hsl(var(--p-yellow))'
+                      : row[key] === 'PATCH'
+                        ? 'hsl(var(--p-orange))'
+                        : row[key] === 'DELETE'
+                          ? 'destructive'
+                          : 'secondary'
+              "
+            >
+              {{ row[key] }}
+            </PUIBadge>
+
+            <code
+              v-else-if="key === 'path' || key === 'sql'"
+              :title="row[key] ? String(row[key]) : undefined"
+              class="pui-truncate p-cell-foreground"
+            >
+              {{ row[key] }}
+            </code>
+
+            <code
+              v-else-if="
+                key === 'result' ||
+                key === 'rawResult' ||
+                key === 'params' ||
+                key === 'payload' ||
+                key === 'body' ||
+                key === 'statusMessage' ||
+                key === 'headers'
+              "
+              :title="row[key] ? String(row[key]) : undefined"
+              class="pui-truncate"
+            >
+              {{ row[key] ? row[key] : '' }}
+            </code>
+
+            <code
+              v-else-if="key === 'queryString'"
+              :title="row[key] ? '?' + String(row[key]) : undefined"
+              class="pui-truncate"
+            >
+              {{ row[key] ? '?' + row[key] : '-' }}
+            </code>
+
+            <div
+              v-else-if="key === 'createdAt' || key === 'scheduledAt' || key === 'completedAt'"
+              v-pui-tooltip.nomd="row[key] ? dayjsRelative(row[key]) : '-'"
+              class="pui-truncate"
+            >
+              {{ row[key] ? dayjsFormatDateTime(row[key]) : '-' }}
+            </div>
+
+            <PUIBadge
+              v-else-if="key === 'statusCode'"
+              :color="
+                row[key] >= 200 && row[key] < 300
+                  ? 'hsl(var(--p-green))'
+                  : row[key] >= 400 && row[key] < 500
+                    ? 'hsl(var(--p-orange))'
+                    : row[key] >= 500
+                      ? 'destructive'
+                      : 'accent'
+              "
+            >
+              {{ row[key] }}
+            </PUIBadge>
+
+            <PUIBadge
+              v-else-if="key === 'operation'"
+              :color="
+                row[key] === 'insert'
+                  ? 'hsl(var(--p-purple))'
+                  : row[key] === 'select'
+                    ? 'hsl(var(--p-green))'
+                    : row[key] === 'update'
+                      ? 'hsl(var(--p-orange))'
+                      : 'destructive'
+              "
+              class="pui-uppercase"
+            >
+              {{ row[key] }}
+            </PUIBadge>
+
+            <span v-else-if="key === 'executionTime'">{{ row[key] }} ms</span>
+
+            <PUIBadge v-else-if="key === 'success'" :color="row[key] ? 'hsl(var(--p-green))' : 'destructive'">
+              {{ row[key] ? __('pruvious-dashboard', 'Success') : __('pruvious-dashboard', 'Error') }}
+            </PUIBadge>
+
+            <PUIBadge v-else-if="key === 'priority'" color="accent">{{ row[key] }}</PUIBadge>
+
+            <PUIBadge
+              v-else-if="key === 'status'"
+              :color="row[key] === 'success' ? 'hsl(var(--p-green))' : row[key] === 'error' ? 'destructive' : 'accent'"
+              class="pui-capitalize"
+            >
+              {{
+                row[key] === 'success'
+                  ? __('pruvious-dashboard', 'Success')
+                  : row[key] === 'error'
+                    ? __('pruvious-dashboard', 'Error')
+                    : __('pruvious-dashboard', 'Pending')
+              }}
+            </PUIBadge>
+
+            <PUIBadge v-else-if="key === 'type'" color="accent">{{ row[key] }}</PUIBadge>
+
+            <PUIBadge v-else-if="key === 'severity'" color="secondary">{{ row[key] }}</PUIBadge>
+
+            <!-- @todo 'user' key -->
+
+            <span v-else :title="row[key] ? String(row[key]) : undefined" class="pui-truncate">
+              {{ typeof row[key] === 'string' ? row[key] || '-' : (row[key] ?? '-') }}
+            </span>
+          </slot>
         </div>
       </template>
 
@@ -164,6 +286,39 @@
       </template>
     </PUIPopup>
 
+    <PruviousDashboardTableSettingsPopup
+      v-if="isTableSettingsPopupVisible"
+      v-model:columns="columns"
+      v-model:params="params"
+      :collection="{ name: `logs:${logCollectionName}` as any, definition: logCollectionDefinition }"
+      :defaultColumns="defaultColumns"
+      :defaultOrderBy="defaultOrderBy"
+      :paginated="paginated"
+      :size="-1"
+      @close="$event().then(() => (isTableSettingsPopupVisible = false))"
+      @update:columns="
+        (columns) => {
+          if (compareColumns(columns, defaultColumns)) {
+            route.query._columns = null
+          } else {
+            route.query._columns = Object.entries(columns)
+              .map(([fieldName, { width, minWidth }]) => {
+                const parts = [fieldName]
+                if (isDefined(width)) {
+                  parts.push(width)
+                } else if (isDefined(minWidth) && minWidth !== '16rem') {
+                  parts.push(minWidth)
+                }
+                return parts.join('|')
+              })
+              .join(',')
+          }
+        }
+      "
+      @update:params="push()"
+      width="64rem"
+    />
+
     <template #footer>
       <div class="pui-justify-between">
         <PUIPagination
@@ -209,11 +364,16 @@
             <Icon mode="svg" name="tabler:trash-x" />
           </PUIButton>
 
-          <!-- @todo
-          <PUIButton v-pui-tooltip="'@todo'" variant="outline">
+          <PUIButton
+            v-pui-tooltip="__('pruvious-dashboard', 'Configure view')"
+            :variant="isDirty || columnsDirty ? 'accent' : 'outline'"
+            @click="isTableSettingsPopupVisible = true"
+          >
             <Icon mode="svg" name="tabler:adjustments" />
+            <template v-if="isDirty || columnsDirty" #bubble>
+              <PUIBubble></PUIBubble>
+            </template>
           </PUIButton>
-          -->
         </div>
       </div>
     </template>
@@ -221,10 +381,20 @@
 </template>
 
 <script lang="ts" setup>
-import { __, useSelectQueryBuilderParams } from '#pruvious/client'
-import type { LogsDatabase } from '#pruvious/server'
+import { __, dayjsFormatDateTime, dayjsRelative, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
+import type { CollectionUIOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
-import { omit } from '@pruvious/utils'
+import {
+  deepCompare,
+  isDefined,
+  isEmpty,
+  isNull,
+  isString,
+  isUndefined,
+  omit,
+  titleCase,
+  toArray,
+} from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
 
@@ -232,28 +402,17 @@ const props = defineProps({
   /**
    * Name of the log collection to display.
    */
-  logCollection: {
+  logCollectionName: {
     type: String as PropType<keyof LogsDatabase['collections']>,
     required: true,
   },
 
   /**
-   * The default column definitions for the data table.
+   * Pseudo-definition of the log collection to display.
    */
-  columns: {
-    type: Object as PropType<PUIColumns>,
+  logCollectionDefinition: {
+    type: Object as PropType<SerializableCollection>,
     required: true,
-  },
-
-  /**
-   * The default table sorting order.
-   *
-   * @default
-   * [{ field: 'createdAt', direction: 'desc' }]
-   */
-  orderBy: {
-    type: Array as PropType<{ field: string; direction: 'asc' | 'desc' }[]>,
-    default: () => [{ field: 'createdAt', direction: 'desc' }],
   },
 
   /**
@@ -301,16 +460,24 @@ const selectedCount = computed(() =>
 )
 const selectAllState = ref<boolean | 'indeterminate'>(false)
 const initialized = ref(false)
+const isTableSettingsPopupVisible = ref(false)
 const paginated = ref<Omit<Paginated<any>, 'records'>>({ currentPage: 1, lastPage: 1, perPage: 50, total: 0 })
-const { columns, data, sort } = puiTable({ columns: props.columns })
-const { params, push, refresh } = useSelectQueryBuilderParams({
+const defaultColumns = resolveColumns(props.logCollectionDefinition.ui.indexPage.table.columns)
+const columnsDirty = ref(false)
+const { columns, data, sort } = puiTable({ columns: defaultColumns })
+const defaultOrderBy = resolveOrderBy()
+const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
+  watch: ['columns'],
   callback: async ({ queryString, params }) => {
+    columns.value = resolveColumns()
+    columnsDirty.value = !compareColumns(columns.value, defaultColumns)
+
     sort.value = params.orderBy?.[0]
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
       : null
 
     const response = await logsQueryBuilder
-      .selectFrom(props.logCollection)
+      .selectFrom(props.logCollectionName)
       .fromQueryString(queryString)
       .select(['id', ...Object.keys(columns.value)] as any)
       .paginate()
@@ -328,7 +495,7 @@ const { params, push, refresh } = useSelectQueryBuilderParams({
     initialized.value = true
   },
   defaultParams: {
-    orderBy: props.orderBy,
+    orderBy: defaultOrderBy,
     page: 1,
     perPage: 50,
   },
@@ -391,6 +558,140 @@ listen('delete', () => {
     onDeleteSelection()
   }
 })
+
+function resolveColumns(
+  from: 'auto' | string | CollectionUIOptions['indexPage']['table']['columns'] | null = 'auto',
+): PUIColumns {
+  const columns: PUIColumns = {}
+  const source =
+    from === 'auto'
+      ? isEmpty(route.query.columns)
+        ? props.logCollectionDefinition.ui.indexPage.table.columns
+        : String(route.query.columns).split(',')
+      : isString(from)
+        ? from.split(',')
+        : from
+
+  if (isUndefined(source) || isNull(source)) {
+    const filteredFieldEntries = Object.entries(props.logCollectionDefinition.fields).filter(([_, options]) =>
+      'ui' in options ? !options.ui?.hidden : true,
+    )
+
+    for (const [fieldName, options] of filteredFieldEntries.slice(
+      0,
+      props.logCollectionDefinition.createdAtField ? 4 : 5,
+    )) {
+      columns[fieldName] = puiColumn({
+        label:
+          'ui' in options && isDefined(options.ui?.label)
+            ? maybeTranslate(options.ui.label)
+            : __('pruvious-dashboard', titleCase(fieldName, false) as any),
+        sortable: options._dataType === 'text' ? 'text' : 'numeric',
+        minWidth: '16rem',
+      })
+    }
+
+    if (props.logCollectionDefinition.createdAtField) {
+      const options = props.logCollectionDefinition.fields.createdAt!
+      columns.createdAt = puiColumn({
+        label:
+          'ui' in options && isDefined(options.ui?.label)
+            ? maybeTranslate(options.ui.label)
+            : __('pruvious-dashboard', 'Created at'),
+        sortable: 'numeric',
+        minWidth: '16rem',
+      })
+    }
+  } else {
+    for (const column of source) {
+      if (isString(column)) {
+        const [field, width, minWidth] = column.split('|').map((p) => p.trim())
+
+        if (field) {
+          const options = props.logCollectionDefinition.fields[field]
+
+          if (options) {
+            columns[field] = puiColumn({
+              label:
+                'ui' in options && isDefined(options.ui?.label)
+                  ? maybeTranslate(options.ui.label)
+                  : __('pruvious-dashboard', titleCase(field, false) as any),
+              sortable: options._dataType === 'text' ? 'text' : 'numeric',
+              width,
+              minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
+            })
+          } else {
+            console.warn(
+              `Unable to resolve field \`${field}\` in \`${props.logCollectionName}\` log collection table columns. Available fields:`,
+              toRaw(props.logCollectionDefinition.fields),
+            )
+          }
+        }
+      } else if ('field' in column) {
+        const options = props.logCollectionDefinition.fields[column.field]
+
+        if (options) {
+          columns[column.field] = puiColumn({
+            label: isDefined(column.label)
+              ? maybeTranslate(column.label)
+              : 'ui' in options && isDefined(options.ui?.label)
+                ? maybeTranslate(options.ui.label)
+                : __('pruvious-dashboard', titleCase(column.field, false) as any),
+            sortable: options._dataType === 'text' ? 'text' : 'numeric',
+            width: column.width,
+            minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
+          })
+        } else {
+          console.warn(
+            `Unable to resolve field \`${column.field}\` in \`${props.logCollectionName}\` log collection table columns. Available fields:`,
+            toRaw(props.logCollectionDefinition.fields),
+          )
+        }
+      }
+    }
+  }
+
+  if (isEmpty(columns)) {
+    Object.assign(columns, {
+      id: puiColumn({ label: maybeTranslate(props.logCollectionDefinition.fields.id!.ui.label), sortable: 'numeric' }),
+    })
+  }
+
+  return columns
+}
+
+function compareColumns(a: PUIColumns, b: PUIColumns): boolean {
+  return (
+    deepCompare(Object.keys(a), Object.keys(b)) &&
+    Object.entries(a).every(([key, A]) => {
+      const B = b[key]
+      const AMinWidth = A.minWidth ?? (isUndefined(A.width) ? '16rem' : undefined)
+      const BMinWidth = B ? (B.minWidth ?? (isUndefined(B.width) ? '16rem' : undefined)) : undefined
+      return B && A.label === B.label && A.width === B.width && A.sortable === B.sortable && AMinWidth === BMinWidth
+    })
+  )
+}
+
+function resolveOrderBy(): {
+  field: string
+  direction?: 'asc' | 'desc'
+  nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
+}[] {
+  const orderBy = props.logCollectionDefinition.ui.indexPage.table.orderBy
+
+  if (isDefined(orderBy)) {
+    return toArray(orderBy).map((orderBy) => {
+      if (isString(orderBy)) {
+        const [field, direction, nulls] = orderBy.split(':').map((p) => p.trim())
+        return { field, direction: direction ?? 'asc', nulls: nulls ?? 'nullsAuto' } as any
+      } else {
+        return orderBy
+      }
+    })
+  }
+
+  return [{ field: props.logCollectionDefinition.createdAtField ? 'createdAt' : 'id', direction: 'desc' }]
+}
 
 function select(id: number | string) {
   selected.value[id] = true
@@ -495,7 +796,7 @@ async function onDelete(id: number | string): Promise<boolean> {
   })
 
   if (action === 'delete') {
-    const query = await logsQueryBuilder.deleteFrom(props.logCollection).where('id', '=', id).run()
+    const query = await logsQueryBuilder.deleteFrom(props.logCollectionName).where('id', '=', id).run()
 
     if (query.success) {
       puiQueueToast(__('pruvious-dashboard', 'Entry deleted'), { type: 'success' })
@@ -523,14 +824,14 @@ async function onDeleteSelection() {
 
     if (allSelected.value) {
       const lastId = await logsQueryBuilder
-        .selectFrom(props.logCollection)
+        .selectFrom(props.logCollectionName)
         .select('id')
         .orderBy('id', 'desc')
         .limit(paginated.value.total)
         .first()
 
       if (lastId.success && lastId.data) {
-        const query = await logsQueryBuilder.deleteFrom(props.logCollection).where('id', '<=', lastId.data.id).run()
+        const query = await logsQueryBuilder.deleteFrom(props.logCollectionName).where('id', '<=', lastId.data.id).run()
 
         if (query.success) {
           count = query.data
@@ -543,7 +844,7 @@ async function onDeleteSelection() {
       for (let i = 0; i < ids.length; i += 50) {
         queries.push(
           logsQueryBuilder
-            .deleteFrom(props.logCollection)
+            .deleteFrom(props.logCollectionName)
             .where('id', 'in', ids.slice(i, i + 50))
             .run()
             .then((query) => {

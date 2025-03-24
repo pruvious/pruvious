@@ -4,35 +4,9 @@
       v-model:details="details"
       v-model:detailsId="detailsId"
       :canDeleteLogs="canDeleteLogs"
-      :columns="columns"
-      logCollection="Queue"
+      :logCollectionDefinition="logCollectionDefinition"
+      logCollectionName="Queue"
     >
-      <template #cell="{ row, key }">
-        <PUIBadge v-if="key === 'priority'" color="accent">{{ row[key] }}</PUIBadge>
-
-        <PUIBadge
-          v-else-if="key === 'status'"
-          :color="row[key] === 'success' ? 'hsl(var(--p-green))' : row[key] === 'error' ? 'destructive' : 'accent'"
-          class="pui-capitalize"
-        >
-          {{
-            row[key] === 'success'
-              ? __('pruvious-dashboard', 'Success')
-              : row[key] === 'error'
-                ? __('pruvious-dashboard', 'Error')
-                : __('pruvious-dashboard', 'Pending')
-          }}
-        </PUIBadge>
-
-        <div v-else-if="key === 'createdAt'" v-pui-tooltip.nomd="dayjsRelative(row[key])" class="pui-truncate">
-          {{ dayjsFormatDateTime(row[key]) }}
-        </div>
-
-        <span v-else :title="row[key] ? String(row[key]) : undefined" class="pui-truncate">
-          {{ row[key] }}
-        </span>
-      </template>
-
       <template v-if="details" #detailsHeader>
         <PUIBadge
           :color="
@@ -368,7 +342,7 @@ import {
   hasPermission,
   usePruviousDashboard,
 } from '#pruvious/client'
-import type { LogsDatabase } from '#pruvious/server'
+import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import { isNull } from '@pruvious/utils'
 import { beautifyCode, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
@@ -406,17 +380,157 @@ const details = ref<{
   response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
   job: { id: number } & LogsDatabase['collections']['Queue']['TCastedTypes']
 } | null>(null)
-const columns: PUIColumns = {
-  priority: puiColumn<string>({ label: __('pruvious-dashboard', 'Priority'), width: '10rem', sortable: 'numeric' }),
-  name: puiColumn<string>({ label: __('pruvious-dashboard', 'Job name'), width: '16rem', sortable: 'text' }),
-  attempt: puiColumn<number | null>({
-    label: __('pruvious-dashboard', 'Attempts'),
-    width: '10rem',
-    sortable: 'numeric',
-  }),
-  status: puiColumn<number | null>({ label: __('pruvious-dashboard', 'Status'), width: '10rem', sortable: 'text' }),
-  createdAt: puiColumn<number>({ label: __('pruvious-dashboard', 'Created at'), width: '10rem', sortable: 'numeric' }),
-}
+
+const logCollectionDefinition = {
+  translatable: false,
+  syncedFields: [] as any,
+  fields: {
+    id: {
+      nullable: false,
+      default: 1,
+      decimalPlaces: 0,
+      max: Number.MAX_SAFE_INTEGER,
+      min: 1,
+      ui: { label: __('pruvious-dashboard', 'ID') },
+      _fieldType: 'number',
+      _dataType: 'bigint',
+    },
+    jobDebugId: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Job debug ID') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    requestDebugId: {
+      nullable: true,
+      default: 'null',
+      ui: { label: __('pruvious-dashboard', 'Request debug ID') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    method: {
+      nullable: false,
+      default: '',
+      choices: [{ value: 'GET' }, { value: 'POST' }, { value: 'PUT' }, { value: 'PATCH' }, { value: 'DELETE' }],
+      ui: { label: __('pruvious-dashboard', 'HTTP Method') },
+      _fieldType: 'select',
+      _dataType: 'text',
+    },
+    path: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Path') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    queryString: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Query string') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    name: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Job name') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    payload: {
+      nullable: true,
+      default: 'null',
+      ui: { label: __('pruvious-dashboard', 'Payload') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    priority: {
+      nullable: false,
+      default: 10,
+      decimalPlaces: 0,
+      max: Number.MAX_SAFE_INTEGER,
+      min: Number.MIN_SAFE_INTEGER,
+      ui: { label: __('pruvious-dashboard', 'Priority') },
+      _fieldType: 'number',
+      _dataType: 'numeric',
+    },
+    key: {
+      nullable: true,
+      default: 'null',
+      ui: { label: __('pruvious-dashboard', 'Key') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    attempt: {
+      nullable: false,
+      default: 1,
+      decimalPlaces: 0,
+      max: Number.MAX_SAFE_INTEGER,
+      min: 0,
+      ui: { label: __('pruvious-dashboard', 'Attempts') },
+      _fieldType: 'number',
+      _dataType: 'numeric',
+    },
+    scheduledAt: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Scheduled at') },
+      _fieldType: 'timestamp',
+      _dataType: 'numeric',
+    },
+    completedAt: {
+      nullable: true,
+      default: null,
+      ui: { label: __('pruvious-dashboard', 'Completed at') },
+      _fieldType: 'timestamp',
+      _dataType: 'numeric',
+    },
+    status: {
+      nullable: false,
+      default: '',
+      choices: [
+        { value: 'pending', label: __('pruvious-dashboard', 'Pending') },
+        { value: 'error', label: __('pruvious-dashboard', 'Error') },
+        { value: 'success', label: __('pruvious-dashboard', 'Success') },
+      ],
+      ui: { label: __('pruvious-dashboard', 'Status') },
+      _fieldType: 'select',
+      _dataType: 'text',
+    },
+    result: {
+      nullable: true,
+      default: 'null',
+      ui: { label: __('pruvious-dashboard', 'Result') },
+      _fieldType: 'text',
+      _dataType: 'text',
+    },
+    user: {
+      nullable: true,
+      default: null,
+      collection: 'Users',
+      fields: ['id', 'email', 'firstName', 'lastName'],
+      ui: { label: __('pruvious-dashboard', 'User') },
+      _fieldType: 'record',
+      _dataType: 'text',
+    },
+    createdAt: {
+      nullable: false,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Created at') },
+      _fieldType: 'timestamp',
+      _dataType: 'numeric',
+    },
+  } as Record<string, Partial<GenericSerializableFieldOptions>>,
+  ui: {
+    indexPage: {
+      table: {
+        columns: ['priority | 150px', 'name', 'attempt | 150px', 'status | 150px', 'createdAt | 220px'],
+        orderBy: 'createdAt:desc',
+      },
+    },
+  },
+} as SerializableCollection
 
 watch(detailsId, async () => {
   let query = { ...route.query }

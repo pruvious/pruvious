@@ -178,6 +178,7 @@ export default defineTranslation({
   'Inactive': 'Inaktiv',
   'Includes all': 'Enthält alle',
   'Includes any': 'Enthält mindestens eines',
+  'Insert': 'Einfügen',
   'Installation': 'Installation',
   'installWelcomeMessage':
     'Willkommen bei Pruvious! Geben Sie Ihre Daten ein, um Ihr Hauptadministrator-Konto zu erstellen.',
@@ -186,6 +187,8 @@ export default defineTranslation({
   'Job': 'Auftrag',
   'Job debug ID': 'Auftrags-Debug-ID',
   'Job name': 'Auftragsname',
+
+  'Key': 'Schlüssel',
 
   'Language': 'Sprache',
   'Language of the dashboard interface.': 'Sprache der Dashboard-Benutzeroberfläche.',
@@ -253,6 +256,7 @@ export default defineTranslation({
   'Query string': 'Query string',
   'Queue': 'Warteschlange',
 
+  'Raw result': 'Rohergebnis',
   'Redirected': 'Weitergeleitet',
   'Redirects': 'Weiterleitungen',
   'Redo': 'Wiederherstellen',
@@ -321,6 +325,7 @@ export default defineTranslation({
   'Starts with (case-insensitive)': 'Beginnt mit (Groß-/Kleinschreibung ignorieren)',
   'Status': 'Status',
   'Status code': 'Statuscode',
+  'Status message': 'Statusmeldung',
   'Stop sharing': 'Teilen beenden',
   'Success': 'Erfolg',
   'Sync configuration': 'Konfiguration synchronisieren',
@@ -374,6 +379,7 @@ export default defineTranslation({
   'Type': 'Typ',
 
   'Undo': 'Rückgängig',
+  'Update': 'Aktualisieren',
   'Updated': 'Aktualisiert',
   'Updated at': 'Aktualisiert am',
   'User': 'Benutzer',

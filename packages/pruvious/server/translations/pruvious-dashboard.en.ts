@@ -179,6 +179,7 @@ export default defineTranslation({
   'Inactive': 'Inactive',
   'Includes all': 'Includes all',
   'Includes any': 'Includes any',
+  'Insert': 'Insert',
   'Installation': 'Installation',
   'installWelcomeMessage': 'Welcome to Pruvious! Enter your details to create your primary administrator account.',
   'Invalid `$param` parameter': createPattern('Invalid `$param` parameter', { param: 'string' }),
@@ -186,6 +187,8 @@ export default defineTranslation({
   'Job': 'Job',
   'Job debug ID': 'Job debug ID',
   'Job name': 'Job name',
+
+  'Key': 'Key',
 
   'Language': 'Language',
   'Language of the dashboard interface.': 'Language of the dashboard interface.',
@@ -253,6 +256,7 @@ export default defineTranslation({
   'Query string': 'Query string',
   'Queue': 'Queue',
 
+  'Raw result': 'Raw result',
   'Redirected': 'Redirected',
   'Redirects': 'Redirects',
   'Redo': 'Redo',
@@ -321,6 +325,7 @@ export default defineTranslation({
   'Starts with (case-insensitive)': 'Starts with (case-insensitive)',
   'Status': 'Status',
   'Status code': 'Status code',
+  'Status message': 'Status message',
   'Stop sharing': 'Stop sharing',
   'Success': 'Success',
   'Sync configuration': 'Sync configuration',
@@ -372,6 +377,7 @@ export default defineTranslation({
   'Type': 'Type',
 
   'Undo': 'Undo',
+  'Update': 'Update',
   'Updated': 'Updated',
   'Updated at': 'Updated at',
   'User': 'User',
