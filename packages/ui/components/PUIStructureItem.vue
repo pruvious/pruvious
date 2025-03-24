@@ -5,13 +5,17 @@
       @mouseup="$emit('drop', 'before')"
       class="pui-structure-item-zone-before"
       :class="{ 'pui-structure-item-zone-visible': draggable?.touch }"
-    ></div>
+    >
+      <span>
+        <Icon mode="svg" name="tabler:grip-horizontal" />
+      </span>
+    </div>
 
     <div v-if="$slots.header" class="pui-structure-item-header">
       <button
         v-if="isDraggable && !disabled"
         @mousedown="handleDrag"
-        @touchstart="onTouchStart()"
+        @touchstart.prevent="onTouchStart()"
         tabindex="-1"
         type="button"
         class="pui-structure-drag-handle pui-raw"
@@ -30,7 +34,11 @@
       @mouseup="$emit('drop', 'after')"
       class="pui-structure-item-zone-after"
       :class="{ 'pui-structure-item-zone-visible': draggable?.touch }"
-    ></div>
+    >
+      <span>
+        <Icon mode="svg" name="tabler:grip-horizontal" />
+      </span>
+    </div>
   </PUICard>
 </template>
 
@@ -248,5 +256,22 @@ function cleanupAfterDrag() {
   background: hsl(var(--pui-ring));
   border-radius: 0.125rem;
   pointer-events: none;
+}
+
+.pui-structure-item-zone-before span,
+.pui-structure-item-zone-after span {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5em;
+  height: 1em;
+  background-color: hsl(var(--pui-primary));
+  border-radius: calc(var(--pui-radius) - 0.125rem);
+  color: hsl(var(--pui-primary-foreground));
+  transform: translate3d(-50%, -50%, 0);
 }
 </style>

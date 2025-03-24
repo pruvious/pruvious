@@ -13,6 +13,7 @@
     <button
       @blur="$emit('highlight', undefined)"
       @click="select"
+      @contextmenu.prevent="select"
       @focus="$emit('highlight', model.item)"
       @keydown.down="
         (event) => {

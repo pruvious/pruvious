@@ -3,7 +3,7 @@
     <div
       @contextmenu="contextMenu?.onContextMenu"
       @touchend="contextMenu?.onTouchEnd"
-      @touchstart="contextMenu?.onTouchStart"
+      @touchstart.prevent="contextMenu?.onTouchStart"
       class="area"
     >
       <span>Right click here</span>

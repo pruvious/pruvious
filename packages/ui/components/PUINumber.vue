@@ -15,7 +15,7 @@
       :aria-label="ariaDragLabel"
       :disabled="disabled"
       @mousedown="handleDrag"
-      @touchstart="handleDrag"
+      @touchstart.prevent="handleDrag"
       tabindex="-1"
       type="button"
       class="pui-number-icon"
