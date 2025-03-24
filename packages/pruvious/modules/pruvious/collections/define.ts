@@ -468,7 +468,7 @@ export interface CollectionMetaOptions<
    * Use `true` or `false` to enable/disable query logging with default settings.
    * For advanced configuration, provide an object with these options:
    *
-   * - `exposeData` - Store actual query parameters and results instead of type placeholders (default: `true`).
+   * - `exposeData` - Store actual query parameters and results instead of type placeholders (default: `false`).
    * - `operations` - Specify which database operations should be logged (logs all by default).
    *
    * @default true
@@ -482,7 +482,7 @@ export interface CollectionMetaOptions<
          *
          * Warning: Enabling this will include potentially sensitive information in logs.
          *
-         * @default true
+         * @default false
          */
         exposeData?: boolean
 
@@ -1736,7 +1736,7 @@ export function defineCollection<
         duplicate: options.duplicate ?? null,
         logs: {
           enabled: options.logs !== false,
-          exposeData: isObject(options.logs) ? !!options.logs.exposeData : true,
+          exposeData: isObject(options.logs) ? !!options.logs.exposeData : false,
           operations: defu(isObject(options.logs) && isObject(options.logs.operations) ? options.logs.operations : {}, {
             insert: true,
             select: true,
