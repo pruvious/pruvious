@@ -32,7 +32,18 @@
       @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
     />
 
-    <div v-else>@todo numeric</div>
+    <PUINumber
+      v-else
+      :decimalPlaces="options.decimalPlaces"
+      :id="id"
+      :max="options.max"
+      :min="options.min"
+      :modelValue="Number(modelValue.value)"
+      :name="id"
+      @commit="$emit('commit', { ...modelValue, value: $event })"
+      @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
+      showSteppers
+    />
   </PruviousFilterField>
 </template>
 
