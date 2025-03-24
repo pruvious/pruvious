@@ -14,7 +14,7 @@ export interface FieldsLayoutRow<TFieldNames extends string = string> {
   /**
    * Groups fields horizontally to display them in a single row.
    * Array items can be either fields or tab groups.
-   * Each field can have a fixed width (using CSS units) or expand to fill available space.
+   * Each field can have a fixed maximum width (using CSS units) or expand to fill available space.
    *
    * @example
    * ```ts
@@ -98,7 +98,7 @@ export interface FieldsLayoutTab<TFieldNames extends string = string> {
    *   // Single field
    *   'email',
    *
-   *   // Half-width field
+   *   // Half-width field (max-width: 50%)
    *   'firstName | 50%',
    *
    *   // Field with custom component styles
@@ -165,14 +165,14 @@ export type FieldsLayoutItem<TFieldNames extends string = string> =
 export interface FieldsLayoutFieldItem<TFieldNames extends string = string> {
   /**
    * Configuration for a single field in the layout.
-   * Can be specified as a field `name`, field name with width, or an object with additional styling.
+   * Can be specified as a field `name`, field name with maximum width, or an object with additional styling.
    *
    * @example
    * ```ts
    * // Field name
    * 'email',
    *
-   * // Field name with component width
+   * // Field name with maximum width
    * 'firstName | 50%',
    *
    * // Object with field name and custom styles

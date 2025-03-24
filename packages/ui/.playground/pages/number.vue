@@ -3,7 +3,7 @@
     <PUINumber
       v-model="value"
       :autoWidth="autoWidth"
-      :decimals="decimals"
+      :decimalPlaces="decimalPlaces"
       :disabled="disabled"
       :dragDirection="dragDirection"
       :error="state.hasErrors"
@@ -38,9 +38,9 @@
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="size">Decimals</label>
+            <label for="size">Decimal places</label>
           </PUIFieldLabel>
-          <PUINumber v-model="decimals" :min="0" :size="-2" id="decimals" />
+          <PUINumber v-model="decimalPlaces" :min="0" :size="-2" id="decimalPlaces" />
         </PUIField>
 
         <PUIField>
@@ -118,7 +118,7 @@ type Props = InstanceType<typeof PUINumber>['$props']
 const state = useShowcase()
 const min = ref(-65353)
 const max = ref(65353)
-const decimals = ref(0)
+const decimalPlaces = ref(0)
 const autoWidth = ref(false)
 const showDragButton = ref(false)
 const showSteppers = ref(false)

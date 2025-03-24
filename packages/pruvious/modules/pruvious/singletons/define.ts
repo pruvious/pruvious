@@ -430,7 +430,7 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *   // Single field
    *   'email',
    *
-   *   // Half-width field
+   *   // Half-width field (max-width: 50%)
    *   'firstName | 50%',
    *
    *   // Field with custom component styles

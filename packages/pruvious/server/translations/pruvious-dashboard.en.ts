@@ -133,6 +133,7 @@ export default defineTranslation({
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',
   'Does not equal': 'Does not equal',
+  'Drag to adjust value': 'Drag to adjust value',
   'Drop items here': 'Drop items here',
   'Duplicate': 'Duplicate',
   'Duplicated': 'Duplicated',

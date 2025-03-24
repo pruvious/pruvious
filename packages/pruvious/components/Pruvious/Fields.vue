@@ -324,11 +324,9 @@ function parseLayout(layout: FieldsLayout): Item[] {
     } else if (isObject(x)) {
       for (const key of Object.keys(x) as (keyof typeof x)[]) {
         if (key === 'field') {
-          const fieldItem = x[key] as FieldsLayoutFieldItem
+          const fieldItem = x as FieldsLayoutFieldItem
 
-          if (isString(fieldItem)) {
-            items.push(...parseLayout([fieldItem]))
-          } else if (isString(fieldItem.field)) {
+          if (isString(fieldItem.field)) {
             items.push(...parseLayout([fieldItem.field]))
           } else if (props.fields?.[fieldItem.field.name]) {
             items.push({

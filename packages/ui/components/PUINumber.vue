@@ -105,7 +105,7 @@ const props = defineProps({
    *
    * @default 0
    */
-  decimals: {
+  decimalPlaces: {
     type: Number,
     default: 0,
   },
@@ -233,11 +233,11 @@ const props = defineProps({
    * Specifies the accessibility label for the drag button.
    * This text is read by screen readers to describe the button's function.
    *
-   * @default 'Drag to adjust'
+   * @default 'Drag to adjust value'
    */
   ariaDragLabel: {
     type: String,
-    default: 'Drag to adjust',
+    default: 'Drag to adjust value',
   },
 })
 
@@ -294,7 +294,7 @@ function normalize() {
       value = Math.min(value, props.max)
     }
 
-    stringified.value = (Math.round(value * 10 ** props.decimals) / 10 ** props.decimals).toString()
+    stringified.value = (Math.round(value * 10 ** props.decimalPlaces) / 10 ** props.decimalPlaces).toString()
     return true
   }
 
@@ -496,6 +496,10 @@ function stopDragging() {
 
 .pui-number-disabled .pui-number-steppers {
   pointer-events: none;
+}
+
+.pui-number-steppers > button {
+  color: hsl(var(--pui-foreground));
 }
 
 .pui-number-steppers > button:disabled {
