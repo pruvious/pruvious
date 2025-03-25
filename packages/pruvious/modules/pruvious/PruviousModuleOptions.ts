@@ -970,6 +970,14 @@ export interface PruviousModuleOptions {
     api?: string
 
     /**
+     * Directory path where block components are stored.
+     * This path is relative to the project's `<srcDir>` directory.
+     *
+     * @default 'blocks'
+     */
+    blocks?: string
+
+    /**
      * Directory path where Pruvious build files are stored.
      * This path is relative to the project's `<rootDir>` directory.
      *

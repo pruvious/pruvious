@@ -26,6 +26,10 @@ export function generateServerFiles() {
   const nuxt = useNuxt()
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
 
+  if (!fs.existsSync(`${buildDir}/server/blocks.ts`)) {
+    fs.writeFileSync(`${buildDir}/server/blocks.ts`, 'export const blocks = {}\n')
+  }
+
   fs.writeFileSync(`${buildDir}/server/index.ts`, getServerFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/server/index.d.ts`, getServerTypeFileContent() + '\n')
 
@@ -1795,6 +1799,8 @@ function getReExports() {
     `export type { PruviousState, PruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
     `export { type CustomLogOptions, insertCustomLog } from '${resolve('../debug/utils.server')}'`,
     `export { type ResolveCustomComponentPathOptions, resolvePruviousComponent, resolveNamedPruviousComponent, resolveCustomComponentPath } from '${resolve('../components/utils.server')}'`,
+    `export { type Block, type GenericBlock, type DefineBlockOptions, defineBlock } from '${resolve('../blocks/define.server')}'`,
+    `export { blocks } from './blocks'`,
   ].join('\n')
 }
 

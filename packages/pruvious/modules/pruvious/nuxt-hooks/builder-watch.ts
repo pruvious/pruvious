@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import { useNuxt } from 'nuxt/kit'
 import type { WatchEvent } from 'nuxt/schema'
 import { join, relative } from 'pathe'
+import { resolveBlockDefinition } from '../blocks/resolver'
 import { generateClientFiles } from '../build/client'
 import { resolveCustomComponentsInFile } from '../components/resolver'
 import { debug } from '../debug/console'
@@ -49,6 +50,7 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       ? join(layer.config.serverDir, layer.config.pruvious?.dir?.filters?.server ?? 'filters')
       : null
     const sharedDir = join(layer.config.rootDir, layer.config.dir?.shared ?? 'shared')
+    const blocksDir = join(layer.config.srcDir, layer.config.pruvious?.dir?.blocks ?? 'blocks')
 
     if (
       path.startsWith(`${clientHooksDir}/`) ||
@@ -74,22 +76,36 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       (apiDir && path.startsWith(`${apiDir}/`)) ||
       (serverHooksDir && path.startsWith(`${serverHooksDir}/`)) ||
       (serverActionsDir && path.startsWith(`${serverActionsDir}/`)) ||
-      (serverFiltersDir && path.startsWith(`${serverFiltersDir}/`))
+      (serverFiltersDir && path.startsWith(`${serverFiltersDir}/`)) ||
+      path.startsWith(`${blocksDir}/`)
     ) {
       // Skip newly created files
       if (event === 'add' && !fs.readFileSync(path, 'utf-8').trim()) {
         return
       }
 
-      // Skip updates in Vue components
-      if (event === 'change' && path.endsWith('.vue') && !path.startsWith(`${fieldComponentsDir}/`)) {
-        // @todo `resolveCustomComponentsInFile()` if file is a block
+      if (path.startsWith(`${blocksDir}/`)) {
+        if (event === 'add' || event === 'change') {
+          try {
+            const clientFileContent = fs.readFileSync(
+              `${nuxt.options.runtimeConfig.pruvious.dir.build}/client/index.ts`,
+              'utf-8',
+            )
 
-        return
-      }
+            if (clientFileContent.includes(`import('${path}')`)) {
+              resolveBlockDefinition({ vueFile: path })
+              resolveCustomComponentsInFile({
+                file: path,
+                srcDir: layer.config.srcDir,
+                srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+              })
 
-      if (event === 'add' || event === 'change') {
-        if (path.startsWith(`${fieldComponentsDir}/`)) {
+              return
+            }
+          } catch {}
+        }
+      } else if (path.startsWith(`${fieldComponentsDir}/`)) {
+        if (event === 'add' || event === 'change') {
           try {
             const clientFileContent = fs.readFileSync(
               `${nuxt.options.runtimeConfig.pruvious.dir.build}/client/index.ts`,
@@ -101,7 +117,7 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
             }
           } catch {}
         }
-
+      } else if (event === 'add' || event === 'change') {
         try {
           const serverFileContent = fs.readFileSync(
             `${nuxt.options.runtimeConfig.pruvious.dir.build}/server/index.ts`,

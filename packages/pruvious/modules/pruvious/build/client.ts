@@ -3,6 +3,7 @@ import { camelCase } from '@pruvious/utils'
 import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { relative } from 'pathe'
+import { resolveBlockFiles } from '../blocks/resolver'
 import { debug } from '../debug/console'
 import { resolveFieldComponentFiles, resolveFieldDefinitionFiles } from '../fields/resolver'
 import {
@@ -306,6 +307,8 @@ function getClientFileContent() {
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
   const fieldComponentFiles = resolveFieldComponentFiles()
   const fieldComponentEntries = Object.entries(fieldComponentFiles)
+  const blockFiles = resolveBlockFiles()
+  const blockEntries = Object.entries(blockFiles)
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
 
   return [
@@ -388,6 +391,25 @@ function getClientFileContent() {
       ),
     `}`,
     ``,
+    `/**`,
+    ` * Key-value object mapping block names to their corresponding Vue components.`,
+    ` *`,
+    ` * Components are loaded asynchronously using Vue's \`defineAsyncComponent\` function.`,
+    ` * They are automatically registered by creating \`.vue\` files in the \`app/blocks/\` directory of the project.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <component v-if="blockComponents[blockName]" :is="blockComponents[blockName]" v-model="props" />`,
+    ` * </template>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const blockComponents: Record<string, () => Component> = {`,
+    ...blockEntries.map(
+      ([name, { file }]) => `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}')),`,
+    ),
+    `}`,
+    ``,
     `const _validatorFn: any = () => null`,
     ...simpleValidatorsMeta.flatMap(({ name, comment, exampleField }) => [
       ``,
@@ -466,6 +488,8 @@ function getClientTypeFileContent() {
     `export const tokenStorage: any`,
     `export const fieldComponents: any`,
     `export const tableFieldComponents: any`,
+    `export const filterFieldComponents: any`,
+    `export const blockComponents: any`,
     ...validatorsMeta.map(({ name }) => `export function ${name}Validator(): any`),
     `export function uniqueValidator(): any`,
     getReExports(),
@@ -499,6 +523,7 @@ function getReExports() {
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
     `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
     `export { dayjs, dayjsUTC, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
+    `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')
 }

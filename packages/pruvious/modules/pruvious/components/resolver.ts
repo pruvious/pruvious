@@ -52,7 +52,21 @@ export function resolveCustomComponents(write = true): Record<string, string> {
   const nuxt = useNuxt()
 
   // Blocks
-  // @todo resolve custom components in blocks
+  for (const { file, layer, layers } of resolveFromLayers({
+    nuxtDir: 'srcDir',
+    pruviousDir: (options) => options.dir?.blocks ?? 'blocks',
+    beforeResolve: (layer) =>
+      debug(
+        `Resolving custom components in blocks in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`,
+      ),
+  })) {
+    resolveCustomComponentsInFile({
+      file: file.absolute,
+      srcDir: layer.config.srcDir,
+      srcDirs: layers.map(({ config }) => config.srcDir),
+      write: false,
+    })
+  }
 
   // Collections
   for (const { file, layer, layers } of resolveFromLayers({
@@ -108,7 +122,7 @@ export function resolveCustomComponents(write = true): Record<string, string> {
   // Shared
   for (const { file, layer, layers } of resolveFromLayers({
     nuxtDir: 'rootDir',
-    pruviousDir: (_, layer) => layer.config.dir?.shared ?? 'shared', // @todo
+    pruviousDir: (_, layer) => layer.config.dir?.shared ?? 'shared',
     beforeResolve: (layer) =>
       debug(
         `Resolving custom components in shared directory in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`,

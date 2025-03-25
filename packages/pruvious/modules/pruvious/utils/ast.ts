@@ -1,14 +1,15 @@
-import generate from '@babel/generator'
-import { parse } from '@babel/parser'
+import _generate from '@babel/generator'
+import { parse, type ParseResult } from '@babel/parser'
 import _traverse, { Binding, NodePath } from '@babel/traverse'
-import { isObject, uniqueArray } from '@pruvious/utils'
+import type { CallExpression } from '@babel/types'
+import { isObject, isString, uniqueArray } from '@pruvious/utils'
 
 interface Context {
   /**
    * The source code string.
    * Can be either TypeScript or JavaScript.
    */
-  code: string
+  code: string | ParseResult
 
   /**
    * Indicates the programming language of the source code.
@@ -22,18 +23,39 @@ interface Context {
   targetFunctionNames: string[]
 }
 
-const traverse = isObject(_traverse) ? ((_traverse as any).default as typeof _traverse) : _traverse
+export const generate = isObject(_generate) ? ((_generate as any).default as typeof _generate) : _generate
+export const traverse = isObject(_traverse) ? ((_traverse as any).default as typeof _traverse) : _traverse
 
 /**
  * Extracts string literals that are passed as arguments to specific function calls within the source code.
+ *
+ * @example
+ * ```ts
+ * const code = `resolvePruviousComponent('@/components/MyComponent.vue')`
+ * const matches = extractStringLiteralArguments({
+ *   code,
+ *   mode: 'ts',
+ *   targetFunctionNames: ['resolvePruviousComponent']
+ * })
+ *
+ * console.log(matches)
+ * // [
+ * //   {
+ * //     functionName: 'resolvePruviousComponent',
+ * //     args: ['@/components/MyComponent.vue']
+ * //   }
+ * // ]
+ * ```
  */
 export function extractStringLiteralArguments({
   code,
   mode,
   targetFunctionNames,
-}: Context): { functionName: string; args: (string | undefined)[] }[] {
-  const ast = parse(code, { sourceType: 'module', plugins: mode === 'ts' ? ['typescript'] : [] })
-  const matches: { functionName: string; args: (string | undefined)[] }[] = []
+}: Context): { functionName: string; args: (string | undefined)[]; node: CallExpression }[] {
+  const ast = isString(code)
+    ? parse(code, { sourceType: 'module', plugins: mode === 'ts' ? ['typescript'] : [] })
+    : code
+  const matches: { functionName: string; args: (string | undefined)[]; node: CallExpression }[] = []
 
   traverse(ast, {
     CallExpression({ node }) {
@@ -41,6 +63,7 @@ export function extractStringLiteralArguments({
         matches.push({
           functionName: node.callee.name,
           args: node.arguments.map((arg) => (arg.type === 'StringLiteral' ? arg.value : undefined)),
+          node,
         })
       }
     },
@@ -53,7 +76,9 @@ export function extractStringLiteralArguments({
  * Removes unused code from the source while preserving specified functions and their required dependencies.
  */
 export function cleanupUnusedCode({ code, mode, targetFunctionNames }: Context): string {
-  const ast = parse(code, { sourceType: 'module', plugins: mode === 'ts' ? ['typescript'] : [] })
+  const ast = isString(code)
+    ? parse(code, { sourceType: 'module', plugins: mode === 'ts' ? ['typescript'] : [] })
+    : code
   const ancestors = new Set<NodePath>()
 
   traverse(ast, {
@@ -72,32 +97,30 @@ export function cleanupUnusedCode({ code, mode, targetFunctionNames }: Context):
   const outerBindings = getOuterBindings([...ancestors])
   const keep = uniqueArray([...outerBindings.map(({ path }) => path), ...ancestors])
 
+  function removeUnusedImports(path: NodePath) {
+    if (!keep.some((keepPath) => keepPath === path)) {
+      path.remove()
+      if (path.parentPath?.node.type === 'ImportDeclaration' && path.parentPath.node.specifiers.length === 0) {
+        path.parentPath.remove()
+      }
+    }
+  }
+
+  function removeUnusedDeclarationsAndStatements(path: NodePath) {
+    if (
+      !keep.some((keepPath) => path === keepPath) &&
+      !keep.some((keepPath) => path.isAncestor(keepPath)) &&
+      !keep.some((keepPath) => path.isDescendant(keepPath))
+    ) {
+      path.remove()
+    }
+  }
+
   traverse(ast, {
-    ImportSpecifier(path) {
-      if (!keep.some((keepPath) => keepPath === path)) {
-        path.remove()
-        if (path.parentPath.node.type === 'ImportDeclaration' && path.parentPath.node.specifiers.length === 0) {
-          path.parentPath.remove()
-        }
-      }
-    },
-    ImportDefaultSpecifier(path) {
-      if (!keep.some((keepPath) => keepPath === path)) {
-        path.remove()
-        if (path.parentPath.node.type === 'ImportDeclaration' && path.parentPath.node.specifiers.length === 0) {
-          path.parentPath.remove()
-        }
-      }
-    },
-    Declaration(path) {
-      if (
-        !keep.some((keepPath) => path === keepPath) &&
-        !keep.some((keepPath) => path.isAncestor(keepPath)) &&
-        !keep.some((keepPath) => path.isDescendant(keepPath))
-      ) {
-        path.remove()
-      }
-    },
+    ImportSpecifier: removeUnusedImports,
+    ImportDefaultSpecifier: removeUnusedImports,
+    Declaration: removeUnusedDeclarationsAndStatements,
+    Statement: removeUnusedDeclarationsAndStatements,
   })
 
   return generate(ast, { compact: false }).code
@@ -110,7 +133,6 @@ export function getOuterBindings(parentPaths: NodePath[]): Binding[] {
   const bindings = new Set<Binding>()
 
   parentPaths.forEach((parentPath) => {
-    console.log('parentPath', parentPath.node.loc?.start)
     traverse(
       parentPath.node,
       {

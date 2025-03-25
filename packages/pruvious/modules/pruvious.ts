@@ -1,10 +1,17 @@
-import { generateSecureRandomString, withLeadingSlash, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
+import {
+  generateSecureRandomString,
+  isString,
+  withLeadingSlash,
+  withoutTrailingSlash,
+  withTrailingSlash,
+} from '@pruvious/utils'
 import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { addServerHandler, createResolver, defineNuxtModule } from 'nuxt/kit'
 import { join } from 'pathe'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
+import { resetBlocksResolver } from './pruvious/blocks/resolver'
 import { generateClientFiles } from './pruvious/build/client'
 import { generateServerFiles } from './pruvious/build/server'
 import { resetCollectionsResolver } from './pruvious/collections/resolver'
@@ -146,6 +153,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
           server: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.actions!.server!)),
         },
         api: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.api!)),
+        blocks: withoutTrailingSlash(join(nuxt.options.srcDir, resolvedOptions.dir.blocks!)),
         build: withoutTrailingSlash(buildDir),
         collections: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.collections!)),
         fields: {
@@ -185,6 +193,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     fs.mkdirSync(`${buildDir}/server`)
 
     // Reset resolvers
+    resetBlocksResolver()
     resetCollectionsResolver()
     resetFieldsResolver()
     resetHooksResolver()
@@ -212,6 +221,16 @@ export default defineNuxtModule<PruviousModuleOptions>({
     addServerHandler({
       route: nuxt.options.runtimeConfig.pruvious.uploads.basePath + '**',
       handler: resolve('./pruvious/uploads/handler.ts'),
+    })
+
+    // Register block component directories
+    nuxt.hook('components:dirs', (dirs) => {
+      for (const [i, layer] of [...nuxt.options._layers].reverse().entries()) {
+        const path = withoutTrailingSlash(join(layer.config.srcDir, layer.config.pruvious?.dir?.blocks ?? 'blocks'))
+        if (fs.existsSync(path) && !dirs.some((dir) => (isString(dir) ? dir === path : dir.path === path))) {
+          dirs.push({ path, priority: 100 + i })
+        }
+      }
     })
 
     // Watch Pruvious files

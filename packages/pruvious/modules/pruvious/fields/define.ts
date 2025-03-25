@@ -959,7 +959,7 @@ const warned: string[] = []
  *
  * - For table view components, add `.table` to the filename (e.g., `app/fields/gallery.table.vue`).
  * - For filter components, add `.filter` to the filename (e.g., `app/fields/gallery.filter.vue`).
- * - For regular view components, use no suffix or add `.regular` (e.g., `app/fields/gallery.vue` or `app/fields/gallery.regular.vue`)
+ * - For regular view components, use no suffix or add `.regular` (e.g., `app/fields/gallery.vue` or `app/fields/gallery.regular.vue`).
  *
  * @see https://pruvious.com/docs/custom-fields (@todo set up this link)
  *
