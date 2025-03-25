@@ -13,12 +13,13 @@
 </template>
 
 <script lang="ts" setup>
-import { pruviousDashboardPost } from '#pruvious/client'
+import { pruviousDashboardPost, usePruviousHMR } from '#pruvious/client'
 import '@pruvious/ui/styles'
 import { useEventListener } from '@vueuse/core'
 
 const runtimeConfig = useRuntimeConfig()
 const mac = puiIsMac()
+const { start } = usePruviousHMR()
 
 useHead({
   titleTemplate: (titleChunk) => {
@@ -28,6 +29,10 @@ useHead({
     { rel: 'icon', type: 'image/svg+xml', href: `${runtimeConfig.app.baseURL}pruvious/favicon.svg` },
     { rel: 'icon', type: 'image/png', href: `${runtimeConfig.app.baseURL}pruvious/favicon.png` },
   ],
+})
+
+onMounted(() => {
+  start()
 })
 
 useEventListener('keydown', (event) => {

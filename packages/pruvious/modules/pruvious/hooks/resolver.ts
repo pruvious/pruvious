@@ -424,9 +424,6 @@ export function resolveFilterCallbackFiles(): {
   return filterCallbacks as any
 }
 
-/**
- * Clears the client-side action and filter cache.
- */
 export function clearCachedClientHooks() {
   actionDefinitions.client = undefined
   filterDefinitions.client = undefined
@@ -434,13 +431,14 @@ export function clearCachedClientHooks() {
   filterCallbacks.client = undefined
 }
 
-export function resetHooksResolver() {
-  actionDefinitions.client = undefined
+export function clearCachedServerHooks() {
   actionDefinitions.server = undefined
-  filterDefinitions.client = undefined
   filterDefinitions.server = undefined
-  actionCallbacks.client = undefined
   actionCallbacks.server = undefined
-  filterCallbacks.client = undefined
   filterCallbacks.server = undefined
+}
+
+export function resetHooksResolver() {
+  clearCachedClientHooks()
+  clearCachedServerHooks()
 }

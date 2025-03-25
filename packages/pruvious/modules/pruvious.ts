@@ -24,6 +24,7 @@ import { watchPruviousFiles } from './pruvious/nuxt-hooks/builder-watch'
 import { optimizeServerTsConfig } from './pruvious/nuxt-hooks/nitro-build-before'
 import { disableDashboardSSR } from './pruvious/nuxt-hooks/nitro-config'
 import { optimizeTsConfig } from './pruvious/nuxt-hooks/prepare-types'
+import { clearClientViteServers, onViteServerCreated } from './pruvious/nuxt-hooks/vite-server'
 import type { PruviousModuleOptions } from './pruvious/PruviousModuleOptions'
 import { resetJobsResolver } from './pruvious/queue/resolver'
 import { resetSingletonsResolver } from './pruvious/singletons/resolver'
@@ -232,6 +233,10 @@ export default defineNuxtModule<PruviousModuleOptions>({
         }
       }
     })
+
+    // Store Vite servers
+    clearClientViteServers()
+    nuxt.hook('vite:serverCreated', onViteServerCreated)
 
     // Watch Pruvious files
     nuxt.hook('builder:watch', watchPruviousFiles)
