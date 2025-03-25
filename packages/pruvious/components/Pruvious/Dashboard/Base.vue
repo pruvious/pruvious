@@ -19,7 +19,6 @@ import { useEventListener } from '@vueuse/core'
 
 const runtimeConfig = useRuntimeConfig()
 const mac = puiIsMac()
-const { start } = usePruviousHMR()
 
 useHead({
   titleTemplate: (titleChunk) => {
@@ -32,7 +31,9 @@ useHead({
 })
 
 onMounted(() => {
-  start()
+  if (import.meta.hot) {
+    usePruviousHMR().start()
+  }
 })
 
 useEventListener('keydown', (event) => {
