@@ -9,7 +9,7 @@ import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
-import { relative } from 'pathe'
+import { dirname, relative, resolve } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
 import { cleanupUnusedCode, generate, traverse } from '../utils/ast'
 import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
@@ -109,6 +109,8 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
   }
 
   try {
+    const nuxt = useNuxt()
+    const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
     const code = fs.existsSync(options.vueFile) ? fs.readFileSync(options.vueFile, 'utf-8') : ''
     const { descriptor } = parseSFC(code)
     const isTS = descriptor.scriptSetup?.lang === 'ts'
@@ -134,6 +136,11 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
       ImportDeclaration(path) {
         if (path.node.source.value === '#pruvious/client') {
           path.node.source.value = '#pruvious/server'
+        } else if (path.node.source.value.startsWith('.')) {
+          path.node.source.value = relative(
+            `${buildDir}/server/blocks`,
+            resolve(dirname(options.vueFile), path.node.source.value),
+          )
         }
       },
     })
