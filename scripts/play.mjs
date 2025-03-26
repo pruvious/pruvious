@@ -14,6 +14,7 @@ const isCloudflareBuild = process.argv.includes('--cf')
 const isTest = process.argv.includes('--test')
 const isDeploy = process.argv.includes('--deploy')
 const isVerbose = process.argv.includes('--verbose')
+const noPublish = process.argv.includes('--no-publish')
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(currentDir, '..')
@@ -37,34 +38,36 @@ await $fetch(new URL('-/ping', process.env.PRIVATE_REGISTRY_BASE_URL)).catch(() 
 })
 
 // Publish packages
-for (const dir of fs.readdirSync(resolve(rootDir, 'packages'))) {
-  if (fs.lstatSync(resolve(rootDir, `packages/${dir}`)).isFile()) {
-    continue
-  }
+if (!noPublish) {
+  for (const dir of fs.readdirSync(resolve(rootDir, 'packages'))) {
+    if (fs.lstatSync(resolve(rootDir, `packages/${dir}`)).isFile()) {
+      continue
+    }
 
-  const version = JSON.parse(fs.readFileSync(resolve(rootDir, `packages/${dir}/package.json`)).toString()).version
-  const handle = `${dir}@${version}`
-  const published = await publish(dir)
+    const version = JSON.parse(fs.readFileSync(resolve(rootDir, `packages/${dir}/package.json`)).toString()).version
+    const handle = `${dir}@${version}`
+    const published = await publish(dir)
 
-  if (!published) {
-    const unpublished = await unpublish(dir)
+    if (!published) {
+      const unpublished = await unpublish(dir)
 
-    if (unpublished) {
-      consola.info(`Unpublished ${colorize('yellow', handle)}`)
+      if (unpublished) {
+        consola.info(`Unpublished ${colorize('yellow', handle)}`)
 
-      const retryPublished = await publish(dir)
+        const retryPublished = await publish(dir)
 
-      if (!retryPublished) {
+        if (!retryPublished) {
+          consola.error(`Failed to publish ${colorize('red', handle)}`)
+          process.exit(1)
+        }
+      } else {
         consola.error(`Failed to publish ${colorize('red', handle)}`)
         process.exit(1)
       }
-    } else {
-      consola.error(`Failed to publish ${colorize('red', handle)}`)
-      process.exit(1)
     }
-  }
 
-  consola.success(`Published ${colorize('greenBright', handle)}`)
+    consola.success(`Published ${colorize('greenBright', handle)}`)
+  }
 }
 
 // Install Nuxt
@@ -259,14 +262,17 @@ async function initPlayground() {
   for (const path of [
     'actions',
     'assets',
+    'blocks',
     'components',
     'filters',
     'hooks',
+    'layouts',
     'pages',
     'server/api',
     'server/collections',
     'server/fields',
     'server/translations',
+    'shared',
     'test',
   ]) {
     if (fs.existsSync(resolve(rootDir, 'packages/pruvious/.playground', path))) {

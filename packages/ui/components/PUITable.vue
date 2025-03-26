@@ -153,7 +153,7 @@ import { deselectAll, isDefined, isNull } from '@pruvious/utils'
 import { useMagicKeys } from '@vueuse/core'
 import type { IPUITable, PUIColumns, PUIRow, PUITableSort } from '../composables/puiTable'
 
-interface PUITableProps extends Partial<IPUITable> {
+interface PUITableProps extends /* @vue-ignore */ Partial<IPUITable> {
   columns: TColumns
 
   /**

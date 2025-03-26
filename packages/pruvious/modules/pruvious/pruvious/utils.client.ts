@@ -1,3 +1,4 @@
+import { isDevelopment, isProduction } from 'std-env'
 import { pruviousGet } from '../api/utils.client'
 import type { SerializableCollection } from '../collections/utils.client'
 import type { SerializableSingleton } from '../singletons/utils.client'
@@ -68,6 +69,8 @@ export const usePruvious = () => useState<PruviousState | null>('pruvious-state'
 export const usePruviousDashboard = () =>
   useState<PruviousDashboardState | null>('pruvious-dashboard-state', () => null)
 
+let unwantedStylesRemoved = false
+
 /**
  * Retrieves the current state of the Pruvious CMS from `/<pruvious.api.basePath>/pruvious`.
  * The HTTP request runs only if the state is not already present.
@@ -126,4 +129,39 @@ export async function refreshPruviousDashboardState(force = false) {
   }
 
   return dashboard.value
+}
+
+/**
+ * Removes unwanted styles from the dashboard.
+ * This function is automatically called by the `pruvious-dashboard` middleware.
+ */
+export function removeUnwantedStylesFromDashboard() {
+  if (!unwantedStylesRemoved) {
+    for (const styleSheet of document.styleSheets) {
+      const devId = (styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId
+
+      if (
+        isProduction ||
+        (!devId?.includes('&scoped=') &&
+          !devId?.includes('/pruvious/components/Pruvious/') &&
+          !devId?.includes('/ui/components/PUI'))
+      ) {
+        styleSheet.ownerNode?.remove()
+      }
+    }
+
+    if (isDevelopment) {
+      for (const styleElement of document.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')) {
+        if (
+          !styleElement.dataset.viteDevId?.includes('&scoped=') &&
+          !styleElement.dataset.viteDevId?.includes('/pruvious/components/Pruvious/') &&
+          !styleElement.dataset.viteDevId?.includes('/ui/components/PUI')
+        ) {
+          styleElement.remove()
+        }
+      }
+    }
+
+    unwantedStylesRemoved = true
+  }
 }

@@ -11,10 +11,12 @@ import {
   useLanguage,
 } from '#pruvious/client'
 import type { LanguageCode } from '#pruvious/server'
+import { removeUnwantedStylesFromDashboard } from '../modules/pruvious/pruvious/utils.client'
 
 /**
  * Pruvious client middleware intended for use in the dashboard.
  *
+ * - Removes unwanted styles from the dashboard.
  * - Retrieves the CMS state from `/<pruvious.api.basePath>/pruvious` and stores it in the `usePruvious` composable.
  * - Retrieves the current user authentication state from `/<pruvious.api.basePath>/auth/state`
  *   and stores it in the `useAuth` composable.
@@ -25,6 +27,9 @@ import type { LanguageCode } from '#pruvious/server'
  */
 export default defineNuxtRouteMiddleware(async () => {
   if (import.meta.client) {
+    // Remove unwanted styles
+    removeUnwantedStylesFromDashboard()
+
     // CMS
     await refreshPruviousState()
 

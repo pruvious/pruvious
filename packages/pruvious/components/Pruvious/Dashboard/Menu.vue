@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 .p-menu > * + * {
   margin-top: 1.5em;
 }

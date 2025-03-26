@@ -247,6 +247,15 @@ export default defineNuxtModule<PruviousModuleOptions>({
     // Enable async context
     nuxt.options.experimental.asyncContext = true
 
+    // Remove dynamic imports from entry points
+    nuxt.hook('build:manifest', (manifest) => {
+      for (const item of Object.values(manifest)) {
+        if (item.isEntry || item.isDynamicEntry) {
+          item.dynamicImports = []
+        }
+      }
+    })
+
     // Log build time
     if (getErrorCount() === 0) {
       success(`Pruvious built in ${Math.round(performance.now() - start)}ms`)
