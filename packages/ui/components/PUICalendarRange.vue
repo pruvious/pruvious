@@ -111,7 +111,7 @@ const props = defineProps({
    * The time difference in minutes between UTC and local time.
    * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
    *
-   * By default, the timezone offset is set to UTC (GMT+0).
+   * By default, the time zone offset is set to UTC (GMT+0).
    *
    * @default 0
    *
@@ -143,7 +143,7 @@ const props = defineProps({
    * (timestamp: number) => new Date(timestamp).toUTCString()
    */
   formatter: {
-    type: Function,
+    type: Function as PropType<(timestamp: number) => string>,
     default: (timestamp: number) => new Date(timestamp).toUTCString(),
   },
 

@@ -10,9 +10,20 @@
  * ```
  */
 export function getTimezoneOffset(timeZone: string, date: number | string | Date = new Date()): number {
-  date = new Date(date)
-  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }))
-  const tzDate = new Date(date.toLocaleString('en-US', { timeZone }))
-  const offset = (tzDate.getTime() - utcDate.getTime()) / 60000
+  const targetDate = new Date(date)
+  const utcMinutes = targetDate.getUTCHours() * 60 + targetDate.getUTCMinutes()
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', minute: 'numeric', hour12: false })
+  const timeString = formatter.format(targetDate)
+  const [hours, minutes] = timeString.split(':').map(Number)
+  const targetMinutes = hours * 60 + minutes
+
+  let offset = targetMinutes - utcMinutes
+
+  if (offset > 720) {
+    offset -= 1440
+  } else if (offset < -720) {
+    offset += 1440
+  }
+
   return offset
 }

@@ -54,6 +54,7 @@ export default defineTranslation({
   'Changes made to this field will automatically sync across all translations.':
     'Changes made to this field will automatically sync across all translations.',
   'Changes that you made may not be saved.': 'Changes that you made may not be saved.',
+  'Clear': 'Clear',
   'Close': 'Close',
   'Collapse': 'Collapse',
   'Collections': 'Collections',
@@ -220,6 +221,7 @@ export default defineTranslation({
   'New translation': 'New translation',
   'New translation of': 'New translation of',
   'Next entry': 'Next entry',
+  'Next month': 'Next month',
   'Next page': 'Next page',
   'No': 'No',
   'No conditions set': 'No conditions set',
@@ -248,6 +250,7 @@ export default defineTranslation({
   'Predefined': 'Predefined',
   'Preview': 'Preview',
   'Previous entry': 'Previous entry',
+  'Previous month': 'Previous month',
   'Previous page': 'Previous page',
   'Priority': 'Priority',
 
@@ -279,6 +282,7 @@ export default defineTranslation({
   'Saved': 'Saved',
   'Scheduled at': 'Scheduled at',
   'Select': 'Select',
+  'Select date': 'Select date',
   'selected': 'selected',
   'Selected $count $entries': createPattern(
     'Selected $count $entries',

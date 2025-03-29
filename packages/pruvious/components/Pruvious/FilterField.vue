@@ -72,11 +72,15 @@ watch(
         (oldValue && newValue.field !== oldValue?.field) ||
         (isNull(normalizedValue.value) && !props.options.nullable) ||
         ((props.options._dataType === 'bigint' || props.options._dataType === 'numeric') &&
-          !isNumber(normalizedValue.value)) ||
-        (props.options._dataType === 'boolean' && !isBoolean(normalizedValue.value)) ||
+          !isNumber(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
+        (props.options._dataType === 'boolean' &&
+          !isBoolean(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
         (props.options._dataType === 'text' &&
           !matrixOperators.includes(normalizedValue.operator) &&
-          !isString(normalizedValue.value)) ||
+          !isString(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
         (props.options._dataType === 'text' &&
           matrixOperators.includes(normalizedValue.operator) &&
           !isArray(normalizedValue.value))

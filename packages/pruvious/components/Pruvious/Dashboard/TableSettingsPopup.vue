@@ -223,6 +223,8 @@ const emit = defineEmits<{
   'keydown': [event: KeyboardEvent]
 }>()
 
+provide('floatingStrategy', 'absolute')
+
 const route = useRoute()
 const popup = useTemplateRef('popup')
 const activeTab = ref<Tab>('filters')

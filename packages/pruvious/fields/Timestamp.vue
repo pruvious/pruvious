@@ -1,6 +1,8 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
     <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+
+    <!-- @todo -->
   </PUIField>
 </template>
 

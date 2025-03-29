@@ -8,7 +8,7 @@
       :max="max"
       :min="min"
       :size="state.size"
-      :timezone="timezoneOffset"
+      :timezone="isNumericString(timezone) ? +timezone : timezone"
       :withTime="withTime"
       id="calendar"
       placeholder="Placeholder..."
@@ -21,9 +21,9 @@
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="timezoneOffset">Timezone offset</label>
+            <label for="timezone">Timezone</label>
           </PUIFieldLabel>
-          <PUINumber v-model="timezoneOffset" :size="-2" id="timezoneOffset" suffix="min" />
+          <PUIInput v-model="timezone" :size="-2" id="timezone" />
         </PUIField>
 
         <PUIField>
@@ -78,8 +78,10 @@
 </template>
 
 <script lang="ts" setup>
+import { isNumericString } from '@pruvious/utils'
+
 const state = useShowcase()
-const timezoneOffset = ref(660)
+const timezone = ref('Europe/Berlin')
 const withTime = ref(true)
 const min = ref(-8640000000000000)
 const max = ref(8640000000000000)

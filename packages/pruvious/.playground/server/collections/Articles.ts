@@ -1,4 +1,4 @@
-import { defineCollection, numberField, repeaterField, textField } from '#pruvious/server'
+import { dateTimeField, defineCollection, numberField, repeaterField, textField } from '#pruvious/server'
 
 export default defineCollection({
   translatable: true,
@@ -19,6 +19,9 @@ export default defineCollection({
         }),
       },
     }),
+    availableSince: dateTimeField({
+      timezone: 'Europe/Berlin',
+    }),
   },
   author: { strict: true },
   editors: { strict: true },
@@ -29,7 +32,11 @@ export default defineCollection({
       },
     },
     createPage: {
-      fields: [{ row: ['name', { field: { name: 'price', style: { flexShrink: 0, width: 'auto' } } }] }, 'variants'],
+      fields: [
+        { row: ['name', { field: { name: 'price', style: { flexShrink: 0, width: 'auto' } } }] },
+        'variants',
+        'createdAt',
+      ],
     },
   },
   copyTranslation: ({ source }) => ({ ...source, author: useEvent().context.pruvious.auth.user?.id }),

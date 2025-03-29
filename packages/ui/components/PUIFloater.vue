@@ -114,6 +114,13 @@ const props = defineProps({
     type: String as PropType<'fixed' | 'absolute'>,
     default: 'fixed',
   },
+
+  /**
+   * Callback function to be called when the escape key is pressed.
+   */
+  onEscapeKey: {
+    type: Function as PropType<(event: KeyboardEvent) => void>,
+  },
 })
 
 const root = useTemplateRef('root')
@@ -211,10 +218,14 @@ async function open(event?: Event) {
       'keydown',
       (event) => {
         if (event.key === 'Escape') {
-          event.preventDefault()
-          event.stopImmediatePropagation()
-          close(event)
-          handle.value?.focus()
+          if (props.onEscapeKey) {
+            props.onEscapeKey(event)
+          } else {
+            event.preventDefault()
+            event.stopImmediatePropagation()
+            close(event)
+            handle.value?.focus()
+          }
         } else {
           emit('keydown', event)
         }

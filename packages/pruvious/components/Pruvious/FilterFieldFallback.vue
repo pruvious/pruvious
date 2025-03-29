@@ -40,6 +40,7 @@
       :min="options.min"
       :modelValue="Number(modelValue.value)"
       :name="id"
+      :suffix="options.ui?.suffix"
       @commit="$emit('commit', { ...modelValue, value: $event })"
       @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
       showSteppers

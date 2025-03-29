@@ -646,7 +646,7 @@ function search(event: KeyboardEvent) {
     }
 
     // Append the entered key to the keyword buffer
-    if (!event.ctrlKey && !event.metaKey && event.key.match(/^[a-z0-9]$/i)) {
+    if (!event.ctrlKey && !event.metaKey && event.key.match(/^[\p{L}\p{N}]$/u)) {
       keyword += event.key
 
       // Find and focus the choice that matches the entered keyword

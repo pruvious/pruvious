@@ -3,9 +3,22 @@
     :disabled="disabled"
     :error="error"
     :handleTitle="displayedValue"
+    :onEscapeKey="
+      (event) => {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        if (isMonthSelectorVisible || isYearSelectorVisible) {
+          isMonthSelectorVisible = false
+          isYearSelectorVisible = false
+        } else {
+          root?.close(event)
+          root?.handle?.focus()
+        }
+      }
+    "
     :size="size"
     :strategy="strategy"
-    @close="$emit('commit', toModelValue(modelValue))"
+    @close="$emit('commit', toModelValue($modelValue))"
     @keydown="onKeyDown"
     @keydown.down="prevYear"
     @keydown.left="prevMonth"
@@ -351,7 +364,7 @@ const props = defineProps({
    * The time difference in minutes between UTC and local time.
    * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
    *
-   * By default, the timezone offset is set to UTC (GMT+0).
+   * By default, the time zone offset is set to UTC (GMT+0).
    *
    * @default 0
    *
@@ -383,7 +396,7 @@ const props = defineProps({
    * (timestamp: number) => new Date(timestamp).toUTCString()
    */
   formatter: {
-    type: Function,
+    type: Function as PropType<(timestamp: number) => string>,
     default: (timestamp: number) => new Date(timestamp).toUTCString(),
   },
 
@@ -629,6 +642,8 @@ const $maxTime = computed(() =>
 const keywordTimeout = useTimeout(750, { controls: true })
 const keyword = ref('')
 
+let timezoneOffset = 0
+
 /**
  * Stops listening for focus events.
  */
@@ -743,11 +758,12 @@ watch(
 )
 
 function withTimezoneOffset(timestamp: number) {
-  return timestamp + (isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone) * 60000
+  timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
+  return timestamp + timezoneOffset * 60000
 }
 
 function withoutTimezoneOffset(timestamp: number) {
-  return timestamp - (isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone) * 60000
+  return timestamp - timezoneOffset * 60000
 }
 
 function toModelValue(timestamp: number | null) {
@@ -845,9 +861,8 @@ function onKeyDown(event: KeyboardEvent) {
       keyword.value = ''
     }
 
-    if (!event.ctrlKey && !event.metaKey && event.key.match(/^[a-z0-9]$/i)) {
+    if (!event.ctrlKey && !event.metaKey && event.key.match(/^[\p{L}\p{N}]$/u)) {
       keyword.value += event.key
-
       keywordTimeout.start()
     } else if (!event.ctrlKey && !event.metaKey && event.key === ' ' && keyword.value) {
       keyword.value += ' '

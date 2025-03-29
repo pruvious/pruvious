@@ -55,6 +55,7 @@ export default defineTranslation({
     'Änderungen an diesem Feld werden automatisch in allen Übersetzungen synchronisiert.',
   'Changes that you made may not be saved.':
     'Änderungen, die Sie vorgenommen haben, werden möglicherweise nicht gespeichert.',
+  'Clear': 'Löschen',
   'Close': 'Schließen',
   'Collapse': 'Einklappen',
   'Collections': 'Collections',
@@ -220,6 +221,7 @@ export default defineTranslation({
   'New translation': 'Neue Übersetzung',
   'New translation of': 'Neue Übersetzung von',
   'Next entry': 'Nächster Eintrag',
+  'Next month': 'Nächster Monat',
   'Next page': 'Nächste Seite',
   'No': 'Nein',
   'No conditions set': 'Keine Bedingungen festgelegt',
@@ -248,6 +250,7 @@ export default defineTranslation({
   'Predefined': 'Vordefiniert',
   'Preview': 'Vorschau',
   'Previous entry': 'Vorheriger Eintrag',
+  'Previous month': 'Vorheriger Monat',
   'Previous page': 'Vorherige Seite',
   'Priority': 'Priorität',
 
@@ -279,6 +282,7 @@ export default defineTranslation({
   'Saved': 'Gespeichert',
   'Scheduled at': 'Geplant am',
   'Select': 'Auswählen',
+  'Select date': 'Datum auswählen',
   'selected': 'ausgewählt',
   'Selected $count $entries': createPattern(
     '$count $entries ausgewählt',

@@ -379,8 +379,6 @@ defineEmits<{
   'restore': [apply: boolean]
 }>()
 
-provide('floatingStrategy', 'absolute')
-
 const auth = useAuth()
 const canCreate = hasPermission('collection:bookmarks:create')
 const canUpdate = hasPermission('collection:bookmarks:update')
