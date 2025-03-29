@@ -46,7 +46,7 @@
       @update:modelValue="$emit('update:modelValue', [modelValue[0], $event])"
     />
 
-    <span class="pui-time-range-decorator"></span>
+    <span class="pui-calendar-range-decorator"></span>
   </div>
 </template>
 
