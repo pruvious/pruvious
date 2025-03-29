@@ -1,3 +1,4 @@
+import { remove } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import fs from 'node:fs'
 import { useNitro, useNuxt } from 'nuxt/kit'
@@ -36,6 +37,8 @@ type PruviousFileType =
   | 'server-filter'
   | 'shared-file'
 
+const skipped: string[] = []
+
 /**
  * Watches Pruvious files for changes.
  */
@@ -49,11 +52,13 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
 
   // Skip newly created files
   if (event === 'add' && !fs.readFileSync(path, 'utf-8').trim()) {
+    skipped.push(path)
     return
   }
 
   if (type === 'collection-definition') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetCollectionsResolver()
       generateServerFiles()
     }
@@ -63,7 +68,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'singleton-definition') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetSingletonsResolver()
       generateServerFiles()
     }
@@ -80,7 +86,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
     })
 
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetTemplatesResolver()
       resetCollectionsResolver()
       resetSingletonsResolver()
@@ -92,7 +99,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'field-definition') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetFieldsResolver()
       resetTemplatesResolver()
       resetCollectionsResolver()
@@ -107,7 +115,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'field-component') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetFieldsResolver()
       resetTemplatesResolver()
       resetCollectionsResolver()
@@ -128,7 +137,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'template-definition') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetTemplatesResolver()
       resetCollectionsResolver()
       resetSingletonsResolver()
@@ -140,7 +150,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'translation-definition') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetTranslationsResolver()
       generateClientFiles()
       generateServerFiles()
@@ -151,7 +162,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'server-handler') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       resetServerHandlersResolver()
       generateServerFiles()
     }
@@ -167,7 +179,8 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'server-hook' || type === 'server-action' || type === 'server-filter') {
-    if (event === 'add' || event === 'unlink') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
       clearCachedServerHooks()
       generateServerFiles()
     }
