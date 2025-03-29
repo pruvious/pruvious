@@ -42,6 +42,7 @@ npm install @pruvious/utils
   - [toForeignKey](#toforeignkey)
   - [toIndex](#toindex)
 - [Date](#date)
+  - [getTimezoneOffset](#gettimezoneoffset)
   - [isDate](#isdate)
   - [toDate](#todate)
   - [toSeconds](#toseconds)
@@ -525,6 +526,19 @@ toIndex('Products', ['price', 'discount'], true) // UC_Products__price__discount
 ```
 
 ## <a id="date">Date</a>
+
+### <a id="gettimezoneoffset">`getTimezoneOffset(timeZone, date)`</a>
+
+Get the time zone offset in minutes from a `timeZone` string and a `date`.
+
+**Example:**
+
+```ts
+getTimezoneOffset('Europe/Berlin', new Date('2021-01-01T00:00:00.000Z'))    // 60
+getTimezoneOffset('Europe/Berlin', new Date('2021-06-01T00:00:00.000Z'))    // 120
+getTimezoneOffset('America/New_York', new Date('2021-01-01T00:00:00.000Z')) // -300
+getTimezoneOffset('Asia/Tokyo', new Date('2021-01-01T00:00:00.000Z'))       // +540
+```
 
 ### <a id="isdate">`isDate(value)`</a>
 

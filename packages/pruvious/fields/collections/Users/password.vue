@@ -14,9 +14,9 @@
           { label: __('pruvious-dashboard', 'No'), value: false },
           { label: __('pruvious-dashboard', 'Yes'), value: true },
         ]"
-        :id="`${id}-switch`"
+        :id="`${id}--switch`"
         :modelValue="changePassword"
-        :name="`${name}-switch`"
+        :name="`${name}--switch`"
         @update:modelValue="
           (value) => {
             changePassword = Boolean(value)

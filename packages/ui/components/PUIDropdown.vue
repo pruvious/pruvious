@@ -59,6 +59,9 @@ const props = defineProps({
 
   /**
    * The type of CSS position property to use.
+   * The `fixed` value is recommended for most cases.
+   * The `absolute` value is useful when the picker is inside a scrolling container.
+   * You can also `provide('floatingStrategy', 'absolute')` from a parent component to change the default value.
    *
    * @default 'fixed'
    */
@@ -132,7 +135,7 @@ const {
     }),
     autoSize({
       apply({ availableHeight, elements }) {
-        if (availableHeight < inner.value!.offsetHeight) {
+        if (availableHeight < inner.value!.scrollHeight) {
           elements.floating.style.height = `${Math.max(0, availableHeight)}px`
         }
       },
@@ -142,7 +145,7 @@ const {
     shift(),
   ],
   placement: props.placement === 'start' ? 'bottom-start' : 'bottom-end',
-  strategy: props.strategy,
+  strategy: inject('floatingStrategy', props.strategy),
   whileElementsMounted: autoUpdate,
 })
 

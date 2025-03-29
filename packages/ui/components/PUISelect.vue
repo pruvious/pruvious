@@ -311,7 +311,7 @@ let unpauseMouseTimeout: ReturnType<typeof setInterval> | undefined
 let keyword = ''
 
 /**
- * Stops listening for focus events
+ * Stops listening for focus events.
  */
 let stopFocusListener: (() => void) | undefined
 

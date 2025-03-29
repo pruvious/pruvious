@@ -26,6 +26,15 @@ const customOptions: {
     increment?: number
 
     /**
+     * The total number of digits to pad with leading zeros.
+     * For example, if `padZeros` is `4`, the number `42` will be displayed as '0042'.
+     * Set to `0` to disable padding.
+     *
+     * @default 0
+     */
+    padZeros?: number
+
+    /**
      * Controls the visibility of the drag button element.
      * When enabled, users can interact with this button to adjust values.
      *
@@ -51,6 +60,7 @@ const customOptions: {
     autoWidth: false,
     dragDirection: 'horizontal',
     increment: 1,
+    padZeros: 0,
     showDragButton: false,
     showSteppers: false,
     suffix: '',

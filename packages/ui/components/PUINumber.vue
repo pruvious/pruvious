@@ -3,7 +3,7 @@
     @dblclick.stop
     class="pui-number"
     :class="{
-      'pui-number-has-drag-button': showDragButton,
+      'pui-number-has-drag-button': showDragButton && !disabled,
       'pui-number-auto-width': autoWidth,
       'pui-number-has-errors': error,
       'pui-number-disabled': disabled,
@@ -11,7 +11,7 @@
     :style="{ '--pui-size': size }"
   >
     <button
-      v-if="showDragButton"
+      v-if="showDragButton && !disabled"
       :aria-label="ariaDragLabel"
       :disabled="disabled"
       @mousedown="handleDrag"
@@ -44,7 +44,7 @@
       {{ stringified || placeholder }}
     </span>
 
-    <span v-if="showSteppers" class="pui-number-steppers">
+    <span v-if="showSteppers && !disabled" class="pui-number-steppers">
       <button
         :disabled="max !== undefined && modelValue >= max"
         @click="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit(true))"
@@ -106,6 +106,18 @@ const props = defineProps({
    * @default 0
    */
   decimalPlaces: {
+    type: Number,
+    default: 0,
+  },
+
+  /**
+   * The total number of digits to pad with leading zeros.
+   * For example, if `padZeros` is `4`, the number `42` will be displayed as '0042'.
+   * Set to `0` to disable padding.
+   *
+   * @default 0
+   */
+  padZeros: {
     type: Number,
     default: 0,
   },
@@ -259,7 +271,7 @@ useEventListener('pui-overlay-animated' as any, updateInputWidth)
 watch(
   () => props.modelValue,
   (newValue) => {
-    stringified.value = newValue.toString()
+    stringified.value = formatWithLeadingZeros(newValue)
   },
   { immediate: true },
 )
@@ -294,7 +306,8 @@ function normalize() {
       value = Math.min(value, props.max)
     }
 
-    stringified.value = (Math.round(value * 10 ** props.decimalPlaces) / 10 ** props.decimalPlaces).toString()
+    const roundedValue = Math.round(value * 10 ** props.decimalPlaces) / 10 ** props.decimalPlaces
+    stringified.value = formatWithLeadingZeros(roundedValue)
     return true
   }
 
@@ -311,6 +324,24 @@ function getNumericValue() {
 }
 
 /**
+ * Formats a number with leading zeros based on `padZeros` property.
+ */
+function formatWithLeadingZeros(value: number): string {
+  if (props.padZeros <= 0) {
+    return value.toString()
+  }
+
+  const isNegative = value < 0
+  const absValue = Math.abs(value)
+  const parts = absValue.toString().split('.')
+  const integerPart = parts[0] ?? ''
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : ''
+  const paddedInteger = integerPart.padStart(props.padZeros, '0')
+  const signPrefix = isNegative ? '-' : ''
+  return signPrefix + paddedInteger + decimalPart
+}
+
+/**
  * Adds the given amount to the input value.
  *
  * @param amount The amount to add.
@@ -319,7 +350,8 @@ function add(amount: number) {
   const value = getNumericValue()
 
   if (isRealNumber(value)) {
-    stringified.value = (value + amount).toString()
+    const newValue = value + amount
+    stringified.value = formatWithLeadingZeros(newValue)
   }
 }
 
@@ -330,7 +362,7 @@ function onBlur() {
   if (normalize()) {
     maybeEmit(true)
   } else {
-    stringified.value = props.modelValue.toString()
+    stringified.value = formatWithLeadingZeros(props.modelValue)
   }
 }
 
@@ -414,8 +446,10 @@ function stopDragging() {
 }
 
 .pui-number-disabled {
+  --pui-foreground: var(--pui-muted-foreground);
+  background-color: hsl(var(--pui-muted));
   box-shadow: none;
-  opacity: 0.5;
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-number-icon {
@@ -499,6 +533,7 @@ function stopDragging() {
 }
 
 .pui-number-steppers > button {
+  outline: none;
   color: hsl(var(--pui-foreground));
 }
 

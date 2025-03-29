@@ -14,6 +14,7 @@
       :min="options.min"
       :modelValue="modelValue"
       :name="path"
+      :padZeros="options.ui.padZeros"
       :placeholder="placeholder"
       :showDragButton="options.ui.showDragButton"
       :showSteppers="options.ui.showSteppers"

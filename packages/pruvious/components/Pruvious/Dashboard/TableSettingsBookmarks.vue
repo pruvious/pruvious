@@ -113,7 +113,6 @@
                 @click="visibleActions = -1"
                 @close="visibleActions = -1"
                 placement="end"
-                strategy="absolute"
               >
                 <PUIDropdownItem
                   v-if="item.data !== currentBookmarkString"
@@ -379,6 +378,8 @@ defineEmits<{
   'apply': []
   'restore': [apply: boolean]
 }>()
+
+provide('floatingStrategy', 'absolute')
 
 const auth = useAuth()
 const canCreate = hasPermission('collection:bookmarks:create')

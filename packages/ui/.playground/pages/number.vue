@@ -9,6 +9,7 @@
       :error="state.hasErrors"
       :max="max"
       :min="min"
+      :padZeros="padZeros"
       :showDragButton="showDragButton"
       :showSteppers="showSteppers"
       :size="state.size"
@@ -24,28 +25,35 @@
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="size">Minimum</label>
+            <label for="min">Minimum</label>
           </PUIFieldLabel>
           <PUINumber v-model="min" :size="-2" id="min" />
         </PUIField>
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="size">Maximum</label>
+            <label for="max">Maximum</label>
           </PUIFieldLabel>
           <PUINumber v-model="max" :size="-2" id="max" />
         </PUIField>
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="size">Decimal places</label>
+            <label for="decimalPlaces">Decimal places</label>
           </PUIFieldLabel>
           <PUINumber v-model="decimalPlaces" :min="0" :size="-2" id="decimalPlaces" />
         </PUIField>
 
         <PUIField>
           <PUIFieldLabel>
-            <label for="auto-width">Auto width</label>
+            <label for="padZeros">Pad zeros</label>
+          </PUIFieldLabel>
+          <PUINumber v-model="padZeros" :min="0" :size="-2" id="padZeros" />
+        </PUIField>
+
+        <PUIField>
+          <PUIFieldLabel>
+            <label for="autoWidth">Auto width</label>
           </PUIFieldLabel>
           <PUIButtonGroup
             v-model="autoWidth"
@@ -54,7 +62,7 @@
               { label: 'Yes', value: true },
             ]"
             :size="-2"
-            id="auto-width"
+            id="autoWidth"
           />
         </PUIField>
 
@@ -119,6 +127,7 @@ const state = useShowcase()
 const min = ref(-65353)
 const max = ref(65353)
 const decimalPlaces = ref(0)
+const padZeros = ref(0)
 const autoWidth = ref(false)
 const showDragButton = ref(false)
 const showSteppers = ref(false)
