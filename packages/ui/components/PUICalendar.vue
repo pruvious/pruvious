@@ -672,7 +672,7 @@ watch(
   () => props.modelValue,
   () => {
     if (!isNull(props.modelValue)) {
-      const normalized = toModelValue(withTimezoneOffset(props.modelValue))
+      const normalized = toModelValue(withTimezoneOffset(props.modelValue, true))
 
       if (normalized !== props.modelValue) {
         emit('update:modelValue', normalized)
@@ -757,9 +757,13 @@ watch(
   },
 )
 
-function withTimezoneOffset(timestamp: number) {
-  timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
-  return timestamp + timezoneOffset * 60000
+function withTimezoneOffset(timestamp: number, store = false) {
+  const _timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
+  if (store) {
+    timezoneOffset = _timezoneOffset
+    console.log(new Date(timestamp), timezoneOffset)
+  }
+  return timestamp + _timezoneOffset * 60000
 }
 
 function withoutTimezoneOffset(timestamp: number) {
