@@ -201,11 +201,11 @@ const props = defineProps({
    * h(Icon, { name: 'tabler:calendar-event' })
    * ```
    *
-   * @default 'calendar-week'
+   * @default 'calendar-down'
    */
   iconFrom: {
     type: [String, Object, null] as PropType<keyof typeof icons | VNode | null>,
-    default: 'calendar-week',
+    default: 'calendar-down',
   },
 
   /**
@@ -221,11 +221,11 @@ const props = defineProps({
    * h(Icon, { name: 'tabler:calendar-event' })
    * ```
    *
-   * @default 'calendar-week'
+   * @default 'calendar-up'
    */
   iconTo: {
     type: [String, Object, null] as PropType<keyof typeof icons | VNode | null>,
-    default: 'calendar-week',
+    default: 'calendar-up',
   },
 
   /**
