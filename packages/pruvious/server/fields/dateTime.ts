@@ -36,34 +36,6 @@ const customOptions: {
    */
   max?: number
 
-  /**
-   * The time zone to use when displaying the date/time in the calendar.
-   * The stored value is always in UTC.
-   *
-   * This value represents the time difference in minutes between UTC and local time.
-   * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
-   *
-   * By default, the time zone offset is set to UTC (GMT+0).
-   *
-   * @default 0
-   *
-   * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
-   * @see https://www.iana.org/time-zones
-   *
-   * @example
-   * ```ts
-   * // GMT+1
-   * 60
-   *
-   * // GMT-5
-   * -300
-   *
-   * // Time zone name
-   * 'Europe/Berlin'
-   * ```
-   */
-  timezone?: number | TimezoneName
-
   ui?: {
     /**
      * Specifies whether the input is clearable.
@@ -122,21 +94,48 @@ const customOptions: {
      * @default 1
      */
     startDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6
-  }
 
-  /**
-   * Specifies whether the calendar should include time selection.
-   *
-   * When disabled, all timestamps are set to midnight.
-   * The `timezone` is used to resolve the midnight time.
-   *
-   * @default false
-   */
-  withTime?: boolean
+    /**
+     * The time zone to use when displaying the date/time in the calendar.
+     * The stored value is always in UTC.
+     *
+     * This value represents the time difference in minutes between UTC and local time.
+     * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+     *
+     * By default, the time zone offset is set to UTC (GMT+0).
+     *
+     * @default 0
+     *
+     * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+     * @see https://www.iana.org/time-zones
+     *
+     * @example
+     * ```ts
+     * // GMT+1
+     * 60
+     *
+     * // GMT-5
+     * -300
+     *
+     * // Time zone name
+     * 'Europe/Berlin'
+     * ```
+     */
+    timezone?: number | TimezoneName
+
+    /**
+     * Specifies whether the calendar should include time selection.
+     *
+     * When disabled, all timestamps are set to midnight.
+     * The `timezone` is used to resolve the midnight time.
+     *
+     * @default false
+     */
+    withTime?: boolean
+  }
 } = {
   min: -8640000000000000,
   max: 8640000000000000,
-  timezone: 0,
   ui: {
     clearable: true,
     icon: 'calendar-week',
@@ -144,8 +143,9 @@ const customOptions: {
     relativeTime: false,
     showSeconds: true,
     startDay: 1,
+    timezone: 0,
+    withTime: false,
   },
-  withTime: false,
 }
 
 export default defineField({

@@ -2,13 +2,90 @@
   <PUIField v-if="!options.ui.hidden">
     <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
 
-    <!-- @todo -->
+    <div class="p-timestamp-row">
+      <PUIIconGroup
+        v-if="options.ui.picker === 'combo'"
+        v-model="picker"
+        :choices="[
+          {
+            value: 'calendar',
+            icon: options.ui.calendar?.icon ?? 'calendar-week',
+            title: __('pruvious-dashboard', 'Calendar (seconds precision)'),
+          },
+          {
+            value: 'numeric',
+            icon: 'forms',
+            title: __('pruvious-dashboard', 'Numeric (milliseconds precision)'),
+          },
+        ]"
+        :id="`${id}--toggle`"
+        :name="`${path}--toggle`"
+        showTooltips
+        variant="accent"
+      />
+
+      <PUICalendar
+        v-if="options.ui.picker === 'calendar' || (options.ui.picker === 'combo' && picker === 'calendar')"
+        :clearable="false"
+        :disabled="disabled"
+        :error="!!error"
+        :formatter="
+          options.ui.relativeTime
+            ? dayjsRelative
+            : options.ui.calendar?.withTime
+              ? dayjsFormatDateTime
+              : dayjsFormatDate
+        "
+        :icon="options.ui.calendar?.icon"
+        :id="id"
+        :initial="options.ui.calendar?.initial"
+        :labels="labels"
+        :max="options.max"
+        :min="options.min"
+        :modelValue="modelValue"
+        :name="path"
+        :placeholder="placeholder"
+        :showSeconds="options.ui.calendar?.showSeconds"
+        :startDay="options.ui.calendar?.startDay"
+        :timezone="options.ui.calendar?.timezone"
+        :withTime="options.ui.calendar?.withTime"
+        @commit="$emit('commit', $event!)"
+        @update:modelValue="$emit('update:modelValue', $event!)"
+      />
+
+      <PUINumber
+        v-if="options.ui.picker === 'numeric' || (options.ui.picker === 'combo' && picker === 'numeric')"
+        :disabled="disabled"
+        :error="!!error"
+        :id="id"
+        :max="options.max"
+        :min="options.min"
+        :modelValue="modelValue"
+        :name="path"
+        :placeholder="placeholder"
+        :showSteppers="true"
+        @commit="$emit('commit', $event)"
+        @update:modelValue="$emit('update:modelValue', $event)"
+        suffix="ms"
+      />
+    </div>
+
+    <PruviousFieldMessage :error="error" :name="name" :options="options" />
   </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { maybeTranslate } from '#pruvious/client'
+import {
+  __,
+  dayjsFormatDate,
+  dayjsFormatDateTime,
+  dayjsLocales,
+  dayjsRelative,
+  maybeTranslate,
+  useLanguage,
+} from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
+import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 
 const props = defineProps({
   /**
@@ -32,6 +109,14 @@ const props = defineProps({
    */
   options: {
     type: Object as PropType<SerializableFieldOptions<'timestamp'>>,
+    required: true,
+  },
+
+  /**
+   * The field path, expressed in dot notation, represents the exact location of the field within the current data structure.
+   */
+  path: {
+    type: String,
     required: true,
   },
 
@@ -80,4 +165,22 @@ defineEmits<{
 
 const id = useId()
 const placeholder = maybeTranslate(props.options.ui.placeholder)
+const picker = ref<'calendar' | 'numeric'>('calendar')
+const language = useLanguage()
+const dayjsLocale = dayjsLocales[language.value as keyof typeof dayjsLocales]?.()
+const labels: PUICalendarLabels = {
+  days: dayjsLocale?.weekdays,
+  daysShort: dayjsLocale?.weekdaysShort,
+  months: dayjsLocale?.months,
+  nextMonth: __('pruvious-dashboard', 'Next month'),
+  previousMonth: __('pruvious-dashboard', 'Previous month'),
+  selectDate: __('pruvious-dashboard', 'Select date'),
+}
 </script>
+
+<style scoped>
+.p-timestamp-row {
+  display: flex;
+  gap: 0.75rem;
+}
+</style>

@@ -37,6 +37,8 @@ export default defineTranslation({
   'Bookmark': 'Bookmark',
   'Bookmarks': 'Bookmarks',
 
+  'Calendar': 'Calendar',
+  'Calendar (seconds precision)': 'Calendar (seconds precision)',
   'Cancel': 'Cancel',
   'cat:3d': '3D',
   'cat:archives': 'Archives',
@@ -229,6 +231,8 @@ export default defineTranslation({
   'No entries were deleted': 'No entries were deleted',
   'No sorting applied': 'No sorting applied',
   'None': 'None',
+  'Numeric': 'Numeric',
+  'Numeric (milliseconds precision)': 'Numeric (milliseconds precision)',
 
   'OK': 'OK',
   'Open user menu': 'Open user menu',
@@ -351,6 +355,8 @@ export default defineTranslation({
   'The unique identifier for translations.': 'The unique identifier for translations.',
   'The user who created the record.': 'The user who created the record.',
   'The users who can edit the record.': 'The users who can edit the record.',
+  'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
+    'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.',
   'Time': 'Time',
   'Time format': 'Time format',
   'timeFormat:H': 'The hour (e.g. 0-23)',

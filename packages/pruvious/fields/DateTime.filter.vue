@@ -6,7 +6,7 @@
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <PUICalendar
-      :formatter="options.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+      :formatter="options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"
       :icon="options.ui.icon"
       :id="id"
       :initial="options.ui.initial"
@@ -17,8 +17,8 @@
       :name="id"
       :showSeconds="options.ui.showSeconds"
       :startDay="options.ui.startDay"
-      :timezone="options.timezone"
-      :withTime="options.withTime"
+      :timezone="options.ui.timezone"
+      :withTime="options.ui.withTime"
       @commit="$emit('commit', { ...modelValue, value: $event })"
       @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
     />
@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import { __, dayjsFormatDate, dayjsFormatDateTime, dayjsLocales, useLanguage, type WhereField } from '#pruvious/client'
-import type { GenericSerializableFieldOptions } from '#pruvious/server'
+import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 
 defineProps({
@@ -43,7 +43,7 @@ defineProps({
    * The combined field options defined in a collection.
    */
   options: {
-    type: Object as PropType<GenericSerializableFieldOptions>,
+    type: Object as PropType<SerializableFieldOptions<'dateTime'>>,
     required: true,
   },
 })

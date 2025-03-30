@@ -37,6 +37,8 @@ export default defineTranslation({
   'Bookmark': 'Merkliste',
   'Bookmarks': 'Merklisten',
 
+  'Calendar': 'Kalender',
+  'Calendar (seconds precision)': 'Kalender (Sekunden-Präzision)',
   'Cancel': 'Abbrechen',
   'cat:3d': '3D',
   'cat:archives': 'Archiv',
@@ -229,6 +231,8 @@ export default defineTranslation({
   'No entries were deleted': 'Es wurden keine Einträge gelöscht',
   'No sorting applied': 'Keine Sortierung angewendet',
   'None': 'Keine',
+  'Numeric': 'Numerisch',
+  'Numeric (milliseconds precision)': 'Numerisch (Millisekunden-Präzision)',
 
   'OK': 'OK',
   'Open user menu': 'Benutzer-Menü öffnen',
@@ -353,6 +357,8 @@ export default defineTranslation({
   'The unique identifier for translations.': 'Der eindeutige Bezeichner für Übersetzungen.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
+  'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
+    'Dieses Feld speichert Zeit mit Millisekunden-Präzision. Wenn Sie den Kalender-Selektor verwenden (der nur Sekunden-Präzision bietet), nutzen Sie die Operatoren `⁠<=` und ⁠`>=`, um sicherzustellen, dass Sie alle relevanten Einträge erfassen. Für exakte Vergleiche auf Millisekunden-Ebene verwenden Sie stattdessen das numerische Eingabefeld.',
   'Time': 'Zeit',
   'Time format': 'Zeitformat',
   'timeFormat:H': 'Die Stunde (z.B. 0-23)',

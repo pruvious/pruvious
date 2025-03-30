@@ -31,7 +31,7 @@ const props = defineProps({
 const date = dayjs(props.modelValue)
 const formattedDate = isNull(props.modelValue)
   ? undefined
-  : props.options.withTime
+  : props.options.ui.withTime
     ? dayjsFormatDateTime(date)
     : dayjsFormatDate(date)
 const relativeTime = isNull(props.modelValue) ? undefined : dayjsRelative(date)

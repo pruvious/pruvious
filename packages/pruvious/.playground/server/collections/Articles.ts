@@ -20,7 +20,7 @@ export default defineCollection({
       },
     }),
     availableSince: dateTimeField({
-      timezone: 'Europe/Berlin',
+      ui: { timezone: 'Europe/Berlin' },
     }),
   },
   author: { strict: true },
