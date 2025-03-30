@@ -329,7 +329,7 @@ function toggle(event?: Event) {
   position: relative;
   display: flex;
   align-items: center;
-  gap: calc(0.5em + 0.125rem);
+  gap: 0.5em;
   width: 100%;
   height: 100%;
   padding: 0 0.5em;
