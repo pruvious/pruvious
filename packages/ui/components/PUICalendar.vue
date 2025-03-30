@@ -761,7 +761,6 @@ function withTimezoneOffset(timestamp: number, store = false) {
   const _timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
   if (store) {
     timezoneOffset = _timezoneOffset
-    console.log(new Date(timestamp), timezoneOffset)
   }
   return timestamp + _timezoneOffset * 60000
 }
