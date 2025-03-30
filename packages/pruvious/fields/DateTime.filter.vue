@@ -15,6 +15,7 @@
       :min="options.min"
       :modelValue="modelValue.value === null ? null : Number(modelValue.value)"
       :name="id"
+      :placeholder="__('pruvious-dashboard', 'Empty')"
       :showSeconds="options.ui.showSeconds"
       :startDay="options.ui.startDay"
       :timezone="options.ui.timezone"
