@@ -13,6 +13,7 @@
       :aria-expanded="isVisible"
       :tabindex="disabled ? -1 : 0"
       :title="handleTitle"
+      @blur="$emit('blurHandle')"
       @click="
         () => {
           if (!disabled) {
@@ -165,6 +166,7 @@ const emit = defineEmits<{
   open: []
   close: []
   keydown: [event: KeyboardEvent]
+  blurHandle: []
 }>()
 
 defineExpose({ handle, container, open, close, toggle, isActive, isVisible })

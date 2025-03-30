@@ -18,6 +18,7 @@
     "
     :size="size"
     :strategy="strategy"
+    @blurHandle="focusVisible = false"
     @close="$emit('commit', toModelValue($modelValue))"
     @keydown="onKeyDown"
     @keydown.down="prevYear"
@@ -26,6 +27,7 @@
     @keydown.up="nextYear"
     ref="root"
     class="pui-calendar"
+    :class="{ 'pui-calendar-focus-visible': focusVisible }"
   >
     <template #handle>
       <Icon
@@ -641,6 +643,7 @@ const $maxTime = computed(() =>
 )
 const keywordTimeout = useTimeout(750, { controls: true })
 const keyword = ref('')
+const focusVisible = ref(false)
 
 let timezoneOffset = 0
 
@@ -659,6 +662,7 @@ watch(
       stopFocusListener = listen(`focus:${id}`, () => {
         if (!props.disabled) {
           root.value?.handle?.focus()
+          focusVisible.value = true
         }
       })
     } else {
@@ -879,6 +883,12 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <style>
+.pui-calendar-focus-visible .pui-floater-handle {
+  border-color: transparent;
+  box-shadow: 0 0 0 0.125rem hsl(var(--pui-ring));
+  outline: none;
+}
+
 .pui-calendar-displayed-value,
 .pui-calendar-placeholder {
   overflow: hidden;
