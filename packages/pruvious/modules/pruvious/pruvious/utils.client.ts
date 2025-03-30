@@ -1,4 +1,3 @@
-import { isDevelopment, isProduction } from 'std-env'
 import { pruviousGet } from '../api/utils.client'
 import type { SerializableCollection } from '../collections/utils.client'
 import type { SerializableSingleton } from '../singletons/utils.client'
@@ -138,27 +137,23 @@ export async function refreshPruviousDashboardState(force = false) {
 export function removeUnwantedStylesFromDashboard() {
   if (!unwantedStylesRemoved) {
     for (const styleSheet of document.styleSheets) {
-      const devId = (styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId
+      let keep = false
 
-      if (
-        isProduction ||
-        (!devId?.includes('&scoped=') &&
-          !devId?.includes('/pruvious/components/Pruvious/') &&
-          !devId?.includes('/ui/components/PUI'))
-      ) {
-        styleSheet.ownerNode?.remove()
-      }
-    }
-
-    if (isDevelopment) {
-      for (const styleElement of document.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')) {
+      for (const rule of styleSheet.cssRules) {
         if (
-          !styleElement.dataset.viteDevId?.includes('&scoped=') &&
-          !styleElement.dataset.viteDevId?.includes('/pruvious/components/Pruvious/') &&
-          !styleElement.dataset.viteDevId?.includes('/ui/components/PUI')
+          rule instanceof CSSStyleRule &&
+          (rule.selectorText.includes('.p-') ||
+            rule.selectorText.includes('.pui-') ||
+            rule.selectorText.includes('[data-sonner-toaster]') ||
+            rule.selectorText.includes('.vue-inspector-'))
         ) {
-          styleElement.remove()
+          keep = true
+          break
         }
+      }
+
+      if (!keep) {
+        styleSheet.disabled = true
       }
     }
 
