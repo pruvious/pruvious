@@ -146,6 +146,7 @@ export default defineTranslation({
   'e.g., https://pruvious.com': 'e.g., https://pruvious.com',
   'e.g. Recently updated': 'e.g. Recently updated',
   'Email': 'Email',
+  'Empty': 'Empty',
   'Ends with': 'Ends with',
   'Ends with (case-insensitive)': 'Ends with (case-insensitive)',
   'Entry deleted': 'Entry deleted',

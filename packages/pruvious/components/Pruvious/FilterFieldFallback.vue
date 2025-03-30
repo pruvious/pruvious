@@ -28,6 +28,7 @@
       :id="id"
       :modelValue="String(modelValue.value)"
       :name="id"
+      :placeholder="__('pruvious-dashboard', 'Empty')"
       @blur="(_, value) => $emit('commit', { ...modelValue, value })"
       @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
     />
