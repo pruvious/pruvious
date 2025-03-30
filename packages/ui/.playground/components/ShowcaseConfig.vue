@@ -19,6 +19,7 @@
         { label: 'Context menu', value: '/context-menu' },
         { label: 'Dialog', value: '/dialog' },
         { label: 'Dropdown', value: '/dropdown' },
+        { label: 'Editor', value: '/editor' },
         { label: 'Field', value: '/field' },
         { label: 'Field label', value: '/field-label' },
         { label: 'Field message', value: '/field-message' },
