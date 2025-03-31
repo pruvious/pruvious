@@ -723,7 +723,7 @@ function* tokenizeWhereQueryStringValue(value: string) {
         token = ''
       }
       yield c
-    } else if (c === '\\' && !escape) {
+    } else if ((c === '\\' || c === '$') && !escape) {
       escape = true
     } else {
       token += c
@@ -883,6 +883,18 @@ function buildWhereCondition(
         ) {
           whereCondition.push({ field: current.field, operator: current.operator, value: '' })
           current = undefined
+        } else if (
+          token.length === 1 &&
+          isDefined(current.operator) &&
+          isUndefined(current.value) &&
+          ['=', '!=', 'like', 'notLike', 'ilike', 'notIlike'].includes(current.operator)
+        ) {
+          whereCondition.push({
+            field: current.field,
+            operator: current.operator,
+            value: isArray(token[0]) ? `[${String(token[0])}]` : String(token[0]),
+          })
+          current = undefined
         } else {
           current = undefined
         }
@@ -968,6 +980,15 @@ function buildWhereQueryString(
   for (const condition of where) {
     if ('field' in condition) {
       const { field, operator, value } = condition
+      let escapedValue = value
+
+      if (isString(escapedValue)) {
+        const isInBrackets = escapedValue.startsWith('[') && escapedValue.endsWith(']')
+        escapedValue = (isInBrackets ? escapedValue.slice(1, -1) : escapedValue).replace(/(\[|\]|\$)/g, (m) => `$${m}`)
+        if (isInBrackets) {
+          escapedValue = `[${escapedValue}]`
+        }
+      }
 
       if (
         isObject(options?.where) &&
@@ -983,7 +1004,7 @@ function buildWhereQueryString(
         continue
       }
 
-      queryString += `${field}[${operator}][${value}]`
+      queryString += `${field}[${operator}][${escapedValue}]`
     } else if ('or' in condition) {
       const orGroup = condition.or.map((group) => buildWhereQueryString(group, options)).join(',')
       queryString += `orGroup[${orGroup}]`

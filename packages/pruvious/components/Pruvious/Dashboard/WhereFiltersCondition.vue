@@ -5,7 +5,13 @@
       :id="id"
       :modelValue="modelValue.field"
       :name="id"
-      @commit="$emit('update:modelValue', { ...modelValue, field: String($event) })"
+      @commit="
+        $emit('update:modelValue', {
+          ...modelValue,
+          field: String($event),
+          value: deepClone(collection.definition.fields[String($event)]!.defaultValue),
+        })
+      "
       class="p-where-filters-condition-field"
     />
 
@@ -29,6 +35,7 @@
 <script lang="ts" setup>
 import type { WhereField } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
+import { deepClone } from '@pruvious/utils'
 
 defineProps({
   /**

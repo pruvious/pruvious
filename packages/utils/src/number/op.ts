@@ -11,7 +11,7 @@ import { isPositiveInteger } from './is'
  * clamp(15, 0, 10) // 10
  * ```
  */
-export function clamp(number: number, min: number, max: number) {
+export function clamp(number: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, number))
 }
 

@@ -116,7 +116,7 @@ export default {
     GenericDatabase
   > {
     const bound = defineField({
-      model: arrayFieldModel(),
+      model: arrayFieldModel(), // @todo need custom object[] model
       // @todo sanitizers (check repeaterFieldModel)
       // @todo validators (check repeaterFieldModel)
       // @todo inputFilters (check repeaterFieldModel)

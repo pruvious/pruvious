@@ -168,6 +168,7 @@ export default defineTranslation({
     { count: 'number' },
     { errors: [{ conditions: [{ count: 1 }], output: 'error' }, 'errors'] },
   ),
+  'From': 'From',
 
   'General': 'General',
   'Go back home': 'Go back home',
@@ -383,6 +384,7 @@ export default defineTranslation({
   'timeSuffix:h': 'h',
   'timeSuffix:m': 'm',
   'timeSuffix:s': 's',
+  'To': 'To',
   'Toggle menu': 'Toggle menu',
   'Toggle relation': 'Toggle relation',
   'Toggle sidebar': 'Toggle sidebar',

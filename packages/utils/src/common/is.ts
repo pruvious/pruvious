@@ -18,6 +18,19 @@ export function isNull(value: any): value is null {
 }
 
 /**
+ * Checks if a `value` is not `null`.
+ *
+ * @example
+ * ```ts
+ * isObject(null) // false
+ * isObject(0)    // true
+ * ```
+ */
+export function isNotNull<T>(value: T | null): value is T {
+  return !isNull(value)
+}
+
+/**
  * Checks if a `value` is `undefined`.
  *
  * @example

@@ -1,5 +1,5 @@
 <template>
-  <div class="pui-time-range" :style="{ '--pui-size': size }">
+  <div class="pui-time-range" :class="`pui-time-range-decorator-${decorator}`" :style="{ '--pui-size': size }">
     <PUITime
       :disabled="disabled"
       :error="error"
@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isDefined } from '@pruvious/utils'
+import { isNumber } from '@pruvious/utils'
 import type { PUITimeLabels } from './PUITime.vue'
 
 const props = defineProps({
@@ -159,6 +159,17 @@ const props = defineProps({
   labels: {
     type: Object as PropType<PUITimeLabels>,
   },
+
+  /**
+   * The position of the decorator that connects the two inputs.
+   * It can be `left`, `right`, or `hidden`.
+   *
+   * @default 'left'
+   */
+  decorator: {
+    type: String as PropType<'left' | 'right' | 'hidden'>,
+    default: 'left',
+  },
 })
 
 defineEmits<{
@@ -166,47 +177,18 @@ defineEmits<{
   'update:modelValue': [value: [number, number]]
 }>()
 
-const minFrom = computed(() => {
-  let minValue = props.min
-  if (isDefined(props.modelValue[1])) {
-    const minBasedOnMaxRange = props.modelValue[1] - props.maxRange
-    if (minBasedOnMaxRange > minValue) {
-      minValue = minBasedOnMaxRange
-    }
-  }
-  return Math.min(minValue, props.max)
-})
-const maxFrom = computed(() => {
-  let maxValue = props.max
-  if (isDefined(props.modelValue[1])) {
-    const maxBasedOnMinRange = props.modelValue[1] - props.minRange
-    if (maxBasedOnMinRange < maxValue) {
-      maxValue = maxBasedOnMinRange
-    }
-  }
-  return Math.max(maxValue, props.min)
-})
-const minTo = computed(() => {
-  let minValue = props.min
-  if (isDefined(props.modelValue[0])) {
-    const minBasedOnMinRange = props.modelValue[0] + props.minRange
-    if (minBasedOnMinRange > minValue) {
-      minValue = minBasedOnMinRange
-    }
-  }
-  return Math.min(minValue, props.max)
-})
-
-const maxTo = computed(() => {
-  let maxValue = props.max
-  if (isDefined(props.modelValue[0])) {
-    const maxBasedOnMaxRange = props.modelValue[0] + props.maxRange
-    if (maxBasedOnMaxRange < maxValue) {
-      maxValue = maxBasedOnMaxRange
-    }
-  }
-  return Math.max(maxValue, props.min)
-})
+const minFrom = computed(() =>
+  isNumber(props.modelValue[1]) && isNumber(props.maxRange)
+    ? Math.max(props.modelValue[1] - props.maxRange, props.min)
+    : props.min,
+)
+const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - props.minRange : props.max))
+const minTo = computed(() => (props.modelValue[0] ?? props.min) + props.minRange)
+const maxTo = computed(() =>
+  isNumber(props.modelValue[0]) && isNumber(props.maxRange)
+    ? Math.min(props.modelValue[0] + props.maxRange, props.max)
+    : props.max,
+)
 </script>
 
 <style>
@@ -214,7 +196,18 @@ const maxTo = computed(() => {
   position: relative;
   width: 100%;
   max-width: 100%;
+}
+
+.pui-time-range-decorator-left {
   padding-left: 1em;
+}
+
+.pui-time-range-decorator-right {
+  padding-right: 1em;
+}
+
+.pui-time-range > .pui-time:nth-child(2) {
+  margin-top: 0.5em;
 }
 
 .pui-time-range > .pui-time:nth-child(2) {
@@ -225,12 +218,26 @@ const maxTo = computed(() => {
   position: absolute;
   top: calc(1em - 0.03125rem);
   bottom: calc(1em - 0.03125rem);
-  left: 0;
   width: 0.5em;
   border-width: 1px;
-  border-right: none;
   border-color: hsl(var(--pui-muted-foreground) / 0.36);
+}
+
+.pui-time-range-decorator-left .pui-time-range-decorator {
+  left: 0;
+  border-right: none;
   border-top-left-radius: calc(var(--pui-radius) - 0.25rem);
   border-bottom-left-radius: calc(var(--pui-radius) - 0.25rem);
+}
+
+.pui-time-range-decorator-right .pui-time-range-decorator {
+  right: 0;
+  border-left: none;
+  border-top-right-radius: calc(var(--pui-radius) - 0.25rem);
+  border-bottom-right-radius: calc(var(--pui-radius) - 0.25rem);
+}
+
+.pui-time-range-decorator-hidden .pui-time-range-decorator {
+  display: none;
 }
 </style>

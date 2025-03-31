@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { __, type WhereField } from '#pruvious/client'
-import type { GenericSerializableFieldOptions } from '#pruvious/server'
+import type { SerializableFieldOptions } from '#pruvious/server'
 
 defineProps({
   /**
@@ -33,7 +33,7 @@ defineProps({
    * The combined field options defined in a collection.
    */
   options: {
-    type: Object as PropType<GenericSerializableFieldOptions>,
+    type: Object as PropType<SerializableFieldOptions<'records'>>,
     required: true,
   },
 })

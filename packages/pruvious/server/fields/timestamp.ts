@@ -1,7 +1,7 @@
 import { defineField } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
 import { numberFieldModel, timestampValidator } from '@pruvious/orm'
-import { TimezoneName } from '../../utils/pruvious/timezone'
+import type { TimezoneName } from '../../utils/pruvious/timezone'
 
 export interface TimestampFieldOptions {
   /**

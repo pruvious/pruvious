@@ -48,6 +48,7 @@
           @click.stop="
             (event) => {
               $emit('update:modelValue', null)
+              $emit('commit', null)
               $nextTick(() => root?.close(event))
             }
           "
@@ -189,10 +190,12 @@
         :year="$currentYear"
         @selectDay="
           (day, event) => {
-            const date = new Date(withTimezoneOffset(modelValue ?? 946684800000))
-            date.setUTCFullYear($currentYear, $currentMonth - 1, day)
-            date.setUTCHours($currentHours, $currentMinutes, $currentSeconds)
-            $emit('update:modelValue', toModelValue(date.getTime()))
+            const date = new Date(modelValue ?? 946684800000)
+            date.setFullYear($currentYear, $currentMonth - 1, day)
+            date.setHours($currentHours, $currentMinutes, $currentSeconds)
+            const timestamp = date.getTime()
+            $emit('update:modelValue', timestamp)
+            $emit('commit', timestamp)
             if (!withTime) {
               $nextTick(() => root?.close(event))
             }
@@ -232,7 +235,17 @@
 
 <script lang="ts" setup>
 import type { icons } from '@iconify-json/tabler/icons.json'
-import { clamp, defu, getTimezoneOffset, isDefined, isNull, isString, searchByKeywords, sleep } from '@pruvious/utils'
+import {
+  clamp,
+  defu,
+  getTimezoneOffset,
+  isDefined,
+  isNull,
+  isString,
+  isUndefined,
+  searchByKeywords,
+  sleep,
+} from '@pruvious/utils'
 import { useTimeout } from '@vueuse/core'
 import type { PUITimeLabels } from './PUITime.vue'
 
@@ -591,6 +604,8 @@ const resolvedLabels = computed<Required<PUICalendarLabels>>(() =>
   }),
 )
 
+let timezoneOffset: number | undefined
+
 const root = useTemplateRef('root')
 const isMonthSelectorVisible = ref(false)
 const isYearSelectorVisible = ref(false)
@@ -599,17 +614,17 @@ const selectorHeight = ref(0)
 const { listen } = puiTrigger()
 const displayedValue = computed(() => (isNull(props.modelValue) ? undefined : props.formatter(props.modelValue)))
 const $initialValue = computed(() =>
-  isNull(props.initial) ? null : clamp(withTimezoneOffset(props.initial), -8640000000000000, 8640000000000000),
+  isNull(props.initial) ? null : clamp(withTimezoneOffset(props.initial, false), -8640000000000000, 8640000000000000),
 )
-const $today = computed(() => new Date(withTimezoneOffset(Date.now())))
+const $today = computed(() => new Date(withTimezoneOffset(Date.now(), false)))
 const $modelValue = computed(() => (isNull(props.modelValue) ? null : withTimezoneOffset(props.modelValue)))
 const $modelDate = computed(() => new Date($modelValue.value ?? $initialValue.value ?? $today.value.getTime()))
 const $initialDate = computed(() => new Date($initialValue.value ?? props.modelValue ?? $today.value.getTime()))
 const $initialDay = computed(() => $initialDate.value.getUTCDate())
 const $initialMonth = computed(() => $initialDate.value.getUTCMonth() + 1)
 const $initialYear = computed(() => $initialDate.value.getUTCFullYear())
-const $minValue = computed(() => clamp(withTimezoneOffset(props.min), -8640000000000000, 8640000000000000))
-const $maxValue = computed(() => clamp(withTimezoneOffset(props.max), -8640000000000000, 8640000000000000))
+const $minValue = computed(() => clamp(withTimezoneOffset(props.min, false), -8640000000000000, 8640000000000000))
+const $maxValue = computed(() => clamp(withTimezoneOffset(props.max, false), -8640000000000000, 8640000000000000))
 const $minDate = computed(() => new Date($minValue.value))
 const $maxDate = computed(() => new Date($maxValue.value))
 const $minYear = computed(() => $minDate.value.getUTCFullYear())
@@ -644,8 +659,6 @@ const $maxTime = computed(() =>
 const keywordTimeout = useTimeout(750, { controls: true })
 const keyword = ref('')
 const focusVisible = ref(false)
-
-let timezoneOffset = 0
 
 /**
  * Stops listening for focus events.
@@ -727,7 +740,7 @@ watch(keywordTimeout.ready, (isReady) => {
     $day = clamp($day ?? focusedDay ?? $initialDay.value, 1, new Date(Date.UTC($year, $month, 0)).getUTCDate())
 
     const $normalized = clamp(
-      new Date(withTimezoneOffset(Date.UTC($year, $month - 1, $day))).getTime(),
+      new Date(withTimezoneOffset(Date.UTC($year, $month - 1, $day), false)).getTime(),
       $minDate.value.getTime(),
       $maxDate.value.getTime(),
     )
@@ -750,7 +763,7 @@ watch(
     if (isActive) {
       const visibleYearMonth = new Date(Date.UTC($currentYear.value, $currentMonth.value - 1))
       const clampedYearMonth = new Date(
-        clamp(withTimezoneOffset(visibleYearMonth.getTime()), $minValue.value, $maxValue.value),
+        clamp(withTimezoneOffset(visibleYearMonth.getTime(), false), $minValue.value, $maxValue.value),
       )
       $currentYear.value = clampedYearMonth.getUTCFullYear()
       $currentMonth.value = clampedYearMonth.getUTCMonth() + 1
@@ -761,16 +774,20 @@ watch(
   },
 )
 
-function withTimezoneOffset(timestamp: number, store = false) {
-  const _timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
-  if (store) {
-    timezoneOffset = _timezoneOffset
+function withTimezoneOffset(timestamp: number, store?: boolean) {
+  try {
+    const _timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
+    if (store || (isUndefined(timezoneOffset) && isUndefined(store))) {
+      timezoneOffset = _timezoneOffset
+    }
+    return timestamp + _timezoneOffset * 60000
+  } catch {
+    return 0
   }
-  return timestamp + _timezoneOffset * 60000
 }
 
 function withoutTimezoneOffset(timestamp: number) {
-  return timestamp - timezoneOffset * 60000
+  return timestamp - (timezoneOffset ?? 0) * 60000
 }
 
 function toModelValue(timestamp: number | null) {

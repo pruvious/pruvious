@@ -167,6 +167,7 @@ export default defineTranslation({
     { count: 'number' },
     { errors: [{ conditions: [{ count: 1 }], output: 'Fehler' }, 'Fehler'] },
   ),
+  'From': 'Von',
 
   'General': 'Allgemein',
   'Go back home': 'Zurück zur Startseite',
@@ -385,6 +386,7 @@ export default defineTranslation({
   'timeSuffix:h': 'h',
   'timeSuffix:m': 'm',
   'timeSuffix:s': 's',
+  'To': 'Bis',
   'Toggle menu': 'Menü umschalten',
   'Toggle relation': 'Verbindung umschalten',
   'Toggle sidebar': 'Seitenleiste umschalten',

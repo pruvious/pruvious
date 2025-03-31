@@ -34,6 +34,7 @@ npm install @pruvious/utils
 - [Common](#common)
   - [isDefined](#isdefined)
   - [isEmpty](#isempty)
+  - [isNotNull](#isnotnull)
   - [isNull](#isnull)
   - [isPrimitive](#isprimitive)
   - [isUndefined](#isundefined)
@@ -442,6 +443,17 @@ isEmpty({})       // true
 isEmpty(' ')      // false
 isEmpty({ a: 1 }) // false
 isEmpty([0])      // false
+```
+
+### <a id="isnotnull">`isNotNull(value)`</a>
+
+Checks if a `value` is not `null`.
+
+**Example:**
+
+```ts
+isObject(null) // false
+isObject(0)    // true
 ```
 
 ### <a id="isnull">`isNull(value)`</a>

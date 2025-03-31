@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import { deepClone } from '@pruvious/utils'
+import { deepClone, isArray, isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -61,10 +61,31 @@ watch(
   () => props.modelValue,
   (newValue, oldValue) => {
     if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
-      const normalizedValue: WhereField = { ...newValue, value: deepClone(props.options.default) }
+      const normalizedValue: WhereField = { ...newValue }
+      const matrixOperators: FilterOperator[] = ['includes', 'includesAny', 'excludes', 'excludesAny']
 
       if (!operatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
         normalizedValue.operator = operatorChoices.value[0]!.value
+      }
+
+      if (
+        (oldValue && newValue.field !== oldValue?.field) ||
+        (isNull(normalizedValue.value) && !props.options.nullable) ||
+        ((props.options._dataType === 'bigint' || props.options._dataType === 'numeric') &&
+          !isNumber(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
+        (props.options._dataType === 'boolean' &&
+          !isBoolean(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
+        (props.options._dataType === 'text' &&
+          !matrixOperators.includes(normalizedValue.operator) &&
+          !isString(normalizedValue.value) &&
+          !isNull(normalizedValue.value)) ||
+        (props.options._dataType === 'text' &&
+          matrixOperators.includes(normalizedValue.operator) &&
+          !isArray(normalizedValue.value))
+      ) {
+        nextTick(() => (normalizedValue.value = deepClone(props.options.default)))
       }
 
       setTimeout(() => emit('commit', normalizedValue))
