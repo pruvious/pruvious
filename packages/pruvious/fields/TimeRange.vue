@@ -1,15 +1,24 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+    <PruviousFieldLabel
+      :id="`${id}--1`"
+      :name="name"
+      :options="options"
+      :synced="synced"
+      :translatable="translatable"
+    />
 
-    <PUITime
+    <PUITimeRange
+      :decorator="options.ui.decorator"
       :disabled="disabled"
       :error="!!error"
       :id="id"
       :labels="labels"
       :max="options.max"
+      :maxRange="options.maxRange"
       :min="options.min"
-      :modelValue="modelValue"
+      :minRange="options.minRange"
+      :modelValue="modelValue ?? [null, null]"
       :name="path"
       :showSeconds="options.ui.showSeconds"
       @commit="$emit('commit', $event)"
@@ -30,7 +39,7 @@ defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: Number,
+    type: Array as unknown as PropType<[number, number]>,
     required: true,
   },
 
@@ -46,7 +55,7 @@ defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'time'>>,
+    type: Object as PropType<SerializableFieldOptions<'timeRange'>>,
     required: true,
   },
 
@@ -97,8 +106,8 @@ defineProps({
 })
 
 defineEmits<{
-  'commit': [value: number]
-  'update:modelValue': [value: number]
+  'commit': [value: [number, number]]
+  'update:modelValue': [value: [number, number]]
 }>()
 
 const id = useId()

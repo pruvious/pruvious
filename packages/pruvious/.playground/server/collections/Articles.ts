@@ -6,6 +6,7 @@ import {
   repeaterField,
   textField,
   timeField,
+  timeRangeField,
 } from '#pruvious/server'
 
 export default defineCollection({
@@ -56,7 +57,7 @@ export default defineCollection({
         timezone: 'Europe/Berlin',
       },
     }),
-    // @todo processingHours: timeRangeField({}),
+    processingHours: timeRangeField({}),
   },
   author: { strict: true },
   editors: { strict: true },
@@ -72,7 +73,7 @@ export default defineCollection({
         'variants',
         { row: ['approvedAt', 'restockTime'] },
         'promotionPeriod',
-        // @todo 'processingHours',
+        'processingHours',
       ],
     },
     updatePage: {
