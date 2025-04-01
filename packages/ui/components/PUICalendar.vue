@@ -165,8 +165,9 @@
                     Date.UTC(year, $currentMonth - 1, 1, $currentHours, $currentMinutes, $currentSeconds),
                   ).getTime(),
                 )!
-                $currentYear = new Date(normalized).getUTCFullYear()
-                $currentMonth = new Date(normalized).getUTCMonth() + 1
+                const normalizedDate = new Date(normalized)
+                $currentYear = normalizedDate.getUTCFullYear()
+                $currentMonth = normalizedDate.getUTCMonth() + 1
                 isYearSelectorVisible = false
                 $nextTick(() => root?.container?.scrollTo({ top: 0, behavior: 'instant' }))
               }
@@ -190,13 +191,15 @@
         :year="$currentYear"
         @selectDay="
           (day, event) => {
-            const date = new Date($currentYear, $currentMonth - 1, day)
+            const date = new Date(Date.UTC($currentYear, $currentMonth - 1, day))
             if (withTime) {
-              date.setHours($currentHours, $currentMinutes, $currentSeconds)
+              date.setUTCHours($currentHours, $currentMinutes, $currentSeconds)
             }
-            const timestamp = date.getTime()
-            $emit('update:modelValue', timestamp)
-            $emit('commit', timestamp)
+            const t1 = date.getTime()
+            const to = isString(timezone) ? getTimezoneOffset(timezone, t1) : timezone
+            const t2 = t1 - (to ?? 0) * 60000
+            $emit('update:modelValue', t2)
+            $emit('commit', t2)
             if (!withTime) {
               $nextTick(() => root?.close(event))
             }
