@@ -190,9 +190,10 @@
         :year="$currentYear"
         @selectDay="
           (day, event) => {
-            const date = new Date(modelValue ?? 946684800000)
-            date.setFullYear($currentYear, $currentMonth - 1, day)
-            date.setHours($currentHours, $currentMinutes, $currentSeconds)
+            const date = new Date($currentYear, $currentMonth - 1, day)
+            if (withTime) {
+              date.setHours($currentHours, $currentMinutes, $currentSeconds)
+            }
             const timestamp = date.getTime()
             $emit('update:modelValue', timestamp)
             $emit('commit', timestamp)
