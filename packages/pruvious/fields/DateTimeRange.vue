@@ -10,6 +10,7 @@
 
     <PUICalendarRange
       :clearable="options.ui.clearable"
+      :decorator="options.ui.decorator"
       :disabled="disabled"
       :error="!!error"
       :formatter="options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"

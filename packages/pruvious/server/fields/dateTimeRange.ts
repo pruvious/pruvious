@@ -5,7 +5,7 @@ import type { TimezoneName } from '../../utils/pruvious/timezone'
 
 const customOptions: {
   /**
-   * The minimum date that can be selected.
+   * The minimum date that can be selected in both calendars.
    * Value must be specified in milliseconds since Unix epoch.
    * The default value represents the earliest possible date in JavaScript.
    *
@@ -21,7 +21,7 @@ const customOptions: {
   min?: number
 
   /**
-   * The maximum date that can be selected.
+   * The maximum date that can be selected in both calendars.
    * Value must be specified in milliseconds since Unix epoch.
    * The default value represents the latest possible date in JavaScript.
    *
@@ -63,6 +63,14 @@ const customOptions: {
      * @default true
      */
     clearable?: boolean
+
+    /**
+     * The position of the decorator that connects the two inputs.
+     * It can be `left`, `right`, or `hidden`.
+     *
+     * @default 'left'
+     */
+    decorator?: 'left' | 'right' | 'hidden'
 
     /**
      * The field icon to display in the first calendar input.
@@ -200,6 +208,7 @@ const customOptions: {
   maxRange: null,
   ui: {
     clearable: true,
+    decorator: 'left',
     iconFrom: 'calendar-down',
     iconTo: 'calendar-up',
     initial: null,
