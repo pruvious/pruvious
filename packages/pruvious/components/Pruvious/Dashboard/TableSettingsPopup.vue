@@ -137,7 +137,6 @@ import {
   castToBoolean,
   castToNumber,
   deepClone,
-  deepCompare,
   isDefined,
   isEmpty,
   isObject,
@@ -322,7 +321,19 @@ const isDefault = computed(
     Object.entries(data.value.columns).every(
       ([key, { width }]) => props.defaultColumns[key] && props.defaultColumns[key].width === width,
     ) &&
-    deepCompare(data.value.orderBy, props.defaultOrderBy),
+    data.value.orderBy.every(({ field, direction, nulls }, i) => {
+      direction ??= 'asc'
+      nulls = (nulls ?? 'nullsAuto') === 'nullsAuto' ? (direction === 'asc' ? 'nullsFirst' : 'nullsLast') : nulls
+      const _field = props.defaultOrderBy[i]?.field
+      const _direction = props.defaultOrderBy[i]?.direction ?? 'asc'
+      const _nulls =
+        (props.defaultOrderBy[i]?.nulls ?? 'nullsAuto') === 'nullsAuto'
+          ? _direction === 'asc'
+            ? 'nullsFirst'
+            : 'nullsLast'
+          : props.defaultOrderBy[i]?.nulls
+      return field === _field && direction === _direction && nulls === _nulls
+    }),
 )
 const isDefaultApplied = computed(
   () =>
@@ -331,7 +342,19 @@ const isDefaultApplied = computed(
     Object.entries(appliedData.value.columns).every(
       ([key, { width }]) => props.defaultColumns[key] && props.defaultColumns[key].width === width,
     ) &&
-    deepCompare(appliedData.value.orderBy, props.defaultOrderBy),
+    appliedData.value.orderBy.every(({ field, direction, nulls }, i) => {
+      direction ??= 'asc'
+      nulls = (nulls ?? 'nullsAuto') === 'nullsAuto' ? (direction === 'asc' ? 'nullsFirst' : 'nullsLast') : nulls
+      const _field = props.defaultOrderBy[i]?.field
+      const _direction = props.defaultOrderBy[i]?.direction ?? 'asc'
+      const _nulls =
+        (props.defaultOrderBy[i]?.nulls ?? 'nullsAuto') === 'nullsAuto'
+          ? _direction === 'asc'
+            ? 'nullsFirst'
+            : 'nullsLast'
+          : props.defaultOrderBy[i]?.nulls
+      return field === _field && direction === _direction && nulls === _nulls
+    }),
 )
 
 watch(
