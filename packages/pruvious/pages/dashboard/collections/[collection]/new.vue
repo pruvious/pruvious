@@ -89,7 +89,7 @@ import {
   selectFrom,
   useDashboardContentLanguage,
 } from '#pruvious/client'
-import { type LanguageCode, type Permission } from '#pruvious/server'
+import type { LanguageCode, Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import {
   blurActiveElement,

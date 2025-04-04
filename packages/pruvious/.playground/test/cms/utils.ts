@@ -122,23 +122,23 @@ export function $paginated<T extends Record<string, any>>(
 }
 
 export function $400(message = 'Bad Request') {
-  return { statusCode: 400, statusMessage: 'Bad Request', message, url: expect.any(String), stack: '' }
+  return { statusCode: 400, statusMessage: 'Bad Request', message, url: expect.any(String), error: true }
 }
 
 export function $401(message = 'Unauthorized') {
-  return { statusCode: 401, statusMessage: 'Unauthorized', message, url: expect.any(String), stack: '' }
+  return { statusCode: 401, statusMessage: 'Unauthorized', message, url: expect.any(String), error: true }
 }
 
 export function $403(message = 'Forbidden') {
-  return { statusCode: 403, statusMessage: 'Forbidden', message, url: expect.any(String), stack: '' }
+  return { statusCode: 403, statusMessage: 'Forbidden', message, url: expect.any(String), error: true }
 }
 
 export function $404(message = 'Not Found') {
-  return { statusCode: 404, statusMessage: 'Not Found', message, url: expect.any(String), stack: '' }
+  return { statusCode: 404, statusMessage: 'Not Found', message, url: expect.any(String), error: true }
 }
 
 export function $422(data: Record<string, any> | Record<string, any>[], message = 'Invalid input') {
-  return { statusCode: 422, statusMessage: 'Unprocessable Entity', data, message, url: expect.any(String), stack: '' }
+  return { statusCode: 422, statusMessage: 'Unprocessable Entity', data, message, url: expect.any(String), error: true }
 }
 
 export function setAdminToken(token: string) {

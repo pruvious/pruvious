@@ -149,7 +149,7 @@ import {
   useAuth,
   useDashboardContentLanguage,
 } from '#pruvious/client'
-import { type Permission } from '#pruvious/server'
+import type { Permission } from '#pruvious/server'
 import type { QueryBuilderResult } from '@pruvious/orm'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import {

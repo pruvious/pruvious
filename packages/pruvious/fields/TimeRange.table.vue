@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { dayjsConfig, dayjsUTC } from '#pruvious/client'
-import { type SerializableFieldOptions } from '#pruvious/server'
+import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({
   /**

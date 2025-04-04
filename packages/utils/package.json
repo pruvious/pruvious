@@ -28,14 +28,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "defu": "^6.1.4",
+    "defu": "6.1.4",
     "dot-prop": "9.0.0",
-    "nanoid": "^5.0.9",
-    "ohash": "^1.1.4",
-    "zeptomatch": "^2.0.0"
+    "nanoid": "5.1.5",
+    "ohash": "1.1.6",
+    "zeptomatch": "2.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
-    "unbuild": "^3.3.1"
+    "typescript": "5.8.2",
+    "unbuild": "3.5.0"
   }
 }

@@ -1,4 +1,4 @@
-import { type GenericField } from '@pruvious/orm'
+import type { GenericField } from '@pruvious/orm'
 import type {
   BaseAuthorFieldOptions,
   BaseCreatedAtFieldOptions,

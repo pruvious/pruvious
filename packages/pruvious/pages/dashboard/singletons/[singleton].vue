@@ -122,7 +122,7 @@ import {
   unsavedChanges,
   useDashboardContentLanguage,
 } from '#pruvious/client'
-import { type Permission } from '#pruvious/server'
+import type { Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { blurActiveElement, isDefined, isUndefined, lockAndLoad, titleCase } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'

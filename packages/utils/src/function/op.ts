@@ -16,5 +16,5 @@ export function executeOrReturn<T, Args extends T extends (...args: any[]) => an
   fn: T,
   ...args: Args
 ): T extends (...args: any[]) => any ? ReturnType<T> : T {
-  return isFunction(fn) ? fn(...args) : fn
+  return isFunction(fn) ? fn(...args) : (fn as any)
 }

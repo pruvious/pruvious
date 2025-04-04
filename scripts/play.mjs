@@ -84,9 +84,6 @@ if (isTest) {
   consola.info('Starting server...')
   await execa('node', ['.output/server/index.mjs'], { ...execaPlaygroundOptions, stdio: 'inherit' })
 } else if (isCloudflareBuild) {
-  consola.info('Building `playground`...')
-  await execa('pnpm', ['build'], { ...execaPlaygroundOptions, stdio: 'inherit' })
-  consola.info('Build completed')
   fs.writeFileSync(
     resolve(playgroundDir, 'wrangler.toml'),
     [
@@ -124,6 +121,9 @@ if (isTest) {
     ].join('\n'),
   )
   consola.info('Created `wrangler.toml`')
+  consola.info('Building `playground`...')
+  await execa('pnpm', ['build'], { ...execaPlaygroundOptions, stdio: 'inherit' })
+  consola.info('Build completed')
 
   if (isDeploy) {
     consola.info('Deploying to Cloudflare...')
@@ -233,7 +233,9 @@ async function initPlayground() {
             `      },`,
             `    },`,
             `  },`,
-            `  nitro: { preset: 'cloudflare_module' },`,
+            `  nitro: {`,
+            `    preset: 'cloudflare_module',`,
+            `  },`,
           ].join('\n')
         : [
             ``,

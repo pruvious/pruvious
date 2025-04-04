@@ -1,4 +1,4 @@
-import { type _, type __, type LanguageCode } from '#pruvious/server'
+import type { _, __, LanguageCode } from '#pruvious/server'
 import {
   createPattern as _createPattern,
   type ExtractPlaceholders,
