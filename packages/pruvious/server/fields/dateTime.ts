@@ -1,51 +1,67 @@
 import { defineField } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
-import { numberFieldModel, timestampValidator } from '@pruvious/orm'
-import type { TimezoneName } from '../../utils/pruvious/timezone'
+import { numberFieldModel } from '@pruvious/orm'
+import type { PUITimezone } from '@pruvious/ui/composables/puiTimezone'
+import { isNotNull, isString } from '@pruvious/utils'
 
 const customOptions: {
   /**
-   * The minimum date that can be selected.
-   * Value must be specified in milliseconds since Unix epoch.
-   * The default value represents the earliest possible date in JavaScript.
+   * The minimum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
    *
-   * @default -8640000000000000
+   * When not specified, defaults to January 1st, 100 CE (0100-01-01T00:00:00.000Z).
+   *
+   * @default -59011459200000
    *
    * @example
    * ```ts
    * new Date('2024-12-15').getTime()
+   * '2024-12-15T00:00:00.000Z'
+   * '2024'
    * ```
    */
-  min?: number
+  min?: number | string
 
   /**
-   * The maximum date that can be selected.
-   * Value must be specified in milliseconds since Unix epoch.
-   * The default value represents the latest possible date in JavaScript.
+   * The maximum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
+   *
+   * When not specified, defaults to the latest possible date in JavaScript.
    *
    * @default 8640000000000000
    *
    * @example
    * ```ts
    * new Date('2077-06-06').getTime()
+   * '2077-06-06T00:00:00.000Z'
+   * '2077'
    * ```
    */
-  max?: number
+  max?: number | string
 
   ui?: {
     /**
-     * Specifies whether the input is clearable.
+     * Controls the visibility of the clear button in the calendar input.
+     * When set to `false`, users cannot remove their date selection.
      *
      * @default true
      */
     clearable?: boolean
 
     /**
-     * The field icon.
+     * The icon to display in the calendar input.
      * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
      *
      * @default 'calendar-week'
@@ -53,17 +69,18 @@ const customOptions: {
     icon?: keyof typeof icons | null
 
     /**
-     * Specifies the starting date/time displayed when the calendar opens.
-     * It must be a timestamp in milliseconds since Unix epoch or `null`.
+     * Sets the initial year and month shown when the calendar opens.
+     * Accepts these formats:
      *
-     * - When not specified, the selected value is used.
-     * - If the selected value is not set, the current date will be used.
+     * - Numeric - Unix timestamp in milliseconds.
+     * - String - ISO 8601 formatted date.
      *
-     * Note: Round the value to second precision as milliseconds are not used in the calendar.
+     * If not specified, the calendar will try to use the field's current value.
+     * When no value exists, it defaults to the current year and month.
      *
      * @default null
      */
-    initial?: number | null
+    initial?: number | string | null
 
     /**
      * Controls whether values should be shown as relative time expressions (like '2 hours ago' or 'in 3 days')
@@ -96,45 +113,28 @@ const customOptions: {
     startDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6
 
     /**
-     * The time zone to use when displaying the date/time in the calendar.
-     * The stored value is always in UTC.
+     * The time zone identifier for displaying date values in the calendar.
+     * The value must be a valid IANA time zone name or `local`.
      *
-     * This value represents the time difference in minutes between UTC and local time.
-     * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+     * This setting affects both calendar display and dates in the data table.
      *
-     * By default, the time zone offset is set to UTC (GMT+0).
-     *
-     * @default 0
+     * @default 'local'
      *
      * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
      * @see https://www.iana.org/time-zones
      *
      * @example
      * ```ts
-     * // GMT+1
-     * 60
-     *
-     * // GMT-5
-     * -300
-     *
-     * // Time zone name
+     * 'local'
      * 'Europe/Berlin'
+     * 'America/New_York'
+     * 'Asia/Tokyo'
      * ```
      */
-    timezone?: number | TimezoneName
-
-    /**
-     * Specifies whether the calendar should include time selection.
-     *
-     * When disabled, all timestamps are set to midnight.
-     * The `timezone` is used to resolve the midnight time.
-     *
-     * @default false
-     */
-    withTime?: boolean
+    timezone?: PUITimezone | 'local'
   }
 } = {
-  min: -8640000000000000,
+  min: -59011459200000,
   max: 8640000000000000,
   ui: {
     clearable: true,
@@ -143,8 +143,7 @@ const customOptions: {
     relativeTime: false,
     showSeconds: true,
     startDay: 1,
-    timezone: 0,
-    withTime: false,
+    timezone: 'local',
   },
 }
 
@@ -152,8 +151,49 @@ export default defineField({
   model: numberFieldModel(),
   nullable: true,
   default: null,
-  sanitizers: [], // @todo sanitize any date input
-  validators: [timestampValidator()],
+  sanitizers: [
+    (value) => {
+      if (isString(value)) {
+        try {
+          return Date.parse(value)
+        } catch {}
+      }
+      return value
+    },
+  ],
+  validators: [
+    (value, { definition, context }) => {
+      if (isNotNull(value)) {
+        if (isString(definition.options.min)) {
+          if (value < Date.parse(definition.options.min)) {
+            throw new Error(
+              context.__('pruvious-orm', 'The value must be greater than or equal to `$min`', {
+                min: Date.parse(definition.options.min),
+              }),
+            )
+          }
+        }
+
+        if (isString(definition.options.max)) {
+          if (value > Date.parse(definition.options.max)) {
+            throw new Error(
+              context.__('pruvious-orm', 'The value must be less than or equal to `$max`', {
+                max: Date.parse(definition.options.max),
+              }),
+            )
+          }
+        }
+      }
+    },
+    (value, { context }) => {
+      if (isNotNull(value)) {
+        const date = new Date(value)
+        if (date.getUTCMilliseconds() !== 0) {
+          throw new Error(context.__('pruvious-api', 'The value must be rounded to seconds'))
+        }
+      }
+    },
+  ],
   customOptions,
   uiOptions: { placeholder: true },
   omitOptions: ['decimalPlaces', 'min', 'max'],

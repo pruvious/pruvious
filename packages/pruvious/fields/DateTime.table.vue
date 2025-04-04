@@ -1,22 +1,22 @@
 <template>
   <div class="pui-truncate">
-    <span v-pui-tooltip.nomd="options.ui.relativeTime ? formattedDate : relativeTime">
-      {{ (options.ui.relativeTime ? relativeTime : formattedDate) ?? '-' }}
+    <span v-pui-tooltip.nomd="options.ui.relativeTime ? absolute : relative">
+      {{ (options.ui.relativeTime ? relative : absolute) ?? '-' }}
     </span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { dayjs, dayjsFormatDate, dayjsFormatDateTime, dayjsRelative } from '#pruvious/client'
+import { dayjsConfig, dayjsResolveTimezone } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isNull } from '@pruvious/utils'
+import { isNull, isUndefined } from '@pruvious/utils'
 
 const props = defineProps({
   /**
    * The casted field value.
    */
   modelValue: {
-    type: Number,
+    type: [Number, null],
   },
 
   /**
@@ -28,11 +28,17 @@ const props = defineProps({
   },
 })
 
-const date = dayjs(props.modelValue)
-const formattedDate = isNull(props.modelValue)
-  ? undefined
-  : props.options.ui.withTime
-    ? dayjsFormatDateTime(date)
-    : dayjsFormatDate(date)
-const relativeTime = isNull(props.modelValue) ? undefined : dayjsRelative(date)
+const absolute = computed(() =>
+  isNull(props.modelValue) || isUndefined(props.modelValue) ? undefined : formatter(props.modelValue, false),
+)
+const relative = computed(() =>
+  isNull(props.modelValue) || isUndefined(props.modelValue) ? undefined : formatter(props.modelValue, true),
+)
+
+function formatter(timestamp: number, relative: boolean): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return relative ? date.tz().fromNow() : date.format(`${dateFormat} ${timeFormat}`)
+}
 </script>

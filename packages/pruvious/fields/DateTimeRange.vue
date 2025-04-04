@@ -12,8 +12,8 @@
       :clearable="options.ui.clearable"
       :decorator="options.ui.decorator"
       :disabled="disabled"
-      :error="!!error"
-      :formatter="options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+      :error="!!resolvedError"
+      :formatter="formatter"
       :iconFrom="options.ui.iconFrom"
       :iconTo="options.ui.iconTo"
       :id="id"
@@ -29,21 +29,21 @@
       :placeholderTo="placeholderTo"
       :showSeconds="options.ui.showSeconds"
       :startDay="options.ui.startDay"
-      :timezone="options.ui.timezone"
-      :withTime="options.ui.withTime"
+      :timezone="timezone"
+      :withTime="true"
       @commit="$emit('commit', $event.every(isNull) ? null : $event)"
       @update:modelValue="$emit('update:modelValue', $event.every(isNull) ? null : $event)"
     />
 
-    <PruviousFieldMessage :error="error" :name="name" :options="options" />
+    <PruviousFieldMessage :error="resolvedError" :name="name" :options="options" />
   </PUIField>
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsFormatDate, dayjsFormatDateTime, dayjsLocales, maybeTranslate, useLanguage } from '#pruvious/client'
+import { __, dayjsConfig, dayjsLocales, dayjsResolveTimezone, maybeTranslate, useLanguage } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
-import { isNull } from '@pruvious/utils'
+import { isNull, isObject, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -82,7 +82,7 @@ const props = defineProps({
    * Represents an error message that can be displayed to the user.
    */
   error: {
-    type: String,
+    type: [String, Object] as PropType<string | Record<string, string>>,
   },
 
   /**
@@ -134,5 +134,16 @@ const labels: PUICalendarLabels = {
   nextMonth: __('pruvious-dashboard', 'Next month'),
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
+}
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.timezone))
+const resolvedError = computed(() =>
+  isString(props.error) ? props.error : isObject(props.error) ? Object.values(props.error) : undefined,
+)
+
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>

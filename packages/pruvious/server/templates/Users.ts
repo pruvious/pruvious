@@ -17,10 +17,12 @@ import {
   selectField,
   selectFrom,
   textField,
+  type TranslatableStringCallbackContext,
   trueFalseField,
   uniqueValidator,
 } from '#pruvious/server'
 import type { WhereCondition } from '@pruvious/orm'
+import { type PUITimezone, puiTimezones } from '@pruvious/ui/composables/puiTimezone'
 import { castToBoolean, generateSecureRandomString, isDefined, isString } from '@pruvious/utils'
 
 export default defineTemplate(() => ({
@@ -121,6 +123,20 @@ export default defineTemplate(() => ({
       ui: {
         label: ({ __ }) => __('pruvious-dashboard', 'Dashboard language'),
         description: ({ __ }) => __('pruvious-dashboard', 'Language of the dashboard interface.'),
+      },
+    }),
+    timezone: selectField({
+      choices: [
+        {
+          value: 'local',
+          label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Auto (device settings)'),
+        },
+        ...puiTimezones.map((value) => ({ value, label: value })),
+      ] as { value: PUITimezone | 'local' }[],
+      default: 'local',
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Time zone'),
+        description: ({ __ }) => __('pruvious-dashboard', 'Time zone used for date and time display.'),
       },
     }),
     dateFormat: textField({
@@ -294,8 +310,11 @@ export default defineTemplate(() => ({
       fields: [
         { row: ['email', 'password'] },
         { row: ['firstName', 'lastName'] },
+        '---',
         { row: ['isActive', 'isAdmin'] },
         'roles',
+        '---',
+        'timezone',
         { row: ['contentLanguage', 'dashboardLanguage'] },
         { row: ['dateFormat', 'timeFormat'] },
       ],

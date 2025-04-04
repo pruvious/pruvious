@@ -522,7 +522,7 @@ function getReExports() {
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
     `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
-    `export { dayjsLocales, dayjs, dayjsUTC, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
+    `export { dayjsLocales, dayjs, dayjsUTC, dayjsConfig, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative, dayjsResolveTimezone } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
     `export { usePruviousHMR } from '${resolve('../../../utils/pruvious/dashboard/hmr')}'`,
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,

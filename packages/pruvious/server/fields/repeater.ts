@@ -1,4 +1,9 @@
-import { defineField, type CombinedFieldOptions, type GenericDatabase } from '#pruvious/server'
+import {
+  defineField,
+  type CombinedFieldOptions,
+  type GenericDatabase,
+  type ResolveFieldUIOptions,
+} from '#pruvious/server'
 import {
   Field,
   repeaterFieldModel,
@@ -70,7 +75,9 @@ export default {
         SubfieldsInput<TSubfields>[],
         TSubfields
       >,
-      RepeaterFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
+      RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
+        CustomOptions<TSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -87,7 +94,9 @@ export default {
       SubfieldsInput<TSubfields>[],
       TSubfields
     >,
-    RepeaterFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
+    RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
+      CustomOptions<TSubfields> &
+      ResolveFieldUIOptions<undefined>,
     false,
     TRequired,
     TImmutable,
@@ -137,7 +146,8 @@ export default {
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields>,
+        CustomOptions<TClientSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -157,7 +167,8 @@ export default {
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields>,
+        CustomOptions<TClientSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -183,7 +194,9 @@ export default {
       SubfieldsInput<Record<string, GenericField>>[],
       Record<string, GenericField>
     >,
-    RepeaterFieldModelOptions<Record<string, any>, Record<string, any>> & CustomOptions<Record<string, GenericField>>,
+    RepeaterFieldModelOptions<Record<string, any>, Record<string, any>> &
+      CustomOptions<Record<string, GenericField>> &
+      ResolveFieldUIOptions<undefined>,
     false,
     boolean,
     boolean,

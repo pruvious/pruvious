@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { clearArray, isDefined, isRealNumber, isUndefined } from '@pruvious/utils'
+import { clearArray, isDefined, isRealNumber, isUndefined, leadingZeros } from '@pruvious/utils'
 import { onKeyDown, onKeyStroke, onKeyUp, useElementBounding, useEventListener } from '@vueuse/core'
 
 const props = defineProps({
@@ -327,18 +327,7 @@ function getNumericValue() {
  * Formats a number with leading zeros based on `padZeros` property.
  */
 function formatWithLeadingZeros(value: number): string {
-  if (props.padZeros <= 0) {
-    return value.toString()
-  }
-
-  const isNegative = value < 0
-  const absValue = Math.abs(value)
-  const parts = absValue.toString().split('.')
-  const integerPart = parts[0] ?? ''
-  const decimalPart = parts.length > 1 ? '.' + parts[1] : ''
-  const paddedInteger = integerPart.padStart(props.padZeros, '0')
-  const signPrefix = isNegative ? '-' : ''
-  return signPrefix + paddedInteger + decimalPart
+  return leadingZeros(value, props.padZeros)
 }
 
 /**

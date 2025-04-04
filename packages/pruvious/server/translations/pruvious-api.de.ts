@@ -71,6 +71,14 @@ export default defineTranslation({
     { param: 'string', min: 'number', max: 'number' },
   ),
   'The $subject must be an image': createPattern('Das $subject muss ein Bild sein', { subject: 'string' }),
+  'The difference between the values must be greater than or equal to `$minRange`': createPattern(
+    'Die Differenz zwischen den Werten muss größer oder gleich `$minRange` sein',
+    { minRange: 'string' },
+  ),
+  'The difference between the values must be less than or equal to `$maxRange`': createPattern(
+    'Die Differenz zwischen den Werten muss kleiner oder gleich `$maxRange` sein',
+    { maxRange: 'string' },
+  ),
   'The email address is already in use': 'Die E-Mail-Adresse wird bereits verwendet',
   'The field `$field` cannot be used for filtering': createPattern(
     'Das Feld `$field` kann nicht zum Filtern verwendet werden',
@@ -103,6 +111,18 @@ export default defineTranslation({
     singleton: 'string',
   }),
   'The source and target languages must be different': 'Die Quell- und Zielsprachen müssen unterschiedlich sein',
+  'The value must be rounded to seconds': 'Der Wert muss auf Sekunden gerundet werden',
+  'The value must be rounded to the nearest UTC day': 'Der Wert muss auf den nächsten UTC-Tag gerundet werden',
+  'The values must be greater than or equal to `$min`': createPattern(
+    'Die Werte müssen größer oder gleich `$min` sein',
+    { min: 'number' },
+  ),
+  'The values must be integers': 'Die Werte müssen Ganzzahlen sein',
+  'The values must be less than or equal to `$max`': createPattern('Die Werte müssen kleiner oder gleich `$max` sein', {
+    max: 'number',
+  }),
+  'The values must be rounded to seconds': 'Die Werte müssen auf Sekunden gerundet werden',
+  'The values must be rounded to the nearest UTC day': 'Die Werte müssen auf den nächsten UTC-Tag gerundet werden',
   'This directory contains nested files or directories that cannot be deleted':
     'Dieser Ordner enthält verschachtelte Dateien oder Ordner, die nicht gelöscht werden können',
   'This directory contains nested files or directories that cannot be moved':

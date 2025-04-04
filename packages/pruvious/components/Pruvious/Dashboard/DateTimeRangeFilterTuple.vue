@@ -1,6 +1,6 @@
 <template>
   <PUICalendarRange
-    :formatter="options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+    :formatter="formatter"
     :iconFrom="options.ui.iconFrom"
     :iconTo="options.ui.iconTo"
     :id="id"
@@ -16,14 +16,15 @@
     :placeholderTo="__('pruvious-dashboard', 'Empty')"
     :showSeconds="options.ui.showSeconds"
     :startDay="options.ui.startDay"
-    :timezone="options.ui.timezone"
-    :withTime="options.ui.withTime"
+    :timezone="timezone"
+    :withTime="true"
     @commit="$emit('commit', { ...modelValue, value: prepareEmitValue($event) })"
+    @update:modelValue="$emit('update:modelValue', { ...modelValue, value: prepareEmitValue($event) })"
   />
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsFormatDate, dayjsFormatDateTime, dayjsLocales, useLanguage, type WhereField } from '#pruvious/client'
+import { __, dayjsConfig, dayjsLocales, dayjsResolveTimezone, useLanguage, type WhereField } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 import { castToNumber, isArray, isInteger, isNotNull, isNull, isString } from '@pruvious/utils'
@@ -47,7 +48,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  commit: [where: WhereField]
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
 }>()
 
 const id = useId()
@@ -62,6 +64,8 @@ const labels: PUICalendarLabels = {
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
 }
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.timezone))
+const minRange = computed(() => puiParseTimeSpan(props.options.minRange))
 const sanitized = computed<[number | null, number | null]>(() => {
   const v = props.modelValue.value
 
@@ -83,15 +87,20 @@ const sanitized = computed<[number | null, number | null]>(() => {
 
 emit('commit', { ...props.modelValue, value: prepareEmitValue(sanitized.value) })
 
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return date.format(`${dateFormat} ${timeFormat}`)
+}
+
 function prepareEmitValue(value: [number | null, number | null]): string | null {
   if (value.every(isNull) || (value.some(isNull) && sanitized.value.every(isNotNull))) {
     return null
   }
 
   if (value.some(isNull)) {
-    value = isNull(value[0])
-      ? [value[1]! - props.options.minRange, value[1]]
-      : [value[0], value[0] + props.options.minRange]
+    value = isNull(value[0]) ? [value[1]! - minRange.value, value[1]] : [value[0], value[0] + minRange.value]
   }
 
   return JSON.stringify(value)

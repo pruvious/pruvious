@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { clamp, countDecimals, parseId } from '../../src'
+import { clamp, countDecimals, leadingZeros, parseId } from '../../src'
 
 test('clamp', () => {
   expect(clamp(1, 0, 2)).toEqual(1)
@@ -36,4 +36,14 @@ test('parse id', () => {
   expect(parseId([])).toEqual(null)
   expect(parseId(null)).toEqual(null)
   expect(parseId(undefined)).toEqual(null)
+})
+
+test('leading zeros', () => {
+  expect(leadingZeros(1, 3)).toEqual('001')
+  expect(leadingZeros(1.5, 3)).toEqual('001.5')
+  expect(leadingZeros(-1, 3)).toEqual('-001')
+  expect(leadingZeros(1, 0)).toEqual('1')
+  expect(leadingZeros(1.5, 0)).toEqual('1.5')
+  expect(leadingZeros(-1, 0)).toEqual('-1')
+  expect(leadingZeros(1, -1)).toEqual('1')
 })

@@ -42,6 +42,7 @@ export class History<T extends Record<string, any> = Record<string, any>> {
   protected maxStates: number
   protected watchUnsavedChanges: boolean
   protected original: T | undefined
+  protected debounceTimer: NodeJS.Timeout | null = null
 
   canUndo = ref(false)
   canRedo = ref(false)
@@ -86,6 +87,22 @@ export class History<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
+   * Adds a new state to the history stack with a debounce delay.
+   */
+  pushDebounced(state: T, delay = 100): Promise<this> {
+    return new Promise((resolve) => {
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer)
+      }
+
+      this.debounceTimer = setTimeout(() => {
+        this.debounceTimer = null
+        resolve(this.push(state))
+      }, delay)
+    })
+  }
+
+  /**
    * Rewrites the current state with a new state.
    * The `remove` parameter specifies the number of states to remove from the history stack.
    */
@@ -105,7 +122,7 @@ export class History<T extends Record<string, any> = Record<string, any>> {
    * Returns `undefined` if there are no states to undo.
    */
   undo(): T | undefined {
-    if (!this.canUndo.value) {
+    if (!this.canUndo.value || this.debounceTimer) {
       return undefined
     }
 
@@ -118,7 +135,7 @@ export class History<T extends Record<string, any> = Record<string, any>> {
    * Returns `undefined` if there are no states to redo.
    */
   redo(): T | undefined {
-    if (!this.canRedo.value) {
+    if (!this.canRedo.value || this.debounceTimer) {
       return undefined
     }
 
@@ -162,6 +179,10 @@ export class History<T extends Record<string, any> = Record<string, any>> {
     this.states = []
     this.currentIndex = -1
     this.original = undefined
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer)
+      this.debounceTimer = null
+    }
     return this.refresh()
   }
 

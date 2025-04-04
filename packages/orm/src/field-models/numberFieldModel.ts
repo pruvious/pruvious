@@ -120,7 +120,7 @@ export function numberFieldModel<
       },
       (value, { definition, context }) => {
         if (!isNull(value)) {
-          if (value < definition.options.min) {
+          if (isRealNumber(definition.options.min) && value < definition.options.min) {
             throw new Error(
               context.__('pruvious-orm', 'The value must be greater than or equal to `$min`', {
                 min: definition.options.min,
@@ -128,7 +128,7 @@ export function numberFieldModel<
             )
           }
 
-          if (value > definition.options.max) {
+          if (isRealNumber(definition.options.max) && value > definition.options.max) {
             throw new Error(
               context.__('pruvious-orm', 'The value must be less than or equal to `$max`', {
                 max: definition.options.max,

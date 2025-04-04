@@ -290,12 +290,12 @@ export function clear<T>(object: T): T {
  */
 export function remap<const TInput extends Record<string, unknown>, TKey extends string, TValue>(
   object: TInput,
-  mapper: (key: keyof TInput, value: TInput[keyof TInput]) => [TKey, TValue],
+  mapper: (key: keyof TInput & string, value: TInput[keyof TInput & string]) => [TKey, TValue],
 ): Record<TKey, TValue> {
   const result = {} as Record<TKey, TValue>
 
   for (const [key, value] of Object.entries(object)) {
-    const [newKey, newValue] = mapper(key as keyof TInput, value as TInput[keyof TInput])
+    const [newKey, newValue] = mapper(key as keyof TInput & string, value as TInput[keyof TInput & string])
     result[newKey] = newValue
   }
 

@@ -16,8 +16,12 @@
       :options="options"
       @commit="
         (value) => {
-          $emit('update:modelValue', value)
           $emit('commit', value)
+        }
+      "
+      @update:modelValue="
+        (value) => {
+          $emit('update:modelValue', value)
         }
       "
     />
@@ -28,8 +32,12 @@
       :options="options"
       @commit="
         (value) => {
-          $emit('update:modelValue', value)
           $emit('commit', value)
+        }
+      "
+      @update:modelValue="
+        (value) => {
+          $emit('update:modelValue', value)
         }
       "
     />
@@ -37,8 +45,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, type WhereField } from '#pruvious/client'
-import type { SerializableFieldOptions } from '#pruvious/server'
+import { __, type WhereField } from '#pruvious/client';
+import type { SerializableFieldOptions } from '#pruvious/server';
 
 const props = defineProps({
   /**
@@ -62,6 +70,10 @@ const emit = defineEmits<{
   'commit': [where: WhereField]
   'update:modelValue': [where: WhereField]
 }>()
+
+if (!['eq', 'ne', 'startsWith', 'endsWith'].includes(props.modelValue.operator)) {
+  setTimeout(() => emit('commit', { ...props.modelValue, operator: 'eq' }))
+}
 
 watch(
   () => props.modelValue.operator,

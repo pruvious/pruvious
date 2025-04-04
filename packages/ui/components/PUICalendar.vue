@@ -19,7 +19,7 @@
     :size="size"
     :strategy="strategy"
     @blurHandle="focusVisible = false"
-    @close="$emit('commit', toModelValue($modelValue))"
+    @close="$emit('commit', prepareEmitValue(date))"
     @keydown="onKeyDown"
     @keydown.down="prevYear"
     @keydown.left="prevMonth"
@@ -72,13 +72,13 @@
               isMonthSelectorVisible = true
               await sleep(0)
               root?.container
-                ?.querySelector(`[data-month='${$currentMonth}']`)
+                ?.querySelector(`[data-month='${selectedMonth}']`)
                 ?.scrollIntoView({ block: 'center', behavior: 'instant' })
             }
           "
           variant="secondary"
         >
-          {{ $currentMonthLabel }}
+          {{ selectedMonthName }}
         </PUIButton>
 
         <PUIButton
@@ -90,18 +90,18 @@
               isYearSelectorVisible = true
               await sleep(0)
               root?.container
-                ?.querySelector(`[data-year='${$currentYear}']`)
+                ?.querySelector(`[data-year='${selectedYear}']`)
                 ?.scrollIntoView({ block: 'center', behavior: 'instant' })
             }
           "
           variant="secondary"
         >
-          {{ $currentYear }}
+          {{ selectedYear }}
         </PUIButton>
 
         <div class="pui-calendar-header-nav">
           <PUIButton
-            :disabled="$currentYear === $minYear && $currentMonth === $minMonth"
+            :disabled="selectedYear === minDate.year() && selectedMonth === minDate.month() + 1"
             :size="typeof size === 'number' ? size - 1 : -2"
             :title="resolvedLabels.previousMonth"
             @click="$event.shiftKey ? prevYear() : prevMonth()"
@@ -111,7 +111,7 @@
           </PUIButton>
 
           <PUIButton
-            :disabled="$currentYear === $maxYear && $currentMonth === $maxMonth"
+            :disabled="selectedYear === maxDate.year() && selectedMonth === maxDate.month() + 1"
             :size="typeof size === 'number' ? size - 1 : -2"
             :title="resolvedLabels.nextMonth"
             @click="$event.shiftKey ? nextYear() : nextMonth()"
@@ -131,12 +131,13 @@
           <PUIButton
             :data-month="i + 1"
             :disabled="
-              ($currentYear === $minYear && i + 1 < $minMonth) || ($currentYear === $maxYear && i + 1 > $maxMonth)
+              (selectedYear === minDate.year() && i < minDate.month()) ||
+              (selectedYear === maxDate.year() && i > maxDate.month())
             "
-            :variant="i + 1 === $currentMonth ? 'primary' : 'secondary'"
+            :variant="i + 1 === selectedMonth ? 'primary' : 'secondary'"
             @click="
               () => {
-                $currentMonth = resolvedLabels.months.indexOf(month) + 1
+                selectedMonth = resolvedLabels.months.indexOf(month) + 1
                 isMonthSelectorVisible = false
                 $nextTick(() => root?.container?.scrollTo({ top: 0, behavior: 'instant' }))
               }
@@ -153,21 +154,17 @@
         class="pui-calendar-selector"
         :style="{ width: `${selectorWidth}px`, height: `${selectorHeight}px` }"
       >
-        <template v-for="year in Array.from({ length: 201 }).map((_, i) => $currentYear - 100 + i)">
+        <template v-for="year in Array.from({ length: 201 }).map((_, i) => selectedYear - 100 + i)">
           <PUIButton
-            v-if="year >= $minYear && year <= $maxYear"
+            v-if="year >= minDate.year() && year <= maxDate.year()"
             :data-year="year"
-            :variant="year === $currentYear ? 'primary' : 'secondary'"
+            :variant="year === selectedYear ? 'primary' : 'secondary'"
             @click="
               () => {
-                const normalized = toModelValue(
-                  new Date(
-                    Date.UTC(year, $currentMonth - 1, 1, $currentHours, $currentMinutes, $currentSeconds),
-                  ).getTime(),
-                )!
-                const normalizedDate = new Date(normalized)
-                $currentYear = normalizedDate.getUTCFullYear()
-                $currentMonth = normalizedDate.getUTCMonth() + 1
+                const current = puiDayjs().tz(`${year}-${selectedMonth}-01`, resolveTimezone())
+                const clamped = clampDate(current)
+                selectedYear = clamped.year()
+                selectedMonth = clamped.month() + 1
                 isYearSelectorVisible = false
                 $nextTick(() => root?.container?.scrollTo({ top: 0, behavior: 'instant' }))
               }
@@ -182,24 +179,28 @@
       <PUICalendarMonth
         v-if="!isMonthSelectorVisible && !isYearSelectorVisible"
         :labels="resolvedLabels"
-        :max="$maxValue"
-        :min="$minValue"
-        :modelValue="$modelValue"
-        :month="$currentMonth"
+        :max="maxDate"
+        :min="minDate"
+        :modelValue="date"
+        :month="selectedMonth"
+        :resolveTimezone="resolveTimezone"
         :startDay="startDay"
-        :today="$today"
-        :year="$currentYear"
+        :timezone="timezone"
+        :today="today"
+        :year="selectedYear"
         @selectDay="
           (day, event) => {
-            const date = new Date(Date.UTC($currentYear, $currentMonth - 1, day))
-            if (withTime) {
-              date.setUTCHours($currentHours, $currentMinutes, $currentSeconds)
+            const { hours, minutes, seconds } = puiTimestampToSpanObject(time)
+            const newDate = puiDayjs().tz(
+              `${selectedYear}-${selectedMonth}-${day} ${hours}:${minutes}:${seconds}`,
+              resolveTimezone(),
+            )
+            const clamped = clampDate(newDate)
+            const emitValue = prepareEmitValue(clamped)
+            $emit('update:modelValue', emitValue)
+            if (!root?.isActive) {
+              $emit('commit', emitValue)
             }
-            const t1 = date.getTime()
-            const to = isString(timezone) ? getTimezoneOffset(timezone, t1) : timezone
-            const t2 = t1 - (to ?? 0) * 60000
-            $emit('update:modelValue', t2)
-            $emit('commit', t2)
             if (!withTime) {
               $nextTick(() => root?.close(event))
             }
@@ -210,17 +211,20 @@
       <div v-if="withTime && !isMonthSelectorVisible && !isYearSelectorVisible" class="pui-calendar-time">
         <PUITime
           :id="id ? `${id}--time` : undefined"
-          :max="$maxTime"
-          :min="$minTime"
-          :modelValue="$currentTime"
+          :max="maxTime"
+          :min="minTime"
+          :modelValue="time"
           :name="name ? `${name}--time` : undefined"
           :showSeconds="showSeconds"
           @update:modelValue="
-            (seconds) => {
-              const date = new Date(withTimezoneOffset(modelValue ?? 946684800000))
-              date.setUTCFullYear($currentYear, $currentMonth - 1)
-              date.setUTCHours(Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60)
-              $emit('update:modelValue', toModelValue(date.getTime()))
+            (time) => {
+              const { hours, minutes, seconds } = puiTimestampToSpanObject(time)
+              const newDate = puiDayjs().tz(
+                `${selectedYear}-${selectedMonth}-${selectedDay} ${hours}:${minutes}:${seconds}`,
+                resolveTimezone(),
+              )
+              const clamped = clampDate(newDate)
+              $emit('update:modelValue', prepareEmitValue(clamped))
             }
           "
         />
@@ -239,18 +243,9 @@
 
 <script lang="ts" setup>
 import type { icons } from '@iconify-json/tabler/icons.json'
-import {
-  clamp,
-  defu,
-  getTimezoneOffset,
-  isDefined,
-  isNull,
-  isString,
-  isUndefined,
-  searchByKeywords,
-  sleep,
-} from '@pruvious/utils'
+import { defu, isNull, isNumber, searchByKeywords, sleep } from '@pruvious/utils'
 import { useTimeout } from '@vueuse/core'
+import type { Dayjs } from 'dayjs/esm'
 import type { PUITimeLabels } from './PUITime.vue'
 
 export interface PUICalendarLabels extends PUITimeLabels {
@@ -341,18 +336,19 @@ const props = defineProps({
   },
 
   /**
-   * Specifies the starting date/time displayed when the calendar opens.
-   * It must be a timestamp in milliseconds since Unix epoch or `null`.
+   * Sets the initial year and month shown when the calendar opens.
+   * Accepts these formats:
    *
-   * - When not specified, the selected value is used.
-   * - If the selected value is not set, the current date will be used.
+   * - Numeric - Unix timestamp in milliseconds.
+   * - String - ISO 8601 formatted date.
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * If not specified, the calendar will try to use the current `modelValue`.
+   * If `modelValue` is `null`, it defaults to the current year and month.
    *
    * @default null
    */
   initial: {
-    type: [Number, null],
+    type: [Number, String, null],
     default: null,
   },
 
@@ -360,7 +356,7 @@ const props = defineProps({
    * Specifies whether the calendar should include time selection.
    *
    * When disabled, all timestamps are set to midnight.
-   * The `timezone` is used to resolve the midnight time.
+   * The `timezone` prop is used to resolve the midnight time.
    *
    * @default false
    */
@@ -380,31 +376,25 @@ const props = defineProps({
   },
 
   /**
-   * The time difference in minutes between UTC and local time.
-   * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+   * The time zone identifier for displaying date values in the calendar.
+   * The value must be a valid IANA time zone name or `local`.
    *
-   * By default, the time zone offset is set to UTC (GMT+0).
-   *
-   * @default 0
+   * @default 'UTC'
    *
    * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
    * @see https://www.iana.org/time-zones
    *
    * @example
    * ```ts
-   * // GMT+1
-   * 60
-   *
-   * // GMT-5
-   * -300
-   *
-   * // Time zone name
+   * 'local'
    * 'Europe/Berlin'
+   * 'America/New_York'
+   * 'Asia/Tokyo'
    * ```
    */
   timezone: {
-    type: [Number, String],
-    default: 0,
+    type: String as PropType<PUITimezone | 'local'>,
+    default: 'UTC',
   },
 
   /**
@@ -444,7 +434,8 @@ const props = defineProps({
   },
 
   /**
-   * Specifies whether the input is clearable.
+   * Controls the visibility of the clear button in the calendar input.
+   * When set to `false`, users cannot remove their date selection.
    *
    * @default true
    */
@@ -454,7 +445,7 @@ const props = defineProps({
   },
 
   /**
-   * The field icon.
+   * The icon to display in the calendar input.
    * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
    *
    * @example
@@ -474,30 +465,54 @@ const props = defineProps({
   },
 
   /**
-   * The minimum allowed timestamp.
-   * The value must be specified in milliseconds since Unix epoch.
-   * The default value represents the earliest possible date in JavaScript.
+   * The minimum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
    *
-   * @default -8640000000000000
+   * When not specified, defaults to January 1st, 100 CE (0100-01-01T00:00:00.000Z).
+   *
+   * @default -59011459200000
+   *
+   * @example
+   * ```ts
+   * new Date('2024-12-15').getTime()
+   * '2024-12-15T00:00:00.000Z'
+   * '2024'
+   * ```
    */
   min: {
-    type: Number,
-    default: -8640000000000000,
+    type: [Number, String],
+    default: -59011459200000,
   },
 
   /**
-   * The maximum allowed timestamp.
-   * The value must be specified in milliseconds since Unix epoch.
-   * The default value represents the latest possible date in JavaScript.
+   * The maximum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
+   *
+   * When not specified, defaults to the latest possible date in JavaScript.
    *
    * @default 8640000000000000
+   *
+   * @example
+   * ```ts
+   * new Date('2077-06-06').getTime()
+   * '2077-06-06T00:00:00.000Z'
+   * '2077'
+   * ```
    */
   max: {
-    type: Number,
+    type: [Number, String],
     default: 8640000000000000,
   },
 
@@ -575,7 +590,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits<{
+defineEmits<{
   'commit': [value: number | null]
   'update:modelValue': [value: number | null]
 }>()
@@ -608,8 +623,6 @@ const resolvedLabels = computed<Required<PUICalendarLabels>>(() =>
   }),
 )
 
-let timezoneOffset: number | undefined
-
 const root = useTemplateRef('root')
 const isMonthSelectorVisible = ref(false)
 const isYearSelectorVisible = ref(false)
@@ -617,48 +630,33 @@ const selectorWidth = ref(0)
 const selectorHeight = ref(0)
 const { listen } = puiTrigger()
 const displayedValue = computed(() => (isNull(props.modelValue) ? undefined : props.formatter(props.modelValue)))
-const $initialValue = computed(() =>
-  isNull(props.initial) ? null : clamp(withTimezoneOffset(props.initial, false), -8640000000000000, 8640000000000000),
-)
-const $today = computed(() => new Date(withTimezoneOffset(Date.now(), false)))
-const $modelValue = computed(() => (isNull(props.modelValue) ? null : withTimezoneOffset(props.modelValue)))
-const $modelDate = computed(() => new Date($modelValue.value ?? $initialValue.value ?? $today.value.getTime()))
-const $initialDate = computed(() => new Date($initialValue.value ?? props.modelValue ?? $today.value.getTime()))
-const $initialDay = computed(() => $initialDate.value.getUTCDate())
-const $initialMonth = computed(() => $initialDate.value.getUTCMonth() + 1)
-const $initialYear = computed(() => $initialDate.value.getUTCFullYear())
-const $minValue = computed(() => clamp(withTimezoneOffset(props.min, false), -8640000000000000, 8640000000000000))
-const $maxValue = computed(() => clamp(withTimezoneOffset(props.max, false), -8640000000000000, 8640000000000000))
-const $minDate = computed(() => new Date($minValue.value))
-const $maxDate = computed(() => new Date($maxValue.value))
-const $minYear = computed(() => $minDate.value.getUTCFullYear())
-const $maxYear = computed(() => $maxDate.value.getUTCFullYear())
-const $minMonth = computed(() => $minDate.value.getUTCMonth() + 1)
-const $maxMonth = computed(() => $maxDate.value.getUTCMonth() + 1)
-const $currentMonth = ref($initialMonth.value)
-const $currentMonthLabel = computed(() => resolvedLabels.value.months[$currentMonth.value - 1])
-const $currentYear = ref($initialYear.value)
-const $currentHours = computed(() => $modelDate.value.getUTCHours())
-const $currentMinutes = computed(() => $modelDate.value.getUTCMinutes())
-const $currentSeconds = computed(() => $modelDate.value.getUTCSeconds())
-const $currentTime = computed(() => $currentHours.value * 3600 + $currentMinutes.value * 60 + $currentSeconds.value)
-const $minTime = computed(() =>
-  isNull($modelValue.value)
+const date = ref<Dayjs | null>(useTimezone(props.modelValue))
+const time = computed(() =>
+  isNull(date.value)
     ? 0
-    : $modelDate.value.getUTCFullYear() === $minDate.value.getUTCFullYear() &&
-        $modelDate.value.getUTCMonth() === $minDate.value.getUTCMonth() &&
-        $modelDate.value.getUTCDate() === $minDate.value.getUTCDate()
-      ? $minDate.value.getUTCHours() * 3600 + $minDate.value.getUTCMinutes() * 60 + $minDate.value.getUTCSeconds()
-      : 0,
+    : puiParseTime({ hours: date.value.hour(), minutes: date.value.minute(), seconds: date.value.second() }),
 )
-const $maxTime = computed(() =>
-  isNull($modelValue.value)
-    ? 86399
-    : $modelDate.value.getUTCFullYear() === $maxDate.value.getUTCFullYear() &&
-        $modelDate.value.getUTCMonth() === $maxDate.value.getUTCMonth() &&
-        $modelDate.value.getUTCDate() === $maxDate.value.getUTCDate()
-      ? $maxDate.value.getUTCHours() * 3600 + $maxDate.value.getUTCMinutes() * 60 + $maxDate.value.getUTCSeconds()
-      : 86399,
+const today = ref(puiDate().tz(resolveTimezone()))
+const initialDate = computed(() => useTimezone(props.initial))
+const selectedYear = ref(initialDate.value?.year() ?? date.value?.year() ?? today.value.year())
+const selectedMonth = ref((initialDate.value?.month() ?? date.value?.month() ?? today.value.month()) + 1)
+const selectedMonthName = computed(() => resolvedLabels.value.months[selectedMonth.value - 1])
+const selectedDay = ref(today.value.date())
+const minDate = computed(() => useTimezone(isNumber(props.min) ? Math.max(props.min, -59011459200000) : props.min)!)
+const maxDate = computed(() => useTimezone(props.max)!)
+const minTime = computed(() =>
+  selectedYear.value === minDate.value.year() &&
+  selectedMonth.value === minDate.value.month() + 1 &&
+  selectedDay.value === minDate.value.date()
+    ? puiParseTime({ hours: minDate.value.hour(), minutes: minDate.value.minute(), seconds: minDate.value.second() })
+    : 0,
+)
+const maxTime = computed(() =>
+  selectedYear.value === maxDate.value.year() &&
+  selectedMonth.value === maxDate.value.month() + 1 &&
+  selectedDay.value === maxDate.value.date()
+    ? puiParseTime({ hours: maxDate.value.hour(), minutes: maxDate.value.minute(), seconds: maxDate.value.second() })
+    : 86399000,
 )
 const keywordTimeout = useTimeout(750, { controls: true })
 const keyword = ref('')
@@ -692,14 +690,8 @@ watch(
 watch(
   () => props.modelValue,
   () => {
-    if (!isNull(props.modelValue)) {
-      const normalized = toModelValue(withTimezoneOffset(props.modelValue, true))
-
-      if (normalized !== props.modelValue) {
-        emit('update:modelValue', normalized)
-        emit('commit', normalized)
-      }
-    }
+    date.value = useTimezone(props.modelValue)
+    selectedDay.value = date.value?.date() ?? 0
   },
   { immediate: true },
 )
@@ -739,22 +731,18 @@ watch(keywordTimeout.ready, (isReady) => {
     const focusedDay = document.activeElement?.classList.contains('pui-calendar-day-button')
       ? +document.activeElement?.getAttribute('data-day')!
       : undefined
-    $year = isDefined($year) ? clamp($year, $minYear.value, $maxYear.value) : $currentYear.value
-    $month = isDefined($month) ? $month : $currentMonth.value
-    $day = clamp($day ?? focusedDay ?? $initialDay.value, 1, new Date(Date.UTC($year, $month, 0)).getUTCDate())
-
-    const $normalized = clamp(
-      new Date(withTimezoneOffset(Date.UTC($year, $month - 1, $day), false)).getTime(),
-      $minDate.value.getTime(),
-      $maxDate.value.getTime(),
+    const current = puiDayjs().tz(
+      `${$year ?? selectedYear.value}-${$month ?? selectedMonth.value}-${$day ?? focusedDay ?? 1}`,
+      resolveTimezone(),
     )
-    const $normalizedDate = new Date($normalized)
-    $currentYear.value = $normalizedDate.getUTCFullYear()
-    $currentMonth.value = $normalizedDate.getUTCMonth() + 1
+    const clamped = clampDate(current)
+
+    selectedYear.value = clamped.year()
+    selectedMonth.value = clamped.month() + 1
 
     nextTick(() => {
       const dayButton = root.value?.container?.querySelector(
-        `.pui-calendar-day-button:not(:disabled)[data-day="${$normalizedDate.getUTCDate()}"]`,
+        `.pui-calendar-day-button:not(:disabled)[data-day="${clamped.date()}"]`,
       ) as HTMLElement | null
       dayButton?.focus()
     })
@@ -765,12 +753,10 @@ watch(
   () => root.value?.isActive,
   (isActive) => {
     if (isActive) {
-      const visibleYearMonth = new Date(Date.UTC($currentYear.value, $currentMonth.value - 1))
-      const clampedYearMonth = new Date(
-        clamp(withTimezoneOffset(visibleYearMonth.getTime(), false), $minValue.value, $maxValue.value),
-      )
-      $currentYear.value = clampedYearMonth.getUTCFullYear()
-      $currentMonth.value = clampedYearMonth.getUTCMonth() + 1
+      const current = puiDayjs().tz(`${selectedYear.value}-${selectedMonth.value}-01`, resolveTimezone())
+      const clamped = clampDate(current)
+      selectedYear.value = clamped.year()
+      selectedMonth.value = clamped.month() + 1
     } else {
       isMonthSelectorVisible.value = false
       isYearSelectorVisible.value = false
@@ -778,34 +764,24 @@ watch(
   },
 )
 
-function withTimezoneOffset(timestamp: number, store?: boolean) {
-  try {
-    const _timezoneOffset = isString(props.timezone) ? getTimezoneOffset(props.timezone, timestamp) : props.timezone
-    if (store || (isUndefined(timezoneOffset) && isUndefined(store))) {
-      timezoneOffset = _timezoneOffset
-    }
-    return timestamp + _timezoneOffset * 60000
-  } catch {
-    return 0
-  }
+function resolveTimezone(): string {
+  return puiResolveTimezone(props.timezone)
 }
 
-function withoutTimezoneOffset(timestamp: number) {
-  return timestamp - (timezoneOffset ?? 0) * 60000
+function useTimezone(date: PUIDateInput) {
+  return isNull(date) ? null : puiDate(date).tz(resolveTimezone())
 }
 
-function toModelValue(timestamp: number | null) {
-  if (isNull(timestamp)) {
+function prepareEmitValue(date: Dayjs | null): number | null {
+  if (isNull(date)) {
     return null
   }
 
-  if (!props.withTime) {
-    const date = new Date(timestamp)
-    date.setUTCHours(0, 0, 0, 0)
-    timestamp = date.getTime()
-  }
+  return props.withTime ? date.valueOf() : date.startOf('day').valueOf()
+}
 
-  return clamp(withoutTimezoneOffset(timestamp), props.min, props.max)
+function clampDate(date: Dayjs) {
+  return puiDayjs().min(puiDayjs().max(date, minDate.value), maxDate.value)
 }
 
 function prevMonth(event?: Event) {
@@ -815,13 +791,10 @@ function prevMonth(event?: Event) {
 
   event?.preventDefault()
   event?.stopImmediatePropagation()
-
-  const _month = $currentMonth.value === 1 ? 12 : $currentMonth.value - 1
-  const _year = $currentYear.value
-  if ((_year === $minYear.value && _month < $minMonth.value) || (_month === 12 && !prevYear())) {
-    return false
-  }
-  $currentMonth.value = _month
+  const current = puiDayjs().tz(`${selectedYear.value}-${selectedMonth.value}-01`, resolveTimezone())
+  const prev = clampDate(current.subtract(1, 'month'))
+  selectedYear.value = prev.year()
+  selectedMonth.value = prev.month() + 1
   nextTick(() => root.value?.container?.focus())
   return true
 }
@@ -833,13 +806,10 @@ function nextMonth(event?: Event) {
 
   event?.preventDefault()
   event?.stopImmediatePropagation()
-
-  const _month = $currentMonth.value === 12 ? 1 : $currentMonth.value + 1
-  const _year = $currentYear.value
-  if ((_year === $maxYear.value && _month > $maxMonth.value) || (_month === 1 && !nextYear())) {
-    return false
-  }
-  $currentMonth.value = _month
+  const current = puiDayjs().tz(`${selectedYear.value}-${selectedMonth.value}-01`, resolveTimezone())
+  const next = clampDate(current.add(1, 'month'))
+  selectedYear.value = next.year()
+  selectedMonth.value = next.month() + 1
   nextTick(() => root.value?.container?.focus())
   return true
 }
@@ -851,17 +821,12 @@ function prevYear(event?: Event) {
 
   event?.preventDefault()
   event?.stopImmediatePropagation()
-
-  if ($currentYear.value - 1 >= $minYear.value) {
-    $currentYear.value--
-    if ($currentYear.value === $minYear.value) {
-      $currentMonth.value = Math.max($minMonth.value, $currentMonth.value)
-    }
-    nextTick(() => root.value?.container?.focus())
-    return true
-  }
-
-  return false
+  const current = puiDayjs().tz(`${selectedYear.value}-${selectedMonth.value}-01`, resolveTimezone())
+  const prev = clampDate(current.subtract(1, 'year'))
+  selectedYear.value = prev.year()
+  selectedMonth.value = prev.month() + 1
+  nextTick(() => root.value?.container?.focus())
+  return true
 }
 
 function nextYear(event?: Event) {
@@ -871,16 +836,12 @@ function nextYear(event?: Event) {
 
   event?.preventDefault()
   event?.stopImmediatePropagation()
-
-  if ($currentYear.value + 1 <= $maxYear.value) {
-    $currentYear.value++
-    if ($currentYear.value === $maxYear.value) {
-      $currentMonth.value = Math.min($maxMonth.value, $currentMonth.value)
-    }
-    nextTick(() => root.value?.container?.focus())
-    return true
-  }
-  return false
+  const current = puiDayjs().tz(`${selectedYear.value}-${selectedMonth.value}-01`, resolveTimezone())
+  const next = clampDate(current.add(1, 'year'))
+  selectedYear.value = next.year()
+  selectedMonth.value = next.month() + 1
+  nextTick(() => root.value?.container?.focus())
+  return true
 }
 
 function onKeyDown(event: KeyboardEvent) {

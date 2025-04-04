@@ -69,6 +69,14 @@ export default defineTranslation({
     { param: 'string', min: 'number', max: 'number' },
   ),
   'The $subject must be an image': createPattern('The $subject must be an image', { subject: 'string' }),
+  'The difference between the values must be greater than or equal to `$minRange`': createPattern(
+    'The difference between the values must be greater than or equal to `$minRange`',
+    { minRange: 'string' },
+  ),
+  'The difference between the values must be less than or equal to `$maxRange`': createPattern(
+    'The difference between the values must be less than or equal to `$maxRange`',
+    { maxRange: 'string' },
+  ),
   'The email address is already in use': 'The email address is already in use',
   'The field `$field` cannot be used for filtering': createPattern('The field `$field` cannot be used for filtering', {
     field: 'string',
@@ -98,6 +106,18 @@ export default defineTranslation({
     singleton: 'string',
   }),
   'The source and target languages must be different': 'The source and target languages must be different',
+  'The value must be rounded to seconds': 'The value must be rounded to seconds',
+  'The value must be rounded to the nearest UTC day': 'The value must be rounded to the nearest UTC day',
+  'The values must be greater than or equal to `$min`': createPattern(
+    'The values must be greater than or equal to `$min`',
+    { min: 'number' },
+  ),
+  'The values must be integers': 'The values must be integers',
+  'The values must be less than or equal to `$max`': createPattern('The values must be less than or equal to `$max`', {
+    max: 'number',
+  }),
+  'The values must be rounded to seconds': 'The values must be rounded to seconds',
+  'The values must be rounded to the nearest UTC day': 'The values must be rounded to the nearest UTC day',
   'This directory contains nested files or directories that cannot be deleted':
     'This directory contains nested files or directories that cannot be deleted',
   'This directory contains nested files or directories that cannot be moved':

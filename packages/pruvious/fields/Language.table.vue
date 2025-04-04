@@ -23,5 +23,5 @@ const props = defineProps({
   },
 })
 
-const language = languages.find(({ code }) => code === props.modelValue)
+const language = computed(() => languages.find(({ code }) => code === props.modelValue))
 </script>

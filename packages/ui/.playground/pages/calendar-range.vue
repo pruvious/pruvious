@@ -10,7 +10,7 @@
       :min="min"
       :minRange="minRange"
       :size="state.size"
-      :timezone="isNumericString(timezone) ? +timezone : timezone"
+      :timezone="timezone"
       :withTime="withTime"
       iconFrom="plane-departure"
       iconTo="plane-arrival"
@@ -97,12 +97,10 @@
 </template>
 
 <script lang="ts" setup>
-import { isNumericString } from '@pruvious/utils'
-
 const state = useShowcase()
-const timezone = ref('Europe/Berlin')
+const timezone = ref<PUITimezone | 'local'>('America/New_York')
 const withTime = ref(true)
-const min = ref(-8640000000000000)
+const min = ref(-59011459200000)
 const max = ref(8640000000000000)
 const minRange = ref(86400000)
 const maxRange = ref(864000000)

@@ -92,8 +92,8 @@ export interface PUITimeLabels {
 
 const props = defineProps({
   /**
-   * The value of the time field in seconds.
-   * It must be an integer between `0` (00:00:00) and `86399` (23:59:59).
+   * The value of the time field in milliseconds.
+   * It must be an integer between `0` (00:00:00) and `86399000` (23:59:59).
    */
   modelValue: {
     type: Number,
@@ -118,25 +118,55 @@ const props = defineProps({
   },
 
   /**
-   * The minimum allowed time.
-   * The value must be specified in seconds (e.g., `3600` for 01:00:00).
+   * The minimum selectable time.
+   * Accepts these formats:
+   *
+   * - Numeric - Unix timestamp in milliseconds (e.g., `3600000` for 01:00:00).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time.
+   *   - Parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *
+   * When not specified, defaults to 0 milliseconds (00:00:00).
    *
    * @default 0
+   *
+   * @example
+   * ```ts
+   * 3600000
+   * '01:00:00'
+   * '01:00'
+   * ```
    */
   min: {
-    type: Number,
+    type: [Number, String],
     default: 0,
   },
 
   /**
-   * The maximum allowed time.
-   * The value must be specified in seconds (e.g., `7200` for 02:00:00).
+   * The maximum selectable time.
+   * Accepts these formats:
    *
-   * @default 86399
+   * - Numeric - Unix timestamp in milliseconds (e.g., `7200000` for 02:00:00).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time.
+   *   - Parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *
+   * When not specified, defaults to 86399000 milliseconds (23:59:59).
+   *
+   * @default 86399000
+   *
+   * @example
+   * ```ts
+   * 7200000
+   * '02:00:00'
+   * '02:00'
+   * ```
    */
   max: {
-    type: Number,
-    default: 86399,
+    type: [Number, String],
+    default: 86399000,
   },
 
   /**
@@ -199,19 +229,33 @@ defineEmits<{
 
 const { listen } = puiTrigger()
 const root = useTemplateRef('root')
-const hours = computed(() => Math.floor(props.modelValue / 3600))
-const minutes = computed(() => Math.floor((props.modelValue % 3600) / 60))
-const seconds = computed(() => props.modelValue % 60)
-const minHours = computed(() => Math.floor(props.min / 3600))
-const maxHours = computed(() => Math.floor(props.max / 3600))
-const minMinutes = computed(() => (hours.value === minHours.value ? Math.floor((props.min % 3600) / 60) : 0))
-const maxMinutes = computed(() => (hours.value === maxHours.value ? Math.floor((props.max % 3600) / 60) : 59))
-const minSeconds = computed(() =>
-  hours.value === minHours.value && minutes.value === minMinutes.value ? props.min % 60 : 0,
-)
-const maxSeconds = computed(() =>
-  hours.value === maxHours.value && minutes.value === maxMinutes.value ? props.max % 60 : 59,
-)
+const min = computed(() => puiParseTime(props.min))
+const max = computed(() => puiParseTime(props.max))
+const hours = computed(() => Math.floor(props.modelValue / 1000 / 3600))
+const minutes = computed(() => Math.floor(((props.modelValue / 1000) % 3600) / 60))
+const seconds = computed(() => Math.floor((props.modelValue / 1000) % 60))
+const minHours = computed(() => Math.floor(min.value / 1000 / 3600))
+const maxHours = computed(() => Math.floor(max.value / 1000 / 3600))
+const minMinutes = computed(() => {
+  if (hours.value > minHours.value) return 0
+  if (hours.value < minHours.value) return 0
+  return Math.floor(((min.value / 1000) % 3600) / 60)
+})
+const maxMinutes = computed(() => {
+  if (hours.value < maxHours.value) return 59
+  if (hours.value > maxHours.value) return 0
+  return Math.floor(((max.value / 1000) % 3600) / 60)
+})
+const minSeconds = computed(() => {
+  if (hours.value > minHours.value || (hours.value === minHours.value && minutes.value > minMinutes.value)) return 0
+  if (hours.value < minHours.value || (hours.value === minHours.value && minutes.value < minMinutes.value)) return 0
+  return Math.floor((min.value / 1000) % 60)
+})
+const maxSeconds = computed(() => {
+  if (hours.value < maxHours.value || (hours.value === maxHours.value && minutes.value < maxMinutes.value)) return 59
+  if (hours.value > maxHours.value || (hours.value === maxHours.value && minutes.value > maxMinutes.value)) return 0
+  return Math.floor((max.value / 1000) % 60)
+})
 
 let stopFocusListener: (() => void) | undefined
 
@@ -233,7 +277,7 @@ watch(
 )
 
 function toModelValue(hours: number, minutes: number, seconds: number): number {
-  return clamp(hours * 3600 + minutes * 60 + seconds, props.min, props.max)
+  return clamp((hours * 3600 + minutes * 60 + seconds) * 1000, min.value, max.value)
 }
 </script>
 

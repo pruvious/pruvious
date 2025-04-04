@@ -1,6 +1,7 @@
 <template>
   <PruviousFilterField
     :modelValue="modelValue"
+    :operatorChoices="operatorChoices"
     :options="options"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
@@ -20,11 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { __, type WhereField } from '#pruvious/client'
+import { __, getValidFilterOperators, type WhereField } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUITimeLabels } from '@pruvious/ui/components/PUITime.vue'
 
-defineProps({
+const props = defineProps({
   /**
    * The current where condition.
    */
@@ -53,4 +54,17 @@ const labels: PUITimeLabels = {
   minutesSuffix: __('pruvious-dashboard', 'timeSuffix:m'),
   secondsSuffix: __('pruvious-dashboard', 'timeSuffix:s'),
 }
+const operatorChoices = getValidFilterOperators(props.options).map(({ value, label }) => {
+  if (value === 'gt') {
+    return { value, label: __('pruvious-dashboard', 'After') }
+  } else if (value === 'gte') {
+    return { value, label: __('pruvious-dashboard', 'After or equal to') }
+  } else if (value === 'lt') {
+    return { value, label: __('pruvious-dashboard', 'Before') }
+  } else if (value === 'lte') {
+    return { value, label: __('pruvious-dashboard', 'Before or equal to') }
+  } else {
+    return { value, label }
+  }
+})
 </script>

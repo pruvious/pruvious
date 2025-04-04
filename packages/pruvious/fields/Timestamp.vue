@@ -29,16 +29,10 @@
         :clearable="false"
         :disabled="disabled"
         :error="!!error"
-        :formatter="
-          options.ui.relativeTime
-            ? dayjsRelative
-            : options.ui.calendar?.withTime
-              ? dayjsFormatDateTime
-              : dayjsFormatDate
-        "
+        :formatter="formatter"
         :icon="options.ui.calendar?.icon"
         :id="id"
-        :initial="options.ui.calendar?.initial"
+        :initial="initial"
         :labels="labels"
         :max="options.max"
         :min="options.min"
@@ -47,8 +41,8 @@
         :placeholder="placeholder"
         :showSeconds="options.ui.calendar?.showSeconds"
         :startDay="options.ui.calendar?.startDay"
-        :timezone="options.ui.calendar?.timezone"
-        :withTime="options.ui.calendar?.withTime"
+        :timezone="timezone"
+        :withTime="true"
         @commit="$emit('commit', $event!)"
         @update:modelValue="$emit('update:modelValue', $event!)"
       />
@@ -75,15 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  dayjsFormatDate,
-  dayjsFormatDateTime,
-  dayjsLocales,
-  dayjsRelative,
-  maybeTranslate,
-  useLanguage,
-} from '#pruvious/client'
+import { __, dayjsConfig, dayjsLocales, dayjsResolveTimezone, maybeTranslate, useLanguage } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 
@@ -175,6 +161,16 @@ const labels: PUICalendarLabels = {
   nextMonth: __('pruvious-dashboard', 'Next month'),
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
+}
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.calendar?.timezone))
+const now = Date.now()
+const initial = computed(() => props.options.ui.calendar?.initial ?? (props.modelValue ? undefined : now))
+
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.calendar?.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return props.options.ui.relativeTime ? date.tz().fromNow() : date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>
 

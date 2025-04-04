@@ -11,7 +11,7 @@
     <PUITimeRange
       :decorator="options.ui.decorator"
       :disabled="disabled"
-      :error="!!error"
+      :error="!!resolvedError"
       :id="id"
       :labels="labels"
       :max="options.max"
@@ -25,7 +25,7 @@
       @update:modelValue="$emit('update:modelValue', $event)"
     />
 
-    <PruviousFieldMessage :error="error" :name="name" :options="options" />
+    <PruviousFieldMessage :error="resolvedError" :name="name" :options="options" />
   </PUIField>
 </template>
 
@@ -33,8 +33,9 @@
 import { __ } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUITimeLabels } from '@pruvious/ui/components/PUITime.vue'
+import { isObject, isString } from '@pruvious/utils'
 
-defineProps({
+const props = defineProps({
   /**
    * The casted field value.
    */
@@ -71,7 +72,7 @@ defineProps({
    * Represents an error message that can be displayed to the user.
    */
   error: {
-    type: String,
+    type: [String, Object] as PropType<string | Record<string, string>>,
   },
 
   /**
@@ -116,4 +117,7 @@ const labels: PUITimeLabels = {
   minutesSuffix: __('pruvious-dashboard', 'timeSuffix:m'),
   secondsSuffix: __('pruvious-dashboard', 'timeSuffix:s'),
 }
+const resolvedError = computed(() =>
+  isString(props.error) ? props.error : isObject(props.error) ? Object.values(props.error) : undefined,
+)
 </script>

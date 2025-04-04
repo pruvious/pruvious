@@ -6,6 +6,7 @@
     :name="id"
     :showSeconds="options.ui.showSeconds"
     @commit="$emit('commit', { ...modelValue, value: prepareEmitValue($event) })"
+    @update:modelValue="$emit('update:modelValue', { ...modelValue, value: prepareEmitValue($event) })"
   />
 </template>
 
@@ -34,7 +35,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  commit: [where: WhereField]
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
 }>()
 
 const id = useId()
@@ -50,16 +52,16 @@ const sanitized = computed<[number, number]>(() => {
     const [from, to] = v.split(',')
     const fromCasted = castToNumber(from?.replace('[', ''))
     const toCasted = castToNumber(to?.replace(']', ''))
-    return isInteger(fromCasted) && isInteger(toCasted) ? [fromCasted, toCasted] : [0, 86399]
+    return isInteger(fromCasted) && isInteger(toCasted) ? [fromCasted, toCasted] : [0, 86399000]
   } else if (isArray(v)) {
     const fromCasted = castToNumber(v[0])
     const toCasted = castToNumber(v[1])
-    return isInteger(fromCasted) && isInteger(toCasted) ? [fromCasted, toCasted] : [0, 86399]
+    return isInteger(fromCasted) && isInteger(toCasted) ? [fromCasted, toCasted] : [0, 86399000]
   } else if (isInteger(v)) {
-    return [v, 86399]
+    return [v, 86399000]
   }
 
-  return [0, 86399]
+  return [0, 86399000]
 })
 
 emit('commit', { ...props.modelValue, value: prepareEmitValue(sanitized.value) })

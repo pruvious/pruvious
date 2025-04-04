@@ -19,14 +19,14 @@
           <PUIFieldLabel>
             <label for="min">Minimum</label>
           </PUIFieldLabel>
-          <PUINumber v-model="min" :size="-2" id="min" suffix="s" />
+          <PUINumber v-model="min" :size="-2" id="min" suffix="ms" />
         </PUIField>
 
         <PUIField>
           <PUIFieldLabel>
             <label for="max">Maximum</label>
           </PUIFieldLabel>
-          <PUINumber v-model="max" :size="-2" id="max" suffix="s" />
+          <PUINumber v-model="max" :size="-2" id="max" suffix="ms" />
         </PUIField>
 
         <ShowcaseHasErrors />
@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 const state = useShowcase()
 const min = ref(0)
-const max = ref(86399)
+const max = ref(86399000)
 const disabled = ref(false)
 const value = ref(0)
 </script>

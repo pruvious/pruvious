@@ -1,7 +1,7 @@
 <template>
   <PUICalendar
     :clearable="false"
-    :formatter="options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+    :formatter="formatter"
     :icon="modelValue.operator === 'startsWith' ? options.ui.iconFrom : options.ui.iconTo"
     :id="id"
     :initial="options.ui.initial"
@@ -13,17 +13,18 @@
     :placeholder="__('pruvious-dashboard', 'Empty')"
     :showSeconds="options.ui.showSeconds"
     :startDay="options.ui.startDay"
-    :timezone="options.ui.timezone"
-    :withTime="options.ui.withTime"
+    :timezone="timezone"
+    :withTime="true"
     @commit="$emit('commit', { ...modelValue, value: prepareEmitValue($event) })"
+    @update:modelValue="$emit('update:modelValue', { ...modelValue, value: prepareEmitValue($event) })"
   />
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsFormatDate, dayjsFormatDateTime, dayjsLocales, useLanguage, type WhereField } from '#pruvious/client'
+import { __, dayjsConfig, dayjsLocales, dayjsResolveTimezone, useLanguage, type WhereField } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
-import { castToNumber, getTimezoneOffset, isArray, isInteger, isNull, isString } from '@pruvious/utils'
+import { castToNumber, isArray, isInteger, isNull, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -44,7 +45,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  commit: [where: WhereField]
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
 }>()
 
 const id = useId()
@@ -59,6 +61,7 @@ const labels: PUICalendarLabels = {
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
 }
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.timezone))
 const sanitized = computed<number | null>(() => {
   const v = props.modelValue.value
 
@@ -88,20 +91,16 @@ watch(
   { immediate: true },
 )
 
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return date.format(`${dateFormat} ${timeFormat}`)
+}
+
 function prepareEmitValue(value: number | null): string {
   if (isNull(value)) {
-    const local = new Date()
-    const utc = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), 0, 0, 0, 0))
-
-    if (props.options.ui.withTime) {
-      utc.setUTCHours(local.getUTCHours(), local.getUTCMinutes(), local.getUTCSeconds())
-    }
-
-    const timezoneOffset = isString(props.options.ui.timezone)
-      ? getTimezoneOffset(props.options.ui.timezone, utc)
-      : props.options.ui.timezone
-
-    value = utc.getTime() - (timezoneOffset ?? 0) * 60000
+    value = Date.now()
   }
 
   return props.modelValue.operator === 'startsWith' ? `[${value},` : `,${value}]`

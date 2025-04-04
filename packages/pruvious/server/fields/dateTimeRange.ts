@@ -1,79 +1,110 @@
 import { defineField, type TranslatableStringCallbackContext } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
 import { arrayFieldModel } from '@pruvious/orm'
-import type { TimezoneName } from '../../utils/pruvious/timezone'
+import { puiParseTimeSpan } from '@pruvious/ui/composables/puiDate'
+import type { PUITimezone } from '@pruvious/ui/composables/puiTimezone'
+import { castToNumber, isArray, isInteger, isNotNull, isNull, isString } from '@pruvious/utils'
 
 const customOptions: {
   /**
-   * The minimum date that can be selected in both calendars.
-   * Value must be specified in milliseconds since Unix epoch.
-   * The default value represents the earliest possible date in JavaScript.
+   * The minimum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
    *
-   * @default -8640000000000000
+   * When not specified, defaults to January 1st, 100 CE (0100-01-01T00:00:00.000Z).
+   *
+   * @default -59011459200000
    *
    * @example
    * ```ts
    * new Date('2024-12-15').getTime()
+   * '2024-12-15T00:00:00.000Z'
+   * '2024'
    * ```
    */
-  min?: number
+  min?: number | string
 
   /**
-   * The maximum date that can be selected in both calendars.
-   * Value must be specified in milliseconds since Unix epoch.
-   * The default value represents the latest possible date in JavaScript.
+   * The maximum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
+   *
+   * When not specified, defaults to the latest possible date in JavaScript.
    *
    * @default 8640000000000000
    *
    * @example
    * ```ts
    * new Date('2077-06-06').getTime()
+   * '2077-06-06T00:00:00.000Z'
+   * '2077'
    * ```
    */
-  max?: number
+  max?: number | string
 
   /**
-   * The minimum allowed time range (difference between the start and end of the range) in milliseconds.
-   * By default, both time values can be the same.
+   * Minimum time span between start and end dates.
+   * Accepts these formats:
    *
-   * Note: The value is rounded to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - Duration string (e.g., '1 hour', '30 minutes').
+   *   - Parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `days`, `hours`, `minutes`, and `seconds` properties.
+   *
+   * By default, start and end times can be identical (zero time difference).
    *
    * @default 0
    */
-  minRange?: number
+  minRange?: number | string | { days?: number; hours?: number; minutes?: number; seconds?: number }
 
   /**
-   * The maximum allowed time range (difference between the start and end of the range) in milliseconds.
-   * By default, no maximum range is set.
+   * Maximum time span between start and end dates.
+   * Accepts these formats:
    *
-   * Note: The value is rounded to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - Duration string (e.g., '1 day', '4 hours').
+   *   - Parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `days`, `hours`, `minutes`, and `seconds` properties.
+   * - null - No maximum range limit.
+   *
+   * When specified, prevents selection of date ranges exceeding this duration.
    *
    * @default null
    */
-  maxRange?: number | null
+  maxRange?: number | string | { days?: number; hours?: number; minutes?: number; seconds?: number } | null
 
   ui?: {
     /**
-     * Specifies whether the inputs are clearable.
+     * Controls the visibility of the clear button in the calendar inputs.
+     * When set to `false`, users cannot remove their date selection.
      *
      * @default true
      */
     clearable?: boolean
 
     /**
-     * The position of the decorator that connects the two inputs.
-     * It can be `left`, `right`, or `hidden`.
+     * The position of the decoration line that visually connects the two inputs.
      *
      * @default 'left'
      */
     decorator?: 'left' | 'right' | 'hidden'
 
     /**
-     * The field icon to display in the first calendar input.
+     * The icon to display in the first calendar input.
      * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
      *
      * @default 'calendar-down'
@@ -81,7 +112,7 @@ const customOptions: {
     iconFrom?: keyof typeof icons | null
 
     /**
-     * The field icon to display in the second calendar input.
+     * The icon to display in the second calendar input.
      * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
      *
      * @default 'calendar-up'
@@ -89,17 +120,18 @@ const customOptions: {
     iconTo?: keyof typeof icons | null
 
     /**
-     * Specifies the starting date/time displayed when a calendar opens.
-     * It must be a timestamp in milliseconds since Unix epoch or `null`.
+     * Sets the initial year and month shown when the calendar opens.
+     * Accepts these formats:
      *
-     * - When not specified, the selected value is used.
-     * - If the selected value is not set, the current date will be used.
+     * - Numeric - Unix timestamp in milliseconds.
+     * - String - ISO 8601 formatted date.
      *
-     * Note: Round the value to second precision as milliseconds are not used in the calendar.
+     * If not specified, the calendar will try to use the field's current value.
+     * When no value exists, it defaults to the current year and month.
      *
      * @default null
      */
-    initial?: number | null
+    initial?: number | string | null
 
     /**
      * The placeholder text for the first calendar input.
@@ -164,45 +196,28 @@ const customOptions: {
     startDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6
 
     /**
-     * The time zone to use when displaying the date/time in the calendars.
-     * The stored value is always in UTC.
+     * The time zone identifier for displaying date values in the calendar.
+     * The value must be a valid IANA time zone name or `local`.
      *
-     * This value represents the time difference in minutes between UTC and local time.
-     * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+     * This setting affects both calendar display and dates in the data table.
      *
-     * By default, the time zone offset is set to UTC (GMT+0).
-     *
-     * @default 0
+     * @default 'local'
      *
      * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
      * @see https://www.iana.org/time-zones
      *
      * @example
      * ```ts
-     * // GMT+1
-     * 60
-     *
-     * // GMT-5
-     * -300
-     *
-     * // Time zone name
+     * 'local'
      * 'Europe/Berlin'
+     * 'America/New_York'
+     * 'Asia/Tokyo'
      * ```
      */
-    timezone?: number | TimezoneName
-
-    /**
-     * Specifies whether the calendars should include time selection.
-     *
-     * When disabled, all timestamps are set to midnight.
-     * The `timezone` is used to resolve the midnight time.
-     *
-     * @default false
-     */
-    withTime?: boolean
+    timezone?: PUITimezone | 'local'
   }
 } = {
-  min: -8640000000000000,
+  min: -59011459200000,
   max: 8640000000000000,
   minRange: 0,
   maxRange: null,
@@ -216,8 +231,7 @@ const customOptions: {
     placeholderTo: undefined,
     showSeconds: true,
     startDay: 1,
-    timezone: 0,
-    withTime: false,
+    timezone: 'local',
   },
 }
 
@@ -228,8 +242,77 @@ export default defineField({
   ] as any),
   nullable: true,
   default: null,
-  sanitizers: [], // @todo sanitize any date input (e.g., ['2024-12-15', 1702627200000]) <- use `toDate()`
-  validators: [], // @todo missing from or to (e.g. [0, null]), [timestampValidator(), timestampValidator()], min/max, minRange/maxRange
+  sanitizers: [
+    (value) => {
+      if (isArray(value)) {
+        try {
+          return value.map(castToNumber).map((v) => (isString(v) ? Date.parse(v) : v)) as [number, number]
+        } catch {}
+      }
+      return value
+    },
+  ],
+  validators: [
+    (value, { context }) => {
+      if (isNotNull(value)) {
+        for (const v of value) {
+          if (!isInteger(v)) {
+            throw new Error(context.__('pruvious-api', 'The values must be integers'))
+          }
+        }
+      }
+    },
+    (value, { definition, context }) => {
+      if (isNotNull(value)) {
+        const min = isString(definition.options.min) ? Date.parse(definition.options.min) : definition.options.min
+        const max = isString(definition.options.max) ? Date.parse(definition.options.max) : definition.options.max
+
+        for (const v of value) {
+          if (v < min) {
+            throw new Error(context.__('pruvious-api', 'The values must be greater than or equal to `$min`', { min }))
+          }
+
+          if (v > max) {
+            throw new Error(context.__('pruvious-api', 'The values must be less than or equal to `$max`', { max }))
+          }
+        }
+      }
+    },
+    (value, { definition, context }) => {
+      if (isNotNull(value)) {
+        const minRange = puiParseTimeSpan(definition.options.minRange)
+        const maxRange = isNull(definition.options.maxRange) ? null : puiParseTimeSpan(definition.options.maxRange)
+
+        if (value[1] - value[0] < minRange) {
+          throw new Error(
+            context.__(
+              'pruvious-api',
+              'The difference between the values must be greater than or equal to `$minRange`',
+              { minRange },
+            ),
+          )
+        }
+
+        if (isNotNull(maxRange) && value[1] - value[0] > maxRange) {
+          throw new Error(
+            context.__('pruvious-api', 'The difference between the values must be less than or equal to `$maxRange`', {
+              maxRange,
+            }),
+          )
+        }
+      }
+    },
+    (value, { context }) => {
+      if (isNotNull(value)) {
+        for (const v of value) {
+          const date = new Date(v)
+          if (date.getUTCMilliseconds() !== 0) {
+            throw new Error(context.__('pruvious-api', 'The values must be rounded to seconds'))
+          }
+        }
+      }
+    },
+  ],
   customOptions: { ...customOptions, minItems: 2, maxItems: 2 } as typeof customOptions,
   uiOptions: {},
   omitOptions: [

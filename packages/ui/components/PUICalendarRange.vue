@@ -52,9 +52,8 @@
 
 <script lang="ts" setup>
 import type { icons } from '@iconify-json/tabler/icons.json'
-import { isNumber } from '@pruvious/utils'
+import { isNull, isNumber } from '@pruvious/utils'
 import type { PUICalendarLabels } from './PUICalendar.vue'
-
 const props = defineProps({
   /**
    * The value of the calendar range field.
@@ -69,18 +68,19 @@ const props = defineProps({
   },
 
   /**
-   * Specifies the starting date/time displayed when a calendar opens.
-   * It must be a timestamp in milliseconds since Unix epoch or `null`.
+   * Sets the initial year and month shown when the calendar opens.
+   * Accepts these formats:
    *
-   * - When not specified, the selected value is used.
-   * - If the selected value is not set, the current date will be used.
+   * - Numeric - Unix timestamp in milliseconds.
+   * - String - ISO 8601 formatted date.
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * If not specified, the calendar will try to use the current `modelValue`.
+   * If `modelValue` is `null`, it defaults to the current year and month.
    *
    * @default null
    */
   initial: {
-    type: [Number, null],
+    type: [Number, String, null],
     default: null,
   },
 
@@ -88,7 +88,7 @@ const props = defineProps({
    * Specifies whether the calendars should include time selection.
    *
    * When disabled, all timestamps are set to midnight.
-   * The `timezone` is used to resolve the midnight time.
+   * The `timezone` prop is used to resolve the midnight time.
    *
    * @default false
    */
@@ -108,31 +108,25 @@ const props = defineProps({
   },
 
   /**
-   * The time difference in minutes between UTC and local time.
-   * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+   * The time zone identifier for displaying date values in the calendar.
+   * The value must be a valid IANA time zone name or `local`.
    *
-   * By default, the time zone offset is set to UTC (GMT+0).
-   *
-   * @default 0
+   * @default 'UTC'
    *
    * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
    * @see https://www.iana.org/time-zones
    *
    * @example
    * ```ts
-   * // GMT+1
-   * 60
-   *
-   * // GMT-5
-   * -300
-   *
-   * // Time zone name
+   * 'local'
    * 'Europe/Berlin'
+   * 'America/New_York'
+   * 'Asia/Tokyo'
    * ```
    */
   timezone: {
-    type: [Number, String],
-    default: 0,
+    type: String as PropType<PUITimezone | 'local'>,
+    default: 'UTC',
   },
 
   /**
@@ -179,7 +173,8 @@ const props = defineProps({
   },
 
   /**
-   * Specifies whether the inputs are clearable.
+   * Controls the visibility of the clear button in the calendar input.
+   * When set to `false`, users cannot remove their date selection.
    *
    * @default true
    */
@@ -189,7 +184,7 @@ const props = defineProps({
   },
 
   /**
-   * The field icon to display in the first calendar input.
+   * The icon to display in the first calendar input.
    * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
    *
    * @example
@@ -209,7 +204,7 @@ const props = defineProps({
   },
 
   /**
-   * The field icon to display in the second calendar input.
+   * The icon to display in the second calendar input.
    * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
    *
    * @example
@@ -229,56 +224,99 @@ const props = defineProps({
   },
 
   /**
-   * The minimum allowed timestamp for both calendars.
-   * The value must be specified in milliseconds since Unix epoch.
-   * The default value represents the earliest possible date in JavaScript.
+   * The minimum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
    *
-   * @default -8640000000000000
+   * When not specified, defaults to January 1st, 100 CE (0100-01-01T00:00:00.000Z).
+   *
+   * @default -59011459200000
+   *
+   * @example
+   * ```ts
+   * new Date('2024-12-15').getTime()
+   * '2024-12-15T00:00:00.000Z'
+   * '2024'
+   * ```
    */
   min: {
-    type: Number,
-    default: -8640000000000000,
+    type: [Number, String],
+    default: -59011459200000,
   },
 
   /**
-   * The maximum allowed timestamp for both calendars.
-   * The value must be specified in milliseconds since Unix epoch.
-   * The default value represents the latest possible date in JavaScript.
+   * The maximum selectable date.
+   * Accepts these formats:
    *
-   * Note: Round the value to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted date.
+   *   - Parsed through `Date.parse()`.
+   *
+   * When not specified, defaults to the latest possible date in JavaScript.
    *
    * @default 8640000000000000
+   *
+   * @example
+   * ```ts
+   * new Date('2077-06-06').getTime()
+   * '2077-06-06T00:00:00.000Z'
+   * '2077'
+   * ```
    */
   max: {
-    type: Number,
+    type: [Number, String],
     default: 8640000000000000,
   },
 
   /**
-   * The minimum allowed time range (difference between the start and end of the range) in milliseconds.
-   * By default, both time values can be the same.
+   * Minimum time span between start and end dates.
+   * Accepts these formats:
    *
-   * Note: The value is rounded to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - Duration string (e.g., '1 hour', '30 minutes').
+   *   - Parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `days`, `hours`, `minutes`, and `seconds` properties.
+   *
+   * By default, start and end times can be identical (zero time difference).
    *
    * @default 0
    */
   minRange: {
-    type: Number,
+    type: [Number, String, Object] as PropType<
+      number | string | { days?: number; hours?: number; minutes?: number; seconds?: number }
+    >,
     default: 0,
   },
 
   /**
-   * The maximum allowed time range (difference between the start and end of the range) in milliseconds.
-   * By default, no maximum range is set.
+   * Maximum time span between start and end dates.
+   * Accepts these formats:
    *
-   * Note: The value is rounded to second precision as milliseconds are not used in the calendar.
+   * - Numeric - Unix timestamp in milliseconds.
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - Duration string (e.g., '1 day', '4 hours').
+   *   - Parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `days`, `hours`, `minutes`, and `seconds` properties.
+   * - null - No maximum range limit.
+   *
+   * When specified, prevents selection of date ranges exceeding this duration.
    *
    * @default null
    */
   maxRange: {
-    type: [Number, null],
+    type: [Number, String, Object, null] as PropType<
+      number | string | { days?: number; hours?: number; minutes?: number; seconds?: number } | null
+    >,
     default: null,
   },
 
@@ -372,17 +410,21 @@ defineEmits<{
   'update:modelValue': [value: [number | null, number | null]]
 }>()
 
+const min = computed(() => puiParseDateTime(props.min))
+const max = computed(() => puiParseDateTime(props.max))
+const minRange = computed(() => puiParseTimeSpan(props.minRange))
+const maxRange = computed(() => (isNull(props.maxRange) ? null : puiParseTimeSpan(props.maxRange)))
 const minFrom = computed(() =>
-  isNumber(props.modelValue[1]) && isNumber(props.maxRange)
-    ? Math.max(props.modelValue[1] - props.maxRange, props.min)
-    : props.min,
+  isNumber(props.modelValue[1]) && isNumber(maxRange.value)
+    ? Math.max(props.modelValue[1] - maxRange.value, min.value)
+    : min.value,
 )
-const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - props.minRange : props.max))
-const minTo = computed(() => (props.modelValue[0] ?? props.min) + props.minRange)
+const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - minRange.value : max.value))
+const minTo = computed(() => (props.modelValue[0] ?? min.value) + minRange.value)
 const maxTo = computed(() =>
-  isNumber(props.modelValue[0]) && isNumber(props.maxRange)
-    ? Math.min(props.modelValue[0] + props.maxRange, props.max)
-    : props.max,
+  isNumber(props.modelValue[0]) && isNumber(maxRange.value)
+    ? Math.min(props.modelValue[0] + maxRange.value, max.value)
+    : max.value,
 )
 </script>
 

@@ -36,6 +36,7 @@
     "@shikijs/transformers": "^2.2.0",
     "@vueuse/core": "^12.5.0",
     "@vueuse/integrations": "^12.5.0",
+    "dayjs": "^1.11.13",
     "dompurify": "^3.2.3",
     "focus-trap": "^7.6.4",
     "marked": "^15.0.7",

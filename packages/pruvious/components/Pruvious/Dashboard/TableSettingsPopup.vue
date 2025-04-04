@@ -31,7 +31,7 @@
                   history.setOriginalState(newStates[0]!)
                   filtersInitialized = true
                 } else {
-                  nextTick(() => history.push(data))
+                  nextTick(() => history.pushDebounced(prepareHistory(data)))
                 }
               }
             }
@@ -49,7 +49,7 @@
             (columns) => {
               data = { ...data, columns, activeTab }
               if (history.size) {
-                nextTick(() => history.push(data))
+                nextTick(() => history.push(prepareHistory(data)))
               }
             }
           "
@@ -65,7 +65,7 @@
             (orderBy) => {
               data = { ...data, orderBy, activeTab }
               if (history.size) {
-                nextTick(() => history.push(data))
+                nextTick(() => history.push(prepareHistory(data)))
               }
             }
           "
@@ -91,11 +91,11 @@
                   orderBy: deepClone(props.defaultOrderBy),
                   activeTab,
                 }
-                nextTick(() => history.push(data))
+                nextTick(() => history.push(prepareHistory(data)))
               }
             }
           "
-          @update:modelValue="nextTick(() => history.push(data))"
+          @update:modelValue="nextTick(() => history.push(prepareHistory(data)))"
         />
       </PUITab>
     </PUITabs>
@@ -361,7 +361,7 @@ watch(
   () => route.query,
   () => {
     setTimeout(() => {
-      history.clear().push(data.value)
+      history.clear().push(prepareHistory(data.value))
       filtersInitialized.value = false
       activeTab.value = 'columns'
     })
@@ -385,17 +385,14 @@ watch(
 watch(
   () => props.columns,
   () => {
-    data.value.columns = remap(deepClone(props.columns), (name, column) => [
-      String(name),
-      omit(column, ['label', 'TType']),
-    ])
+    data.value.columns = remap(deepClone(props.columns), (name, column) => [name, omit(column, ['label', 'TType'])])
   },
   { immediate: true },
 )
 
 onMounted(() => {
   setTimeout(() => {
-    history.push(data.value)
+    history.push(prepareHistory(data.value))
     isListening.value = true
     listen('save', (e) => {
       e.preventDefault()
@@ -426,7 +423,7 @@ function apply() {
       'update:columns',
       remap(data.value.columns, (name, column) => {
         const columnChoice = columnFieldChoices.value.find(({ value }) => value === name)
-        return [String(name), { ...column, label: columnChoice?.label, TType: undefined }]
+        return [name, { ...column, label: columnChoice?.label, TType: undefined }]
       }),
     )
   }
@@ -486,6 +483,19 @@ function castWhereCondition(
   }
 
   return casted
+}
+
+function prepareHistory(data: TableSettings) {
+  return {
+    where: data.where,
+    columns: remap(data.columns, (columnName, column) => [columnName, omit(column, ['label', 'TType'] as any)]),
+    orderBy: data.orderBy.map(({ field, direction, nulls }) => {
+      direction ??= 'asc'
+      nulls = (nulls ?? 'nullsAuto') === 'nullsAuto' ? (direction === 'asc' ? 'nullsFirst' : 'nullsLast') : nulls
+      return { field, direction, nulls }
+    }),
+    activeTab: data.activeTab,
+  }
 }
 </script>
 

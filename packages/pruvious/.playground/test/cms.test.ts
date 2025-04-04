@@ -21,4 +21,13 @@ describe('cms', async () => {
   // Collections
   await import('./cms/collections/users')
   await import('./cms/collections/public')
+
+  // Fields
+  await import('./cms/fields/date')
+  await import('./cms/fields/dateRange')
+  await import('./cms/fields/dateTime')
+  await import('./cms/fields/dateTimeRange')
+  await import('./cms/fields/time')
+  await import('./cms/fields/timeRange')
+  await import('./cms/fields/timestamp')
 })

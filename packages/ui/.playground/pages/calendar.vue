@@ -8,7 +8,7 @@
       :max="max"
       :min="min"
       :size="state.size"
-      :timezone="isNumericString(timezone) ? +timezone : timezone"
+      :timezone="timezone"
       :withTime="withTime"
       id="calendar"
       placeholder="Placeholder..."
@@ -78,12 +78,10 @@
 </template>
 
 <script lang="ts" setup>
-import { isNumericString } from '@pruvious/utils'
-
 const state = useShowcase()
-const timezone = ref('Europe/Berlin')
+const timezone = ref<PUITimezone | 'local'>('America/New_York')
 const withTime = ref(true)
-const min = ref(-8640000000000000)
+const min = ref(1740960000000)
 const max = ref(8640000000000000)
 const clearable = ref(true)
 const disabled = ref(false)

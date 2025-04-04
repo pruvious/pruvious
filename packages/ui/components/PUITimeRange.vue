@@ -39,8 +39,8 @@ import type { PUITimeLabels } from './PUITime.vue'
 const props = defineProps({
   /**
    * The value of the time range field.
-   * It must be a tuple of integers between `0` (00:00:00) and `86399` (23:59:59).
-   * The integers represent the start and end of the range in seconds.
+   * It must be a tuple of integers between `0` (00:00:00) and `86399000` (23:59:59).
+   * The integers represent the start and end of the range in milliseconds.
    */
   modelValue: {
     type: Array as unknown as PropType<[number, number]>,
@@ -65,47 +65,101 @@ const props = defineProps({
   },
 
   /**
-   * The minimum allowed time for both inputs.
-   * The value must be specified in seconds (e.g., `3600` for 01:00:00).
+   * The minimum selectable time.
+   * Accepts these formats:
+   *
+   * - Numeric - Unix timestamp in milliseconds (e.g., `3600000` for 01:00:00).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time.
+   *   - Parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *
+   * When not specified, defaults to 0 milliseconds (00:00:00).
    *
    * @default 0
+   *
+   * @example
+   * ```ts
+   * 3600000
+   * '01:00:00'
+   * '01:00'
+   * ```
    */
   min: {
-    type: Number,
+    type: [Number, String],
     default: 0,
   },
 
   /**
-   * The maximum allowed time for both inputs.
-   * The value must be specified in seconds (e.g., `7200` for 02:00:00).
+   * The maximum selectable time.
+   * Accepts these formats:
    *
-   * @default 86399
+   * - Numeric - Unix timestamp in milliseconds (e.g., `7200000` for 02:00:00).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time.
+   *   - Parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *
+   * When not specified, defaults to 86399000 milliseconds (23:59:59).
+   *
+   * @default 86399000
+   *
+   * @example
+   * ```ts
+   * 7200000
+   * '02:00:00'
+   * '02:00'
+   * ```
    */
   max: {
-    type: Number,
-    default: 86399,
+    type: [Number, String],
+    default: 86399000,
   },
 
   /**
-   * The minimum range of the time range in seconds.
-   * By default, both time values can be the same.
+   * Minimum time span between start and end times.
+   * Accepts these formats:
+   *
+   * - Numeric - Timestamp in milliseconds (e.g., `3600000` for 1 hour).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time or duration string (e.g., '1 hour', '30 minutes').
+   *   - ISO 8601 format is parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *   - Duration string is parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `hours`, `minutes`, and `seconds` properties.
+   *
+   * By default, start and end times can be identical (zero time difference).
    *
    * @default 0
    */
   minRange: {
-    type: Number,
+    type: [Number, String, Object] as PropType<
+      number | string | { hours?: number; minutes?: number; seconds?: number }
+    >,
     default: 0,
   },
 
   /**
-   * The maximum range of the time range in seconds.
-   * By default, the maximum range is 86399 seconds (23:59:59).
+   * Maximum time span between start and end times.
+   * Accepts these formats:
    *
-   * @default 86399
+   * - Numeric - Timestamp in milliseconds (e.g., `7200000` for 2 hours).
+   *   - Values must be rounded to the nearest second.
+   *     Millisecond timestamps are only used for consistency.
+   * - String - ISO 8601 formatted time or duration string (e.g., '1 hour', '30 minutes').
+   *   - ISO 8601 format is parsed through `Date.parse('1970-01-01T' + time + 'Z')`.
+   *   - Duration string is parsed using the [`jose`](https://github.com/panva/jose/blob/main/src/lib/secs.ts) library.
+   * - Object - Object with `hours`, `minutes`, and `seconds` properties.
+   *
+   * By default, the maximum range is 86399000 milliseconds (23:59:59).
+   *
+   * @default 86399000
    */
   maxRange: {
-    type: Number,
-    default: 86399,
+    type: [Number, String, Object] as PropType<
+      number | string | { hours?: number; minutes?: number; seconds?: number }
+    >,
+    default: 86399000,
   },
 
   /**
@@ -177,17 +231,21 @@ defineEmits<{
   'update:modelValue': [value: [number, number]]
 }>()
 
+const min = computed(() => puiParseTime(props.min))
+const max = computed(() => puiParseTime(props.max))
+const minRange = computed(() => puiParseTimeSpan(props.minRange))
+const maxRange = computed(() => puiParseTimeSpan(props.maxRange))
 const minFrom = computed(() =>
-  isNumber(props.modelValue[1]) && isNumber(props.maxRange)
-    ? Math.max(props.modelValue[1] - props.maxRange, props.min)
-    : props.min,
+  isNumber(props.modelValue[1]) && isNumber(maxRange.value)
+    ? Math.max(props.modelValue[1] - maxRange.value, min.value)
+    : min.value,
 )
-const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - props.minRange : props.max))
-const minTo = computed(() => (props.modelValue[0] ?? props.min) + props.minRange)
+const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - minRange.value : max.value))
+const minTo = computed(() => (props.modelValue[0] ?? min.value) + minRange.value)
 const maxTo = computed(() =>
-  isNumber(props.modelValue[0]) && isNumber(props.maxRange)
-    ? Math.min(props.modelValue[0] + props.maxRange, props.max)
-    : props.max,
+  isNumber(props.modelValue[0]) && isNumber(maxRange.value)
+    ? Math.min(props.modelValue[0] + maxRange.value, max.value)
+    : max.value,
 )
 </script>
 

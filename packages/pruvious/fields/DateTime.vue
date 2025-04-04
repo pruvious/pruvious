@@ -6,7 +6,7 @@
       :clearable="options.ui.clearable"
       :disabled="disabled"
       :error="!!error"
-      :formatter="options.ui.relativeTime ? dayjsRelative : options.ui.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+      :formatter="formatter"
       :icon="options.ui.icon"
       :id="id"
       :initial="options.ui.initial"
@@ -18,8 +18,8 @@
       :placeholder="placeholder"
       :showSeconds="options.ui.showSeconds"
       :startDay="options.ui.startDay"
-      :timezone="options.ui.timezone"
-      :withTime="options.ui.withTime"
+      :timezone="timezone"
+      :withTime="true"
       @commit="$emit('commit', $event)"
       @update:modelValue="$emit('update:modelValue', $event)"
     />
@@ -29,15 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  dayjsFormatDate,
-  dayjsFormatDateTime,
-  dayjsLocales,
-  dayjsRelative,
-  maybeTranslate,
-  useLanguage,
-} from '#pruvious/client'
+import { __, dayjsConfig, dayjsLocales, dayjsResolveTimezone, maybeTranslate, useLanguage } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 
@@ -129,5 +121,13 @@ const labels: PUICalendarLabels = {
   nextMonth: __('pruvious-dashboard', 'Next month'),
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
+}
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.timezone))
+
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return props.options.ui.relativeTime ? date.tz().fromNow() : date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>

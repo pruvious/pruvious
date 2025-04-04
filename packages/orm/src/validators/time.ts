@@ -4,8 +4,8 @@ import type { CustomErrorMessage } from './types'
 import { resolveCustomErrorMessage } from './utils'
 
 /**
- * Creates a validator to ensure that the field value is an integer between 0 and 86399 (inclusive),
- * representing seconds in a day (00:00:00 to 23:59:59).
+ * Creates a validator to ensure that the field value is an integer between 0 and 86399000 (inclusive),
+ * representing milliseconds in a day (00:00:00 to 23:59:59).
  *
  * - Skips validation when value is `null`.
  * - Throws an error if the validation fails.
@@ -22,7 +22,7 @@ export function timeValidator<TDatabase extends GenericDatabase = GenericDatabas
       return
     }
 
-    if (!isInteger(value) || value < 0 || value > 86399) {
+    if (!isInteger(value) || value < 0 || value > 86399000) {
       const defaultErrorMessage = context.__('pruvious-orm', 'Invalid input')
       throw new Error(resolveCustomErrorMessage(errorMessage, defaultErrorMessage, pick(context, ['_', '__'])))
     }

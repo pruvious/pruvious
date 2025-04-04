@@ -32,16 +32,16 @@
 </template>
 
 <script lang="ts" setup>
-import { isNull } from '@pruvious/utils'
+import type { Dayjs } from 'dayjs/esm'
 import type { PUICalendarLabels } from './PUICalendar.vue'
 
 const props = defineProps({
   /**
    * The value of the calendar field.
-   * It must be a timestamp in milliseconds since Unix epoch or `null`.
+   * It must be `Dayjs` object or `null`.
    */
   modelValue: {
-    type: [Number, null],
+    type: [Object, null] as PropType<Dayjs | null>,
     required: true,
   },
 
@@ -64,20 +64,20 @@ const props = defineProps({
   },
 
   /**
-   * The minimum allowed timestamp.
-   * The value must be specified in milliseconds since Unix epoch.
+   * The minimum allowed date.
+   * The value must be a `Dayjs` object.
    */
   min: {
-    type: Number,
+    type: Object as PropType<Dayjs>,
     required: true,
   },
 
   /**
-   * The maximum allowed timestamp.
-   * The value must be specified in milliseconds since Unix epoch.
+   * The maximum allowed date.
+   * The value must be a `Dayjs` object.
    */
   max: {
-    type: Number,
+    type: Object as PropType<Dayjs>,
     required: true,
   },
 
@@ -99,10 +99,17 @@ const props = defineProps({
 
   /**
    * The current date.
-   * It must be a timestamp in milliseconds since Unix epoch.
    */
   today: {
-    type: Date,
+    type: Object as PropType<Dayjs>,
+    required: true,
+  },
+
+  /**
+   * A function that resolves the timezone.
+   */
+  resolveTimezone: {
+    type: Function as PropType<() => string>,
     required: true,
   },
 
@@ -120,37 +127,32 @@ defineEmits<{
 }>()
 
 const days = computed(() => Array.from({ length: 7 }, (_, i) => ((i + props.startDay) % 7) + 1))
-const totalDays = computed(() => new Date(Date.UTC(props.year, props.month, 0)).getUTCDate())
-const weeks = computed<Array<Array<{ day: number; disabled: boolean; selected: boolean; isToday: boolean }>>>(() => {
-  const firstDayOfMonth = new Date(Date.UTC(props.year, props.month - 1, 1))
-  const startDayIndex = (firstDayOfMonth.getDay() + 7 - props.startDay) % 7
-  const prevMonthDays = new Date(Date.UTC(props.year, props.month - 1, 0)).getUTCDate()
-
-  const selectedDate = isNull(props.modelValue) ? null : new Date(props.modelValue)
-  const selectedDay = isNull(selectedDate) ? null : selectedDate.getUTCDate()
-  const selectedMonth = isNull(selectedDate) ? null : selectedDate.getUTCMonth() + 1
-  const selectedYear = isNull(selectedDate) ? null : selectedDate.getUTCFullYear()
-  const isCurrentMonthAndYear = selectedMonth === props.month && selectedYear === props.year
-
-  const todayDay = props.today.getUTCDate()
-  const todayMonth = props.today.getUTCMonth() + 1
-  const todayYear = props.today.getUTCFullYear()
-  const isTodayMonthAndYear = todayMonth === props.month && todayYear === props.year
+const selectedDate = computed(() => puiDayjs().tz(`${props.year}-${props.month}-01`, props.resolveTimezone()))
+const totalDays = computed(() => selectedDate.value.daysInMonth())
+const weeks = computed(() => {
+  const firstDayOfMonth = puiDayjs().tz(`${props.year}-${props.month}-01`, props.resolveTimezone())
+  const startDayIndex = (firstDayOfMonth.day() + 7 - props.startDay) % 7
+  const prevMonthDays = puiDayjs()
+    .tz(`${props.year}-${props.month}-01`, props.resolveTimezone())
+    .subtract(1, 'month')
+    .daysInMonth()
+  const isActiveMonthAndYear = props.modelValue?.year() === props.year && props.modelValue?.month() + 1 === props.month
+  const isTodayMonthAndYear = props.today.year() === props.year && props.today.month() + 1 === props.month
 
   const currentMonthDays = Array.from({ length: totalDays.value }, (_, i) => {
     const day = i + 1
-    const currentDateStart = new Date(Date.UTC(props.year, props.month - 1, day))
-    const currentTimestampStart = currentDateStart.getTime()
+    const currentDateStart = puiDayjs().tz(`${props.year}-${props.month}-${day}`, props.resolveTimezone())
+    const currentTimestampStart = currentDateStart.valueOf()
     const currentTimestampEnd = currentTimestampStart + 86400000 - 1
     const isDisabled =
-      (currentTimestampStart < props.min && currentTimestampEnd < props.min) ||
-      (currentTimestampStart > props.max && currentTimestampEnd > props.max)
+      (currentTimestampStart < props.min.valueOf() && currentTimestampEnd < props.min.valueOf()) ||
+      (currentTimestampStart > props.max.valueOf() && currentTimestampEnd > props.max.valueOf())
 
     return {
       day,
       disabled: isDisabled,
-      selected: isCurrentMonthAndYear && selectedDay === day,
-      isToday: isTodayMonthAndYear && todayDay === day,
+      selected: isActiveMonthAndYear && props.modelValue?.date() === day,
+      isToday: isTodayMonthAndYear && props.today.date() === day,
     }
   })
 

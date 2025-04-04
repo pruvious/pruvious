@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import { deepClone, isArray, isBoolean, isNull, isNumber, isString } from '@pruvious/utils'
+import { deepClone, isArray, isBoolean, isDefined, isNull, isNumber, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -46,6 +46,13 @@ const props = defineProps({
    */
   operatorChoices: {
     type: Array as PropType<{ value: FilterOperator; label: string }[]>,
+  },
+
+  /**
+   * A value that overrides the default value from field options when initializing or resetting the filter.
+   */
+  forcedDefault: {
+    type: null as unknown as PropType<any>,
   },
 })
 
@@ -85,7 +92,12 @@ watch(
           matrixOperators.includes(normalizedValue.operator) &&
           !isArray(normalizedValue.value))
       ) {
-        nextTick(() => (normalizedValue.value = deepClone(props.options.default)))
+        nextTick(
+          () =>
+            (normalizedValue.value = deepClone(
+              isDefined(props.forcedDefault) ? props.forcedDefault : props.options.default,
+            )),
+        )
       }
 
       setTimeout(() => emit('commit', normalizedValue))

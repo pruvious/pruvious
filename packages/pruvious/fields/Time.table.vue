@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsUTC, getUser } from '#pruvious/client'
+import { dayjsConfig, dayjsUTC } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({
@@ -27,7 +27,6 @@ const props = defineProps({
   },
 })
 
-const user = getUser()
-const ms = (props.modelValue ?? 0) * 1000
-const formatted = user ? dayjsUTC(ms).format(user.timeFormat) : dayjsUTC(ms).format('LTS')
+const { timeFormat } = dayjsConfig()
+const formatted = computed(() => dayjsUTC(props.modelValue).format(timeFormat))
 </script>

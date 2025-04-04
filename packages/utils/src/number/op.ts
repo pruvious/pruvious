@@ -45,3 +45,27 @@ export function parseId(value: any): number | null {
   const id = castToNumber(value)
   return isPositiveInteger(id) ? id : null
 }
+
+/**
+ * Formats a `number` with `leadingZeros`.
+ *
+ * @example
+ * ```ts
+ * formatWithLeadingZeros(1, 3)   // '001'
+ * formatWithLeadingZeros(1.5, 3) // '001.5'
+ * formatWithLeadingZeros(-1, 3)  // '-001'
+ */
+export function leadingZeros(number: number, leadingZeros: number): string {
+  if (leadingZeros <= 0) {
+    return number.toString()
+  }
+
+  const isNegative = number < 0
+  const absValue = Math.abs(number)
+  const parts = absValue.toString().split('.')
+  const integerPart = parts[0] ?? ''
+  const decimalPart = parts.length > 1 ? '.' + parts[1] : ''
+  const paddedInteger = integerPart.padStart(leadingZeros, '0')
+  const signPrefix = isNegative ? '-' : ''
+  return signPrefix + paddedInteger + decimalPart
+}

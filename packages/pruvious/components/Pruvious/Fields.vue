@@ -10,7 +10,7 @@
       :dataContainerName="dataContainerName"
       :dataContainerType="dataContainerType"
       :disabled="disabled"
-      :error="errors?.[item.field.name]"
+      :error="item.error"
       :fields="fields"
       :modelValue="data[item.field.name]"
       :name="item.field.name"
@@ -143,6 +143,7 @@ interface DynamicFieldItem {
   type: 'DynamicField'
   field: { name: string; path: string; options: GenericSerializableFieldOptions }
   style?: StyleValue
+  error?: string | Record<string, string>
 }
 
 interface RowItem {
@@ -314,6 +315,7 @@ function parseLayout(layout: FieldsLayout): Item[] {
           type: 'DynamicField',
           field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options: props.fields[name] },
           style: { maxWidth: x.split('|')[1]?.trim() },
+          error: getFieldErrors(name),
         })
       } else {
         console.warn(
@@ -337,6 +339,7 @@ function parseLayout(layout: FieldsLayout): Item[] {
                 options: props.fields[fieldItem.field.name]!,
               },
               style: fieldItem.field.style,
+              error: getFieldErrors(fieldItem.field.name),
             })
           } else {
             console.warn(
@@ -396,6 +399,28 @@ function parseLayout(layout: FieldsLayout): Item[] {
   }
 
   return items
+}
+
+function getFieldErrors(fieldName: string): string | Record<string, string> | undefined {
+  if (props.errors && props.fields?.[fieldName] && props.fields[fieldName]._dataType === 'text') {
+    const subFieldErrors: Record<string, string> = {}
+
+    for (const [key, value] of Object.entries(props.errors)) {
+      if (key.startsWith(`${fieldName}.`)) {
+        subFieldErrors[key.replace(`${fieldName}.`, '')] = value
+      }
+    }
+
+    if (props.errors[fieldName]) {
+      return isEmpty(subFieldErrors)
+        ? props.errors[fieldName]
+        : { [fieldName]: props.errors[fieldName], ...subFieldErrors }
+    } else if (!isEmpty(subFieldErrors)) {
+      return subFieldErrors
+    }
+  }
+
+  return undefined
 }
 </script>
 

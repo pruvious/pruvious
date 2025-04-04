@@ -285,6 +285,9 @@ importers:
       '@vueuse/integrations':
         specifier: ^12.5.0
         version: 12.5.0(change-case@5.4.4)(focus-trap@7.6.4)(fuse.js@7.0.0)(typescript@5.7.3)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       dompurify:
         specifier: ^3.2.3
         version: 3.2.3

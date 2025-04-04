@@ -27,7 +27,7 @@ const props = defineProps({
   },
 })
 
-const date = dayjs(props.modelValue)
-const formattedDate = dayjsFormatDateTime(date)
-const relativeTime = dayjsRelative(date)
+const date = computed(() => dayjs(props.modelValue))
+const formattedDate = computed(() => dayjsFormatDateTime(date.value))
+const relativeTime = computed(() => dayjsRelative(date.value))
 </script>

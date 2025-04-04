@@ -1,7 +1,8 @@
 import { defineField } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
-import { numberFieldModel, timestampValidator } from '@pruvious/orm'
-import type { TimezoneName } from '../../utils/pruvious/timezone'
+import { numberFieldModel } from '@pruvious/orm'
+import type { PUITimezone } from '@pruvious/ui/composables/puiTimezone'
+import { isNotNull, isString } from '@pruvious/utils'
 
 export interface TimestampFieldOptions {
   /**
@@ -37,7 +38,7 @@ export interface TimestampFieldOptions {
      */
     calendar?: {
       /**
-       * The field icon.
+       * The icon to display in the calendar input.
        * You can use either a string for Tabler icons or a Vue node for Nuxt icons.
        *
        * @default 'calendar-week'
@@ -45,17 +46,18 @@ export interface TimestampFieldOptions {
       icon?: keyof typeof icons | null
 
       /**
-       * Specifies the starting date/time displayed when the calendar opens.
-       * It must be a timestamp in milliseconds since Unix epoch or `null`.
+       * Sets the initial year and month shown when the calendar opens.
+       * Accepts these formats:
        *
-       * - When not specified, the selected value is used.
-       * - If the selected value is not set, the current date will be used.
+       * - Numeric - Unix timestamp in milliseconds.
+       * - String - ISO 8601 formatted date.
        *
-       * Note: Round the value to second precision as milliseconds are not used in the calendar.
+       * If not specified, the calendar will try to use the field's current value.
+       * When no value exists, it defaults to the current year and month.
        *
        * @default null
        */
-      initial?: number | null
+      initial?: number | string | null
 
       /**
        * Specifies whether to show the seconds input in the time picker.
@@ -80,42 +82,25 @@ export interface TimestampFieldOptions {
       startDay?: 0 | 1 | 2 | 3 | 4 | 5 | 6
 
       /**
-       * The time zone to use when displaying the date/time in the calendar.
-       * The stored value is always in UTC.
+       * The time zone identifier for displaying date values in the calendar.
+       * The value must be a valid IANA time zone name or `local`.
        *
-       * This value represents the time difference in minutes between UTC and local time.
-       * You can also use a time zone name (e.g., 'Europe/Berlin') which will automatically handle daylight saving time adjustments.
+       * Note: Data table timestamps are always shown in the user's preferred timezone.
        *
-       * By default, the time zone offset is set to UTC (GMT+0).
-       *
-       * @default 0
+       * @default 'local'
        *
        * @see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
        * @see https://www.iana.org/time-zones
        *
        * @example
        * ```ts
-       * // GMT+1
-       * 60
-       *
-       * // GMT-5
-       * -300
-       *
-       * // Time zone name
+       * 'local'
        * 'Europe/Berlin'
+       * 'America/New_York'
+       * 'Asia/Tokyo'
        * ```
        */
-      timezone?: number | TimezoneName
-
-      /**
-       * Specifies whether the calendar should include time selection.
-       *
-       * When disabled, all timestamps are set to midnight.
-       * The `timezone` is used to resolve the midnight time.
-       *
-       * @default false
-       */
-      withTime?: boolean
+      timezone?: PUITimezone | 'local'
     }
 
     /**
@@ -148,8 +133,7 @@ const customOptions: TimestampFieldOptions = {
       initial: null,
       showSeconds: true,
       startDay: 1,
-      timezone: 0,
-      withTime: false,
+      timezone: 'local',
     },
     picker: 'combo',
     relativeTime: false,
@@ -158,8 +142,41 @@ const customOptions: TimestampFieldOptions = {
 
 export default defineField({
   model: numberFieldModel(),
-  sanitizers: [], // @todo sanitize any date input
-  validators: [timestampValidator()],
+  sanitizers: [
+    (value) => {
+      if (isString(value)) {
+        try {
+          return Date.parse(value)
+        } catch {}
+      }
+      return value
+    },
+  ],
+  validators: [
+    (value, { definition, context }) => {
+      if (isNotNull(value)) {
+        if (isString(definition.options.min)) {
+          if (value < Date.parse(definition.options.min)) {
+            throw new Error(
+              context.__('pruvious-orm', 'The value must be greater than or equal to `$min`', {
+                min: Date.parse(definition.options.min),
+              }),
+            )
+          }
+        }
+
+        if (isString(definition.options.max)) {
+          if (value > Date.parse(definition.options.max)) {
+            throw new Error(
+              context.__('pruvious-orm', 'The value must be less than or equal to `$max`', {
+                max: Date.parse(definition.options.max),
+              }),
+            )
+          }
+        }
+      }
+    },
+  ],
   customOptions,
   uiOptions: { placeholder: true },
   omitOptions: ['decimalPlaces', 'min', 'max'],

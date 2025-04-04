@@ -1,6 +1,8 @@
 <template>
   <PUIFieldMessage v-if="error || description" :error="!!error">
-    <p v-if="error">{{ error }}</p>
+    <template v-if="error">
+      <p v-for="error of errors">{{ error }}</p>
+    </template>
 
     <PUIProse v-else-if="description?.type === 'simple'" v-html="description.html" />
 
@@ -18,6 +20,7 @@
 <script lang="ts" setup>
 import { resolveFieldDescription } from '#pruvious/client'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
+import { toArray } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -40,11 +43,12 @@ const props = defineProps({
    * Represents an error message that can be displayed to the user.
    */
   error: {
-    type: String,
+    type: [String, Array] as PropType<string | string[]>,
   },
 })
 
 const description = resolveFieldDescription(props.options.ui?.description)
+const errors = computed(() => (props.error ? toArray(props.error) : undefined))
 const expanded = ref(description?.type === 'expandable' && description.expanded)
 </script>
 

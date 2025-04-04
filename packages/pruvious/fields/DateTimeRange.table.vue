@@ -7,9 +7,9 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjs, dayjsFormatDate, dayjsFormatDateTime } from '#pruvious/client'
+import { dayjsConfig, dayjsResolveTimezone } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isNull } from '@pruvious/utils'
+import { isNull, isUndefined } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -28,11 +28,16 @@ const props = defineProps({
   },
 })
 
-const dateFrom = dayjs(props.modelValue?.[0])
-const dateTo = dayjs(props.modelValue?.[1])
-const formatted = isNull(props.modelValue)
-  ? undefined
-  : props.options.ui.withTime
-    ? dayjsFormatDateTime(dateFrom) + ' - ' + dayjsFormatDateTime(dateTo)
-    : dayjsFormatDate(dateFrom) + ' - ' + dayjsFormatDate(dateTo)
+const formatted = computed(() =>
+  isNull(props.modelValue) || isUndefined(props.modelValue)
+    ? undefined
+    : `${formatter(props.modelValue[0])} - ${formatter(props.modelValue[1])}`,
+)
+
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return date.format(`${dateFormat} ${timeFormat}`)
+}
 </script>

@@ -6,6 +6,7 @@
     :name="id"
     :showSeconds="options.ui.showSeconds"
     @commit="$emit('commit', { ...modelValue, value: prepareEmitValue($event) })"
+    @update:modelValue="$emit('update:modelValue', { ...modelValue, value: prepareEmitValue($event) })"
   />
 </template>
 
@@ -34,7 +35,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  commit: [where: WhereField]
+  'commit': [where: WhereField]
+  'update:modelValue': [where: WhereField]
 }>()
 
 const id = useId()
@@ -50,12 +52,12 @@ const sanitized = computed<number>(() => {
     const [from, to] = v.split(',')
     const fromCasted = castToNumber(from?.replace('[', ''))
     const toCasted = castToNumber(to?.replace(']', ''))
-    const tuple = [isInteger(fromCasted) ? fromCasted : 0, isInteger(toCasted) ? toCasted : 86399]
+    const tuple = [isInteger(fromCasted) ? fromCasted : 0, isInteger(toCasted) ? toCasted : 86399000]
     return props.modelValue.operator === 'startsWith' ? tuple[0]! : tuple[1]!
   } else if (isArray(v)) {
     const fromCasted = castToNumber(v[0])
     const toCasted = castToNumber(v[1])
-    const tuple = [isInteger(fromCasted) ? fromCasted : 0, isInteger(toCasted) ? toCasted : 86399]
+    const tuple = [isInteger(fromCasted) ? fromCasted : 0, isInteger(toCasted) ? toCasted : 86399000]
     return props.modelValue.operator === 'startsWith' ? tuple[0]! : tuple[1]!
   } else if (isInteger(v)) {
     return v

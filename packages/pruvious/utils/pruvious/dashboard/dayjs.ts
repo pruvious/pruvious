@@ -1,12 +1,13 @@
-import _dayjs from 'dayjs/esm'
+import type { LanguageCode } from '#pruvious/server'
+import { isEmpty } from '@pruvious/utils'
 import advancedFormat from 'dayjs/esm/plugin/advancedFormat'
 import isoWeek from 'dayjs/esm/plugin/isoWeek'
 import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
 import relativeTime from 'dayjs/esm/plugin/relativeTime'
-import timezone from 'dayjs/esm/plugin/timezone'
-import utc from 'dayjs/esm/plugin/utc'
 import weekOfYear from 'dayjs/esm/plugin/weekOfYear'
 import { getUser } from '../../../modules/pruvious/auth/utils.client'
+
+const _dayjs = puiDayjs()
 
 export const dayjsLocales = {
   /**
@@ -81,8 +82,6 @@ function extend() {
     _dayjs.extend(isoWeek)
     _dayjs.extend(localizedFormat)
     _dayjs.extend(relativeTime)
-    _dayjs.extend(timezone)
-    _dayjs.extend(utc)
     _dayjs.extend(weekOfYear)
 
     _dayjs.locale(dayjsLocales.de(), null as any, true)
@@ -92,28 +91,107 @@ function extend() {
 }
 
 /**
- * Returns an extended dayjs instance with all plugins loaded.
+ * Returns an extended and localized `Dayjs` instance with the following plugins applied:
+ *
+ * - advancedFormat
+ * - isoWeek
+ * - localizedFormat
+ * - minMax
+ * - relativeTime
+ * - timezone
+ * - utc
+ * - weekOfYear
+ *
+ * The locale and timezone are set according to the authenticated user's settings.
  *
  * @see https://day.js.org
  */
-export function dayjs(date?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
+export function dayjs(date?: PUIDateInput, format?: string, strict?: boolean) {
   return getDayjs(false, date, format, strict)
 }
 
 /**
- * Returns an extended dayjs instance in UTC mode with all plugins loaded.
+ * Returns an extended and localized `Dayjs` instance in UTC mode with the following plugins applied:
+ *
+ * - advancedFormat
+ * - isoWeek
+ * - localizedFormat
+ * - minMax
+ * - relativeTime
+ * - timezone
+ * - utc
+ * - weekOfYear
+ *
+ * The locale is set according to the authenticated user's settings.
  *
  * @see https://day.js.org/docs/en/plugin/utc
  */
-export function dayjsUTC(config?: _dayjs.ConfigType, format?: string, strict?: boolean): _dayjs.Dayjs {
-  return getDayjs(true, config, format, strict)
+export function dayjsUTC(date?: PUIDateInput, format?: string, strict?: boolean) {
+  return getDayjs(true, date, format, strict)
+}
+
+function getDayjs(utc: boolean, date?: PUIDateInput, format?: string, strict?: boolean) {
+  extend()
+  const language = getUser()?.dashboardLanguage ?? 'en'
+  const timezone = dayjsResolveTimezone(getUser()?.timezone)
+  return utc
+    ? _dayjs.utc(date, format, strict).locale(language)
+    : _dayjs(date, format, strict).tz(timezone).locale(language)
+}
+
+/**
+ * Returns an object with the following properties:
+ *
+ * - `dayjs` - The extended `dayjs` object.
+ * - `language` - The authenticated user's `dashboardLanguage`. If not authenticated, defaults to 'en'.
+ * - `timezone` - The authenticated user's `timezone`. If not authenticated, defaults to the local timezone.
+ *
+ * @see https://day.js.org
+ */
+export function dayjsConfig(): {
+  /**
+   * The extended `dayjs` object.
+   */
+  dayjs: typeof _dayjs
+
+  /**
+   * The authenticated user's `dashboardLanguage`.
+   * If not authenticated, defaults to 'en'.
+   */
+  language: LanguageCode
+
+  /**
+   * The authenticated user's `timezone`.
+   * If not authenticated, defaults to the local timezone.
+   */
+  timezone: PUITimezone
+
+  /**
+   * The authenticated user's `dateFormat`.
+   * If not authenticated, defaults to `LL` (localized long date format, e.g. 'February 24, 2025').
+   */
+  dateFormat: string
+
+  /**
+   * The authenticated user's `timeFormat`.
+   * If not authenticated, defaults to `LTS` (localized time with seconds, e.g. '8:30:25 PM').
+   */
+  timeFormat: string
+} {
+  extend()
+  const user = getUser()
+  const language = user?.dashboardLanguage ?? 'en'
+  const timezone = dayjsResolveTimezone(user?.timezone)
+  const dateFormat = user?.dateFormat ?? 'LL'
+  const timeFormat = user?.timeFormat ?? 'LTS'
+  return { dayjs: _dayjs, language, timezone, dateFormat, timeFormat }
 }
 
 /**
  * Formats a `date` input according to the authenticated user's date and time preferences.
- * Uses `LL LTS` format if no user is authenticated.
+ * Uses `LL LTS` format in `local` timezone if no user is authenticated.
  */
-export function dayjsFormatDateTime(date?: _dayjs.ConfigType): string {
+export function dayjsFormatDateTime(date?: PUIDateInput): string {
   const user = getUser()
   const _date = dayjs(date)
   return user ? _date.format(`${user.dateFormat} ${user.timeFormat}`) : _date.format('LL LTS')
@@ -121,34 +199,40 @@ export function dayjsFormatDateTime(date?: _dayjs.ConfigType): string {
 
 /**
  * Formats a `date` input according to the authenticated user's date preferences.
- * Uses `LL` format if no user is authenticated.
+ * Uses `LL` format in `local` timezone if no user is authenticated.
  */
-export function dayjsFormatDate(date?: _dayjs.ConfigType): string {
+export function dayjsFormatDate(date?: PUIDateInput): string {
   const user = getUser()
   const _date = dayjs(date)
   return user ? _date.format(user.dateFormat) : _date.format('LL')
 }
 
 /**
- * Returns a relative time string (e.g., '2 hours ago', 'in 3 days') for the given `date`.
- * The output is localized according to the authenticated user's dashboard language.
- */
-export function dayjsRelative(date?: _dayjs.ConfigType): string {
-  return dayjs(date).fromNow()
-}
-
-/**
  * Formats a `date` input according to the authenticated user's time preferences.
- * Uses `LTS` format if no user is authenticated.
+ * Uses `LTS` format in `local` timezone if no user is authenticated.
  */
-export function dayjsFormatTime(date?: _dayjs.ConfigType): string {
+export function dayjsFormatTime(date?: PUIDateInput): string {
   const user = getUser()
   const _date = dayjs(date)
   return user ? _date.format(user.timeFormat) : _date.format('LTS')
 }
 
-function getDayjs(utc: boolean, date?: _dayjs.ConfigType, format?: string, strict?: boolean) {
-  extend()
-  const language = getUser()?.dashboardLanguage ?? 'en'
-  return utc ? _dayjs.utc(date, format, strict).locale(language) : _dayjs(date, format, strict).locale(language)
+/**
+ * Returns a relative time string (e.g., '2 hours ago', 'in 3 days') for the given `date`.
+ * The output is localized according to the authenticated user's `dashboardLanguage` and `timezone` settings.
+ */
+export function dayjsRelative(date?: PUIDateInput): string {
+  return dayjs(date).fromNow()
+}
+
+/**
+ * Resolves the `timezone` identifier.
+ * It must be a valid IANA time zone name or `local`.
+ * If not specified or set to `local`, returns the user's preferred timezone
+ */
+export function dayjsResolveTimezone(timezone?: PUITimezone | 'local'): PUITimezone {
+  if (isEmpty(timezone) || timezone === 'local') {
+    return puiResolveTimezone(getUser()?.timezone)
+  }
+  return timezone
 }

@@ -1,13 +1,13 @@
 <template>
   <div class="pui-truncate">
     <span :title="formatted">
-      {{ formatted ?? '-' }}
+      {{ formatted }}
     </span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { dayjsUTC, getUser } from '#pruvious/client'
+import { dayjsConfig, dayjsUTC } from '#pruvious/client'
 import { type SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({
@@ -27,10 +27,10 @@ const props = defineProps({
   },
 })
 
-const user = getUser()
-const msFrom = (props.modelValue?.[0] ?? 0) * 1000
-const msTo = (props.modelValue?.[1] ?? 0) * 1000
-const formattedFrom = user ? dayjsUTC(msFrom).format(user.timeFormat) : dayjsUTC(msFrom).format('LTS')
-const formattedTo = user ? dayjsUTC(msTo).format(user.timeFormat) : dayjsUTC(msTo).format('LTS')
-const formatted = `${formattedFrom} - ${formattedTo}`
+const { timeFormat } = dayjsConfig()
+const msFrom = computed(() => (props.modelValue?.[0] ?? 0) * 1000)
+const msTo = computed(() => (props.modelValue?.[1] ?? 0) * 1000)
+const formattedFrom = computed(() => dayjsUTC(msFrom.value).format(timeFormat))
+const formattedTo = computed(() => dayjsUTC(msTo.value).format(timeFormat))
+const formatted = computed(() => `${formattedFrom.value} - ${formattedTo.value}`)
 </script>

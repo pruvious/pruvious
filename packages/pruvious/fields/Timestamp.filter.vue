@@ -1,6 +1,8 @@
 <template>
   <PruviousFilterField
+    :forcedDefault="now"
     :modelValue="modelValue"
+    :operatorChoices="operatorChoices"
     :options="options"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
@@ -35,10 +37,10 @@
       <PUICalendar
         v-if="options.ui.picker === 'calendar' || (options.ui.picker === 'combo' && picker === 'calendar')"
         :clearable="false"
-        :formatter="options.ui.calendar?.withTime ? dayjsFormatDateTime : dayjsFormatDate"
+        :formatter="formatter"
         :icon="options.ui.calendar?.icon"
         :id="id"
-        :initial="options.ui.calendar?.initial"
+        :initial="initial"
         :labels="labels"
         :max="options.max"
         :min="options.min"
@@ -46,8 +48,8 @@
         :name="id"
         :showSeconds="options.ui.calendar?.showSeconds"
         :startDay="options.ui.calendar?.startDay"
-        :timezone="options.ui.calendar?.timezone"
-        :withTime="options.ui.calendar?.withTime"
+        :timezone="timezone"
+        :withTime="true"
         @commit="$emit('commit', { ...modelValue, value: $event })"
         @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
       />
@@ -69,11 +71,19 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsFormatDate, dayjsFormatDateTime, dayjsLocales, useLanguage, type WhereField } from '#pruvious/client'
+import {
+  __,
+  dayjsConfig,
+  dayjsLocales,
+  dayjsResolveTimezone,
+  getValidFilterOperators,
+  useLanguage,
+  type WhereField,
+} from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 
-defineProps({
+const props = defineProps({
   /**
    * The current where condition.
    */
@@ -107,6 +117,29 @@ const labels: PUICalendarLabels = {
   nextMonth: __('pruvious-dashboard', 'Next month'),
   previousMonth: __('pruvious-dashboard', 'Previous month'),
   selectDate: __('pruvious-dashboard', 'Select date'),
+}
+const operatorChoices = getValidFilterOperators(props.options).map(({ value, label }) => {
+  if (value === 'gt') {
+    return { value, label: __('pruvious-dashboard', 'After') }
+  } else if (value === 'gte') {
+    return { value, label: __('pruvious-dashboard', 'After or equal to') }
+  } else if (value === 'lt') {
+    return { value, label: __('pruvious-dashboard', 'Before') }
+  } else if (value === 'lte') {
+    return { value, label: __('pruvious-dashboard', 'Before or equal to') }
+  } else {
+    return { value, label }
+  }
+})
+const timezone = computed(() => dayjsResolveTimezone(props.options.ui.calendar?.timezone))
+const now = Date.now()
+const initial = computed(() => props.options.ui.calendar?.initial ?? (props.modelValue.value ? undefined : now))
+
+function formatter(timestamp: number): string {
+  const { dayjs, language, dateFormat, timeFormat } = dayjsConfig()
+  const timezone = dayjsResolveTimezone(props.options.ui.calendar?.timezone)
+  const date = dayjs(timestamp).tz(timezone).locale(language)
+  return date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>
 
