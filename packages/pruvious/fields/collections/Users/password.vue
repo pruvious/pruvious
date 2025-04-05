@@ -1,7 +1,7 @@
 <template>
   <PUIField v-if="!disabled">
     <PUIFieldLabel :required="operation === 'create'">
-      <label v-if="operation === 'update'" :for="`${id}-switch`">
+      <label v-if="operation === 'update'" :for="`${id}--switch`">
         {{ __('pruvious-dashboard', 'Change password') }}
       </label>
       <label v-else :for="id">{{ __('pruvious-dashboard', 'Password') }}</label>
