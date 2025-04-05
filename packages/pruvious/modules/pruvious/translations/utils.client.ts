@@ -5,7 +5,7 @@ import type {
   ExtractTranslatableStringsDefinitions,
   TranslatableStrings,
 } from '@pruvious/i18n'
-import { isArray, isObject, isString, type PathMatcher } from '@pruvious/utils'
+import type { PathMatcher } from '@pruvious/utils/path-matcher'
 
 const matchers: Record<string, PathMatcher> = {}
 
@@ -103,7 +103,7 @@ export async function preloadTranslatableStrings<
 export async function preloadTranslatableStringsForPath(path: string) {
   const language = useLanguage().value
   const { translatableStringsPreloadRules } = useRuntimeConfig().public.pruvious
-  const { PathMatcher } = await import('@pruvious/utils')
+  const { PathMatcher } = await import('@pruvious/utils/path-matcher')
 
   for (const [domain, { include, exclude }] of Object.entries(translatableStringsPreloadRules)) {
     if (!matchers[domain]) {

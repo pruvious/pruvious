@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { PathMatcher } from '../../src'
+import { PathMatcher } from '../../src/misc/PathMatcher'
 
 test('path matcher', async () => {
   const m1 = new PathMatcher({

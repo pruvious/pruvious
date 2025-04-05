@@ -5,7 +5,8 @@ import {
   resolveCurrentUser,
   triggerQueueProcessing,
 } from '#pruvious/server'
-import { PathMatcher, randomIdentifier } from '@pruvious/utils'
+import { randomIdentifier } from '@pruvious/utils'
+import { PathMatcher } from '@pruvious/utils/path-matcher'
 import { logRequest } from '../../modules/pruvious/debug/logs'
 
 let matcher: PathMatcher

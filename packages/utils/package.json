@@ -19,6 +19,10 @@
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
+    },
+    "./path-matcher": {
+      "import": "./dist/misc/PathMatcher.mjs",
+      "types": "./dist/misc/PathMatcher.d.ts"
     }
   },
   "main": "./dist/index.mjs",

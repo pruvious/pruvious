@@ -9,7 +9,8 @@ import {
   type DatabaseOperation,
   type QueryBuilderResult,
 } from '@pruvious/orm'
-import { anonymizeObject, isArray, isBoolean, isNumber, isObject, isString, PathMatcher } from '@pruvious/utils'
+import { anonymizeObject, isArray, isBoolean, isNumber, isObject, isString } from '@pruvious/utils'
+import { PathMatcher } from '@pruvious/utils/path-matcher'
 import type { H3Event } from 'h3'
 import type { PruviousModuleOptions, ResolvedDebugConfig } from '../PruviousModuleOptions'
 import { privateCollectionMeta } from '../collections/meta'

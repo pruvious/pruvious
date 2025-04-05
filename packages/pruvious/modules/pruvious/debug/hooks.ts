@@ -1,6 +1,7 @@
 import type { GenericSingleton } from '#pruvious/server'
 import type { CollectionHooks, GenericCollection } from '@pruvious/orm'
-import { anonymizeObject, isString, PathMatcher, randomIdentifier } from '@pruvious/utils'
+import { anonymizeObject, isString, randomIdentifier } from '@pruvious/utils'
+import { PathMatcher } from '@pruvious/utils/path-matcher'
 import { colorize } from 'consola/utils'
 import type { CollectionMeta } from '../collections/define'
 import { debug } from './console'
