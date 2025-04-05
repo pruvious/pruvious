@@ -31,6 +31,7 @@
 <script lang="ts" setup>
 import { isEmpty } from '@pruvious/utils'
 import { Toaster } from 'vue-sonner'
+import { puiToast, usePUIToasterQueue } from '../pui/toast'
 
 const route = useRoute()
 const toasterQueue = usePUIToasterQueue()

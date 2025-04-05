@@ -66,6 +66,8 @@
 
 <script lang="ts" setup>
 import { clamp } from '@pruvious/utils'
+import { puiParseTime } from '../pui/date'
+import { puiTrigger } from '../pui/trigger'
 
 export interface PUITimeLabels {
   /**

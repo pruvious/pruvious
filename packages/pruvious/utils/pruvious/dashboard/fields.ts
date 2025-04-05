@@ -2,8 +2,9 @@ import { dashboardBasePath } from '#pruvious/client/base'
 import { __ } from '#pruvious/client/i18n'
 import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { WhereField as _WhereField, Operator } from '@pruvious/orm'
+import { puiMarkdown } from '@pruvious/ui/pui/html'
 import { isDefined, isFunction, isObject, titleCase } from '@pruvious/utils'
-import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'
+import { maybeTranslate } from './i18n'
 
 interface ResolvedFieldDescriptionBase {
   /**

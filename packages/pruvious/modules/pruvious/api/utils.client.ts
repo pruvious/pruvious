@@ -452,7 +452,7 @@ export async function pfetch<
         }
       }
     },
-  } satisfies NitroFetchOptions<string> as TOptions).finally(() => {
+  } as TOptions).finally(() => {
     // Enable UI
     if (options?.disableRef) {
       options.disableRef.value = false

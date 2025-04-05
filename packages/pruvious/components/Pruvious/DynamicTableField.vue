@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { customComponents, tableFieldComponents } from '#pruvious/client'
 import type { Collections, Fields, GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
+import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { isDefined } from '@pruvious/utils'
 
 const props = defineProps({

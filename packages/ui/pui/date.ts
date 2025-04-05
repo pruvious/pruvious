@@ -3,6 +3,7 @@ import dayjs from 'dayjs/esm'
 import minMax from 'dayjs/esm/plugin/minMax'
 import timezone from 'dayjs/esm/plugin/timezone'
 import utc from 'dayjs/esm/plugin/utc'
+import type { PUITimezone } from './timezone'
 
 export type PUIDayjs = typeof dayjs
 

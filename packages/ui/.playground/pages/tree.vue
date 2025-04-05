@@ -31,6 +31,7 @@
 <script lang="ts" setup>
 import { isDefined } from '@pruvious/utils'
 import type { PUITreeItemModel } from '../../components/PUITreeItem.vue'
+import { puiTree, type PUITreeMapper } from '../../pui/tree'
 
 interface VNode {
   id: string

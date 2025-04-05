@@ -265,14 +265,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  dashboardBasePath,
-  dayjsFormatDateTime,
-  dayjsRelative,
-  hasPermission,
-  usePruviousDashboard,
-} from '#pruvious/client'
+import { __, dashboardBasePath, dashboardMiddleware, hasPermission, usePruviousDashboard } from '#pruvious/client'
+import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import { isEmpty } from '@pruvious/utils'
 import { beautifyCode, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
@@ -281,20 +275,21 @@ import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
 definePageMeta({
   path: dashboardBasePath + 'logs/custom',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-auth-guard',
-    (to) => {
-      if (!usePruviousDashboard().value?.logs?.custom) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-            page: to.path,
-          }),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + 'overview')
-      }
-    },
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'auth-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ __, puiQueueToast, usePruviousDashboard }) => {
+        if (!usePruviousDashboard().value?.logs?.custom) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
+              page: to.path,
+            }),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + 'overview')
+        }
+      }),
   ],
 })
 

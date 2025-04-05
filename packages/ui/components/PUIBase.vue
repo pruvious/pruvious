@@ -9,6 +9,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiHTMLInit } from '../pui/html'
+import { puiTooltipInit } from '../pui/tooltip'
 import '../styles'
 
 defineProps({
@@ -46,4 +48,7 @@ defineProps({
     type: Number,
   },
 })
+
+await puiHTMLInit()
+puiTooltipInit()
 </script>

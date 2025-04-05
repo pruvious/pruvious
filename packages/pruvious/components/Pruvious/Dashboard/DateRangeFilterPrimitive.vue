@@ -18,7 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsConfig, dayjsLocales, useLanguage, type WhereField } from '#pruvious/client'
+import { __, useLanguage, type WhereField } from '#pruvious/client'
+import { dayjsConfig, dayjsLocales } from '#pruvious/client/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 import { castToNumber, isArray, isInteger, isNull, isString } from '@pruvious/utils'

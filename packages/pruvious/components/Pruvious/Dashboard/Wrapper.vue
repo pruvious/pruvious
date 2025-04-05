@@ -5,7 +5,8 @@
 </template>
 
 <style>
-body {
+body,
+.pui-body {
   --pui-dialog-size: -1;
   --pui-toast-size: -1;
   --pui-tooltip-size: -1;

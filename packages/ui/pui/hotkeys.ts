@@ -1,5 +1,6 @@
 import { isFunction, remove } from '@pruvious/utils'
 import { useEventListener } from '@vueuse/core'
+import { usePUIOverlayCounter } from './overlay'
 
 export type PUIHotkeyAction =
   | 'close'

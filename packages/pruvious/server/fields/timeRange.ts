@@ -1,6 +1,6 @@
 import { defineField } from '#pruvious/server'
 import { arrayFieldModel } from '@pruvious/orm'
-import { puiParseTimeSpan } from '@pruvious/ui/composables/puiDate'
+import { puiParseTimeSpan } from '@pruvious/ui/pui/date'
 import { castToNumber, isArray, isInteger, isNotNull, isString } from '@pruvious/utils'
 
 const customOptions: {

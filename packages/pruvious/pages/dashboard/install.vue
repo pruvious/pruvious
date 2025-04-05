@@ -78,24 +78,25 @@
 import {
   __,
   dashboardBasePath,
+  dashboardMiddleware,
   pruviousDashboardPost,
   refreshPruviousDashboardState,
   refreshPruviousState,
   storeAuthToken,
-  usePruvious,
 } from '#pruvious/client'
 import { lockAndLoad } from '@pruvious/utils'
 
 definePageMeta({
   path: dashboardBasePath + 'install',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-guest-guard',
-    () => {
-      if (usePruvious().value?.installed) {
-        return navigateTo(dashboardBasePath + 'login', { replace: true })
-      }
-    },
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'guest-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ usePruvious }) => {
+        if (usePruvious().value?.installed) {
+          return navigateTo(dashboardBasePath + 'login', { replace: true })
+        }
+      }),
   ],
 })
 

@@ -14,9 +14,8 @@
   "files": [
     "assets",
     "components",
-    "composables",
+    "pui",
     "nuxt.config.ts",
-    "plugins",
     "styles.ts"
   ],
   "main": "./nuxt.config.ts",

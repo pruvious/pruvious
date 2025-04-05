@@ -1,8 +1,8 @@
 import { defineField, type TranslatableStringCallbackContext } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
 import { arrayFieldModel } from '@pruvious/orm'
-import { puiParseTimeSpan } from '@pruvious/ui/composables/puiDate'
-import type { PUITimezone } from '@pruvious/ui/composables/puiTimezone'
+import { puiParseTimeSpan } from '@pruvious/ui/pui/date'
+import type { PUITimezone } from '@pruvious/ui/pui/timezone'
 import { castToNumber, isArray, isInteger, isNotNull, isNull, isString } from '@pruvious/utils'
 
 const customOptions: {

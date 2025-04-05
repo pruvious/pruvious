@@ -43,6 +43,7 @@
 <script lang="ts" setup>
 import type { icons as tablerIcons } from '@iconify-json/tabler/icons.json'
 import { isObject, next, prev, type Primitive } from '@pruvious/utils'
+import { puiTrigger } from '../pui/trigger'
 
 export interface PUIIconGroupChoiceModel {
   /**

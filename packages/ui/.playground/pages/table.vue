@@ -78,6 +78,9 @@
 </template>
 
 <script lang="ts" setup>
+import { puiColumn, puiTable } from '../../pui/table'
+import { puiToast } from '../../pui/toast'
+
 const state = useShowcase()
 const selectable = ref(false)
 const selected = ref<Record<number, boolean>>({})

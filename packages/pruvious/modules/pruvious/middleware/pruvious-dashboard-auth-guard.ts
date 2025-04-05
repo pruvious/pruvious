@@ -1,10 +1,10 @@
 import { dashboardBasePath, useAuth } from '#pruvious/client'
-
+import type { RouteLocationNormalized } from 'vue-router'
 /**
  * Pruvious client middleware that guards against non-logged-in users and users without the `access-dashboard` permission.
  * It is intended for use in the dashboard.
  */
-export default defineNuxtRouteMiddleware((to) => {
+export const dashboardAuthGuard = (to: RouteLocationNormalized) => {
   const { isLoggedIn, permissions } = useAuth().value
 
   if (!isLoggedIn) {
@@ -24,4 +24,4 @@ export default defineNuxtRouteMiddleware((to) => {
       return navigateTo('/')
     }
   }
-})
+}

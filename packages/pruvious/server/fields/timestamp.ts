@@ -1,7 +1,7 @@
 import { defineField } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
 import { numberFieldModel } from '@pruvious/orm'
-import type { PUITimezone } from '@pruvious/ui/composables/puiTimezone'
+import type { PUITimezone } from '@pruvious/ui/pui/timezone'
 import { isNotNull, isString } from '@pruvious/utils'
 
 export interface TimestampFieldOptions {

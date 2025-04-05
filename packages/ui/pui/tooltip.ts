@@ -1,8 +1,7 @@
-import { defineNuxtPlugin } from '#imports'
 import { isArray, isObject, isString } from '@pruvious/utils'
 import tippy, { type Instance, type Props } from 'tippy.js'
 import type { Directive, DirectiveBinding } from 'vue'
-import { puiMarkdown, puiSanitize } from '../composables/puiHTML'
+import { puiMarkdown, puiSanitize } from './html'
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -31,29 +30,34 @@ type CustomElement = HTMLElement & { _puiTooltip?: Instance; _puiTooltipValue?: 
 type PUITooltipDirectiveModifiers = 'destructive' | 'nomd' | 'row' | 'watch'
 type PUITooltipDirective = Directive<CustomElement, Partial<Props> | string | undefined>
 
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.directive('pui-tooltip', <PUITooltipDirective>{
-    mounted: (el, binding: DirectiveBinding<Partial<Props> | string | undefined, PUITooltipDirectiveModifiers>) => {
-      initTooltip(el, binding)
-    },
-    updated: (el, binding) => {
-      if (JSON.stringify(binding.value) !== el._puiTooltipValue) {
-        if (el._puiTooltip) {
-          const tippyProps = prepareProps(binding)
-          if (tippyProps) {
-            el._puiTooltip.setProps(tippyProps)
-            el._puiTooltipValue = JSON.stringify(binding.value)
+let initialized = false
+
+export function puiTooltipInit() {
+  if (!initialized) {
+    useNuxtApp().vueApp.directive('pui-tooltip', <PUITooltipDirective>{
+      mounted: (el, binding: DirectiveBinding<Partial<Props> | string | undefined, PUITooltipDirectiveModifiers>) => {
+        initTooltip(el, binding)
+      },
+      updated: (el, binding) => {
+        if (JSON.stringify(binding.value) !== el._puiTooltipValue) {
+          if (el._puiTooltip) {
+            const tippyProps = prepareProps(binding)
+            if (tippyProps) {
+              el._puiTooltip.setProps(tippyProps)
+              el._puiTooltipValue = JSON.stringify(binding.value)
+            }
+          } else {
+            initTooltip(el, binding)
           }
-        } else {
-          initTooltip(el, binding)
         }
-      }
-    },
-    beforeUnmount: (el) => {
-      destroyTooltip(el)
-    },
-  })
-})
+      },
+      beforeUnmount: (el) => {
+        destroyTooltip(el)
+      },
+    })
+  }
+  initialized = true
+}
 
 function prepareProps(
   binding: DirectiveBinding<Partial<Props> | string | undefined, PUITooltipDirectiveModifiers>,

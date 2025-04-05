@@ -82,7 +82,11 @@ if (isTest) {
   await execa('pnpm', ['build'], { ...execaPlaygroundOptions, stdio: 'inherit' })
   consola.info('Build completed')
   consola.info('Starting server...')
-  await execa('node', ['.output/server/index.mjs'], { ...execaPlaygroundOptions, stdio: 'inherit' })
+  await execa('node', ['.output/server/index.mjs'], {
+    ...execaPlaygroundOptions,
+    stdio: 'inherit',
+    env: { ...execaPlaygroundOptions.env, PORT: 3100 },
+  })
 } else if (isCloudflareBuild) {
   fs.writeFileSync(
     resolve(playgroundDir, 'wrangler.toml'),
@@ -222,8 +226,8 @@ async function initPlayground() {
             `    i18n: {`,
             `      languages: [`,
             `        { code: 'en', name: 'English' },`,
-            `        { code: 'de', name: 'German' },`,
-            `        { code: 'bs', name: 'Bosnian' },`,
+            `        { code: 'de', name: 'Deutsch' },`,
+            `        { code: 'bs', name: 'Bosanski' },`,
             `      ],`,
             `    },`,
             `    debug: {`,
@@ -243,8 +247,8 @@ async function initPlayground() {
             `    i18n: {`,
             `      languages: [`,
             `        { code: 'en', name: 'English' },`,
-            `        { code: 'de', name: 'German' },`,
-            `        { code: 'bs', name: 'Bosnian' },`,
+            `        { code: 'de', name: 'Deutsch' },`,
+            `        { code: 'bs', name: 'Bosanski' },`,
             `      ],`,
             `    },`,
             `    debug: {`,

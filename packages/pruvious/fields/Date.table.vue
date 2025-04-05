@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig } from '#pruvious/client'
+import { dayjsConfig } from '#pruvious/client/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isNumber } from '@pruvious/utils'
 

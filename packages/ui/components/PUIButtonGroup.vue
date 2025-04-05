@@ -39,6 +39,7 @@
 
 <script lang="ts" setup>
 import { next, prev, type Primitive } from '@pruvious/utils'
+import { puiTrigger } from '../pui/trigger'
 
 export interface PUIButtonGroupChoiceModel {
   /**

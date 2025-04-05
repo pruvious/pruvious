@@ -97,6 +97,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { PUITimezone } from '../../pui/timezone'
+
 const state = useShowcase()
 const timezone = ref<PUITimezone | 'local'>('America/New_York')
 const withTime = ref(true)

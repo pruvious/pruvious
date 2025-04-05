@@ -34,6 +34,8 @@
 
 <script lang="ts" setup>
 import { getOverlayTransitionDuration, usePruviousDashboardLayout } from '#pruvious/client'
+import { puiIsEditingText } from '@pruvious/ui/pui/hotkeys'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { useElementSize } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 

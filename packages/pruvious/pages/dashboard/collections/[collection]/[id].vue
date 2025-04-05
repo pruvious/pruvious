@@ -132,6 +132,7 @@ import {
   __,
   applyFilters,
   dashboardBasePath,
+  dashboardMiddleware,
   getCollectionBySlug,
   getOverlayTransitionDuration,
   hasPermission,
@@ -152,6 +153,12 @@ import {
 import type { Permission } from '#pruvious/server'
 import type { QueryBuilderResult } from '@pruvious/orm'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
+import { puiDialog } from '@pruvious/ui/pui/dialog'
+import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { puiHTMLInit } from '@pruvious/ui/pui/html'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { puiQueueToast, puiToast } from '@pruvious/ui/pui/toast'
+import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import {
   blurActiveElement,
   castToNumber,
@@ -170,42 +177,46 @@ import { collectionsToMenuItems } from '../../../../utils/pruvious/dashboard/men
 definePageMeta({
   path: dashboardBasePath + 'collections/:collection/:id',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-auth-guard',
-    (to) => {
-      const collection = getCollectionBySlug(to.params.collection)
-      const id = castToNumber(to.params.id)
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'auth-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ __, getCollectionBySlug, hasPermission, puiQueueToast }) => {
+        const collection = getCollectionBySlug(to.params.collection)
+        const id = castToNumber(to.params.id)
 
-      if (!collection || !collection.definition.api.update || collection.definition.ui.hidden) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'Page not found'),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + 'overview')
-      } else if (!isPositiveInteger(id)) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'Page not found'),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-      } else if (
-        !hasPermission(`collection:${to.params.collection}:read` as Permission) &&
-        !hasPermission(`collection:${to.params.collection}:update` as Permission)
-      ) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-            page: to.path,
-          }),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-      }
-    },
+        if (!collection || !collection.definition.api.update || collection.definition.ui.hidden) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'Page not found'),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + 'overview')
+        } else if (!isPositiveInteger(id)) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'Page not found'),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
+        } else if (
+          !hasPermission(`collection:${to.params.collection}:read` as Permission) &&
+          !hasPermission(`collection:${to.params.collection}:update` as Permission)
+        ) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
+              page: to.path,
+            }),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
+        }
+      }),
   ],
 })
+
+await puiHTMLInit()
+puiTooltipInit()
 
 const route = useRoute()
 const id = castToNumber(route.params.id) as number

@@ -45,6 +45,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiToast } from '../../pui/toast'
+
 const state = useShowcase()
 const type = ref<'default' | 'success' | 'error' | 'info' | 'warning'>('default')
 const actionButton = ref(false)
@@ -53,7 +55,7 @@ function showToast() {
   puiToast('Hello!', {
     action: actionButton.value ? { label: 'Close' } : undefined,
     description:
-      'This message is created using the `$toast()` function from [Vue Sonner](https://github.com/xiaoluoboding/vue-sonner).',
+      'This message is created using the `toast()` function from [Vue Sonner](https://github.com/xiaoluoboding/vue-sonner).',
     duration: actionButton.value ? Infinity : undefined,
     type: type.value,
   })

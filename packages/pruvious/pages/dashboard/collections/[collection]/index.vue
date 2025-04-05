@@ -264,6 +264,7 @@ import {
   __,
   customComponents,
   dashboardBasePath,
+  dashboardMiddleware,
   getCollectionBySlug,
   hasPermission,
   maybeTranslate,
@@ -277,6 +278,13 @@ import {
 } from '#pruvious/client'
 import type { CollectionUIOptions, Permission } from '#pruvious/server'
 import type { Paginated, QueryBuilderResult } from '@pruvious/orm'
+import { puiDialog } from '@pruvious/ui/pui/dialog'
+import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { puiHTMLInit } from '@pruvious/ui/pui/html'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { puiColumn, puiTable, type PUIColumns } from '@pruvious/ui/pui/table'
+import { puiQueueToast, puiToast } from '@pruvious/ui/pui/toast'
+import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import {
   deepCompare,
   isDefined,
@@ -296,22 +304,26 @@ import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/la
 definePageMeta({
   path: dashboardBasePath + 'collections/:collection',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-auth-guard',
-    (to) => {
-      const collection = getCollectionBySlug(to.params.collection)
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'auth-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ __, getCollectionBySlug, puiQueueToast }) => {
+        const collection = getCollectionBySlug(to.params.collection)
 
-      if (!collection || collection.definition.ui.hidden) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'Page not found'),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + 'overview')
-      }
-    },
+        if (!collection || collection.definition.ui.hidden) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'Page not found'),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + 'overview')
+        }
+      }),
   ],
 })
+
+await puiHTMLInit()
+puiTooltipInit()
 
 const route = useRoute()
 const collection = getCollectionBySlug(route.params.collection)!

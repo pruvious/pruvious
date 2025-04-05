@@ -34,6 +34,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiToast } from '../../pui/toast'
+
 const state = useShowcase()
 const event = ref<MouseEvent | TouchEvent | null>(null)
 const contextMenu = useTemplateRef('contextMenu')

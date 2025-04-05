@@ -108,6 +108,7 @@
 <script lang="ts" setup>
 import { isDefined, isString, last, next, prev, searchByKeywords, type Primitive } from '@pruvious/utils'
 import { onClickOutside, useEventListener, useScrollLock, useTimeout } from '@vueuse/core'
+import { puiTrigger } from '../pui/trigger'
 import type PUIScrollable from './PUIScrollable.vue'
 
 export interface PUISelectChoiceModel {

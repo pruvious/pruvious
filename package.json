@@ -12,7 +12,6 @@
     "build:i18n": "pnpm --filter @pruvious/i18n build",
     "build:orm": "pnpm --filter @pruvious/orm build",
     "build:storage": "pnpm --filter @pruvious/storage build",
-    "build:ui": "pnpm --filter @pruvious/ui build",
     "build:utils": "pnpm --filter @pruvious/utils build",
     "dev": "node scripts/clean.mjs && pnpm --filter pruvious dev",
     "dev:ui": "node scripts/clean.mjs && pnpm --filter @pruvious/ui dev",

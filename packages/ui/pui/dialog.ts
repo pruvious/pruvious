@@ -1,4 +1,4 @@
-import { puiMarkdown, puiSanitize } from './puiHTML'
+import { puiMarkdown, puiSanitize } from './html'
 
 export interface PUIDialogOptions<TActions extends PUIDialogAction[]> {
   /**

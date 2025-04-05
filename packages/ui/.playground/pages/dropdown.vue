@@ -29,6 +29,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiToast } from '../../pui/toast'
+
 const state = useShowcase()
 const button = useTemplateRef('button')
 const isVisible = ref(false)

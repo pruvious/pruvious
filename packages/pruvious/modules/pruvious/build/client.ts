@@ -27,6 +27,7 @@ export function generateClientFiles() {
   fs.writeFileSync(`${buildDir}/client/hooks.ts`, getClientHooksFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/client/index.ts`, getClientFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/client/index.d.ts`, getClientTypeFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/client/dayjs.ts`, getClientDayjsFileContent() + '\n')
 }
 
 /**
@@ -66,7 +67,7 @@ function getClientI18nFileContent() {
 
   return [
     `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
-    `import type { i18n as _i18n } from '../server'`,
+    `import type { i18n as _i18n, LanguageCode } from '../server'`,
     `import { useLanguage } from '${resolve('../translations/utils.client')}'`,
     ``,
     `/**`,
@@ -131,6 +132,14 @@ function getClientI18nFileContent() {
     ` * \`\`\``,
     ` */`,
     `export function _<THandle extends ExtractHandlesByDomainAndLanguage<'default', string, ExtractTranslatableStringsDefinitions<typeof i18n>>, TInput extends ExtractInput<'default', string, THandle & string, ExtractTranslatableStringsDefinitions<typeof i18n>>>(handle: THandle, input?: TInput): string { return i18n.__$('default', useLanguage().value, handle as any, input) }`,
+    ``,
+    `/**`,
+    ` * Verifies if a language \`code\` exists in the configured languages list.`,
+    ` * The function checks against the language codes defined in the \`pruvious.i18n.languages\` array within \`nuxt.config.ts\`.`,
+    ` */`,
+    `export function isValidLanguageCode(code: unknown): code is LanguageCode {`,
+    `  return languages.some((language) => language.code === code)`,
+    `}`,
     ``,
   ].join('\n')
 }
@@ -496,17 +505,28 @@ function getClientTypeFileContent() {
   ].join('\n')
 }
 
+/**
+ * Generates the `#pruvious/client/dayjs.ts` file content.
+ */
+function getClientDayjsFileContent() {
+  const { resolve } = createResolver(import.meta.url)
+
+  return [
+    `export { dayjsLocales, dayjs, dayjsUTC, dayjsConfig, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative, dayjsResolveTimezone } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
+  ].join('\n')
+}
+
 function getReExports() {
   const { resolve } = createResolver(import.meta.url)
 
   return [
     `export { dashboardBasePath } from './base'`,
-    `export { i18n, _, __, languages, primaryLanguage, dashboardLanguages } from './i18n'`,
+    `export { i18n, _, __, languages, primaryLanguage, dashboardLanguages, isValidLanguageCode } from './i18n'`,
     `export { type Actions, type Filters, actions, filters, loadActions, loadFilters } from './hooks'`,
     `export { pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, pfetch, type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError } from '${resolve('../api/utils.client')}'`,
     `export { useAuth, refreshAuthState, getAuthTokenPayload, getAuthTokenExpiresIn, storeAuthToken, removeAuthToken, isLoggedIn, getUser, hasPermission, type AuthState } from '${resolve('../auth/utils.client')}'`,
     `export { usePruvious, usePruviousDashboard, refreshPruviousState, refreshPruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
-    `export { useLanguage, useDashboardContentLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath, deserializeTranslatableStringCallbacks, maybeTranslate, isValidLanguageCode } from '${resolve('../translations/utils.client')}'`,
+    `export { useLanguage, useDashboardContentLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath, deserializeTranslatableStringCallbacks } from '${resolve('../translations/utils.client')}'`,
     `export { pruviousDashboardPost, pruviousDashboardGet, pruviousDashboardPatch, pruviousDashboardDelete, pfetchDashboard } from '${resolve('../api/dashboard-utils.client')}'`,
     `export { defineAction, defineFilter } from '${resolve('../hooks/define.client')}'`,
     `export { addAction, doActions, addFilter, applyFilters } from '${resolve('../hooks/utils.client')}'`,
@@ -514,6 +534,10 @@ function getReExports() {
     `export { insertInto, selectFrom, update, deleteFrom, selectSingleton, updateSingleton, useSelectQueryBuilderParams } from '${resolve('../client-query-builder/utils.client')}'`,
     `export { SingletonSelectQueryBuilder } from '${resolve('../client-query-builder/SingletonSelectQueryBuilder')}'`,
     `export { SingletonUpdateQueryBuilder } from '${resolve('../client-query-builder/SingletonUpdateQueryBuilder')}'`,
+    `export { dashboardDefaultMiddleware } from '${resolve('../middleware/pruvious-dashboard')}'`,
+    `export { dashboardAuthGuard } from '${resolve('../middleware/pruvious-dashboard-auth-guard')}'`,
+    `export { dashboardGuestGuard } from '${resolve('../middleware/pruvious-dashboard-guest-guard')}'`,
+    `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolve('../middleware/utils.client')}'`,
     `export { fillFieldData, prepareFieldData, resolveSubfieldsFromData, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
     `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
@@ -522,8 +546,8 @@ function getReExports() {
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
     `export { type ResolvedCollectionRecordPermissions, resolveCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
     `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
-    `export { dayjsLocales, dayjs, dayjsUTC, dayjsConfig, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative, dayjsResolveTimezone } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
     `export { usePruviousHMR } from '${resolve('../../../utils/pruvious/dashboard/hmr')}'`,
+    `export { maybeTranslate } from '${resolve('../../../utils/pruvious/dashboard/i18n')}'`,
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')

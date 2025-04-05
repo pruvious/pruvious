@@ -11,6 +11,7 @@
 
 <script lang="ts" setup>
 import { __, hasPermission, pruviousDashboardPost, QueryBuilder } from '#pruvious/client'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
 
 const props = defineProps({
   /**

@@ -27,7 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dayjs, maybeTranslate } from '#pruvious/client'
+import { __, maybeTranslate } from '#pruvious/client'
+import { dayjs } from '#pruvious/client/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { useIntervalFn } from '@vueuse/core'
 

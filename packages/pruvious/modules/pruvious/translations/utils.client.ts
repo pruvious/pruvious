@@ -1,12 +1,11 @@
-import { _, __, languages } from '#pruvious/client/i18n'
-import type { LanguageCode, TranslatableStringCallbackContext } from '#pruvious/server'
+import type { LanguageCode } from '#pruvious/server'
 import type {
   ExtractDomains,
   ExtractLanguagesByDomain,
   ExtractTranslatableStringsDefinitions,
   TranslatableStrings,
 } from '@pruvious/i18n'
-import { isArray, isFunction, isObject, isString, PathMatcher } from '@pruvious/utils'
+import { isArray, isObject, isString, type PathMatcher } from '@pruvious/utils'
 
 const matchers: Record<string, PathMatcher> = {}
 
@@ -104,6 +103,7 @@ export async function preloadTranslatableStrings<
 export async function preloadTranslatableStringsForPath(path: string) {
   const language = useLanguage().value
   const { translatableStringsPreloadRules } = useRuntimeConfig().public.pruvious
+  const { PathMatcher } = await import('@pruvious/utils')
 
   for (const [domain, { include, exclude }] of Object.entries(translatableStringsPreloadRules)) {
     if (!matchers[domain]) {
@@ -132,34 +132,4 @@ export function deserializeTranslatableStringCallbacks<T>(object: T): T {
   }
 
   return object
-}
-
-/**
- * Executes a translatable string callback or returns the provided string.
- *
- * Translatable string callbacks are used for translating field option values, usually in the UI.
- * They are anonymous functions that receive an object with `_` and `__` properties to access the translation functions.
- * The language is automatically resolved from the `useLanguage()` composable.
- *
- * @example
- * ```ts
- * // String
- * maybeTranslate('First Name') // 'First Name'
- *
- * // Function
- * maybeTranslate(({ _ }) => _('First Name')) // 'Vorname'
- * ```
- */
-export function maybeTranslate<T extends string | ((context: TranslatableStringCallbackContext) => string) | undefined>(
-  value: T,
-): T extends undefined ? string | undefined : string {
-  return isFunction(value) ? value({ _: _, __: __ }) : (value as any)
-}
-
-/**
- * Verifies if a language `code` exists in the configured languages list.
- * The function checks against the language codes defined in the `pruvious.i18n.languages` array within `nuxt.config.ts`.
- */
-export function isValidLanguageCode(code: unknown): code is LanguageCode {
-  return languages.some((language) => language.code === code)
 }

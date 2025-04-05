@@ -326,6 +326,7 @@ import {
   useAuth,
 } from '#pruvious/client'
 import type { Collections, SerializableCollection } from '#pruvious/server'
+import { puiToast } from '@pruvious/ui/pui/toast'
 import { sortNaturallyByProp } from '@pruvious/utils'
 import type { TableSettings } from './TableSettingsPopup.vue'
 

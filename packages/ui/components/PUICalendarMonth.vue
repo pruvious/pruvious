@@ -33,6 +33,7 @@
 
 <script lang="ts" setup>
 import type { Dayjs } from 'dayjs/esm'
+import { puiDayjs } from '../pui/date'
 import type { PUICalendarLabels } from './PUICalendar.vue'
 
 const props = defineProps({

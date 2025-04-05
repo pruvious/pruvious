@@ -22,7 +22,7 @@ import {
   uniqueValidator,
 } from '#pruvious/server'
 import type { WhereCondition } from '@pruvious/orm'
-import { type PUITimezone, puiTimezones } from '@pruvious/ui/composables/puiTimezone'
+import { type PUITimezone, puiTimezones } from '@pruvious/ui/pui/timezone'
 import { castToBoolean, generateSecureRandomString, isDefined, isString } from '@pruvious/utils'
 
 export default defineTemplate(() => ({

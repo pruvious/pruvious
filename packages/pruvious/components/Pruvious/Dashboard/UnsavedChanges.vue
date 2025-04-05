@@ -18,6 +18,7 @@
 
 <script lang="ts" setup>
 import { __, getOverlayTransitionDuration, unsavedChanges } from '#pruvious/client'
+import { puiIsEditingText, puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { blurActiveElement, isDefined } from '@pruvious/utils'
 import { useEventListener, watchOnce } from '@vueuse/core'
 import { onBeforeRouteLeave, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'

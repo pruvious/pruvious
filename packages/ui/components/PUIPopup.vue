@@ -43,6 +43,8 @@
 import { sleep } from '@pruvious/utils'
 import { useActiveElement, useEventListener } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
+import { puiIsEditingText } from '../pui/hotkeys'
+import { usePUIOverlayCounter } from '../pui/overlay'
 import PUIContainer from './PUIContainer.vue'
 
 defineProps({

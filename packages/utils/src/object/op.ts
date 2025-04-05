@@ -1,7 +1,5 @@
-import { deleteProperty as _deleteProperty, getProperty as _getProperty, setProperty as _setProperty } from 'dot-prop'
 import { isArray } from '../array/is'
 import { isDefined } from '../common/is'
-import { resolveRelativeDotNotation } from '../misc/path'
 import { isObject } from './is'
 
 /**
@@ -133,71 +131,6 @@ export function omit<T, K extends keyof T>(object: T, keys: K[]): Omit<T, K> {
   }
 
   return result
-}
-
-/**
- * Retrieves a property from an `object` using a specified `path` in dot notation.
- *
- * @example
- * ```ts
- * getProperty({ foo: { bar: 'baz' }}, 'foo.bar') // 'baz'
- * getProperty({ foo: ['bar', 'baz']}, 'foo.1')   // 'baz'
- * getProperty({ foo: ['bar', 'baz']}, 'foo', 1)  // 'baz'
- * getProperty({ foo: { bar: 'baz' }}, 'bar')     // undefined
- * ```
- */
-export function getProperty<T extends any>(
-  object: Record<string, any>,
-  path: string,
-  ...append: (string | number)[]
-): T {
-  if (append.length) {
-    path = resolveRelativeDotNotation(`${path}._`, append.join('/'))
-  }
-
-  path = convertDotToBracket(path)
-  return path ? _getProperty(object, path) : (object as T)
-}
-
-/**
- * Sets a property on an `object` to a specified `value` using a `path` in dot notation.
- *
- * @example
- * ```ts
- * setProperty({ foo: {}}, 'foo.bar', { bar: 'baz' }) // { foo: { bar: 'baz' } }
- * setProperty({ foo: ['bar']}, 'foo.1', 'baz)        // { foo: ['bar', 'baz'] }
- * ```
- */
-export function setProperty<T extends Record<string, any>>(object: T, path: string, value: any): T {
-  return _setProperty(object, convertDotToBracket(path), value)
-}
-
-/**
- * Removes a property from an `object` using a specified `path` in dot notation.
- *
- * @example
- * ```ts
- * deleteProperty({ foo: { bar: 'baz' }}, 'foo.bar') // true
- * deleteProperty({ foo: ['bar', 'baz']}, 'foo.1')   // true
- * deleteProperty({ foo: { bar: 'baz' }}, 'bar')     // false
- * ```
- */
-export function deleteProperty(object: Record<string, any>, path: string): any {
-  const prop = path.replace(/\.([0-9]+)(\.|$)/gm, '[$1]$2')
-
-  if (prop.endsWith(']')) {
-    const index = +prop.slice(prop.lastIndexOf('[') + 1, -1)
-    const array = _getProperty(object, prop.slice(0, prop.lastIndexOf('['))) as any
-
-    if (isArray(array)) {
-      array.splice(index, 1)
-      return true
-    }
-
-    return false
-  }
-
-  return _deleteProperty(object, prop)
 }
 
 /**
@@ -403,12 +336,4 @@ export function invertMap<K extends string | number | symbol, V extends string |
 ): Record<V, K> {
   const invertedEntries = Object.entries(object).map(([key, value]) => [value, key])
   return Object.fromEntries(invertedEntries) as Record<V, K>
-}
-
-function convertDotToBracket(path: string) {
-  if (/^\d+$/.test(path)) {
-    return `[${path}]`
-  }
-
-  return path.replace(/\.(\d+)(?=\.|$)/g, '[$1]').replace(/^(\d+)/, '[$1]')
 }

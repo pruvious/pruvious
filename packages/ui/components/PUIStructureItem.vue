@@ -45,6 +45,7 @@
 <script lang="ts" setup>
 import { clearArray, deselectAll } from '@pruvious/utils'
 import { onKeyStroke, useEventListener } from '@vueuse/core'
+import { usePUIStructureDraggable } from '../pui/structure'
 
 const props = defineProps({
   /**

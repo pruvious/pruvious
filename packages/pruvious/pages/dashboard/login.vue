@@ -18,19 +18,20 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, usePruvious } from '#pruvious/client'
+import { __, dashboardBasePath, dashboardMiddleware } from '#pruvious/client'
 import { isString, withoutLeadingSlash, withoutTrailingSlash } from '@pruvious/utils'
 
 definePageMeta({
   path: dashboardBasePath + 'login',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-guest-guard',
-    () => {
-      if (!usePruvious().value?.installed) {
-        return navigateTo(dashboardBasePath + 'install', { replace: true })
-      }
-    },
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'guest-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ usePruvious }) => {
+        if (!usePruvious().value?.installed) {
+          return navigateTo(dashboardBasePath + 'install', { replace: true })
+        }
+      }),
   ],
 })
 

@@ -1,15 +1,5 @@
 import { expect, test } from 'vitest'
-import {
-  move,
-  moveByProp,
-  next,
-  prev,
-  remove,
-  removeByProp,
-  searchByKeywords,
-  uniqueArray,
-  uniqueArrayByProp,
-} from '../../src'
+import { move, moveByProp, next, prev, remove, removeByProp, uniqueArray, uniqueArrayByProp } from '../../src'
 
 test('remove from array', () => {
   const a = [1, 2, 3, 4, 5]
@@ -67,12 +57,6 @@ test('remove from array by prop', () => {
   const b3 = removeByProp({ id: 4 }, b, 'id', true)
   expect(b3).toEqual([{ id: 3 }])
   expect(b).toBe(b3)
-})
-
-test('search by keywords', () => {
-  expect(searchByKeywords(['foo', 'bar'], 'FOO')).toEqual(['foo'])
-  expect(searchByKeywords([{ foo: 'foo' }, { foo: 'bar' }], 'FOO', 'foo')).toEqual([{ foo: 'foo' }])
-  expect(searchByKeywords(['foo', 'bar'], 'FOO BAZ')).toEqual([])
 })
 
 test('prev', () => {

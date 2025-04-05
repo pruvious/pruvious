@@ -73,6 +73,16 @@
 <script generic="T, SourceIdProp extends string, SourceChildrenProp extends string" lang="ts" setup>
 import { deepClone, isDescendant, isUndefined, next, prev, randomIdentifier, remove } from '@pruvious/utils'
 import { onClickOutside, useFocusWithin } from '@vueuse/core'
+import { usePUIHotkeys } from '../pui/hotkeys'
+import {
+  puiAddTreeItemsBefore,
+  puiDeleteTreeItems,
+  puiDropTreeItems,
+  puiFlatTreeItems,
+  puiMoveTreeItems,
+  puiNormalizeTreeSelection,
+  puiSortTreeItems,
+} from '../pui/tree'
 import type { PUITreeDropTarget, PUITreeExtendedItemModel, PUITreeItemModel } from './PUITreeItem.vue'
 
 export type PUITreeModel<T> = PUITreeItemModel<T>[]

@@ -66,6 +66,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiToast } from '../../pui/toast'
+
 const state = useShowcase()
 const disabled = ref(false)
 const isPasswordVisible = ref(false)

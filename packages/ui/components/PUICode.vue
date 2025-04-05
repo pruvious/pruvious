@@ -25,6 +25,7 @@
 import { transformerNotationHighlight } from '@shikijs/transformers'
 import { useClipboard } from '@vueuse/core'
 import type { CodeToHastOptions, HighlighterCore } from 'shiki'
+import { highlighter } from '../pui/code'
 
 const props = defineProps({
   /**

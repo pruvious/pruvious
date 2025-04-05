@@ -14,6 +14,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiDialog } from '../../pui/dialog'
+
 const state = useShowcase()
 const result = ref('undefined')
 

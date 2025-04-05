@@ -1,6 +1,6 @@
 import { isString } from '@pruvious/utils'
 import { toast, type ExternalToast } from 'vue-sonner'
-import { puiMarkdown, puiSanitize } from './puiHTML'
+import { puiMarkdown, puiSanitize } from './html'
 
 export type PUIToastOptions = ExternalToast & {
   /**

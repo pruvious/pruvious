@@ -51,8 +51,8 @@
 import {
   __,
   dashboardBasePath,
+  dashboardMiddleware,
   deserializeTranslatableStringCallbacks,
-  hasPermission,
   History,
   parseConditionalLogic,
   prepareFieldData,
@@ -65,26 +65,31 @@ import {
   useLanguage,
 } from '#pruvious/client'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
+import { puiDialog } from '@pruvious/ui/pui/dialog'
+import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { blurActiveElement, isDefined, isUndefined, lockAndLoad } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 
 definePageMeta({
   path: dashboardBasePath + 'me',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-auth-guard',
-    (to) => {
-      if (!hasPermission('update-account')) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-            page: to.path,
-          }),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + 'overview')
-      }
-    },
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'auth-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ __, hasPermission, puiQueueToast }) => {
+        if (!hasPermission('update-account')) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
+              page: to.path,
+            }),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + 'overview')
+        }
+      }),
   ],
 })
 

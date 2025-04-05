@@ -30,6 +30,8 @@
 </template>
 
 <script lang="ts" setup>
+import { usePUIDialog } from '../pui/dialog'
+
 const dialog = usePUIDialog()
 const popup = useTemplateRef('popup')
 </script>

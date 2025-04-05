@@ -22,6 +22,7 @@
 
 <script lang="ts" setup>
 import { useDebounceFn, useElementSize, useScroll } from '@vueuse/core'
+import { usePUIStructureDraggable } from '../pui/structure'
 
 const props = defineProps({
   /**

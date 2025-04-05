@@ -10,6 +10,8 @@
 </template>
 
 <script lang="ts" setup>
+import { puiTrigger } from '../pui/trigger'
+
 defineProps({
   /**
    * Adjusts the size of the component.

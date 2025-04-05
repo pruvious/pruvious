@@ -34,6 +34,7 @@
 
 <script lang="ts" setup>
 import { isNumber } from '@pruvious/utils'
+import { puiParseTime, puiParseTimeSpan } from '../pui/date'
 import type { PUITimeLabels } from './PUITime.vue'
 
 const props = defineProps({

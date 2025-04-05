@@ -73,6 +73,7 @@
 <script generic="TItem extends Record<string, any>, TType extends string | undefined = undefined" lang="ts" setup>
 import { isDefined, isNull } from '@pruvious/utils'
 import { onClickOutside } from '@vueuse/core'
+import { usePUIStructureDraggable } from '../pui/structure'
 
 const props = defineProps({
   /**

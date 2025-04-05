@@ -11,7 +11,7 @@ import {
   useLanguage,
 } from '#pruvious/client'
 import type { LanguageCode } from '#pruvious/server'
-import { removeUnwantedStylesFromDashboard } from '../modules/pruvious/pruvious/utils.client'
+import { removeUnwantedStylesFromDashboard } from '../pruvious/utils.client'
 
 /**
  * Pruvious client middleware intended for use in the dashboard.
@@ -25,7 +25,7 @@ import { removeUnwantedStylesFromDashboard } from '../modules/pruvious/pruvious/
  *   - If the user is not logged in, the primary language is used.
  * - Preloads the required translations.
  */
-export default defineNuxtRouteMiddleware(async () => {
+export const dashboardDefaultMiddleware = async () => {
   if (import.meta.client) {
     // Remove unwanted styles
     removeUnwantedStylesFromDashboard()
@@ -58,4 +58,4 @@ export default defineNuxtRouteMiddleware(async () => {
 
     await preloadTranslatableStrings('pruvious-dashboard', dashboardLanguage as any)
   }
-})
+}

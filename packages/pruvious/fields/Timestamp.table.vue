@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjs, dayjsFormatDateTime, dayjsRelative } from '#pruvious/client'
+import { dayjs, dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({

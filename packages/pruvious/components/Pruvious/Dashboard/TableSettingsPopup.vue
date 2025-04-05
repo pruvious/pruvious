@@ -132,6 +132,8 @@ import { __, hasPermission, History, maybeTranslate, resolveFieldLabel, unsavedC
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField, Paginated, SelectQueryBuilderParams } from '@pruvious/orm'
 import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'
+import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { puiColumn, type PUIColumn, type PUIColumns } from '@pruvious/ui/pui/table'
 import {
   blurActiveElement,
   castToBoolean,

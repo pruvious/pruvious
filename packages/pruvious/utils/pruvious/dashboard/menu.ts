@@ -12,7 +12,7 @@ import type {
 import { getUser } from '../../../modules/pruvious/auth/utils.client'
 import type { CollectionUIOptions } from '../../../modules/pruvious/collections/define'
 import type { SingletonUIOptions } from '../../../modules/pruvious/singletons/define'
-import { maybeTranslate } from '../../../modules/pruvious/translations/utils.client'
+import { maybeTranslate } from './i18n'
 
 export type DashboardMenuItem = Pick<PUIVerticalMenuItemModel, 'action' | 'label' | 'icon' | 'submenu'> & {
   /**

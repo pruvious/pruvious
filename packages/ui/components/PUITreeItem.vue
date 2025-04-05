@@ -192,6 +192,8 @@
 <script generic="T" lang="ts" setup>
 import { clearArray, deselectAll, isFunction, uniqueArrayByProp } from '@pruvious/utils'
 import { onKeyStroke, useEventListener } from '@vueuse/core'
+import { puiIsMac } from '../pui/hotkeys'
+import { puiGetChildTreeItems } from '../pui/tree'
 import type { PUITreeModel } from './PUITree.vue'
 
 export type PUITreeItemModel<T> = {

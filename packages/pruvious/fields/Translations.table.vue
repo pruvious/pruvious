@@ -39,6 +39,7 @@ import {
   type ResolvedCollectionRecordPermissions,
 } from '#pruvious/client'
 import type { Collections } from '#pruvious/server'
+import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { filterObject, slugify } from '@pruvious/utils'
 
 const props = defineProps({

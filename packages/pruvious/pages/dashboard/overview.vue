@@ -10,11 +10,11 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath } from '#pruvious/client'
+import { __, dashboardBasePath, dashboardMiddleware } from '#pruvious/client'
 
 definePageMeta({
   path: dashboardBasePath + 'overview',
-  middleware: ['pruvious-dashboard', 'pruvious-dashboard-auth-guard'],
+  middleware: [(to) => dashboardMiddleware(to, 'default'), (to) => dashboardMiddleware(to, 'auth-guard')],
 })
 
 useHead({

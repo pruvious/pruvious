@@ -107,6 +107,7 @@ import {
   __,
   applyFilters,
   dashboardBasePath,
+  dashboardMiddleware,
   fillFieldData,
   getSingletonBySlug,
   hasPermission,
@@ -124,6 +125,11 @@ import {
 } from '#pruvious/client'
 import type { Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
+import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { puiHTMLInit } from '@pruvious/ui/pui/html'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
+import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import { blurActiveElement, isDefined, isUndefined, lockAndLoad, titleCase } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveSingletonLayout } from '../../../utils/pruvious/dashboard/layout'
@@ -131,21 +137,26 @@ import { resolveSingletonLayout } from '../../../utils/pruvious/dashboard/layout
 definePageMeta({
   path: dashboardBasePath + 'singletons/:singleton',
   middleware: [
-    'pruvious-dashboard',
-    'pruvious-dashboard-auth-guard',
-    (to) => {
-      const singleton = getSingletonBySlug(to.params.singleton)
-      if (!singleton || singleton.definition.ui.hidden) {
-        puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-          type: 'error',
-          description: __('pruvious-dashboard', 'Page not found'),
-          showAfterRouteChange: true,
-        })
-        return navigateTo(dashboardBasePath + 'overview')
-      }
-    },
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => dashboardMiddleware(to, 'auth-guard'),
+    (to) =>
+      dashboardMiddleware(to, ({ __, puiQueueToast, getSingletonBySlug }) => {
+        const singleton = getSingletonBySlug(to.params.singleton)
+
+        if (!singleton || singleton.definition.ui.hidden) {
+          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+            type: 'error',
+            description: __('pruvious-dashboard', 'Page not found'),
+            showAfterRouteChange: true,
+          })
+          return navigateTo(dashboardBasePath + 'overview')
+        }
+      }),
   ],
 })
+
+await puiHTMLInit()
+puiTooltipInit()
 
 const route = useRoute()
 const singleton = getSingletonBySlug(route.params.singleton)!

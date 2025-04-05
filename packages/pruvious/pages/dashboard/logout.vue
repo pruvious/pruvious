@@ -5,6 +5,7 @@
 <script lang="ts" setup>
 import {
   dashboardBasePath,
+  dashboardMiddleware,
   pruviousDashboardPost,
   refreshPruviousDashboardState,
   removeAuthToken,
@@ -14,7 +15,7 @@ import {
 
 definePageMeta({
   path: dashboardBasePath + 'logout',
-  middleware: ['pruvious-dashboard', 'pruvious-dashboard-auth-guard'],
+  middleware: [(to) => dashboardMiddleware(to, 'default'), (to) => dashboardMiddleware(to, 'auth-guard')],
 })
 
 await pruviousDashboardPost('auth/logout', {}).finally(removeAuthToken)

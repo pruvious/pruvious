@@ -81,6 +81,7 @@ import {
   useDashboardContentLanguage,
 } from '#pruvious/client'
 import type { LanguageCode, Permission, SerializableSingleton, Singletons } from '#pruvious/server'
+import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
 
 const props = defineProps({

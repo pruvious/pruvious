@@ -115,6 +115,7 @@ import {
   type ResolvedCollectionRecordPermissions,
 } from '#pruvious/client'
 import type { Collections, LanguageCode, SerializableCollection } from '#pruvious/server'
+import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
 
 const props = defineProps({

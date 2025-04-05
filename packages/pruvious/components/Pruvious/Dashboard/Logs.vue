@@ -381,9 +381,15 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dayjsFormatDateTime, dayjsRelative, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
+import { __, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
+import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { CollectionUIOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
+import { puiDialog } from '@pruvious/ui/pui/dialog'
+import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { puiColumn, puiTable, type PUIColumns } from '@pruvious/ui/pui/table'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import {
   deepCompare,
   isDefined,

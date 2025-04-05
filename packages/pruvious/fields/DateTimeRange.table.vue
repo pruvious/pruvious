@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig, dayjsResolveTimezone } from '#pruvious/client'
+import { dayjsConfig, dayjsResolveTimezone } from '#pruvious/client/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isNull, isUndefined } from '@pruvious/utils'
 

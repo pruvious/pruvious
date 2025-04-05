@@ -3,11 +3,11 @@
 </template>
 
 <script lang="ts" setup>
-import { dashboardBasePath, useAuth } from '#pruvious/client'
+import { dashboardBasePath, dashboardMiddleware, useAuth } from '#pruvious/client'
 
 definePageMeta({
   path: dashboardBasePath,
-  middleware: ['pruvious-dashboard'],
+  middleware: [(to) => dashboardMiddleware(to, 'default')],
 })
 
 const { isLoggedIn } = useAuth().value
