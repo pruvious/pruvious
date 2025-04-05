@@ -115,21 +115,3 @@ export async function preloadTranslatableStringsForPath(path: string) {
     }
   }
 }
-
-/**
- * Deserializes translatable string functions that were serialized using the `serializeTranslatableStringCallbacks()` function.
- * This affects all functions in the provided `object`.
- */
-export function deserializeTranslatableStringCallbacks<T>(object: T): T {
-  if (isObject(object)) {
-    return Object.fromEntries(
-      Object.entries(object).map(([key, value]) => [key, deserializeTranslatableStringCallbacks(value)]),
-    ) as T
-  } else if (isArray(object)) {
-    return object.map(deserializeTranslatableStringCallbacks) as T
-  } else if (isString(object) && object.startsWith('EVAL::')) {
-    return new Function(`return ${object.slice(6)}`)() as T
-  }
-
-  return object
-}

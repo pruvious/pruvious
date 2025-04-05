@@ -1,7 +1,7 @@
+import { isArray, isObject, isString } from '@pruvious/utils'
 import { pruviousGet } from '../api/utils.client'
 import type { SerializableCollection } from '../collections/utils.client'
 import type { SerializableSingleton } from '../singletons/utils.client'
-import { deserializeTranslatableStringCallbacks } from '../translations/utils.client'
 
 export interface PruviousState {
   /**
@@ -159,4 +159,22 @@ export function removeUnwantedStylesFromDashboard() {
 
     unwantedStylesRemoved = true
   }
+}
+
+/**
+ * Deserializes translatable string functions that were serialized using the `serializeTranslatableStringCallbacks()` function.
+ * This affects all functions in the provided `object`.
+ */
+export function deserializeTranslatableStringCallbacks<T>(object: T): T {
+  if (isObject(object)) {
+    return Object.fromEntries(
+      Object.entries(object).map(([key, value]) => [key, deserializeTranslatableStringCallbacks(value)]),
+    ) as T
+  } else if (isArray(object)) {
+    return object.map(deserializeTranslatableStringCallbacks) as T
+  } else if (isString(object) && object.startsWith('EVAL::')) {
+    return new Function(`return ${object.slice(6)}`)() as T
+  }
+
+  return object
 }
