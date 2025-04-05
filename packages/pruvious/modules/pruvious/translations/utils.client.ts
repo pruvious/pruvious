@@ -1,4 +1,4 @@
-import type { LanguageCode } from '#pruvious/server'
+import type { LanguageCode, i18n as _i18n } from '#pruvious/server'
 import type {
   ExtractDomains,
   ExtractLanguagesByDomain,
@@ -72,12 +72,12 @@ export function extractLanguageCode(path: string): LanguageCode {
  * ```
  */
 export async function preloadTranslatableStrings<
-  TDomain extends ExtractDomains<ExtractTranslatableStringsDefinitions<typeof i18n>>,
-  TLanguage extends ExtractLanguagesByDomain<TDomain, ExtractTranslatableStringsDefinitions<typeof i18n>>,
+  TDomain extends ExtractDomains<ExtractTranslatableStringsDefinitions<typeof _i18n>>,
+  TLanguage extends ExtractLanguagesByDomain<TDomain, ExtractTranslatableStringsDefinitions<typeof _i18n>>,
 >(domain: TDomain, language: TLanguage): Promise<TranslatableStrings> {
   const { i18n } = await import('#pruvious/client')
 
-  if (!i18n.hasDefinition(domain, language)) {
+  if (!i18n().hasDefinition(domain, language)) {
     const { apiBasePath } = useRuntimeConfig().public.pruvious
     const nuxtApp = useNuxtApp()
     const handler = () => $fetch<TranslatableStrings>(apiBasePath + 'translations', { query: { domain, language } })
@@ -88,10 +88,10 @@ export async function preloadTranslatableStrings<
         }).then(({ data }) => data.value ?? {})
       : await handler()
 
-    i18n.defineTranslatableStrings({ domain, language, strings })
+    i18n().defineTranslatableStrings({ domain, language, strings })
   }
 
-  return i18n.getDefinition(domain, language)!.strings
+  return i18n().getDefinition(domain, language)!.strings
 }
 
 /**
