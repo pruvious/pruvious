@@ -7,51 +7,51 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 
 ## Installation
 
-Create a new Nuxt project:
+1. Create a new Nuxt project:
 
-```bash
-npm create nuxt
-```
+   ```bash
+   npm create nuxt
+   ```
 
-Fix the Nuxt version to `3.15.2` in your `package.json`. Versions above `3.15.2` currently have an issue with Nuxt layers that affects compatibility. This should be resolved in future updates.
+2. Install Pruvious 4:
 
-Install Pruvious 4:
+   ```bash
+   pnpm add https://pkg.pr.new/pruvious/pruvious/pruvious@v4
+   ```
 
-```bash
-pnpm add https://pkg.pr.new/pruvious/pruvious/pruvious@v4
-```
+   You can also use specific git commits instead of `@v4`. For example: `https://pkg.pr.new/pruvious/pruvious/pruvious@b2cbc6afe7f2c2e8a80a1366ee20629e3583bc21`
 
-You can also use specific git commits instead of `@v4`. For example: `https://pkg.pr.new/pruvious/pruvious/pruvious@ad54f7d76d314b130918e652a585c05b54c12e46`
+3. Add the Pruvious layer to your `nuxt.config.ts`:
 
-Add the Pruvious layer to your `nuxt.config.ts`:
+   ```ts
+   export default defineNuxtConfig({
+     extends: ['pruvious'],
+     pruvious: { auth: { jwt: { secret: 'dev' } } }, // Maintain login sessions during development
+   })
+   ```
 
-```ts
-export default defineNuxtConfig({
-  extends: ['pruvious'],
-  pruvious: { auth: { jwt: { secret: 'dev' } } }, // Maintain login sessions during development
-})
-```
+4. Add the following lines to your `.gitignore` file:
 
-Add the following lines to your `.gitignore` file:
+   ```text
+   .pruvious
+   .uploads
+   *.sqlite
+   *.sqlite-*
+   ```
 
-```text
-.pruvious
-.uploads
-*.sqlite
-*.sqlite-*
-```
+5. Remove the `app.vue` file from your project.
 
-Remove the `app.vue` file from your project and start the development server:
+6. Start the development server:
 
-```bash
-pnpm dev
-```
+   ```bash
+   pnpm dev
+   ```
 
-Visit http://localhost:3000/dashboard to complete the CMS installation.
-
-The documentation for version 4 is currently under development. In the meantime, please refer to the inline code comments, which contain examples and explanations for most features.
+   Visit http://localhost:3000/dashboard to complete the CMS installation.
 
 ### Tips
+
+The documentation for version 4 is currently under development. In the meantime, please refer to the inline code comments, which contain examples and explanations for most features.
 
 #### Creating Collections
 
@@ -206,17 +206,17 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | Checkbox field |
 | 👻 | Checkboxes field |
 | 🚧 | Chips field |
-| 👻 | Date field |
-| 👻 | Date range field |
-| 🚧 | Date-time field |
-| 👻 | Date-time range field |
+| ✅ | Date field |
+| ✅ | Date range field |
+| ✅ | Date-time field |
+| ✅ | Date-time range field |
 | 👻 | Editor field |
 | 👻 | File field |
 | 👻 | Gallery field |
 | 👻 | Icon field |
 | 👻 | Image field |
 | 👻 | Link field |
-| 🚧 | Number field |
+| ✅ | Number field |
 | 👻 | Range field |
 | 🚧 | Record field |
 | 🚧 | Records field |
@@ -228,19 +228,19 @@ Package: <a href="packages/pruvious">pruvious</a>
 | ✅ | Switch field |
 | ✅ | Text field |
 | 👻 | Text area field |
-| 👻 | Time field |
-| 👻 | Time range field |
-| 🚧 | Timestamp field |
+| ✅ | Time field |
+| ✅ | Time range field |
+| ✅ | Timestamp field |
 | ✅ | True-false field |
 
 #### 🚧 Field presets
 
 | Status | Feature |
 |:---:|:---|
-| 🚧 | Created at |
-| 🚧 | Updated at |
-| 🚧 | Author |
-| 🚧 | Editors |
+| ✅ | Created at |
+| ✅ | Updated at |
+| ✅ | Author |
+| ✅ | Editors |
 | 🚧 | Language |
 | 🚧 | Translations |
 
