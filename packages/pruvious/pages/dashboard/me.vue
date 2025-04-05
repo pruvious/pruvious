@@ -67,8 +67,10 @@ import {
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
+import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
+import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import { blurActiveElement, isDefined, isUndefined, lockAndLoad } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 
@@ -92,6 +94,9 @@ definePageMeta({
       }),
   ],
 })
+
+await puiHTMLInit()
+puiTooltipInit()
 
 useHead({
   title: __('pruvious-dashboard', 'My account'),
