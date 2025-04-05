@@ -1,5 +1,10 @@
 <template>
-  <PUIPopup v-if="loginPopup" :size="-1" ref="popup" width="21rem">
+  <PUIPopup
+    v-if="loginPopup && route.path !== dashboardBasePath + 'login' && route.path !== dashboardBasePath + 'logout'"
+    :size="-1"
+    ref="popup"
+    width="21rem"
+  >
     <PruviousDashboardLogin>
       <template #header>
         <PUIField>
@@ -43,4 +48,5 @@
 import { __, dashboardBasePath, usePruviousLoginPopup } from '#pruvious/client'
 
 const loginPopup = usePruviousLoginPopup()
+const route = useRoute()
 </script>
