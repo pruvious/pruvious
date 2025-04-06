@@ -421,7 +421,7 @@ const minFrom = computed(() =>
     ? Math.max(props.modelValue[1] - maxRange.value, min.value)
     : min.value,
 )
-const maxFrom = computed(() => (isNumber(props.modelValue[1]) ? props.modelValue[1] - minRange.value : max.value))
+const maxFrom = computed(() => (props.modelValue[1] ?? max.value) - minRange.value)
 const minTo = computed(() => (props.modelValue[0] ?? min.value) + minRange.value)
 const maxTo = computed(() =>
   isNumber(props.modelValue[0]) && isNumber(maxRange.value)
