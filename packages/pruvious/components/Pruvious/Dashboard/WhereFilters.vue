@@ -111,13 +111,19 @@
         </PUIStructure>
 
         <div class="pui-row">
-          <PUIButton @click="addCondition()" variant="outline" class="p-where-filters-large-button">
+          <PUIButton
+            :disabled="!fieldChoices.length"
+            @click="addCondition()"
+            variant="outline"
+            class="p-where-filters-large-button"
+          >
             <Icon mode="svg" name="tabler:plus" />
             <span>{{ __('pruvious-dashboard', 'Condition') }}</span>
           </PUIButton>
 
           <PUIButton
             v-pui-tooltip="__('pruvious-dashboard', 'Add condition')"
+            :disabled="!fieldChoices.length"
             @click="addCondition()"
             variant="outline"
             class="p-where-filters-small-button"
@@ -125,7 +131,12 @@
             <Icon mode="svg" name="tabler:plus" />
           </PUIButton>
 
-          <PUIButton @click="addOrGroup()" variant="outline" class="p-where-filters-large-button">
+          <PUIButton
+            :disabled="!fieldChoices.length"
+            @click="addOrGroup()"
+            variant="outline"
+            class="p-where-filters-large-button"
+          >
             <Icon mode="svg" name="tabler:copy-plus" />
             <span>{{ __('pruvious-dashboard', 'Condition group') }}</span>
           </PUIButton>
