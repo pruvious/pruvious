@@ -486,7 +486,12 @@ function resolveColumns(
           'ui' in options && isDefined(options.ui?.label)
             ? maybeTranslate(options.ui.label)
             : __('pruvious-dashboard', titleCase(fieldName, false) as any),
-        sortable: options._dataType === 'text' ? 'text' : 'numeric',
+        sortable:
+          options.ui.dataTable === false || (isObject(options.ui.dataTable) && options.ui.dataTable.sortable === false)
+            ? false
+            : options._dataType === 'text'
+              ? 'text'
+              : 'numeric',
         minWidth: '16rem',
       })
     }
