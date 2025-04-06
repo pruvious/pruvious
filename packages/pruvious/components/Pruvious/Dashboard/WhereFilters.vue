@@ -187,11 +187,21 @@ const props = defineProps({
     type: Array as PropType<{ label: string; value: string }[]>,
     required: true,
   },
+
+  /**
+   * Whether the component is initialized.
+   * If `false`, the where conditions will be optimized and committed.
+   */
+  initialized: {
+    type: Boolean,
+    required: true,
+  },
 })
 
 const emit = defineEmits<{
   'commit': [where: (_WhereField | WhereOrGroupSimplified)[]]
   'update:modelValue': [where: (_WhereField | WhereOrGroupSimplified)[]]
+  'update:initialized': [optimize: boolean]
 }>()
 
 defineExpose({ refresh })
@@ -245,11 +255,13 @@ function fromModelValue(
 ): (WhereField | WhereAndGroup | WhereOrGroup)[] {
   const result = _fromModelValue(where)
 
-  if (result.length === 1 && 'or' in result[0]!) {
+  if (!props.initialized && result.length === 1 && 'or' in result[0]!) {
     relation.value = 'or'
     nextTick(() => emit('commit', prepareEmitValue()))
     return result[0].or.flat()
   }
+
+  setTimeout(() => emit('update:initialized', true), 100)
 
   return result
 }
@@ -261,13 +273,13 @@ function _fromModelValue(
 
   for (const item of where) {
     if ('or' in item) {
-      if (item.or.length === 1) {
+      if (!props.initialized && item.or.length === 1) {
         result.push(..._fromModelValue(item.or[0]!))
       } else {
         const orGroup: WhereOrGroup = { $key: nanoid(), or: [] }
 
         for (const andGroup of item.or) {
-          if (andGroup.length === 1) {
+          if (!props.initialized && andGroup.length === 1) {
             orGroup.or.push(_fromModelValue([andGroup[0]!]))
           } else {
             orGroup.or.push([{ $key: nanoid(), and: andGroup.map((andItem) => _fromModelValue([andItem])) }])
@@ -342,7 +354,7 @@ function toModelValue(where: (WhereField | WhereAndGroup | WhereOrGroup)[]): (_W
       prepared.push(...toModelValue(item.and.flat()))
     } else if ('or' in item) {
       if (!isEmpty(item.or)) {
-        if (item.or.length === 1) {
+        if (!props.initialized && item.or.length === 1) {
           prepared.push(...toModelValue(item.or[0]!))
         } else {
           prepared.push({ or: item.or.map((orGroup) => toModelValue(orGroup)) })

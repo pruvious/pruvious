@@ -19,20 +19,19 @@
       <PUITab name="filters">
         <PruviousDashboardWhereFilters
           v-model="data.where"
+          v-model:initialized="filtersInitialized"
           :collection="collection"
           :fieldChoices="whereFieldChoices"
           @commit="
             (where) => {
               data = { ...data, where, activeTab }
-              if (history.size) {
-                if (rewriteHistory && !filtersInitialized) {
-                  const newStates = history.getAllStates().map((state) => ({ ...state, where }))
-                  ;(history as any).states = newStates
-                  history.setOriginalState(newStates[0]!)
-                  filtersInitialized = true
-                } else {
-                  nextTick(() => history.pushDebounced(prepareHistory(data)))
-                }
+              if (history.size && (rewriteHistory || !filtersInitialized)) {
+                const newStates = history.getAllStates().map((state) => ({ ...state, where }))
+                ;(history as any).states = newStates
+                history.setOriginalState(newStates[0]!)
+                filtersInitialized = true
+              } else {
+                nextTick(() => history.pushDebounced(prepareHistory(data)))
               }
             }
           "
