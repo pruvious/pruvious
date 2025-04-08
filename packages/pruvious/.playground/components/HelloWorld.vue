@@ -65,7 +65,7 @@ defineProps({
     },
   }),
   structure: structureField({
-    items: {
+    structure: {
       image: {
         src: textField({}),
         alt: textField({}),

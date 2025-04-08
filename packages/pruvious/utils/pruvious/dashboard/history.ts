@@ -87,7 +87,8 @@ export class History<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
-   * Adds a new state to the history stack with a debounce delay.
+   * Adds a new state to the history stack with a debounce `delay` in milliseconds.
+   * The default `delay` is 100 milliseconds.
    */
   pushDebounced(state: T, delay = 100): Promise<this> {
     return new Promise((resolve) => {

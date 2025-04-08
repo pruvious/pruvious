@@ -4,13 +4,40 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  repeaterField,
+  textField,
   timeField,
   timeRangeField,
   timestampField,
 } from '#pruvious/server'
+import { repeaterTestField } from '~/shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
+    // repeater
+    repeater: repeaterTestField(),
+    repeaterMinMax: repeaterField({
+      subfields: { foo: textField({}) },
+      minItems: 2,
+      maxItems: 3,
+      default: [{ foo: 'FOO' }, { foo: 'BAR' }],
+      ui: { label: 'Repeater (min/max)', header: { subfieldValue: 'foo' } },
+    }),
+    repeaterUnique: repeaterField({
+      subfields: { foo: textField({}) },
+      enforceUniqueItems: true,
+      ui: { label: 'Repeater (unique items)' },
+    }),
+    repeaterDeduplicate: repeaterField({
+      subfields: { foo: textField({}) },
+      deduplicateItems: true,
+      ui: { label: 'Repeater (deduplicate items)' },
+    }),
+    repeaterNested: repeaterField({
+      subfields: { foo: textField({ required: true }), nested: repeaterTestField() },
+      ui: { label: 'Repeater (nested)' },
+    }),
+
     // date
     date: dateField({ ui: { label: 'Date' } }),
     dateMinMax: dateField({ min: Date.parse('2025-03-01'), max: '2025-03-31', ui: { label: 'Date (min/max)' } }),
@@ -94,6 +121,10 @@ export default defineCollection({
       fields: [
         {
           tabs: [
+            {
+              label: 'Repeater',
+              fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
+            },
             {
               label: 'Date',
               fields: ['date', 'dateMinMax'],

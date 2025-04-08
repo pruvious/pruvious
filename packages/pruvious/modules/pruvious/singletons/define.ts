@@ -433,6 +433,9 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *   // Half-width field (max-width: 50%)
    *   'firstName | 50%',
    *
+   *   // Auto-width field { width: 'auto', flexShrink: 0 }
+   *   'middleName | auto',
+   *
    *   // Field with custom component styles
    *   {
    *     field: {

@@ -1,9 +1,7 @@
 <template>
   <template v-for="item of items">
     <PruviousDynamicField
-      v-if="
-        item.type === 'DynamicField' && conditionalLogic[rootPath ? `${rootPath}.${item.field.name}` : item.field.name]
-      "
+      v-if="item.type === 'DynamicField'"
       :conditionalLogic="conditionalLogic"
       :conditionalLogicResolver="conditionalLogicResolver"
       :data="data"
@@ -12,17 +10,21 @@
       :disabled="disabled"
       :error="item.error"
       :fields="fields"
-      :modelValue="data[item.field.name]"
+      :hidden.attr="!conditionalLogic[rootPath ? `${rootPath}.${item.field.name}` : item.field.name] ? '' : undefined"
+      :key="item.field.name"
+      :modelValue="modelValue[item.field.name]"
       :name="item.field.name"
       :operation="operation"
       :options="item.field.options"
       :path="item.field.path"
+      :rootPath="rootPath"
       :synced="translatable && !rootPath && syncedFields.includes(item.field.name)"
       :translatable="translatable"
       :type="item.field.options._fieldType"
-      @commit="$emit('commit', { ...data, [item.field.name]: $event }, item.field.path)"
+      @commit="$emit('commit', { ...modelValue, [item.field.name]: $event }, item.field.path)"
+      @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
       @update:conditionalLogic="$emit('update:conditionalLogic', $event, item.field.path)"
-      @update:modelValue="$emit('update:data', { ...data, [item.field.name]: $event }, item.field.path)"
+      @update:modelValue="$emit('update:modelValue', { ...modelValue, [item.field.name]: $event }, item.field.path)"
       class="p-fields-item p-fields-field"
       :style="item.style"
     />
@@ -38,13 +40,15 @@
         :errors="errors"
         :fields="fields"
         :layout="item.layout"
+        :modelValue="modelValue"
         :operation="operation"
         :rootPath="rootPath"
         :syncedFields="syncedFields"
         :translatable="translatable"
         @commit="(value, path) => $emit('commit', value, path)"
+        @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
         @update:conditionalLogic="(value, path) => $emit('update:conditionalLogic', value, path)"
-        @update:data="(value, path) => $emit('update:data', value, path)"
+        @update:modelValue="(value, path) => $emit('update:modelValue', value, path)"
       />
     </div>
 
@@ -59,13 +63,15 @@
         :errors="errors"
         :fields="fields"
         :layout="item.layout"
+        :modelValue="modelValue"
         :operation="operation"
         :rootPath="rootPath"
         :syncedFields="syncedFields"
         :translatable="translatable"
         @commit="(value, path) => $emit('commit', value, path)"
+        @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
         @update:conditionalLogic="(value, path) => $emit('update:conditionalLogic', value, path)"
-        @update:data="(value, path) => $emit('update:data', value, path)"
+        @update:modelValue="(value, path) => $emit('update:modelValue', value, path)"
       />
     </PUICard>
 
@@ -81,13 +87,15 @@
           :errors="errors"
           :fields="fields"
           :layout="tabLayout"
+          :modelValue="modelValue"
           :operation="operation"
           :rootPath="rootPath"
           :syncedFields="syncedFields"
           :translatable="translatable"
           @commit="(value, path) => $emit('commit', value, path)"
+          @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
           @update:conditionalLogic="(value, path) => $emit('update:conditionalLogic', value, path)"
-          @update:data="(value, path) => $emit('update:data', value, path)"
+          @update:modelValue="(value, path) => $emit('update:modelValue', value, path)"
         />
       </PUITab>
     </PUITabs>
@@ -104,13 +112,15 @@
       :fields="fields"
       :is="item.component"
       :layout="layout"
+      :modelValue="modelValue"
       :operation="operation"
       :rootPath="rootPath"
       :syncedFields="syncedFields"
       :translatable="translatable"
       @commit="$emit('commit', $event)"
+      @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
       @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
-      @update:data="$emit('update:data', $event)"
+      @update:modelValue="$emit('update:modelValue', $event)"
       class="p-fields-item p-fields-component"
     />
 
@@ -173,6 +183,15 @@ interface HRItem {
 
 const props = defineProps({
   /**
+   * The field data to be displayed.
+   * Contains key-value pairs representing the (sub)fields and their values.
+   */
+  modelValue: {
+    type: Object as PropType<Record<string, any>>,
+    required: true,
+  },
+
+  /**
    * Defines whether this data container is a `collection` (manages multiple items) or a `singleton` (manages a single item).
    */
   dataContainerType: {
@@ -198,14 +217,14 @@ const props = defineProps({
   },
 
   /**
-   * A key-value pair of field names and their combined options defined in a collection, singleton, or block.
+   * A key-value pair of (sub)field names and their combined options defined in a collection, singleton, block, or field.
    */
   fields: {
     type: Object as PropType<Record<string, GenericSerializableFieldOptions>>,
   },
 
   /**
-   * Defines how fields are arranged.
+   * Defines how (sub)fields are arranged.
    * By default, fields are stacked vertically in their definition order.
    */
   layout: {
@@ -243,7 +262,7 @@ const props = defineProps({
 
   /**
    * Represents a key-value object of error messages that can be displayed to the user.
-   * Keys are field paths in dot notation (e.g. `repeater.0.field`) and values are error messages.
+   * Keys are (sub)field paths in dot notation (e.g. `repeater.0.field`) and values are error messages.
    */
   errors: {
     type: Object as PropType<Record<string, string>>,
@@ -288,8 +307,9 @@ const props = defineProps({
 
 defineEmits<{
   'commit': [value: any, path?: string]
-  'update:data': [value: any, path?: string]
+  'update:modelValue': [value: any, path?: string]
   'update:conditionalLogic': [value: Record<string, boolean>, path?: string]
+  'queueConditionalLogicUpdate': [path?: (string & {}) | string[] | '$resolve' | '$reset']
 }>()
 
 const items = computed<Item[]>(() =>
@@ -298,6 +318,7 @@ const items = computed<Item[]>(() =>
     : Object.entries(props.fields ?? {}).map(([name, options]) => ({
         type: 'DynamicField',
         field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options },
+        error: getFieldErrors(name),
       })),
 )
 
@@ -311,10 +332,11 @@ function parseLayout(layout: FieldsLayout): Item[] {
       const name = x.split('|')[0]!.trim()
 
       if (props.fields?.[name]) {
+        const width = x.split('|')[1]?.trim()
         items.push({
           type: 'DynamicField',
           field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options: props.fields[name] },
-          style: { maxWidth: x.split('|')[1]?.trim() },
+          style: width === 'auto' ? { width: 'auto', flexShrink: 0 } : { maxWidth: width },
           error: getFieldErrors(name),
         })
       } else {
@@ -420,7 +442,7 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
     }
   }
 
-  return undefined
+  return props.errors?.[fieldName]
 }
 </script>
 

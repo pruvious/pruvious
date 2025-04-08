@@ -1,6 +1,9 @@
 <template>
   <PUIFieldLabel :required="options.required">
-    <label :for="id">{{ label }}</label>
+    <slot :label="label" name="label">
+      <label :for="id">{{ label }}</label>
+    </slot>
+
     <Icon
       v-if="translatable && synced"
       v-pui-tooltip="

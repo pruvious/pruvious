@@ -9,53 +9,60 @@
   >
     <div v-if="modelValue.length || (droppable && !disabled)" ref="container">
       <div v-if="modelValue.length" class="pui-structure-items">
-        <PUIStructureItem
-          v-for="(item, i) of modelValue"
-          :disabled="disabled"
-          :droppable="droppable"
-          :index="i"
-          :isDraggable="isDraggable"
-          :item="item"
-          :key="item.$key ?? i"
-          :structureId="id"
-          :touchDuration="touchDuration"
-          @draggable="
-            (value) => {
-              draggable = value
-                ? {
-                    ...value,
-                    index: i,
-                    type: resolveItemType?.(value.item as any),
-                    structureId: allowCrossDrop ? null : id,
-                    remove: () => {
-                      const items = modelValue.filter((_, j) => i !== j)
-                      $emit('update:modelValue', items)
-                      return items
-                    },
-                  }
-                : null
-            }
-          "
-          @drop="onDrop(i, $event)"
-        >
-          <template v-if="$slots.header" #header="headerProps">
-            <slot
-              :disabled="disabled"
-              :index="headerProps.index"
-              :item="(headerProps as { item: TItem }).item"
-              name="header"
-            />
-          </template>
+        <template v-for="(item, i) of modelValue" :key="item.$key ?? i">
+          <slot :index="i" :item="item" name="itemBefore" />
 
-          <template v-if="$slots.item" #item="itemProps">
-            <slot
-              :disabled="disabled"
-              :index="itemProps.index"
-              :item="(itemProps as { item: TItem }).item"
-              name="item"
-            />
-          </template>
-        </PUIStructureItem>
+          <PUIStructureItem
+            :disabled="disabled"
+            :droppable="droppable"
+            :index="i"
+            :isDraggable="isDraggable"
+            :item="item"
+            :structureId="id"
+            :touchDuration="touchDuration"
+            @draggable="
+              (value) => {
+                draggable = value
+                  ? {
+                      ...value,
+                      index: i,
+                      type: resolveItemType?.(value.item as any),
+                      structureId: allowCrossDrop ? null : id,
+                      remove: (isSameStructure) => {
+                        const items = modelValue.filter((_, j) => i !== j)
+                        $emit('update:modelValue', items)
+                        if (!isSameStructure) {
+                          $emit('commit', items)
+                        }
+                        return items
+                      },
+                    }
+                  : null
+              }
+            "
+            @drop="onDrop(i, $event)"
+          >
+            <template v-if="$slots.header" #header="headerProps">
+              <slot
+                :disabled="disabled"
+                :index="headerProps.index"
+                :item="(headerProps as { item: TItem }).item"
+                name="header"
+              />
+            </template>
+
+            <template v-if="$slots.item" #item="itemProps">
+              <slot
+                :disabled="disabled"
+                :index="itemProps.index"
+                :item="(itemProps as { item: TItem }).item"
+                name="item"
+              />
+            </template>
+          </PUIStructureItem>
+
+          <slot :index="i" :item="item" name="itemAfter" />
+        </template>
       </div>
 
       <div
@@ -173,7 +180,10 @@ const props = defineProps({
 
 const emit = defineEmits<{
   'update:modelValue': [value: TItem[]]
+  'commit': [value: TItem[]]
 }>()
+
+provide('floatingStrategy', 'absolute')
 
 const id = useId()
 const container = useTemplateRef('container')
@@ -209,13 +219,14 @@ onClickOutside(container, () => {
 function onDrop(index: number, position: 'before' | 'after') {
   if (draggable.value) {
     const { item, index: draggableIndex, remove } = draggable.value
+    const isSameStructure = props.modelValue.includes(item as TItem)
 
     if (position === 'after') {
       index++
     }
 
     if (props.modelValue.includes(item as any)) {
-      const items = remove()
+      const items = remove(isSameStructure)
 
       if (index > draggableIndex) {
         index--
@@ -224,8 +235,10 @@ function onDrop(index: number, position: 'before' | 'after') {
       emit('update:modelValue', [...items.slice(0, index), item as any, ...items.slice(index)])
     } else {
       emit('update:modelValue', [...props.modelValue.slice(0, index), item as any, ...props.modelValue.slice(index)])
-      nextTick(remove)
+      nextTick(() => remove(isSameStructure))
     }
+
+    nextTick(() => nextTick(() => emit('commit', props.modelValue)))
 
     draggable.value = null
   }

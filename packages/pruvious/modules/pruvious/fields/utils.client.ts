@@ -119,7 +119,7 @@ export function prepareFieldData<T extends Record<string, any>>(
  *
  * The method returns a map with:
  *
- * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', '1.firstName', etc.).
+ * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', 'foo.bar', etc.).
  * - Values as the corresponding `GenericSerializableFieldOptions` instances.
  */
 export function resolveSubfieldsFromData(
@@ -128,14 +128,29 @@ export function resolveSubfieldsFromData(
 ): Record<string, GenericSerializableFieldOptions> {
   const map: Record<string, GenericSerializableFieldOptions> = {}
 
-  if (isDefined(subfields) && isArray(data)) {
-    for (const [index, item] of data.entries()) {
+  if (isDefined(subfields)) {
+    if (isArray(data)) {
+      for (const [index, item] of data.entries()) {
+        for (const [subfieldName, subfield] of Object.entries(subfields)) {
+          const key = `${index}.${subfieldName}`
+          map[key] = subfield
+
+          if (subfield.subfields && isObject(item)) {
+            const nestedMap = resolveSubfieldsFromData(subfield.subfields, item[subfieldName])
+
+            for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
+              map[`${key}.${nestedKey}`] = nestedField
+            }
+          }
+        }
+      }
+    } else if (isObject(data)) {
       for (const [subfieldName, subfield] of Object.entries(subfields)) {
-        const key = `${index}.${subfieldName}`
+        const key = subfieldName
         map[key] = subfield
 
-        if (subfield.subfields && isObject(item)) {
-          const nestedMap = resolveSubfieldsFromData(subfield.subfields, item[subfieldName])
+        if (subfield.subfields) {
+          const nestedMap = resolveSubfieldsFromData(subfield.subfields, data[subfieldName])
 
           for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
             map[`${key}.${nestedKey}`] = nestedField

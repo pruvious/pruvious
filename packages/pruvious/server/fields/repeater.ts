@@ -1,8 +1,12 @@
 import {
   defineField,
+  resolveCustomComponentPath,
+  walkFieldLayoutItems,
   type CombinedFieldOptions,
+  type FieldsLayout,
   type GenericDatabase,
   type ResolveFieldUIOptions,
+  type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import {
   Field,
@@ -15,7 +19,10 @@ import {
   type RepeaterFieldModelOptions,
   type SubfieldsInput,
 } from '@pruvious/orm'
+import { isArray, isNotNull, isObject, setProperty } from '@pruvious/utils'
+import { hash } from 'ohash'
 import type { PropType } from 'vue'
+import type { ResolveFromLayersResult } from '../../modules/pruvious/utils/resolve'
 
 interface CustomOptions<TSubfields extends Record<string, GenericField>> {
   /**
@@ -40,6 +47,130 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
    * ```
    */
   subfields: TSubfields
+
+  ui?: {
+    /**
+     * Sets the label for the "Add item" button in the repeater.
+     *
+     * You can either provide a string or a function that returns a string.
+     * The function receives an object with `_` and `__` properties to access the translation functions.
+     *
+     * Important: When using a function, only use simple anonymous functions without context binding,
+     * since the option needs to be serialized for client-side use.
+     *
+     * @example
+     * ```ts
+     * // String (non-translatable)
+     * label: 'Add menu item'
+     *
+     * // Function (translatable)
+     * label: ({ __ }) => __('pruvious-dashboard', 'Add menu item')
+     * ```
+     *
+     * @default
+     * ({ __ }) => __('pruvious-dashboard', 'Add item')
+     */
+    addItemLabel?: string | ((context: TranslatableStringCallbackContext) => string)
+
+    /**
+     * Optional header configuration for the repeater.
+     * By default, only the item order numbers are shown in the header.
+     *
+     * @default
+     * {
+     *   showItemNumbers: true,
+     *   subfieldValue: false,
+     * }
+     */
+    header?: {
+      /**
+       * Controls whether item order numbers appear in the repeater header.
+       *
+       * @default true
+       */
+      showItemNumbers?: boolean
+
+      /**
+       * Displays the value of a specified subfield in the repeater header.
+       * Set to `false` to hide subfield values.
+       *
+       * @default false
+       */
+      subfieldValue?: keyof TSubfields | false
+    }
+
+    /**
+     * Customizes the layout of the repeater's subfields in the dashboard.
+     * If not specified, the subfields are stacked vertically in the order they are defined.
+     *
+     * @default undefined
+     *
+     * @example
+     * ```ts
+     * [
+     *   // Single field
+     *   'email',
+     *
+     *   // Half-width field (max-width: 50%)
+     *   'firstName | 50%',
+     *
+     *   // Auto-width field { width: 'auto', flexShrink: 0 }
+     *   'middleName | auto',
+     *
+     *   // Field with custom component styles
+     *   {
+     *     field: {
+     *       name: 'lastName',
+     *       style: { maxWidth: '50%' },
+     *     },
+     *   },
+     *
+     *   // Field group (row)
+     *   {
+     *     row: [
+     *       // Has maximum width of 8rem
+     *       'countryCode | 8rem',
+     *
+     *       // Takes up the remaining space
+     *       'phone',
+     *     ],
+     *   },
+     *
+     *   // Horizontal rule
+     *   '---',
+     *
+     *   // Field group (tabs)
+     *   {
+     *     tabs: [
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Address'),
+     *         fields: ['street | 40%', 'city | 40%', 'zipCode'],
+     *       },
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Contact'),
+     *         fields: [
+     *           {
+     *             // Custom Vue component
+     *             // - The component must be resolved using `resolvePruviousComponent()`
+     *             //   or `resolveNamedPruviousComponent()`.
+     *             // - The import path must be a literal string, not a variable.
+     *             // - The import path can be an absolute or relative to the definition file.
+     *             component: resolvePruviousComponent('>/components/Dashboard/ContactForm.vue'),
+     *           },
+     *         ],
+     *       },
+     *     ],
+     *   },
+     *
+     *   // Card group
+     *   {
+     *     card: ['comments', 'assignedTo'],
+     *   },
+     * ]
+     * ```
+     */
+    subfieldsLayout?: FieldsLayout<keyof TSubfields & string> | undefined
+  }
 }
 
 type ExtractClientSubfields<T extends Record<string, { field: GenericField }>> = {
@@ -48,6 +179,14 @@ type ExtractClientSubfields<T extends Record<string, { field: GenericField }>> =
 
 const customOptions: CustomOptions<Record<string, GenericField>> = {
   subfields: {},
+  ui: {
+    addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add item'),
+    header: {
+      showItemNumbers: true,
+      subfieldValue: false,
+    },
+    subfieldsLayout: undefined,
+  },
 }
 
 export default {
@@ -104,9 +243,70 @@ export default {
     TConditionalLogic,
     GenericDatabase
   > {
+    const { location }: { fieldType: string; location: ResolveFromLayersResult } = this as any
+
+    if (isArray(customOptions.ui?.subfieldsLayout)) {
+      for (const { item, path } of walkFieldLayoutItems(customOptions.ui.subfieldsLayout)) {
+        if (isObject(item) && 'component' in item) {
+          setProperty(
+            customOptions.ui.subfieldsLayout,
+            `${path}.component`,
+            item.component.includes('/')
+              ? hash(
+                  resolveCustomComponentPath({
+                    component: item.component,
+                    file: location.file.absolute,
+                    srcDir: location.layer.config.srcDir,
+                  }),
+                )
+              : item.component,
+          )
+        }
+      }
+    }
+
     const bound = defineField({
       model: repeaterFieldModel(options.subfields),
-      customOptions: { ...customOptions, ui: { dataTable: false } },
+      sanitizers: [
+        (value, { definition }) => {
+          if (definition.options.deduplicateItems && isArray(value)) {
+            const unique = [...value]
+            const stringified = value.map((item) => JSON.stringify(item))
+
+            for (let i = 0; i < stringified.length; i++) {
+              if (stringified.indexOf(stringified[i]!) !== i) {
+                stringified.splice(i, 1)
+                value.splice(i, 1)
+                i--
+              }
+            }
+
+            return unique
+          }
+
+          return value
+        },
+      ],
+      validators: [
+        (value, { definition, context, path }, errors) => {
+          if (definition.options.enforceUniqueItems && isNotNull(value)) {
+            const stringified = value.map((item) => JSON.stringify(item))
+            let hasDuplicates = false
+
+            for (const [i, item] of stringified.entries()) {
+              if (stringified.indexOf(item) !== i) {
+                errors[`${path}.${i}`] = context.__('pruvious-orm', 'The value must be unique')
+                hasDuplicates = true
+              }
+            }
+
+            if (hasDuplicates) {
+              throw new Error(context.__('pruvious-orm', 'Each item in this field must be unique'))
+            }
+          }
+        },
+      ],
+      customOptions: { ...customOptions },
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)

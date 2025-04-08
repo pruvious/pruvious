@@ -35,7 +35,7 @@ export default defineFilter<
 
     /**
      * Represents a key-value object of error messages that can be displayed to the user.
-     * Keys are field paths in dot notation (e.g. `repeater.0.field`) and values are error messages.
+     * Keys are top-level field paths in dot notation (e.g. `repeater.0.field`) and values are error messages.
      */
     errors: Ref<Record<string, string>>
   }

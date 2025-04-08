@@ -301,20 +301,21 @@ export function resolveCustomComponentsInFile(options: ResolveCustomComponentsIn
 function writeToFile() {
   const nuxt = useNuxt()
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
+  const file = `${buildDir}/client/custom-components.ts`
+  const content = [
+    `import { type Component, defineAsyncComponent } from 'vue'`,
+    ``,
+    `export const customComponents: Record<string, () => Component | string> = {`,
+    ...Object.entries(components)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, path]) => `  '${name}': () => defineAsyncComponent(() => import('${path}')),`),
+    `}`,
+    ``,
+  ].join('\n')
 
-  fs.writeFileSync(
-    `${buildDir}/client/custom-components.ts`,
-    [
-      `import { type Component, defineAsyncComponent } from 'vue'`,
-      ``,
-      `export const customComponents: Record<string, () => Component | string> = {`,
-      ...Object.entries(components).map(
-        ([name, path]) => `  '${name}': () => defineAsyncComponent(() => import('${path}')),`,
-      ),
-      `}`,
-      ``,
-    ].join('\n'),
-  )
+  if (!fs.existsSync(file) || fs.readFileSync(file, 'utf-8') !== content) {
+    fs.writeFileSync(file, content)
+  }
 }
 
 const debouncedWriteToFile = useDebounceFn(writeToFile, 250)

@@ -11,8 +11,8 @@
     :label="label"
     :queryBuilder="queryBuilder"
     @commit="history.push($event)"
+    @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
-    @updateConditionalLogic="updateConditionalLogicDebounced($event)"
     operation="create"
   >
     <template #header>
@@ -40,8 +40,9 @@
     <PruviousFields
       v-if="data"
       v-model:conditionalLogic="conditionalLogic"
-      v-model:data="data"
+      v-model:modelValue="data"
       :conditionalLogicResolver="conditionalLogicResolver"
+      :data="data"
       :dataContainerName="collection.name"
       :errors="errors"
       :fields="collection.definition.fields"
@@ -49,7 +50,8 @@
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
       @commit="history.push($event)"
-      @update:data="(_, path) => updateConditionalLogicDebounced(path)"
+      @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
+      @update:modelValue="(_, path) => queueConditionalLogicUpdate(path)"
       dataContainerType="collection"
       operation="create"
     />
@@ -105,6 +107,7 @@ import {
   isUndefined,
   lockAndLoad,
   titleCase,
+  toArray,
 } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
@@ -240,6 +243,7 @@ const data = ref<Record<string, any>>(fillFieldData({}, collection.definition.fi
 const conditionalLogicResolver = new ConditionalLogicResolver()
 let conditionalLogicDependencies: Record<string, boolean> = {}
 const conditionalLogic = ref(resolveConditionalLogic())
+const conditionalLogicUpdateQueue = new Set<(string & {}) | '$resolve' | '$reset'>()
 const errors = ref<Record<string, string>>({})
 const history = new History({
   omit: Object.entries(collection.definition.fields)
@@ -281,19 +285,36 @@ function resolveConditionalLogic(reset = true) {
   return conditionalLogicResolver.resolve()
 }
 
-const updateConditionalLogicDebounced = useDebounceFn((path?: string) => {
-  if (isDefined(path) && !isDefined(conditionalLogicDependencies[path])) {
-    const parsedConditionalLogic = parseConditionalLogic(collection.definition.fields, data.value)
-    for (const from of Object.keys(parsedConditionalLogic)) {
-      conditionalLogicDependencies[from] ??= false
-      const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
-      for (const to of referencedFieldPaths) {
-        conditionalLogicDependencies[to] = true
+function queueConditionalLogicUpdate(path?: (string & {}) | string[] | '$resolve' | '$reset') {
+  if (isUndefined(path) || path === '$resolve') {
+    conditionalLogicUpdateQueue.add('$resolve')
+  } else if (path === '$reset') {
+    conditionalLogicUpdateQueue.add('$reset')
+  } else {
+    toArray(path).forEach((p) => conditionalLogicUpdateQueue.add(p))
+  }
+  updateConditionalLogicDebounced()
+}
+
+const updateConditionalLogicDebounced = useDebounceFn(() => {
+  const queue = [...conditionalLogicUpdateQueue]
+  conditionalLogicUpdateQueue.clear()
+  if (queue.some((path) => path === '$reset')) {
+    conditionalLogic.value = resolveConditionalLogic(true)
+  } else {
+    if (queue.some((path) => isString(path) && !isDefined(conditionalLogicDependencies[path]))) {
+      const parsedConditionalLogic = parseConditionalLogic(collection.definition.fields, data.value)
+      for (const from of Object.keys(parsedConditionalLogic)) {
+        conditionalLogicDependencies[from] ??= false
+        const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
+        for (const to of referencedFieldPaths) {
+          conditionalLogicDependencies[to] = true
+        }
       }
     }
-  }
-  if (isUndefined(path) || conditionalLogicDependencies[path]) {
-    conditionalLogic.value = conditionalLogicResolver.setInput(data.value).resolve()
+    if (queue.some((path) => path === '$resolve' || conditionalLogicDependencies[path])) {
+      conditionalLogic.value = conditionalLogicResolver.setInput(data.value).resolve()
+    }
   }
 }, 50)
 

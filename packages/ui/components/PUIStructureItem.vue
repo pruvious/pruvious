@@ -1,5 +1,11 @@
 <template>
-  <PUICard class="pui-structure-item" :class="{ 'pui-structure-item-dragging': draggable?.item === item }">
+  <PUICard
+    class="pui-structure-item"
+    :class="{
+      'pui-structure-item-dragging': draggable?.item === item,
+      'pui-structure-item-collapsed': item.$expanded === false,
+    }"
+  >
     <div
       v-if="droppable"
       @mouseup="$emit('drop', 'before')"
@@ -25,7 +31,7 @@
       <slot :index="index" :item="item" name="header" />
     </div>
 
-    <div v-if="$slots.item" class="pui-structure-item-inner">
+    <div v-if="$slots.item && item.$expanded !== false" class="pui-structure-item-inner">
       <slot :index="index" :item="item" name="item" />
     </div>
 
@@ -191,7 +197,13 @@ function cleanupAfterDrag() {
   border-bottom-width: 1px;
 }
 
+.pui-structure-item-collapsed .pui-structure-item-header {
+  margin-bottom: -0.75rem;
+  border-bottom-width: 0;
+}
+
 .pui-structure-drag-handle {
+  flex-shrink: 0;
   position: relative;
   display: flex;
   justify-content: center;

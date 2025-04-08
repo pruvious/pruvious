@@ -41,7 +41,7 @@ export default defineCollection({
       },
     },
     createPage: {
-      fields: [{ row: ['name', { field: { name: 'price', style: { flexShrink: 0, width: 'auto' } } }] }, 'variants'],
+      fields: [{ row: ['name', 'price | auto'] }, 'variants'],
     },
     updatePage: {
       fields: 'mirror',

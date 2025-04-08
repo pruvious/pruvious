@@ -64,6 +64,18 @@ export class ConditionalLogicResolver {
   }
 
   /**
+   * Retrieves a copy of the current conditional logic object.
+   *
+   * Returns an object where:
+   *
+   * - Keys are field paths (use dot notation for nested fields).
+   * - Values are corresponding conditional logic objects to evaluate (if present).
+   */
+  getConditionalLogic() {
+    return deepClone(this.conditionalLogic)
+  }
+
+  /**
    * Compares a specified `fieldPath` from the input data against the provided `conditionalLogic`.
    * Supports dot notation for accessing nested fields.
    *

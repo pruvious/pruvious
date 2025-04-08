@@ -300,7 +300,8 @@ export interface DefineFieldOptions<
    *
    * Special option names:
    *
-   * - `subfields` - A key-value object of `Field` instances representing the subfields of this field.
+   * - `structure` - A map of key-value objects with `Field` instances describing each item of a structure.
+   * - `subfields` - A key-value object of `Field` instances representing the subfields of a field.
    * - `ui` - An object that configures how this field is displayed in the user interface.
    *
    * @example
@@ -338,6 +339,7 @@ export interface DefineFieldOptions<
    *   dataTable: true,
    *   customComponent: true,
    *   customTableComponent: true,
+   *   customFilterComponent: true
    * }
    */
   uiOptions?: TUIOptions
@@ -614,7 +616,6 @@ export interface FieldUIOptions<
         | {
             /**
              * Whether this field should be visible as a column in the data table.
-             * @todo omit in repeater, object, nullableObject, map, and structure fields
              *
              * @default true
              */
@@ -622,7 +623,6 @@ export interface FieldUIOptions<
 
             /**
              * Whether this field can be sorted in the data table.
-             * @todo omit in repeater, object, nullableObject, map, and structure fields
              *
              * @default true
              */
@@ -630,7 +630,6 @@ export interface FieldUIOptions<
 
             /**
              * Whether this field can be filtered in the data table.
-             * @todo omit in repeater, object, nullableObject, map, and structure fields
              *
              * @default true
              */

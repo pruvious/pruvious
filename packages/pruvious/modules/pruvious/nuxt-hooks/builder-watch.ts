@@ -57,6 +57,12 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'collection-definition') {
+    resolveCustomComponentsInFile({
+      file: path,
+      srcDir: layer.config.srcDir,
+      srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+    })
+
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetCollectionsResolver()
@@ -68,6 +74,12 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'singleton-definition') {
+    resolveCustomComponentsInFile({
+      file: path,
+      srcDir: layer.config.srcDir,
+      srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+    })
+
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetSingletonsResolver()

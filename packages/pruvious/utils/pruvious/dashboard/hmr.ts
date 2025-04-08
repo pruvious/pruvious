@@ -13,10 +13,11 @@ let isListening = false
  */
 export function usePruviousHMR() {
   const eventHandler = useDebounceFn(async () => {
+    const route = useRoute()
     clear((i18n() as any).definitions)
     clear((i18n() as any).cache)
     await Promise.all([refreshPruviousState(true), refreshAuthState(true), refreshPruviousDashboardState(true)])
-    await navigateTo({ path: dashboardBasePath + '_redirect', query: { to: useRoute().fullPath } }, { replace: true })
+    await navigateTo({ path: dashboardBasePath + '_redirect', query: { to: route.fullPath } }, { replace: true })
   }, 50)
 
   function stop() {

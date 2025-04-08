@@ -32,5 +32,5 @@ export const usePUIStructureDraggable = () =>
     /**
      * Function to remove the current draggable item from its current structure.
      */
-    remove: () => Record<string, any>[]
+    remove: (isSameStructure: boolean) => Record<string, any>[]
   } | null>('pruvious-ui-structure-draggable', () => null)

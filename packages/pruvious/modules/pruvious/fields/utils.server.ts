@@ -38,7 +38,14 @@ type BaseSerializableFieldOptions = Required<
   }
 
 export type SerializableFieldOptions<TField extends keyof Fields> = Readonly<
-  BaseSerializableFieldOptions & Omit<Fields[TField]['options'], 'populator'>
+  BaseSerializableFieldOptions &
+    Omit<Fields[TField]['options'], 'populator' | 'structure' | 'subfields'> &
+    (Fields[TField]['options'] extends { structure: any }
+      ? { structure: { [$key: string]: Record<string, GenericField> } }
+      : {}) &
+    (Fields[TField]['options'] extends { subfields: any }
+      ? { subfields: Record<string, GenericSerializableFieldOptions> }
+      : {})
 >
 
 export type GenericSerializableFieldOptions = Readonly<BaseSerializableFieldOptions & Record<string, any>>

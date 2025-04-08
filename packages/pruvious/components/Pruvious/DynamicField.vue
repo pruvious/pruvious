@@ -14,10 +14,12 @@
     :operation="operation"
     :options="props.options"
     :path="path"
+    :rootPath="rootPath"
     :synced="synced"
     :translatable="translatable"
     :type="type"
     @commit="$emit('commit', $event)"
+    @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
     @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
   />
@@ -93,7 +95,7 @@ const props = defineProps({
   },
 
   /**
-   * A key-value pair of field names and their combined options defined in a collection, singleton, or block.
+   * A key-value pair of (sub)field names and their combined options defined in a collection, singleton, block, or field.
    */
   fields: {
     type: Object as PropType<Record<string, GenericSerializableFieldOptions>>,
@@ -105,6 +107,17 @@ const props = defineProps({
   path: {
     type: String,
     required: true,
+  },
+
+  /**
+   * Specifies the root path in dot notation for the current `fields` that will be shown.
+   * Only displays fields that are nested under this base path.
+   *
+   * @default ''
+   */
+  rootPath: {
+    type: String,
+    default: '',
   },
 
   /**
@@ -178,38 +191,76 @@ defineEmits<{
   'commit': [value: any]
   'update:modelValue': [value: any]
   'update:conditionalLogic': [value: Record<string, boolean>]
+  'queueConditionalLogicUpdate': [path?: (string & {}) | string[] | '$resolve' | '$reset']
 }>()
 
-const component = computed(() => {
-  const primaryPath = `${props.dataContainerType}s/${props.dataContainerName}/${props.path.replaceAll('.', '/')}`
-  const secondaryPath = primaryPath
-    .split('/')
-    .map((part) => (isStringInteger(part) ? '[n]' : part))
-    .join('/')
+const component = shallowRef<Component | string>()
+let key = ''
 
-  if (fieldComponents[primaryPath]) {
-    return fieldComponents[primaryPath]()
-  } else if (fieldComponents[`${primaryPath}.regular`]) {
-    return fieldComponents[`${primaryPath}.regular`]!()
-  } else if (fieldComponents[secondaryPath]) {
-    return fieldComponents[secondaryPath]()
-  } else if (fieldComponents[`${secondaryPath}.regular`]) {
-    return fieldComponents[`${secondaryPath}.regular`]!()
-  }
+watch(
+  () => [props.dataContainerType, props.dataContainerName, props.path, props.options, props.name, props.type],
+  () => {
+    const primaryPath = `${props.dataContainerType}s/${props.dataContainerName}/${props.path.replaceAll('.', '/')}`
+    const secondaryPath = primaryPath
+      .split('/')
+      .map((part) => (isStringInteger(part) ? '[n]' : part))
+      .join('/')
 
-  const customComponent = ((props.options as any).ui as GenericFieldUIOptions | undefined)?.customComponent
-
-  if (customComponent) {
-    if (isDefined(customComponents[customComponent])) {
-      return customComponents[customComponent]()
-    } else {
-      console.warn(
-        `Unable to resolve custom component \`${customComponent}\` for field \`${props.name}\` in \`${props.dataContainerName}\` ${props.dataContainerType}. Available custom components:`,
-        toRaw(customComponents),
-      )
+    if (fieldComponents[primaryPath]) {
+      if (key !== `fieldComponents:${primaryPath}`) {
+        key = `fieldComponents:${primaryPath}`
+        component.value = fieldComponents[primaryPath]()
+      }
+      return
+    } else if (fieldComponents[`${primaryPath}.regular`]) {
+      if (key !== `fieldComponents:${primaryPath}.regular`) {
+        key = `fieldComponents:${primaryPath}.regular`
+        component.value = fieldComponents[`${primaryPath}.regular`]!()
+      }
+      return
+    } else if (fieldComponents[secondaryPath]) {
+      if (key !== `fieldComponents:${secondaryPath}`) {
+        key = `fieldComponents:${secondaryPath}`
+        component.value = fieldComponents[secondaryPath]()
+      }
+      return
+    } else if (fieldComponents[`${secondaryPath}.regular`]) {
+      if (key !== `fieldComponents:${secondaryPath}.regular`) {
+        key = `fieldComponents:${secondaryPath}.regular`
+        component.value = fieldComponents[`${secondaryPath}.regular`]!()
+      }
+      return
     }
-  }
 
-  return fieldComponents[props.type]?.() ?? resolveComponent('PruviousFieldFallback')
-})
+    const customComponent = ((props.options as any).ui as GenericFieldUIOptions | undefined)?.customComponent
+    if (customComponent) {
+      if (isDefined(customComponents[customComponent])) {
+        if (key !== `customComponents:${customComponent}`) {
+          key = `customComponents:${customComponent}`
+          component.value = customComponents[customComponent]()
+        }
+      } else {
+        console.warn(
+          `Unable to resolve custom component \`${customComponent}\` for field \`${props.name}\` in \`${props.dataContainerName}\` ${props.dataContainerType}. Available custom components:`,
+          toRaw(customComponents),
+        )
+      }
+      return
+    }
+
+    if (isDefined(fieldComponents[props.type])) {
+      if (key !== `fieldComponents:${props.type}`) {
+        key = `fieldComponents:${props.type}`
+        component.value = fieldComponents[props.type]!()
+      }
+      return
+    } else {
+      if (key !== 'fieldFallback') {
+        key = 'fieldFallback'
+        component.value = resolveComponent('PruviousFieldFallback')
+      }
+    }
+  },
+  { immediate: true },
+)
 </script>

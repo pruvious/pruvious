@@ -12,8 +12,8 @@
     :singleton="singleton"
     :singletonLanguage="singletonLanguage"
     @commit="history.push($event)"
+    @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
-    @updateConditionalLogic="updateConditionalLogicDebounced($event)"
   >
     <template #header>
       {{ label }}
@@ -22,8 +22,9 @@
     <PruviousFields
       v-if="data"
       v-model:conditionalLogic="conditionalLogic"
-      v-model:data="data"
+      v-model:modelValue="data"
       :conditionalLogicResolver="conditionalLogicResolver"
+      :data="data"
       :dataContainerName="singleton.name"
       :disabled="!canUpdate"
       :errors="errors"
@@ -32,7 +33,8 @@
       :syncedFields="singleton.definition.syncedFields"
       :translatable="singleton.definition.translatable"
       @commit="history.push($event)"
-      @update:data="(_, path) => updateConditionalLogicDebounced(path)"
+      @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
+      @update:modelValue="(_, path) => queueConditionalLogicUpdate(path)"
       dataContainerType="singleton"
       operation="update"
     />
@@ -130,7 +132,7 @@ import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
-import { blurActiveElement, isDefined, isUndefined, lockAndLoad, titleCase } from '@pruvious/utils'
+import { blurActiveElement, isDefined, isString, isUndefined, lockAndLoad, titleCase, toArray } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveSingletonLayout } from '../../../utils/pruvious/dashboard/layout'
 
@@ -177,6 +179,7 @@ const data = ref(await readData())
 const conditionalLogicResolver = new ConditionalLogicResolver()
 let conditionalLogicDependencies: Record<string, boolean> = {}
 const conditionalLogic = ref(resolveConditionalLogic())
+const conditionalLogicUpdateQueue = new Set<(string & {}) | '$resolve' | '$reset'>()
 const errors = ref<Record<string, string>>({})
 const history = new History({
   omit: Object.entries(singleton.definition.fields)
@@ -233,19 +236,36 @@ function resolveConditionalLogic(reset = true) {
   return conditionalLogicResolver.resolve()
 }
 
-const updateConditionalLogicDebounced = useDebounceFn((path?: string) => {
-  if (isDefined(path) && !isDefined(conditionalLogicDependencies[path])) {
-    const parsedConditionalLogic = parseConditionalLogic(singleton.definition.fields, data.value)
-    for (const from of Object.keys(parsedConditionalLogic)) {
-      conditionalLogicDependencies[from] ??= false
-      const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
-      for (const to of referencedFieldPaths) {
-        conditionalLogicDependencies[to] = true
+function queueConditionalLogicUpdate(path?: (string & {}) | string[] | '$resolve' | '$reset') {
+  if (isUndefined(path) || path === '$resolve') {
+    conditionalLogicUpdateQueue.add('$resolve')
+  } else if (path === '$reset') {
+    conditionalLogicUpdateQueue.add('$reset')
+  } else {
+    toArray(path).forEach((p) => conditionalLogicUpdateQueue.add(p))
+  }
+  updateConditionalLogicDebounced()
+}
+
+const updateConditionalLogicDebounced = useDebounceFn(() => {
+  const queue = [...conditionalLogicUpdateQueue]
+  conditionalLogicUpdateQueue.clear()
+  if (queue.some((path) => path === '$reset')) {
+    conditionalLogic.value = resolveConditionalLogic(true)
+  } else {
+    if (queue.some((path) => isString(path) && !isDefined(conditionalLogicDependencies[path]))) {
+      const parsedConditionalLogic = parseConditionalLogic(singleton.definition.fields, data.value)
+      for (const from of Object.keys(parsedConditionalLogic)) {
+        conditionalLogicDependencies[from] ??= false
+        const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
+        for (const to of referencedFieldPaths) {
+          conditionalLogicDependencies[to] = true
+        }
       }
     }
-  }
-  if (isUndefined(path) || conditionalLogicDependencies[path]) {
-    conditionalLogic.value = conditionalLogicResolver.setInput(data.value).resolve()
+    if (queue.some((path) => path === '$resolve' || conditionalLogicDependencies[path])) {
+      conditionalLogic.value = conditionalLogicResolver.setInput(data.value).resolve()
+    }
   }
 }, 50)
 
