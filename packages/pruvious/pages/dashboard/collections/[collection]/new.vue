@@ -254,11 +254,11 @@ const isSubmitting = ref(false)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
 const fieldLayout =
-  collection.definition.ui.createPage.fields === 'mirror'
-    ? collection.definition.ui.updatePage.fields == 'mirror'
+  collection.definition.ui.createPage.fieldsLayout === 'mirror'
+    ? collection.definition.ui.updatePage.fieldsLayout == 'mirror'
       ? undefined
-      : collection.definition.ui.updatePage.fields
-    : collection.definition.ui.createPage.fields
+      : collection.definition.ui.updatePage.fieldsLayout
+    : collection.definition.ui.createPage.fieldsLayout
 const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
 
 await loadFilters('dashboard:collections:new:footer:buttons')

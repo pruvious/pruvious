@@ -296,11 +296,11 @@ const isSubmitting = ref(false)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
 const fieldLayout =
-  collection.definition.ui.updatePage.fields === 'mirror'
-    ? collection.definition.ui.createPage.fields == 'mirror'
+  collection.definition.ui.updatePage.fieldsLayout === 'mirror'
+    ? collection.definition.ui.createPage.fieldsLayout == 'mirror'
       ? undefined
-      : collection.definition.ui.createPage.fields
-    : collection.definition.ui.updatePage.fields
+      : collection.definition.ui.createPage.fieldsLayout
+    : collection.definition.ui.updatePage.fieldsLayout
 const isRecordMenuVisible = ref(false)
 const recordMenuButton = useTemplateRef('recordMenuButton')
 const isTranslationPopupVisible = ref(false)

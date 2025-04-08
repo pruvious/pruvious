@@ -635,15 +635,15 @@ export interface CollectionMetaOptions<
    *     icon: 'folder',
    *   },
    *   indexPage: {
-   *     layout: 'default',  // Standard dashboard layout with header and sidebar
+   *     dashboardLayout: 'default', // Standard dashboard layout with header and sidebar
    *   },
    *   createPage: {
-   *     layout: 'auto',     // Automatic layout selection based on block support
-   *     fields: undefined,  // Display all fields in the order they are defined
+   *     dashboardLayout: 'auto',    // Automatic layout selection based on block support
+   *     fieldsLayout: undefined,    // Display all fields in the order they are defined
    *   },
    *   updatePage: {
-   *     layout: 'auto',     // Automatic layout selection based on block support
-   *     fields: undefined,  // Display all fields in the order they are defined
+   *     dashboardLayout: 'auto',    // Automatic layout selection based on block support
+   *     fieldsLayout: undefined,    // Display all fields in the order they are defined
    *   },
    * }
    */
@@ -828,7 +828,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   layout: 'default', // Standard dashboard layout with header and sidebar
+   *   dashboardLayout: 'default', // Standard dashboard layout with header and sidebar
    * }
    */
   indexPage: {
@@ -850,7 +850,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * @default 'default'
      */
-    layout: 'default' | (string & {})
+    dashboardLayout: 'default' | (string & {})
 
     table: {
       /**
@@ -1035,8 +1035,8 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   layout: 'auto',    // Automatic layout selection based on block support
-   *   fields: undefined  // Display all fields in the order they are defined
+   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   fieldsLayout: undefined, // Display all fields in the order they are defined
    * }
    */
   createPage: {
@@ -1068,7 +1068,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * @default 'auto'
      */
-    layout: 'auto' | 'default' | 'live-preview' | (string & {})
+    dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
 
     /**
      * Customizes the layout of the collection's fields in the dashboard.
@@ -1142,7 +1142,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * ]
      * ```
      */
-    fields: FieldsLayout<TFieldNames> | undefined | 'mirror'
+    fieldsLayout: FieldsLayout<TFieldNames> | undefined | 'mirror'
   }
 
   /**
@@ -1150,8 +1150,8 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   layout: 'auto',    // Automatic layout selection based on block support
-   *   fields: undefined  // Display all fields in the order they are defined
+   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   fieldsLayout: undefined, // Display all fields in the order they are defined
    * }
    */
   updatePage: {
@@ -1183,7 +1183,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * @default 'auto'
      */
-    layout: 'auto' | 'default' | 'live-preview' | (string & {})
+    dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
 
     /**
      * Customizes the layout of the collection's fields in the dashboard.
@@ -1256,7 +1256,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * ]
      * ```
      */
-    fields: FieldsLayout<TFieldNames> | undefined | 'mirror'
+    fieldsLayout: FieldsLayout<TFieldNames> | undefined | 'mirror'
   }
 }
 
@@ -1649,16 +1649,16 @@ export function defineCollection<
       })
     }
 
-    if (isString(ui?.indexPage?.layout) && ui.indexPage.layout !== 'default') {
-      ui.indexPage.layout = ui.indexPage.layout.includes('/')
+    if (isString(ui?.indexPage?.dashboardLayout) && ui.indexPage.dashboardLayout !== 'default') {
+      ui.indexPage.dashboardLayout = ui.indexPage.dashboardLayout.includes('/')
         ? hash(
             resolveCustomComponentPath({
-              component: ui.indexPage.layout,
+              component: ui.indexPage.dashboardLayout,
               file: resolveContext.location.file.absolute,
               srcDir: resolveContext.location.layer.config.srcDir,
             }),
           )
-        : ui.indexPage.layout
+        : ui.indexPage.dashboardLayout
     }
 
     if (isArray(ui?.indexPage?.table?.columns)) {
@@ -1681,23 +1681,26 @@ export function defineCollection<
     }
 
     for (const page of ['createPage', 'updatePage'] as const) {
-      if (isString(ui?.[page]?.layout) && !['auto', 'default', 'live-preview'].includes(ui[page].layout)) {
-        ui[page].layout = ui[page].layout.includes('/')
+      if (
+        isString(ui?.[page]?.dashboardLayout) &&
+        !['auto', 'default', 'live-preview'].includes(ui[page].dashboardLayout)
+      ) {
+        ui[page].dashboardLayout = ui[page].dashboardLayout.includes('/')
           ? hash(
               resolveCustomComponentPath({
-                component: ui[page].layout,
+                component: ui[page].dashboardLayout,
                 file: resolveContext.location.file.absolute,
                 srcDir: resolveContext.location.layer.config.srcDir,
               }),
             )
-          : ui[page].layout
+          : ui[page].dashboardLayout
       }
 
-      if (isArray(ui?.[page]?.fields)) {
-        for (const { item, path } of walkFieldLayoutItems(ui[page].fields)) {
+      if (isArray(ui?.[page]?.fieldsLayout)) {
+        for (const { item, path } of walkFieldLayoutItems(ui[page].fieldsLayout)) {
           if (isObject(item) && 'component' in item) {
             setProperty(
-              ui[page].fields,
+              ui[page].fieldsLayout,
               `${path}.component`,
               item.component.includes('/')
                 ? hash(
@@ -1759,11 +1762,11 @@ export function defineCollection<
           label: undefined,
           menu: { hidden: false, group: 'collections', order: 10, icon: 'folder' as const },
           indexPage: {
-            layout: 'default' as const,
+            dashboardLayout: 'default' as const,
             table: { columns: undefined, orderBy: undefined as any, perPage: 50 },
           },
-          createPage: { layout: 'auto', fields: undefined },
-          updatePage: { layout: 'auto', fields: undefined },
+          createPage: { dashboardLayout: 'auto', fieldsLayout: undefined },
+          updatePage: { dashboardLayout: 'auto', fieldsLayout: undefined },
         } satisfies Required<CollectionUIOptions>),
       } satisfies CollectionMeta,
     }) as any

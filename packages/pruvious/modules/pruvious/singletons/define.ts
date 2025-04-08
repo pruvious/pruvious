@@ -416,7 +416,7 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *
    * @default 'auto'
    */
-  layout: 'auto' | 'default' | 'live-preview' | (string & {})
+  dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
 
   /**
    * Customizes the layout of the collection's fields in the dashboard.
@@ -488,7 +488,7 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    * ]
    * ```
    */
-  fields: FieldsLayout<TFieldNames> | undefined
+  fieldsLayout: FieldsLayout<TFieldNames> | undefined
 }
 
 export interface Singleton<
@@ -945,23 +945,23 @@ export function defineSingleton<
       })
     }
 
-    if (isString(ui?.layout) && !['auto', 'default', 'live-preview'].includes(ui.layout)) {
-      ui.layout = ui.layout.includes('/')
+    if (isString(ui?.dashboardLayout) && !['auto', 'default', 'live-preview'].includes(ui.dashboardLayout)) {
+      ui.dashboardLayout = ui.dashboardLayout.includes('/')
         ? hash(
             resolveCustomComponentPath({
-              component: ui.layout,
+              component: ui.dashboardLayout,
               file: resolveContext.location.file.absolute,
               srcDir: resolveContext.location.layer.config.srcDir,
             }),
           )
-        : ui.layout
+        : ui.dashboardLayout
     }
 
-    if (ui?.fields) {
-      for (const { item, path } of walkFieldLayoutItems(ui.fields)) {
+    if (ui?.fieldsLayout) {
+      for (const { item, path } of walkFieldLayoutItems(ui.fieldsLayout)) {
         if (isObject(item) && 'component' in item) {
           setProperty(
-            ui.fields,
+            ui.fieldsLayout,
             `${path}.component`,
             item.component.includes('/')
               ? hash(
@@ -1011,8 +1011,8 @@ export function defineSingleton<
         hidden: false,
         label: undefined,
         menu: { hidden: false, group: 'general', order: 10, icon: 'settings' as const },
-        layout: 'auto' as any,
-        fields: undefined as any,
+        dashboardLayout: 'auto' as any,
+        fieldsLayout: undefined as any,
       } satisfies Required<SingletonUIOptions>),
       TFieldNames: undefined as any,
       TDataTypes: undefined as any,

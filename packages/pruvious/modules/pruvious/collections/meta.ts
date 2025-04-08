@@ -17,8 +17,8 @@ export const privateCollectionMeta: CollectionMeta = {
     hidden: true,
     label: '',
     menu: { hidden: true, group: 'general', order: 10, icon: 'folder' },
-    indexPage: { layout: 'default', table: { columns: undefined, orderBy: undefined, perPage: 50 } },
-    createPage: { layout: 'auto', fields: undefined },
-    updatePage: { layout: 'auto', fields: undefined },
+    indexPage: { dashboardLayout: 'default', table: { columns: undefined, orderBy: undefined, perPage: 50 } },
+    createPage: { dashboardLayout: 'auto', fieldsLayout: undefined },
+    updatePage: { dashboardLayout: 'auto', fieldsLayout: undefined },
   },
 }

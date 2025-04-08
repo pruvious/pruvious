@@ -6,7 +6,7 @@ export default defineSingleton({
   fields: {},
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'SEO'),
-    layout: resolvePruviousComponent('>/components/Pruvious/Dashboard/Redirects.vue'), // @todo this is temporary
+    dashboardLayout: resolvePruviousComponent('>/components/Pruvious/Dashboard/Redirects.vue'), // @todo this is temporary
     menu: { group: 'utilities', order: 30, icon: 'eye-search' },
   },
   copyTranslation: ({ source }) => source,

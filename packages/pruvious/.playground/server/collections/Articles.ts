@@ -41,10 +41,10 @@ export default defineCollection({
       },
     },
     createPage: {
-      fields: [{ row: ['name', 'price | auto'] }, 'variants'],
+      fieldsLayout: [{ row: ['name', 'price | auto'] }, 'variants'],
     },
     updatePage: {
-      fields: 'mirror',
+      fieldsLayout: 'mirror',
     },
   },
   copyTranslation: ({ source }) => ({ ...source, author: useEvent().context.pruvious.auth.user?.id }),

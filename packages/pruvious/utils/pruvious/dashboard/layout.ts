@@ -41,33 +41,33 @@ export function resolveCollectionLayout(
   },
 ): Component | string {
   if (page === 'index') {
-    if (collection.definition.ui.indexPage.layout === 'default') {
+    if (collection.definition.ui.indexPage.dashboardLayout === 'default') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
     } else {
-      const component = collection.definition.ui.indexPage.layout
+      const component = collection.definition.ui.indexPage.dashboardLayout
       if (isDefined(customComponents[component])) {
         return customComponents[component]()
       } else {
         throw new Error(
-          `Unable to resolve custom layout component \`${component}\` for collection \`${collection.name}\`.`,
+          `Unable to resolve custom dashboard layout component \`${component}\` for collection \`${collection.name}\`.`,
         )
       }
     }
   } else {
-    if (collection.definition.ui[`${page}Page`].layout === 'auto') {
+    if (collection.definition.ui[`${page}Page`].dashboardLayout === 'auto') {
       // @todo resolve based on blocks
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-    } else if (collection.definition.ui[`${page}Page`].layout === 'default') {
+    } else if (collection.definition.ui[`${page}Page`].dashboardLayout === 'default') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-    } else if (collection.definition.ui[`${page}Page`].layout === 'live-preview') {
+    } else if (collection.definition.ui[`${page}Page`].dashboardLayout === 'live-preview') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))
     } else {
-      const component = collection.definition.ui[`${page}Page`].layout
+      const component = collection.definition.ui[`${page}Page`].dashboardLayout
       if (isDefined(customComponents[component])) {
         return customComponents[component]()
       } else {
         throw new Error(
-          `Unable to resolve custom layout component \`${component}\` for collection \`${collection.name}\`.`,
+          `Unable to resolve custom dashboard layout component \`${component}\` for collection \`${collection.name}\`.`,
         )
       }
     }
@@ -81,19 +81,21 @@ export function resolveSingletonLayout(singleton: {
   name: keyof Singletons
   definition: SerializableSingleton
 }): Component | string {
-  if (singleton.definition.ui.layout === 'auto') {
+  if (singleton.definition.ui.dashboardLayout === 'auto') {
     // @todo resolve based on blocks
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-  } else if (singleton.definition.ui.layout === 'default') {
+  } else if (singleton.definition.ui.dashboardLayout === 'default') {
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-  } else if (singleton.definition.ui.layout === 'live-preview') {
+  } else if (singleton.definition.ui.dashboardLayout === 'live-preview') {
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))
   } else {
-    const component = singleton.definition.ui.layout
+    const component = singleton.definition.ui.dashboardLayout
     if (isDefined(customComponents[component])) {
       return customComponents[component]()
     } else {
-      throw new Error(`Unable to resolve custom layout component \`${component}\` for singleton \`${singleton.name}\`.`)
+      throw new Error(
+        `Unable to resolve custom dashboard layout component \`${component}\` for singleton \`${singleton.name}\`.`,
+      )
     }
   }
 }

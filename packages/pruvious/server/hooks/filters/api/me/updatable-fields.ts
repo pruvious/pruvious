@@ -12,6 +12,7 @@ export interface MyAccountFields {
    *   'lastName',
    *   'contentLanguage',
    *   'dashboardLanguage',
+   *   'timezone',
    *   'dateFormat',
    *   'timeFormat',
    *   'bookmarks',
@@ -26,13 +27,16 @@ export interface MyAccountFields {
    * @default
    * [
    *   { row: ['firstName', 'lastName'] },
+   *   '---',
    *   { row: ['contentLanguage', 'dashboardLanguage'] },
+   *   '---',
+   *   'timezone',
    *   { row: ['dateFormat', 'timeFormat'] },
    *   '---',
    *   'password',
    * ]
    */
-  layout: FieldsLayout<keyof Collections['Users']['fields']> | undefined
+  fieldsLayout: FieldsLayout<keyof Collections['Users']['fields']> | undefined
 }
 
 export function defaultMyAccountFields(): MyAccountFields {
@@ -48,7 +52,7 @@ export function defaultMyAccountFields(): MyAccountFields {
       'timeFormat',
       'bookmarks',
     ],
-    layout: [
+    fieldsLayout: [
       { row: ['firstName', 'lastName'] },
       '---',
       { row: ['contentLanguage', 'dashboardLanguage'] },

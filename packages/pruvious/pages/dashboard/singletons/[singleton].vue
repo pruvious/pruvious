@@ -29,7 +29,7 @@
       :disabled="!canUpdate"
       :errors="errors"
       :fields="singleton.definition.fields"
-      :layout="singleton.definition.ui.fields"
+      :layout="singleton.definition.ui.fieldsLayout"
       :syncedFields="singleton.definition.syncedFields"
       :translatable="singleton.definition.translatable"
       @commit="history.push($event)"

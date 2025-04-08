@@ -15,7 +15,7 @@
       :data="data"
       :errors="errors"
       :fields="structure.data.fields"
-      :layout="structure.data.layout"
+      :layout="structure.data.fieldsLayout"
       :syncedFields="[]"
       :translatable="false"
       @commit="history.push($event)"

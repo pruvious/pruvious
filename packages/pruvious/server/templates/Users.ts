@@ -307,7 +307,7 @@ export default defineTemplate(() => ({
       },
     },
     createPage: {
-      fields: [
+      fieldsLayout: [
         { row: ['email', 'password'] },
         { row: ['firstName', 'lastName'] },
         '---',
@@ -319,7 +319,7 @@ export default defineTemplate(() => ({
         { row: ['dateFormat', 'timeFormat'] },
       ],
     },
-    updatePage: { fields: 'mirror' },
+    updatePage: { fieldsLayout: 'mirror' },
   },
 }))
 

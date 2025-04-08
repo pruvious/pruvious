@@ -85,7 +85,7 @@ interface PostResponse {
 interface GetResponse {
   'auth/state': AuthState
   'me': Partial<Collections['Users']['TCastedTypes']>
-  'me/structure': { fields: Record<string, GenericSerializableFieldOptions>; layout?: FieldsLayout }
+  'me/structure': { fields: Record<string, GenericSerializableFieldOptions>; fieldsLayout?: FieldsLayout }
   'pruvious': PruviousState
   'pruvious/dashboard': PruviousDashboardState
 }

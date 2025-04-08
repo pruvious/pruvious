@@ -11,7 +11,7 @@ import { defaultMyAccountFields } from '../../hooks/filters/api/me/updatable-fie
 export default defineEventHandler(async (event) => {
   assertUserPermissions(event, ['update-account'])
 
-  const { fields, layout } = await applyFilters('api:me:updatable-fields', defaultMyAccountFields(), {})
+  const { fields, fieldsLayout } = await applyFilters('api:me:updatable-fields', defaultMyAccountFields(), {})
 
   const structure = {
     fields: Object.fromEntries(
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
           },
         ]),
     ),
-    layout,
+    fieldsLayout,
   }
 
   return structure

@@ -118,7 +118,7 @@ export default defineCollection({
   updatedAt: false,
   ui: {
     createPage: {
-      fields: [
+      fieldsLayout: [
         {
           tabs: [
             {
@@ -164,6 +164,6 @@ export default defineCollection({
         },
       ],
     },
-    updatePage: { fields: 'mirror' },
+    updatePage: { fieldsLayout: 'mirror' },
   },
 })
