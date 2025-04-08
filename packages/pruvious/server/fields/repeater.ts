@@ -19,7 +19,7 @@ import {
   type RepeaterFieldModelOptions,
   type SubfieldsInput,
 } from '@pruvious/orm'
-import { isArray, isNotNull, isObject, setProperty } from '@pruvious/utils'
+import { isArray, isObject, setProperty } from '@pruvious/utils'
 import { hash } from 'ohash'
 import type { PropType } from 'vue'
 import type { ResolveFromLayersResult } from '../../modules/pruvious/utils/resolve'
@@ -267,45 +267,6 @@ export default {
 
     const bound = defineField({
       model: repeaterFieldModel(options.subfields),
-      sanitizers: [
-        (value, { definition }) => {
-          if (definition.options.deduplicateItems && isArray(value)) {
-            const unique = [...value]
-            const stringified = value.map((item) => JSON.stringify(item))
-
-            for (let i = 0; i < stringified.length; i++) {
-              if (stringified.indexOf(stringified[i]!) !== i) {
-                stringified.splice(i, 1)
-                value.splice(i, 1)
-                i--
-              }
-            }
-
-            return unique
-          }
-
-          return value
-        },
-      ],
-      validators: [
-        (value, { definition, context, path }, errors) => {
-          if (definition.options.enforceUniqueItems && isNotNull(value)) {
-            const stringified = value.map((item) => JSON.stringify(item))
-            let hasDuplicates = false
-
-            for (const [i, item] of stringified.entries()) {
-              if (stringified.indexOf(item) !== i) {
-                errors[`${path}.${i}`] = context.__('pruvious-orm', 'The value must be unique')
-                hasDuplicates = true
-              }
-            }
-
-            if (hasDuplicates) {
-              throw new Error(context.__('pruvious-orm', 'Each item in this field must be unique'))
-            }
-          }
-        },
-      ],
       customOptions: { ...customOptions },
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
