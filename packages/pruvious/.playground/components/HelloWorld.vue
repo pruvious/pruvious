@@ -13,8 +13,6 @@
       </li>
     </ul>
     <p>{{ nullableObject?.foo }}</p>
-    <p>{{ nullableObject?.bar.x?.baz }}</p>
-    <p>{{ nullableObject?.bar.y?.baz }}</p>
     <p v-if="structure[0]?.$key === 'image'">{{ structure[0].alt }}</p>
     <p v-if="structure[0]?.$key === 'video'">{{ structure[0].autoplay }}</p>
   </div>
@@ -24,7 +22,6 @@
 import {
   buttonGroupField,
   chipsField,
-  mapField,
   nullableObjectField,
   recordsField,
   repeaterField,
@@ -57,11 +54,6 @@ defineProps({
   nullableObject: nullableObjectField({
     subfields: {
       foo: textField({}),
-      bar: mapField({
-        subfields: {
-          baz: textField({}),
-        },
-      }),
     },
   }),
   structure: structureField({

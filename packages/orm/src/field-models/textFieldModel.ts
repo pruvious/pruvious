@@ -89,6 +89,7 @@ export function textFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
+  undefined,
   undefined
 > {
   return new FieldModel({

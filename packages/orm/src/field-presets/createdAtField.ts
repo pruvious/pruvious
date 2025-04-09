@@ -6,7 +6,7 @@ import { numberFieldModel, type NumberFieldModelOptions } from '../field-models'
  * Generates a `createdAt` field that stores the timestamp of when a record was created.
  */
 export function createdAtField(): Field<
-  FieldModel<NumberFieldModelOptions<number, number>, 'numeric', number, number, string | number, undefined>,
+  FieldModel<NumberFieldModelOptions<number, number>, 'numeric', number, number, string | number, undefined, undefined>,
   {},
   false,
   false,

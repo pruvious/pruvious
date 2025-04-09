@@ -65,6 +65,7 @@ export function booleanFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
+  undefined,
   undefined
 > {
   return new FieldModel({

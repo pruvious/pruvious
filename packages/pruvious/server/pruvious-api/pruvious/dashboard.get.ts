@@ -11,7 +11,7 @@ import {
   type PruviousDashboardState,
   type Singletons,
 } from '#pruvious/server'
-import { isArray, isObject, omit, pick } from '@pruvious/utils'
+import { isArray, isObject, omit, pick, remap } from '@pruvious/utils'
 
 export default defineEventHandler(() => {
   const runtimeConfig = useRuntimeConfig()
@@ -106,7 +106,9 @@ function serializeFields(fields: Record<string, any>): Record<string, GenericSer
       ]),
       ...serializeTranslatableStringCallbacks({
         ...omit(field.options, ['populator', 'structure', 'subfields']),
-        structure: isObject(field.options.structure) ? serializeFields(field.options.structure) : undefined,
+        structure: isObject(field.options.structure)
+          ? remap(field.options.structure, ($key, subfields) => [$key, serializeFields(subfields)])
+          : undefined,
         subfields: isObject(field.options.subfields)
           ? serializeFields(field.options.subfields)
           : isArray(field.options.subfields)

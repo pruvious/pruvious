@@ -80,6 +80,7 @@ export default {
           number,
           TPopulatedType,
           number | string,
+          undefined,
           undefined
         >,
         NumberFieldModelOptions<number, TPopulatedType> &
@@ -101,6 +102,7 @@ export default {
       number,
       TPopulatedType,
       number | string,
+      undefined,
       undefined
     >,
     NumberFieldModelOptions<number, TPopulatedType> &
@@ -199,6 +201,7 @@ export default {
           number,
           TPopulatedType,
           number | string,
+          undefined,
           undefined
         >,
         NumberFieldModelOptions<number, TPopulatedType> &
@@ -221,6 +224,7 @@ export default {
         number,
         TPopulatedType,
         number | string,
+        undefined,
         undefined
       >,
       NumberFieldModelOptions<number, TPopulatedType> &
@@ -250,6 +254,7 @@ export default {
         number,
         Record<string, any>,
         number | string,
+        undefined,
         undefined
       >,
       NumberFieldModelOptions<number, Record<string, any>> &

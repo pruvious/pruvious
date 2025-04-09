@@ -161,6 +161,34 @@ interface IFieldModel {
   subfields?: any
 
   /**
+   * A map of key-value objects describing each item of a structure.
+   *
+   * - Map keys are unique item identifiers (keys).
+   *   - These keys will be included in the field value (which is an array of objects).
+   *   - Each object in the array will contain an additional `$key` property.
+   * - Map values are subfield definition objects where:
+   *   - Keys represent subfield names.
+   *   - Values are `Field` class instances.
+   *
+   * Set to `undefined` if the field has no structured subfields.
+   *
+   * @example
+   * ```ts
+   * {
+   *   image: {
+   *     src: new Field({ model: textFieldModel(), options: {}, required: true }),
+   *     alt: new Field({ model: textFieldModel(), options: {} }),
+   *   },
+   *   video: {
+   *     src: new Field({ model: textFieldModel(), options: {}, required: true }),
+   *     autoplay: new Field({ model: booleanFieldModel(), options: {} }),
+   *   },
+   * }
+   * ```
+   */
+  structure?: any
+
+  /**
    * Input filters allow you to set or modify the field's input value at specific stages during INSERT or UPDATE queries.
    * They run regardless of whether an input value is provided in the query.
    * The following filters are available:
@@ -218,6 +246,7 @@ export interface FieldModelDefinition<
   TPopulatedType,
   TInputType,
   TSubfields extends Record<string, GenericField> | undefined,
+  TStructure extends { [$key: string]: Record<string, GenericField> } | undefined,
 > extends IFieldModel {
   dataType: TDataType
   defaultValue: TCastedType | null
@@ -228,6 +257,7 @@ export interface FieldModelDefinition<
   validators?: BaseValidator[]
   populator?: Populator<TCastedType, TPopulatedType>
   subfields?: TSubfields
+  structure?: TStructure
   inputFilters?: InputFilters<
     GenericFieldModel,
     TOptions,
@@ -320,7 +350,8 @@ export type GenericFieldModel = FieldModel<
   any,
   any,
   any,
-  Record<string, GenericField> | undefined
+  Record<string, GenericField> | undefined,
+  { [$key: string]: Record<string, GenericField> } | undefined
 >
 
 /**
@@ -333,6 +364,7 @@ export class FieldModel<
   const TPopulatedType,
   const TInputType,
   TSubfields extends Record<string, GenericField> | undefined,
+  TStructure extends { [$key: string]: Record<string, GenericField> } | undefined,
 > implements IFieldModel
 {
   readonly dataType: TDataType
@@ -343,8 +375,9 @@ export class FieldModel<
   readonly sanitizers: Sanitizer<TCastedType, any>[]
   readonly validators: BaseValidator[]
   readonly subfields: TSubfields
+  readonly structure: TStructure
   readonly inputFilters: Required<
-    FieldModelDefinition<TOptions, TDataType, TCastedType, TPopulatedType, TInputType, TSubfields>
+    FieldModelDefinition<TOptions, TDataType, TCastedType, TPopulatedType, TInputType, TSubfields, TStructure>
   >['inputFilters']
   readonly populator: Populator<TCastedType, TPopulatedType> | null
 
@@ -385,7 +418,15 @@ export class FieldModel<
   readonly TOptions!: TOptions
 
   constructor(
-    definition: FieldModelDefinition<TOptions, TDataType, TCastedType, TPopulatedType, TInputType, TSubfields>,
+    definition: FieldModelDefinition<
+      TOptions,
+      TDataType,
+      TCastedType,
+      TPopulatedType,
+      TInputType,
+      TSubfields,
+      TStructure
+    >,
   ) {
     this.dataType = definition.dataType
     this.defaultValue = definition.defaultValue
@@ -395,6 +436,7 @@ export class FieldModel<
     this.sanitizers = definition.sanitizers ?? []
     this.validators = definition.validators ?? []
     this.subfields = definition.subfields as TSubfields
+    this.structure = definition.structure as TStructure
     this.inputFilters = definition.inputFilters ?? {}
     this.populator = definition.populator ?? null
   }

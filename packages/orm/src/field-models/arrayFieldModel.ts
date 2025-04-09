@@ -148,6 +148,7 @@ export function arrayFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
+  undefined,
   undefined
 > {
   return new FieldModel({

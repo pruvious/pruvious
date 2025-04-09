@@ -1,5 +1,13 @@
 import { expect, test } from 'vitest'
-import { ExecError, Field, parseConditionalLogic, prepareQuery, repeaterFieldModel, textFieldModel } from '../src'
+import {
+  ExecError,
+  Field,
+  parseConditionalLogic,
+  prepareQuery,
+  repeaterFieldModel,
+  structureFieldModel,
+  textFieldModel,
+} from '../src'
 
 test('prepare query', async () => {
   // SQLite
@@ -96,4 +104,105 @@ test('parse conditional logic', () => {
     'foo.0.bar': { '../foo': { '<': 5 } },
     'foo.1.bar': { '../foo': { '<': 5 } },
   })
+
+  expect(
+    parseConditionalLogic(
+      {
+        foo: new Field({
+          model: structureFieldModel({
+            BAR: {
+              bar: new Field({ model: textFieldModel(), conditionalLogic: { '../foo': { '<': 5 } }, options: {} }),
+            },
+          }),
+          conditionalLogic: { '0.bar': { '=': 'BAR' } },
+          options: {},
+        }),
+      },
+      { foo: [{}, {}] },
+    ),
+  ).toEqual({
+    'foo': { '0.bar': { '=': 'BAR' } },
+    'foo.0.bar': { '../foo': { '<': 5 } },
+    'foo.1.bar': { '../foo': { '<': 5 } },
+  })
+
+  expect(
+    parseConditionalLogic(
+      {
+        foo: new Field({
+          model: structureFieldModel({
+            BAR: {
+              bar: new Field({
+                model: textFieldModel(),
+                conditionalLogic: { '../foo': { '<': 5 } },
+                options: {},
+              }),
+              baz: new Field({
+                model: repeaterFieldModel({
+                  qux: new Field({ model: textFieldModel(), conditionalLogic: { '../foo': { '<': 5 } }, options: {} }),
+                }),
+                conditionalLogic: { '0.qux': { '=': 'BAR' } },
+                options: {},
+              }),
+            },
+          }),
+          conditionalLogic: { '0.bar': { '=': 'BAR' } },
+          options: {},
+        }),
+      },
+      { foo: [{ $key: 'BAR', baz: [{}] }, {}] },
+    ),
+  ).toEqual({
+    'foo': { '0.bar': { '=': 'BAR' } },
+    'foo.0.bar': { '../foo': { '<': 5 } },
+    'foo.0.baz': { '0.qux': { '=': 'BAR' } },
+    'foo.0.baz.0.qux': { '../foo': { '<': 5 } },
+    'foo.1.bar': { '../foo': { '<': 5 } },
+    'foo.1.baz': { '0.qux': { '=': 'BAR' } },
+  })
+
+  expect(
+    parseConditionalLogic(
+      {
+        structureNested: new Field({
+          model: structureFieldModel({
+            foo: {
+              nested: new Field({
+                model: structureFieldModel({
+                  repeater: {
+                    repeater: new Field({
+                      model: repeaterFieldModel({
+                        type: new Field({ model: textFieldModel(), default: 'text', options: {} }),
+                        text: new Field({
+                          model: textFieldModel(),
+                          conditionalLogic: { type: { '=': 'text' } },
+                          required: true,
+                          options: {},
+                        }),
+                        number: new Field({
+                          model: textFieldModel(),
+                          conditionalLogic: { type: { '=': 'number' } },
+                          required: true,
+                          options: {},
+                        }),
+                      }),
+                      options: {},
+                    }),
+                  },
+                }),
+                options: {},
+              }),
+            },
+          }),
+          options: {},
+        }),
+      },
+      { structureNested: [{ $key: 'foo', nested: [{}, { $key: 'repeater', repeater: [{}] }] }] },
+    ),
+  ).toEqual({
+    'structureNested.0.nested.1.repeater.0.text': { type: { '=': 'text' } },
+    'structureNested.0.nested.1.repeater.0.number': { type: { '=': 'number' } },
+  })
+
+  // @todo objectFieldModel test
 })

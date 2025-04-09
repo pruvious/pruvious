@@ -67,6 +67,7 @@ export function objectFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
+  undefined,
   undefined
 > {
   return new FieldModel({

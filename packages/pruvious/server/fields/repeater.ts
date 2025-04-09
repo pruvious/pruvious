@@ -212,7 +212,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>[],
-        TSubfields
+        TSubfields,
+        undefined
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         CustomOptions<TSubfields> &
@@ -231,7 +232,8 @@ export default {
       TCastedType,
       TPopulatedType,
       SubfieldsInput<TSubfields>[],
-      TSubfields
+      TSubfields,
+      undefined
     >,
     RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
       CustomOptions<TSubfields> &
@@ -267,7 +269,7 @@ export default {
 
     const bound = defineField({
       model: repeaterFieldModel(options.subfields),
-      customOptions: { ...customOptions },
+      customOptions,
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)
@@ -303,7 +305,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>[],
-        TSubfields
+        TSubfields,
+        undefined
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
@@ -324,7 +327,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>[],
-        TSubfields
+        TSubfields,
+        undefined
       >,
       RepeaterFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
@@ -353,7 +357,8 @@ export default {
       Record<string, any>,
       Record<string, any>,
       SubfieldsInput<Record<string, GenericField>>[],
-      Record<string, GenericField>
+      Record<string, GenericField>,
+      undefined
     >,
     RepeaterFieldModelOptions<Record<string, any>, Record<string, any>> &
       CustomOptions<Record<string, GenericField>> &

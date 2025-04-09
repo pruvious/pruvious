@@ -111,7 +111,7 @@ export default {
   >(
     options: Omit<
       CombinedFieldOptions<
-        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined>,
+        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
         TextFieldModelOptions<TValues, TValues> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
@@ -125,7 +125,7 @@ export default {
       'allowEmptyString' | 'maxLength' | 'minLength' | 'trim'
     >,
   ): Field<
-    FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined>,
+    FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
     TextFieldModelOptions<TValues, TValues> & CustomOptions<TChoices> & ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     TRequired,
@@ -171,7 +171,7 @@ export default {
   >(
     options: Omit<
       CombinedFieldOptions<
-        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined>,
+        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
         TextFieldModelOptions<TValues, TValues> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
@@ -186,7 +186,7 @@ export default {
     >,
   ): { type: PropType<TValues>; required: true } & {
     field: Field<
-      FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined>,
+      FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
       TextFieldModelOptions<TValues, TValues> & CustomOptions<TChoices> & ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
@@ -206,7 +206,7 @@ export default {
    */
   TOptions: undefined as unknown as Omit<
     CombinedFieldOptions<
-      FieldModel<TextFieldModelOptions<string, string>, 'text', string, string, string, undefined>,
+      FieldModel<TextFieldModelOptions<string, string>, 'text', string, string, string, undefined, undefined>,
       TextFieldModelOptions<string, string> &
         CustomOptions<(SelectChoice | SelectChoiceGroup)[]> &
         ResolveFieldUIOptions<{ placeholder: true }>,

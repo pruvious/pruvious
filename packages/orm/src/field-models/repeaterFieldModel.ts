@@ -162,7 +162,8 @@ export function repeaterFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
-  TSubfields
+  TSubfields,
+  undefined
 > {
   return new FieldModel({
     dataType: 'text',

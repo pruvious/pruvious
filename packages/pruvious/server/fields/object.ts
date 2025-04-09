@@ -67,7 +67,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>,
-        TSubfields
+        TSubfields,
+        undefined
       >,
       ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
       false,
@@ -84,7 +85,8 @@ export default {
       TCastedType,
       TPopulatedType,
       SubfieldsInput<TSubfields>,
-      TSubfields
+      TSubfields,
+      undefined
     >,
     ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
     false,
@@ -101,7 +103,7 @@ export default {
       // @todo validators (check repeaterFieldModel)
       // @todo inputFilters (check repeaterFieldModel)
       // @todo populator (check repeaterFieldModel)
-      customOptions: { ...customOptions, ui: { dataTable: false } },
+      customOptions,
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)
@@ -137,7 +139,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>,
-        TSubfields
+        TSubfields,
+        undefined
       >,
       ObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
@@ -157,7 +160,8 @@ export default {
         TCastedType,
         TPopulatedType,
         SubfieldsInput<TSubfields>,
-        TSubfields
+        TSubfields,
+        undefined
       >,
       ObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
@@ -185,7 +189,8 @@ export default {
       Record<string, any>,
       Record<string, any>,
       SubfieldsInput<Record<string, GenericField>>,
-      Record<string, GenericField>
+      Record<string, GenericField>,
+      undefined
     >,
     ObjectFieldModelOptions<Record<string, any>, Record<string, any>> & CustomOptions<Record<string, GenericField>>,
     boolean,

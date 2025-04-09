@@ -6,7 +6,7 @@ import { numberFieldModel, type NumberFieldModelOptions } from '../field-models'
  * Generates a `updatedAt` field that stores the timestamp of when a record was last updated.
  */
 export function updatedAtField(): Field<
-  FieldModel<NumberFieldModelOptions<number, number>, 'numeric', number, number, string | number, undefined>,
+  FieldModel<NumberFieldModelOptions<number, number>, 'numeric', number, number, string | number, undefined, undefined>,
   {},
   false,
   false,

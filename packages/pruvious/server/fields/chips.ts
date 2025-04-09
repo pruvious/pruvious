@@ -44,6 +44,7 @@ export default {
         TCastedType,
         TCastedType,
         TCastedType,
+        undefined,
         undefined
       >,
       ArrayFieldModelOptions<TAllowedType, TAllowedType> & CustomOptions & ResolveFieldUIOptions<undefined>,
@@ -61,6 +62,7 @@ export default {
       TCastedType,
       TCastedType,
       TCastedType,
+      undefined,
       undefined
     >,
     ArrayFieldModelOptions<TAllowedType, TAllowedType> & CustomOptions & ResolveFieldUIOptions<undefined>,
@@ -108,6 +110,7 @@ export default {
         TCastedType,
         TCastedType,
         TCastedType,
+        undefined,
         undefined
       >,
       ArrayFieldModelOptions<TAllowedType, TAllowedType> & CustomOptions & ResolveFieldUIOptions<undefined>,
@@ -126,6 +129,7 @@ export default {
         TCastedType,
         TCastedType,
         TCastedType,
+        undefined,
         undefined
       >,
       ArrayFieldModelOptions<TAllowedType, TAllowedType> & CustomOptions & ResolveFieldUIOptions<undefined>,
@@ -146,7 +150,7 @@ export default {
    * Note: This is a TypeScript type assertion and does not involve any runtime logic or data.
    */
   TOptions: undefined as unknown as CombinedFieldOptions<
-    FieldModel<ArrayFieldModelOptions<string, string>, 'text', string, string, string, undefined>,
+    FieldModel<ArrayFieldModelOptions<string, string>, 'text', string, string, string, undefined, undefined>,
     ArrayFieldModelOptions<string, string> & CustomOptions & ResolveFieldUIOptions<undefined>,
     false,
     boolean,

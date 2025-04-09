@@ -35,6 +35,12 @@ describe('repeater field', () => {
     expect(await $postAsAdmin(repeater, { repeater: true })).toEqual($422([{ repeater: expect.any(String) }]))
     expect(await $postAsAdmin(repeater, { repeater: null })).toEqual($422([{ repeater: expect.any(String) }]))
 
+    // required subfield
+    expect(await $postAsAdmin(repeater, { repeater: [{}] })).toEqual($422([{ 'repeater.0.text': expect.any(String) }]))
+    expect(await $postAsAdmin(repeaterNested, { repeaterNested: [{ nested: [{}] }] })).toEqual(
+      $422([{ 'repeaterNested.0.foo': expect.any(String), 'repeaterNested.0.nested.0.text': expect.any(String) }]),
+    )
+
     // min/max
     expect(await $postAsAdmin(repeaterMinMax, {})).toEqual([{ repeaterMinMax: [{ foo: 'FOO' }, { foo: 'BAR' }] }])
     expect(await $postAsAdmin(repeaterMinMax, { repeaterMinMax: [{ foo: '' }, { foo: '' }, { foo: '' }] })).toEqual([

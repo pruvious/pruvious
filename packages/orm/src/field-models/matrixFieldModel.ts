@@ -128,6 +128,7 @@ export function matrixFieldModel<
   TCastedType,
   TPopulatedType,
   TInputType,
+  undefined,
   undefined
 > {
   return new FieldModel({

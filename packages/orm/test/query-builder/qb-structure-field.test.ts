@@ -5,19 +5,24 @@ import {
   Database,
   Field,
   numberFieldModel,
-  repeaterFieldModel,
+  structureFieldModel,
   textFieldModel,
   uniqueValidator,
   urlValidator,
 } from '../../src'
 import { initAllDrivers, qbe, qbo } from '../utils'
 
-describe('repeater field', () => {
+describe('structure field', () => {
   test('basic sanitization and validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_field_sanitization_validation')) {
-      const subfields = {
-        label: new Field({ model: textFieldModel(), options: {} }),
-        link: new Field({ model: textFieldModel(), nullable: false, options: {} }),
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_field_sanitization_validation')) {
+      const structure = {
+        foo: {
+          label: new Field({ model: textFieldModel(), options: {} }),
+          link: new Field({ model: textFieldModel(), nullable: false, options: {} }),
+        },
+        bar: {
+          baz: new Field({ model: textFieldModel(), options: {} }),
+        },
       }
       const db = new Database({
         driver,
@@ -26,7 +31,7 @@ describe('repeater field', () => {
           Required: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel(subfields),
+                model: structureFieldModel(structure),
                 options: {},
                 required: true,
               }),
@@ -35,7 +40,7 @@ describe('repeater field', () => {
           NonNullable: new Collection({
             fields: {
               bar: new Field({
-                model: repeaterFieldModel(subfields),
+                model: structureFieldModel(structure),
                 options: {},
                 required: true,
                 nullable: false,
@@ -45,7 +50,7 @@ describe('repeater field', () => {
           AllowEmptyArray: new Collection({
             fields: {
               baz: new Field({
-                model: repeaterFieldModel(subfields),
+                model: structureFieldModel(structure),
                 options: {
                   allowEmptyArray: true,
                 },
@@ -92,20 +97,20 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Required')
-          .values({ foo: [{ label: null, link: '' }] })
+          .values({ foo: [{ $key: 'foo', label: null, link: '' }] })
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ label: null, link: '' }] }]))
+      ).toEqual(qbo([{ foo: [{ $key: 'foo', label: null, link: '' }] }]))
 
       expect(await qb.insertInto('Required').values({ foo: null }).returning('foo').run()).toEqual(qbo([{ foo: null }]))
 
       expect(
         await qb
           .insertInto('Required')
-          .values({ foo: JSON.stringify([{ label: null, link: '' }]) as any })
+          .values({ foo: JSON.stringify([{ $key: 'bar', baz: '' }]) as any })
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ label: null, link: '' }] }]))
+      ).toEqual(qbo([{ foo: [{ $key: 'bar', baz: '' }] }]))
 
       expect(
         await qb
@@ -146,63 +151,67 @@ describe('repeater field', () => {
   })
 
   test('subfields sanitization and validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_subfield_sanitization_validation')) {
-      const subfields = {
-        label: new Field({
-          model: textFieldModel(),
-          required: true,
-          nullable: false,
-          options: {},
-          validators: [
-            (value) => {
-              if (value === 'Voldemort') {
-                throw new Error('You know who')
-              }
-            },
-          ],
-        }),
-        link: new Field({
-          model: textFieldModel(),
-          required: true,
-          nullable: false,
-          options: {},
-          validators: [urlValidator('The value must be a valid URL')],
-        }),
-        rel: new Field({
-          model: repeaterFieldModel({
-            value: new Field({
-              model: textFieldModel(),
-              required: true,
-              nullable: false,
-              options: {},
-              validators: [
-                (value) => {
-                  const allowedRelValues = [
-                    'alternate',
-                    'author',
-                    'bookmark',
-                    'external',
-                    'help',
-                    'license',
-                    'next',
-                    'nofollow',
-                    'noreferrer',
-                    'noopener',
-                    'prev',
-                    'search',
-                    'tag',
-                  ]
-
-                  if (!allowedRelValues.includes(value)) {
-                    throw new Error('Invalid `rel` value')
-                  }
-                },
-              ],
-            }),
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_subfield_sanitization_validation')) {
+      const structure = {
+        foo: {
+          label: new Field({
+            model: textFieldModel(),
+            required: true,
+            nullable: false,
+            options: {},
+            validators: [
+              (value) => {
+                if (value === 'Voldemort') {
+                  throw new Error('You know who')
+                }
+              },
+            ],
           }),
-          nullable: false,
-          options: {},
-        }),
+          link: new Field({
+            model: textFieldModel(),
+            required: true,
+            nullable: false,
+            options: {},
+            validators: [urlValidator('The value must be a valid URL')],
+          }),
+          rel: new Field({
+            model: structureFieldModel({
+              REL: {
+                value: new Field({
+                  model: textFieldModel(),
+                  required: true,
+                  nullable: false,
+                  options: {},
+                  validators: [
+                    (value) => {
+                      const allowedRelValues = [
+                        'alternate',
+                        'author',
+                        'bookmark',
+                        'external',
+                        'help',
+                        'license',
+                        'next',
+                        'nofollow',
+                        'noreferrer',
+                        'noopener',
+                        'prev',
+                        'search',
+                        'tag',
+                      ]
+
+                      if (!allowedRelValues.includes(value)) {
+                        throw new Error('Invalid `rel` value')
+                      }
+                    },
+                  ],
+                }),
+              },
+            }),
+            nullable: false,
+            options: {},
+          }),
+        },
       }
       const db = new Database({
         driver,
@@ -211,7 +220,7 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel(subfields),
+                model: structureFieldModel(structure),
                 options: {},
                 required: true,
               }),
@@ -225,14 +234,14 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ label: 'Foo', link: 'bar', rel: [] }] })
+          .values({ foo: [{ $key: 'foo', label: 'Foo', link: 'bar', rel: [] }] })
           .run(),
       ).toEqual(qbe([{ 'foo.0.link': 'The value must be a valid URL' }]))
 
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ label: null, link: null, rel: null } as any] })
+          .values({ foo: [{ $key: 'foo', label: null, link: null, rel: null } as any] })
           .run(),
       ).toEqual(
         qbe([
@@ -249,11 +258,36 @@ describe('repeater field', () => {
           .insertInto('Foo')
           .values({ foo: [{} as any] })
           .run(),
-      ).toEqual(qbe([{ 'foo.0.label': 'This field is required', 'foo.0.link': 'This field is required' }]))
+      ).toEqual(qbe([{ 'foo.0': 'Missing `$key` property' }]))
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ label: '', link: '' }] })
+          .values({ foo: [{ $key: 'foo' } as any] })
+          .run(),
+      ).toEqual(
+        qbe([
+          {
+            'foo.0.label': 'This field is required',
+            'foo.0.link': 'This field is required',
+          },
+        ]),
+      )
+      expect(
+        await qb
+          .insertInto('Foo')
+          .values({ foo: [{ $key: true } as any] })
+          .run(),
+      ).toEqual(qbe([{ 'foo.0': 'The `$key` must be a string' }]))
+      expect(
+        await qb
+          .insertInto('Foo')
+          .values({ foo: [{ $key: 'bar' } as any] })
+          .run(),
+      ).toEqual(qbe([{ 'foo.0': 'Invalid `$key`' }]))
+      expect(
+        await qb
+          .insertInto('Foo')
+          .values({ foo: [{ $key: 'foo', label: '', link: '' }] })
           .run(),
       ).toEqual(
         qbe([{ 'foo.0.label': 'This field cannot be left empty', 'foo.0.link': 'This field cannot be left empty' }]),
@@ -266,21 +300,26 @@ describe('repeater field', () => {
             {
               foo: [
                 {
+                  $key: 'foo',
                   label: ' Foo ',
                   link: ' http://pruvious.com ',
-                  rel: [{ value: ' nofollow ', bar: 'BAR' }],
+                  rel: [{ $key: 'REL', value: ' nofollow ', bar: 'BAR' }],
                   baz: 'BAZ',
                 },
               ],
             },
-            { foo: [{ label: 123, link: ' http://pruvious.com ', baz: 'BAZ' }] },
+            { foo: [{ $key: 'foo', label: 123, link: ' http://pruvious.com ', baz: 'BAZ' }] },
           ])
           .returning('foo')
           .run(),
       ).toEqual(
         qbo([
-          { foo: [{ label: 'Foo', link: 'http://pruvious.com', rel: [{ value: 'nofollow' }] }] },
-          { foo: [{ label: '123', link: 'http://pruvious.com', rel: [] }] },
+          {
+            foo: [
+              { $key: 'foo', label: 'Foo', link: 'http://pruvious.com', rel: [{ $key: 'REL', value: 'nofollow' }] },
+            ],
+          },
+          { foo: [{ $key: 'foo', label: '123', link: 'http://pruvious.com', rel: [] }] },
         ]),
       )
 
@@ -288,7 +327,10 @@ describe('repeater field', () => {
         await qb
           .update('Foo')
           .set({
-            foo: [{ label: 321, link: 'http://pruvious.com' }, { link: 'http://pruvious.com' } as any],
+            foo: [
+              { $key: 'foo', label: 321, link: 'http://pruvious.com' },
+              { $key: 'foo', link: 'http://pruvious.com' } as any,
+            ],
           })
           .run(),
       ).toEqual(qbe({ 'foo.1.label': 'This field is required' }))
@@ -297,24 +339,24 @@ describe('repeater field', () => {
         await qb
           .update('Foo')
           .set({
-            foo: [{ label: 321, link: 'http://pruvious.com' }],
+            foo: [{ $key: 'foo', label: 321, link: 'http://pruvious.com' }],
           })
           .where('id', '=', 1)
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ label: '321', link: 'http://pruvious.com', rel: [] }] }]))
+      ).toEqual(qbo([{ foo: [{ $key: 'foo', label: '321', link: 'http://pruvious.com', rel: [] }] }]))
 
       expect(
         await qb
           .selectFrom('Foo')
-          .where('foo', '=', JSON.stringify([{ label: '321', link: 'http://pruvious.com', rel: [] }]))
+          .where('foo', '=', JSON.stringify([{ $key: 'foo', label: '321', link: 'http://pruvious.com', rel: [] }]))
           .count(),
       ).toEqual(qbo(1))
 
       expect(
         await qb
           .selectFrom('Foo')
-          .where('foo', '=', JSON.stringify([{ label: '321', rel: [], link: 'http://pruvious.com' }]))
+          .where('foo', '=', JSON.stringify([{ $key: 'foo', label: '321', rel: [], link: 'http://pruvious.com' }]))
           .count(),
       ).toEqual(qbo(0))
 
@@ -324,7 +366,7 @@ describe('repeater field', () => {
   })
 
   test('subfields conditional logic', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_subfield_conditional_logic')) {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_subfield_conditional_logic')) {
       const db = new Database({
         driver,
         PGPool,
@@ -332,20 +374,22 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({
-                  req: new Field({
-                    model: textFieldModel(),
-                    required: true,
-                    nullable: false,
-                    options: { allowEmptyString: true },
-                  }),
-                  dep: new Field({
-                    model: textFieldModel(),
-                    required: true,
-                    nullable: false,
-                    options: {},
-                    conditionalLogic: { req: { '!=': '' } },
-                  }),
+                model: structureFieldModel({
+                  foo: {
+                    req: new Field({
+                      model: textFieldModel(),
+                      required: true,
+                      nullable: false,
+                      options: { allowEmptyString: true },
+                    }),
+                    dep: new Field({
+                      model: textFieldModel(),
+                      required: true,
+                      nullable: false,
+                      options: {},
+                      conditionalLogic: { req: { '!=': '' } },
+                    }),
+                  },
                 }),
                 options: {},
                 required: true,
@@ -360,7 +404,7 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{} as any] })
+          .values({ foo: [{ $key: 'foo' } as any] })
           .run(),
       ).toEqual(
         qbe([
@@ -374,14 +418,14 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ req: '' }] })
+          .values({ foo: [{ $key: 'foo', req: '' }] })
           .run(),
       ).toEqual(qbo(1))
 
       expect(
         await qb
           .update('Foo')
-          .set({ foo: [{} as any] })
+          .set({ foo: [{ $key: 'foo' } as any] })
           .run(),
       ).toEqual(
         qbe({
@@ -396,7 +440,7 @@ describe('repeater field', () => {
   })
 
   test('auto-generated subfields', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_auto_generated_subfields')) {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_auto_generated_subfields')) {
       const db = new Database({
         driver,
         PGPool,
@@ -404,23 +448,25 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({
-                  one: new Field({
-                    model: textFieldModel(),
-                    required: true,
-                    nullable: false,
-                    autoGenerated: true,
-                    options: { allowEmptyString: true },
-                    inputFilters: { beforeInputSanitization: () => 1 },
-                  }),
-                  two: new Field({
-                    model: numberFieldModel(),
-                    required: true,
-                    nullable: false,
-                    autoGenerated: true,
-                    options: {},
-                    inputFilters: { beforeInputValidation: () => 2 },
-                  }),
+                model: structureFieldModel({
+                  foo: {
+                    one: new Field({
+                      model: textFieldModel(),
+                      required: true,
+                      nullable: false,
+                      autoGenerated: true,
+                      options: { allowEmptyString: true },
+                      inputFilters: { beforeInputSanitization: () => 1 },
+                    }),
+                    two: new Field({
+                      model: numberFieldModel(),
+                      required: true,
+                      nullable: false,
+                      autoGenerated: true,
+                      options: {},
+                      inputFilters: { beforeInputValidation: () => 2 },
+                    }),
+                  },
                 }),
                 options: {},
                 required: true,
@@ -430,21 +476,23 @@ describe('repeater field', () => {
           Bar: new Collection({
             fields: {
               bar: new Field({
-                model: repeaterFieldModel({
-                  baz: new Field({
-                    model: textFieldModel(),
-                    required: true,
-                    nullable: false,
-                    autoGenerated: true,
-                    options: { allowEmptyString: true },
-                    inputFilters: { beforeQueryExecution: () => 'BAZ' },
-                  }),
+                model: structureFieldModel({
+                  bar: {
+                    baz: new Field({
+                      model: textFieldModel(),
+                      required: true,
+                      nullable: false,
+                      autoGenerated: true,
+                      options: { allowEmptyString: true },
+                      inputFilters: { beforeQueryExecution: () => 'BAZ' },
+                    }),
+                  },
                 }),
                 required: true,
                 nullable: false,
                 autoGenerated: true,
                 options: {},
-                inputFilters: { beforeInputValidation: () => [{ baz: 'baz' }] },
+                inputFilters: { beforeInputValidation: () => [{ $key: 'bar' as const, baz: 'baz' }] },
               }),
             },
           }),
@@ -456,21 +504,23 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{}, {}] })
+          .values({ foo: [{ $key: 'foo' }, { $key: 'foo' }] })
           .returning('foo')
           .run(),
       ).toEqual(
         qbo([
           {
             foo: [
-              { one: '1', two: 2 },
-              { one: '1', two: 2 },
+              { $key: 'foo', one: '1', two: 2 },
+              { $key: 'foo', one: '1', two: 2 },
             ],
           },
         ]),
       )
 
-      expect(await qb.insertInto('Bar').values({}).returning('bar').run()).toEqual(qbo([{ bar: [{ baz: 'BAZ' }] }]))
+      expect(await qb.insertInto('Bar').values({ $key: 'bar' }).returning('bar').run()).toEqual(
+        qbo([{ bar: [{ $key: 'bar', baz: 'BAZ' }] }]),
+      )
 
       await db.close()
       await close?.()
@@ -478,7 +528,7 @@ describe('repeater field', () => {
   })
 
   test('unique subfields', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_unique_subfields')) {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_unique_subfields')) {
       const db = new Database({
         driver,
         PGPool,
@@ -486,12 +536,14 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({
-                  bar: new Field({
-                    model: textFieldModel(),
-                    options: {},
-                    validators: [uniqueValidator()],
-                  }),
+                model: structureFieldModel({
+                  foo: {
+                    bar: new Field({
+                      model: textFieldModel(),
+                      options: {},
+                      validators: [uniqueValidator()],
+                    }),
+                  },
                 }),
                 options: {},
                 default: null,
@@ -502,16 +554,18 @@ describe('repeater field', () => {
           Bar: new Collection({
             fields: {
               bar: new Field({
-                model: repeaterFieldModel({
-                  baz: new Field({
-                    model: textFieldModel(),
-                    options: {},
-                    validators: [uniqueValidator(['baz', 'qux'], 'Duplicate!')],
-                  }),
-                  qux: new Field({
-                    model: numberFieldModel(),
-                    options: {},
-                  }),
+                model: structureFieldModel({
+                  bar: {
+                    baz: new Field({
+                      model: textFieldModel(),
+                      options: {},
+                      validators: [uniqueValidator(['baz', 'qux'], 'Duplicate!')],
+                    }),
+                    qux: new Field({
+                      model: numberFieldModel(),
+                      options: {},
+                    }),
+                  },
                 }),
                 options: {},
               }),
@@ -533,20 +587,20 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values([{ foo: [{ bar: '1' }] }, { foo: [{ bar: 1 }] }])
+          .values([{ foo: [{ $key: 'foo', bar: '1' }] }, { foo: [{ $key: 'foo', bar: 1 }] }])
           .run(),
       ).toEqual(qbe([{ foo: 'The value must be unique' }, { foo: 'The value must be unique' }]))
       expect(
         await qb
           .insertInto('Foo')
-          .values([{ foo: [{ bar: '1' }] }, { foo: [{ bar: '2' }] }])
+          .values([{ foo: [{ $key: 'foo', bar: '1' }] }, { foo: [{ $key: 'foo', bar: '2' }] }])
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ bar: '1' }] }, { foo: [{ bar: '2' }] }]))
+      ).toEqual(qbo([{ foo: [{ $key: 'foo', bar: '1' }] }, { foo: [{ $key: 'foo', bar: '2' }] }]))
       expect(
         await qb
           .insertInto('Foo')
-          .values([{ foo: [{ bar: '1' }] }, { foo: [{ bar: '2' }] }])
+          .values([{ foo: [{ $key: 'foo', bar: '1' }] }, { foo: [{ $key: 'foo', bar: '2' }] }])
           .run(),
       ).toEqual(qbe([{ foo: 'The value must be unique' }, { foo: 'The value must be unique' }]))
 
@@ -556,7 +610,12 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ bar: '3' }, { bar: 3 }] })
+          .values({
+            foo: [
+              { $key: 'foo', bar: '3' },
+              { $key: 'foo', bar: 3 },
+            ],
+          })
           .run(),
       ).toEqual(qbe([{ 'foo.0.bar': 'The value must be unique', 'foo.1.bar': 'The value must be unique' }]))
 
@@ -565,8 +624,8 @@ describe('repeater field', () => {
           .insertInto('Bar')
           .values({
             bar: [
-              { baz: 'A', qux: 4 },
-              { qux: 4, baz: 'A' },
+              { $key: 'bar', baz: 'A', qux: 4 },
+              { $key: 'bar', qux: 4, baz: 'A' },
             ],
           })
           .run(),
@@ -577,8 +636,8 @@ describe('repeater field', () => {
           .insertInto('Bar')
           .values({
             bar: [
-              { baz: 'A', qux: 4 },
-              { qux: 3, baz: 'A' },
+              { $key: 'bar', baz: 'A', qux: 4 },
+              { $key: 'bar', qux: 3, baz: 'A' },
             ],
           })
           .run(),
@@ -589,8 +648,8 @@ describe('repeater field', () => {
           .update('Bar')
           .set({
             bar: [
-              { baz: 'A', qux: 4 },
-              { qux: 4, baz: 'A' },
+              { $key: 'bar', baz: 'A', qux: 4 },
+              { $key: 'bar', qux: 4, baz: 'A' },
             ],
           })
           .run(),
@@ -601,8 +660,8 @@ describe('repeater field', () => {
     }
   })
 
-  test('repeater items unique sanitization', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_field_unique_items_sanitization')) {
+  test('structure items unique sanitization', async () => {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_field_unique_items_sanitization')) {
       const db = new Database({
         driver,
         PGPool,
@@ -610,7 +669,7 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({ bar: new Field({ model: textFieldModel(), options: {} }) }),
+                model: structureFieldModel({ foo: { bar: new Field({ model: textFieldModel(), options: {} }) } }),
                 options: { deduplicateItems: true },
               }),
             },
@@ -623,26 +682,45 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ bar: 'baz' }, { bar: 'baz' }] })
+          .values({
+            foo: [
+              { $key: 'foo', bar: 'baz' },
+              { $key: 'foo', bar: 'baz' },
+            ],
+          })
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ bar: 'baz' }] }]))
+      ).toEqual(qbo([{ foo: [{ $key: 'foo', bar: 'baz' }] }]))
 
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ bar: 'baz' }, { bar: 'BAZ' }] })
+          .values({
+            foo: [
+              { $key: 'foo', bar: 'baz' },
+              { $key: 'foo', bar: 'BAZ' },
+            ],
+          })
           .returning('foo')
           .run(),
-      ).toEqual(qbo([{ foo: [{ bar: 'baz' }, { bar: 'BAZ' }] }]))
+      ).toEqual(
+        qbo([
+          {
+            foo: [
+              { $key: 'foo', bar: 'baz' },
+              { $key: 'foo', bar: 'BAZ' },
+            ],
+          },
+        ]),
+      )
 
       await db.close()
       await close?.()
     }
   })
 
-  test('repeater items unique validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_field_unique_items_validation')) {
+  test('structure items unique validation', async () => {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_field_unique_items_validation')) {
       const db = new Database({
         driver,
         PGPool,
@@ -650,7 +728,7 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({ bar: new Field({ model: textFieldModel(), options: {} }) }),
+                model: structureFieldModel({ foo: { bar: new Field({ model: textFieldModel(), options: {} }) } }),
                 options: { enforceUniqueItems: true },
               }),
             },
@@ -663,7 +741,12 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{ bar: 'baz' }, { bar: 'baz' }] })
+          .values({
+            foo: [
+              { $key: 'foo', bar: 'baz' },
+              { $key: 'foo', bar: 'baz' },
+            ],
+          })
           .run(),
       ).toEqual(qbe([{ 'foo': 'Each item in this field must be unique', 'foo.1': 'The value must be unique' }]))
 
@@ -672,8 +755,8 @@ describe('repeater field', () => {
     }
   })
 
-  test('repeater items min/max', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_field_min_max_validation')) {
+  test('structure items min/max', async () => {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_field_min_max_validation')) {
       const db = new Database({
         driver,
         PGPool,
@@ -681,7 +764,7 @@ describe('repeater field', () => {
           Foo: new Collection({
             fields: {
               foo: new Field({
-                model: repeaterFieldModel({}),
+                model: structureFieldModel({ foo: {} }),
                 options: { minItems: 2, maxItems: 4 },
               }),
             },
@@ -689,7 +772,7 @@ describe('repeater field', () => {
           Bar: new Collection({
             fields: {
               bar: new Field({
-                model: repeaterFieldModel({}),
+                model: structureFieldModel({ bar: {} }),
                 options: { minItems: 1, maxItems: 1 },
               }),
             },
@@ -702,42 +785,42 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{}] })
+          .values({ foo: [{ $key: 'foo' }] })
           .run(),
       ).toEqual(qbe([{ foo: 'This field must contain at least 2 items' }]))
 
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{}, {}] })
+          .values({ foo: [{ $key: 'foo' }, { $key: 'foo' }] })
           .run(),
       ).toEqual(qbo(1))
 
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{}, {}, {}, {}] })
+          .values({ foo: [{ $key: 'foo' }, { $key: 'foo' }, { $key: 'foo' }, { $key: 'foo' }] })
           .run(),
       ).toEqual(qbo(1))
 
       expect(
         await qb
           .insertInto('Foo')
-          .values({ foo: [{}, {}, {}, {}, {}] })
+          .values({ foo: [{ $key: 'foo' }, { $key: 'foo' }, { $key: 'foo' }, { $key: 'foo' }, { $key: 'foo' }] })
           .run(),
       ).toEqual(qbe([{ foo: 'This field must contain at most 4 items' }]))
 
       expect(
         await qb
           .insertInto('Bar')
-          .values({ bar: [{}, {}] })
+          .values({ bar: [{ $key: 'bar' }, { $key: 'bar' }] })
           .run(),
       ).toEqual(qbe([{ bar: 'This field must contain exactly 1 item' }]))
 
       expect(
         await qb
           .insertInto('Bar')
-          .values({ bar: [{}] })
+          .values({ bar: [{ $key: 'bar' }] })
           .run(),
       ).toEqual(qbo(1))
 
@@ -746,8 +829,8 @@ describe('repeater field', () => {
     }
   })
 
-  test('repeater population', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_repeater_field_min_max_validation')) {
+  test('structure population', async () => {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_structure_field_min_max_validation')) {
       const Categories = new Collection({
         fields: {
           name: new Field({
@@ -764,29 +847,31 @@ describe('repeater field', () => {
             options: {},
           }),
           categories: new Field({
-            model: repeaterFieldModel({
-              category: new Field({
-                model: bigIntFieldModel<number, Pick<(typeof Categories)['TPopulatedTypes'], 'name'> | null>(),
-                options: {
-                  populator: async (value, { context }) => {
-                    if (value) {
-                      const categories = await context.database
-                        .queryBuilder<{ Categories: typeof Categories }>()
-                        .selectFrom('Categories')
-                        .select('name')
-                        .where('id', '=', value)
-                        .useCache(context.cache)
-                        .first()
+            model: structureFieldModel({
+              cat: {
+                category: new Field({
+                  model: bigIntFieldModel<number, Pick<(typeof Categories)['TPopulatedTypes'], 'name'> | null>(),
+                  options: {
+                    populator: async (value, { context }) => {
+                      if (value) {
+                        const categories = await context.database
+                          .queryBuilder<{ Categories: typeof Categories }>()
+                          .selectFrom('Categories')
+                          .select('name')
+                          .where('id', '=', value)
+                          .useCache(context.cache)
+                          .first()
 
-                      if (categories.success) {
-                        return categories.data
+                        if (categories.success) {
+                          return categories.data
+                        }
                       }
-                    }
 
-                    return null
+                      return null
+                    },
                   },
-                },
-              }),
+                }),
+              },
             }),
             options: {},
           }),
@@ -795,33 +880,35 @@ describe('repeater field', () => {
       const Users = new Collection({
         fields: {
           roles: new Field({
-            model: repeaterFieldModel({
-              role: new Field({
-                model: bigIntFieldModel<
-                  number,
-                  Pick<(typeof Roles)['TPopulatedTypes'], 'name' | 'categories'> | null
-                >(),
-                options: {
-                  populator: async (value, { context }) => {
-                    if (value) {
-                      const role = await context.database
-                        .queryBuilder<{ Roles: typeof Roles }>()
-                        .selectFrom('Roles')
-                        .select(['name', 'categories'])
-                        .where('id', '=', value)
-                        .populate()
-                        .useCache(context.cache)
-                        .first()
+            model: structureFieldModel({
+              rol: {
+                role: new Field({
+                  model: bigIntFieldModel<
+                    number,
+                    Pick<(typeof Roles)['TPopulatedTypes'], 'name' | 'categories'> | null
+                  >(),
+                  options: {
+                    populator: async (value, { context }) => {
+                      if (value) {
+                        const role = await context.database
+                          .queryBuilder<{ Roles: typeof Roles }>()
+                          .selectFrom('Roles')
+                          .select(['name', 'categories'])
+                          .where('id', '=', value)
+                          .populate()
+                          .useCache(context.cache)
+                          .first()
 
-                      if (role.success) {
-                        return role.data
+                        if (role.success) {
+                          return role.data
+                        }
                       }
-                    }
 
-                    return null
+                      return null
+                    },
                   },
-                },
-              }),
+                }),
+              },
             }),
             options: {},
           }),
@@ -841,16 +928,33 @@ describe('repeater field', () => {
       expect(
         await qb
           .insertInto('Roles')
-          .values([{ name: 'Role 1', categories: [{ category: 1 }, { category: 2 }] }])
+          .values([
+            {
+              name: 'Role 1',
+              categories: [
+                { $key: 'cat', category: 1 },
+                { $key: 'cat', category: 2 },
+              ],
+            },
+          ])
           .returning('categories')
           .populate()
           .run(),
-      ).toEqual(qbo([{ categories: [{ category: { name: 'Category 1' } }, { category: { name: 'Category 2' } }] }]))
+      ).toEqual(
+        qbo([
+          {
+            categories: [
+              { $key: 'cat', category: { name: 'Category 1' } },
+              { $key: 'cat', category: { name: 'Category 2' } },
+            ],
+          },
+        ]),
+      )
 
       expect(
         await qb
           .insertInto('Users')
-          .values([{ roles: [{ role: 1 }] }])
+          .values([{ roles: [{ $key: 'rol', role: 1 }] }])
           .returning('roles')
           .populate()
           .run(),
@@ -859,9 +963,13 @@ describe('repeater field', () => {
           {
             roles: [
               {
+                $key: 'rol',
                 role: {
                   name: 'Role 1',
-                  categories: [{ category: { name: 'Category 1' } }, { category: { name: 'Category 2' } }],
+                  categories: [
+                    { $key: 'cat', category: { name: 'Category 1' } },
+                    { $key: 'cat', category: { name: 'Category 2' } },
+                  ],
                 },
               },
             ],

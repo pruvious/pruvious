@@ -948,8 +948,9 @@ Deeply compares two values.
 **Example:**
 
 ```ts
-deepCompare({}, {})         // true
-deepCompare([1, 2], [2, 1]) // false
+deepCompare({}, {})                         // true
+deepCompare([1, 2], [2, 1])                 // false
+deepCompare({ a: 1, b: 2 }, { b: 2, a: 1 }) // true
 ```
 
 ### <a id="deleteproperty">`deleteProperty(object, path)`</a>

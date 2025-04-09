@@ -14,6 +14,7 @@ export const translatableStrings = {
 
   'Each item in this field must be unique': 'Each item in this field must be unique',
 
+  'Invalid `$key`': 'Invalid `$key`',
   'Invalid email address': 'Invalid email address',
   'Invalid input': 'Invalid input',
   'Invalid nulls order `$order`': createPattern('Invalid nulls order `$order`', { order: 'string' }),
@@ -25,6 +26,9 @@ export const translatableStrings = {
   'Invalid URL': 'Invalid URL',
   'Invalid value': 'Invalid value',
 
+  'Missing `$key` property': 'Missing `$key` property',
+
+  'The `$key` must be a string': 'The `$key` must be a string',
   'The `$param` parameter must be a positive integer': createPattern(
     'The `$param` parameter must be a positive integer',
     { param: 'string' },
@@ -162,6 +166,7 @@ export const translatableStringsDe = {
 
   'Each item in this field must be unique': 'Jedes Element in diesem Feld muss eindeutig sein',
 
+  'Invalid `$key`': 'Ungültiger `$key`',
   'Invalid email address': 'Ungültige E-Mail-Adresse',
   'Invalid input': 'Ungültige Eingabe',
   'Invalid nulls order `$order`': createPattern('Ungültige Null-Sortierung `$order`', { order: 'string' }),
@@ -173,6 +178,9 @@ export const translatableStringsDe = {
   'Invalid URL': 'Ungültige URL',
   'Invalid value': 'Ungültiger Wert',
 
+  'Missing `$key` property': 'Fehlende `$key`-Eigenschaft',
+
+  'The `$key` must be a string': 'Der `$key` muss eine Zeichenkette sein',
   'The `$param` parameter must be a positive integer': createPattern(
     'Der Parameter `$param` muss eine positive Ganzzahl sein',
     { param: 'string' },

@@ -80,7 +80,7 @@ export function prepareQuery<S extends string, D extends 'sqlite' | 'postgres' |
  *
  * The method returns a map with:
  *
- * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', '1.firstName', etc.).
+ * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', 'foo.bar', etc.).
  * - Values as the corresponding `Field` instances.
  */
 export function resolveSubfieldsFromInput(
@@ -89,14 +89,40 @@ export function resolveSubfieldsFromInput(
 ): Record<string, GenericField> {
   const map: Record<string, GenericField> = {}
 
-  if (isDefined(subfields) && isArray(inputValues)) {
-    for (const [index, item] of inputValues.entries()) {
+  if (isDefined(subfields)) {
+    if (isArray(inputValues)) {
+      for (const [index, item] of inputValues.entries()) {
+        for (const [subfieldName, subfield] of Object.entries(subfields)) {
+          const key = `${index}.${subfieldName}`
+          map[key] = subfield
+
+          if (subfield.model.subfields && isObject(item)) {
+            const nestedMap = resolveSubfieldsFromInput(subfield.model.subfields, item[subfieldName])
+
+            for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
+              map[`${key}.${nestedKey}`] = nestedField
+            }
+          } else if (subfield.model.structure && isObject(item) && isArray(item[subfieldName])) {
+            for (const [$key, structureSubfields] of Object.entries(subfield.model.structure)) {
+              const nestedMap = resolveSubfieldsFromInput(
+                structureSubfields as any,
+                item[subfieldName].map((item: any) => (item.$key === $key ? item : undefined)),
+              )
+
+              for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
+                map[`${key}.${nestedKey}`] = nestedField
+              }
+            }
+          }
+        }
+      }
+    } else if (isObject(inputValues)) {
       for (const [subfieldName, subfield] of Object.entries(subfields)) {
-        const key = `${index}.${subfieldName}`
+        const key = subfieldName
         map[key] = subfield
 
-        if (subfield.model.subfields && isObject(item)) {
-          const nestedMap = resolveSubfieldsFromInput(subfield.model.subfields, item[subfieldName])
+        if (subfield.model.subfields) {
+          const nestedMap = resolveSubfieldsFromInput(subfield.model.subfields, inputValues[subfieldName])
 
           for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
             map[`${key}.${nestedKey}`] = nestedField
@@ -134,6 +160,19 @@ export function parseConditionalLogic(
 
       for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
         parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      }
+    } else if (field.model.structure) {
+      if (isObject(input) && isArray(input[fieldName])) {
+        for (const [$key, subfields] of Object.entries(field.model.structure)) {
+          const subfieldMap = resolveSubfieldsFromInput(
+            subfields as any,
+            input[fieldName].map((item: any) => (item.$key === $key ? item : undefined)),
+          )
+
+          for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
+            parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+          }
+        }
       }
     }
   }

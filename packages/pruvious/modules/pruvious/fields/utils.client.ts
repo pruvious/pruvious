@@ -41,7 +41,7 @@ export function fillFieldData<T extends Record<string, any>>(
  * fields that have changed compared to their previous state.
  * It also removes immutable fields from the output object and handles the operation as an update.
  *
- * @todo test with subfields (conditional logic and dependencies)
+ * @todo test with subfields and structures (conditional logic and dependencies)
  */
 export function prepareFieldData<T extends Record<string, any>>(
   data: T,
@@ -105,6 +105,26 @@ export function prepareFieldData<T extends Record<string, any>>(
                 }
               }
             }
+          } else if (field.structure) {
+            const subfieldMap = resolveSubfieldsFromData(field.structure, preparedData[fieldName])
+
+            for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
+              for (const subfieldDependency of subfield.dependencies) {
+                const subfieldReferencedFieldPath = resolveRelativeDotNotation(
+                  `${fieldName}.${subfieldPath}`,
+                  subfieldDependency,
+                )
+
+                if (isUndefined(getProperty(preparedData, subfieldReferencedFieldPath))) {
+                  const subfieldReferencedFieldValue = deepClone(getProperty(data, subfieldReferencedFieldPath))
+
+                  if (isDefined(subfieldReferencedFieldValue)) {
+                    setProperty(preparedData, subfieldReferencedFieldPath, subfieldReferencedFieldValue)
+                    includedDependencies = true
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -140,6 +160,17 @@ export function resolveSubfieldsFromData(
 
             for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
               map[`${key}.${nestedKey}`] = nestedField
+            }
+          } else if (subfield.model.structure && isObject(item) && isArray(item[subfieldName])) {
+            for (const [$key, structureSubfields] of Object.entries(subfield.model.structure)) {
+              const nestedMap = resolveSubfieldsFromData(
+                structureSubfields as any,
+                item[subfieldName].map((item: any) => (item.$key === $key ? item : undefined)),
+              )
+
+              for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
+                map[`${key}.${nestedKey}`] = nestedField
+              }
             }
           }
         }
@@ -185,6 +216,19 @@ export function parseConditionalLogic(
 
       for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
         parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      }
+    } else if (field.structure) {
+      if (isObject(data) && isArray(data[fieldName])) {
+        for (const [$key, subfields] of Object.entries(field.model.structure)) {
+          const subfieldMap = resolveSubfieldsFromData(
+            subfields as any,
+            data[fieldName].map((item: any) => (item.$key === $key ? item : undefined)),
+          )
+
+          for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
+            parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+          }
+        }
       }
     }
   }

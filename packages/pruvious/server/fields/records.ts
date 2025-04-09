@@ -79,6 +79,7 @@ export default {
         number[],
         TPopulatedType,
         (number | string)[],
+        undefined,
         undefined
       >,
       MatrixFieldModelOptions<number[], TPopulatedType> &
@@ -98,6 +99,7 @@ export default {
       number[],
       TPopulatedType,
       (number | string)[],
+      undefined,
       undefined
     >,
     MatrixFieldModelOptions<number[], TPopulatedType> &
@@ -247,6 +249,7 @@ export default {
         number[],
         TPopulatedType,
         (number | string)[],
+        undefined,
         undefined
       >,
       MatrixFieldModelOptions<number[], TPopulatedType> &
@@ -267,6 +270,7 @@ export default {
         number[],
         TPopulatedType,
         (number | string)[],
+        undefined,
         undefined
       >,
       MatrixFieldModelOptions<number[], TPopulatedType> &
@@ -295,6 +299,7 @@ export default {
       number[],
       Record<string, any>[],
       (number | string)[],
+      undefined,
       undefined
     >,
     MatrixFieldModelOptions<number[], Record<string, any>[]> &

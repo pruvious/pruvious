@@ -277,6 +277,7 @@ This package provides several built-in field models:
 - `booleanFieldModel` - Stores and deserializes field values as `boolean` both in the database and application.
 - `numberFieldModel` - Stores field values as `numeric` in the database and deserializes them as `number` in JavaScript.
 - `repeaterFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of objects (subfields) in JavaScript.
+- `structureFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of keyed objects (subfields) in JavaScript.
 - `textFieldModel` - Stores field values as `text` in the database and deserializes them as `string` in JavaScript.
 
 ## <a id="sync">Sync (migrations)</a>
