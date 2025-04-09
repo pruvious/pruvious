@@ -100,7 +100,7 @@ export interface RepeaterFieldModelOptions<TCastedType, TPopulatedType> {
  * The following validators are applied in order:
  *
  * 1. If the field is required, the value cannot be `undefined`.
- * 2. If the field is required and `allowEmptyArray` is `false`, This field must contain at least one item.
+ * 2. If the field is required and `allowEmptyArray` is `false`, this field must contain at least one item.
  * 3. If the field is not nullable, the value cannot be `null`.
  * 4. The value must be an `array` or `null`.
  * 5. All items in the array must be of type `object`.
