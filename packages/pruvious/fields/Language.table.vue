@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="language" class="pui-row">
-      <PUIBadge color="secondary" class="pui-uppercase">{{ language.code }}</PUIBadge>
+      <PUIBadge color="secondary" class="p-language-code pui-truncate">{{ language.code }}</PUIBadge>
       <span class="pui-truncate">{{ language.name }}</span>
     </div>
     <PruviousTableFieldFallback v-else :modelValue="modelValue" />
@@ -25,3 +25,10 @@ const props = defineProps({
 
 const language = computed(() => languages.find(({ code }) => code === props.modelValue))
 </script>
+
+<style scoped>
+.p-language-code {
+  flex-shrink: 1;
+  text-transform: uppercase;
+}
+</style>
