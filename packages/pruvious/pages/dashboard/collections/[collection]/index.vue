@@ -222,6 +222,7 @@
       :resolvedPermissions="resolvedPermissions"
       :size="-1"
       @close="$event().then(() => (isTranslationPopupVisible = false))"
+      showEditCurrentButton
     />
 
     <PruviousDashboardTableSettingsPopup

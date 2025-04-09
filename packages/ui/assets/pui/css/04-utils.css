@@ -60,6 +60,10 @@
   white-space: nowrap;
 }
 
+.pui-invisible {
+  visibility: hidden;
+}
+
 .pui-no-transition,
 .pui-no-transition * {
   transition: none !important;

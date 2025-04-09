@@ -50,7 +50,7 @@
             </PUIButton>
 
             <PUIButton
-              v-if="singleton.definition.copyTranslation"
+              v-if="singleton.definition.copyTranslation && code !== contentLanguage"
               v-pui-tooltip="
                 __('pruvious-dashboard', 'Copy $from to $to', {
                   from: contentLanguage.toUpperCase(),

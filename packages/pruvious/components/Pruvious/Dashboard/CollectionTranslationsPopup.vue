@@ -53,7 +53,7 @@
             </PUIButton>
 
             <PUIButton
-              v-else-if="permissions[code].id !== id"
+              v-else-if="permissions[code].id !== id || showEditCurrentButton"
               v-pui-tooltip="
                 permissions[code].canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View')
               "
@@ -73,7 +73,7 @@
             </PUIButton>
 
             <PUIButton
-              v-if="collection.definition.copyTranslation"
+              v-if="collection.definition.copyTranslation && (code !== contentLanguage || showEditCurrentButton)"
               v-pui-tooltip="
                 __('pruvious-dashboard', 'Copy $from to $to', {
                   from: contentLanguage.toUpperCase(),
@@ -92,6 +92,7 @@
                   : 'outline'
               "
               @click="copyTranslation(code)"
+              :class="{ 'pui-invisible': code === contentLanguage }"
             >
               <Icon mode="svg" name="tabler:file-import" />
             </PUIButton>
@@ -149,6 +150,16 @@ const props = defineProps({
    */
   currentlyEditingLabel: {
     type: String,
+  },
+
+  /**
+   * Specifies whether to enable the edit button for the item currently being edited.
+   *
+   * @default false
+   */
+  showEditCurrentButton: {
+    type: Boolean,
+    default: false,
   },
 })
 
