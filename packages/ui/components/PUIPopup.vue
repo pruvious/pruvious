@@ -273,6 +273,10 @@ function focusRoot() {
   padding: 0.75rem;
 }
 
+.pui-popup-content {
+  container-type: inline-size;
+}
+
 .pui-popup-full-height .pui-popup-content {
   position: relative;
   z-index: 1;

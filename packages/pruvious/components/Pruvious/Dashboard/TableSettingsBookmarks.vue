@@ -57,132 +57,141 @@
         <span class="pui-label pui-muted">{{ __('pruvious-dashboard', 'My bookmarks') }}</span>
       </PUIFieldLabel>
 
-      <PUIStructure v-if="myBookmarks.length" :modelValue="myBookmarks">
-        <template #item="{ item }">
-          <div class="pui-row">
-            <span class="pui-row pui-mr-auto">
-              <span class="pui-truncate">{{ item.name }}</span>
-              <span v-if="item.shared" class="pui-muted pui-shrink-0">({{ __('pruvious-dashboard', 'shared') }})</span>
-            </span>
+      <div v-if="myBookmarks.length" class="pui-relative">
+        <PUIStructure :modelValue="myBookmarks">
+          <template #item="{ item }">
+            <div class="pui-row">
+              <span class="pui-row pui-mr-auto">
+                <span class="pui-truncate">{{ item.name }}</span>
+                <span v-if="item.shared" class="pui-muted pui-shrink-0">
+                  ({{ __('pruvious-dashboard', 'shared') }})
+                </span>
+              </span>
 
-            <PUIButton
-              v-pui-tooltip="
-                item.data === appliedBookmarkString
-                  ? __('pruvious-dashboard', 'Currently applied')
-                  : __('pruvious-dashboard', 'Apply')
-              "
-              :size="-3"
-              :variant="item.data === appliedBookmarkString ? 'accent' : 'outline'"
-              @click="
-                () => {
-                  $emit('update:modelValue', JSON.parse(item.data))
-                  $emit('apply')
-                }
-              "
-            >
-              <Icon mode="svg" name="tabler:check" />
-            </PUIButton>
-
-            <PUIButton
-              v-pui-tooltip="
-                item.id === defaultBookmarkId
-                  ? __('pruvious-dashboard', 'Currently default')
-                  : __('pruvious-dashboard', 'Set as default')
-              "
-              :size="-3"
-              :variant="item.id === defaultBookmarkId ? 'accent' : 'outline'"
-              @click="setDefaultBookmark(item.id)"
-            >
-              <Icon mode="svg" name="tabler:star" />
-            </PUIButton>
-
-            <div v-if="canUpdate || canDelete || item.data !== currentBookmarkString" class="pui-row pui-shrink-0">
               <PUIButton
-                v-pui-tooltip="__('pruvious-dashboard', 'More actions')"
-                :ref="(el) => (actionButtons[item.id] = el)"
+                v-pui-tooltip="
+                  item.data === appliedBookmarkString
+                    ? __('pruvious-dashboard', 'Currently applied')
+                    : __('pruvious-dashboard', 'Apply')
+                "
                 :size="-3"
-                :variant="visibleActions === item.id ? 'primary' : 'outline'"
-                @click="visibleActions = visibleActions === item.id ? -1 : item.id"
+                :variant="item.data === appliedBookmarkString ? 'accent' : 'outline'"
+                @click="
+                  () => {
+                    $emit('update:modelValue', JSON.parse(item.data))
+                    $emit('apply')
+                  }
+                "
               >
-                <Icon mode="svg" name="tabler:dots-vertical" />
+                <Icon mode="svg" name="tabler:check" />
               </PUIButton>
-              <PUIDropdown
-                v-if="visibleActions === item.id"
-                :reference="actionButtons?.[item.id]?.$el"
-                :restoreFocus="false"
-                @click="visibleActions = -1"
-                @close="visibleActions = -1"
-                placement="end"
+
+              <PUIButton
+                v-pui-tooltip="
+                  item.id === defaultBookmarkId
+                    ? __('pruvious-dashboard', 'Currently default')
+                    : __('pruvious-dashboard', 'Set as default')
+                "
+                :size="-3"
+                :variant="item.id === defaultBookmarkId ? 'accent' : 'outline'"
+                @click="setDefaultBookmark(item.id)"
               >
-                <PUIDropdownItem
-                  v-if="item.data !== currentBookmarkString"
-                  :title="__('pruvious-dashboard', 'Load configuration')"
-                  @click="
-                    () => {
-                      $emit('update:modelValue', JSON.parse(item.data))
-                      puiToast(__('pruvious-dashboard', 'Loaded'), { type: 'success' })
-                    }
-                  "
-                >
-                  <Icon mode="svg" name="tabler:arrow-bar-to-down" />
-                  <span>{{ __('pruvious-dashboard', 'Load configuration') }}</span>
-                </PUIDropdownItem>
+                <Icon mode="svg" name="tabler:star" />
+              </PUIButton>
 
-                <PUIDropdownItem
-                  v-if="canUpdate && item.data !== currentBookmarkString"
-                  :title="__('pruvious-dashboard', 'Sync configuration')"
-                  @click="syncBookmark(item.id)"
+              <div v-if="canUpdate || canDelete || item.data !== currentBookmarkString" class="pui-row pui-shrink-0">
+                <PUIButton
+                  v-pui-tooltip="__('pruvious-dashboard', 'More actions')"
+                  :ref="(el) => (actionButtons[item.id] = el)"
+                  :size="-3"
+                  :variant="visibleActions?.id === item.id ? 'primary' : 'outline'"
+                  @click="visibleActions = visibleActions?.id === item.id ? null : item"
                 >
-                  <Icon mode="svg" name="tabler:device-floppy" />
-                  <span>{{ __('pruvious-dashboard', 'Sync configuration') }}</span>
-                </PUIDropdownItem>
-
-                <PUIDropdownItem
-                  v-if="canUpdate && !item.shared"
-                  :title="__('pruvious-dashboard', 'Share')"
-                  @click="updateBookmarkSharing(item.id, true)"
-                >
-                  <Icon mode="svg" name="tabler:users-plus" />
-                  <span>{{ __('pruvious-dashboard', 'Share') }}</span>
-                </PUIDropdownItem>
-
-                <PUIDropdownItem
-                  v-if="canUpdate && item.shared"
-                  :title="__('pruvious-dashboard', 'Stop sharing')"
-                  @click="updateBookmarkSharing(item.id, false)"
-                >
-                  <Icon mode="svg" name="tabler:users-minus" />
-                  <span>{{ __('pruvious-dashboard', 'Stop sharing') }}</span>
-                </PUIDropdownItem>
-
-                <PUIDropdownItem
-                  v-if="canUpdate"
-                  :title="__('pruvious-dashboard', 'Rename')"
-                  @click="
-                    () => {
-                      bookmarkName = item.name
-                      bookmarkPopupState = item.id
-                    }
-                  "
-                >
-                  <Icon mode="svg" name="tabler:pencil" />
-                  <span>{{ __('pruvious-dashboard', 'Rename') }}</span>
-                </PUIDropdownItem>
-
-                <PUIDropdownItem
-                  v-if="canDelete"
-                  :title="__('pruvious-dashboard', 'Delete')"
-                  @click="deleteBookmark(item.id)"
-                  destructive
-                >
-                  <Icon mode="svg" name="tabler:trash-x" />
-                  <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
-                </PUIDropdownItem>
-              </PUIDropdown>
+                  <Icon mode="svg" name="tabler:dots-vertical" />
+                </PUIButton>
+              </div>
             </div>
-          </div>
-        </template>
-      </PUIStructure>
+          </template>
+        </PUIStructure>
+
+        <PUIDropdown
+          v-if="visibleActions"
+          :reference="actionButtons?.[visibleActions.id]?.$el"
+          :restoreFocus="false"
+          @click="visibleActions = null"
+          @close="visibleActions = null"
+          placement="end"
+        >
+          <PUIDropdownItem
+            v-if="visibleActions.data !== currentBookmarkString"
+            :title="__('pruvious-dashboard', 'Load configuration')"
+            @click="
+              () => {
+                if (visibleActions) {
+                  $emit('update:modelValue', JSON.parse(visibleActions.data))
+                  puiToast(__('pruvious-dashboard', 'Loaded'), { type: 'success' })
+                }
+              }
+            "
+          >
+            <Icon mode="svg" name="tabler:arrow-bar-to-down" />
+            <span>{{ __('pruvious-dashboard', 'Load configuration') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="canUpdate && visibleActions.data !== currentBookmarkString"
+            :title="__('pruvious-dashboard', 'Sync configuration')"
+            @click="syncBookmark(visibleActions.id)"
+          >
+            <Icon mode="svg" name="tabler:device-floppy" />
+            <span>{{ __('pruvious-dashboard', 'Sync configuration') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="canUpdate && !visibleActions.shared"
+            :title="__('pruvious-dashboard', 'Share')"
+            @click="updateBookmarkSharing(visibleActions.id, true)"
+          >
+            <Icon mode="svg" name="tabler:users-plus" />
+            <span>{{ __('pruvious-dashboard', 'Share') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="canUpdate && visibleActions.shared"
+            :title="__('pruvious-dashboard', 'Stop sharing')"
+            @click="updateBookmarkSharing(visibleActions.id, false)"
+          >
+            <Icon mode="svg" name="tabler:users-minus" />
+            <span>{{ __('pruvious-dashboard', 'Stop sharing') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="canUpdate"
+            :title="__('pruvious-dashboard', 'Rename')"
+            @click="
+              () => {
+                if (visibleActions) {
+                  bookmarkName = visibleActions.name
+                  bookmarkPopupState = visibleActions.id
+                }
+              }
+            "
+          >
+            <Icon mode="svg" name="tabler:pencil" />
+            <span>{{ __('pruvious-dashboard', 'Rename') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="canDelete"
+            :title="__('pruvious-dashboard', 'Delete')"
+            @click="deleteBookmark(visibleActions.id)"
+            destructive
+          >
+            <Icon mode="svg" name="tabler:trash-x" />
+            <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
+          </PUIDropdownItem>
+        </PUIDropdown>
+      </div>
 
       <PUIButton
         v-if="canCreate"
@@ -299,7 +308,7 @@
         />
       </PUIField>
 
-      <div class="p-table-settings-new-bookmark-buttons pui-row">
+      <div class="p-table-settings-bookmarks-popup-buttons pui-row">
         <PUIButton @click="bookmarkPopup?.close().then(() => (bookmarkPopupState = false))" variant="outline">
           {{ __('pruvious-dashboard', 'Cancel') }}
         </PUIButton>
@@ -416,7 +425,7 @@ const bookmarkPopupState = ref<'new' | number | false>(false)
 const bookmarkPopup = useTemplateRef('bookmarkPopup')
 const bookmarkName = ref('')
 const actionButtons = ref<Record<number | string, any>>({})
-const visibleActions = ref(-1)
+const visibleActions = ref<Bookmark | null>(null)
 
 async function createBookmark() {
   if (!bookmarkName.value.trim()) {
@@ -572,7 +581,7 @@ async function setDefaultBookmark(id: number | null) {
   border-bottom-left-radius: 0;
 }
 
-.p-table-settings-new-bookmark-buttons {
+.p-table-settings-bookmarks-popup-buttons {
   justify-content: flex-end;
   margin-top: 0.75rem;
 }

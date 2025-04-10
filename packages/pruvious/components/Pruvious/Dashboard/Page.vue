@@ -82,6 +82,8 @@ defineProps({
 }
 
 .p-page-main {
+  container-type: inline-size;
+  contain: layout;
   padding: 0.75rem;
 }
 

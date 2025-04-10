@@ -136,7 +136,7 @@ function updatePreview() {
   font-size: 0.8125rem;
 }
 
-@media (max-width: 480px) {
+@container (max-width: 768px) {
   .p-preview > :first-child {
     display: none;
   }

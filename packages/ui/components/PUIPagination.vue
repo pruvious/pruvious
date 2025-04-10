@@ -283,7 +283,7 @@ watch(
   z-index: 2;
 }
 
-@media (max-width: 767px) {
+@container (max-width: 767px) {
   .pui-pagination-buttons {
     display: none;
   }

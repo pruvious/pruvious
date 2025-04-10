@@ -312,6 +312,8 @@ defineEmits<{
   'queueConditionalLogicUpdate': [path?: (string & {}) | string[] | '$resolve' | '$reset']
 }>()
 
+provide('floatingStrategy', 'absolute')
+
 const items = computed<Item[]>(() =>
   props.layout
     ? parseLayout(props.layout)
@@ -486,7 +488,7 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
   margin-top: 0.75rem;
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .p-fields-row {
     flex-direction: column;
   }

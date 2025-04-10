@@ -57,11 +57,8 @@ defineProps({
 }
 
 .pui-card-body {
+  container-type: inline-size;
   padding: var(--pui-padding-body, 0.75rem);
-}
-
-.pui-card-footer {
-  padding: var(--pui-padding-footer, 0.75rem);
 }
 
 .pui-card-body > :where(*) {
@@ -70,5 +67,9 @@ defineProps({
 
 .pui-card-body > :where(:first-child) {
   margin-top: 0;
+}
+
+.pui-card-footer {
+  padding: var(--pui-padding-footer, 0.75rem);
 }
 </style>

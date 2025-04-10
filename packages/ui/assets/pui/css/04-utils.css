@@ -30,6 +30,10 @@
   flex-shrink: 0;
 }
 
+.pui-relative {
+  position: relative;
+}
+
 .pui-w-full {
   width: 100%;
 }

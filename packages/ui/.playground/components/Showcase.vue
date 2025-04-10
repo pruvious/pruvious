@@ -8,11 +8,22 @@
       <hr />
     </div>
 
-    <div v-if="$slots.config" class="showcase-config">
+    <PUIButton v-if="$slots.config" @click="visible = !visible" title="Toggle sidebar" class="showcase-config-toggle">
+      <Icon mode="svg" name="tabler:menu" />
+    </PUIButton>
+
+    <div v-if="$slots.config && visible" ref="configWrapper" class="showcase-config-wrapper">
       <slot name="config" />
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+const configWrapper = useTemplateRef('configWrapper')
+const visible = ref(true)
+
+provide('root', configWrapper)
+</script>
 
 <style scoped>
 .showcase {
@@ -54,16 +65,28 @@
   z-index: 1;
 }
 
-.showcase-config {
+.showcase-config-wrapper {
   --pui-size: -2;
-  position: absolute;
+  position: fixed;
   z-index: 9;
   top: 0.5rem;
   right: 0.5rem;
-  max-width: calc(100% - 1rem);
+  max-width: 16rem;
+  max-height: calc(100% - 1rem);
   padding: 0.5rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--pui-foreground) / 0.25) transparent;
   background: hsl(var(--pui-card));
   border-width: 1px;
   border-radius: var(--pui-radius);
+}
+
+.showcase-config-toggle {
+  --pui-size: -4;
+  position: fixed;
+  z-index: 10;
+  top: 0.375rem;
+  right: 0.375rem;
 }
 </style>

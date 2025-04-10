@@ -275,7 +275,7 @@ function duplicate(index: number) {
   display: none;
 }
 
-@media (max-width: 480px) {
+@container (max-width: 480px) {
   .p-where-filters-large-button {
     display: none;
   }
