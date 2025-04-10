@@ -17,19 +17,21 @@
       </span>
     </div>
 
-    <div v-if="$slots.header" class="pui-structure-item-header">
-      <button
-        v-if="isDraggable && !disabled"
-        @mousedown="handleDrag"
-        @touchstart.prevent="onTouchStart()"
-        tabindex="-1"
-        type="button"
-        class="pui-structure-drag-handle pui-raw"
-      >
-        <Icon mode="svg" name="tabler:grip-vertical" />
-      </button>
-      <slot :index="index" :item="item" name="header" />
-    </div>
+    <template v-if="$slots.header" #header>
+      <div class="pui-row">
+        <button
+          v-if="isDraggable && !disabled"
+          @mousedown="handleDrag"
+          @touchstart.prevent="onTouchStart()"
+          tabindex="-1"
+          type="button"
+          class="pui-structure-drag-handle pui-raw"
+        >
+          <Icon mode="svg" name="tabler:grip-vertical" />
+        </button>
+        <slot :index="index" :item="item" name="header" />
+      </div>
+    </template>
 
     <div v-if="$slots.item && item.$expanded !== false" class="pui-structure-item-inner">
       <slot :index="index" :item="item" name="item" />
@@ -181,25 +183,13 @@ function cleanupAfterDrag() {
 </script>
 
 <style>
-.pui-structure-item.pui-card {
+.pui-structure-item {
+  --pui-padding-header: 0.5rem;
   position: relative;
-  padding: 0.75rem;
 }
 
-.pui-structure-item-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: calc(100% + 1.5rem);
-  margin: -0.75rem;
-  margin-bottom: 0;
-  padding: 0.5rem;
-  border-bottom-width: 1px;
-}
-
-.pui-structure-item-collapsed .pui-structure-item-header {
-  margin-bottom: -0.75rem;
-  border-bottom-width: 0;
+.pui-structure-item-collapsed > .pui-card-body {
+  display: none;
 }
 
 .pui-structure-drag-handle {
@@ -218,12 +208,9 @@ function cleanupAfterDrag() {
 
 .pui-structure-item-inner {
   container-type: inline-size;
+  margin: 0;
   transition: var(--pui-transition);
   transition-property: opacity;
-}
-
-.pui-structure-item-inner:not(:first-child) {
-  margin-top: 0.75rem;
 }
 
 .pui-structure-item-dragging .pui-structure-item-inner {

@@ -211,7 +211,7 @@ function toModelValue(): PUIColumns {
 }
 
 .p-table-columns-configurator
-  :deep(.pui-structure-item:hover > .pui-structure-item-header > .p-table-columns-configurator-actions) {
+  :deep(.pui-structure-item:hover > .pui-card-header > .pui-row > .p-table-columns-configurator-actions) {
   display: flex;
 }
 </style>

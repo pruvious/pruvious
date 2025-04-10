@@ -228,7 +228,7 @@ function toModelValue(): TableSettings['orderBy'] {
   margin-top: 0.75rem;
 }
 
-.p-order-by :deep(.pui-structure-item:hover > .pui-structure-item-header > .p-order-by-actions) {
+.p-order-by :deep(.pui-structure-item:hover > .pui-card-header > .pui-row > .p-order-by-actions) {
   display: flex;
 }
 </style>

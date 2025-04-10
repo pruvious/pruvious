@@ -43,7 +43,7 @@
                 'field' in item ? __('pruvious-dashboard', 'Condition') : __('pruvious-dashboard', 'Condition group')
               }}
             </span>
-            <div class="p-where-filter-actions">
+            <div class="p-where-filters-actions">
               <PUIButton
                 v-pui-tooltip="__('pruvious-dashboard', 'Duplicate')"
                 :size="-2"
@@ -426,13 +426,13 @@ function refresh() {
   margin-top: 0.75rem;
 }
 
-.p-where-filters :where(.p-where-filter-actions) {
+.p-where-filters :where(.p-where-filters-actions) {
   display: none;
   gap: 0.25rem;
   margin-left: auto;
 }
 
-.p-where-filters :deep(.pui-structure-item:hover > .pui-structure-item-header > .p-where-filter-actions) {
+.p-where-filters :deep(.pui-structure-item:hover > .pui-card-header > .pui-row > .p-where-filters-actions) {
   display: flex;
 }
 

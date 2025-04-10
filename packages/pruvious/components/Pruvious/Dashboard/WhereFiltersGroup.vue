@@ -42,7 +42,7 @@
                 'field' in item ? __('pruvious-dashboard', 'Condition') : __('pruvious-dashboard', 'Condition group')
               }}
             </span>
-            <div class="p-where-filter-actions">
+            <div class="p-where-filters-actions">
               <PUIButton
                 v-pui-tooltip="__('pruvious-dashboard', 'Duplicate')"
                 :size="-2"

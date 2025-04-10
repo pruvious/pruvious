@@ -1,6 +1,16 @@
 <template>
   <div class="pui-card" :style="{ '--pui-size': size }">
-    <slot />
+    <div v-if="$slots.header" name="header" class="pui-card-header">
+      <slot name="header" />
+    </div>
+
+    <div v-if="$slots.default" name="default" class="pui-card-body">
+      <slot />
+    </div>
+
+    <div v-if="$slots.footer" name="footer" class="pui-card-footer">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
 
@@ -35,15 +45,30 @@ defineProps({
   background-color: hsl(var(--pui-card));
   border-width: 1px;
   border-radius: var(--pui-radius);
-  padding: 0.75rem;
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
 }
 
-.pui-card > :where(*) {
+.pui-card > :where(*):not(:first-child) {
+  border-top-width: 1px;
+}
+
+.pui-card-header {
+  padding: var(--pui-padding-header, 0.75rem);
+}
+
+.pui-card-body {
+  padding: var(--pui-padding-body, 0.75rem);
+}
+
+.pui-card-footer {
+  padding: var(--pui-padding-footer, 0.75rem);
+}
+
+.pui-card-body > :where(*) {
   margin-top: 1em;
 }
 
-.pui-card > :where(:first-child) {
+.pui-card-body > :where(:first-child) {
   margin-top: 0;
 }
 </style>

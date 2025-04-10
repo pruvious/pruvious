@@ -586,8 +586,9 @@ function focusFirstSubfield() {
 .p-repeater
   > *
   > :where(.pui-structure-items)
-  > :where(.pui-structure-item:hover, .pui-structure-item:focus-within)
-  > :where(.pui-structure-item-header)
+  > :where(.pui-card:hover, .pui-card:focus-within)
+  > :where(.pui-card-header)
+  > :where(.pui-row)
   > .p-repeater-actions,
 .p-repeater-actions-visible {
   display: flex;
