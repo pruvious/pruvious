@@ -1,5 +1,5 @@
 <template>
-  <PUIField v-if="!options.ui.hidden">
+  <PUIField v-if="!options.ui.hidden" class="p-short-field">
     <PUISwitch
       :disabled="disabled"
       :error="!!error"

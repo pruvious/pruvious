@@ -461,6 +461,12 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
   margin-top: 0;
 }
 
+.p-fields-row > .p-short-field {
+  display: flex;
+  height: 2rem;
+  margin-top: auto;
+}
+
 :deep(.pui-tabs-content:not(:first-child)) {
   margin-top: 1rem;
 }
@@ -483,6 +489,11 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
 @media (max-width: 480px) {
   .p-fields-row {
     flex-direction: column;
+  }
+
+  .p-fields-row > .p-short-field {
+    height: auto;
+    margin-top: 0;
   }
 
   .p-fields-item:not(.p-fields-hr) {
