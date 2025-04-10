@@ -4,7 +4,10 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  numberField,
   repeaterField,
+  structureField,
+  switchField,
   textField,
   timeField,
   timeRangeField,
@@ -14,6 +17,63 @@ import { repeaterTestField } from '~/shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
+    // structure
+    structure: structureField({
+      structure: {
+        image: {
+          src: textField({ required: true }),
+          alt: textField({}),
+        },
+        video: {
+          src: textField({ required: true }),
+          autoplay: switchField({}),
+        },
+      },
+      ui: {
+        subfieldsLayout: {
+          image: [{ row: ['src', 'alt'] }],
+          video: [{ row: ['src', 'autoplay | auto'] }],
+        },
+      },
+    }),
+    structureMinMax: structureField({
+      structure: {
+        foo: { bar: textField({}) },
+        baz: { qux: numberField({}) },
+      },
+      minItems: 2,
+      maxItems: 3,
+      default: [
+        { $key: 'foo', bar: 'BAR' },
+        { $key: 'baz', qux: 1337 },
+      ],
+      ui: { label: 'Structure (min/max)', header: { foo: { subfieldValue: 'bar' }, baz: { subfieldValue: 'qux' } } },
+    }),
+    structureUnique: structureField({
+      structure: { foo: { bar: textField({}) } },
+      enforceUniqueItems: true,
+      ui: { label: 'Structure (unique items)' },
+    }),
+    structureDeduplicate: structureField({
+      structure: { foo: { bar: textField({}) } },
+      deduplicateItems: true,
+      ui: { label: 'Structure (deduplicate items)' },
+    }),
+    structureNested: structureField({
+      structure: {
+        foo: {
+          nested: structureField({
+            structure: {
+              repeater: {
+                repeater: repeaterTestField(),
+              },
+            },
+          }),
+        },
+      },
+      ui: { label: 'Structure (nested)' },
+    }),
+
     // repeater
     repeater: repeaterTestField(),
     repeaterMinMax: repeaterField({
@@ -121,6 +181,10 @@ export default defineCollection({
       fieldsLayout: [
         {
           tabs: [
+            {
+              label: 'Structure',
+              fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
+            },
             {
               label: 'Repeater',
               fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],

@@ -11,8 +11,8 @@
       :disabled="disabled"
       :dropItemsHereLabel="__('pruvious-dashboard', 'Drop items here')"
       :isDraggable="!disabled"
-      :resolveItemType="() => itemTypeHash"
-      :types="[itemTypeHash]"
+      :resolveItemType="(item) => itemTypeHash[item.$itemKey]"
+      :types="itemTypeHashValues"
       @commit="commitModelValue($event)"
       @update:modelValue="
         (value) => {
@@ -21,21 +21,31 @@
         }
       "
       allowCrossDrop
-      class="p-repeater"
+      class="p-structure"
     >
       <template #header="{ item, index }">
-        <span v-if="options.ui.header?.subfieldValue" class="pui-muted pui-truncate">
+        <span
+          v-if="
+            options.ui.header?.[item.$itemKey]?.showLabel !== false || options.ui.header?.[item.$itemKey]?.subfieldValue
+          "
+          class="pui-muted pui-truncate"
+        >
+          {{ options.ui.header?.[item.$itemKey]?.showItemNumber !== false ? `${index + 1}.` : '' }}
+          {{ options.ui.header?.[item.$itemKey]?.showLabel !== false ? itemLabels[item.$itemKey] : '' }}
           {{
-            options.ui.header?.showItemNumber !== false
-              ? `${index + 1}. ${item[options.ui.header.subfieldValue]}`
-              : item[options.ui.header.subfieldValue]
+            options.ui.header?.[item.$itemKey]?.subfieldValue &&
+            item[options.ui.header[item.$itemKey]!.subfieldValue as string] !== ''
+              ? options.ui.header?.[item.$itemKey]?.showLabel !== false
+                ? `(${item[options.ui.header[item.$itemKey]!.subfieldValue as string]})`
+                : item[options.ui.header[item.$itemKey]!.subfieldValue as string]
+              : ''
           }}
         </span>
-        <span v-else-if="options.ui.header?.showItemNumber !== false" class="pui-muted pui-truncate">
+        <span v-else-if="options.ui.header?.[item.$itemKey]?.showItemNumber !== false" class="pui-muted pui-truncate">
           #{{ index + 1 }}
         </span>
 
-        <span class="p-repeater-actions" :class="{ 'p-repeater-actions-visible': visibleActions === index }">
+        <span class="p-structure-actions" :class="{ 'p-structure-actions-visible': visibleActions === index }">
           <PUIButton
             v-if="!disabled && structuredValue.length > 1"
             v-pui-tooltip="__('pruvious-dashboard', 'Move up')"
@@ -115,12 +125,15 @@
             placement="end"
           >
             <PUIDropdownItem
-              v-if="options.maxItems === false || structuredValue.length < options.maxItems"
+              v-if="(options.maxItems === false || structuredValue.length < options.maxItems) && !insertItemAction"
               :title="__('pruvious-dashboard', 'Insert before')"
-              @click="
+              @click.stop="
                 () => {
-                  visibleActions = -1
-                  $nextTick(() => addItem(index))
+                  if (Object.keys(options.structure).length > 1) {
+                    insertItemAction = 'before'
+                  } else {
+                    addItem(Object.keys(options.structure)[0]!, index)
+                  }
                 }
               "
             >
@@ -129,12 +142,15 @@
             </PUIDropdownItem>
 
             <PUIDropdownItem
-              v-if="options.maxItems === false || structuredValue.length < options.maxItems"
+              v-if="(options.maxItems === false || structuredValue.length < options.maxItems) && !insertItemAction"
               :title="__('pruvious-dashboard', 'Insert after')"
-              @click="
+              @click.stop="
                 () => {
-                  visibleActions = -1
-                  $nextTick(() => addItem(index + 1))
+                  if (Object.keys(options.structure).length > 1) {
+                    insertItemAction = 'after'
+                  } else {
+                    addItem(Object.keys(options.structure)[0]!, index + 1)
+                  }
                 }
               "
             >
@@ -143,7 +159,7 @@
             </PUIDropdownItem>
 
             <PUIDropdownItem
-              v-if="!allExpanded"
+              v-if="!allExpanded && !insertItemAction"
               :title="__('pruvious-dashboard', 'Expand all')"
               @click="
                 () => {
@@ -161,7 +177,7 @@
             </PUIDropdownItem>
 
             <PUIDropdownItem
-              v-if="!allCollapsed"
+              v-if="!allCollapsed && !insertItemAction"
               :title="__('pruvious-dashboard', 'Collapse all')"
               @click="
                 () => {
@@ -180,7 +196,9 @@
 
             <PUIDropdownItem
               v-if="
-                !options.enforceUniqueItems && (options.maxItems === false || structuredValue.length < options.maxItems)
+                !options.enforceUniqueItems &&
+                (options.maxItems === false || structuredValue.length < options.maxItems) &&
+                !insertItemAction
               "
               :title="__('pruvious-dashboard', 'Duplicate')"
               @click="
@@ -204,7 +222,7 @@
             </PUIDropdownItem>
 
             <PUIDropdownItem
-              v-if="options.minItems === false || structuredValue.length > options.minItems"
+              v-if="(options.minItems === false || structuredValue.length > options.minItems) && !insertItemAction"
               :title="__('pruvious-dashboard', 'Delete')"
               @click="
                 () => {
@@ -222,14 +240,29 @@
               <Icon mode="svg" name="tabler:trash" />
               <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
             </PUIDropdownItem>
+
+            <template v-if="insertItemAction">
+              <PUIDropdownItem
+                v-for="(_, $key) in options.structure"
+                :title="itemLabels[$key]"
+                @click="
+                  () => {
+                    visibleActions = -1
+                    $nextTick(() => addItem(String($key), insertItemAction === 'before' ? index : index + 1))
+                  }
+                "
+              >
+                <span>{{ itemLabels[$key] }}</span>
+              </PUIDropdownItem>
+            </template>
           </PUIDropdown>
         </span>
       </template>
 
       <template #item="{ item, index }">
-        <div class="p-repeater-item">
+        <div class="p-structure-item">
           <PruviousFields
-            v-if="hasSubfields"
+            v-if="hasSubfields[item.$itemKey]"
             :conditionalLogic="conditionalLogic ?? {}"
             :conditionalLogicResolver="conditionalLogicResolver ?? new ConditionalLogicResolver()"
             :data="data ?? {}"
@@ -237,8 +270,8 @@
             :dataContainerType="dataContainerType"
             :disabled="disabled"
             :errors="subfieldErrors?.[index]"
-            :fields="(options as any).subfields"
-            :layout="options.ui.subfieldsLayout"
+            :fields="(options as any).structure[item.$itemKey]"
+            :layout="options.ui.subfieldsLayout?.[item.$itemKey]"
             :modelValue="item"
             :operation="operation"
             :rootPath="`${path}.${index}`"
@@ -255,7 +288,7 @@
       </template>
 
       <template #itemBefore="{ index }">
-        <div v-if="itemErrors?.[index]" hidden class="p-repeater-next-item-has-error"></div>
+        <div v-if="itemErrors?.[index]" hidden class="p-structure-next-item-has-error"></div>
       </template>
 
       <template #itemAfter="{ index }">
@@ -263,23 +296,42 @@
           :error="itemErrors?.[index]"
           :name="name"
           :options="options"
-          class="p-repeater-item-error"
+          class="p-structure-item-error"
         />
       </template>
     </PUIStructure>
 
-    <div class="p-repeater-add-item">
+    <div class="p-structure-add-item">
       <PUIButton
         :disabled="disabled || (options.maxItems !== false && structuredValue.length >= options.maxItems)"
-        @click="addItem()"
-        variant="outline"
+        :variant="isAddItemMenuVisible ? 'primary' : 'outline'"
+        @click="
+          () => {
+            if (Object.keys(options.structure).length > 1) {
+              isAddItemMenuVisible = true
+            } else {
+              addItem(Object.keys(options.structure)[0]!)
+            }
+          }
+        "
+        ref="addItemButton"
       >
         <Icon mode="svg" name="tabler:plus" />
         <span>{{ addItemLabel }}</span>
       </PUIButton>
+      <PUIDropdown
+        v-if="isAddItemMenuVisible"
+        :reference="addItemButton?.$el"
+        @click="isAddItemMenuVisible = false"
+        @close="isAddItemMenuVisible = false"
+      >
+        <PUIDropdownItem v-for="(_, $key) in options.structure" @click="addItem(String($key))">
+          <span>{{ itemLabels[$key] }}</span>
+        </PUIDropdownItem>
+      </PUIDropdown>
     </div>
 
-    <PruviousFieldMessage :error="repeaterErrors" :name="name" :options="options" />
+    <PruviousFieldMessage :error="structureErrors" :name="name" :options="options" />
   </PUIField>
 </template>
 
@@ -302,6 +354,7 @@ import {
   nanoid,
   omit,
   remap,
+  titleCase,
 } from '@pruvious/utils'
 import { hash } from 'ohash'
 
@@ -326,7 +379,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'repeater'>>,
+    type: Object as PropType<SerializableFieldOptions<'structure'>>,
     required: true,
   },
 
@@ -452,14 +505,21 @@ const emit = defineEmits<{
 const root = useTemplateRef('root')
 const prevModelValue = ref<Record<string, any>[]>()
 const structuredValue = ref<Record<string, any>[]>([])
-const hasSubfields = computed(() => !isEmpty(props.options.subfields))
+const hasSubfields = computed(() =>
+  remap(props.options.structure, ($itemKey, subfields) => [$itemKey, !isEmpty(subfields)]),
+)
+const addItemButton = useTemplateRef('addItemButton')
+const isAddItemMenuVisible = ref(false)
 const addItemLabel = isDefined(props.options.ui.addItemLabel)
   ? maybeTranslate(props.options.ui.addItemLabel)
   : __('pruvious-dashboard', 'Add item')
 const actionButtons = ref<Record<number, any>>({})
 const visibleActions = ref(-1)
+const insertItemAction = ref<'before' | 'after' | false>(false)
 const localErrors = ref<string | Record<string, string>>()
-const repeaterErrors = computed(() => (isObject(localErrors.value) ? localErrors.value[props.name] : localErrors.value))
+const structureErrors = computed(() =>
+  isObject(localErrors.value) ? localErrors.value[props.name] : localErrors.value,
+)
 const itemErrors = computed(() =>
   isObject(localErrors.value)
     ? Object.fromEntries(Object.entries(localErrors.value).filter(([path]) => !path.includes('.')))
@@ -483,10 +543,22 @@ const subfieldErrors = computed(() => {
   }
 })
 const itemTypeHash = computed(() =>
-  hash(remap(props.options.subfields, (subfieldName, { _fieldType }) => [subfieldName, _fieldType])),
+  remap(props.options.structure, ($itemKey, subfields) => [
+    $itemKey,
+    hash(remap(subfields, (subfieldName, { _fieldType }) => [subfieldName, _fieldType])),
+  ]),
 )
+const itemTypeHashValues = computed(() => Object.values(itemTypeHash.value))
 const allCollapsed = computed(() => structuredValue.value.every((item) => !item.$expanded))
 const allExpanded = computed(() => structuredValue.value.every((item) => item.$expanded))
+const itemLabels = computed(() =>
+  remap(props.options.structure, ($itemKey) => [
+    $itemKey,
+    isDefined(props.options.ui.itemLabels?.[$itemKey])
+      ? maybeTranslate(props.options.ui.itemLabels[$itemKey])
+      : __('pruvious-dashboard', titleCase($itemKey, false) as any),
+  ]),
+)
 
 watch(
   () => props.modelValue,
@@ -494,6 +566,7 @@ watch(
     if (!deepCompare(props.modelValue, prevModelValue.value)) {
       prevModelValue.value = props.modelValue
       structuredValue.value = props.modelValue.map((item, i) => ({
+        $itemKey: item.$key,
         ...item,
         $expanded: !structuredValue.value.length || !allCollapsed.value,
         $key: structuredValue.value[i]?.$key ?? nanoid(),
@@ -514,9 +587,16 @@ watch(
   { immediate: true },
 )
 
-function addItem(index?: number) {
+watch(visibleActions, () => {
+  if (visibleActions.value !== -1) {
+    insertItemAction.value = false
+  }
+})
+
+function addItem($key: string, index?: number) {
   const item = {
-    ...remap(props.options.subfields, (fieldName, options) => [fieldName, deepClone(options.default)]),
+    $itemKey: $key,
+    ...remap(props.options.structure[$key]!, (fieldName, options) => [fieldName, deepClone(options.default)]),
     $expanded: true,
     $key: nanoid(),
   }
@@ -549,7 +629,10 @@ function queueConditionalLogicUpdate(mValue: Record<string, any>[]) {
 }
 
 function updateModelValue(sValue: Record<string, any>[]) {
-  const newModelValue = sValue.map((item) => omit(item, ['$expanded', '$key']))
+  const newModelValue = sValue.map((item) => ({
+    $key: item.$itemKey,
+    ...omit(item, ['$itemKey', '$expanded', '$key']),
+  }))
   prevModelValue.value = newModelValue
   structuredValue.value = sValue
   emit('update:modelValue', newModelValue)
@@ -559,7 +642,7 @@ function updateModelValue(sValue: Record<string, any>[]) {
 function commitModelValue(sValue: Record<string, any>[]) {
   emit(
     'commit',
-    sValue.map((item) => omit(item, ['$expanded', '$key'])),
+    sValue.map((item) => ({ $key: item.$itemKey, ...omit(item, ['$itemKey', '$expanded', '$key']) })),
   )
 }
 
@@ -576,37 +659,41 @@ function focusFirstSubfield() {
   cursor: default;
 }
 
-.p-repeater-actions {
+.p-structure-actions {
   flex-shrink: 0;
   display: none;
   gap: 0.25rem;
   margin-left: auto;
 }
 
-.p-repeater
+.p-structure
   > *
   > :where(.pui-structure-items)
   > :where(.pui-card:hover, .pui-card:focus-within)
   > :where(.pui-card-header)
   > :where(.pui-row)
-  > .p-repeater-actions,
-.p-repeater-actions-visible {
+  > .p-structure-actions,
+.p-structure-actions-visible {
   display: flex;
 }
 
-.p-repeater-next-item-has-error + * {
+.p-structure-actions > * {
+  flex-shrink: 0;
+}
+
+.p-structure-next-item-has-error + * {
   border-color: hsl(var(--pui-destructive));
 }
 
-.p-repeater-item-error {
+.p-structure-item-error {
   margin-top: -0.25rem;
 }
 
-.pui-structure:not(.pui-structure-empty) + .p-repeater-add-item {
+.pui-structure:not(.pui-structure-empty) + .p-structure-add-item {
   margin-top: 0.75rem;
 }
 
-.pui-structure-dropzone + .p-repeater-add-item {
+.pui-structure-dropzone + .p-structure-add-item {
   display: none;
 }
 </style>

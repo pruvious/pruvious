@@ -78,7 +78,7 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
      *
      * @default
      * {
-     *   showItemNumbers: true,
+     *   showItemNumber: true,
      *   subfieldValue: false,
      * }
      */
@@ -88,7 +88,7 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
        *
        * @default true
        */
-      showItemNumbers?: boolean
+      showItemNumber?: boolean
 
       /**
        * Displays the value of a specified subfield in the repeater header.
@@ -182,7 +182,7 @@ const customOptions: CustomOptions<Record<string, GenericField>> = {
   ui: {
     addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add item'),
     header: {
-      showItemNumbers: true,
+      showItemNumber: true,
       subfieldValue: false,
     },
     subfieldsLayout: undefined,

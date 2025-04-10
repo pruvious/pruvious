@@ -161,8 +161,8 @@ export function resolveSubfieldsFromData(
             for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
               map[`${key}.${nestedKey}`] = nestedField
             }
-          } else if (subfield.model.structure && isObject(item) && isArray(item[subfieldName])) {
-            for (const [$key, structureSubfields] of Object.entries(subfield.model.structure)) {
+          } else if (subfield.structure && isObject(item) && isArray(item[subfieldName])) {
+            for (const [$key, structureSubfields] of Object.entries(subfield.structure)) {
               const nestedMap = resolveSubfieldsFromData(
                 structureSubfields as any,
                 item[subfieldName].map((item: any) => (item.$key === $key ? item : undefined)),
@@ -219,7 +219,7 @@ export function parseConditionalLogic(
       }
     } else if (field.structure) {
       if (isObject(data) && isArray(data[fieldName])) {
-        for (const [$key, subfields] of Object.entries(field.model.structure)) {
+        for (const [$key, subfields] of Object.entries(field.structure)) {
           const subfieldMap = resolveSubfieldsFromData(
             subfields as any,
             data[fieldName].map((item: any) => (item.$key === $key ? item : undefined)),

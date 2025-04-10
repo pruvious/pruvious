@@ -23,22 +23,22 @@
         </PUIButton>
       </template>
 
-      <template #item="{ item, disabled }">
+      <template #item="{ item, disabled, index }">
         <div v-if="'alt' in item" class="pui-row">
           <div class="pui-flex-1">
             <PUIField>
               <PUIFieldLabel>
-                <label for="src">Source</label>
+                <label :for="`src-${index}`">Source</label>
               </PUIFieldLabel>
-              <PUIInput v-model="item.src" :disabled="disabled" id="src" name="src" />
+              <PUIInput v-model="item.src" :disabled="disabled" :id="`src-${index}`" :name="`src-${index}`" />
             </PUIField>
           </div>
           <div class="pui-flex-1">
             <PUIField>
               <PUIFieldLabel>
-                <label for="alt">Alt</label>
+                <label :for="`alt-${index}`">Alt</label>
               </PUIFieldLabel>
-              <PUIInput v-model="item.alt" :disabled="disabled" id="alt" name="alt" />
+              <PUIInput v-model="item.alt" :disabled="disabled" :id="`alt-${index}`" :name="`alt-${index}`" />
             </PUIField>
           </div>
         </div>
@@ -46,17 +46,22 @@
           <div class="pui-flex-1">
             <PUIField>
               <PUIFieldLabel>
-                <label for="src">Source</label>
+                <label :for="`src-${index}`">Source</label>
               </PUIFieldLabel>
-              <PUIInput v-model="item.src" :disabled="disabled" id="src" name="src" />
+              <PUIInput v-model="item.src" :disabled="disabled" :id="`src-${index}`" :name="`src-${index}`" />
             </PUIField>
           </div>
           <div class="pui-flex-1">
             <PUIField>
               <PUIFieldLabel>
-                <label for="autoplay">Autoplay</label>
+                <label :for="`autoplay-${index}`">Autoplay</label>
               </PUIFieldLabel>
-              <PUISwitch v-model="item.autoplay" :disabled="disabled" id="autoplay" name="autoplay" />
+              <PUISwitch
+                v-model="item.autoplay"
+                :disabled="disabled"
+                :id="`autoplay-${index}`"
+                :name="`autoplay-${index}`"
+              />
             </PUIField>
           </div>
         </div>
