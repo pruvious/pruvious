@@ -11,13 +11,13 @@ import {
 import {
   Field,
   structureFieldModel,
-  type ArrayFieldModelOptions,
   type ConditionalLogic,
   type ExtractCastedStructureTypes,
   type ExtractPopulatedStructureTypes,
   type ExtractStructureInput,
   type FieldModel,
   type GenericField,
+  type StructureFieldModelOptions,
 } from '@pruvious/orm'
 import { isArray, isDefined, isObject, setProperty } from '@pruvious/utils'
 import { hash } from 'ohash'
@@ -269,7 +269,7 @@ export default {
   >(
     options: CombinedFieldOptions<
       FieldModel<
-        ArrayFieldModelOptions<TCastedType, TPopulatedType>,
+        StructureFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -277,7 +277,7 @@ export default {
         undefined,
         TStructure
       >,
-      ArrayFieldModelOptions<TCastedType, TPopulatedType> &
+      StructureFieldModelOptions<TCastedType, TPopulatedType> &
         CustomOptions<TStructure> &
         ResolveFieldUIOptions<undefined>,
       false,
@@ -289,7 +289,7 @@ export default {
     >,
   ): Field<
     FieldModel<
-      ArrayFieldModelOptions<TCastedType, TPopulatedType>,
+      StructureFieldModelOptions<TCastedType, TPopulatedType>,
       'text',
       TCastedType,
       TPopulatedType,
@@ -297,7 +297,9 @@ export default {
       undefined,
       TStructure
     >,
-    ArrayFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TStructure> & ResolveFieldUIOptions<undefined>,
+    StructureFieldModelOptions<TCastedType, TPopulatedType> &
+      CustomOptions<TStructure> &
+      ResolveFieldUIOptions<undefined>,
     false,
     TRequired,
     TImmutable,
@@ -376,7 +378,7 @@ export default {
   >(
     options: CombinedFieldOptions<
       FieldModel<
-        ArrayFieldModelOptions<TCastedType, TPopulatedType>,
+        StructureFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -384,7 +386,7 @@ export default {
         undefined,
         TStructure
       >,
-      ArrayFieldModelOptions<TCastedType, TPopulatedType> &
+      StructureFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
         CustomOptions<TClienTStructure> &
         ResolveFieldUIOptions<undefined>,
@@ -398,7 +400,7 @@ export default {
   ): { type: PropType<TPopulatedType>; required: true } & {
     field: Field<
       FieldModel<
-        ArrayFieldModelOptions<TCastedType, TPopulatedType>,
+        StructureFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -406,7 +408,7 @@ export default {
         undefined,
         TStructure
       >,
-      ArrayFieldModelOptions<TCastedType, TPopulatedType> &
+      StructureFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
         CustomOptions<TClienTStructure> &
         ResolveFieldUIOptions<undefined>,
@@ -428,7 +430,7 @@ export default {
    */
   TOptions: undefined as unknown as CombinedFieldOptions<
     FieldModel<
-      ArrayFieldModelOptions<Record<string, any>, Record<string, any>>,
+      StructureFieldModelOptions<Record<string, any>, Record<string, any>>,
       'text',
       Record<string, any>,
       Record<string, any>,
@@ -436,7 +438,7 @@ export default {
       undefined,
       { [$key: string]: Record<string, GenericField> }
     >,
-    ArrayFieldModelOptions<Record<string, any>, Record<string, any>> &
+    StructureFieldModelOptions<Record<string, any>, Record<string, any>> &
       CustomOptions<{ [$key: string]: Record<string, GenericField> }> &
       ResolveFieldUIOptions<undefined>,
     false,
