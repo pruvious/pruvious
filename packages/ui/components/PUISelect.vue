@@ -23,7 +23,15 @@
         }
       "
       @keydown.enter.prevent.stop="selectHighlightedOrClose"
-      @keydown.escape.prevent.stop="close"
+      @keydown.escape.prevent.stop="
+        () => {
+          if (isExpanded) {
+            close()
+          } else {
+            blurActiveElement()
+          }
+        }
+      "
       @keydown.space="selectHighlightedOrToggle"
       @keydown.tab="focusFirst"
       @keydown.up.prevent.stop="
@@ -106,7 +114,16 @@
 </template>
 
 <script lang="ts" setup>
-import { isDefined, isString, last, next, prev, searchByKeywords, type Primitive } from '@pruvious/utils'
+import {
+  blurActiveElement,
+  isDefined,
+  isString,
+  last,
+  next,
+  prev,
+  searchByKeywords,
+  type Primitive,
+} from '@pruvious/utils'
 import { onClickOutside, useEventListener, useScrollLock, useTimeout } from '@vueuse/core'
 import { puiTrigger } from '../pui/trigger'
 import type PUIScrollable from './PUIScrollable.vue'

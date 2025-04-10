@@ -34,6 +34,7 @@
       @blur="onBlur()"
       @input="maybeEmit()"
       @keydown.down.prevent.stop="(add($event.shiftKey ? -10 * increment : -increment), normalize(), maybeEmit(true))"
+      @keydown.escape.stop="blurActiveElement()"
       @keydown.up.prevent.stop="(add($event.shiftKey ? 10 * increment : increment), normalize(), maybeEmit(true))"
       type="text"
       class="pui-number-input"
@@ -70,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { clearArray, isDefined, isRealNumber, isUndefined, leadingZeros } from '@pruvious/utils'
+import { blurActiveElement, clearArray, isDefined, isRealNumber, isUndefined, leadingZeros } from '@pruvious/utils'
 import { onKeyDown, onKeyStroke, onKeyUp, useElementBounding, useEventListener } from '@vueuse/core'
 
 const props = defineProps({

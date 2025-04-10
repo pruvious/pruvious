@@ -25,6 +25,7 @@
       @blur="$emit('blur', $event, ($event.target as HTMLInputElement).value)"
       @focus="$emit('focus', $event, ($event.target as HTMLInputElement).value)"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @keydown.escape.stop="blurActiveElement()"
       class="pui-input-control"
     />
 
@@ -33,6 +34,8 @@
 </template>
 
 <script lang="ts" setup>
+import { blurActiveElement } from '@pruvious/utils'
+
 defineProps({
   /**
    * The value of the input field.
