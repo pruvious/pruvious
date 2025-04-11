@@ -37,10 +37,9 @@ import {
   dashboardBasePath,
   resolveTranslatableCollectionRecordPermissions,
   useDashboardContentLanguage,
-  usePruviousDashboard,
   type ResolvedTranslatableCollectionRecordPermissions,
 } from '#pruvious/client'
-import type { Collections } from '#pruvious/server'
+import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { filterObject, slugify } from '@pruvious/utils'
 
@@ -54,22 +53,17 @@ const props = defineProps({
   },
 
   /**
-   * The name of the current collection in PascalCase format.
+   * The name and definition of the current translatable collection.
    */
-  collectionName: {
-    type: String as PropType<keyof Collections>,
+  collection: {
+    type: Object as PropType<{ name: keyof Collections; definition: SerializableCollection }>,
     required: true,
   },
 })
 
-const dashboard = usePruviousDashboard()
 const contentLanguage = useDashboardContentLanguage()
-const collectionDefinition = dashboard.value!.collections[props.collectionName]!
-const collectionSlug = slugify(props.collectionName)
-const permissions = await resolveTranslatableCollectionRecordPermissions(+props.cell.row.id, {
-  name: props.collectionName,
-  definition: collectionDefinition,
-})
+const collectionSlug = slugify(props.collection.name)
+const permissions = await resolveTranslatableCollectionRecordPermissions(+props.cell.row.id, props.collection)
 const filteredPermissions = filterObject(
   permissions,
   (language) => language !== contentLanguage.value,

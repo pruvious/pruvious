@@ -55,7 +55,7 @@
             v-model:selected="selected"
             v-model:sort="sort"
             :cell="cellProps"
-            :collectionName="collection.name"
+            :collection="collection"
             :columns="columns"
             :data="cellProps.row"
             :fields="collection.definition.fields"
@@ -68,7 +68,7 @@
           <PruviousDynamicTableField
             v-else
             :cell="cellProps"
-            :collectionName="collection.name"
+            :collection="collection"
             :columns="columns"
             :data="cellProps.row"
             :fields="collection.definition.fields"
