@@ -83,34 +83,35 @@ interface CustomOptions<TStructure extends { [$key: string]: Record<string, Gene
     addItemLabel?: string | ((context: TranslatableStringCallbackContext) => string)
 
     /**
-     * Optional header configuration for each item in the structure.
+     * Optional label configuration for each item in the structure.
+     * These settings are used in the structure item headers and data table cells.
      *
      * - Object keys are unique item identifiers (keys).
-     * - Object values are header configuration objects.
+     * - Object values are label configuration objects.
      *
-     * By default, the item order numbers and `itemLabels` are shown in the headers.
+     * By default, the item order numbers and `itemTypeLabels` are shown as item labels.
      *
      * @default undefined
      */
-    header?:
+    itemLabelConfiguration?:
       | {
           [K in keyof TStructure]?: {
             /**
-             * Controls whether item order numbers appear in the structure item header.
+             * Controls whether item order numbers appear in the label.
              *
              * @default true
              */
             showItemNumber?: boolean
 
             /**
-             * Controls whether to show `itemLabels` in the structure item header.
+             * Controls whether to show `itemTypeLabels` in the label.
              *
              * @default true
              */
-            showLabel?: boolean
+            showItemType?: boolean
 
             /**
-             * Displays the value of a specified subfield in the structure item header.
+             * Displays the value of a specified subfield in the label.
              * Set to `false` to hide subfield values.
              *
              * @default false
@@ -121,7 +122,7 @@ interface CustomOptions<TStructure extends { [$key: string]: Record<string, Gene
       | undefined
 
     /**
-     * Sets the display label for each item in the structure by its key.
+     * Sets the display label for each item type in the structure by its key.
      *
      * If not specified, the item key will be automatically transformed to Title case and used as the label.
      * The resulting label is wrapped in the translation function `__('pruvious-dashboard', label)`.
@@ -148,12 +149,12 @@ interface CustomOptions<TStructure extends { [$key: string]: Record<string, Gene
      *
      * // Key transformation (default)
      * // Example: the item key `vimeoVideo` is transformed into `__('pruvious-dashboard', 'Vimeo video')`
-     * itemLabels: {
+     * itemTypeLabels: {
      *   vimeoVideo: undefined,
      * }
      * ```
      */
-    itemLabels?: {
+    itemTypeLabels?: {
       [K in keyof TStructure]?: string | ((context: TranslatableStringCallbackContext) => string)
     }
 
@@ -245,8 +246,8 @@ const customOptions: CustomOptions<{ [$key: string]: Record<string, GenericField
   structure: {},
   ui: {
     addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add item'),
-    header: undefined,
-    itemLabels: undefined,
+    itemLabelConfiguration: undefined,
+    itemTypeLabels: undefined,
     subfieldsLayout: undefined,
   },
 }

@@ -26,24 +26,27 @@
       <template #header="{ item, index }">
         <span
           v-if="
-            options.ui.header?.[item.$itemKey]?.showLabel !== false || options.ui.header?.[item.$itemKey]?.subfieldValue
+            options.ui.itemLabelConfiguration?.[item.$itemKey]?.showItemType !== false ||
+            options.ui.itemLabelConfiguration?.[item.$itemKey]?.subfieldValue
           "
           class="pui-muted pui-truncate"
         >
-          {{ options.ui.header?.[item.$itemKey]?.showItemNumber !== false ? `${index + 1}.` : '' }}
-          {{ options.ui.header?.[item.$itemKey]?.showLabel !== false ? itemLabels[item.$itemKey] : '' }}
+          {{ options.ui.itemLabelConfiguration?.[item.$itemKey]?.showItemNumber !== false ? `${index + 1}.` : '' }}
           {{
-            options.ui.header?.[item.$itemKey]?.subfieldValue &&
-            item[options.ui.header[item.$itemKey]!.subfieldValue as string] !== ''
-              ? options.ui.header?.[item.$itemKey]?.showLabel !== false
-                ? `(${item[options.ui.header[item.$itemKey]!.subfieldValue as string]})`
-                : item[options.ui.header[item.$itemKey]!.subfieldValue as string]
+            options.ui.itemLabelConfiguration?.[item.$itemKey]?.showItemType !== false
+              ? itemTypeLabels[item.$itemKey]
+              : ''
+          }}
+          {{
+            options.ui.itemLabelConfiguration?.[item.$itemKey]?.subfieldValue &&
+            item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string] !== ''
+              ? options.ui.itemLabelConfiguration?.[item.$itemKey]?.showItemType !== false
+                ? `(${item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]})`
+                : item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]
               : ''
           }}
         </span>
-        <span v-else-if="options.ui.header?.[item.$itemKey]?.showItemNumber !== false" class="pui-muted pui-truncate">
-          #{{ index + 1 }}
-        </span>
+        <span v-else class="pui-muted pui-truncate">#{{ index + 1 }}</span>
 
         <span class="p-structure-actions" :class="{ 'p-structure-actions-visible': visibleActions === index }">
           <PUIButton
@@ -244,7 +247,7 @@
             <template v-if="insertItemAction">
               <PUIDropdownItem
                 v-for="(_, $key) in options.structure"
-                :title="itemLabels[$key]"
+                :title="itemTypeLabels[$key]"
                 @click="
                   () => {
                     visibleActions = -1
@@ -252,7 +255,7 @@
                   }
                 "
               >
-                <span>{{ itemLabels[$key] }}</span>
+                <span>{{ itemTypeLabels[$key] }}</span>
               </PUIDropdownItem>
             </template>
           </PUIDropdown>
@@ -326,7 +329,7 @@
         @close="isAddItemMenuVisible = false"
       >
         <PUIDropdownItem v-for="(_, $key) in options.structure" @click="addItem(String($key))">
-          <span>{{ itemLabels[$key] }}</span>
+          <span>{{ itemTypeLabels[$key] }}</span>
         </PUIDropdownItem>
       </PUIDropdown>
     </div>
@@ -551,11 +554,11 @@ const itemTypeHash = computed(() =>
 const itemTypeHashValues = computed(() => Object.values(itemTypeHash.value))
 const allCollapsed = computed(() => structuredValue.value.every((item) => !item.$expanded))
 const allExpanded = computed(() => structuredValue.value.every((item) => item.$expanded))
-const itemLabels = computed(() =>
+const itemTypeLabels = computed(() =>
   remap(props.options.structure, ($itemKey) => [
     $itemKey,
-    isDefined(props.options.ui.itemLabels?.[$itemKey])
-      ? maybeTranslate(props.options.ui.itemLabels[$itemKey])
+    isDefined(props.options.ui.itemTypeLabels?.[$itemKey])
+      ? maybeTranslate(props.options.ui.itemTypeLabels[$itemKey])
       : __('pruvious-dashboard', titleCase($itemKey, false) as any),
   ]),
 )

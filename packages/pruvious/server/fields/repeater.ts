@@ -73,8 +73,9 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
     addItemLabel?: string | ((context: TranslatableStringCallbackContext) => string)
 
     /**
-     * Optional header configuration for the repeater.
-     * By default, only the item order numbers are shown in the header.
+     * Optional label configuration for each item in the repeater.
+     * These settings are used in the repeater item headers and data table cells.
+     * By default, only the item order numbers are shown as item labels.
      *
      * @default
      * {
@@ -82,16 +83,16 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
      *   subfieldValue: false,
      * }
      */
-    header?: {
+    itemLabelConfiguration?: {
       /**
-       * Controls whether item order numbers appear in the repeater header.
+       * Controls whether item order numbers appear in the label.
        *
        * @default true
        */
       showItemNumber?: boolean
 
       /**
-       * Displays the value of a specified subfield in the repeater header.
+       * Displays the value of a specified subfield in the label.
        * Set to `false` to hide subfield values.
        *
        * @default false
@@ -181,7 +182,7 @@ const customOptions: CustomOptions<Record<string, GenericField>> = {
   subfields: {},
   ui: {
     addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add item'),
-    header: {
+    itemLabelConfiguration: {
       showItemNumber: true,
       subfieldValue: false,
     },

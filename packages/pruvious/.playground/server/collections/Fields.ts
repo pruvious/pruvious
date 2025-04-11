@@ -47,7 +47,10 @@ export default defineCollection({
         { $key: 'foo', bar: 'BAR' },
         { $key: 'baz', qux: 1337 },
       ],
-      ui: { label: 'Structure (min/max)', header: { foo: { subfieldValue: 'bar' }, baz: { subfieldValue: 'qux' } } },
+      ui: {
+        label: 'Structure (min/max)',
+        itemLabelConfiguration: { foo: { subfieldValue: 'bar' }, baz: { subfieldValue: 'qux' } },
+      },
     }),
     structureUnique: structureField({
       structure: { foo: { bar: textField({}) } },
@@ -81,7 +84,7 @@ export default defineCollection({
       minItems: 2,
       maxItems: 3,
       default: [{ foo: 'FOO' }, { foo: 'BAR' }],
-      ui: { label: 'Repeater (min/max)', header: { subfieldValue: 'foo' } },
+      ui: { label: 'Repeater (min/max)', itemLabelConfiguration: { subfieldValue: 'foo' } },
     }),
     repeaterUnique: repeaterField({
       subfields: { foo: textField({}) },

@@ -24,16 +24,14 @@
       class="p-repeater"
     >
       <template #header="{ item, index }">
-        <span v-if="options.ui.header?.subfieldValue" class="pui-muted pui-truncate">
+        <span v-if="options.ui.itemLabelConfiguration?.subfieldValue" class="pui-muted pui-truncate">
           {{
-            options.ui.header?.showItemNumber !== false
-              ? `${index + 1}. ${item[options.ui.header.subfieldValue]}`
-              : item[options.ui.header.subfieldValue]
+            options.ui.itemLabelConfiguration?.showItemNumber !== false
+              ? `${index + 1}. ${item[options.ui.itemLabelConfiguration.subfieldValue]}`
+              : item[options.ui.itemLabelConfiguration.subfieldValue]
           }}
         </span>
-        <span v-else-if="options.ui.header?.showItemNumber !== false" class="pui-muted pui-truncate">
-          #{{ index + 1 }}
-        </span>
+        <span v-else class="pui-muted pui-truncate">#{{ index + 1 }}</span>
 
         <span class="p-repeater-actions" :class="{ 'p-repeater-actions-visible': visibleActions === index }">
           <PUIButton
