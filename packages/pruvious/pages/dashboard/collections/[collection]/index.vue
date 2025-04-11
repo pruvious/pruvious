@@ -31,7 +31,7 @@
         }"
         :onOpenActions="
           async ({ row }) => {
-            resolvedPermissions = await resolveCollectionRecordPermissions(Number(row.id), collection)
+            resolvedPermissions = await resolveTranslatableCollectionRecordPermissions(Number(row.id), collection)
           }
         "
         :selectable="selectable"
@@ -61,6 +61,7 @@
             :fields="collection.definition.fields"
             :is="resolvedCustomComponents[cellProps.key]"
             :params="params"
+            :permissionsResolver="recordsPermissionsResolver"
             :push="push"
             :refresh="refresh"
           />
@@ -74,6 +75,7 @@
             :modelValue="cellProps.row[cellProps.key]"
             :name="String(cellProps.key)"
             :options="collection.definition.fields[cellProps.key]!"
+            :permissionsResolver="recordsPermissionsResolver"
             :synced="
               collection.definition.translatable && collection.definition.syncedFields.includes(String(cellProps.key))
             "
@@ -272,10 +274,11 @@ import {
   pruviousDashboardGet,
   pruviousDashboardPost,
   QueryBuilder,
-  resolveCollectionRecordPermissions,
+  resolveTranslatableCollectionRecordPermissions,
+  useCollectionRecordPermissionsResolver,
   useDashboardContentLanguage,
   useSelectQueryBuilderParams,
-  type ResolvedCollectionRecordPermissions,
+  type ResolvedTranslatableCollectionRecordPermissions,
 } from '#pruvious/client'
 import type { CollectionUIOptions, Permission } from '#pruvious/server'
 import type { Paginated, QueryBuilderResult } from '@pruvious/orm'
@@ -347,6 +350,7 @@ const canCreate =
 const canDelete =
   collection.definition.api.update && hasPermission(`collection:${route.params.collection}:delete` as Permission)
 const isManaged = collection.definition.authorField || collection.definition.editorsField
+const recordsPermissionsResolver = useCollectionRecordPermissionsResolver(collection)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
 const tableWrapper = useTemplateRef('tableWrapper')
@@ -358,7 +362,7 @@ const selectedCount = computed(() =>
   allSelected.value ? paginated.value.total : Object.values(selected.value).filter(Boolean).length,
 )
 const selectAllState = ref<boolean | 'indeterminate'>(false)
-const resolvedPermissions = ref<ResolvedCollectionRecordPermissions | null>(null)
+const resolvedPermissions = ref<ResolvedTranslatableCollectionRecordPermissions | null>(null)
 const isTranslationPopupVisible = ref(false)
 const isTableSettingsPopupVisible = ref(false)
 const paginated = ref<Omit<Paginated<any>, 'records'>>({
@@ -385,10 +389,20 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
       ? { column: params.orderBy[0].field, direction: params.orderBy[0].direction! }
       : null
 
+    const select = ['id', ...Object.keys(columns.value).filter((column) => !column.startsWith('$'))]
+
+    if (collection.definition.authorField) {
+      select.push('author')
+    }
+
+    if (collection.definition.editorsField) {
+      select.push('editors')
+    }
+
     const query = queryBuilder
       .selectFrom(collection.name)
       .fromQueryString(queryString)
-      .select(['id', ...Object.keys(columns.value).filter((column) => !column.startsWith('$'))] as any)
+      .select(select as any)
 
     if (collection.definition.translatable) {
       query.where('language', '=', contentLanguage.value)

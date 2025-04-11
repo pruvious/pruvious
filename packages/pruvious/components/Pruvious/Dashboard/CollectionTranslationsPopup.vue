@@ -113,9 +113,9 @@ import {
   pruviousDashboardGet,
   pruviousDashboardPost,
   QueryBuilder,
-  resolveCollectionRecordPermissions,
+  resolveTranslatableCollectionRecordPermissions,
   useDashboardContentLanguage,
-  type ResolvedCollectionRecordPermissions,
+  type ResolvedTranslatableCollectionRecordPermissions,
 } from '#pruvious/client'
 import type { Collections, LanguageCode, SerializableCollection } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
@@ -144,7 +144,7 @@ const props = defineProps({
    * If not provided, the permissions will be resolved automatically.
    */
   resolvedPermissions: {
-    type: Object as PropType<ResolvedCollectionRecordPermissions>,
+    type: Object as PropType<ResolvedTranslatableCollectionRecordPermissions>,
   },
 
   /**
@@ -173,7 +173,7 @@ defineEmits<{
 const contentLanguage = useDashboardContentLanguage()
 const popup = useTemplateRef('popup')
 const permissions = ref(
-  props.resolvedPermissions ?? (await resolveCollectionRecordPermissions(props.id, props.collection)),
+  props.resolvedPermissions ?? (await resolveTranslatableCollectionRecordPermissions(props.id, props.collection)),
 )
 const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
 const lock = ref(false)
@@ -196,7 +196,7 @@ const copyTranslation = lockAndLoad(lock, async (targetLanguage: LanguageCode) =
             .run()
 
     if (query.success) {
-      permissions.value = await resolveCollectionRecordPermissions(props.id, props.collection)
+      permissions.value = await resolveTranslatableCollectionRecordPermissions(props.id, props.collection)
       puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
     } else if (!isEmpty(query.inputErrors)) {
       puiToast(__('pruvious-dashboard', 'Error'), {

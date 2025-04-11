@@ -8,6 +8,7 @@
     :modelValue="modelValue"
     :name="name"
     :options="options"
+    :permissionsResolver="permissionsResolver"
     :synced="synced"
     :translatable="translatable"
     :type="type"
@@ -15,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, tableFieldComponents } from '#pruvious/client'
+import { customComponents, tableFieldComponents, type CollectionRecordPermissionsResolver } from '#pruvious/client'
 import type { Collections, Fields, GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { isDefined } from '@pruvious/utils'
@@ -102,6 +103,13 @@ const props = defineProps({
   synced: {
     type: Boolean,
     default: false,
+  },
+
+  /**
+   * A function that accepts a record `id` and optional field values, returning a `Promise` resolving to the permission details for that record.
+   */
+  permissionsResolver: {
+    type: Function as PropType<CollectionRecordPermissionsResolver>,
   },
 })
 

@@ -1,73 +1,154 @@
 import { languages } from '#pruvious/client/i18n'
 import type { Collections, LanguageCode, Permission, SerializableCollection } from '#pruvious/server'
-import { isNumber, kebabCase } from '@pruvious/utils'
+import { isNumber, isUndefined, kebabCase } from '@pruvious/utils'
 import { getUser, hasPermission } from '../../../modules/pruvious/auth/utils.client'
 import { selectFrom } from '../../../modules/pruvious/client-query-builder/utils.client'
 
-export type ResolvedCollectionRecordPermissions = Record<
-  LanguageCode,
-  {
-    /**
-     * The current record ID.
-     */
-    id: number | null
+export interface ResolvedCollectionRecordPermissions {
+  /**
+   * The current record ID.
+   */
+  id: number | null
 
-    /**
-     * Whether the current user can create new collection records.
-     */
-    canCreate: boolean
+  /**
+   * Whether the current user can create new collection records.
+   */
+  canCreate: boolean
 
-    /**
-     * Whether the current user has permission to read a record by its `id`.
-     * Checks the `author` and `editors` fields (if enabled in the collection) to verify read rights.
-     */
-    canRead: boolean
+  /**
+   * Whether the current user has permission to read a record by its `id`.
+   * Checks the `author` and `editors` fields (if enabled in the collection) to verify read rights.
+   */
+  canRead: boolean
 
-    /**
-     * Whether the current user has permission to update a record by its `id`.
-     * Checks `author` and `editors` fields (if enabled in the collection) to verify update rights.
-     */
-    canUpdate: boolean
+  /**
+   * Whether the current user has permission to update a record by its `id`.
+   * Checks `author` and `editors` fields (if enabled in the collection) to verify update rights.
+   */
+  canUpdate: boolean
 
-    /**
-     * Whether the current user has permission to delete a record by its `id`.
-     * Checks the `author` field (if enabled in the collection) to verify delete rights.
-     */
-    canDelete: boolean
+  /**
+   * Whether the current user has permission to delete a record by its `id`.
+   * Checks the `author` field (if enabled in the collection) to verify delete rights.
+   */
+  canDelete: boolean
+}
+
+export type ResolvedTranslatableCollectionRecordPermissions = Record<LanguageCode, ResolvedCollectionRecordPermissions>
+
+export type CollectionRecordPermissionsResolver = (
+  id: number,
+  additionalFieldValues?: { author?: number | null; editors?: number[] },
+) => Promise<ResolvedCollectionRecordPermissions>
+
+/**
+ * Resolves user permissions for a specific `collection` record identified by its `id`.
+ * Requires the authenticated user to have read access to the record.
+ *
+ * You can provide the `author` and `editor` values (if enabled in the `collection.definition`)
+ * as the third parameter to avoid making an API call to fetch this information.
+ *
+ * @example
+ * ```ts
+ * await resolveCollectionRecordPermissions(1, collection)
+ * // { id: 1, canCreate: true, canRead: true, canUpdate: true, canDelete: true }
+ * ```
+ */
+export async function resolveCollectionRecordPermissions(
+  id: number,
+  collection: { name: keyof Collections; definition: SerializableCollection },
+  additionalFieldValues?: { author?: number | null; editors?: number[] },
+): Promise<ResolvedCollectionRecordPermissions> {
+  const isManaged = collection.definition.authorField || collection.definition.editorsField
+  const canManage = hasPermission(`collection:${kebabCase(collection.name)}:manage` as Permission)
+  const canCreate = hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
+  const canUpdate = hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
+  const canDelete = hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
+  const results: ResolvedCollectionRecordPermissions = {
+    id,
+    canCreate,
+    canRead: !isManaged || canManage,
+    canUpdate: canUpdate && (!isManaged || canManage),
+    canDelete: canDelete && (!isManaged || canManage),
   }
->
+
+  if (isManaged && !canManage && (canUpdate || canDelete)) {
+    const userId = getUser()?.id!
+
+    let _canUpdate = false
+    let _canDelete = false
+    let author = additionalFieldValues?.author
+    let editors = additionalFieldValues?.editors
+
+    const select: any = [
+      collection.definition.authorField && isUndefined(author) ? 'author' : null,
+      collection.definition.editorsField && isUndefined(editors) ? 'editors' : null,
+    ].filter(Boolean)
+
+    if (select.length) {
+      await selectFrom(collection.name)
+        .select(select)
+        .where('id', '=', id)
+        .first()
+        .then(({ data }) => {
+          results.canRead = !!data
+
+          if (select.includes('author')) {
+            author = data?.author
+          }
+
+          if (select.includes('editors')) {
+            editors = data?.editors
+          }
+        })
+    }
+
+    if (collection.definition.authorField) {
+      _canUpdate = author === userId
+      _canDelete = author === userId
+    }
+
+    if (collection.definition.editorsField) {
+      _canUpdate ||= !!editors?.includes(userId)
+    }
+
+    results.canUpdate = canUpdate && _canUpdate
+    results.canDelete = canDelete && _canDelete
+  }
+
+  return results
+}
 
 /**
  * Resolves user permissions for all defined languages of a `collection` record identified by its `id`.
  * Requires the authenticated user to have read access to the base record.
- *
  *
  * @returns a key-value object with language codes as keys and resolved permissions as values.
  *          If the `collection` is not translatable, the resolved permissions will be the same for all languages.
  *
  * @example
  * ```ts
- * await resolveCollectionRecordPermissions(1, translatableCollection)
+ * await resolveTranslatableCollectionRecordPermissions(1, translatableCollection)
  * // {
- * //   en: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
- * //   de: { id: null, canCreate: true, canUpdate: true, canDelete: true },
- * //   fr: { id: 2, canCreate: true, canUpdate: true, canDelete: true },
+ * //   en: { id: 1, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+ * //   de: { id: null, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+ * //   fr: { id: 2, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
  * // }
  *
- * await resolveCollectionRecordPermissions(1, nonTranslatableCollection)
+ * await resolveTranslatableCollectionRecordPermissions(1, nonTranslatableCollection)
  * // {
- * //   en: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
- * //   de: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
- * //   fr: { id: 1, canCreate: true, canUpdate: true, canDelete: true },
+ * //   en: { id: 1, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+ * //   de: { id: 1, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+ * //   fr: { id: 1, canCreate: true, canRead: true, canUpdate: true, canDelete: true },
  * // }
  * ```
  */
-export async function resolveCollectionRecordPermissions(
+export async function resolveTranslatableCollectionRecordPermissions(
   id: number,
   collection: { name: keyof Collections; definition: SerializableCollection },
-): Promise<ResolvedCollectionRecordPermissions> {
+): Promise<ResolvedTranslatableCollectionRecordPermissions> {
   const translations: Partial<Record<LanguageCode, number | null>> = {}
-  const results = {} as ResolvedCollectionRecordPermissions
+  const results = {} as ResolvedTranslatableCollectionRecordPermissions
   const isManaged = collection.definition.authorField || collection.definition.editorsField
   const canManage = hasPermission(`collection:${kebabCase(collection.name)}:manage` as Permission)
   const canCreate = hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
@@ -163,4 +244,54 @@ export async function resolveCollectionRecordPermissions(
   }
 
   return results
+}
+
+/**
+ * Creates a cached permission resolver for collection records.
+ *
+ * This composable function returns a method that resolves user permissions for specific records,
+ * with built-in caching to prevent redundant permission checks for the same record ID.
+ *
+ * Returns a function that accepts a record `id` and optional field values,
+ * returning a `Promise` resolving to the permission details for that record.
+ * The cache is based on the record ID only.
+ * If you provide different `additionalFieldValues` for the same ID in subsequent calls,
+ * the cached resolver from the first call will still be used.
+ *
+ * @example
+ * ```ts
+ * // Create a permission resolver for the 'posts' collection
+ * const resolvePermissions = useCollectionRecordPermissionsResolver({
+ *   name: 'posts',
+ *   definition: postsCollection
+ * })
+ *
+ * // Check permissions for record with ID 1337
+ * const permissions = await resolvePermissions(1337)
+ * // { id: 1337, canCreate: true, canRead: true, canUpdate: true, canDelete: false }
+ *
+ * // With additional field values to avoid extra API calls
+ * const permissionsWithFields = await resolvePermissions(1337, {
+ *   author: 1,
+ *   editors: [2, 3]
+ * })
+ *
+ * // Subsequent calls for the same ID will use the cached resolver
+ * const samePermissions = await resolvePermissions(1337) // Uses cached resolver
+ * ```
+ */
+
+export function useCollectionRecordPermissionsResolver(collection: {
+  name: keyof Collections
+  definition: SerializableCollection
+}): CollectionRecordPermissionsResolver {
+  const cache: Record<number, () => Promise<ResolvedCollectionRecordPermissions>> = {}
+
+  return async (id: number, additionalFieldValues?: { author?: number | null; editors?: number[] }) => {
+    if (!cache[id]) {
+      cache[id] = () => resolveCollectionRecordPermissions(id, collection, additionalFieldValues)
+    }
+
+    return cache[id]()
+  }
 }

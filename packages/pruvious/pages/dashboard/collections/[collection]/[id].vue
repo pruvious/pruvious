@@ -147,7 +147,7 @@ import {
   pruviousDashboardGet,
   pruviousDashboardPost,
   QueryBuilder,
-  resolveCollectionRecordPermissions,
+  resolveTranslatableCollectionRecordPermissions,
   unsavedChanges,
   useAuth,
   useDashboardContentLanguage,
@@ -316,7 +316,7 @@ onMounted(() => {
       if (isSubmitting.value) {
         contentLanguage.value = oldContentLanguage
       } else {
-        const resolvedPermissions = await resolveCollectionRecordPermissions(id, collection)
+        const resolvedPermissions = await resolveTranslatableCollectionRecordPermissions(id, collection)
 
         if (resolvedPermissions[newContentLanguage].id) {
           if (!resolvedPermissions[newContentLanguage].canRead) {
@@ -455,7 +455,7 @@ const saveData = lockAndLoad(isSubmitting, async () => {
 })
 
 async function duplicateRecord() {
-  const resolvedPermissions = await resolveCollectionRecordPermissions(id, collection)
+  const resolvedPermissions = await resolveTranslatableCollectionRecordPermissions(id, collection)
   const canUpdate =
     collection.definition.api.update && hasPermission(`collection:${route.params.collection}:update` as Permission)
 
