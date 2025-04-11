@@ -20,8 +20,8 @@
         <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'All items')" :to="allItemsLink" variant="outline">
           <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
         </PUIButton>
-        <span class="pui-shrink-0">{{ label }}</span>
-        <span v-if="translationOf" class="p-translation-of pui-muted pui-truncate">
+        <span class="pui-truncate">{{ label }}</span>
+        <span v-if="translationOf" class="p-translation-of pui-muted">
           (
           <span class="pui-truncate">{{ __('pruvious-dashboard', 'New translation of') }}</span>
           &nbsp;
@@ -33,7 +33,7 @@
           </NuxtLink>
           )
         </span>
-        <span v-else class="pui-muted pui-truncate">({{ __('pruvious-dashboard', 'New') }})</span>
+        <span v-else class="pui-shrink-0 pui-muted">({{ __('pruvious-dashboard', 'New') }})</span>
       </div>
     </template>
 

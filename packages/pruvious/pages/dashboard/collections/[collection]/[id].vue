@@ -25,8 +25,8 @@
         <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'All items')" :to="allItemsLink" variant="outline">
           <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
         </PUIButton>
-        <span class="pui-shrink-0">{{ label }}</span>
-        <span class="pui-muted pui-truncate">(#{{ id }})</span>
+        <span class="pui-truncate">{{ label }}</span>
+        <span class="pui-shrink-0 pui-muted">(#{{ id }})</span>
       </div>
     </template>
 
