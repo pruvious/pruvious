@@ -141,9 +141,7 @@ const copyTranslation = lockAndLoad(lock, async (targetLanguage: LanguageCode) =
 .p-title {
   font-weight: 500;
 }
-</style>
 
-<style scoped>
 hr {
   width: calc(100% + 1.5rem);
   margin: 0.75rem -0.75rem;
