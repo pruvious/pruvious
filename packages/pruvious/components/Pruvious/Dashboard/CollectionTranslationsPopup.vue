@@ -55,7 +55,9 @@
             <PUIButton
               v-else-if="permissions[code].id !== id || showEditCurrentButton"
               v-pui-tooltip="
-                permissions[code].canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View')
+                permissions[code].canUpdate
+                  ? __('pruvious-dashboard', 'Edit translation')
+                  : __('pruvious-dashboard', 'View translation')
               "
               :disabled="!permissions[code].canRead"
               :size="-2"

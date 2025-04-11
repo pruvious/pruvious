@@ -148,6 +148,7 @@ export default defineTranslation({
   'Duplicated': 'Dupliziert',
 
   'Edit': 'Bearbeiten',
+  'Edit translation': 'Übersetzung bearbeiten',
   'Editors': 'Editoren',
   'e.g., https://pruvious.com': 'z.B. https://pruvious.com',
   'e.g. Recently updated': 'z.B. Zuletzt aktualisiert',
@@ -420,6 +421,7 @@ export default defineTranslation({
 
   'View': 'Anzeigen',
   'View configuration': 'Ansichtskonfiguration',
+  'View translation': 'Übersetzung anzeigen',
 
   'Would you like to duplicate all translations or only the current one?':
     'Möchten Sie alle Übersetzungen duplizieren oder nur die aktuelle?',

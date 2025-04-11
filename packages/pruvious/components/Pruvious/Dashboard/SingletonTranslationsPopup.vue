@@ -34,7 +34,9 @@
           <div class="pui-row">
             <PUIButton
               v-if="code !== contentLanguage"
-              v-pui-tooltip="canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View')"
+              v-pui-tooltip="
+                canUpdate ? __('pruvious-dashboard', 'Edit translation') : __('pruvious-dashboard', 'View translation')
+              "
               :size="-2"
               :variant="!canUpdate ? 'ghost' : 'outline'"
               @click="

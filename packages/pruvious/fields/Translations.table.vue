@@ -3,7 +3,9 @@
     <template v-for="({ id, canCreate, canRead, canUpdate }, language) of filteredPermissions">
       <PUIButton
         v-if="id"
-        v-pui-tooltip="canUpdate ? __('pruvious-dashboard', 'Edit') : __('pruvious-dashboard', 'View')"
+        v-pui-tooltip="
+          canUpdate ? __('pruvious-dashboard', 'Edit translation') : __('pruvious-dashboard', 'View translation')
+        "
         :disabled="!canRead && !canUpdate"
         :size="-3"
         :to="dashboardBasePath + `collections/${collectionSlug}/${id}`"
