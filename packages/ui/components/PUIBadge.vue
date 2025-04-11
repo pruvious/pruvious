@@ -101,10 +101,13 @@ onMounted(() => {
 <style>
 .pui-badge {
   flex-shrink: 0;
-  display: inline-block;
+  display: inline-flex;
+  padding: 0.140625rem 0.5rem;
+  overflow: hidden;
   border-radius: calc(var(--pui-radius) - 0.125rem);
-  padding: 0.125rem 0.5rem;
   font-size: calc(1rem + var(--pui-size) * 0.125rem - 0.0625rem);
   font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
