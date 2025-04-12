@@ -312,7 +312,7 @@ const filtersInitialized = ref(false)
 const whereFiltersComponent = useTemplateRef('whereFiltersComponent')
 const { listen, isListening } = usePUIHotkeys({
   allowInOverlays: true,
-  target: () => (popup.value?.root instanceof HTMLDivElement ? popup.value.root : popup.value?.$el),
+  target: () => popup.value?.root,
   listen: false,
 })
 const isDefault = computed(

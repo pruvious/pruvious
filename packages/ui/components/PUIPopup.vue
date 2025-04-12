@@ -4,7 +4,7 @@
       :is="fullHeight ? 'div' : PUIContainer"
       @keydown.escape="onEscapeKey"
       @keydown.stop="$emit('keydown', $event)"
-      ref="root"
+      ref="rootRef"
       tabindex="-1"
       class="pui-popup"
       :class="[
@@ -98,10 +98,11 @@ const emit = defineEmits<{
   keydown: [event: KeyboardEvent]
 }>()
 
-const root = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('root')
+const rootRef = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('rootRef')
+const root = ref<HTMLElement>()
 const content = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('content')
 const activeElement = useActiveElement()
-const { activate, deactivate } = useFocusTrap(root as any, {
+const { activate, deactivate } = useFocusTrap(root, {
   escapeDeactivates: false,
   initialFocus: false,
   returnFocusOnDeactivate: false,
@@ -132,6 +133,14 @@ onMounted(() => {
     setTimeout(() => dispatchEvent(new CustomEvent('pui-overlay-animated')), transitionDuration)
   })
 })
+
+watch(
+  rootRef,
+  (r) => {
+    root.value = r instanceof HTMLDivElement ? r : r?.root instanceof HTMLElement ? r.root : r?.$el
+  },
+  { immediate: true },
+)
 
 watch(activeElement, () => {
   nextTick(() => {
@@ -178,8 +187,7 @@ async function close() {
  * If no such element is found, the root element is focused.
  */
 function autofocus() {
-  const rootEl = root.value instanceof HTMLElement ? root.value : root.value?.$el
-  const el = rootEl?.querySelector('[autofocus], [data-autofocus]')
+  const el = root.value?.querySelector('[autofocus], [data-autofocus]')
   if (el instanceof HTMLElement) {
     el.focus()
     setTimeout(() => el.focus(), transitionDuration)
@@ -192,9 +200,8 @@ function autofocus() {
  * Focuses the root element of the popup.
  */
 function focusRoot() {
-  const el = root.value instanceof HTMLElement ? root.value : root.value?.$el
-  el?.focus()
-  setTimeout(() => el?.focus(), transitionDuration)
+  root.value?.focus()
+  setTimeout(() => root.value?.focus(), transitionDuration)
 }
 </script>
 
