@@ -75,7 +75,10 @@
             :modelValue="cellProps.row[cellProps.key]"
             :name="String(cellProps.key)"
             :options="collection.definition.fields[cellProps.key]!"
+            :params="params"
             :permissionsResolver="recordsPermissions.resolver"
+            :push="push"
+            :refresh="refresh"
             :synced="
               collection.definition.translatable && collection.definition.syncedFields.includes(String(cellProps.key))
             "

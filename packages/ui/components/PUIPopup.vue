@@ -11,6 +11,7 @@
         {
           'pui-popup-visible': visible,
           'pui-popup-full-height': fullHeight,
+          'pui-popup-auto-height': fullHeight === 'auto',
         },
         additionalClasses,
       ]"
@@ -60,11 +61,12 @@ defineProps({
 
   /**
    * Controls whether the popup expands to full height with sticky header and footer.
+   * You can also set it to 'auto' to make the popup auto-height.
    *
    * @default false
    */
   fullHeight: {
-    type: Boolean,
+    type: [Boolean, String] as PropType<boolean | 'auto'>,
     default: false,
   },
 
@@ -263,6 +265,13 @@ function focusRoot() {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.pui-popup-auto-height .pui-popup-container {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  max-height: 100%;
 }
 
 .pui-popup-header {

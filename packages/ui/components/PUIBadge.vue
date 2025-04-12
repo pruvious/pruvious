@@ -102,6 +102,7 @@ onMounted(() => {
 .pui-badge {
   flex-shrink: 0;
   display: inline-flex;
+  max-width: 100%;
   padding: 0.140625rem 0.5rem;
   overflow: hidden;
   border-radius: calc(var(--pui-radius) - 0.125rem);

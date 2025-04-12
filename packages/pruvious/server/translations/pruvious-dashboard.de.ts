@@ -148,6 +148,7 @@ export default defineTranslation({
   'Duplicated': 'Dupliziert',
 
   'Edit': 'Bearbeiten',
+  'Edit field value': 'Feldwert bearbeiten',
   'Edit translation': 'Übersetzung bearbeiten',
   'Editors': 'Editoren',
   'e.g., https://pruvious.com': 'z.B. https://pruvious.com',
@@ -281,6 +282,7 @@ export default defineTranslation({
   'Queue': 'Warteschlange',
 
   'Raw result': 'Rohergebnis',
+  'Record not found': 'Eintrag nicht gefunden',
   'Redirected': 'Weitergeleitet',
   'Redirects': 'Weiterleitungen',
   'Redo': 'Wiederherstellen',
@@ -421,6 +423,7 @@ export default defineTranslation({
 
   'View': 'Anzeigen',
   'View configuration': 'Ansichtskonfiguration',
+  'View field value': 'Feldwert anzeigen',
   'View translation': 'Übersetzung anzeigen',
 
   'Would you like to duplicate all translations or only the current one?':
