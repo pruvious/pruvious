@@ -555,7 +555,7 @@ function getReExports() {
     `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,
     `export { usePruviousLoginPopup } from '${resolve('../../../utils/pruvious/dashboard/login')}'`,
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
-    `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissionsResolver } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
+    `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
     `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
     `export { usePruviousHMR } from '${resolve('../../../utils/pruvious/dashboard/hmr')}'`,
     `export { maybeTranslate } from '${resolve('../../../utils/pruvious/dashboard/i18n')}'`,

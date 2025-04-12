@@ -61,7 +61,7 @@
             :fields="collection.definition.fields"
             :is="resolvedCustomComponents[cellProps.key]"
             :params="params"
-            :permissionsResolver="recordsPermissionsResolver"
+            :permissionsResolver="recordsPermissions.resolver"
             :push="push"
             :refresh="refresh"
           />
@@ -75,7 +75,7 @@
             :modelValue="cellProps.row[cellProps.key]"
             :name="String(cellProps.key)"
             :options="collection.definition.fields[cellProps.key]!"
-            :permissionsResolver="recordsPermissionsResolver"
+            :permissionsResolver="recordsPermissions.resolver"
             :synced="
               collection.definition.translatable && collection.definition.syncedFields.includes(String(cellProps.key))
             "
@@ -275,7 +275,7 @@ import {
   pruviousDashboardPost,
   QueryBuilder,
   resolveTranslatableCollectionRecordPermissions,
-  useCollectionRecordPermissionsResolver,
+  useCollectionRecordPermissions,
   useDashboardContentLanguage,
   useSelectQueryBuilderParams,
   type ResolvedTranslatableCollectionRecordPermissions,
@@ -350,7 +350,7 @@ const canCreate =
 const canDelete =
   collection.definition.api.update && hasPermission(`collection:${route.params.collection}:delete` as Permission)
 const isManaged = collection.definition.authorField || collection.definition.editorsField
-const recordsPermissionsResolver = useCollectionRecordPermissionsResolver(collection)
+const recordsPermissions = useCollectionRecordPermissions(collection)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
 const tableWrapper = useTemplateRef('tableWrapper')
@@ -413,6 +413,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     if (response.success) {
       data.value = response.data.records as any
       paginated.value = omit(response.data, ['records'])
+      recordsPermissions.clearCache()
 
       if (paginated.value.currentPage > paginated.value.lastPage) {
         params.page = paginated.value.lastPage || 1

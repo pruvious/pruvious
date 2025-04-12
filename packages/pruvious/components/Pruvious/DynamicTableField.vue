@@ -3,6 +3,7 @@
     :cell="cell"
     :collection="collection"
     :data="data"
+    :editable="editable"
     :fields="fields"
     :is="component"
     :modelValue="modelValue"
@@ -25,7 +26,8 @@ import type {
   SerializableCollection,
 } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { isDefined } from '@pruvious/utils'
+import { isDefined, isEmpty } from '@pruvious/utils'
+import { computedAsync } from '@vueuse/core'
 
 const props = defineProps({
   /**
@@ -118,6 +120,20 @@ const props = defineProps({
     type: Function as PropType<CollectionRecordPermissionsResolver>,
   },
 })
+
+const resolvedPermissions = computedAsync(() =>
+  props.permissionsResolver?.(Number(props.cell.row.id), {
+    author: props.collection.definition.authorField ? props.data?.author : undefined,
+    editors: props.collection.definition.editorsField ? props.data?.editors : undefined,
+  }),
+)
+
+const editable = computed(
+  () =>
+    !!resolvedPermissions.value?.canUpdate &&
+    isEmpty(props.collection.definition.fields[props.name]?.conditionalLogic) &&
+    isEmpty(props.collection.definition.fields[props.name]?.dependencies),
+)
 
 const component = computed(() => {
   const path = `collections/${props.collection.name}/${props.name}`

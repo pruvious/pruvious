@@ -1,6 +1,6 @@
 import { languages } from '#pruvious/client/i18n'
 import type { Collections, LanguageCode, Permission, SerializableCollection } from '#pruvious/server'
-import { isNumber, isUndefined, kebabCase } from '@pruvious/utils'
+import { clear, isNumber, isUndefined, kebabCase } from '@pruvious/utils'
 import { getUser, hasPermission } from '../../../modules/pruvious/auth/utils.client'
 import { selectFrom } from '../../../modules/pruvious/client-query-builder/utils.client'
 
@@ -252,16 +252,19 @@ export async function resolveTranslatableCollectionRecordPermissions(
  * This composable function returns a method that resolves user permissions for specific records,
  * with built-in caching to prevent redundant permission checks for the same record ID.
  *
- * Returns a function that accepts a record `id` and optional field values,
- * returning a `Promise` resolving to the permission details for that record.
- * The cache is based on the record ID only.
- * If you provide different `additionalFieldValues` for the same ID in subsequent calls,
- * the cached resolver from the first call will still be used.
+ * Returns an object with two properties:
+ *
+ * - `resolver`   - A function that accepts a record `id` and optional field values,
+ *                  returning a `Promise` resolving to the permission details for that record.
+ *                  The cache is based on the record ID only.
+ *                  If you provide different `additionalFieldValues` for the same ID in subsequent calls,
+ *                  the cached resolver from the first call will still be used.
+ * - `clearCache` - A function to clear the cache for all record IDs.
  *
  * @example
  * ```ts
  * // Create a permission resolver for the 'posts' collection
- * const resolvePermissions = useCollectionRecordPermissionsResolver({
+ * const resolvePermissions = useCollectionRecordPermissions({
  *   name: 'posts',
  *   definition: postsCollection
  * })
@@ -281,17 +284,20 @@ export async function resolveTranslatableCollectionRecordPermissions(
  * ```
  */
 
-export function useCollectionRecordPermissionsResolver(collection: {
+export function useCollectionRecordPermissions(collection: {
   name: keyof Collections
   definition: SerializableCollection
-}): CollectionRecordPermissionsResolver {
+}): { resolver: CollectionRecordPermissionsResolver; clearCache: () => void } {
   const cache: Record<number, () => Promise<ResolvedCollectionRecordPermissions>> = {}
 
-  return async (id: number, additionalFieldValues?: { author?: number | null; editors?: number[] }) => {
-    if (!cache[id]) {
-      cache[id] = () => resolveCollectionRecordPermissions(id, collection, additionalFieldValues)
-    }
+  return {
+    resolver: async (id: number, additionalFieldValues?: { author?: number | null; editors?: number[] }) => {
+      if (!cache[id]) {
+        cache[id] = () => resolveCollectionRecordPermissions(id, collection, additionalFieldValues)
+      }
 
-    return cache[id]()
+      return cache[id]()
+    },
+    clearCache: () => clear(cache),
   }
 }
