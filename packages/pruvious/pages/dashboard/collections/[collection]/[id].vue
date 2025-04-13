@@ -251,6 +251,7 @@ useHead({
 })
 
 provide('showContentLanguageSwitcher', collection.definition.translatable)
+provide('silentContentLanguageSwitcher', true)
 
 const auth = useAuth()
 const conditionalLogicResolver = new ConditionalLogicResolver()

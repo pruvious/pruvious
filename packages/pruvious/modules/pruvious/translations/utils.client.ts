@@ -16,13 +16,6 @@ const matchers: Record<string, PathMatcher> = {}
 export const useLanguage = () => useState<LanguageCode>('pruvious-language', () => null as any)
 
 /**
- * Composable that provides access to the active language code used for collection records and singletons in the dashboard.
- * The language is manually selected by users through the dashboard interface and persisted in their `dashboard` settings.
- */
-export const useDashboardContentLanguage = () =>
-  useState<LanguageCode>('pruvious-dashboard-content-language', () => null as any)
-
-/**
  * Extracts the language code from a URL path.
  *
  * Checks the first segment of the provided `path` and returns the corresponding language code if it matches a language configured in the CMS.

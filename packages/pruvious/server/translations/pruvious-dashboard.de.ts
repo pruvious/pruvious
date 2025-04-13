@@ -355,6 +355,9 @@ export default defineTranslation({
   'Status message': 'Statusmeldung',
   'Stop sharing': 'Teilen beenden',
   'Success': 'Erfolg',
+  'Switched content language to `$language`': createPattern('Inhaltssprache auf `$language` umgeschaltet', {
+    language: 'string',
+  }),
   'Sync configuration': 'Konfiguration synchronisieren',
 
   'The `$language` translation does not exist': createPattern(

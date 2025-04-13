@@ -39,31 +39,50 @@ import {
   useAuth,
   useDashboardContentLanguage,
 } from '#pruvious/client'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
+import { isUndefined } from '@pruvious/utils'
 
 const showContentLanguageSwitcher = inject('showContentLanguageSwitcher', false)
 const disableContentLanguageSwitcher = inject('disableContentLanguageSwitcher', false)
+const silentContentLanguageSwitcher = inject('silentContentLanguageSwitcher', false)
 const auth = useAuth()
 const contentLanguage = useDashboardContentLanguage()
 const button = useTemplateRef('button')
 const isVisible = ref(false)
 
-watch(
-  contentLanguage,
-  async (contentLanguage) => {
-    if (auth.value.user?.contentLanguage !== contentLanguage) {
-      if (hasPermission('update-account')) {
-        const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
+let preferredContentLanguage = hasPermission('update-account')
+  ? auth.value.user?.contentLanguage
+  : localStorage.getItem('contentLanguage')
 
-        if (query.success) {
-          Object.assign(auth.value.user ?? {}, query.data)
+const stop = watch(
+  contentLanguage,
+  async (contentLanguage, oldValue) => {
+    if (preferredContentLanguage !== contentLanguage) {
+      preferredContentLanguage = contentLanguage
+
+      if (!silentContentLanguageSwitcher || isUndefined(oldValue)) {
+        if (hasPermission('update-account')) {
+          const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
+
+          if (query.success) {
+            Object.assign(auth.value.user ?? {}, query.data)
+          }
+        } else {
+          localStorage.setItem('contentLanguage', contentLanguage)
         }
-      } else {
-        localStorage.setItem('contentLanguage', contentLanguage)
+
+        puiQueueToast(
+          __('pruvious-dashboard', 'Switched content language to `$language`', {
+            language: contentLanguage.toUpperCase(),
+          }),
+        )
       }
     }
   },
   { immediate: true },
 )
+
+onBeforeRouteLeave(stop)
 </script>
 
 <style scoped>
