@@ -376,7 +376,7 @@ const paginated = ref<Omit<Paginated<any>, 'records'>>({
 })
 const resolvedCustomComponents: Record<string, Component | string> = {}
 const initialized = ref(false)
-const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.columns)
+const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.columns ?? null)
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
 const refreshing = ref(false)
