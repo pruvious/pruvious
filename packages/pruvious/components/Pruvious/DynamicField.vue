@@ -1,5 +1,6 @@
 <template>
   <component
+    :alwaysVisibleFields="alwaysVisibleFields"
     :conditionalLogic="conditionalLogic"
     :conditionalLogicResolver="conditionalLogicResolver"
     :data="data"
@@ -184,6 +185,14 @@ const props = defineProps({
    */
   operation: {
     type: String as PropType<'create' | 'update'>,
+  },
+
+  /**
+   * A list of fields that should always be visible, regardless of conditional logic.
+   * The fields must be specified in dot notation (e.g. `repeater.0.field`).
+   */
+  alwaysVisibleFields: {
+    type: Array as PropType<string[]>,
   },
 })
 

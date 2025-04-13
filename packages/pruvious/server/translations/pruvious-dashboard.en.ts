@@ -139,6 +139,7 @@ export default defineTranslation({
     { count: 'number' },
     { entries: [{ conditions: [{ count: 1 }], output: 'entry' }, 'entries'] },
   ),
+  'Dependencies': 'Dependencies',
   'Deselect': 'Deselect',
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',

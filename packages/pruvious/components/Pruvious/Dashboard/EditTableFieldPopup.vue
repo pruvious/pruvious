@@ -20,13 +20,14 @@
       v-if="data"
       v-model:conditionalLogic="conditionalLogic"
       v-model:modelValue="data"
+      :alwaysVisibleFields="[props.name]"
       :conditionalLogicResolver="conditionalLogicResolver"
       :data="data"
       :dataContainerName="collection.name"
       :disabled="disabled"
       :errors="errors"
       :fields="fieldDefinitions"
-      :layout="[props.name]"
+      :layout="layout"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
       @commit="history.push($event)"
@@ -50,15 +51,22 @@
 <script lang="ts" setup>
 import {
   __,
+  getTopLevelFieldDependencies,
   History,
   maybeTranslate,
   parseConditionalLogic,
   prepareFieldData,
   pruviousDashboardPost,
   QueryBuilder,
+  resolveFieldLabel,
   unsavedChanges,
 } from '#pruvious/client'
-import type { Collections, GenericSerializableFieldOptions, SerializableCollection } from '#pruvious/server'
+import type {
+  Collections,
+  FieldsLayout,
+  GenericSerializableFieldOptions,
+  SerializableCollection,
+} from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
@@ -70,6 +78,7 @@ import {
   isString,
   isUndefined,
   lockAndLoad,
+  pick,
   remap,
   titleCase,
   toArray,
@@ -147,10 +156,34 @@ const emit = defineEmits<{
 
 defineExpose({ close })
 
+const data = ref({ [props.name]: props.modelValue })
+const dependencies = getTopLevelFieldDependencies(props.name, props.options).filter((dep) => dep !== props.name)
+const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
+
+if (dependencies.length) {
+  if (dependencies.some((dep) => isUndefined(props.cell.row[dep]))) {
+    await queryBuilder
+      .selectFrom(props.collection.name)
+      .select(dependencies as any)
+      .where('id', '=', props.cell.row.id)
+      .first()
+      .then((result) => {
+        if (result.success) {
+          data.value = { ...data.value, ...result.data }
+        }
+      })
+  } else {
+    data.value = { ...data.value, ...pick(props.cell.row, dependencies) }
+  }
+}
+
 const route = useRoute()
 const popup = useTemplateRef('popup')
-const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
-const data = ref({ [props.name]: props.modelValue })
+const fields = props.collection.definition.fields
+const fieldDefinitions = remap(data.value, (fieldName) => [
+  fieldName,
+  { ...fields[fieldName]!, ui: { ...fields[fieldName]!.ui, hidden: false } },
+])
 const conditionalLogicResolver = new ConditionalLogicResolver()
 let conditionalLogicDependencies: Record<string, boolean> = {}
 const conditionalLogic = ref(resolveConditionalLogic())
@@ -166,12 +199,23 @@ const { listen, isListening } = usePUIHotkeys({
 const label = isDefined(props.collection.definition.ui.label)
   ? maybeTranslate(props.collection.definition.ui.label)
   : __('pruvious-dashboard', titleCase(props.collection.name ?? '', false) as any)
-const fieldDefinitions = computed(() =>
-  remap(props.collection.definition.fields, (fieldName, options) => [
-    fieldName,
-    { ...options, ui: { ...options.ui, hidden: false } },
-  ]),
-)
+const layout: FieldsLayout =
+  Object.keys(fieldDefinitions).length > 1
+    ? [
+        {
+          tabs: [
+            {
+              label: resolveFieldLabel(fieldDefinitions[props.name]!.ui?.label, props.name),
+              fields: [props.name],
+            },
+            {
+              label: __('pruvious-dashboard', 'Dependencies'),
+              fields: dependencies,
+            },
+          ],
+        },
+      ]
+    : [props.name]
 
 let transitionDuration = 300
 
@@ -217,7 +261,7 @@ function resolveConditionalLogic(reset = true) {
   conditionalLogicResolver.setInput(data.value)
   conditionalLogicDependencies = {}
   if (reset) {
-    conditionalLogicResolver.setConditionalLogic(parseConditionalLogic({ [props.name]: props.options }, data.value))
+    conditionalLogicResolver.setConditionalLogic(parseConditionalLogic(fieldDefinitions, data.value))
   }
   return conditionalLogicResolver.resolve()
 }
@@ -240,7 +284,7 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
     conditionalLogic.value = resolveConditionalLogic(true)
   } else {
     if (queue.some((path) => isString(path) && !isDefined(conditionalLogicDependencies[path]))) {
-      const parsedConditionalLogic = parseConditionalLogic({ [props.name]: props.options }, data.value)
+      const parsedConditionalLogic = parseConditionalLogic(fieldDefinitions, data.value)
       for (const from of Object.keys(parsedConditionalLogic)) {
         conditionalLogicDependencies[from] ??= false
         const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
@@ -256,12 +300,12 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
 }, 50)
 
 const saveData = lockAndLoad(isSubmitting, async () => {
-  const preparedData = prepareFieldData(data.value, { [props.name]: props.options }, history.getOriginalState())
+  const preparedData = prepareFieldData(data.value, fieldDefinitions, history.getOriginalState())
   const query = await queryBuilder
     .update(props.collection.name)
     .set(preparedData)
     .where('id', '=', props.cell.row.id)
-    .returning(props.name)
+    .returning(Object.keys(fieldDefinitions) as any)
     .run()
 
   if (query.success) {

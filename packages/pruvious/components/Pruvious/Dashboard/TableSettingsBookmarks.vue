@@ -562,7 +562,7 @@ async function setDefaultBookmark(id: number | null) {
   margin-top: 1rem;
 }
 
-.p-table-settings-bookmarks :deep(.pui-field + .pui-field) {
+.p-table-settings-bookmarks :deep(.pui-field:not([hidden]) ~ .pui-field:not([hidden])) {
   margin-top: 1.5rem;
 }
 

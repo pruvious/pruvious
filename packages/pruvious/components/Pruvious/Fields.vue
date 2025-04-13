@@ -2,6 +2,7 @@
   <template v-for="item of items">
     <PruviousDynamicField
       v-if="item.type === 'DynamicField'"
+      :alwaysVisibleFields="alwaysVisibleFields"
       :conditionalLogic="conditionalLogic"
       :conditionalLogicResolver="conditionalLogicResolver"
       :data="data"
@@ -10,7 +11,12 @@
       :disabled="disabled"
       :error="item.error"
       :fields="fields"
-      :hidden.attr="!conditionalLogic[rootPath ? `${rootPath}.${item.field.name}` : item.field.name] ? '' : undefined"
+      :hidden.attr="
+        !conditionalLogic[rootPath ? `${rootPath}.${item.field.name}` : item.field.name] &&
+        !alwaysVisibleFields?.includes(rootPath ? `${rootPath}.${item.field.name}` : item.field.name)
+          ? ''
+          : undefined
+      "
       :key="item.field.name"
       :modelValue="modelValue[item.field.name]"
       :name="item.field.name"
@@ -31,6 +37,7 @@
 
     <div v-else-if="item.type === 'row'" class="p-fields-item p-fields-row">
       <PruviousFields
+        :alwaysVisibleFields="alwaysVisibleFields"
         :conditionalLogic="conditionalLogic"
         :conditionalLogicResolver="conditionalLogicResolver"
         :data="data"
@@ -54,6 +61,7 @@
 
     <PUICard v-else-if="item.type === 'card'" class="p-fields-item p-fields-card">
       <PruviousFields
+        :alwaysVisibleFields="alwaysVisibleFields"
         :conditionalLogic="conditionalLogic"
         :conditionalLogicResolver="conditionalLogicResolver"
         :data="data"
@@ -78,6 +86,7 @@
     <PUITabs v-else-if="item.type === 'tabs'" :list="item.list" class="p-fields-item p-fields-tabs">
       <PUITab v-for="(tabLayout, i) of item.layouts" :name="i">
         <PruviousFields
+          :alwaysVisibleFields="alwaysVisibleFields"
           :conditionalLogic="conditionalLogic"
           :conditionalLogicResolver="conditionalLogicResolver"
           :data="data"
@@ -102,6 +111,7 @@
 
     <component
       v-else-if="item.type === 'component'"
+      :alwaysVisibleFields="alwaysVisibleFields"
       :conditionalLogic="conditionalLogic"
       :conditionalLogicResolver="conditionalLogicResolver"
       :data="data"
@@ -303,6 +313,14 @@ const props = defineProps({
     type: String as PropType<'create' | 'update'>,
     required: true,
   },
+
+  /**
+   * A list of fields that should always be visible, regardless of conditional logic.
+   * The fields must be specified in dot notation (e.g. `repeater.0.field`).
+   */
+  alwaysVisibleFields: {
+    type: Array as PropType<string[]>,
+  },
 })
 
 defineEmits<{
@@ -449,8 +467,8 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
 </script>
 
 <style scoped>
-.p-fields-item + .p-fields-item {
-  margin-top: 1rem;
+.p-fields-item:not([hidden]) ~ .p-fields-item:not([hidden]) {
+  margin-top: var(--p-gap, 1rem);
 }
 
 .p-fields-row {
@@ -460,13 +478,13 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
 }
 
 .p-fields-row > .p-fields-item {
-  margin-top: 0;
+  --p-gap: 0;
 }
 
 .p-fields-row > .p-field-no-label {
+  --p-gap: calc(1rem + 0.5em);
   display: flex;
   height: 2rem;
-  margin-top: calc(1rem + 0.5em);
 }
 
 :deep(.pui-tabs-content:not(:first-child)) {
@@ -485,7 +503,7 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
 
 .p-fields-item + .p-fields-hr,
 .p-fields-hr + .p-fields-item {
-  margin-top: 0.75rem;
+  --p-gap: 0.75rem;
 }
 
 @container (max-width: 480px) {

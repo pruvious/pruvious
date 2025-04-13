@@ -31,11 +31,11 @@ defineProps({
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
 }
 
-.pui-field + .pui-field {
+.pui-field:not([hidden]) + .pui-field:not([hidden]) {
   margin-top: calc(1em + 0.125rem);
 }
 
-.pui-field + .pui-field-narrow {
+.pui-field:not([hidden]) + .pui-field-narrow:not([hidden]) {
   margin-top: calc(0.5em + 0.125rem);
 }
 

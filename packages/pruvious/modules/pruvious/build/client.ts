@@ -550,7 +550,7 @@ function getReExports() {
     `export { dashboardAuthGuard } from '${resolve('../middleware/pruvious-dashboard-auth-guard')}'`,
     `export { dashboardGuestGuard } from '${resolve('../middleware/pruvious-dashboard-guest-guard')}'`,
     `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolve('../middleware/utils.client')}'`,
-    `export { fillFieldData, prepareFieldData, resolveSubfieldsFromData, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
+    `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, resolveSubfieldsFromData, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
     `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
     `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,
