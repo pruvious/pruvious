@@ -9,7 +9,7 @@
         $emit('update:modelValue', {
           ...modelValue,
           field: String($event),
-          value: deepClone(collection.definition.fields[String($event)]!.defaultValue),
+          value: deepClone(collection.definition.fields[String($event)]!.default),
         })
       "
       class="p-where-filters-condition-field"
