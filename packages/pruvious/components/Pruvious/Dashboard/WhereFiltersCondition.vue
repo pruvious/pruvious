@@ -1,5 +1,12 @@
 <template>
-  <div class="p-where-filters-condition pui-row">
+  <div
+    class="p-where-filters-condition pui-row"
+    :class="{
+      'p-where-filters-condition-top':
+        collection.definition.fields[modelValue.field]?.subfields ||
+        collection.definition.fields[modelValue.field]?.structure,
+    }"
+  >
     <PUISelect
       :choices="fieldChoices"
       :id="id"
@@ -74,6 +81,11 @@ const id = useId()
 <style lang="postcss" scoped>
 .p-where-filters-condition {
   width: 100%;
+}
+
+.p-where-filters-condition-top,
+.p-where-filters-condition-top :deep(.p-field-filter) {
+  align-items: start;
 }
 
 .p-where-filters-condition-field {
