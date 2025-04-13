@@ -1,5 +1,5 @@
 <template>
-  <div ref="root" class="p-editable-field-cell">
+  <div ref="root" class="p-editable-field-cell" :class="{ 'p-editable-field-cell-wrap': wrap }">
     <slot>-</slot>
 
     <div class="p-editable-field-cell-button" :class="`p-editable-field-cell-button-${resolvedEditButtonPosition}`">
@@ -52,11 +52,21 @@ const props = defineProps({
    * - `absolute` - The button is positioned absolutely within its container (bottom right).
    * - `auto` - The button is positioned automatically based on available space (default).
    *
-   * @default 'auto'
+   * @default 'relative'
    */
   editButtonPosition: {
     type: String as PropType<'auto' | 'absolute' | 'relative'>,
-    default: 'auto',
+    default: 'relative',
+  },
+
+  /**
+   * Determines if items should wrap to the next line when there isn't enough space.
+   *
+   * @default false
+   */
+  wrap: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -82,9 +92,12 @@ const resolvedEditButtonPosition = computed(() => {
   position: relative;
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
   align-items: center;
   min-height: 1.5rem;
+}
+
+.p-editable-field-cell-wrap {
+  flex-wrap: wrap;
 }
 
 .p-editable-field-cell-button {

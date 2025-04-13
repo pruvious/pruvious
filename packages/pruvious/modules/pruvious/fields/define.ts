@@ -1160,7 +1160,11 @@ export function defineField<
                     ].filter(Boolean) as (keyof GenericFieldUIOptions)[],
                   ),
                   ...(defaultCustomOptions as any).ui,
-                  ...userProvidedCustomOptions.ui,
+                  ...omit(userProvidedCustomOptions.ui, [
+                    'customComponent',
+                    'customTableComponent',
+                    'customFilterComponent',
+                  ]),
                 },
               }
             : ({} as any),

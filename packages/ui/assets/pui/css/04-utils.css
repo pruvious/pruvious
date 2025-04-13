@@ -64,6 +64,18 @@
   white-space: nowrap;
 }
 
+.pui-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--pui-clamp, 1);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-clamp: var(--pui-clamp, 1);
+}
+
+.pui-hyphenate {
+  hyphens: auto;
+}
+
 .pui-invisible {
   visibility: hidden;
 }

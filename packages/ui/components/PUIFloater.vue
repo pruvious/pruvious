@@ -201,6 +201,10 @@ onMounted(() => {
   })
 })
 
+onBeforeUnmount(() => {
+  close()
+})
+
 /**
  * Opens the floater.
  */

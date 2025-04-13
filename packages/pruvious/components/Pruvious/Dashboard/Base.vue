@@ -13,15 +13,19 @@
 </template>
 
 <script lang="ts" setup>
-import { pruviousDashboardPost, usePruviousHMR } from '#pruvious/client'
+import { pruviousDashboardPost, useDashboardContentLanguage, usePruviousHMR } from '#pruvious/client'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import '@pruvious/ui/styles'
 import { useEventListener } from '@vueuse/core'
 
 const runtimeConfig = useRuntimeConfig()
+const dashboardLanguage = useDashboardContentLanguage()
 const mac = puiIsMac()
 
 useHead({
+  htmlAttrs: {
+    lang: dashboardLanguage,
+  },
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} - Pruvious` : 'Pruvious'
   },

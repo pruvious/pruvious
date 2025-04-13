@@ -2,7 +2,7 @@
   <PUIField v-if="!options.ui.hidden">
     <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
 
-    <div class="p-timestamp-row">
+    <div class="pui-row">
       <PUIIconGroup
         v-if="options.ui.picker === 'combo'"
         v-model="picker"
@@ -174,10 +174,3 @@ function formatter(timestamp: number): string {
   return props.options.ui.relativeTime ? date.tz().fromNow() : date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>
-
-<style scoped>
-.p-timestamp-row {
-  display: flex;
-  gap: 0.75rem;
-}
-</style>

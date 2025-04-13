@@ -97,7 +97,13 @@
   padding: 0.5em 0.75em;
 }
 
-.tippy-box code {
+.tippy-box pre > code {
+  font-size: 0.875em;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.tippy-box :not(pre) > code {
   padding: 0.25em 0.5em;
   background-color: hsl(var(--pui-accent) / 0.2);
   border-radius: 0.5em;

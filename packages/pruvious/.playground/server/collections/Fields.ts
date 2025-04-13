@@ -102,7 +102,7 @@ export default defineCollection({
     }),
 
     // date
-    date: dateField({ ui: { label: 'Date' } }),
+    date: dateField({ ui: { label: 'Date', placeholder: 'Select a date' } }),
     dateMinMax: dateField({ min: Date.parse('2025-03-01'), max: '2025-03-31', ui: { label: 'Date (min/max)' } }),
 
     // dateRange

@@ -1,8 +1,13 @@
 <template>
   <div>
-    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
+    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name" editButtonPosition="auto" wrap>
       <template v-if="modelValue?.length">
-        <PUIBadge v-for="(item, index) of modelValue" color="secondary" class="p-item">
+        <PUIBadge
+          v-for="(item, index) of modelValue"
+          v-pui-tooltip="'```\n' + JSON.stringify(item, null, 2) + '\n```'"
+          color="secondary"
+          class="p-item"
+        >
           <span
             v-if="
               options.ui.itemLabelConfiguration?.[item.$key]?.showItemType !== false ||
@@ -34,6 +39,7 @@
       :cell="cell"
       :collection="collection"
       :disabled="!editable"
+      :fullHeight="'auto'"
       :modelValue="modelValue"
       :name="name"
       :options="options"
@@ -142,6 +148,7 @@ watch(
 .pui-badge {
   align-items: center;
   height: 1.5rem;
+  cursor: default;
   font-size: 0.75rem;
 }
 </style>

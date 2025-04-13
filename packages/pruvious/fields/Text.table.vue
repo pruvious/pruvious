@@ -1,8 +1,16 @@
 <template>
   <div>
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <span :title="formatted" class="pui-truncate">
-        {{ formatted }}
+      <span
+        :title="modelValue"
+        :class="{
+          'pui-truncate': truncate.lines === 1,
+          'pui-clamp': truncate.lines && truncate.lines > 1,
+          'pui-hyphenate': options.ui.table?.hyphenate,
+        }"
+        :style="{ '--pui-clamp': truncate.lines }"
+      >
+        {{ formattedValue }}
       </span>
     </PruviousDashboardEditableFieldCell>
 
@@ -21,10 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig, dayjsUTC } from '#pruvious/client/dayjs'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isString } from '@pruvious/utils'
+import { castToNumber, isDefined, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -39,7 +46,7 @@ const props = defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: Number,
+    type: String,
   },
 
   /**
@@ -54,7 +61,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'time'>>,
+    type: Object as PropType<SerializableFieldOptions<'text'>>,
     required: true,
   },
 
@@ -91,8 +98,20 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const { timeFormat } = dayjsConfig()
-const formatted = computed(() => dayjsUTC(props.modelValue).format(timeFormat))
+const truncate = computed<{ characters?: number; lines?: number; words?: number }>(() => {
+  return isDefined(props.options.ui.table?.truncate) ? props.options.ui.table?.truncate : { lines: 1 }
+})
+const formattedValue = computed(() => {
+  let result = props.modelValue ?? ''
+  if (isDefined(truncate.value.characters)) {
+    result = result.length > truncate.value.characters ? `${result.slice(0, truncate.value.characters)}...` : result
+  } else if (isDefined(truncate.value.words)) {
+    result = result.split(' ').slice(0, truncate.value.words).join(' ')
+    result = result.length > truncate.value.words ? `${result}...` : result
+  }
+  return result || '-'
+})
+
 const isEditPopupVisible = ref(false)
 
 watch(

@@ -1,9 +1,9 @@
 <template>
   <div>
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <span :title="formatted" class="pui-truncate">
-        {{ formatted }}
-      </span>
+      <PUIBadge :textColor="modelValue ? undefined : 'inherit'" color="secondary">
+        {{ modelValue ? yesLabel : noLabel }}
+      </PUIBadge>
     </PruviousDashboardEditableFieldCell>
 
     <PruviousDashboardEditTableFieldPopup
@@ -21,10 +21,10 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig, dayjsUTC } from '#pruvious/client/dayjs'
+import { __, maybeTranslate } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isString } from '@pruvious/utils'
+import { castToNumber, isDefined, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -39,7 +39,7 @@ const props = defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: Number,
+    type: Boolean,
   },
 
   /**
@@ -54,7 +54,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'time'>>,
+    type: Object as PropType<SerializableFieldOptions<'trueFalse'>>,
     required: true,
   },
 
@@ -91,8 +91,12 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const { timeFormat } = dayjsConfig()
-const formatted = computed(() => dayjsUTC(props.modelValue).format(timeFormat))
+const noLabel = isDefined(props.options.ui.noLabel)
+  ? maybeTranslate(props.options.ui.noLabel)
+  : __('pruvious-dashboard', 'No')
+const yesLabel = isDefined(props.options.ui.yesLabel)
+  ? maybeTranslate(props.options.ui.yesLabel)
+  : __('pruvious-dashboard', 'Yes')
 const isEditPopupVisible = ref(false)
 
 watch(

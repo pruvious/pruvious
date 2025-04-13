@@ -7,7 +7,7 @@
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
-    <div class="p-timestamp-filter-row">
+    <div class="pui-row">
       <PUIIconGroup
         v-if="options.ui.picker === 'combo'"
         v-model="picker"
@@ -135,10 +135,3 @@ function formatter(timestamp: number): string {
   return date.format(`${dateFormat} ${timeFormat}`)
 }
 </script>
-
-<style scoped>
-.p-timestamp-filter-row {
-  display: flex;
-  gap: 0.5rem;
-}
-</style>

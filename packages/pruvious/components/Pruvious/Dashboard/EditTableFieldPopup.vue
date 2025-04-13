@@ -1,5 +1,5 @@
 <template>
-  <PUIPopup :size="-1" @close="close()" fullHeight="auto" ref="popup" width="40rem">
+  <PUIPopup :fullHeight="fullHeight" :size="-1" @close="close()" ref="popup" width="40rem">
     <template #header>
       <span class="p-title pui-row">
         <span class="pui-truncate">{{ label }}</span>
@@ -25,7 +25,7 @@
       :dataContainerName="collection.name"
       :disabled="disabled"
       :errors="errors"
-      :fields="collection.definition.fields"
+      :fields="fieldDefinitions"
       :layout="[props.name]"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
@@ -36,14 +36,11 @@
       operation="update"
     />
 
-    <template #footer>
+    <template v-if="!disabled" #footer>
       <div class="pui-justify-between">
-        <PruviousDashboardHistoryButtons v-if="!disabled" v-model="data" :history="history" />
-        <PUIButton v-if="!disabled" :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
+        <PruviousDashboardHistoryButtons v-if="isListening" v-model="data" :history="history" />
+        <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()" class="pui-ml-auto">
           {{ __('pruvious-dashboard', 'Save') }}
-        </PUIButton>
-        <PUIButton v-else @click="close()" variant="outline">
-          {{ __('pruvious-dashboard', 'Close') }}
         </PUIButton>
       </div>
     </template>
@@ -73,6 +70,7 @@ import {
   isString,
   isUndefined,
   lockAndLoad,
+  remap,
   titleCase,
   toArray,
 } from '@pruvious/utils'
@@ -129,6 +127,17 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+
+  /**
+   * Controls whether the edit popup expands to full height with sticky header and footer.
+   * You can also set it to 'auto' to make the popup auto-height.
+   *
+   * @default false
+   */
+  fullHeight: {
+    type: [Boolean, String] as PropType<boolean | 'auto'>,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -157,6 +166,12 @@ const { listen, isListening } = usePUIHotkeys({
 const label = isDefined(props.collection.definition.ui.label)
   ? maybeTranslate(props.collection.definition.ui.label)
   : __('pruvious-dashboard', titleCase(props.collection.name ?? '', false) as any)
+const fieldDefinitions = computed(() =>
+  remap(props.collection.definition.fields, (fieldName, options) => [
+    fieldName,
+    { ...options, ui: { ...options.ui, hidden: false } },
+  ]),
+)
 
 let transitionDuration = 300
 

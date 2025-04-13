@@ -1,8 +1,11 @@
 <template>
   <div>
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <span :title="formatted" class="pui-truncate">
-        {{ formatted }}
+      <span
+        :title="modelValue ? (modelValue === label ? modelValue : `${label || '-'} (${modelValue})`) : undefined"
+        class="pui-truncate"
+      >
+        {{ label || ' -' }}
       </span>
     </PruviousDashboardEditableFieldCell>
 
@@ -21,10 +24,10 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig, dayjsUTC } from '#pruvious/client/dayjs'
+import { maybeTranslate } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isString } from '@pruvious/utils'
+import { castToNumber, isDefined, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -39,7 +42,7 @@ const props = defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: Number,
+    type: String,
   },
 
   /**
@@ -54,7 +57,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'time'>>,
+    type: Object as PropType<SerializableFieldOptions<'select'>>,
     required: true,
   },
 
@@ -91,8 +94,22 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const { timeFormat } = dayjsConfig()
-const formatted = computed(() => dayjsUTC(props.modelValue).format(timeFormat))
+const label = computed(() => {
+  for (const choice of props.options.choices) {
+    if ('value' in choice) {
+      if (choice.value === props.modelValue) {
+        return isDefined(choice.label) ? maybeTranslate(choice.label) : choice.value
+      }
+    } else if (choice.choices) {
+      for (const subChoice of choice.choices) {
+        if (subChoice.value === props.modelValue) {
+          return isDefined(subChoice.label) ? maybeTranslate(subChoice.label) : subChoice.value
+        }
+      }
+    }
+  }
+  return props.modelValue
+})
 const isEditPopupVisible = ref(false)
 
 watch(
