@@ -39,7 +39,7 @@
       :cell="cell"
       :collection="collection"
       :disabled="!editable"
-      :fullHeight="'auto'"
+      :fullHeight="modelValue?.length ? 'auto' : false"
       :modelValue="modelValue"
       :name="name"
       :options="options"

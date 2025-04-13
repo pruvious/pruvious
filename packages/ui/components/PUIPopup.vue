@@ -61,7 +61,7 @@ defineProps({
 
   /**
    * Controls whether the popup expands to full height with sticky header and footer.
-   * You can also set it to 'auto' to make the popup auto-height.
+   * You can also set it to `auto` to make the popup auto-height while preserving the sticky header and footer.
    *
    * @default false
    */
