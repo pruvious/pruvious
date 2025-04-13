@@ -1,6 +1,6 @@
 <template>
   <component
-    :collectionName="collectionName"
+    :collection="collection"
     :fields="fields"
     :is="component"
     :modelValue="modelValue"
@@ -16,7 +16,13 @@
 
 <script lang="ts" setup>
 import { customComponents, filterFieldComponents, type WhereField } from '#pruvious/client'
-import type { Collections, Fields, GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
+import type {
+  Collections,
+  Fields,
+  GenericFieldUIOptions,
+  GenericSerializableFieldOptions,
+  SerializableCollection,
+} from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
 
 const props = defineProps({
@@ -53,10 +59,10 @@ const props = defineProps({
   },
 
   /**
-   * The name of the current collection in PascalCase format.
+   * The name and definition of the current translatable collection.
    */
-  collectionName: {
-    type: String as PropType<keyof Collections>,
+  collection: {
+    type: Object as PropType<{ name: keyof Collections; definition: SerializableCollection }>,
     required: true,
   },
 
@@ -94,7 +100,7 @@ defineEmits<{
 }>()
 
 const component = computed(() => {
-  const path = `collections/${props.collectionName}/${props.name}`
+  const path = `collections/${props.collection.name}/${props.name}`
 
   if (filterFieldComponents[path]) {
     return filterFieldComponents[path]()
@@ -107,7 +113,7 @@ const component = computed(() => {
       return customComponents[customComponent]()
     } else {
       console.warn(
-        `Unable to resolve custom component \`${customComponent}\` for field \`${props.name}\` in \`${props.collectionName}\` collection. Available custom components:`,
+        `Unable to resolve custom component \`${customComponent}\` for field \`${props.name}\` in \`${props.collection.name}\` collection. Available custom components:`,
         toRaw(customComponents),
       )
     }

@@ -17,7 +17,7 @@
 
     <PruviousDynamicFilterField
       v-if="collection.definition.fields[modelValue.field]"
-      :collectionName="collection.name"
+      :collection="collection"
       :fields="collection.definition.fields"
       :modelValue="modelValue"
       :name="modelValue.field"
