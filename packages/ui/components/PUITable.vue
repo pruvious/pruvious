@@ -10,7 +10,11 @@
         style="width: calc((1rem + var(--pui-size) * 0.125rem) + 1.125rem)"
         :style="{ '--pui-size': buttonSize }"
       />
-      <col v-for="(column, key) in columns" :key="key" :style="{ width: column.width, minWidth: column.minWidth }" />
+      <col
+        v-for="(column, key) in columns"
+        :key="key"
+        :style="{ width: column.width ?? (isSafari ? column.minWidth : undefined), minWidth: column.minWidth }"
+      />
       <col
         v-if="$slots.actions"
         style="width: calc(2 * (1rem + var(--pui-size) * 0.125rem) + 1.75rem)"
@@ -287,6 +291,7 @@ const actionButtons = ref<Record<number | string, any>>({})
 const visibleActions = ref(-1)
 const selectOrigin = ref<number | string | null>(null)
 const { shift } = useMagicKeys()
+const isSafari = window.navigator.userAgent.includes('Safari') && !window.navigator.userAgent.includes('Chrome')
 
 defineExpose({ selectOrigin })
 
