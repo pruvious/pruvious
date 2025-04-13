@@ -26,12 +26,12 @@
       :cell="cell"
       :collection="collection"
       :disabled="!editable"
-      :fullHeight="'auto'"
       :modelValue="modelValue"
       :name="name"
       :options="options"
       @close="$event().then(() => (isEditPopupVisible = false))"
       @updated="refresh?.(true)"
+      fullHeight="auto"
     />
   </div>
 </template>

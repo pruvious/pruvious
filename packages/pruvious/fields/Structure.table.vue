@@ -39,7 +39,7 @@
       :cell="cell"
       :collection="collection"
       :disabled="!editable"
-      :fullHeight="modelValue?.length ? 'auto' : false"
+      :fullHeight="fullHeight"
       :modelValue="modelValue"
       :name="name"
       :options="options"
@@ -129,6 +129,7 @@ const itemTypeLabels = computed(() =>
   ]),
 )
 const isEditPopupVisible = ref(false)
+const fullHeight = props.modelValue?.length ? 'auto' : false
 
 watch(
   () => route.query,
