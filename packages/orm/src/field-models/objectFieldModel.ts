@@ -2,8 +2,6 @@ import { isNull, isObject, isSerializable, isString, isUndefined } from '@pruvio
 import { FieldModel, type Populator } from '../core'
 
 export interface ObjectFieldModelOptions<TCastedType, TPopulatedType> {
-  // @todo allowEmptyObject: boolean (default true)
-
   /**
    * A function that transforms the field value into a format suitable for application use.
    * It can be used retrieve related data from the database, format the value, or perform other operations.
