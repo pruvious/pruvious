@@ -5,6 +5,62 @@
         <span class="pui-muted pui-truncate">{{ index + 1 }}. {{ __('pruvious-dashboard', 'Sorting') }}</span>
         <div class="p-order-by-actions">
           <PUIButton
+            v-if="orderBy.length > 1"
+            v-pui-tooltip="__('pruvious-dashboard', 'Move up')"
+            :disabled="index === 0"
+            :size="-2"
+            @click="
+              () => {
+                orderBy = orderBy.map((item, i) => {
+                  if (i === index - 1) {
+                    return orderBy[index]!
+                  } else if (i === index) {
+                    return orderBy[index - 1]!
+                  }
+                  return item
+                })
+                emitCommit()
+              }
+            "
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:chevron-up" />
+          </PUIButton>
+
+          <PUIButton
+            v-if="orderBy.length > 1"
+            v-pui-tooltip="__('pruvious-dashboard', 'Move down')"
+            :disabled="index === orderBy.length - 1"
+            :size="-2"
+            @click="
+              () => {
+                orderBy = orderBy.map((item, i) => {
+                  if (i === index + 1) {
+                    return orderBy[index]!
+                  } else if (i === index) {
+                    return orderBy[index + 1]!
+                  }
+                  return item
+                })
+                emitCommit()
+              }
+            "
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:chevron-down" />
+          </PUIButton>
+
+          <PUIButton
+            v-pui-tooltip="__('pruvious-dashboard', 'Insert before')"
+            :disabled="orderBy.length >= fieldChoices.length"
+            :size="-2"
+            @click="addColumn(index)"
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:arrow-bar-to-up" />
+          </PUIButton>
+
+          <PUIButton
             v-pui-tooltip="__('pruvious-dashboard', 'Delete')"
             :size="-2"
             @click="
@@ -158,11 +214,11 @@ watch(
   { immediate: true },
 )
 
-function addColumn() {
+function addColumn(index?: number) {
   const columnChoice = props.fieldChoices.find(({ value }) => orderBy.value.every(({ field }) => field !== value))
 
   if (columnChoice) {
-    orderBy.value.push(resolveOrderBy(columnChoice.value))
+    orderBy.value.splice(index ?? orderBy.value.length, 0, resolveOrderBy(columnChoice.value))
     emitCommit()
   }
 }

@@ -6,7 +6,63 @@
         <div class="p-table-columns-configurator-actions">
           <PUIButton
             v-if="columns.length > 1"
+            v-pui-tooltip="__('pruvious-dashboard', 'Move up')"
+            :disabled="index === 0"
+            :size="-2"
+            @click="
+              () => {
+                columns = columns.map((item, i) => {
+                  if (i === index - 1) {
+                    return columns[index]!
+                  } else if (i === index) {
+                    return columns[index - 1]!
+                  }
+                  return item
+                })
+                emitCommit()
+              }
+            "
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:chevron-up" />
+          </PUIButton>
+
+          <PUIButton
+            v-if="columns.length > 1"
+            v-pui-tooltip="__('pruvious-dashboard', 'Move down')"
+            :disabled="index === columns.length - 1"
+            :size="-2"
+            @click="
+              () => {
+                columns = columns.map((item, i) => {
+                  if (i === index + 1) {
+                    return columns[index]!
+                  } else if (i === index) {
+                    return columns[index + 1]!
+                  }
+                  return item
+                })
+                emitCommit()
+              }
+            "
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:chevron-down" />
+          </PUIButton>
+
+          <PUIButton
+            v-pui-tooltip="__('pruvious-dashboard', 'Insert before')"
+            :disabled="columns.length >= fieldChoices.length"
+            :size="-2"
+            @click="addColumn(index)"
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:arrow-bar-to-up" />
+          </PUIButton>
+
+          <PUIButton
             v-pui-tooltip="__('pruvious-dashboard', 'Delete')"
+            :disabled="columns.length < 2"
             :size="-2"
             @click="
               () => {
@@ -151,11 +207,11 @@ watch(
   { immediate: true },
 )
 
-function addColumn() {
+function addColumn(index?: number) {
   const columnChoice = props.fieldChoices.find(({ value }) => columns.value.every(({ name }) => name !== value))
 
   if (columnChoice) {
-    columns.value.push({
+    columns.value.splice(index ?? columns.value.length, 0, {
       name: columnChoice.value,
       label: columnChoice.label,
       width: null,
@@ -201,6 +257,7 @@ function toModelValue(): PUIColumns {
 
 <style scoped>
 .p-table-columns-configurator :where(.p-table-columns-configurator-actions) {
+  flex-shrink: 0;
   display: none;
   gap: 0.25rem;
   margin-left: auto;
