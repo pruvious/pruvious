@@ -1,5 +1,5 @@
 <template>
-  <PUIPopup v-if="isVisible" :size="-1" @close="$event().then(cancel)" ref="popup" width="26rem">
+  <PUIPopup v-if="isVisible" :size="-1" @close="$event().then(cancel)" @keydown="onKeyDown" ref="popup" width="26rem">
     <PUIProse>
       <p>{{ __('pruvious-dashboard', 'Changes that you made may not be saved.') }}</p>
     </PUIProse>
@@ -101,6 +101,19 @@ function leave() {
   }
   destination.value = undefined
   leaveCount.value++
+}
+
+function onKeyDown(event: KeyboardEvent) {
+  if (
+    event.code === 'Enter' &&
+    !(document.activeElement instanceof HTMLButtonElement) &&
+    !event.metaKey &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.shiftKey
+  ) {
+    popup.value?.close().then(leave)
+  }
 }
 </script>
 
