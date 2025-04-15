@@ -24,6 +24,7 @@ describe('cms', async () => {
 
   // Fields
   await import('./cms/fields/object')
+  await import('./cms/fields/nullableObject')
   await import('./cms/fields/structure')
   await import('./cms/fields/repeater')
   await import('./cms/fields/date')

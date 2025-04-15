@@ -4,6 +4,7 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  nullableObjectField,
   numberField,
   objectField,
   repeaterField,
@@ -19,6 +20,65 @@ import { repeaterTestField } from '~/shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
+    // nullableObject
+    nullableObject: nullableObjectField({
+      subfields: {
+        type: selectField({
+          choices: [
+            { label: 'Text', value: 'text' },
+            { label: 'Number', value: 'number' },
+          ],
+          default: 'text',
+        }),
+        text: textField({
+          conditionalLogic: { type: { '=': 'text' } },
+          validators: [
+            (value) => {
+              if (value === 'FOO') throw new Error('Invalid value')
+            },
+          ],
+        }),
+        number: numberField({ required: true, default: 1337, conditionalLogic: { type: { '=': 'number' } } }),
+      },
+      ui: { subfieldsLayout: [{ row: ['type', 'text', 'number'] }], description: 'Test description' },
+    }),
+    nullableObjectNested: nullableObjectField({
+      subfields: {
+        foo: textField({}),
+        nested: nullableObjectField({
+          subfields: {
+            type: selectField({
+              choices: [
+                { label: 'Text', value: 'text' },
+                { label: 'Number', value: 'number' },
+              ],
+              default: 'text',
+            }),
+            text: textField({
+              conditionalLogic: { type: { '=': 'text' } },
+              validators: [
+                (value) => {
+                  if (value === 'FOO') throw new Error('Invalid value')
+                },
+              ],
+            }),
+            number: numberField({ required: true, default: 1337, conditionalLogic: { type: { '=': 'number' } } }),
+          },
+          ui: {
+            label: 'Nullable object (nested)',
+            subfieldsLayout: [{ row: ['type', 'text', 'number'] }],
+          },
+        }),
+        nestedDefault: nullableObjectField({
+          subfields: {
+            foo: textField({}),
+          },
+          default: { foo: 'BAR' },
+          ui: { label: 'Object (nested with default)' },
+        }),
+      },
+    }),
+
     // object
     object: objectField({
       subfields: {
@@ -238,6 +298,10 @@ export default defineCollection({
       fieldsLayout: [
         {
           tabs: [
+            {
+              label: 'Nullable object',
+              fields: ['nullableObject', 'nullableObjectNested'],
+            },
             {
               label: 'Object',
               fields: ['object', 'objectNested'],

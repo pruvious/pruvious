@@ -49,7 +49,6 @@ export interface StructuredObjectFieldModelOptions<TCastedType, TPopulatedType> 
  * The data is stored as `text` in the database and represented as `Record<string, any>` in JavaScript.
  *
  * The default value is an object containing the default values of the `subfields`.
- * If this field is `nullable`, the default value is `null`.
  *
  * ---
  *

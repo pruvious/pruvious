@@ -1,38 +1,54 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
     <PUICard :class="{ 'p-object-has-error': objectErrors }">
-      <template v-if="label" #header>
-        <span class="pui-block pui-medium pui-truncate">{{ label }}</span>
+      <template #header>
+        <div class="pui-justify-between">
+          <span class="pui-block pui-medium pui-truncate">{{ label }}</span>
+          <PUISwitch
+            :modelValue="!!modelValue"
+            :title="modelValue ? __('pruvious-dashboard', 'Disable') : __('pruvious-dashboard', 'Enable')"
+            @update:modelValue="
+              (enabled) => {
+                $emit('update:modelValue', enabled ? objectValue : null)
+                $emit('commit', enabled ? objectValue : null)
+                $nextTick(queueConditionalLogicUpdate)
+              }
+            "
+            class="p-nullable-object-toggle"
+          />
+        </div>
       </template>
 
-      <PruviousFields
-        v-if="hasSubfields"
-        :alwaysVisibleFields="alwaysVisibleFields"
-        :conditionalLogic="conditionalLogic ?? {}"
-        :conditionalLogicResolver="conditionalLogicResolver ?? new ConditionalLogicResolver()"
-        :data="data ?? {}"
-        :dataContainerName="dataContainerName"
-        :dataContainerType="dataContainerType"
-        :disabled="disabled"
-        :errors="subfieldErrors"
-        :fields="options.subfields"
-        :layout="options.ui.subfieldsLayout"
-        :modelValue="modelValue"
-        :operation="operation"
-        :rootPath="path"
-        :syncedFields="[]"
-        :translatable="translatable"
-        @commit="$emit('commit', $event)"
-        @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
-        @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
-        @update:modelValue="
-          (value) => {
-            $emit('update:modelValue', value)
-            $nextTick(queueConditionalLogicUpdate)
-          }
-        "
-      />
-      <span v-else class="pui-muted">{{ __('pruvious-dashboard', 'No fields to display') }}</span>
+      <template v-if="modelValue" #default>
+        <PruviousFields
+          v-if="hasSubfields"
+          :alwaysVisibleFields="alwaysVisibleFields"
+          :conditionalLogic="conditionalLogic ?? {}"
+          :conditionalLogicResolver="conditionalLogicResolver ?? new ConditionalLogicResolver()"
+          :data="data ?? {}"
+          :dataContainerName="dataContainerName"
+          :dataContainerType="dataContainerType"
+          :disabled="disabled"
+          :errors="subfieldErrors"
+          :fields="options.subfields"
+          :layout="options.ui.subfieldsLayout"
+          :modelValue="modelValue"
+          :operation="operation"
+          :rootPath="path"
+          :syncedFields="[]"
+          :translatable="translatable"
+          @commit="$emit('commit', $event)"
+          @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
+          @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
+          @update:modelValue="
+            (value) => {
+              $emit('update:modelValue', value)
+              $nextTick(queueConditionalLogicUpdate)
+            }
+          "
+        />
+        <span v-else class="pui-muted">{{ __('pruvious-dashboard', 'No fields to display') }}</span>
+      </template>
     </PUICard>
 
     <PruviousFieldMessage :error="objectErrors" :name="name" :options="options" />
@@ -48,14 +64,14 @@ import type {
   Singletons,
 } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
-import { isDefined, isEmpty, isObject, omit } from '@pruvious/utils'
+import { deepClone, isDefined, isEmpty, isObject, omit, remap } from '@pruvious/utils'
 
 const props = defineProps({
   /**
    * The casted field value.
    */
   modelValue: {
-    type: Object as PropType<Record<string, any>>,
+    type: [Object, null] as PropType<Record<string, any> | null>,
     required: true,
   },
 
@@ -71,7 +87,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'object'>>,
+    type: Object as PropType<SerializableFieldOptions<'nullableObject'>>,
     required: true,
   },
 
@@ -96,7 +112,7 @@ const props = defineProps({
    * Contains key-value pairs representing the record's fields and their values.
    */
   data: {
-    type: Object as PropType<Record<string, any>>,
+    type: Object as PropType<Record<string, any> | null>,
   },
 
   /**
@@ -196,12 +212,19 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  'commit': [value: Record<string, any>]
-  'update:modelValue': [value: Record<string, any>]
+  'commit': [value: Record<string, any> | null]
+  'update:modelValue': [value: Record<string, any> | null]
   'update:conditionalLogic': [value: Record<string, boolean>]
   'queueConditionalLogicUpdate': [path?: (string & {}) | string[] | '$resolve' | '$reset']
 }>()
 
+const objectValue = ref(
+  deepClone(
+    props.modelValue ??
+      props.options.default ??
+      remap(props.options.subfields, (sn, so) => [sn, deepClone(so.default)]),
+  ),
+)
 const label = resolveFieldLabel(props.options.ui.label, props.name)
 const hasSubfields = computed(() => !isEmpty(props.options.subfields))
 const objectErrors = computed(() => (isObject(props.error) ? props.error[props.name] : props.error))
@@ -209,7 +232,10 @@ const subfieldErrors = computed(() => (isObject(props.error) ? omit(props.error,
 
 watch(
   () => props.modelValue,
-  (_, oldValue) => {
+  (value, oldValue) => {
+    if (value) {
+      objectValue.value = deepClone(value)
+    }
     if (isDefined(oldValue)) {
       queueConditionalLogicUpdate()
     }
@@ -218,7 +244,7 @@ watch(
 )
 
 function queueConditionalLogicUpdate() {
-  if (props.conditionalLogicResolver) {
+  if (props.conditionalLogicResolver && props.modelValue) {
     const parsedConditionalLogic = props.conditionalLogicResolver.getConditionalLogic()
 
     for (const subfieldName of Object.keys(props.modelValue)) {
@@ -239,5 +265,10 @@ function queueConditionalLogicUpdate() {
 <style scoped>
 .p-object-has-error {
   border-color: hsl(var(--pui-destructive));
+}
+
+.p-nullable-object-toggle {
+  flex-shrink: 0;
+  width: auto;
 }
 </style>

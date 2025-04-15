@@ -10,6 +10,14 @@
   font-weight: 500;
 }
 
+.pui-block {
+  display: block;
+}
+
+.pui-flex {
+  display: flex;
+}
+
 .pui-justify-between {
   display: flex;
   justify-content: space-between;
