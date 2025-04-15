@@ -6,6 +6,10 @@
   color: hsl(var(--pui-muted-foreground));
 }
 
+.pui-medium {
+  font-weight: 500;
+}
+
 .pui-justify-between {
   display: flex;
   justify-content: space-between;

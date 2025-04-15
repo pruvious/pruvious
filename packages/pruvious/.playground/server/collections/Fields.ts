@@ -5,6 +5,7 @@ import {
   dateTimeRangeField,
   defineCollection,
   numberField,
+  objectField,
   repeaterField,
   selectField,
   structureField,
@@ -18,6 +19,58 @@ import { repeaterTestField } from '~/shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
+    // object
+    object: objectField({
+      subfields: {
+        type: selectField({
+          choices: [
+            { label: 'Text', value: 'text' },
+            { label: 'Number', value: 'number' },
+          ],
+          default: 'text',
+        }),
+        text: textField({
+          conditionalLogic: { type: { '=': 'text' } },
+          validators: [
+            (value) => {
+              if (value === 'FOO') throw new Error('Invalid value')
+            },
+          ],
+        }),
+        number: numberField({ required: true, default: 1337, conditionalLogic: { type: { '=': 'number' } } }),
+      },
+      ui: { subfieldsLayout: [{ row: ['type', 'text', 'number'] }], description: 'Test description' },
+    }),
+    objectNested: objectField({
+      subfields: {
+        foo: textField({}),
+        nested: objectField({
+          subfields: {
+            type: selectField({
+              choices: [
+                { label: 'Text', value: 'text' },
+                { label: 'Number', value: 'number' },
+              ],
+              default: 'text',
+            }),
+            text: textField({
+              conditionalLogic: { type: { '=': 'text' } },
+              validators: [
+                (value) => {
+                  if (value === 'FOO') throw new Error('Invalid value')
+                },
+              ],
+            }),
+            number: numberField({ required: true, default: 1337, conditionalLogic: { type: { '=': 'number' } } }),
+          },
+          ui: {
+            label: 'Object (nested)',
+            subfieldsLayout: [{ row: ['type', 'text', 'number'] }],
+          },
+        }),
+      },
+    }),
+
     // structure
     structure: structureField({
       structure: {
@@ -177,69 +230,6 @@ export default defineCollection({
       default: Date.parse('2025-03-01'),
       ui: { label: 'Timestamp (min/max)' },
     }),
-
-    // dependent fields
-    typeDependency: selectField({
-      ui: { label: 'Type (dependency)' },
-      choices: [
-        { label: 'Text', value: 'text' },
-        { label: 'Number', value: 'number' },
-      ],
-      default: 'text',
-    }),
-    sizeDependency: selectField({
-      ui: { label: 'Size (dependency)' },
-      choices: [
-        { label: 'Small', value: 'small' },
-        { label: 'Medium', value: 'medium' },
-        { label: 'Large', value: 'large' },
-      ],
-      default: 'medium',
-    }),
-    textDependent: textField({
-      ui: { label: 'Text (dependent)' },
-      required: true,
-      conditionalLogic: { '../../typeDependency': { '=': 'text' } },
-      dependencies: ['sizeDependency'],
-    }),
-    numberDependent: numberField({
-      ui: { label: 'Number (dependent)' },
-      required: true,
-      conditionalLogic: { '../../typeDependency': { '=': 'number' } },
-      dependencies: ['sizeDependency'],
-    }),
-    repeaterDependent: repeaterField({
-      ui: { label: 'Repeater (dependent)' },
-      subfields: {
-        text: textField({
-          required: true,
-          conditionalLogic: { '../../typeDependency': { '=': 'text' } },
-          dependencies: ['/sizeDependency'],
-        }),
-        number: numberField({
-          required: true,
-          conditionalLogic: { '../../typeDependency': { '=': 'number' } },
-          dependencies: ['/sizeDependency'],
-        }),
-      },
-    }),
-    structureDependent: structureField({
-      ui: { label: 'Structure (dependent)' },
-      structure: {
-        foo: {
-          text: textField({
-            required: true,
-            conditionalLogic: { '../../typeDependency': { '=': 'text' } },
-            dependencies: ['/sizeDependency'],
-          }),
-          number: numberField({
-            required: true,
-            conditionalLogic: { '../../typeDependency': { '=': 'number' } },
-            dependencies: ['/sizeDependency'],
-          }),
-        },
-      },
-    }),
   },
   createdAt: false,
   updatedAt: false,
@@ -248,6 +238,10 @@ export default defineCollection({
       fieldsLayout: [
         {
           tabs: [
+            {
+              label: 'Object',
+              fields: ['object', 'objectNested'],
+            },
             {
               label: 'Structure',
               fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
@@ -290,17 +284,6 @@ export default defineCollection({
             {
               label: 'Timestamp',
               fields: ['timestamp', 'timestampMinMax'],
-            },
-            {
-              label: 'Dependent fields',
-              fields: [
-                'textDependent',
-                'numberDependent',
-                'typeDependency',
-                'sizeDependency',
-                'repeaterDependent',
-                'structureDependent',
-              ],
             },
           ],
         },

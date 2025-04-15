@@ -1,16 +1,27 @@
-import { defineField, type CombinedFieldOptions, type GenericDatabase } from '#pruvious/server'
+import {
+  defineField,
+  resolveCustomComponentPath,
+  walkFieldLayoutItems,
+  type CombinedFieldOptions,
+  type FieldsLayout,
+  type GenericDatabase,
+  type ResolveFieldUIOptions,
+} from '#pruvious/server'
 import {
   Field,
-  objectFieldModel,
+  structuredObjectFieldModel,
   type ConditionalLogic,
   type ExtractCastedTypes,
   type ExtractPopulatedTypes,
   type FieldModel,
   type GenericField,
-  type ObjectFieldModelOptions,
+  type StructuredObjectFieldModelOptions,
   type SubfieldsInput,
 } from '@pruvious/orm'
+import { isArray, isObject, setProperty } from '@pruvious/utils'
+import { hash } from 'ohash'
 import type { PropType } from 'vue'
+import type { ResolveFromLayersResult } from '../../modules/pruvious/utils/resolve'
 
 interface CustomOptions<TSubfields extends Record<string, GenericField>> {
   /**
@@ -34,6 +45,80 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
    * ```
    */
   subfields: TSubfields
+
+  ui?: {
+    /**
+     * Customizes the subfields layout.
+     * If not specified, the subfields are stacked vertically in the order they are defined.
+     *
+     * @default undefined
+     *
+     * @example
+     * ```ts
+     * [
+     *   // Single field
+     *   'email',
+     *
+     *   // Half-width field (max-width: 50%)
+     *   'firstName | 50%',
+     *
+     *   // Auto-width field { width: 'auto', flexShrink: 0 }
+     *   'middleName | auto',
+     *
+     *   // Field with custom component styles
+     *   {
+     *     field: {
+     *       name: 'lastName',
+     *       style: { maxWidth: '50%' },
+     *     },
+     *   },
+     *
+     *   // Field group (row)
+     *   {
+     *     row: [
+     *       // Has maximum width of 8rem
+     *       'countryCode | 8rem',
+     *
+     *       // Takes up the remaining space
+     *       'phone',
+     *     ],
+     *   },
+     *
+     *   // Horizontal rule
+     *   '---',
+     *
+     *   // Field group (tabs)
+     *   {
+     *     tabs: [
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Address'),
+     *         fields: ['street | 40%', 'city | 40%', 'zipCode'],
+     *       },
+     *       {
+     *         label: ({ __ }) => __('pruvious-dashboard', 'Contact'),
+     *         fields: [
+     *           {
+     *             // Custom Vue component
+     *             // - The component must be resolved using `resolvePruviousComponent()`
+     *             //   or `resolveNamedPruviousComponent()`.
+     *             // - The import path must be a literal string, not a variable.
+     *             // - The import path can be an absolute or relative to the definition file.
+     *             component: resolvePruviousComponent('>/components/Dashboard/ContactForm.vue'),
+     *           },
+     *         ],
+     *       },
+     *     ],
+     *   },
+     *
+     *   // Card group
+     *   {
+     *     card: ['comments', 'assignedTo'],
+     *   },
+     * ]
+     * ```
+     */
+    subfieldsLayout?: FieldsLayout<keyof TSubfields & string> | undefined
+  }
 }
 
 type ExtractClientSubfields<T extends Record<string, { field: GenericField }>> = {
@@ -42,6 +127,9 @@ type ExtractClientSubfields<T extends Record<string, { field: GenericField }>> =
 
 const customOptions: CustomOptions<Record<string, GenericField>> = {
   subfields: {},
+  ui: {
+    subfieldsLayout: undefined,
+  },
 }
 
 export default {
@@ -62,7 +150,7 @@ export default {
   >(
     options: CombinedFieldOptions<
       FieldModel<
-        ObjectFieldModelOptions<TCastedType, TPopulatedType>,
+        StructuredObjectFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -70,7 +158,9 @@ export default {
         TSubfields,
         undefined
       >,
-      ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
+      StructuredObjectFieldModelOptions<TCastedType, TPopulatedType> &
+        CustomOptions<TSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -80,7 +170,7 @@ export default {
     >,
   ): Field<
     FieldModel<
-      ObjectFieldModelOptions<TCastedType, TPopulatedType>,
+      StructuredObjectFieldModelOptions<TCastedType, TPopulatedType>,
       'text',
       TCastedType,
       TPopulatedType,
@@ -88,7 +178,9 @@ export default {
       TSubfields,
       undefined
     >,
-    ObjectFieldModelOptions<TCastedType, TPopulatedType> & CustomOptions<TSubfields>,
+    StructuredObjectFieldModelOptions<TCastedType, TPopulatedType> &
+      CustomOptions<TSubfields> &
+      ResolveFieldUIOptions<undefined>,
     false,
     TRequired,
     TImmutable,
@@ -96,13 +188,30 @@ export default {
     TConditionalLogic,
     GenericDatabase
   > {
+    const { location }: { fieldType: string; location: ResolveFromLayersResult } = this as any
+
+    if (isArray(customOptions.ui?.subfieldsLayout)) {
+      for (const { item, path } of walkFieldLayoutItems(customOptions.ui.subfieldsLayout)) {
+        if (isObject(item) && 'component' in item) {
+          setProperty(
+            customOptions.ui.subfieldsLayout,
+            `${path}.component`,
+            item.component.includes('/')
+              ? hash(
+                  resolveCustomComponentPath({
+                    component: item.component,
+                    file: location.file.absolute,
+                    srcDir: location.layer.config.srcDir,
+                  }),
+                )
+              : item.component,
+          )
+        }
+      }
+    }
+
     const bound = defineField({
-      model: objectFieldModel(),
-      // @todo default
-      // @todo sanitizers (check repeaterFieldModel)
-      // @todo validators (check repeaterFieldModel)
-      // @todo inputFilters (check repeaterFieldModel)
-      // @todo populator (check repeaterFieldModel)
+      model: structuredObjectFieldModel(options.subfields),
       customOptions,
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
@@ -134,7 +243,7 @@ export default {
   >(
     options: CombinedFieldOptions<
       FieldModel<
-        ObjectFieldModelOptions<TCastedType, TPopulatedType>,
+        StructuredObjectFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -142,9 +251,10 @@ export default {
         TSubfields,
         undefined
       >,
-      ObjectFieldModelOptions<TCastedType, TPopulatedType> &
+      StructuredObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields>,
+        CustomOptions<TClientSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -155,7 +265,7 @@ export default {
   ): { type: PropType<TPopulatedType>; required: true } & {
     field: Field<
       FieldModel<
-        ObjectFieldModelOptions<TCastedType, TPopulatedType>,
+        StructuredObjectFieldModelOptions<TCastedType, TPopulatedType>,
         'text',
         TCastedType,
         TPopulatedType,
@@ -163,9 +273,10 @@ export default {
         TSubfields,
         undefined
       >,
-      ObjectFieldModelOptions<TCastedType, TPopulatedType> &
+      StructuredObjectFieldModelOptions<TCastedType, TPopulatedType> &
         // @ts-expect-error
-        CustomOptions<TClientSubfields>,
+        CustomOptions<TClientSubfields> &
+        ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -184,7 +295,7 @@ export default {
    */
   TOptions: undefined as unknown as CombinedFieldOptions<
     FieldModel<
-      ObjectFieldModelOptions<Record<string, any>, Record<string, any>>,
+      StructuredObjectFieldModelOptions<Record<string, any>, Record<string, any>>,
       'text',
       Record<string, any>,
       Record<string, any>,
@@ -192,7 +303,9 @@ export default {
       Record<string, GenericField>,
       undefined
     >,
-    ObjectFieldModelOptions<Record<string, any>, Record<string, any>> & CustomOptions<Record<string, GenericField>>,
+    StructuredObjectFieldModelOptions<Record<string, any>, Record<string, any>> &
+      CustomOptions<Record<string, GenericField>> &
+      ResolveFieldUIOptions<undefined>,
     boolean,
     boolean,
     boolean,

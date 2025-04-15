@@ -473,7 +473,8 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
 
 .p-fields-row {
   display: flex;
-  gap: 0.75rem;
+  column-gap: 0.75rem;
+  row-gap: 1rem;
   width: 100%;
 }
 

@@ -92,6 +92,10 @@ const id = useId()
   width: calc(50% - 6.5rem);
 }
 
+:deep(.pui-field-message) {
+  display: none;
+}
+
 @container (max-width: 640px) {
   .p-where-filters-condition {
     flex-direction: column;

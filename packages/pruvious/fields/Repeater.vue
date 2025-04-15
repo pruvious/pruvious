@@ -236,7 +236,7 @@
             :dataContainerType="dataContainerType"
             :disabled="disabled"
             :errors="subfieldErrors?.[index]"
-            :fields="(options as any).subfields"
+            :fields="options.subfields"
             :layout="options.ui.subfieldsLayout"
             :modelValue="item"
             :operation="operation"
