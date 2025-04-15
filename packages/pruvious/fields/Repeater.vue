@@ -253,8 +253,12 @@
         </div>
       </template>
 
-      <template #itemBefore="{ index }">
-        <div v-if="itemErrors?.[index]" hidden class="p-repeater-next-item-has-error"></div>
+      <template #itemBefore="{ item, index }">
+        <div
+          v-if="itemErrors?.[index] || (subfieldErrors?.[index] && !item.$expanded)"
+          hidden
+          class="p-repeater-next-item-has-error"
+        ></div>
       </template>
 
       <template #itemAfter="{ index }">

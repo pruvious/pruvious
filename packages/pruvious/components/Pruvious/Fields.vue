@@ -139,7 +139,7 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, maybeTranslate } from '#pruvious/client'
+import { __, customComponents, maybeTranslate } from '#pruvious/client'
 import type {
   Collections,
   FieldsLayout,
@@ -154,7 +154,7 @@ import type {
 } from '#pruvious/server'
 import type { ConditionalLogicResolver } from '@pruvious/orm'
 import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'
-import { isDefined, isEmpty, isObject, isString } from '@pruvious/utils'
+import { isDefined, isEmpty, isObject, isString, uniqueArray } from '@pruvious/utils'
 import type { Component, StyleValue } from 'vue'
 
 type Item = DynamicFieldItem | RowItem | CardItem | TabsItem | ComponentItem | HRItem
@@ -332,14 +332,25 @@ defineEmits<{
 
 provide('floatingStrategy', 'absolute')
 
-const items = computed<Item[]>(() =>
-  props.layout
-    ? parseLayout(props.layout)
-    : Object.entries(props.fields ?? {}).map(([name, options]) => ({
-        type: 'DynamicField',
-        field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options },
-        error: getFieldErrors(name),
-      })),
+const items = ref<Item[]>([])
+
+watch(
+  () => [props.layout, props.fields, props.rootPath],
+  () => {
+    items.value = props.layout
+      ? parseLayout(props.layout)
+      : Object.entries(props.fields ?? {}).map(([name, options]) => ({
+          type: 'DynamicField',
+          field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options },
+        }))
+    refreshErrors(items.value)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => props.errors,
+  () => refreshErrors(items.value),
 )
 
 function parseLayout(layout: FieldsLayout): Item[] {
@@ -357,7 +368,6 @@ function parseLayout(layout: FieldsLayout): Item[] {
           type: 'DynamicField',
           field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options: props.fields[name] },
           style: width === 'auto' ? { width: 'auto', flexShrink: 0 } : { maxWidth: width },
-          error: getFieldErrors(name),
         })
       } else {
         console.warn(
@@ -381,7 +391,6 @@ function parseLayout(layout: FieldsLayout): Item[] {
                 options: props.fields[fieldItem.field.name]!,
               },
               style: fieldItem.field.style,
-              error: getFieldErrors(fieldItem.field.name),
             })
           } else {
             console.warn(
@@ -463,6 +472,50 @@ function getFieldErrors(fieldName: string): string | Record<string, string> | un
   }
 
   return props.errors?.[fieldName]
+}
+
+function refreshErrors(items: Item[]): void {
+  for (const item of items) {
+    if (item.type === 'DynamicField') {
+      item.error = getFieldErrors(item.field.name)
+    } else if (item.type === 'tabs') {
+      for (const [i, layout] of item.layouts.entries()) {
+        if (isEmpty(props.errors)) {
+          item.list[i]!.bubble = undefined
+        } else {
+          const fieldNames = extractFieldNames(layout)
+          const count = Object.keys(props.errors).filter((key) =>
+            fieldNames.some((name) => key === name || key.startsWith(`${name}.`)),
+          ).length
+          item.list[i]!.bubble = count
+            ? {
+                content: String(count),
+                tooltip: __('pruvious-dashboard', 'Found $count $errors', { count }),
+                variant: 'destructive',
+              }
+            : undefined
+        }
+      }
+    }
+  }
+}
+
+function extractFieldNames(layout: FieldsLayout): string[] {
+  const fieldNames: string[] = []
+
+  for (const item of parseLayout(layout)) {
+    if (item.type === 'DynamicField') {
+      fieldNames.push(item.field.name)
+    } else if (item.type === 'card' || item.type === 'row') {
+      fieldNames.push(...extractFieldNames(item.layout))
+    } else if (item.type === 'tabs') {
+      for (const layout of item.layouts) {
+        fieldNames.push(...extractFieldNames(layout))
+      }
+    }
+  }
+
+  return uniqueArray(fieldNames)
 }
 </script>
 
