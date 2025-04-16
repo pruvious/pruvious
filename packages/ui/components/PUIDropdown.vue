@@ -1,5 +1,6 @@
 <template>
   <div
+    @keydown.space.prevent
     ref="floating"
     tabindex="-1"
     class="pui-dropdown"
@@ -159,7 +160,7 @@ onMounted(() => {
   document.body.classList.add('pui-no-interaction')
   prevFocus.value = document.activeElement as HTMLElement
   parentContainer.value = floating.value?.parentElement
-  floating.value?.focus()
+  setTimeout(() => floating.value?.focus())
 
   while (
     parentContainer.value &&
