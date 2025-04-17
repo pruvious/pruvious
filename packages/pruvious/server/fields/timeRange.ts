@@ -207,4 +207,6 @@ export default defineField({
     'minItems',
     'maxItems',
   ],
+  castedTypeFn: () => '[number, number]',
+  populatedTypeFn: () => '[number, number]',
 })
