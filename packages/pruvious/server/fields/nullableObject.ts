@@ -218,11 +218,11 @@ export default {
       castedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).castedTypeFn(subfield)}`)
-          .join(', ')} }`,
+          .join(', ')} } | null`,
       populatedTypeFn: () =>
         `{ ${Object.entries(options.subfields)
           .map(([subfieldName, subfield]) => `${subfieldName}: ${(subfield as any).populatedTypeFn(subfield)}`)
-          .join(', ')} }`,
+          .join(', ')} } | null`,
     }).serverFn.bind(this)
     return bound(options as any) as any
   },
