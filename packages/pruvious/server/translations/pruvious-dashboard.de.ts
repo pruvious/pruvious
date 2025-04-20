@@ -1,6 +1,8 @@
 import { createPattern, defineTranslation } from '#pruvious/server'
 
 export default defineTranslation({
+  '$collection overview': createPattern('$collection Übersicht', { collection: 'string' }),
+
   'A translation for language `$language` already exists': createPattern(
     'Eine Übersetzung für die Sprache `$language` existiert bereits',
     { language: 'string' },
@@ -16,7 +18,6 @@ export default defineTranslation({
   'After or equal to': 'Nach oder gleich',
   'All': 'Alle',
   'All ($count)': createPattern('Alle ($count)', { count: 'number' }),
-  'All items': 'Alle Einträge',
   'All of the following conditions must be met': 'Alle folgenden Bedingungen müssen erfüllt sein',
   'An error occurred during duplication': 'Beim Duplizieren ist ein Fehler aufgetreten',
   'An error occurred while copying the translation': 'Beim Kopieren der Übersetzung ist ein Fehler aufgetreten',

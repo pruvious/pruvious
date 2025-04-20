@@ -22,7 +22,11 @@
   >
     <template #header>
       <div class="pui-row">
-        <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'All items')" :to="allItemsLink" variant="outline">
+        <PUIButton
+          v-pui-tooltip="__('pruvious-dashboard', '$collection overview', { collection: label })"
+          :to="allItemsLink"
+          variant="outline"
+        >
           <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
         </PUIButton>
         <span class="pui-truncate">{{ label }}</span>
