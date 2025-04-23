@@ -5,7 +5,7 @@ import { useNitro, useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer, WatchEvent } from 'nuxt/schema'
 import { join, relative } from 'pathe'
 import { resetServerHandlersResolver } from '../api/resolver'
-import { resetBlocksResolver, resolveBlockDefinition } from '../blocks/resolver'
+import { resetBlocksResolver, resolveBlockDefinition, resolveBlockFiles } from '../blocks/resolver'
 import { generateClientFiles } from '../build/client'
 import { generateServerFiles } from '../build/server'
 import { resetCollectionsResolver } from '../collections/resolver'
@@ -42,7 +42,7 @@ const skipped: string[] = []
 /**
  * Watches Pruvious files for changes.
  */
-export function watchPruviousFiles(event: WatchEvent, path: string) {
+export async function watchPruviousFiles(event: WatchEvent, path: string) {
   const nuxt = useNuxt()
   const { type, layer } = resolvePruviousFile(path)
 
@@ -91,20 +91,26 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'block-component') {
-    resolveBlockDefinition({ vueFile: path })
-    resolveCustomComponentsInFile({
-      file: path,
-      srcDir: layer.config.srcDir,
-      srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
-    })
-
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetTemplatesResolver()
       resetCollectionsResolver()
+      resetBlocksResolver()
       resetSingletonsResolver()
       generateClientFiles()
       generateServerFiles()
+      resolveBlockFiles()
+      reloadOnNitroCompiled(event, path)
+    } else {
+      const written = await resolveBlockDefinition({ vueFile: path, srcDir: layer.config.srcDir })
+      resolveCustomComponentsInFile({
+        file: path,
+        srcDir: layer.config.srcDir,
+        srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+      })
+      if (written) {
+        reloadOnNitroCompiled(event, path)
+      }
     }
 
     return
@@ -120,6 +126,7 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       resetBlocksResolver()
       generateClientFiles()
       generateServerFiles()
+      resolveBlockFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -136,6 +143,7 @@ export function watchPruviousFiles(event: WatchEvent, path: string) {
       resetBlocksResolver()
       generateClientFiles()
       generateServerFiles()
+      resolveBlockFiles()
       reloadOnNitroCompiled(event, path)
     }
 

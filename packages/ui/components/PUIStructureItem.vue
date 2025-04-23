@@ -188,7 +188,12 @@ function cleanupAfterDrag() {
   position: relative;
 }
 
-.pui-structure-item-collapsed > .pui-card-body {
+.pui-structure-item-collapsed .pui-card-body {
+  padding: 0;
+  border-top: none;
+}
+
+.pui-structure-item-collapsed .pui-structure-item-inner {
   display: none;
 }
 

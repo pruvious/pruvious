@@ -4,7 +4,8 @@
     :class="{
       'p-where-filters-condition-top':
         collection.definition.fields[modelValue.field]?.subfields ||
-        collection.definition.fields[modelValue.field]?.structure,
+        collection.definition.fields[modelValue.field]?.structure ||
+        collection.definition.fields[modelValue.field]?._fieldType === 'blocks',
     }"
   >
     <PUISelect

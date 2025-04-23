@@ -52,6 +52,20 @@
               $nextTick(() => root?.close(event))
             }
           "
+          @keydown.enter.prevent="
+            () => {
+              $emit('update:modelValue', null)
+              $emit('commit', null)
+              root?.handle?.focus()
+            }
+          "
+          @keydown.space.prevent="
+            () => {
+              $emit('update:modelValue', null)
+              $emit('commit', null)
+              root?.handle?.focus()
+            }
+          "
           is="span"
           tabindex="0"
           variant="ghost"
@@ -906,6 +920,10 @@ function onKeyDown(event: KeyboardEvent) {
   aspect-ratio: 1;
   margin-right: calc(-0.5em - 1px);
   margin-left: auto;
+}
+
+.pui-calendar-clear .pui-button {
+  border-radius: calc(var(--pui-radius) - 0.25rem);
 }
 
 .pui-calendar-placeholder {

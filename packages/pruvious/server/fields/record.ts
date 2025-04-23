@@ -167,9 +167,8 @@ export default {
         return (query.success ? query.data : null) as any
       },
       omitOptions: ['decimalPlaces', 'min', 'max'],
-      castedTypeFn: () => 'number',
-      populatedTypeFn: ({ options }) =>
-        `Pick<DynamicCollectionFieldTypes[${options.populate ? "'Populated'" : "'Casted'"}]['${options.collection}'], ${(options.fields ?? ['id']).map((field) => `'${field}'`).join(' | ')}> | null`,
+      populatedTypeFn: ({ field }) =>
+        `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName) => `'${fieldName}'`).join(' | ')}> | null`,
     }).serverFn.bind(this)
     return bound(options as any) as any
   },

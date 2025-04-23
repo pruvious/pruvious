@@ -30,11 +30,146 @@ export function generateServerFiles() {
     fs.writeFileSync(`${buildDir}/server/blocks.ts`, 'export const blocks = {}\n')
   }
 
+  fs.writeFileSync(`${buildDir}/server/fields.ts`, getServerFieldsFileContent() + '\n')
+
+  fs.writeFileSync(`${buildDir}/server/hooks.ts`, getServerHooksFileContent() + '\n')
+
   fs.writeFileSync(`${buildDir}/server/index.ts`, getServerFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/server/index.d.ts`, getServerTypeFileContent() + '\n')
 
   fs.appendFileSync(`${buildDir}/server/index.ts`, getServerFileContentPatch() + '\n')
   fs.appendFileSync(`${buildDir}/server/index.d.ts`, getServerTypeFileContentPatch() + '\n')
+}
+
+/**
+ * Generates the `#pruvious/server/fields.ts` file content.
+ */
+function getServerFieldsFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/fields.ts>`)
+
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
+
+  return [
+    ...fieldDefinitionEntries.map(([name, { file }]) => `import _${camelCase(name)}Field from '${file.import}'`),
+    ``,
+    `/**`,
+    ` * Type representing all defined field types.`,
+    ` * The keys are the field names, and the values are the \`Field\` definition objects.`,
+    ` */`,
+    `export type Fields = {`,
+    ...fieldDefinitionEntries.map(([name]) => `  '${name}': ReturnType<typeof _${camelCase(name)}Field.serverFn>,`),
+    `}`,
+    ``,
+    `/**`,
+    ` * Represents the type structure for all available field configuration options.`,
+    ` * The keys are the field names, and the values are the field options.`,
+    ` */`,
+    `export type FieldOptions = {`,
+    ...fieldDefinitionEntries.map(([name]) => `  '${name}': typeof _${camelCase(name)}Field.TOptions,`),
+    `}`,
+    ``,
+    ...fieldDefinitionEntries.flatMap(([name, location]) => [
+      `export const ${camelCase(name)}Field = _${camelCase(name)}Field.serverFn.bind({ fieldType: '${camelCase(name)}', location: ${JSON.stringify(location)} })`,
+    ]),
+  ].join('\n')
+}
+
+/**
+ * Generates the `#pruvious/server/hooks.ts` file content.
+ */
+function getServerHooksFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/hooks.ts>`)
+
+  const actionDefinitionFiles = resolveActionDefinitionFiles()
+  const serverActionDefinitionEntries = Object.entries(actionDefinitionFiles.server)
+  const actionCallbackFiles = resolveActionCallbackFiles()
+  const serverActionCallbackEntries = Object.entries(actionCallbackFiles.server)
+  const filterDefinitionFiles = resolveFilterDefinitionFiles()
+  const serverFilterDefinitionEntries = Object.entries(filterDefinitionFiles.server)
+  const filterCallbackFiles = resolveFilterCallbackFiles()
+  const serverFilterCallbackEntries = Object.entries(filterCallbackFiles.server)
+
+  return [
+    ...serverActionDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
+    ),
+    ...serverFilterDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Filter from '${file.import}'`,
+    ),
+    ``,
+    `/**`,
+    ` * Type representing all defined server-side action hooks.`,
+    ` * The keys are the action names, and the values are the \`Action\` definition objects.`,
+    ` */`,
+    `export type Actions = {`,
+    ...serverActionDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Action,`,
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Type representing all defined server-side filter hooks.`,
+    ` * The keys are the filter names, and the values are the \`Filter\` definition objects.`,
+    ` */`,
+    `export type Filters = {`,
+    ...serverFilterDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Filter,`,
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Stores all loaded server-side actions in a key-value structure.`,
+    ` * The keys represent action names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The action function to be executed.`,
+    ` * - \`priority\` - The priority of the action.`,
+    ` */`,
+    `export const actions: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Stores all loaded server-side filters in a key-value structure.`,
+    ` * The keys represent filter names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The filter function to be executed.`,
+    ` * - \`priority\` - The priority of the filter.`,
+    ` */`,
+    `export const filters: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Loads all server-side actions.`,
+    ` *`,
+    ` * Actions are functions that allow you to hook into specific points in the application flow.`,
+    ` * They provide a way to execute custom code without changing the original implementation.`,
+    ` *`,
+    ` * This function is called automatically when the server starts.`,
+    ` */`,
+    `export async function loadActions() {`,
+    ...serverActionCallbackEntries.flatMap(([_, locations]) =>
+      locations.map(({ file }) => `  await import('${file.import}')`),
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Loads all server-side filters.`,
+    ` *`,
+    ` * Filters are functions that allow modification of data at specific points in the application flow.`,
+    ` * They provide a way to transform data without changing the original implementation.`,
+    ` *`,
+    ` * This function is called automatically when the server starts.`,
+    ` */`,
+    `export async function loadFilters() {`,
+    ...serverFilterCallbackEntries.flatMap(([_, locations]) =>
+      locations.map(({ file }) => `  await import('${file.import}')`),
+    ),
+    `}`,
+  ].join('\n')
 }
 
 /**
@@ -47,8 +182,6 @@ function getServerFileContent() {
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/index.ts>`)
 
   const { resolve } = createResolver(import.meta.url)
-  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
-  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
   const templateFiles = resolveTemplateFiles()
   const templateEntries = Object.entries(templateFiles)
   const collectionFiles = resolveCollectionFiles()
@@ -57,14 +190,6 @@ function getServerFileContent() {
   const singletonEntries = Object.entries(singletonFiles)
   const jobFiles = resolveJobFiles()
   const jobEntries = Object.entries(jobFiles)
-  const actionDefinitionFiles = resolveActionDefinitionFiles()
-  const serverActionDefinitionEntries = Object.entries(actionDefinitionFiles.server)
-  const actionCallbackFiles = resolveActionCallbackFiles()
-  const serverActionCallbackEntries = Object.entries(actionCallbackFiles.server)
-  const filterDefinitionFiles = resolveFilterDefinitionFiles()
-  const serverFilterDefinitionEntries = Object.entries(filterDefinitionFiles.server)
-  const filterCallbackFiles = resolveFilterCallbackFiles()
-  const serverFilterCallbackEntries = Object.entries(filterCallbackFiles.server)
   const translationFiles = resolveTranslationFiles()
   const dashboardLanguages = Object.keys(translationFiles['pruvious-dashboard'] ?? {}).map((code) => ({
     code,
@@ -154,18 +279,12 @@ function getServerFileContent() {
     `import { collectionGuards } from '${resolve('../collections/guards')}'`,
     `import { cacheCollection } from '${resolve('../cache/collection')}'`,
     `import { queueCollection } from '${resolve('../queue/collection')}'`,
+    `import { parseConditionalLogic } from '${resolve('../fields/utils.server')}'`,
     `import type { DynamicCollectionFieldTypes } from './dynamic-collection-field-types'`,
     ...collectionEntries.map(([name, { file }]) => `import type ${name}Collection from '${file.import}'`),
     ...templateEntries.map(([name, { file }]) => `import type ${name}Template from '${file.import}'`),
     ...singletonEntries.map(([name, { file }]) => `import type ${name}Singleton from '${file.import}'`),
-    ...fieldDefinitionEntries.map(([name, { file }]) => `import _${camelCase(name)}Field from '${file.import}'`),
     ...jobEntries.map(([name, { file }]) => `import type ${camelCase(name)}Job from '${file.import}'`),
-    ...serverActionDefinitionEntries.map(
-      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
-    ),
-    ...serverFilterDefinitionEntries.map(
-      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Filter from '${file.import}'`,
-    ),
     ...Object.entries(translationFiles).flatMap(([domain, languages]) =>
       Object.entries(languages).flatMap(([language, paths]) =>
         paths
@@ -361,42 +480,6 @@ function getServerFileContent() {
     `export type StandardRoutes = ${standardRoutes.map((route) => `'${pruviousOptions.api.basePath + route}'`).join(' | ')} | '/uploads/**'`,
     ``,
     `/**`,
-    ` * Type representing all defined server-side action hooks.`,
-    ` * The keys are the action names, and the values are the \`Action\` definition objects.`,
-    ` */`,
-    `export type Actions = {`,
-    ...serverActionDefinitionEntries.map(
-      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Action,`,
-    ),
-    `}`,
-    ``,
-    `/**`,
-    ` * Type representing all defined server-side filter hooks.`,
-    ` * The keys are the filter names, and the values are the \`Filter\` definition objects.`,
-    ` */`,
-    `export type Filters = {`,
-    ...serverFilterDefinitionEntries.map(
-      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Filter,`,
-    ),
-    `}`,
-    ``,
-    `/**`,
-    ` * Type representing all defined field types.`,
-    ` * The keys are the field names, and the values are the \`Field\` definition objects.`,
-    ` */`,
-    `export type Fields = {`,
-    ...fieldDefinitionEntries.map(([name]) => `  '${name}': ReturnType<typeof _${camelCase(name)}Field.serverFn>,`),
-    `}`,
-    ``,
-    `/**`,
-    ` * Represents the type structure for all available field configuration options.`,
-    ` * The keys are the field names, and the values are the field options.`,
-    ` */`,
-    `export type FieldOptions = {`,
-    ...fieldDefinitionEntries.map(([name]) => `  '${name}': typeof _${camelCase(name)}Field.TOptions,`),
-    `}`,
-    ``,
-    `/**`,
     ` * Type definition for custom icon names with their prefixes.`,
     ` * It is generated from the \`icons.customCollections\` option of the \`@nuxt/icon\` module.`,
     ` *`,
@@ -445,24 +528,6 @@ function getServerFileContent() {
     ` * The keys are the job names, and the values are the \`Job\` definition objects.`,
     ` */`,
     `export const jobs: Jobs = {} as any`,
-    ``,
-    `/**`,
-    ` * Stores all loaded server-side actions in a key-value structure.`,
-    ` * The keys represent action names, and their values are arrays of objects containing the following properties:`,
-    ` *`,
-    ` * - \`callback\` - The action function to be executed.`,
-    ` * - \`priority\` - The priority of the action.`,
-    ` */`,
-    `export const actions: Record<string, { callback: Function, priority: number }[]> = {}`,
-    ``,
-    `/**`,
-    ` * Stores all loaded server-side filters in a key-value structure.`,
-    ` * The keys represent filter names, and their values are arrays of objects containing the following properties:`,
-    ` *`,
-    ` * - \`callback\` - The filter function to be executed.`,
-    ` * - \`priority\` - The priority of the filter.`,
-    ` */`,
-    `export const filters: Record<string, { callback: Function, priority: number }[]> = {}`,
     ``,
     `/**`,
     ` * Array of all custom icon names with their prefixes.`,
@@ -683,7 +748,9 @@ function getServerFileContent() {
     ` */`,
     `export function insertInto<TCollectionName extends keyof Collections & string>(collection: TCollectionName) {`,
     `  const event = useEvent()`,
-    `  return database().queryBuilder({ contextLanguage: event.context.pruvious.language }).insertInto(collection)`,
+    `  const insertInto = database().queryBuilder({ contextLanguage: event.context.pruvious.language }).insertInto(collection)`,
+    `  insertInto.parseConditionalLogic = parseConditionalLogic`,
+    `  return insertInto`,
     `}`,
     ``,
     `/**`,
@@ -753,7 +820,9 @@ function getServerFileContent() {
     ` */`,
     `export function guardedInsertInto<TCollectionName extends keyof Collections & string>(collection: TCollectionName) {`,
     `  const event = useEvent()`,
-    `  return database().queryBuilder({ contextLanguage: event.context.pruvious.language }).insertInto(collection).prepare(collectionGuards())`,
+    `  const insertInto = database().queryBuilder({ contextLanguage: event.context.pruvious.language }).insertInto(collection).prepare(collectionGuards())`,
+    `  insertInto.parseConditionalLogic = parseConditionalLogic`,
+    `  return insertInto`,
     `}`,
     ``,
     `/**`,
@@ -987,7 +1056,9 @@ function getServerFileContent() {
     ` */`,
     `export function update<TCollectionName extends keyof Collections & string>(collection: TCollectionName) {`,
     `  const event = useEvent()`,
-    `  return database().queryBuilder({ contextLanguage: event.context.pruvious.language }).update(collection)`,
+    `  const update = database().queryBuilder({ contextLanguage: event.context.pruvious.language }).update(collection)`,
+    `  update.parseConditionalLogic = parseConditionalLogic`,
+    `  return update`,
     `}`,
     ``,
     `/**`,
@@ -1051,7 +1122,9 @@ function getServerFileContent() {
     ` */`,
     `export function guardedUpdate<TCollectionName extends keyof Collections & string>(collection: TCollectionName) {`,
     `  const event = useEvent()`,
-    `  return database().queryBuilder({ contextLanguage: event.context.pruvious.language }).update(collection).prepare(collectionGuards())`,
+    `  const update = database().queryBuilder({ contextLanguage: event.context.pruvious.language }).update(collection).prepare(collectionGuards())`,
+    `  update.parseConditionalLogic = parseConditionalLogic`,
+    `  return update`,
     `}`,
     ``,
     `/**`,
@@ -1376,34 +1449,6 @@ function getServerFileContent() {
     `}`,
     ``,
     `/**`,
-    ` * Loads all server-side actions.`,
-    ` *`,
-    ` * Actions are functions that allow you to hook into specific points in the application flow.`,
-    ` * They provide a way to execute custom code without changing the original implementation.`,
-    ` *`,
-    ` * This function is called automatically when the server starts.`,
-    ` */`,
-    `export async function loadActions() {`,
-    ...serverActionCallbackEntries.flatMap(([_, locations]) =>
-      locations.map(({ file }) => `  await import('${file.import}')`),
-    ),
-    `}`,
-    ``,
-    `/**`,
-    ` * Loads all server-side filters.`,
-    ` *`,
-    ` * Filters are functions that allow modification of data at specific points in the application flow.`,
-    ` * They provide a way to transform data without changing the original implementation.`,
-    ` *`,
-    ` * This function is called automatically when the server starts.`,
-    ` */`,
-    `export async function loadFilters() {`,
-    ...serverFilterCallbackEntries.flatMap(([_, locations]) =>
-      locations.map(({ file }) => `  await import('${file.import}')`),
-    ),
-    `}`,
-    ``,
-    `/**`,
     ` * Retrieves the storage manager.`,
     ` */`,
     `export function storage() { return _storage }`,
@@ -1572,10 +1617,6 @@ function getServerFileContent() {
     `  }`,
     `}`,
     ``,
-    ...fieldDefinitionEntries.flatMap(([name, location]) => [
-      `export const ${camelCase(name)}Field = _${camelCase(name)}Field.serverFn.bind({ fieldType: '${camelCase(name)}', location: ${JSON.stringify(location)} })`,
-    ]),
-    ``,
     `/**`,
     ` * The \`I18n\` instance containing all translatable strings in the CMS.`,
     ` */`,
@@ -1708,9 +1749,6 @@ function getServerTypeFileContent() {
     `export type Templates = any`,
     `export type Singletons = any`,
     `export type Jobs = any`,
-    `export type Actions = any`,
-    `export type Filters = any`,
-    `export type Fields = any`,
     `export type IconName = any`,
     `export const permissions: any`,
     `export const languages: any`,
@@ -1719,8 +1757,6 @@ function getServerTypeFileContent() {
     `export const collections: any`,
     `export const singletons: any`,
     `export const jobs: any`,
-    `export const actions: any`,
-    `export const filters: any`,
     `export const iconNames: any`,
     `export function getTemplate(): any`,
     `export function database(): any`,
@@ -1743,8 +1779,6 @@ function getServerTypeFileContent() {
     `export function initQueueDatabase(): any`,
     `export function initLogsDatabase(): any`,
     `export function loadJobs(): any`,
-    `export function loadActions(): any`,
-    `export function loadFilters(): any`,
     `export function storage(): any`,
     `export function putFile(): any`,
     `export function getFile(): any`,
@@ -1752,7 +1786,6 @@ function getServerTypeFileContent() {
     `export function deleteFile(): any`,
     `export function getFileMeta(): any`,
     `export function initStorage(): any`,
-    ...fieldDefinitionEntries.map(([name]) => `export function ${camelCase(name)}Field(): any`),
     `export const i18n: any`,
     `export function __(): any`,
     `export function _(): any`,
@@ -1763,6 +1796,8 @@ function getServerTypeFileContent() {
 
 function getReExports() {
   const { resolve } = createResolver(import.meta.url)
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
 
   return [
     `export { defineCollection, defineCollectionFromTemplate, type DefineCollectionOptions, type CollectionMetaOptions, type CollectionGuard, type CollectionUIOptions, type CollectionMeta, type GenericMetaCollection, type MetaContext } from '${resolve('../collections/define')}'`,
@@ -1799,8 +1834,12 @@ function getReExports() {
     `export type { PruviousState, PruviousDashboardState } from '${resolve('../pruvious/utils.client')}'`,
     `export { type CustomLogOptions, insertCustomLog } from '${resolve('../debug/utils.server')}'`,
     `export { type ResolveCustomComponentPathOptions, resolvePruviousComponent, resolveNamedPruviousComponent, resolveCustomComponentPath } from '${resolve('../components/utils.server')}'`,
-    `export { type Block, type GenericBlock, type DefineBlockOptions, defineBlock } from '${resolve('../blocks/define.server')}'`,
-    `export { blocks } from './blocks'`,
+    `export { type Block, type GenericBlock, type DefineBlockOptions } from '${resolve('../blocks/define.server')}'`,
+    `export type { SerializableBlock } from '${resolve('../blocks/utils.client')}'`,
+    `export type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('../blocks/utils.server')}'`,
+    `export { type Actions, type Filters, actions, filters, loadActions, loadFilters } from './hooks'`,
+    `export { type BlockName, type Blocks, blocks, getBlockGroups, getBlockTags } from './blocks'`,
+    `export { type Fields, type FieldOptions${fieldDefinitionEntries.map(([name]) => `, ${camelCase(name)}Field`).join('')} } from './fields'`,
   ].join('\n')
 }
 
@@ -1829,26 +1868,42 @@ function getServerFileContentPatch() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
   const dynamicCollectionFieldTypesPath = `${pruviousOptions.dir.build}/server/dynamic-collection-field-types.ts`
+  const dynamicBlockTypesPath = `${pruviousOptions.dir.build}/server/dynamic-block-types.ts`
   const content: string[] = []
+  const { resolve } = createResolver(import.meta.url)
 
   fs.writeFileSync(dynamicCollectionFieldTypesPath, `export type DynamicCollectionFieldTypes = any`)
+  fs.writeFileSync(
+    dynamicBlockTypesPath,
+    [
+      `export type DynamicBlockFieldTypes = any`,
+      `export type BlockGroupName = any`,
+      `export type BlockTagName = any`,
+    ].join('\n'),
+  )
 
   if (isDevelopment) {
     content.push(
       ``,
       `import fs from 'node:fs'`,
+      `import { filters, loadFilters } from './hooks'`,
+      `import { blocks } from './blocks'`,
+      `import type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('../blocks/utils.server')}'`,
       ``,
       `async function generateDynamicCollectionFieldTypes() {`,
       `  await loadCollections()`,
       ``,
       `  const content = [`,
+      "    `import type { BlockName } from './blocks'`,",
+      "    `import type { DynamicBlockFieldTypes } from './dynamic-block-types'`,",
+      '    ``,',
       '    `export interface DynamicCollectionFieldTypes {`,',
       '    `  Casted: {`,',
       '    ...Object.entries(collections).map(([name, collection]) => [',
       '    `    ${name}: {`,',
       '    `      id: number`,',
       '    ...Object.entries(collection.fields).map(([fieldName, field]) => [',
-      '    `      ${fieldName}: ${field.castedTypeFn(field)},`,',
+      '    `      ${fieldName}: ${field.castedTypeFn({ field, collections, blocks })},`,',
       '    ]).flat(),',
       '    `    },`',
       '    ]).flat(),',
@@ -1858,7 +1913,7 @@ function getServerFileContentPatch() {
       '    `    ${name}: {`,',
       '    `      id: number`,',
       '    ...Object.entries(collection.fields).map(([fieldName, field]) => [',
-      '    `      ${fieldName}: ${field.populatedTypeFn(field)},`,',
+      '    `      ${fieldName}: ${field.populatedTypeFn({ field, collections, blocks })},`,',
       '    ]).flat(),',
       '    `    },`',
       '    ]).flat(),',
@@ -1873,9 +1928,76 @@ function getServerFileContentPatch() {
       `generateDynamicCollectionFieldTypes()`,
       ``,
       `export type { DynamicCollectionFieldTypes } from './dynamic-collection-field-types'`,
+      ``,
+      `async function generateDynamicBlockTypes() {`,
+      `  await loadFilters()`,
+      ``,
+      `  const blockGroupNames: BlockGroupDefinition[] = (await filters['blocks:groups']?.reduce(async (acc, { callback }) => callback(await acc, {}), Promise.resolve([]))) ?? []`,
+      `  const blockTagNames: BlockTagDefinition[] = (await filters['blocks:tags']?.reduce(async (acc, { callback }) => callback(await acc, {}), Promise.resolve([]))) ?? []`,
+      ``,
+      `  const content = [`,
+      "    `import type { Booleanish } from '@pruvious/utils'`,",
+      "    `import type { BlockName } from './blocks'`,",
+      "    `import type { DynamicCollectionFieldTypes } from './dynamic-collection-field-types'`,",
+      '    ``,',
+      '    `export interface DynamicBlockFieldTypes {`,',
+      '    `  Casted: {`,',
+      '    ...Object.entries(blocks).map(([name, block]) => [',
+      '    `    ${name}: {`,',
+      "    `      $key: '${name}'`,",
+      '    ...Object.entries(block.fields).map(([fieldName, field]) => [',
+      '    `      ${fieldName}: ${field.castedTypeFn({ field, collections, blocks })},`,',
+      '    ]).flat(),',
+      '    `    },`',
+      '    ]).flat(),',
+      '    `  },`,',
+      '    `  Populated: {`,',
+      '    ...Object.entries(blocks).map(([name, block]) => [',
+      '    `    ${name}: {`,',
+      "    `      $key: '${name}'`,",
+      '    ...Object.entries(block.fields).map(([fieldName, field]) => [',
+      '    `      ${fieldName}: ${field.populatedTypeFn({ field, collections, blocks })},`,',
+      '    ]).flat(),',
+      '    `    },`',
+      '    ]).flat(),',
+      '    `  },`,',
+      '    `  Input: {`,',
+      '    ...Object.entries(blocks).map(([name, block]) => [',
+      '    `    ${name}: {`,',
+      "    `      $key: '${name}'`,",
+      '    ...Object.entries(block.fields).filter(([_, field]) => !field.autoGenerated).map(([fieldName, field]) => [',
+      "    `      ${fieldName}${!field.required || field.conditionalLogic ? '?' : ''}: ${field.inputTypeFn({ field, collections, blocks })},`,",
+      '    ]).flat(),',
+      '    `    },`',
+      '    ]).flat(),',
+      '    `  },`,',
+      '    `}`,',
+      '    ``,',
+      '    `/**`,',
+      '    ` * Type representing all registered block group names.`,',
+      '    ` */`,',
+      "    `export type BlockGroupName = ${blockGroupNames.map(({ name }) => `'${name}'`).join(' | ') || 'never'}`,",
+      '    ``,',
+      '    `/**`,',
+      '    ` * Type representing all registered block tag names.`,',
+      '    ` */`,',
+      "    `export type BlockTagName = ${blockTagNames.map(({ name }) => `'${name}'`).join(' | ') || 'never'}`,",
+      '    ``,',
+      `  ]`,
+      ``,
+      `  fs.writeFileSync('${dynamicBlockTypesPath}', content.join('\\n'))`,
+      `}`,
+      ``,
+      `generateDynamicBlockTypes()`,
+      ``,
+      `export type { DynamicBlockFieldTypes, BlockGroupName, BlockTagName } from './dynamic-block-types'`,
     )
   } else {
-    content.push(``, `export type { DynamicCollectionFieldTypes } from './dynamic-collection-field-types'`)
+    content.push(
+      ``,
+      `export type { DynamicCollectionFieldTypes } from './dynamic-collection-field-types'`,
+      `export type { DynamicBlockFieldTypes, BlockGroupName, BlockTagName } from './dynamic-block-types'`,
+    )
   }
 
   return content.join('\n')
@@ -1885,5 +2007,5 @@ function getServerFileContentPatch() {
  * Generates additional content to append to the `#pruvious/server` type file.
  */
 function getServerTypeFileContentPatch() {
-  return [`export type DynamicCollectionFieldTypes = any`].join('\n')
+  return [`export type DynamicCollectionFieldTypes = any`, `export type DynamicBlockTypes = any`].join('\n')
 }

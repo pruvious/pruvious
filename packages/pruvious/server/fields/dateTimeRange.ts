@@ -326,4 +326,5 @@ export default defineField({
   ],
   castedTypeFn: () => '[number, number] | null',
   populatedTypeFn: () => '[number, number] | null',
+  inputTypeFn: () => '[number | string | Date, number | string | Date] | null',
 })

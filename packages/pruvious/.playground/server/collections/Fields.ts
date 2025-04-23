@@ -1,4 +1,5 @@
 import {
+  blocksField,
   dateField,
   dateRangeField,
   dateTimeField,
@@ -20,6 +21,29 @@ import { repeaterTestField } from '~/shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
+    // blocks
+    blocks: blocksField({}),
+    blocksMinMax: blocksField({
+      minItems: 2,
+      maxItems: 3,
+      default: [
+        { $key: 'Button', label: 'Foo' },
+        { $key: 'Button', label: 'Bar' },
+      ],
+      ui: { label: 'Blocks (min/max)' },
+    }),
+    blocksUnique: blocksField({
+      enforceUniqueItems: true,
+      ui: { label: 'Blocks (unique items)' },
+    }),
+    blocksDeduplicate: blocksField({
+      deduplicateItems: true,
+      ui: { label: 'Blocks (deduplicate items)' },
+    }),
+    blocksAllowedRoot: blocksField({
+      allowRootBlocks: ['Container', 'Nesting'],
+    }),
+
     // nullableObject
     nullableObject: nullableObjectField({
       subfields: {
@@ -298,6 +322,10 @@ export default defineCollection({
       fieldsLayout: [
         {
           tabs: [
+            {
+              label: 'Blocks',
+              fields: ['blocks', 'blocksMinMax', 'blocksUnique', 'blocksDeduplicate', 'blocksAllowedRoot'],
+            },
             {
               label: 'Nullable object',
               fields: ['nullableObject', 'nullableObjectNested'],

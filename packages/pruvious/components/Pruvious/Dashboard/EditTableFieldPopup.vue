@@ -37,6 +37,8 @@
       operation="update"
     />
 
+    <PruviousDashboardHistoryScrollState />
+
     <template v-if="!disabled" #footer>
       <div class="pui-justify-between">
         <PruviousDashboardHistoryButtons v-if="isListening" v-model="data" :history="history" />
@@ -238,8 +240,14 @@ onMounted(() => {
         setTimeout(() => {
           const potd = getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration')
           transitionDuration = potd.endsWith('ms') ? parseInt(potd) : potd.endsWith('s') ? parseFloat(potd) * 1000 : 300
-          popup.value?.root?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, [tabindex="0"]')?.focus()
-        }, transitionDuration),
+          setTimeout(
+            () =>
+              popup.value?.root
+                ?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, [tabindex="0"]')
+                ?.focus(),
+            transitionDuration,
+          )
+        }),
       ),
     )
     setTimeout(() => {

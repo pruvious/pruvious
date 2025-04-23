@@ -1,5 +1,7 @@
+import type { BlockGroupDefinition, BlockTagDefinition } from '#pruvious/server'
 import { isArray, isObject, isString } from '@pruvious/utils'
 import { pruviousGet } from '../api/utils.client'
+import type { SerializableBlock } from '../blocks/utils.client'
 import type { SerializableCollection } from '../collections/utils.client'
 import type { SerializableSingleton } from '../singletons/utils.client'
 
@@ -27,6 +29,22 @@ export interface PruviousDashboardState {
    * The key is the singleton name, and the value is the `SerializableSingleton` definition.
    */
   singletons: Record<string, SerializableSingleton>
+
+  /**
+   * Contains all registered blocks.
+   * The key is the block name, and the value is the `SerializableBlock` definition.
+   */
+  blocks: Record<string, SerializableBlock>
+
+  /**
+   * Array containing all available block groups.
+   */
+  blockGroups: BlockGroupDefinition[]
+
+  /**
+   * Array containing all available block tags.
+   */
+  blockTags: BlockTagDefinition[]
 
   /**
    * Indicates which log types are available for the current user.
@@ -119,6 +137,21 @@ export async function refreshPruviousDashboardState(force = false) {
           Object.assign(options, deserializeTranslatableStringCallbacks(options))
         }
         Object.assign(singleton.ui, deserializeTranslatableStringCallbacks(singleton.ui as any))
+      }
+
+      for (const block of Object.values(data.blocks)) {
+        for (const options of Object.values(block.fields)) {
+          Object.assign(options, deserializeTranslatableStringCallbacks(options))
+        }
+        Object.assign(block.ui, deserializeTranslatableStringCallbacks(block.ui as any))
+      }
+
+      for (const group of data.blockGroups) {
+        Object.assign(group, deserializeTranslatableStringCallbacks(group))
+      }
+
+      for (const tag of data.blockTags) {
+        Object.assign(tag, deserializeTranslatableStringCallbacks(tag))
       }
 
       dashboard.value = data

@@ -333,16 +333,19 @@ defineEmits<{
 provide('floatingStrategy', 'absolute')
 
 const items = ref<Item[]>([])
+const isLivePreview = inject('isLivePreview', false)
 
 watch(
   () => [props.layout, props.fields, props.rootPath],
   () => {
     items.value = props.layout
       ? parseLayout(props.layout)
-      : Object.entries(props.fields ?? {}).map(([name, options]) => ({
-          type: 'DynamicField',
-          field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options },
-        }))
+      : Object.entries(props.fields ?? {})
+          .filter(([_, options]) => !isLivePreview || options._fieldType !== 'blocks')
+          .map(([name, options]) => ({
+            type: 'DynamicField',
+            field: { name, path: props.rootPath ? `${props.rootPath}.${name}` : name, options },
+          }))
     refreshErrors(items.value)
   },
   { immediate: true },
@@ -350,7 +353,9 @@ watch(
 
 watch(
   () => props.errors,
-  () => refreshErrors(items.value),
+  () => {
+    refreshErrors(items.value)
+  },
 )
 
 function parseLayout(layout: FieldsLayout): Item[] {
@@ -566,8 +571,8 @@ function extractFieldNames(layout: FieldsLayout): string[] {
   }
 
   .p-fields-row > .p-field-no-label {
+    --p-gap: 0;
     height: auto;
-    margin-top: 0;
   }
 
   .p-fields-item:not(.p-fields-hr) {

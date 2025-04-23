@@ -41,7 +41,7 @@ export function resolveCollectionLayout(
   },
 ): Component | string {
   if (page === 'index') {
-    if (collection.definition.ui.indexPage.dashboardLayout === 'default') {
+    if (collection.definition.ui.indexPage.dashboardLayout === 'standard') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
     } else {
       const component = collection.definition.ui.indexPage.dashboardLayout
@@ -57,7 +57,7 @@ export function resolveCollectionLayout(
     if (collection.definition.ui[`${page}Page`].dashboardLayout === 'auto') {
       // @todo resolve based on blocks
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-    } else if (collection.definition.ui[`${page}Page`].dashboardLayout === 'default') {
+    } else if (collection.definition.ui[`${page}Page`].dashboardLayout === 'standard') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
     } else if (collection.definition.ui[`${page}Page`].dashboardLayout === 'live-preview') {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))
@@ -84,7 +84,7 @@ export function resolveSingletonLayout(singleton: {
   if (singleton.definition.ui.dashboardLayout === 'auto') {
     // @todo resolve based on blocks
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
-  } else if (singleton.definition.ui.dashboardLayout === 'default') {
+  } else if (singleton.definition.ui.dashboardLayout === 'standard') {
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
   } else if (singleton.definition.ui.dashboardLayout === 'live-preview') {
     return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))

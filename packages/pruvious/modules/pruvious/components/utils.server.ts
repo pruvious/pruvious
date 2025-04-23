@@ -37,11 +37,9 @@ export interface ResolveCustomComponentPathOptions {
  *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
  *   - A path starting with the Nuxt alias `@/` or `~/`.
  *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
- *   - A relative path to a `.vue` component.
- *     - This path must be relative to the file where the function is called.
- *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
  *   - An absolute path to a `.vue` component.
  *   - A path for an npm module.
+ * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
  *
  * The function itself does nothing and simply returns the `path` as is.
  * It is used by the Pruvious build process to resolve custom components and generate the `customComponents` object.
@@ -54,7 +52,6 @@ export interface ResolveCustomComponentPathOptions {
  *
  * // Correct
  * resolvePruviousComponent('>/components/MyComponent.vue')
- * resolvePruviousComponent('../../app/components/MyComponent.vue')
  * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
  *
  * // Incorrect
@@ -88,11 +85,9 @@ export function resolvePruviousComponent(path: string) {
  *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
  *   - A path starting with the Nuxt alias `@/` or `~/`.
  *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
- *   - A relative path to a `.vue` component.
- *     - This path must be relative to the file where the function is called.
- *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
  *   - An absolute path to a `.vue` component.
  *   - A path for an npm module.
+ * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
  *
  * The function itself does nothing and simply returns `name` as is.
  * It is used by the Pruvious build process to resolve custom components and generate the `customComponents` object.
@@ -104,7 +99,6 @@ export function resolvePruviousComponent(path: string) {
  *
  * // Correct
  * resolveNamedPruviousComponent('MyComponent', '>/components/MyComponent.vue')
- * resolveNamedPruviousComponent('MyComponent', '../../app/components/MyComponent.vue')
  * resolveNamedPruviousComponent('MyComponent', '/Project/app/components/MyComponent.vue')
  *
  * // Incorrect

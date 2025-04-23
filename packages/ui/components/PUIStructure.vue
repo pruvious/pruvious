@@ -79,7 +79,7 @@
 
 <script generic="TItem extends Record<string, any>, TType extends string | undefined = undefined" lang="ts" setup>
 import { isDefined, isNull } from '@pruvious/utils'
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useDebounceFn, watchPausable, type useScroll } from '@vueuse/core'
 import { usePUIStructureDraggable } from '../pui/structure'
 
 const props = defineProps({
@@ -187,6 +187,7 @@ provide('floatingStrategy', 'absolute')
 
 const id = useId()
 const container = useTemplateRef('container')
+const scroll = inject<ReturnType<typeof useScroll> | null>('scroll', null)
 const draggable = usePUIStructureDraggable()
 const droppable = computed(() => {
   if (draggable.value) {
@@ -209,6 +210,27 @@ const droppable = computed(() => {
 
   return false
 })
+const prevScrollY = ref(0)
+const scrollWatcher = watchPausable(
+  () => scroll?.y.value ?? window.scrollY,
+  (scrollY) => {
+    if (scrollY !== prevScrollY.value) {
+      if (scroll) {
+        scroll.y.value = prevScrollY.value
+      } else {
+        window.scrollTo({ top: prevScrollY.value, behavior: 'instant' })
+      }
+    }
+  },
+  { initialState: 'paused' },
+)
+const pauseScrollWatcher = useDebounceFn(() => scrollWatcher.pause(), 250)
+const resumeScrollWatcher = () => {
+  prevScrollY.value = scroll?.y.value ?? window.scrollY
+  scrollWatcher.resume()
+}
+
+defineExpose({ resumeScrollWatcher, pauseScrollWatcher })
 
 onClickOutside(container, () => {
   if (droppable.value) {
@@ -220,6 +242,8 @@ function onDrop(index: number, position: 'before' | 'after') {
   if (draggable.value) {
     const { item, index: draggableIndex, remove } = draggable.value
     const isSameStructure = props.modelValue.includes(item as TItem)
+
+    resumeScrollWatcher()
 
     if (position === 'after') {
       index++
@@ -239,6 +263,8 @@ function onDrop(index: number, position: 'before' | 'after') {
     }
 
     nextTick(() => nextTick(() => emit('commit', props.modelValue)))
+
+    pauseScrollWatcher()
 
     draggable.value = null
   }
@@ -266,6 +292,7 @@ function onDrop(index: number, position: 'before' | 'after') {
   padding: 0.25rem 0.75rem;
   background-color: hsl(var(--pui-card));
   border-width: 1px;
+  border-style: dashed;
   border-radius: var(--pui-radius);
   color: hsl(var(--pui-muted-foreground));
   font-size: calc(1em - 0.0625rem);
@@ -274,6 +301,7 @@ function onDrop(index: number, position: 'before' | 'after') {
 .pui-structure-empty-zone:hover,
 .pui-structure-empty-zone-highlighted {
   border-width: 2px;
+  border-style: solid;
   border-color: hsl(var(--pui-primary));
 }
 </style>

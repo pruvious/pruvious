@@ -282,7 +282,7 @@ export interface PUITreeExtendedItemModel<T> {
   item: PUITreeItemModel<T>
 
   /**
-   * The index of the item in the `parent` or the root tree if `parent` is `undefined`.
+   * The index of the item in the `parent` or the root tree if `parents` is empty.
    */
   index: number
 

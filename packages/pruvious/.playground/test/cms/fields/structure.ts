@@ -25,7 +25,7 @@ describe('structure field', () => {
     expect(
       await $patchAsAdmin(
         `/api/collections/fields?returning=structure&where=structure[=][${JSON.stringify(t1).replaceAll('$', '$$$')}]`,
-        { structure: t2 },
+        { structure: t2.map((item) => ({ ...item, qux: false })) },
       ),
     ).toEqual([{ structure: t2 }])
   })

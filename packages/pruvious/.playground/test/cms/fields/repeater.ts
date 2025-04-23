@@ -18,7 +18,7 @@ describe('repeater field', () => {
     ).toEqual($paginated([{ repeater: t1 }]))
     expect(
       await $patchAsAdmin(`/api/collections/fields?returning=repeater&where=repeater[=][${JSON.stringify(t1)}]`, {
-        repeater: t2,
+        repeater: t2.map((item) => ({ ...item, qux: false })),
       }),
     ).toEqual([{ repeater: t2 }])
   })

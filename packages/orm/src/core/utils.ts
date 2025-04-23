@@ -1,4 +1,4 @@
-import { isArray, isDefined, isFunction, isObject, type ExtractSQLParams } from '@pruvious/utils'
+import { isArray, isFunction, isObject, isString, type ExtractSQLParams } from '@pruvious/utils'
 import { ExecError } from './ExecError'
 import type { GenericField, GenericInputFilter, GenericSanitizedInputFilter, OrderedInputFilter } from './Field'
 import type { ConditionalLogic, DataType } from './types'
@@ -75,67 +75,6 @@ export function prepareQuery<S extends string, D extends 'sqlite' | 'postgres' |
 }
 
 /**
- * Maps `subfields` based on user `inputValues`.
- * The `inputValues` don't have to be sanitized or validated.
- *
- * The method returns a map with:
- *
- * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', 'foo.bar', etc.).
- * - Values as the corresponding `Field` instances.
- */
-export function resolveSubfieldsFromInput(
-  subfields: Record<string, GenericField> | undefined,
-  inputValues: any,
-): Record<string, GenericField> {
-  const map: Record<string, GenericField> = {}
-
-  if (isDefined(subfields)) {
-    if (isArray(inputValues)) {
-      for (const [index, item] of inputValues.entries()) {
-        for (const [subfieldName, subfield] of Object.entries(subfields)) {
-          const key = `${index}.${subfieldName}`
-          map[key] = subfield
-
-          if (subfield.model.subfields && isObject(item)) {
-            const nestedMap = resolveSubfieldsFromInput(subfield.model.subfields, item[subfieldName])
-
-            for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-              map[`${key}.${nestedKey}`] = nestedField
-            }
-          } else if (subfield.model.structure && isObject(item) && isArray(item[subfieldName])) {
-            for (const [$key, structureSubfields] of Object.entries(subfield.model.structure)) {
-              const nestedMap = resolveSubfieldsFromInput(
-                structureSubfields as any,
-                item[subfieldName].map((item: any) => (item.$key === $key ? item : undefined)),
-              )
-
-              for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-                map[`${key}.${nestedKey}`] = nestedField
-              }
-            }
-          }
-        }
-      }
-    } else if (isObject(inputValues)) {
-      for (const [subfieldName, subfield] of Object.entries(subfields)) {
-        const key = subfieldName
-        map[key] = subfield
-
-        if (subfield.model.subfields) {
-          const nestedMap = resolveSubfieldsFromInput(subfield.model.subfields, inputValues[subfieldName])
-
-          for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-            map[`${key}.${nestedKey}`] = nestedField
-          }
-        }
-      }
-    }
-  }
-
-  return map
-}
-
-/**
  * Parses conditional logic for a list of `fields` and their `input` data.
  *
  * Returns an object where:
@@ -144,33 +83,39 @@ export function resolveSubfieldsFromInput(
  * - Values are the corresponding conditional logic objects to evaluate (if present).
  */
 export function parseConditionalLogic(
-  fields: Record<string, Pick<GenericField, 'conditionalLogic' | 'model'>>,
+  fields: Record<string, Pick<GenericField, 'conditionalLogic' | 'model' | 'options'>>,
   input: Record<string, any>,
 ): Record<string, ConditionalLogic | undefined> {
   const parsedConditionalLogic: Record<string, ConditionalLogic | undefined> = {}
 
   for (const [fieldName, field] of Object.entries(fields)) {
+    const item = input[fieldName]
     parsedConditionalLogic[fieldName] = field.conditionalLogic
 
     if (field.model.subfields) {
-      const subfieldMap = resolveSubfieldsFromInput(
-        field.model.subfields,
-        isObject(input) ? input[fieldName] : undefined,
-      )
-
-      for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
-        parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      if (isObject(item)) {
+        for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.model.subfields, item))) {
+          parsedConditionalLogic[`${fieldName}.${sfp}`] = sfpcl
+        }
+      } else if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.model.subfields, arrayItem))) {
+              parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+            }
+          }
+        }
       }
     } else if (field.model.structure) {
-      if (isObject(input) && isArray(input[fieldName])) {
-        for (const [$key, subfields] of Object.entries(field.model.structure)) {
-          const subfieldMap = resolveSubfieldsFromInput(
-            subfields as any,
-            input[fieldName].map((item: any) => (item.$key === $key ? item : undefined)),
-          )
-
-          for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
-            parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const subfields = isString(arrayItem.$key) ? field.model.structure[arrayItem.$key] : undefined
+            if (subfields) {
+              for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(subfields, arrayItem))) {
+                parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
           }
         }
       }

@@ -7,7 +7,7 @@ import type { GenericField } from '@pruvious/orm'
  * Use this in `<script setup>` of a Vue component located in the `app/blocks/` directory.
  * The filename determines the block name, which should be in PascalCase (e.g. 'Button.ts', 'TwoColumns.ts', etc.).
  *
- * Fields defined here will be merged with the fields defined in `defineProps` in the Vue component.
+ * Fields defined here will be merged with the fields defined in `defineProps(fields)`.
  *
  * Note: This function is a compiler macro and does not return any value.
  *

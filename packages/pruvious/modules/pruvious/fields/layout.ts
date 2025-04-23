@@ -212,11 +212,9 @@ export interface FieldsLayoutComponentItem {
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
    *   - A path starting with the Nuxt alias `@/` or `~/`.
    *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-   *   - A relative path to a `.vue` component.
-   *     - This path must be relative to the file where the function is called.
-   *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *   - An absolute path to a `.vue` component.
    *   - A path for an npm module.
+   * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *
    * The custom component receives the following props:
    *
@@ -232,7 +230,6 @@ export interface FieldsLayoutComponentItem {
    *
    * // Correct
    * resolvePruviousComponent('>/components/MyComponent.vue')
-   * resolvePruviousComponent('../../app/components/MyComponent.vue')
    * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
    *
    * // Incorrect

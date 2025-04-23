@@ -22,10 +22,12 @@ import {
   parseConditionalLogic,
   SanitizedUpdateContext,
   UpdateContext,
+  type ConditionalLogic,
   type ExtractCastedTypes,
   type ExtractPopulatedTypes,
   type GenericCollection,
   type GenericDatabase,
+  type GenericField,
   type Populator,
   type QueryDetails,
 } from '../core'
@@ -101,6 +103,10 @@ export class UpdateQueryBuilder<
   TKnownReturningFields extends boolean = true,
   TPopulateFields extends boolean = false,
 > extends ConditionalQueryBuilder<TCollections, TCollectionName, TCollection, TI18n> {
+  public parseConditionalLogic: (
+    fields: Record<string, Pick<GenericField, 'conditionalLogic' | 'model' | 'options'>>,
+    input: Record<string, any>,
+  ) => Record<string, ConditionalLogic | undefined>
   protected rawInput: Record<string, any> = {}
   protected sanitizedInput: Record<string, any> = {}
   protected conditionalLogicResolver = new ConditionalLogicResolver()
@@ -123,6 +129,7 @@ export class UpdateQueryBuilder<
     protected logger: (message: string, ...optionalParams: any[]) => void,
   ) {
     super(collections, collectionName, i18n, db, contextLanguage, logger)
+    this.parseConditionalLogic = parseConditionalLogic
   }
 
   /**
@@ -258,6 +265,7 @@ export class UpdateQueryBuilder<
       this.logger,
     )
 
+    clone.parseConditionalLogic = this.parseConditionalLogic
     clone.cache = { ...this.cache }
     clone.customContextData = { ...this.customContextData }
     clone.verboseMode = this.verboseMode
@@ -897,7 +905,7 @@ export class UpdateQueryBuilder<
   protected resolveConditionalLogic() {
     this.conditionalLogicResolver = new ConditionalLogicResolver()
       .setInput(this.sanitizedInput)
-      .setConditionalLogic(parseConditionalLogic(this.c().fields, this.sanitizedInput))
+      .setConditionalLogic(this.parseConditionalLogic(this.c().fields, this.sanitizedInput))
     this.conditionalLogicResolver.resolve()
 
     // Check for missing field references

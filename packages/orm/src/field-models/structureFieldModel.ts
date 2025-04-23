@@ -116,9 +116,10 @@ export type ExtractStructureInput<T extends { [$key: string]: Record<string, Gen
  * 3. If the field is not nullable, the value cannot be `null`.
  * 4. The value must be an `array` or `null`.
  * 5. All items in the array must be of type `object`.
- * 6. All subfields must be valid (their own validators are applied).
- * 7. If the option `enforceUniqueItems` is `true`, all items in the array must be unique.
- * 8. If the option `minItems` or `maxItems` are set, the number of items in the array must be within the specified range.
+ * 6. All items in the array must have a valid `$key` property.
+ * 7. All subfields must be valid (their own validators are applied).
+ * 8. If the option `enforceUniqueItems` is `true`, all items in the array must be unique.
+ * 9. If the option `minItems` or `maxItems` are set, the number of items in the array must be within the specified range.
  *
  * ---
  *
@@ -323,8 +324,6 @@ export function structureFieldModel<
       },
       (value, { definition, context, path }, errors) => {
         if (!isNull(value)) {
-          let hasErrors = false
-
           for (const [i, item] of value.entries()) {
             if (isUndefined(item.$key)) {
               errors[`${path}.${i}`] = context.__('pruvious-orm', 'Missing `$key` property')
@@ -333,10 +332,6 @@ export function structureFieldModel<
             } else if (!definition.model.structure![item.$key]) {
               errors[`${path}.${i}`] = context.__('pruvious-orm', 'Invalid `$key`')
             }
-          }
-
-          if (hasErrors) {
-            throw new Error('_ignore') // Break the top-level loop
           }
         }
       },

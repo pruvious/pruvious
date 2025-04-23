@@ -1,5 +1,7 @@
 import {
   resolveCustomComponentPath,
+  type Blocks,
+  type Collections,
   type GenericDatabase,
   type TranslatableStringCallbackContext,
 } from '#pruvious/server'
@@ -84,14 +86,20 @@ export interface DefineFieldOptions<
    * - `numeric` => `number`
    * - `text`    => `string`
    *
-   * The function receives the current `field` instance as a parameter.
+   * The `nullable` option is also taken into account when determining the casted type.
+   *
+   * The function receives a `context` object with the following properties:
+   *
+   * - `field` - The current field instance.
+   * - `collections` - An object containing all collection definitions (key-value pairs).
+   * - `blocks` - An object containing all block definitions (key-value pairs).
    *
    * @example
    * ```ts
    * () => number[]
    * ```
    */
-  castedTypeFn?: (
+  castedTypeFn?: (context: {
     field: Field<
       TModel,
       TModel['TOptions'] & (TCustomOptions extends undefined ? never : TCustomOptions),
@@ -101,8 +109,10 @@ export interface DefineFieldOptions<
       boolean,
       ConditionalLogic | undefined,
       GenericDatabase
-    >,
-  ) => string
+    >
+    collections: Collections
+    blocks: Blocks
+  }) => string
 
   /**
    * A function that returns a string representing the field's TypeScript type after populating.
@@ -115,14 +125,20 @@ export interface DefineFieldOptions<
    * - `numeric` => `number`
    * - `text`    => `string`
    *
-   * The function receives the current `field` instance as a parameter.
+   * The `nullable` option is also taken into account when determining the populated type.
+   *
+   * The function receives a `context` object with the following properties:
+   *
+   * - `field` - The current field instance.
+   * - `collections` - An object containing all collection definitions (key-value pairs).
+   * - `blocks` - An object containing all block definitions (key-value pairs).
    *
    * @example
    * ```ts
    * ({ options }) => `(${options.allowValues.map((value) => `'${value}'`).join(' | ')})[]`
    * ```
    */
-  populatedTypeFn?: (
+  populatedTypeFn?: (context: {
     field: Field<
       TModel,
       TModel['TOptions'] & (TCustomOptions extends undefined ? never : TCustomOptions),
@@ -132,8 +148,49 @@ export interface DefineFieldOptions<
       boolean,
       ConditionalLogic | undefined,
       GenericDatabase
-    >,
-  ) => string
+    >
+    collections: Collections
+    blocks: Blocks
+  }) => string
+
+  /**
+   * A function that returns a string representing the field's TypeScript type for input values in blocks.
+   * It is used for resolving field types in blocks where circular references prevent automatic type inference.
+   *
+   * If not specified, the field type is automatically resolved from the field model's `dataType`:
+   *
+   * - `bigint`  => `number | string`
+   * - `boolean` => `Booleanish`
+   * - `numeric` => `number | string`
+   * - `text`    => `number | string`
+   *
+   * The `nullable` option is also taken into account when determining the input type.
+   *
+   * The function receives a `context` object with the following properties:
+   *
+   * - `field` - The current field instance.
+   * - `collections` - An object containing all collection definitions (key-value pairs).
+   * - `blocks` - An object containing all block definitions (key-value pairs).
+   *
+   * @example
+   * ```ts
+   * ({ options }) => `(${options.allowValues.map((value) => `'${value}'`).join(' | ')})[]`
+   * ```
+   */
+  inputTypeFn?: (context: {
+    field: Field<
+      TModel,
+      TModel['TOptions'] & (TCustomOptions extends undefined ? never : TCustomOptions),
+      DefaultFalse<TNullable>,
+      boolean,
+      boolean,
+      boolean,
+      ConditionalLogic | undefined,
+      GenericDatabase
+    >
+    collections: Collections
+    blocks: Blocks
+  }) => string
 
   /**
    * Determines if the field can accept `null` values.
@@ -652,11 +709,9 @@ export interface FieldUIOptions<
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
    *   - A path starting with the Nuxt alias `@/` or `~/`.
    *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-   *   - A relative path to a `.vue` component.
-   *     - This path must be relative to the file where the function is called.
-   *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *   - An absolute path to a `.vue` component.
    *   - A path for an npm module.
+   * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *
    * The final component displayed is resolved in the following order, with the first match being used:
    *
@@ -689,7 +744,6 @@ export interface FieldUIOptions<
    *
    * // Correct
    * resolvePruviousComponent('>/components/MyComponent.vue')
-   * resolvePruviousComponent('../../app/components/MyComponent.vue')
    * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
    *
    * // Incorrect
@@ -712,11 +766,9 @@ export interface FieldUIOptions<
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
    *   - A path starting with the Nuxt alias `@/` or `~/`.
    *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-   *   - A relative path to a `.vue` component.
-   *     - This path must be relative to the file where the function is called.
-   *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *   - An absolute path to a `.vue` component.
    *   - A path for an npm module.
+   * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *
    * The final component displayed is resolved in the following order, with the first match being used:
    *
@@ -746,7 +798,6 @@ export interface FieldUIOptions<
    *
    * // Correct
    * resolvePruviousComponent('>/components/MyComponent.vue')
-   * resolvePruviousComponent('../../app/components/MyComponent.vue')
    * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
    *
    * // Incorrect
@@ -769,11 +820,9 @@ export interface FieldUIOptions<
    *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
    *   - A path starting with the Nuxt alias `@/` or `~/`.
    *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-   *   - A relative path to a `.vue` component.
-   *     - This path must be relative to the file where the function is called.
-   *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *   - An absolute path to a `.vue` component.
    *   - A path for an npm module.
+   * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *
    * The final component displayed is resolved in the following order, with the first match being used:
    *
@@ -803,7 +852,6 @@ export interface FieldUIOptions<
    *
    * // Correct
    * resolvePruviousComponent('>/components/MyComponent.vue')
-   * resolvePruviousComponent('../../app/components/MyComponent.vue')
    * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
    *
    * // Incorrect
@@ -1176,15 +1224,14 @@ export function defineField<
         ...omit(filteredOptions, [...modelOptionKeys, 'guards'] as any),
         validators,
       }) as any
-      const typeMap = {
-        bigint: 'number',
-        boolean: 'boolean',
-        numeric: 'number',
-        text: 'string',
-      }
 
-      field.castedTypeFn = fieldTypeOptions.castedTypeFn ?? (() => typeMap[model.dataType])
-      field.populatedTypeFn = fieldTypeOptions.populatedTypeFn ?? (() => typeMap[model.dataType])
+      const typeMap = { bigint: 'number', boolean: 'boolean', numeric: 'number', text: 'string' }
+      const nullUnion = fieldTypeOptions.nullable ? ' | null' : ''
+      field.castedTypeFn = fieldTypeOptions.castedTypeFn ?? (() => typeMap[model.dataType] + nullUnion)
+      field.populatedTypeFn = fieldTypeOptions.populatedTypeFn ?? (() => typeMap[model.dataType] + nullUnion)
+      field.inputTypeFn =
+        fieldTypeOptions.inputTypeFn ??
+        (() => (model.dataType === 'boolean' ? 'Booleanish' : 'number | string') + nullUnion)
 
       return field
     },

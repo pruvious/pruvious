@@ -299,7 +299,8 @@ export default defineTemplate(() => ({
   ],
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'Users'),
-    menu: { group: 'management', icon: 'users', order: 1 },
+    icon: 'users',
+    menu: { group: 'management', order: 1 },
     indexPage: {
       table: {
         columns: ['email', 'roles', 'isActive | 150px', 'isAdmin | 150px', 'createdAt | 150px'],

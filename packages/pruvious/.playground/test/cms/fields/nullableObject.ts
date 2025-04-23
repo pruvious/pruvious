@@ -16,9 +16,7 @@ describe('nullableObject field', () => {
     expect(
       await $patchAsAdmin(
         `/api/collections/fields?returning=nullableObject&where=nullableObject[=][${JSON.stringify(t1)}]`,
-        {
-          nullableObject: t2,
-        },
+        { nullableObject: { ...t2, qux: false } },
       ),
     ).toEqual([{ nullableObject: t2 }])
   })

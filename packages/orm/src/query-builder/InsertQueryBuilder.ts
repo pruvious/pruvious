@@ -22,10 +22,12 @@ import {
   InsertContext,
   parseConditionalLogic,
   SanitizedInsertContext,
+  type ConditionalLogic,
   type ExtractCastedTypes,
   type ExtractPopulatedTypes,
   type GenericCollection,
   type GenericDatabase,
+  type GenericField,
   type Populator,
   type QueryDetails,
 } from '../core'
@@ -107,6 +109,10 @@ export class InsertQueryBuilder<
   TKnownReturningFields extends boolean = true,
   TPopulateFields extends boolean = false,
 > extends DerivedQueryBuilder<TCollections, TCollectionName, TCollection, TI18n> {
+  public parseConditionalLogic: (
+    fields: Record<string, Pick<GenericField, 'conditionalLogic' | 'model' | 'options'>>,
+    input: Record<string, any>,
+  ) => Record<string, ConditionalLogic | undefined>
   protected rawInput: Record<string, any>[] = []
   protected sanitizedInput: Record<string, any>[] = []
   protected conditionalLogicResolvers: ConditionalLogicResolver[] = []
@@ -128,6 +134,7 @@ export class InsertQueryBuilder<
     protected logger: (message: string, ...optionalParams: any[]) => void,
   ) {
     super(collections, collectionName, i18n, db, contextLanguage, logger)
+    this.parseConditionalLogic = parseConditionalLogic
   }
 
   /**
@@ -261,6 +268,7 @@ export class InsertQueryBuilder<
       this.logger,
     )
 
+    clone.parseConditionalLogic = this.parseConditionalLogic
     clone.cache = { ...this.cache }
     clone.customContextData = { ...this.customContextData }
     clone.verboseMode = this.verboseMode
@@ -900,7 +908,7 @@ export class InsertQueryBuilder<
     for (const item of this.sanitizedInput.values()) {
       const resolver = new ConditionalLogicResolver()
         .setInput(item)
-        .setConditionalLogic(parseConditionalLogic(this.c().fields, item))
+        .setConditionalLogic(this.parseConditionalLogic(this.c().fields, item))
       resolver.resolve()
 
       // Set default values for `required` fields that are missing from the input data and do not meet their conditional logic

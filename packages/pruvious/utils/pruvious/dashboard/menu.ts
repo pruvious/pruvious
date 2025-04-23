@@ -124,7 +124,7 @@ export function collectionsToMenuItems(
         label: isDefined(definition.ui.label)
           ? maybeTranslate(definition.ui.label)
           : __('pruvious-dashboard', titleCase(name, false) as any),
-        icon: definition.ui.menu.icon,
+        icon: definition.ui.icon,
         group: definition.ui.menu.group as any,
         order: definition.ui.menu.order,
       }
@@ -144,7 +144,7 @@ export function singletonsToMenuItems(
       label: isDefined(definition.ui.label)
         ? maybeTranslate(definition.ui.label)
         : __('pruvious-dashboard', titleCase(name, false) as any),
-      icon: definition.ui.menu.icon,
+      icon: definition.ui.icon,
       group: definition.ui.menu.group as any,
       order: definition.ui.menu.order,
     }))

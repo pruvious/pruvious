@@ -14,6 +14,7 @@ export default defineTemplate(() => ({
   indexes: [{ fields: ['name'], unique: true }],
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'Roles'),
-    menu: { group: 'management', icon: 'shield', order: 2 },
+    icon: 'shield',
+    menu: { group: 'management', order: 2 },
   },
 }))

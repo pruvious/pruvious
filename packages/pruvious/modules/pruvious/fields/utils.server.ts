@@ -1,6 +1,13 @@
-import type { Fields, GenericDatabase } from '#pruvious/server'
-import type { ConditionalLogic, Context, DataType, FieldDefinition, GenericField } from '@pruvious/orm'
-import { isObject } from '@pruvious/utils'
+import type { BlockName, Fields, GenericDatabase } from '#pruvious/server'
+import { blocks } from '#pruvious/server/blocks'
+import {
+  type ConditionalLogic,
+  type Context,
+  type DataType,
+  type FieldDefinition,
+  type GenericField,
+} from '@pruvious/orm'
+import { isArray, isObject, isString } from '@pruvious/utils'
 import { hash } from 'ohash'
 
 export type GenericFieldDefinition = FieldDefinition<
@@ -81,4 +88,68 @@ export function limitPopulation(
   if (map.get(entry)! > limit) {
     throw new Error(`Field \`${path}\` has exceeded the maximum population limit (${limit}) in a single query`)
   }
+}
+
+/**
+ * A function that returns a conditional logic parser for a list of `fields` (including block fields) and their `input` data.
+ *
+ * Returns an object where:
+ *
+ * - Keys are field paths (using dot notation for nested fields).
+ * - Values are the corresponding conditional logic objects to evaluate (if present).
+ */
+export function parseConditionalLogic(
+  fields: Record<string, Pick<GenericField, 'conditionalLogic' | 'model' | 'options'>>,
+  input: Record<string, any>,
+): Record<string, ConditionalLogic | undefined> {
+  const parsedConditionalLogic: Record<string, ConditionalLogic | undefined> = {}
+
+  for (const [fieldName, field] of Object.entries(fields)) {
+    const item = input[fieldName]
+    parsedConditionalLogic[fieldName] = field.conditionalLogic
+
+    if (field.model.subfields) {
+      if (isObject(item)) {
+        for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.model.subfields, item))) {
+          parsedConditionalLogic[`${fieldName}.${sfp}`] = sfpcl
+        }
+      } else if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.model.subfields, arrayItem))) {
+              parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+            }
+          }
+        }
+      }
+    } else if (field.model.structure) {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const subfields = isString(arrayItem.$key) ? field.model.structure[arrayItem.$key] : undefined
+            if (subfields) {
+              for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(subfields, arrayItem))) {
+                parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    } else if (field.options._fieldType === 'blocks') {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const block = isString(arrayItem.$key) ? blocks[arrayItem.$key as BlockName] : undefined
+            if (block) {
+              for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(block.fields, arrayItem))) {
+                parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return parsedConditionalLogic
 }

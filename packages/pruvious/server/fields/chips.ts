@@ -76,13 +76,17 @@ export default {
     const bound = defineField({
       model: arrayFieldModel(),
       customOptions,
-      castedTypeFn: ({ options }) =>
-        options.allowValues
-          ? `(${options.allowValues.map((value) => `'${value.replaceAll("'", "\\'")}'`).join(' | ')})[]`
+      castedTypeFn: ({ field }) =>
+        field.options.allowValues
+          ? `(${field.options.allowValues.map((value) => `'${value.replaceAll("'", "\\'")}'`).join(' | ')})[]`
           : 'string[]',
-      populatedTypeFn: ({ options }) =>
-        options.allowValues
-          ? `(${options.allowValues.map((value) => `'${value.replaceAll("'", "\\'")}'`).join(' | ')})[]`
+      populatedTypeFn: ({ field }) =>
+        field.options.allowValues
+          ? `(${field.options.allowValues.map((value) => `'${value.replaceAll("'", "\\'")}'`).join(' | ')})[]`
+          : 'string[]',
+      inputTypeFn: ({ field }) =>
+        field.options.allowValues
+          ? `(${field.options.allowValues.map((value) => `'${value.replaceAll("'", "\\'")}'`).join(' | ')})[]`
           : 'string[]',
     }).serverFn.bind(this)
     return bound(options as any) as any

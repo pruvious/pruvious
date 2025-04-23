@@ -167,7 +167,7 @@ export function* resolve(options: ResolveOptions): Generator<ResolveResult> {
       }
 
       // Skip empty files
-      if (options.skipFilesWithSpaces !== false && !fs.readFileSync(join(options.dir, file), 'utf-8').trim()) {
+      if (options.skipEmptyFiles !== false && !fs.readFileSync(join(options.dir, file), 'utf-8').trim()) {
         continue
       }
 

@@ -626,24 +626,24 @@ export interface CollectionMetaOptions<
    *
    * @default
    * {
-   *   hidden: false,        // Visible in the dashboard
-   *   label: undefined,     // Automatically generated from the collection name
+   *   hidden: false,                 // Visible in the dashboard
+   *   label: undefined,              // Automatically generated from the collection name
+   *   icon: 'folder',
    *   menu: {
    *     hidden: false,
    *     group: 'collections',
    *     order: 10,
-   *     icon: 'folder',
    *   },
    *   indexPage: {
-   *     dashboardLayout: 'default', // Standard dashboard layout with header and sidebar
+   *     dashboardLayout: 'standard', // Standard dashboard layout with header and sidebar
    *   },
    *   createPage: {
-   *     dashboardLayout: 'auto',    // Automatic layout selection based on block support
-   *     fieldsLayout: undefined,    // Display all fields in the order they are defined
+   *     dashboardLayout: 'auto',     // Automatic layout selection based on block support
+   *     fieldsLayout: undefined,     // Display all fields in the order they are defined
    *   },
    *   updatePage: {
-   *     dashboardLayout: 'auto',    // Automatic layout selection based on block support
-   *     fieldsLayout: undefined,    // Display all fields in the order they are defined
+   *     dashboardLayout: 'auto',     // Automatic layout selection based on block support
+   *     fieldsLayout: undefined,     // Display all fields in the order they are defined
    *   },
    * }
    */
@@ -770,12 +770,23 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
   label: string | ((context: TranslatableStringCallbackContext) => string) | undefined
 
   /**
+   * The icon used to represent the collection in the dashboard.
+   * Must be a valid Tabler icon name.
+   *
+   * @see https://tabler-icons.io for available icons
+   *
+   * @default 'folder'
+   */
+  icon: keyof typeof icons
+
+  /**
    * Options to customize how the collection appears in the dashboard's navigation menu.
    *
    * For more advanced menu customization, use the client-side filters:
    *
    * - `dashboard:menu:general`
    * - `dashboard:menu:collections`
+   * - `dashboard:menu:management`
    * - `dashboard:menu:utilities`
    *
    * @default
@@ -783,7 +794,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *   hidden: false,
    *   group: 'collections',
    *   order: 10,
-   *   icon: 'folder',
    * }
    */
   menu: {
@@ -810,16 +820,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * @default 10
      */
     order: number
-
-    /**
-     * The icon displayed in the menu item.
-     * Must be a valid Tabler icon name.
-     *
-     * @see https://tabler-icons.io for available icons
-     *
-     * @default 'folder'
-     */
-    icon: keyof typeof icons
   }
 
   /**
@@ -828,7 +828,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   dashboardLayout: 'default', // Standard dashboard layout with header and sidebar
+   *   dashboardLayout: 'standard', // Standard dashboard layout with header and sidebar
    * }
    */
   indexPage: {
@@ -838,7 +838,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * Available options:
      *
-     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
      * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
      *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
      *   - The import path must be a literal string, not a variable.
@@ -848,9 +848,9 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * - @todo
      *
-     * @default 'default'
+     * @default 'standard'
      */
-    dashboardLayout: 'default' | (string & {})
+    dashboardLayout: 'standard' | (string & {})
 
     table: {
       /**
@@ -900,11 +900,9 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                      *     - This path is resolved relative to the `<srcDir>` directory of the Nuxt layer where the function is called.
                      *   - A path starting with the Nuxt alias `@/` or `~/`.
                      *     - This path is resolved relative to the first matching `<srcDir>` directory in the Nuxt layer hierarchy.
-                     *   - A relative path to a `.vue` component.
-                     *     - This path must be relative to the file where the function is called.
-                     *     - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
                      *   - An absolute path to a `.vue` component.
                      *   - A path for an npm module.
+                     * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
                      *
                      * The custom component receives the following props:
                      *
@@ -916,7 +914,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                      *
                      * // Correct
                      * resolvePruviousComponent('>/components/MyComponent.vue')
-                     * resolvePruviousComponent('../../app/components/MyComponent.vue')
                      * resolvePruviousComponent('/Project/app/components/MyComponent.vue')
                      *
                      * // Incorrect
@@ -1045,13 +1042,13 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * When set to 'auto', the layout is determined based on block support:
      *
-     * - With blocks enabled: Uses 'live-preview' layout
-     * - Without blocks: Uses 'default' layout
+     * - With `blocksField({})`: Uses 'live-preview' layout
+     * - Without `blocksField({})`: Uses 'standard' layout
      *
      * Available options:
      *
      * - `'auto'` - Automatic layout selection based on block support.
-     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
      * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
      * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
      *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
@@ -1068,10 +1065,11 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * @default 'auto'
      */
-    dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
+    dashboardLayout: 'auto' | 'standard' | 'live-preview' | (string & {})
 
     /**
      * Customizes the layout of the collection's fields in the dashboard.
+     *
      * If not specified, the fields are stacked vertically in the order they are defined.
      *
      * Provide `mirror` to use the same layout as in the `updatePage` settings.
@@ -1142,7 +1140,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * ]
      * ```
      */
-    fieldsLayout: FieldsLayout<TFieldNames> | undefined | 'mirror'
+    fieldsLayout: FieldsLayout<TFieldNames> | 'mirror' | undefined
   }
 
   /**
@@ -1160,13 +1158,13 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * When set to 'auto', the layout is determined based on block support:
      *
-     * - With blocks enabled: Uses 'live-preview' layout
-     * - Without blocks: Uses 'default' layout
+     * - With `blocksField({})`: Uses 'live-preview' layout
+     * - Without `blocksField({})`: Uses 'standard' layout
      *
      * Available options:
      *
      * - `'auto'` - Automatic layout selection based on block support.
-     * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+     * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
      * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
      * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
      *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
@@ -1183,12 +1181,14 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *
      * @default 'auto'
      */
-    dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
+    dashboardLayout: 'auto' | 'standard' | 'live-preview' | (string & {})
 
     /**
      * Customizes the layout of the collection's fields in the dashboard.
-     * Provide `mirror` to use the same layout as in the `createPage` settings.
+     *
      * If not specified, the fields are stacked vertically in the order they are defined.
+     *
+     * Provide `mirror` to use the same layout as in the `createPage` settings.
      *
      * @default undefined
      *
@@ -1256,7 +1256,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * ]
      * ```
      */
-    fieldsLayout: FieldsLayout<TFieldNames> | undefined | 'mirror'
+    fieldsLayout: FieldsLayout<TFieldNames> | 'mirror' | undefined
   }
 }
 
@@ -1649,7 +1649,7 @@ export function defineCollection<
       })
     }
 
-    if (isString(ui?.indexPage?.dashboardLayout) && ui.indexPage.dashboardLayout !== 'default') {
+    if (isString(ui?.indexPage?.dashboardLayout) && ui.indexPage.dashboardLayout !== 'standard') {
       ui.indexPage.dashboardLayout = ui.indexPage.dashboardLayout.includes('/')
         ? hash(
             resolveCustomComponentPath({
@@ -1683,7 +1683,7 @@ export function defineCollection<
     for (const page of ['createPage', 'updatePage'] as const) {
       if (
         isString(ui?.[page]?.dashboardLayout) &&
-        !['auto', 'default', 'live-preview'].includes(ui[page].dashboardLayout)
+        !['auto', 'standard', 'live-preview'].includes(ui[page].dashboardLayout)
       ) {
         ui[page].dashboardLayout = ui[page].dashboardLayout.includes('/')
           ? hash(
@@ -1760,9 +1760,10 @@ export function defineCollection<
         ui: defu(ui ?? {}, {
           hidden: false,
           label: undefined,
-          menu: { hidden: false, group: 'collections', order: 10, icon: 'folder' as const },
+          icon: 'folder',
+          menu: { hidden: false, group: 'collections', order: 10 },
           indexPage: {
-            dashboardLayout: 'default' as const,
+            dashboardLayout: 'standard',
             table: { columns: undefined, orderBy: undefined as any, perPage: 50 },
           },
           createPage: { dashboardLayout: 'auto', fieldsLayout: undefined },

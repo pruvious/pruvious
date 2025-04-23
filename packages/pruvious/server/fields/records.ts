@@ -217,8 +217,9 @@ export default {
         return []
       },
       castedTypeFn: () => 'number[]',
-      populatedTypeFn: ({ options }) =>
-        `Pick<DynamicCollectionFieldTypes[${options.populate ? "'Populated'" : "'Casted'"}]['${options.collection}'], ${(options.fields ?? ['id']).map((field) => `'${field}'`).join(' | ')}>[]`,
+      populatedTypeFn: ({ field }) =>
+        `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName) => `'${fieldName}'`).join(' | ')}>[]`,
+      inputTypeFn: () => '(number | string)[]',
     }).serverFn.bind(this)
     return bound(options as any) as any
   },

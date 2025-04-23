@@ -1,16 +1,17 @@
-import type { GenericSerializableFieldOptions } from '#pruvious/server'
+import type { BlockName, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { ConditionalLogic } from '@pruvious/orm'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import {
   deepClone,
   deepCompare,
   isArray,
-  isDefined,
   isObject,
+  isString,
   isUndefined,
   resolveRelativeDotNotation,
   uniqueArray,
 } from '@pruvious/utils'
+import { usePruviousDashboard } from '../pruvious/utils.client'
 
 /**
  * Fills any `undefined` values in the `data` object by using the default values specified in the `fields` configuration.
@@ -83,7 +84,12 @@ export function getTopLevelFieldDependencies(
   const _structure = (fieldOptions.structure ?? {}) as {
     [$key: string]: Record<string, GenericSerializableFieldOptions>
   }
-  const subfields = { ..._subfields, ...Object.values(_structure).reduce((acc, sf) => ({ ...acc, ...sf }), {}) }
+  const _blockFields = fieldOptions._fieldType === 'blocks' ? (usePruviousDashboard().value?.blocks ?? {}) : {}
+  const subfields: Record<string, GenericSerializableFieldOptions> = {
+    ..._subfields,
+    ...Object.values(_structure).reduce((acc, sf) => ({ ...acc, ...sf }), {}),
+    ...Object.values(_blockFields).reduce((acc, block) => ({ ...acc, ...block.fields }), {}),
+  }
 
   if (fieldOptions.conditionalLogic) {
     for (const path of new ConditionalLogicResolver().getReferencedFieldPaths(
@@ -99,77 +105,19 @@ export function getTopLevelFieldDependencies(
   }
 
   for (const [sn, so] of Object.entries(subfields)) {
+    if (so._fieldType === 'blocks' && fieldOptions._fieldType === 'blocks') {
+      continue
+    }
+
     dependencies.push(
       ...getTopLevelFieldDependencies(
-        fieldOptions._fieldType === 'repeater' || fieldOptions._fieldType === 'structure'
-          ? `${fieldPath}.0.${sn}`
-          : `${fieldPath}.${sn}`,
+        isArray(fieldOptions.default) ? `${fieldPath}.0.${sn}` : `${fieldPath}.${sn}`,
         so,
       ),
     )
   }
 
   return uniqueArray(dependencies)
-}
-
-/**
- * Maps `subfields` based on user `data`.
- *
- * The method returns a map with:
- *
- * - Keys as subfield paths in dot notation (e.g., '0.firstName', '0.lastName', 'foo.bar', etc.).
- * - Values as the corresponding `GenericSerializableFieldOptions` instances.
- */
-export function resolveSubfieldsFromData(
-  subfields: Record<string, GenericSerializableFieldOptions> | undefined,
-  data: any,
-): Record<string, GenericSerializableFieldOptions> {
-  const map: Record<string, GenericSerializableFieldOptions> = {}
-
-  if (isDefined(subfields)) {
-    if (isArray(data)) {
-      for (const [index, item] of data.entries()) {
-        for (const [subfieldName, subfield] of Object.entries(subfields)) {
-          const key = `${index}.${subfieldName}`
-          map[key] = subfield
-
-          if (subfield.subfields && isObject(item)) {
-            const nestedMap = resolveSubfieldsFromData(subfield.subfields, item[subfieldName])
-
-            for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-              map[`${key}.${nestedKey}`] = nestedField
-            }
-          } else if (subfield.structure && isObject(item) && isArray(item[subfieldName])) {
-            for (const [$key, structureSubfields] of Object.entries(subfield.structure)) {
-              const nestedMap = resolveSubfieldsFromData(
-                structureSubfields as any,
-                item[subfieldName].map((item: any) => (item.$key === $key ? item : undefined)),
-              )
-
-              for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-                map[`${key}.${nestedKey}`] = nestedField
-              }
-            }
-          }
-        }
-      }
-    } else if (isObject(data)) {
-      for (const [subfieldName, subfield] of Object.entries(subfields)) {
-        const key = subfieldName
-        map[key] = subfield
-
-        if (subfield.subfields) {
-          const nestedMap = resolveSubfieldsFromData(subfield.subfields, data[subfieldName])
-
-          for (const [nestedKey, nestedField] of Object.entries(nestedMap)) {
-            map[`${key}.${nestedKey}`] = nestedField
-          }
-        }
-      }
-    }
-  }
-
-  return map
 }
 
 /**
@@ -182,29 +130,52 @@ export function resolveSubfieldsFromData(
  */
 export function parseConditionalLogic(
   fields: Record<string, GenericSerializableFieldOptions>,
-  data: Record<string, any>,
+  data: Record<string, unknown>,
 ): Record<string, ConditionalLogic | undefined> {
   const parsedConditionalLogic: Record<string, ConditionalLogic | undefined> = {}
 
   for (const [fieldName, field] of Object.entries(fields)) {
+    const item = data[fieldName]
     parsedConditionalLogic[fieldName] = field.conditionalLogic
 
     if (field.subfields) {
-      const subfieldMap = resolveSubfieldsFromData(field.subfields, data[fieldName])
-
-      for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
-        parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      if (isObject(item)) {
+        for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.subfields, item))) {
+          parsedConditionalLogic[`${fieldName}.${sfp}`] = sfpcl
+        }
+      } else if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(field.subfields, arrayItem))) {
+              parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+            }
+          }
+        }
       }
     } else if (field.structure) {
-      if (isObject(data) && isArray(data[fieldName])) {
-        for (const [$key, subfields] of Object.entries(field.structure)) {
-          const subfieldMap = resolveSubfieldsFromData(
-            subfields as any,
-            data[fieldName].map((item: any) => (item.$key === $key ? item : undefined)),
-          )
-
-          for (const [subfieldPath, subfield] of Object.entries(subfieldMap)) {
-            parsedConditionalLogic[`${fieldName}.${subfieldPath}`] = subfield.conditionalLogic
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const subfields = isString(arrayItem.$key) ? field.structure[arrayItem.$key] : undefined
+            if (subfields) {
+              for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(subfields, arrayItem))) {
+                parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    } else if (field._fieldType === 'blocks') {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const blocks = usePruviousDashboard().value?.blocks ?? {}
+            const block = isString(arrayItem.$key) ? blocks[arrayItem.$key as BlockName] : undefined
+            if (block) {
+              for (const [sfp, sfpcl] of Object.entries(parseConditionalLogic(block.fields, arrayItem))) {
+                parsedConditionalLogic[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
           }
         }
       }

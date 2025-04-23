@@ -22,6 +22,7 @@ export interface MyAccountFields {
 
   /**
    * Customizes the layout of the collection's fields in the dashboard.
+   *
    * If not specified, the fields are stacked vertically in the order they are defined.
    *
    * @default

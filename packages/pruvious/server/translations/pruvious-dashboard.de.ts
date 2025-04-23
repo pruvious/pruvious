@@ -10,6 +10,7 @@ export default defineTranslation({
   'Action failed': 'Aktion fehlgeschlagen',
   'Actions': 'Aktionen',
   'Active': 'Aktiv',
+  'Add block': 'Block hinzufügen',
   'Add condition': 'Bedingung hinzufügen',
   'Add condition group': 'Bedingungsgruppe hinzufügen',
   'Add item': 'Eintrag hinzufügen',
@@ -246,6 +247,8 @@ export default defineTranslation({
   'Next month': 'Nächster Monat',
   'Next page': 'Nächste Seite',
   'No': 'Nein',
+  'No blocks can be added here': 'Hier können keine Blöcke hinzugefügt werden',
+  'No blocks match your search criteria': 'Keine Blöcke entsprechen Ihren Suchkriterien',
   'No conditions set': 'Keine Bedingungen festgelegt',
   'No data available': 'Keine Daten verfügbar',
   'No entries were deleted': 'Es wurden keine Einträge gelöscht',
@@ -259,6 +262,7 @@ export default defineTranslation({
   'Open user menu': 'Benutzer-Menü öffnen',
   'Operation': 'Operation',
   'or': 'oder',
+  'Other': 'Andere',
   'Output': 'Ausgabe',
   'Output (database)': 'Ausgabe (Datenbank)',
   'Output (ORM)': 'Ausgabe (ORM)',
@@ -306,8 +310,10 @@ export default defineTranslation({
 
   'Save': 'Speichern',
   'Saved': 'Gespeichert',
+  'Search...': 'Suchen...',
   'Scheduled at': 'Geplant am',
   'Select': 'Auswählen',
+  'Select block': 'Block auswählen',
   'Select date': 'Datum auswählen',
   'selected': 'ausgewählt',
   'Selected $count $entries': createPattern(
@@ -382,6 +388,7 @@ export default defineTranslation({
   'The unique identifier for translations.': 'Der eindeutige Bezeichner für Übersetzungen.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
+  'This block is not allowed here': 'Dieser Block ist hier nicht erlaubt',
   'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
     'Dieses Feld speichert Zeit mit Millisekunden-Präzision. Wenn Sie den Kalender-Selektor verwenden (der nur Sekunden-Präzision bietet), nutzen Sie die Operatoren `⁠<=` und ⁠`>=`, um sicherzustellen, dass Sie alle relevanten Einträge erfassen. Für exakte Vergleiche auf Millisekunden-Ebene verwenden Sie stattdessen das numerische Eingabefeld.',
   'Time': 'Zeit',

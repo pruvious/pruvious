@@ -1,5 +1,8 @@
 import {
+  blocks,
   collections,
+  getBlockGroups,
+  getBlockTags,
   hasCollectionPermission,
   hasPermission,
   hasSingletonPermission,
@@ -13,11 +16,14 @@ import {
 } from '#pruvious/server'
 import { isArray, isObject, omit, pick, remap } from '@pruvious/utils'
 
-export default defineEventHandler(() => {
+export default defineEventHandler(async () => {
   const runtimeConfig = useRuntimeConfig()
   const state: PruviousDashboardState = {
     collections: {},
     singletons: {},
+    blocks: {},
+    blockGroups: [],
+    blockTags: [],
     logs: null,
   }
 
@@ -75,6 +81,11 @@ export default defineEventHandler(() => {
         }
       }
     }
+
+    // Blocks
+    state.blocks = remap(blocks, ($key, block) => [$key, { ...block, fields: serializeFields(block.fields) }])
+    state.blockGroups = await getBlockGroups().then(serializeTranslatableStringCallbacks)
+    state.blockTags = await getBlockTags().then(serializeTranslatableStringCallbacks)
 
     // Logs
     if (hasPermission('read-logs')) {

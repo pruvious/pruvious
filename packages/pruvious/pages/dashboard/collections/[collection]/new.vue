@@ -22,7 +22,7 @@
           :to="allItemsLink"
           variant="outline"
         >
-          <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
+          <Icon :name="`tabler:${collection.definition.ui.icon}`" mode="svg" />
         </PUIButton>
         <span class="pui-truncate">{{ label }}</span>
         <span v-if="translationOf" class="p-translation-of pui-muted">
@@ -59,6 +59,8 @@
       dataContainerType="collection"
       operation="create"
     />
+
+    <PruviousDashboardHistoryScrollState />
 
     <template #footer>
       <div class="pui-justify-between">

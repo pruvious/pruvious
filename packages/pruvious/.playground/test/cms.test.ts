@@ -23,6 +23,7 @@ describe('cms', async () => {
   await import('./cms/collections/public')
 
   // Fields
+  await import('./cms/fields/blocks')
   await import('./cms/fields/object')
   await import('./cms/fields/nullableObject')
   await import('./cms/fields/structure')

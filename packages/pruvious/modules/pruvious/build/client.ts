@@ -333,6 +333,7 @@ function getClientFileContent() {
 
   return [
     `import { type Component, defineAsyncComponent } from 'vue'`,
+    `import type { Blocks } from '../server'`,
     ...fieldDefinitionEntries.map(([name, { file }]) => `import type _${name}Field from '${file.import}'`),
     ``,
     `const _fieldFn = () => null`,
@@ -424,7 +425,7 @@ function getClientFileContent() {
     ` * </template>`,
     ` * \`\`\``,
     ` */`,
-    `export const blockComponents: Record<string, () => Component> = {`,
+    `export const blockComponents: Record<keyof Blocks, () => Component> = {`,
     ...blockEntries.map(
       ([name, { file }]) => `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}')),`,
     ),
@@ -550,7 +551,7 @@ function getReExports() {
     `export { dashboardAuthGuard } from '${resolve('../middleware/pruvious-dashboard-auth-guard')}'`,
     `export { dashboardGuestGuard } from '${resolve('../middleware/pruvious-dashboard-guest-guard')}'`,
     `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolve('../middleware/utils.client')}'`,
-    `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, resolveSubfieldsFromData, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
+    `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
     `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
     `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,

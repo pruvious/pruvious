@@ -179,10 +179,23 @@ function prepareEmitValue(value: Record<string, any>): string {
 
 <style scoped>
 :deep(.p-field-filter-value > .pui-field) {
-  margin-top: -0.5rem;
+  --pui-gap: 0.5rem;
+}
+
+:deep(.p-field-filter-value .pui-structure-items .pui-structure-items) {
+  --pui-gap: 0.75rem;
 }
 
 :deep(.p-field-filter-value > .pui-field > .pui-field-label) {
   display: none;
+}
+
+:deep(.p-field-filter-value > .pui-field > .pui-structure:not(.pui-structure-empty) + .p-structure-add-item) {
+  margin-top: 0.5rem;
+}
+
+:deep(.p-field-filter-value > .pui-field > .pui-structure),
+:deep(.p-field-filter-value > .pui-field > .pui-structure-empty + .p-structure-add-item) {
+  margin-top: 0;
 }
 </style>

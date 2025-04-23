@@ -246,8 +246,8 @@
 
             <template v-if="insertItemAction">
               <PUIDropdownItem
-                v-for="(_, $key) in options.structure"
-                :title="itemTypeLabels[$key]"
+                v-for="(label, $key) in itemTypeLabels"
+                :title="label"
                 @click="
                   () => {
                     visibleActions = -1
@@ -255,7 +255,7 @@
                   }
                 "
               >
-                <span>{{ itemTypeLabels[$key] }}</span>
+                <span>{{ label }}</span>
               </PUIDropdownItem>
             </template>
           </PUIDropdown>
@@ -333,8 +333,8 @@
         @click="isAddItemMenuVisible = false"
         @close="isAddItemMenuVisible = false"
       >
-        <PUIDropdownItem v-for="(_, $key) in options.structure" @click="addItem(String($key))">
-          <span>{{ itemTypeLabels[$key] }}</span>
+        <PUIDropdownItem v-for="(label, $key) in itemTypeLabels" @click="addItem(String($key))">
+          <span>{{ label }}</span>
         </PUIDropdownItem>
       </PUIDropdown>
     </div>
@@ -362,6 +362,7 @@ import {
   nanoid,
   omit,
   remap,
+  sortNaturallyByProp,
   titleCase,
 } from '@pruvious/utils'
 import { hash } from 'ohash'
@@ -568,12 +569,17 @@ const itemTypeHashValues = computed(() => Object.values(itemTypeHash.value))
 const allCollapsed = computed(() => structuredValue.value.every((item) => !item.$expanded))
 const allExpanded = computed(() => structuredValue.value.every((item) => item.$expanded))
 const itemTypeLabels = computed(() =>
-  remap(props.options.structure, ($itemKey) => [
-    $itemKey,
-    isDefined(props.options.ui.itemTypeLabels?.[$itemKey])
-      ? maybeTranslate(props.options.ui.itemTypeLabels[$itemKey])
-      : __('pruvious-dashboard', titleCase($itemKey, false) as any),
-  ]),
+  Object.fromEntries(
+    sortNaturallyByProp(
+      Object.keys(props.options.structure).map(($itemKey) => ({
+        $itemKey,
+        label: isDefined(props.options.ui.itemTypeLabels?.[$itemKey])
+          ? maybeTranslate(props.options.ui.itemTypeLabels[$itemKey])
+          : __('pruvious-dashboard', titleCase($itemKey, false) as any),
+      })),
+      'label',
+    ).map(({ $itemKey, label }) => [$itemKey, label]),
+  ),
 )
 
 watch(

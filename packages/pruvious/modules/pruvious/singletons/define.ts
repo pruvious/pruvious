@@ -335,12 +335,23 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
   label: string | ((context: TranslatableStringCallbackContext) => string) | undefined
 
   /**
+   * The icon used to represent the singleton in the dashboard.
+   * Must be a valid Tabler icon name.
+   *
+   * @see https://tabler-icons.io for available icons
+   *
+   * @default 'settings'
+   */
+  icon: keyof typeof icons
+
+  /**
    * Options to customize how the singleton appears in the dashboard's navigation menu.
    *
    * For more advanced menu customization, use the client-side filters:
    *
    * - `dashboard:menu:general`
    * - `dashboard:menu:collections`
+   * - `dashboard:menu:management`
    * - `dashboard:menu:utilities`
    *
    * @default
@@ -348,7 +359,6 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *   hidden: false,
    *   group: 'general',
    *   order: 10,
-   *   icon: 'settings',
    * }
    */
   menu: {
@@ -375,16 +385,6 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
      * @default 10
      */
     order: number
-
-    /**
-     * The icon displayed in the menu item.
-     * Must be a valid Tabler icon name.
-     *
-     * @see https://tabler-icons.io for available icons
-     *
-     * @default 'settings'
-     */
-    icon: keyof typeof icons
   }
 
   /**
@@ -393,13 +393,13 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *
    * When set to 'auto', the layout is determined based on block support:
    *
-   * - With blocks enabled: Uses 'live-preview' layout
-   * - Without blocks: Uses 'default' layout
+   * - With `blocksField({})`: Uses 'live-preview' layout
+   * - Without `blocksField({})`: Uses 'standard' layout
    *
    * Available options:
    *
    * - `'auto'` - Automatic layout selection based on block support.
-   * - `'default'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
+   * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
    * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
    * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
    *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
@@ -416,10 +416,11 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *
    * @default 'auto'
    */
-  dashboardLayout: 'auto' | 'default' | 'live-preview' | (string & {})
+  dashboardLayout: 'auto' | 'standard' | 'live-preview' | (string & {})
 
   /**
    * Customizes the layout of the collection's fields in the dashboard.
+   *
    * If not specified, the fields are stacked vertically in the order they are defined.
    *
    * @default undefined
@@ -731,15 +732,15 @@ export interface DefineSingletonOptions<
   /**
    * @default
    * {
-   *   hidden: false,     // Visible in the dashboard
-   *   label: undefined,  // Automatically generated from the singleton name
-   *   layout: 'auto',    // Automatic layout selection based on block support
-   *   fields: undefined, // Stacked vertically in the order they are defined
+   *   hidden: false,           // Visible in the dashboard
+   *   label: undefined,        // Automatically generated from the singleton name
+   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   fieldsLayout: undefined, // Stacked vertically in the order they are defined
+   *   icon: 'folder',
    *   menu: {
    *     hidden: false,
    *     group: 'collections',
    *     order: 10,
-   *     icon: 'folder',
    *   },
    * }
    */
@@ -945,7 +946,7 @@ export function defineSingleton<
       })
     }
 
-    if (isString(ui?.dashboardLayout) && !['auto', 'default', 'live-preview'].includes(ui.dashboardLayout)) {
+    if (isString(ui?.dashboardLayout) && !['auto', 'standard', 'live-preview'].includes(ui.dashboardLayout)) {
       ui.dashboardLayout = ui.dashboardLayout.includes('/')
         ? hash(
             resolveCustomComponentPath({
@@ -1010,7 +1011,8 @@ export function defineSingleton<
       ui: defu(ui ?? {}, {
         hidden: false,
         label: undefined,
-        menu: { hidden: false, group: 'general', order: 10, icon: 'settings' as const },
+        icon: 'settings',
+        menu: { hidden: false, group: 'general', order: 10 },
         dashboardLayout: 'auto' as any,
         fieldsLayout: undefined as any,
       } satisfies Required<SingletonUIOptions>),

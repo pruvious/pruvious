@@ -118,7 +118,7 @@ test('parse conditional logic', () => {
           options: {},
         }),
       },
-      { foo: [{}, {}] },
+      { foo: [{ $key: 'BAR' }, { $key: 'BAR' }] },
     ),
   ).toEqual({
     'foo': { '0.bar': { '=': 'BAR' } },
@@ -150,7 +150,7 @@ test('parse conditional logic', () => {
           options: {},
         }),
       },
-      { foo: [{ $key: 'BAR', baz: [{}] }, {}] },
+      { foo: [{ $key: 'BAR', baz: [{}] }, { $key: 'BAR' }] },
     ),
   ).toEqual({
     'foo': { '0.bar': { '=': 'BAR' } },

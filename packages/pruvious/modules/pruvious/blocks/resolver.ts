@@ -1,16 +1,17 @@
 import { parse } from '@babel/parser'
 import template from '@babel/template'
 import type { CallExpression, ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types'
-import { exportDefaultDeclaration, identifier, objectExpression, objectProperty } from '@babel/types'
+import { exportDefaultDeclaration, identifier, objectExpression, objectProperty, stringLiteral } from '@babel/types'
 import { isDefined, pascalCase } from '@pruvious/utils'
 import { parse as parseSFC } from '@vue/compiler-sfc'
 import { useDebounceFn } from '@vueuse/core'
 import { colorize } from 'consola/utils'
 import fs from 'node:fs'
-import { useNuxt } from 'nuxt/kit'
+import { createResolver, useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { dirname, relative, resolve } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
+import { resolveFieldDefinitionFiles } from '../fields/resolver'
 import { cleanupUnusedCode, generate, traverse } from '../utils/ast'
 import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
@@ -19,6 +20,11 @@ export interface ResolveBlockDefinitionOptions {
    * An absolute path to the `.vue` component file of the block.
    */
   vueFile: string
+
+  /**
+   * The source directory of the Nuxt layer where the block is defined.
+   */
+  srcDir: string
 
   /**
    * Whether to write to the `#pruvious/server/blocks.ts` file.
@@ -83,14 +89,14 @@ export function resolveBlockFiles(write = true): Record<string, ResolveFromLayer
       }
 
       blocks[blockName] = location
-      resolveBlockDefinition({ vueFile: location.file.absolute, write: false })
+      resolveBlockDefinition({ vueFile: location.file.absolute, srcDir: location.layer.config.srcDir, write: false })
       duplicates[blockName] = { layer, relativePath: file.relative }
       debug(`Resolved block \`${blockName}\` in <${file.relative}>`)
     }
   }
 
   if (write) {
-    writeToFile()
+    writeBlocks()
   }
 
   return blocks
@@ -99,18 +105,21 @@ export function resolveBlockFiles(write = true): Record<string, ResolveFromLayer
 /**
  * Resolves the block definition from a Vue block component file.
  * It generates the block definition code and writes it to the `#pruvious/server/blocks.ts` file (if `options.write` is `true`).
+ *
+ * @returns a Promise that resolves to `true` if any internal definition was successfully written, `false` otherwise.
  */
-export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
+export async function resolveBlockDefinition(options: ResolveBlockDefinitionOptions): Promise<boolean> {
   const write = options.write ?? true
   const [blockName] = Object.entries(blocks ?? {}).find(([_, { file }]) => file.absolute === options.vueFile) ?? []
 
   if (!blockName) {
-    return
+    return false
   }
 
   try {
     const nuxt = useNuxt()
     const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
+    const workspaceDir = nuxt.options.workspaceDir
     const code = fs.existsSync(options.vueFile) ? fs.readFileSync(options.vueFile, 'utf-8') : ''
     const { descriptor } = parseSFC(code)
     const isTS = descriptor.scriptSetup?.lang === 'ts'
@@ -118,6 +127,8 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
       sourceType: 'module',
       plugins: isTS ? ['typescript'] : [],
     })
+    const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+    const fieldDefinitionImports = Object.keys(fieldDefinitionFiles).map((fieldType) => `${fieldType}Field`)
 
     let defineBlockNode: CallExpression | undefined
     let definePropsNode: CallExpression | undefined
@@ -135,7 +146,17 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
       },
       ImportDeclaration(path) {
         if (path.node.source.value === '#pruvious/client') {
-          path.node.source.value = '#pruvious/server'
+          for (let i = path.node.specifiers.length - 1; i >= 0; i--) {
+            const specifier = path.node.specifiers[i]!
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              specifier.imported.type === 'Identifier' &&
+              !fieldDefinitionImports.includes(specifier.imported.name)
+            ) {
+              path.node.specifiers.splice(i, 1)
+            }
+          }
+          path.node.source.value = '#pruvious/server/fields'
         } else if (path.node.source.value.startsWith('.')) {
           path.node.source.value = relative(
             `${buildDir}/server/blocks`,
@@ -145,10 +166,15 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
       },
     })
 
+    ast.program.body.unshift(
+      template.statement(
+        `import { defineBlock } from '${createResolver(import.meta.url).resolve('../blocks/define.server')}'`,
+      )(),
+    )
+
     if (!defineBlockNode) {
       const defineBlockStatement = template.statement(`defineBlock({})`)() as ExpressionStatement
       defineBlockNode = defineBlockStatement.expression as CallExpression
-      ast.program.body.unshift(template.statement(`import { defineBlock } from '#pruvious/server'`)())
     }
 
     if (defineBlockNode.arguments.length === 1) {
@@ -177,18 +203,36 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
         }
       }
 
+      // Add location
+      const locationProperty = objectProperty(
+        identifier('_location'),
+        objectExpression([
+          objectProperty(
+            identifier('file'),
+            objectExpression([
+              objectProperty(identifier('absolute'), stringLiteral(options.vueFile)),
+              objectProperty(identifier('relative'), stringLiteral(relative(workspaceDir, options.vueFile))),
+            ]),
+          ),
+          objectProperty(identifier('srcDir'), stringLiteral(options.srcDir)),
+        ]),
+      )
+      locationProperty.leadingComments = [{ type: 'CommentLine', value: ' @ts-expect-error' }]
+      arg.properties.push(locationProperty)
+
       // Export default defineBlock
       ast.program.body.push(exportDefaultDeclaration(defineBlockNode))
     }
 
-    blockDefinitions[blockName] = cleanupUnusedCode({
-      code: generate(ast).code,
-      mode: isTS ? 'ts' : 'js',
-      targetFunctionNames: ['defineBlock'],
-    })
+    blockDefinitions[blockName] =
+      cleanupUnusedCode({
+        code: generate(ast).code,
+        mode: isTS ? 'ts' : 'js',
+        targetFunctionNames: ['defineBlock'],
+      }) + '\n'
 
     if (write) {
-      debouncedWriteToFile()
+      return debouncedWriteBlocks()
     }
   } catch {
     blockDefinitions[blockName] = [
@@ -196,41 +240,91 @@ export function resolveBlockDefinition(options: ResolveBlockDefinitionOptions) {
       `export default defineBlock({})`,
     ].join('\n')
   }
+
+  return false
 }
 
-function writeToFile() {
+function writeBlocks(): boolean {
   const nuxt = useNuxt()
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
   const blocksTS: string[] = []
+  const { resolve } = createResolver(import.meta.url)
+
+  let written = false
 
   if (fs.existsSync(`${buildDir}/server/blocks`)) {
-    fs.rmSync(`${buildDir}/server/blocks`, { recursive: true })
+    for (const file of fs.readdirSync(`${buildDir}/server/blocks`)) {
+      if (!blockDefinitions[file.replace(/\.ts$/, '')]) {
+        fs.rmSync(`${buildDir}/server/blocks/${file}`)
+      }
+    }
+  } else {
+    fs.mkdirSync(`${buildDir}/server/blocks`)
   }
 
-  fs.mkdirSync(`${buildDir}/server/blocks`)
-
   for (const [blockName, definition] of Object.entries(blockDefinitions)) {
-    fs.writeFileSync(`${buildDir}/server/blocks/${blockName}.ts`, definition)
+    const path = `${buildDir}/server/blocks/${blockName}.ts`
+
+    if (!fs.existsSync(path) || fs.readFileSync(path, 'utf-8') !== definition) {
+      fs.writeFileSync(path, definition)
+      written = true
+    }
+
     blocksTS.push(`// ${blocks?.[blockName]?.file.absolute}`, `import ${blockName} from './blocks/${blockName}'`, ``)
   }
 
-  fs.writeFileSync(
-    `${buildDir}/server/blocks.ts`,
-    [
-      ...blocksTS,
-      `/**`,
-      ` * Stores all blocks in a key-value structure.`,
-      ` * The keys are the blocks names, and the values are the \`Block\` instances.`,
-      ` */`,
-      `export const blocks = {`,
-      ...Object.keys(blockDefinitions).map((blockName) => `  ${blockName},`),
-      `}`,
-      ``,
-    ].join('\n'),
-  )
+  const path = `${buildDir}/server/blocks.ts`
+  const content = [
+    ...blocksTS,
+    `import { uniqueArray } from '@pruvious/utils'`,
+    `import type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('../blocks/utils.server')}'`,
+    `import { applyFilters } from '${resolve('../hooks/utils.server')}'`,
+    ``,
+    `/**`,
+    ` * Type representing all block names utilized by the CMS.`,
+    ` */`,
+    `export type BlockName = ${Object.keys(blockDefinitions)
+      .map((blockName) => `'${blockName}'`)
+      .join(' | ')}`,
+    ``,
+    `/**`,
+    ` * Type representing all blocks utilized by the CMS.`,
+    ` * The keys are the block names, and the values are the \`Block\` instances.`,
+    ` */`,
+    `export type Blocks = typeof blocks`,
+    ``,
+    `/**`,
+    ` * Stores all blocks in a key-value structure.`,
+    ` * The keys are the blocks names, and the values are the \`Block\` instances.`,
+    ` */`,
+    `export const blocks = {`,
+    ...Object.keys(blockDefinitions).map((blockName) => `  ${blockName},`),
+    `}`,
+    ``,
+    `/**`,
+    ` * Retrieves all registered block groups.`,
+    ` */`,
+    `export async function getBlockGroups(): Promise<BlockGroupDefinition[]> {`,
+    `  return uniqueArray(await applyFilters('blocks:groups', [], {}))`,
+    `}`,
+    ``,
+    `/**`,
+    ` * Retrieves all registered block tags.`,
+    ` */`,
+    `export async function getBlockTags(): Promise<BlockTagDefinition[]> {`,
+    `  return uniqueArray(await applyFilters('blocks:tags', [], {}))`,
+    `}`,
+  ].join('\n')
+
+  if (!fs.existsSync(path) || fs.readFileSync(path, 'utf-8') !== content) {
+    fs.writeFileSync(path, content)
+    written = true
+  }
+
+  return written
 }
 
-const debouncedWriteToFile = useDebounceFn(writeToFile, 250)
+const debouncedWriteBlocks = useDebounceFn(writeBlocks, 250)
 
 export function resetBlocksResolver() {
   blocks = undefined

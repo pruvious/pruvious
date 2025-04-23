@@ -103,10 +103,12 @@ export default {
       default: options.choices[0]?.value,
       customOptions,
       omitOptions: ['allowEmptyString', 'maxLength', 'minLength', 'trim'],
-      castedTypeFn: ({ options }) =>
-        options.choices.map((choice) => `'${choice.value.replaceAll("'", "\\'")}'`).join(' | '),
-      populatedTypeFn: ({ options }) =>
-        options.choices.map((choice) => `'${choice.value.replaceAll("'", "\\'")}'`).join(' | '),
+      castedTypeFn: ({ field }) =>
+        field.options.choices.map((choice) => `'${choice.value.replaceAll("'", "\\'")}'`).join(' | '),
+      populatedTypeFn: ({ field }) =>
+        field.options.choices.map((choice) => `'${choice.value.replaceAll("'", "\\'")}'`).join(' | '),
+      inputTypeFn: ({ field }) =>
+        field.options.choices.map((choice) => `'${choice.value.replaceAll("'", "\\'")}'`).join(' | '),
     }).serverFn.bind(this)
     return bound(options as any) as any
   },

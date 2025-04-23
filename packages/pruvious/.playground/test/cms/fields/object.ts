@@ -17,7 +17,7 @@ describe('object field', () => {
     )
     expect(
       await $patchAsAdmin(`/api/collections/fields?returning=object&where=object[=][${JSON.stringify(t1)}]`, {
-        object: t2,
+        object: { ...t2, qux: false },
       }),
     ).toEqual([{ object: t2 }])
   })

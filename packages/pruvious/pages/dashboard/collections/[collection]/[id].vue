@@ -27,7 +27,7 @@
           :to="allItemsLink"
           variant="outline"
         >
-          <Icon :name="`tabler:${collection.definition.ui.menu.icon}`" mode="svg" />
+          <Icon :name="`tabler:${collection.definition.ui.icon}`" mode="svg" />
         </PUIButton>
         <span class="pui-truncate">{{ label }}</span>
         <span class="pui-shrink-0 pui-muted">(#{{ id }})</span>
@@ -53,6 +53,8 @@
       dataContainerType="collection"
       operation="update"
     />
+
+    <PruviousDashboardHistoryScrollState />
 
     <template v-if="canCreate || canUpdate || canDelete" #footer class="pui-row pui-ml-auto">
       <div class="pui-row">

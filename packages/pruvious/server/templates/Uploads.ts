@@ -37,6 +37,7 @@ function multipartField() {
 
   ;(field as any).castedTypeFn = () => '{ key: string; parts: { partNumber: number, etag: string }[] }'
   ;(field as any).populatedTypeFn = () => '{ key: string; parts: { partNumber: number, etag: string }[] }'
+  ;(field as any).inputTypeFn = () => '{ key: string; parts: { partNumber: number, etag: string }[] }'
 
   return field
 }

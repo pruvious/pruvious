@@ -3,16 +3,20 @@
 </template>
 
 <script lang="ts" setup>
-import { _, buttonGroupField } from '#pruvious/client'
+import { blocksField, buttonGroupField } from '#pruvious/client'
 
 defineProps({
   spacing: buttonGroupField({
     choices: [
-      { value: 'sm', label: _('Small') },
-      { value: 'md', label: _('Medium') },
-      { value: 'lg', label: _('Large') },
+      { value: 'sm', label: ({ __ }) => __('pruvious-dashboard', 'Small') },
+      { value: 'md', label: ({ __ }) => __('pruvious-dashboard', 'Medium') },
+      { value: 'lg', label: ({ __ }) => __('pruvious-dashboard', 'Large') },
     ],
     default: 'md',
+  }),
+  blocks: blocksField({
+    allowRootBlocks: ['Button', 'Container', 'group:test', 'tag:test'],
+    allowNestedBlocks: ['Button', 'Image'],
   }),
 })
 

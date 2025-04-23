@@ -204,18 +204,6 @@ const emit = defineEmits<{
   'moveUpItems': [items: PUITreeItemModel<T>[], event: KeyboardEvent]
 }>()
 
-defineExpose({
-  deleteItems,
-  dropItems,
-  duplicateItems,
-  flatItems,
-  getActiveItems,
-  moveDownItems,
-  moveUpItems,
-  scrollToItem,
-  scrollToSelection,
-})
-
 const root = useTemplateRef('root')
 const { focused } = useFocusWithin(root)
 const previouslyFocusedElement = ref<Element | null>(null)
@@ -231,6 +219,20 @@ const scrollable = useTemplateRef('scrollable')
 const mousePaused = ref(false)
 const { listen } = usePUIHotkeys()
 const stop: (() => void)[] = []
+
+defineExpose({
+  activeItems,
+  selectedItemIds,
+  deleteItems,
+  dropItems,
+  duplicateItems,
+  flatItems,
+  getActiveItems,
+  moveDownItems,
+  moveUpItems,
+  scrollToItem,
+  scrollToSelection,
+})
 
 /**
  * Timeout to unpause mouse events after a delay following mouse movement.

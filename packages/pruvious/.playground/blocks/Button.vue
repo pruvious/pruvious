@@ -3,9 +3,17 @@
 </template>
 
 <script lang="ts" setup>
-import { textField } from '#pruvious/client'
+import { defineBlock, textField } from '#pruvious/client'
+
+defineBlock({
+  ui: {
+    itemLabelConfiguration: {
+      fieldValue: 'label',
+    },
+  },
+})
 
 defineProps({
-  label: textField({}),
+  label: textField({ required: true }),
 })
 </script>

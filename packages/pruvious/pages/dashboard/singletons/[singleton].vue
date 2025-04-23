@@ -39,6 +39,8 @@
       operation="update"
     />
 
+    <PruviousDashboardHistoryScrollState />
+
     <template #footer>
       <div class="pui-justify-between">
         <PruviousDashboardHistoryButtons v-if="canUpdate && data" v-model="data" :history="history" />

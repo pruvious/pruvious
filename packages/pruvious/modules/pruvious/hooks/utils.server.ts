@@ -1,4 +1,4 @@
-import { actions, filters, type Actions, type Filters } from '#pruvious/server'
+import { actions, filters, type Actions, type Filters } from '#pruvious/server/hooks'
 
 /**
  * Registers a new server-side action function for a given action `name`.
@@ -6,7 +6,7 @@ import { actions, filters, type Actions, type Filters } from '#pruvious/server'
  * Actions are functions that allow you to hook into specific points in the application flow.
  * They provide a way to execute custom code without changing the original implementation.
  *
- * Place your actions anywhere in the `app/actions/` directory.
+ * Place your actions anywhere in the `server/actions/` directory.
  * Before executing any actions, you must define them with the `defineAction<Context>()` function.
  *
  * Actions run in the order they are added.
@@ -111,7 +111,7 @@ export async function doActions<
  * Filters are functions that allow modification of data at specific points in the application flow.
  * They provide a way to transform data without changing the original implementation.
  *
- * Place your filters anywhere in the `app/filters/` directory.
+ * Place your filters anywhere in the `server/filters/` directory.
  * Before applying any filters in your application, you must define them with the `defineFilter<Value, Context>()` function.
  *
  * Filters run in the order they are added.
@@ -121,22 +121,20 @@ export async function doActions<
  *
  * @example
  * ```ts
- * // app/hooks/filters/foo/returnable.ts
+ * // server/hooks/filters/foo/returnable.ts
  * import { defineFilter } from '#pruvious/server'
  *
  * export default defineFilter<string>()
  *
- * // app/filters/foo.ts
+ * // server/filters/foo.ts
  * import { addFilter } from '#pruvious/server'
  *
  * addFilter('foo:returnable', (value) => {
  *   return value + ', world!'
  * })
  *
- * // app/utils/foo.ts
- * import { applyFilters, loadFilters } from '#pruvious/server'
- *
- * await loadFilters('foo:returnable')
+ * // server/utils/foo.ts
+ * import { applyFilters } from '#pruvious/server'
  *
  * export async function foo() {
  *   const returnable = 'Hello'
@@ -163,22 +161,20 @@ export function addFilter<
  *
  * @example
  * ```ts
- * // app/hooks/filters/foo/returnable.ts
+ * // server/hooks/filters/foo/returnable.ts
  * import { defineFilter } from '#pruvious/server'
  *
  * export default defineFilter<string>()
  *
- * // app/filters/foo.ts
+ * // server/filters/foo.ts
  * import { addFilter } from '#pruvious/server'
  *
  * addFilter('foo:returnable', (value) => {
  *   return value + ', world!'
  * })
  *
- * // app/utils/foo.ts
- * import { applyFilters, loadFilters } from '#pruvious/server'
- *
- * await loadFilters('foo:returnable')
+ * // server/utils/foo.ts
+ * import { applyFilters } from '#pruvious/server'
  *
  * export async function foo() {
  *   const returnable = 'Hello'
