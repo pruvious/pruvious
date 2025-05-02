@@ -58,7 +58,7 @@ export interface Block<TFields extends Record<string, GenericField>> {
      *
      * @see https://tabler-icons.io for available icons
      *
-     * @default 'components'
+     * @default 'cube'
      */
     icon?: keyof typeof icons
 
@@ -339,7 +339,7 @@ export function defineBlock<const TFields extends Record<string, GenericField>>(
     group: options.group ?? null,
     tags: options.tags ?? [],
     ui: {
-      icon: options.ui?.icon ?? 'components',
+      icon: options.ui?.icon ?? 'cube',
       label: options.ui?.label,
       itemLabelConfiguration: {
         showBlockLabel: options.ui?.itemLabelConfiguration?.showBlockLabel ?? true,

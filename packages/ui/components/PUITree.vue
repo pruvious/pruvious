@@ -32,6 +32,7 @@
           :isLastDescendant="i === activeItems.length - 1"
           :key="activeItem.item.id"
           :model="activeItem"
+          :persistentExpandButton="persistentExpandButton"
           :selectedItemIds="selectedItemIds"
           :selectedItems="selectedItems"
           :touchDuration="touchDuration"
@@ -144,6 +145,16 @@ const props = defineProps({
   },
 
   /**
+   * Controls whether the expand button for tree items is always visible.
+   *
+   * @default true
+   */
+  persistentExpandButton: {
+    type: Boolean,
+    default: true,
+  },
+
+  /**
    * The source from which the tree is built.
    *
    * - The `source.root` must be an array of objects that have the `source.props.id` property.
@@ -223,6 +234,7 @@ const stop: (() => void)[] = []
 defineExpose({
   activeItems,
   selectedItemIds,
+  focused,
   deleteItems,
   dropItems,
   duplicateItems,
@@ -232,6 +244,8 @@ defineExpose({
   moveUpItems,
   scrollToItem,
   scrollToSelection,
+  scrollable,
+  updatePlaceholder,
 })
 
 /**
@@ -336,7 +350,6 @@ watch(
           emit('moveUpItems', normalizedSelection, event)
 
           setTimeout(() => {
-            root.value?.querySelector('button')?.focus()
             emit('update:selectedItems', puiSortTreeItems(props.selectedItems, props.modelValue))
 
             if (event instanceof KeyboardEvent) {
@@ -357,7 +370,6 @@ watch(
           emit('moveDownItems', normalizedSelection, event)
 
           setTimeout(() => {
-            root.value?.querySelector('button')?.focus()
             emit('update:selectedItems', puiSortTreeItems(props.selectedItems, props.modelValue))
 
             if (event instanceof KeyboardEvent) {
@@ -375,21 +387,7 @@ watch(
  * Updates the placeholder properties when the tree is scrolled.
  */
 onMounted(() => {
-  watch(
-    scrollable.value!.scroll.y,
-    (y) => {
-      clearTimeout(unsetPlaceholderItemHeightTimeout)
-      unsetPlaceholderItemHeightTimeout = setTimeout(() => (placeholder.value.itemHeight = undefined), 1000)
-
-      if (isUndefined(placeholder.value.itemHeight)) {
-        placeholder.value.itemHeight = calcItemSizes().itemHeight
-      }
-
-      placeholder.value.start = Math.floor(y / placeholder.value.itemHeight)
-      placeholder.value.end = Math.ceil((y + scrollable.value!.$el.offsetHeight) / placeholder.value.itemHeight)
-    },
-    { immediate: true },
-  )
+  watch(scrollable.value!.scroll.y, (y) => updatePlaceholder(y), { immediate: true })
 })
 
 /**
@@ -413,6 +411,21 @@ onUnmounted(() => {
  */
 function flatItems() {
   return puiFlatTreeItems(props.modelValue)
+}
+
+/*
+ * Updates the placeholder properties based on the current scroll position.
+ */
+function updatePlaceholder(y: number) {
+  clearTimeout(unsetPlaceholderItemHeightTimeout)
+  unsetPlaceholderItemHeightTimeout = setTimeout(() => (placeholder.value.itemHeight = undefined), 1000)
+
+  if (isUndefined(placeholder.value.itemHeight)) {
+    placeholder.value.itemHeight = calcItemSizes().itemHeight
+  }
+
+  placeholder.value.start = Math.floor(y / placeholder.value.itemHeight)
+  placeholder.value.end = Math.ceil((y + scrollable.value!.$el.offsetHeight) / placeholder.value.itemHeight)
 }
 
 /**
@@ -596,7 +609,7 @@ function deleteItems(items: PUITreeItemModel<T>[], event: Event) {
   if (props.source) {
     for (const { item, parent } of deleted) {
       remove(
-        item.source,
+        toRaw(item.source),
         parent?.source[props.source.props.children as unknown as keyof T] ?? (props.source.root as any),
         true,
       )
@@ -743,7 +756,9 @@ function revertFocus() {
       document.activeElement?.blur()
     }
 
-    previouslyFocusedElement.value.focus()
+    if (previouslyFocusedElement.value.nodeName !== 'BUTTON') {
+      previouslyFocusedElement.value.focus()
+    }
   }
 }
 </script>

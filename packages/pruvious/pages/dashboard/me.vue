@@ -30,7 +30,12 @@
 
     <template #footer>
       <div class="pui-justify-between">
-        <PruviousDashboardHistoryButtons v-if="data" v-model="data" :history="history" />
+        <PruviousDashboardHistoryButtons
+          v-if="data"
+          v-model="data"
+          :history="history"
+          @update:modelValue="errors = {}"
+        />
 
         <div class="pui-row pui-ml-auto">
           <PUIButton

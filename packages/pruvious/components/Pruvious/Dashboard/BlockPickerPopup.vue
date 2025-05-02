@@ -1,5 +1,5 @@
 <template>
-  <PUIPopup :size="-1" @close="close()" fullHeight="auto" ref="popup" width="32rem">
+  <PUIPopup :size="-1" @close="close()" fullHeight="auto" ref="popup" width="36rem">
     <template #header>
       <span class="p-title pui-row">
         <span class="pui-truncate">{{ __('pruvious-dashboard', 'Select block') }}</span>
@@ -40,37 +40,43 @@
       </div>
 
       <div v-if="tags.length" class="p-block-picker-tags">
-        <PUIButton
-          v-for="tag of tags"
-          :size="-3"
-          :variant="activeTags.includes(tag.name) ? 'primary' : 'outline'"
-          @click="
-            activeTags.includes(tag.name)
-              ? activeTags.splice(activeTags.indexOf(tag.name), 1)
-              : activeTags.push(tag.name)
-          "
-          tabindex="-3"
-          class="p-block-picker-tag"
-        >
+        <span :title="__('pruvious-dashboard', 'Tags')" class="p-block-picker-tags-icon">
           <Icon mode="svg" name="tabler:tag" />
-          <span class="p-block-picker-tag-label">{{ tag.label }}</span>
-        </PUIButton>
+        </span>
+        <div class="p-block-picker-tags-list">
+          <PUIButton
+            v-for="tag of tags"
+            :size="-3"
+            :variant="activeTags.includes(tag.name) ? 'primary' : 'outline'"
+            @click="
+              activeTags.includes(tag.name)
+                ? activeTags.splice(activeTags.indexOf(tag.name), 1)
+                : activeTags.push(tag.name)
+            "
+            tabindex="-3"
+            class="p-block-picker-tag"
+          >
+            <span class="p-block-picker-tag-label">{{ tag.label }}</span>
+          </PUIButton>
+        </div>
       </div>
 
       <div v-for="group of filteredGroups" class="p-block-picker-group">
         <span v-if="groups.length > 1" class="p-block-picker-group-label">{{ group.label }}</span>
 
-        <button
-          v-for="block of group.blocks"
-          @click="$emit('pick', block.name, close)"
-          class="p-block-picker-block pui-raw"
-        >
-          <Icon :name="`tabler:${block.icon}`" mode="svg" class="p-block-picker-block-icon" />
-          <span class="p-block-picker-block-meta">
-            <span class="p-block-picker-block-title">{{ block.label }}</span>
-            <span v-if="block.description" class="p-block-picker-block-description">{{ block.description }}</span>
-          </span>
-        </button>
+        <div class="p-block-picker-blocks">
+          <button
+            v-for="block of group.blocks"
+            @click="$emit('pick', block.name, close)"
+            class="p-block-picker-block pui-raw"
+          >
+            <Icon :name="`tabler:${block.icon}`" mode="svg" class="p-block-picker-block-icon" />
+            <span class="p-block-picker-block-meta">
+              <span class="p-block-picker-block-title">{{ block.label }}</span>
+              <span v-if="block.description" class="p-block-picker-block-description">{{ block.description }}</span>
+            </span>
+          </button>
+        </div>
       </div>
 
       <p v-if="!filteredGroups.length" class="p-block-picker-block-no-results pui-muted">
@@ -233,9 +239,22 @@ async function close() {
 
 .p-block-picker-tags {
   display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.p-block-picker-tags-list {
+  display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+}
+
+.p-block-picker-tags-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .p-block-picker-tag {
@@ -259,13 +278,19 @@ async function close() {
   line-height: calc(1em + 0.5rem);
 }
 
+.p-block-picker-blocks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
 .p-block-picker-block {
   display: flex;
   gap: 0.75rem;
   width: 100%;
   padding: 0.75rem 0.75rem;
-  background-color: hsl(var(--pui-secondary));
-  border: 1px solid hsl(var(--pui-border));
+  background-color: transparent;
+  border-width: 1px;
   border-radius: var(--pui-radius);
   color: hsl(var(--pui-secondary-foreground));
   text-align: left;
@@ -275,6 +300,7 @@ async function close() {
 
 .p-block-picker-block:hover {
   background-color: hsl(var(--pui-accent));
+  border-color: hsl(var(--pui-accent));
   color: hsl(var(--pui-accent-foreground));
 }
 
@@ -285,10 +311,6 @@ async function close() {
     0 0 #0000;
   outline: 0.125rem solid transparent;
   outline-offset: 0.125rem;
-}
-
-.p-block-picker-block + .p-block-picker-block {
-  margin-top: 0.5rem;
 }
 
 .p-block-picker-block-icon {
@@ -314,9 +336,21 @@ async function close() {
   color: hsl(var(--pui-muted-foreground));
   font-size: 0.8125rem;
   line-height: 1.25rem;
+  transition: var(--pui-transition);
+  transition-property: background-color, border-color, box-shadow, color;
+}
+
+.p-block-picker-block:hover .p-block-picker-block-description {
+  color: hsl(var(--pui-foreground));
 }
 
 .p-block-picker-block-no-results {
   margin-top: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .p-block-picker-blocks {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -85,6 +85,7 @@ function prepareProps(
       animation: false,
       arrow: true,
       hideOnClick: true,
+      touch: 'hold',
       maxWidth: 320,
       offset: [0, 10],
       placement: 'top',

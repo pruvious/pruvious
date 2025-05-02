@@ -223,12 +223,6 @@ export class SingletonBaseQueryBuilder {
 
         for (const [column, value] of Object.entries(row)) {
           if (fields[column]) {
-            try {
-              deserializedRow[column] = await fields[column].model.deserializer(value)
-            } catch {
-              deserializedRow[column] = deepClone(fields[column].default)
-            }
-          } else {
             deserializedRow[column] = value
           }
         }

@@ -33,6 +33,7 @@ useHead({
     { rel: 'icon', type: 'image/svg+xml', href: `${runtimeConfig.app.baseURL}pruvious/favicon.svg` },
     { rel: 'icon', type: 'image/png', href: `${runtimeConfig.app.baseURL}pruvious/favicon.png` },
   ],
+  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' }],
 })
 
 onMounted(() => {

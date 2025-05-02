@@ -71,20 +71,28 @@ const props = defineProps({
 })
 
 const root = useTemplateRef('root')
-const resolvedEditButtonPosition = computed(() => {
-  if (props.editButtonPosition === 'auto') {
-    const cell = root.value?.parentElement?.parentElement
-    const lastItem = root.value?.querySelector('.p-item:last-of-type')
+const resolvedEditButtonPosition = ref(props.editButtonPosition === 'auto' ? 'relative' : props.editButtonPosition)
 
-    if (cell && lastItem) {
-      const { right: parentRight } = cell.getBoundingClientRect()
-      const { right: childRight } = lastItem.getBoundingClientRect()
-      return parentRight - childRight < 32 ? 'absolute' : 'relative'
-    }
-  }
+watch(
+  () => props.editButtonPosition,
+  (position) => {
+    setTimeout(() => {
+      if (position === 'auto') {
+        const cell = root.value?.parentElement?.parentElement
+        const lastItem = root.value?.querySelector('.p-item:last-of-type')
 
-  return props.editButtonPosition
-})
+        if (cell && lastItem) {
+          const { right: parentRight } = cell.getBoundingClientRect()
+          const { right: childRight } = lastItem.getBoundingClientRect()
+          resolvedEditButtonPosition.value = parentRight - childRight < 32 ? 'absolute' : 'relative'
+        }
+      } else {
+        resolvedEditButtonPosition.value = position
+      }
+    })
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>

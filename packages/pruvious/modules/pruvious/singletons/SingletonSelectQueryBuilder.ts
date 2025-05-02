@@ -650,7 +650,7 @@ export class SingletonSelectQueryBuilder<
     return Object.assign(context, {
       singleton: this.singleton,
       singletonName: this.singletonName,
-      language: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
+      singletonLanguage: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
     })
   }
 

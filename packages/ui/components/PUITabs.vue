@@ -1,30 +1,44 @@
 <template>
   <div class="pui-tabs" :style="{ '--pui-size': size }">
-    <PUIButtonGroup
-      v-if="choices.length > 1"
+    <slot
+      :active="active"
       :choices="choices"
       :id="listId"
-      :modelValue="active"
-      :variant="variant"
-      @update:modelValue="
-        (value) => {
-          active = value as T
-          $emit('change', value as T)
+      :setActive="
+        (tab: T) => {
+          active = tab
+          $emit('change', tab)
         }
       "
-      class="pui-tabs-list"
+      name="nav"
     >
-      <template #default="{ label, index }">
-        <span>{{ label }}</span>
-        <PUIBubble
-          v-if="list[index]?.bubble"
-          v-pui-tooltip="list[index].bubble?.tooltip"
-          :variant="list[index].bubble?.variant"
-        >
-          {{ list[index].bubble.content }}
-        </PUIBubble>
-      </template>
-    </PUIButtonGroup>
+      <PUIButtonGroup
+        v-if="choices.length > 1"
+        :choices="choices"
+        :id="listId"
+        :modelValue="active"
+        :variant="variant"
+        @update:modelValue="
+          (value) => {
+            active = value as T
+            $emit('change', value as T)
+          }
+        "
+        class="pui-tabs-list"
+      >
+        <template #default="{ label, index }">
+          <span>{{ label }}</span>
+          <PUIBubble
+            v-if="list[index]?.bubble"
+            v-pui-tooltip="list[index].bubble?.tooltip"
+            :variant="list[index].bubble?.variant"
+          >
+            {{ list[index].bubble.content }}
+          </PUIBubble>
+        </template>
+      </PUIButtonGroup>
+    </slot>
+
     <div class="pui-tabs-content" :style="{ minHeight: contentMinHeight ? `${contentMinHeight}px` : undefined }">
       <div ref="contentContainer">
         <slot />

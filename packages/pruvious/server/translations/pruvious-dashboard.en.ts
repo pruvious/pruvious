@@ -2,6 +2,11 @@ import { createPattern, defineTranslation } from '#pruvious/server'
 
 export default defineTranslation({
   '$collection overview': createPattern('$collection overview', { collection: 'string' }),
+  '$count blocks could not be pasted': createPattern(
+    '$count $subject could not be pasted',
+    { count: 'number' },
+    { subject: [{ conditions: [{ count: 1 }], output: 'block' }, 'blocks'] },
+  ),
 
   'A translation for language `$language` already exists': createPattern(
     'A translation for language `$language` already exists',
@@ -10,10 +15,15 @@ export default defineTranslation({
   'Action failed': 'Action failed',
   'Actions': 'Actions',
   'Active': 'Active',
+  'Add after': 'Add after',
+  'Add before': 'Add before',
   'Add block': 'Add block',
   'Add condition': 'Add condition',
   'Add condition group': 'Add condition group',
+  'Add inside': 'Add inside',
   'Add item': 'Add item',
+  'Add nested block': 'Add nested block',
+  'Add top-level block': 'Add top-level block',
   'Administrator': 'Administrator',
   'After': 'After',
   'After or equal to': 'After or equal to',
@@ -41,6 +51,7 @@ export default defineTranslation({
   'Base URL': 'Base URL',
   'Before': 'Before',
   'Before or equal to': 'Before or equal to',
+  'Blocks': 'Blocks',
   'Body': 'Body',
   'Bookmark': 'Bookmark',
   'Bookmarks': 'Bookmarks',
@@ -152,6 +163,7 @@ export default defineTranslation({
   'Duplicate': 'Duplicate',
   'Duplicated': 'Duplicated',
 
+  'Each block in this field must be unique': 'Each block in this field must be unique',
   'Edit': 'Edit',
   'Edit field value': 'Edit field value',
   'Edit translation': 'Edit translation',
@@ -174,6 +186,7 @@ export default defineTranslation({
   'Expand all': 'Expand all',
 
   'False': 'False',
+  'Fields': 'Fields',
   'Filters': 'Filters',
   'First name': 'First name',
   'Fixed width': 'Fixed width',
@@ -201,8 +214,6 @@ export default defineTranslation({
   'Includes all': 'Includes all',
   'Includes any': 'Includes any',
   'Insert': 'Insert',
-  'Insert after': 'Insert after',
-  'Insert before': 'Insert before',
   'Installation': 'Installation',
   'installWelcomeMessage': 'Welcome to Pruvious! Enter your details to create your primary administrator account.',
   'Invalid `$param` parameter': createPattern('Invalid `$param` parameter', { param: 'string' }),
@@ -247,6 +258,7 @@ export default defineTranslation({
   'Next month': 'Next month',
   'Next page': 'Next page',
   'No': 'No',
+  'No blocks added': 'No blocks added',
   'No blocks can be added here': 'No blocks can be added here',
   'No blocks match your search criteria': 'No blocks match your search criteria',
   'No conditions set': 'No conditions set',
@@ -273,6 +285,9 @@ export default defineTranslation({
   'Page not found': 'Page not found',
   'Parameters': 'Parameters',
   'Password': 'Password',
+  'Paste after': 'Paste after',
+  'Paste before': 'Paste before',
+  'Paste inside': 'Paste inside',
   'Path': 'Path',
   'Payload': 'Payload',
   'Pending': 'Pending',
@@ -294,6 +309,7 @@ export default defineTranslation({
   'Redirected': 'Redirected',
   'Redirects': 'Redirects',
   'Redo': 'Redo',
+  'Refresh': 'Refresh',
   'Reload': 'Reload',
   'Remember me': 'Remember me',
   'Rename': 'Rename',
@@ -370,6 +386,7 @@ export default defineTranslation({
   }),
   'Sync configuration': 'Sync configuration',
 
+  'Tags': 'Tags',
   'The `$language` translation does not exist': createPattern('The `$language` translation does not exist', {
     language: 'string',
   }),
@@ -387,6 +404,22 @@ export default defineTranslation({
   'The user who created the record.': 'The user who created the record.',
   'The users who can edit the record.': 'The users who can edit the record.',
   'This block is not allowed here': 'This block is not allowed here',
+  'This field must contain at least $min blocks': createPattern(
+    'This field must contain at least $min $blocks',
+    { min: 'number' },
+    { blocks: [{ conditions: [{ min: 1 }], output: 'block' }, 'blocks'] },
+  ),
+  'This field must contain at least one block': 'This field must contain at least one block',
+  'This field must contain at most $max blocks': createPattern(
+    'This field must contain at most $max $blocks',
+    { max: 'number' },
+    { blocks: [{ conditions: [{ max: 1 }], output: 'block' }, 'blocks'] },
+  ),
+  'This field must contain exactly $exact blocks': createPattern(
+    'This field must contain exactly $exact $blocks',
+    { exact: 'number' },
+    { blocks: [{ conditions: [{ exact: 1 }], output: 'block' }, 'blocks'] },
+  ),
   'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
     'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.',
   'Time': 'Time',

@@ -133,9 +133,9 @@ interface IField {
    * { './size': { '=': 'sm' } }
    *
    * // Check nested sibling field
-   * { 'address.city': { in: ['London', 'Paris'] } }
+   * { 'address.city': { '=': 'London' } }
    * // or
-   * { './address.city': { in: ['London', 'Paris'] } }
+   * { './address.city': { '=': 'London' } }
    *
    * // Check parent field (e.g. array length)
    * { '..': { '>': 1 } }

@@ -61,7 +61,7 @@
       @mousedown="handleDrag"
       @mouseenter="
         () => {
-          if (!mousePaused) {
+          if (model.item.selectable !== false && !mousePaused) {
             $emit('highlight', model.item)
           }
         }
@@ -75,7 +75,7 @@
       "
       @mousemove="
         () => {
-          if (model.item.id !== highlightedItem?.id) {
+          if (model.item.selectable !== false && model.item.id !== highlightedItem?.id) {
             $emit('highlight', model.item)
           }
 
@@ -90,17 +90,18 @@
       class="pui-tree-item-button pui-raw"
       :class="{
         'pui-tree-item-button-highlighted': model.item.id === highlightedItem?.id && !isDragging,
+        'pui-tree-item-button-selectable': model.item.selectable !== false,
         'pui-tree-item-button-selected': selectedItemIds[model.item.id],
       }"
       :style="{
         paddingLeft:
-          model.item.nestable && model.item.children?.length
-            ? `calc(${model.parents.length} * 1.5em)`
-            : `calc(${model.parents.length} * 1.5em + 1em + 0.125rem)`,
+          model.item.nestable && (persistentExpandButton || model.item.children?.length)
+            ? `calc(0.25rem + (${model.parents.length} * (1em + 0.125rem)))`
+            : `calc(0.25rem + (${model.parents.length} * (1em + 0.125rem)) + (1em + 0.125rem))`,
       }"
     >
       <span
-        v-if="model.item.nestable && model.item.children?.length"
+        v-if="model.item.nestable && (persistentExpandButton || model.item.children?.length)"
         @click.stop="model.item.expanded ? collapse() : expand()"
         class="pui-tree-item-toggle"
         :class="{ 'pui-tree-item-toggle-expanded': model.item.expanded }"
@@ -250,6 +251,13 @@ export type PUITreeItemModel<T> = {
    * @default false
    */
   movable?: boolean | ((item: PUITreeItemModel<T>) => boolean)
+
+  /**
+   * Specifies whether the tree item can be selected.
+   *
+   * @default true
+   */
+  selectable?: boolean
 } & (
   | {
       /**
@@ -421,6 +429,16 @@ const props = defineProps({
     type: Number,
     default: 500,
   },
+
+  /**
+   * Controls whether the expand button for tree items is always visible.
+   *
+   * @default true
+   */
+  persistentExpandButton: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits<{
@@ -518,6 +536,10 @@ onUnmounted(() => {
  * Handles the selection of the tree item.
  */
 function select(event: MouseEvent | KeyboardEvent) {
+  if (props.model.item.selectable === false) {
+    return
+  }
+
   if (event.shiftKey && props.selectionOrigin) {
     const originIndex = props.activeItems.findIndex(({ item }) => item.id === props.selectionOrigin!.id)
     const [start, end] =
@@ -528,7 +550,7 @@ function select(event: MouseEvent | KeyboardEvent) {
       uniqueArrayByProp(
         [...props.selectedItems, ...props.activeItems.map(({ item }) => item).slice(start, end + 1)],
         'id',
-      ),
+      ).filter(({ selectable }) => selectable !== false),
     )
   } else if (puiIsMac() ? event.metaKey : event.ctrlKey) {
     if (props.selectedItems.some(({ id }) => id === props.model.item.id)) {
@@ -582,6 +604,11 @@ function updateTree(updatedProps: Partial<PUITreeItemModel<T>>) {
  * Handles the dragging of the selected tree items.
  */
 function handleDrag(event: MouseEvent) {
+  if (props.model.item.selectable === false) {
+    event.preventDefault()
+    return
+  }
+
   if (event.button > 0 || !isDraggable.value || !props.selectedItems.every(({ draggable }) => draggable)) {
     return
   }
@@ -623,7 +650,10 @@ function stopDragging() {
  * Starts the dragging of the selected tree items on touch devices.
  */
 function onTouchStart() {
-  if (isDraggable.value || props.selectedItems.every(({ draggable }) => draggable)) {
+  if (
+    props.model.item.selectable !== false &&
+    (isDraggable.value || props.selectedItems.every(({ draggable }) => draggable))
+  ) {
     touchTimeout = setTimeout(() => {
       emit('select', [props.model.item])
       emit('update:isDragging', true)
@@ -653,7 +683,7 @@ function cleanupAfterDrag() {
 function canDrop(zone: PUITreeDropTarget<T>['zone'], item?: PUITreeItemModel<T>) {
   item ??= props.model.item
 
-  if ((isFunction(item.droppable) && item.droppable(props.selectedItems, item, zone)) || item.droppable) {
+  if (isFunction(item.droppable) ? item.droppable(props.selectedItems, item, zone) : item.droppable) {
     // Items cannot be dropped in themselves
     if (zone === 'inside' && props.selectedItems.some(({ id }) => id === item.id)) {
       allowedDropZones.value.inside = false
@@ -733,9 +763,8 @@ function canDrop(zone: PUITreeDropTarget<T>['zone'], item?: PUITreeItemModel<T>)
   display: flex;
   justify-content: center;
   align-items: center;
-  width: calc(1em + 0.25rem);
-  height: calc(1em + 0.25rem);
-  padding-left: 0.125rem;
+  width: calc(1em + 0.125rem);
+  height: calc(1em + 0.125rem);
   color: hsl(var(--pui-muted-foreground));
 }
 
@@ -750,7 +779,7 @@ function canDrop(zone: PUITreeDropTarget<T>['zone'], item?: PUITreeItemModel<T>)
   align-items: center;
   width: 1em;
   height: 1em;
-  margin-right: 0.5em;
+  margin-right: 0.375rem;
   overflow: hidden;
   color: hsl(var(--pui-muted-foreground));
   font-size: calc(1em + 0.125rem);

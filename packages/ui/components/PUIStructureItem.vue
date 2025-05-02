@@ -18,7 +18,7 @@
     </div>
 
     <template v-if="$slots.header" #header>
-      <div class="pui-row">
+      <div class="pui-structure-item-header pui-row">
         <button
           v-if="isDraggable && !disabled"
           @mousedown="handleDrag"
@@ -195,6 +195,10 @@ function cleanupAfterDrag() {
 
 .pui-structure-item-collapsed .pui-structure-item-inner {
   display: none;
+}
+
+.pui-structure-item-header {
+  min-height: 2em;
 }
 
 .pui-structure-drag-handle {

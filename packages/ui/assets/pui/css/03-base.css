@@ -2,6 +2,7 @@
   min-width: 0;
   box-sizing: border-box;
   border: 0 solid hsl(var(--pui-border));
+  -webkit-tap-highlight-color: transparent;
   text-underline-offset: 0.125em;
   text-underline-offset: round(0.125em, 1px);
 }

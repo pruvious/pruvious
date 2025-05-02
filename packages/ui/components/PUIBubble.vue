@@ -44,8 +44,8 @@ defineProps({
   min-width: round(1em, 1px);
   min-height: 1em;
   min-height: round(1em, 1px);
-  padding: 0.125em 0.375em;
-  padding: round(0.125em, 1px) round(0.375em, 1px);
+  padding: 0.125em 0.5em;
+  padding: round(0.125em, 1px) round(0.5em, 1px);
   border: 1px solid hsl(var(--pui-background));
   font-size: calc(1rem + var(--pui-size) * 0.125rem - 0.1875rem);
   font-weight: 600;

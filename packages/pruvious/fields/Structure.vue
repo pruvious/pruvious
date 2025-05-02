@@ -129,7 +129,7 @@
           >
             <PUIDropdownItem
               v-if="(options.maxItems === false || structuredValue.length < options.maxItems) && !insertItemAction"
-              :title="__('pruvious-dashboard', 'Insert before')"
+              :title="__('pruvious-dashboard', 'Add before')"
               @click.stop="
                 () => {
                   if (Object.keys(options.structure).length > 1) {
@@ -141,12 +141,12 @@
               "
             >
               <Icon mode="svg" name="tabler:arrow-bar-to-up" />
-              <span>{{ __('pruvious-dashboard', 'Insert before') }}</span>
+              <span>{{ __('pruvious-dashboard', 'Add before') }}</span>
             </PUIDropdownItem>
 
             <PUIDropdownItem
               v-if="(options.maxItems === false || structuredValue.length < options.maxItems) && !insertItemAction"
-              :title="__('pruvious-dashboard', 'Insert after')"
+              :title="__('pruvious-dashboard', 'Add after')"
               @click.stop="
                 () => {
                   if (Object.keys(options.structure).length > 1) {
@@ -158,44 +158,10 @@
               "
             >
               <Icon mode="svg" name="tabler:arrow-bar-to-down" />
-              <span>{{ __('pruvious-dashboard', 'Insert after') }}</span>
+              <span>{{ __('pruvious-dashboard', 'Add after') }}</span>
             </PUIDropdownItem>
 
-            <PUIDropdownItem
-              v-if="!allExpanded && !insertItemAction"
-              :title="__('pruvious-dashboard', 'Expand all')"
-              @click="
-                () => {
-                  visibleActions = -1
-                  $nextTick(() => {
-                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: true }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
-                  })
-                }
-              "
-            >
-              <Icon mode="svg" name="tabler:maximize" />
-              <span>{{ __('pruvious-dashboard', 'Expand all') }}</span>
-            </PUIDropdownItem>
-
-            <PUIDropdownItem
-              v-if="!allCollapsed && !insertItemAction"
-              :title="__('pruvious-dashboard', 'Collapse all')"
-              @click="
-                () => {
-                  visibleActions = -1
-                  $nextTick(() => {
-                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: false }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
-                  })
-                }
-              "
-            >
-              <Icon mode="svg" name="tabler:minimize" />
-              <span>{{ __('pruvious-dashboard', 'Collapse all') }}</span>
-            </PUIDropdownItem>
+            <hr />
 
             <PUIDropdownItem
               v-if="
@@ -242,6 +208,44 @@
             >
               <Icon mode="svg" name="tabler:trash" />
               <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
+            </PUIDropdownItem>
+
+            <hr />
+
+            <PUIDropdownItem
+              v-if="!allExpanded && !insertItemAction"
+              :title="__('pruvious-dashboard', 'Expand all')"
+              @click="
+                () => {
+                  visibleActions = -1
+                  $nextTick(() => {
+                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: true }))
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                  })
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:maximize" />
+              <span>{{ __('pruvious-dashboard', 'Expand all') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="!allCollapsed && !insertItemAction"
+              :title="__('pruvious-dashboard', 'Collapse all')"
+              @click="
+                () => {
+                  visibleActions = -1
+                  $nextTick(() => {
+                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: false }))
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                  })
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:minimize" />
+              <span>{{ __('pruvious-dashboard', 'Collapse all') }}</span>
             </PUIDropdownItem>
 
             <template v-if="insertItemAction">

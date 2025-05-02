@@ -3,8 +3,14 @@
     v-model:conditionalLogic="conditionalLogic"
     v-model:data="data"
     v-model:errors="errors"
+    :canCreate="true"
+    :canDelete="false"
+    :canUpdate="false"
     :collection="collection"
     :conditionalLogicResolver="conditionalLogicResolver"
+    :dataContainerName="collection.name"
+    :disabled="false"
+    :fieldsLayout="fieldsLayout"
     :history="history"
     :is="layout"
     :isSubmitting="isSubmitting"
@@ -13,6 +19,7 @@
     @commit="history.push($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
+    dataContainerType="collection"
     operation="create"
   >
     <template #header>
@@ -50,7 +57,7 @@
       :dataContainerName="collection.name"
       :errors="errors"
       :fields="collection.definition.fields"
-      :layout="fieldLayout"
+      :layout="fieldsLayout"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
       @commit="history.push($event)"
@@ -63,8 +70,13 @@
     <PruviousDashboardHistoryScrollState />
 
     <template #footer>
-      <div class="pui-justify-between">
-        <PruviousDashboardHistoryButtons v-if="data" v-model="data" :history="history" />
+      <div class="pui-justify-between pui-w-full">
+        <PruviousDashboardHistoryButtons
+          v-if="data"
+          v-model="data"
+          :history="history"
+          @update:modelValue="errors = {}"
+        />
 
         <div class="pui-row pui-ml-auto">
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
@@ -259,7 +271,7 @@ const history = new History({
 const isSubmitting = ref(false)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
-const fieldLayout =
+const fieldsLayout =
   collection.definition.ui.createPage.fieldsLayout === 'mirror'
     ? collection.definition.ui.updatePage.fieldsLayout == 'mirror'
       ? undefined

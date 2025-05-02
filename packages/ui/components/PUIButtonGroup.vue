@@ -145,7 +145,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits<{
+defineEmits<{
   'update:modelValue': [value: Primitive]
 }>()
 

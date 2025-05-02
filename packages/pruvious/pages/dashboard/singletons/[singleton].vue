@@ -3,17 +3,24 @@
     v-model:conditionalLogic="conditionalLogic"
     v-model:data="data"
     v-model:errors="errors"
+    :canCreate="false"
+    :canDelete="false"
     :canUpdate="canUpdate"
     :conditionalLogicResolver="conditionalLogicResolver"
+    :dataContainerName="singleton.name"
+    :disabled="!canUpdate"
     :history="history"
     :is="layout"
     :isSubmitting="isSubmitting"
     :label="label"
+    :layout="singleton.definition.ui.fieldsLayout"
     :singleton="singleton"
     :singletonLanguage="singletonLanguage"
     @commit="history.push($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
+    dataContainerType="singleton"
+    operation="update"
   >
     <template #header>
       {{ label }}
@@ -42,8 +49,13 @@
     <PruviousDashboardHistoryScrollState />
 
     <template #footer>
-      <div class="pui-justify-between">
-        <PruviousDashboardHistoryButtons v-if="canUpdate && data" v-model="data" :history="history" />
+      <div class="pui-justify-between pui-w-full">
+        <PruviousDashboardHistoryButtons
+          v-if="canUpdate && data"
+          v-model="data"
+          :history="history"
+          @update:modelValue="errors = {}"
+        />
 
         <div class="pui-row pui-ml-auto">
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
@@ -70,6 +82,15 @@
             @close="isSingletonMenuVisible = false"
           >
             <PUIDropdownItem
+              v-if="singleton.definition.translatable"
+              :title="__('pruvious-dashboard', 'Translate')"
+              @click="isTranslationPopupVisible = true"
+            >
+              <Icon mode="svg" name="tabler:language" />
+              <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
               v-if="canUpdate"
               :title="__('pruvious-dashboard', 'Restore defaults')"
               @click="
@@ -82,15 +103,6 @@
             >
               <Icon mode="svg" name="tabler:restore" />
               <span>{{ __('pruvious-dashboard', 'Restore defaults') }}</span>
-            </PUIDropdownItem>
-
-            <PUIDropdownItem
-              v-if="singleton.definition.translatable"
-              :title="__('pruvious-dashboard', 'Translate')"
-              @click="isTranslationPopupVisible = true"
-            >
-              <Icon mode="svg" name="tabler:language" />
-              <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
             </PUIDropdownItem>
           </PUIDropdown>
         </div>

@@ -333,4 +333,10 @@ function calcItemSizes() {
   background-color: hsl(var(--pui-card) / 0.16);
   border: none;
 }
+
+.pui-dropdown-inner > hr + hr,
+.pui-dropdown-inner > hr:first-child,
+.pui-dropdown-inner > hr:last-child {
+  display: none;
+}
 </style>

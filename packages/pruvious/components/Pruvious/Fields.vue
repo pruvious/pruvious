@@ -83,7 +83,7 @@
       />
     </PUICard>
 
-    <PUITabs v-else-if="item.type === 'tabs'" :list="item.list" class="p-fields-item p-fields-tabs">
+    <PruviousDashboardTabs v-else-if="item.type === 'tabs'" :list="item.list" class="p-fields-item p-fields-tabs">
       <PUITab v-for="(tabLayout, i) of item.layouts" :name="i">
         <PruviousFields
           :alwaysVisibleFields="alwaysVisibleFields"
@@ -107,7 +107,7 @@
           @update:modelValue="(value, path) => $emit('update:modelValue', value, path)"
         />
       </PUITab>
-    </PUITabs>
+    </PruviousDashboardTabs>
 
     <component
       v-else-if="item.type === 'component'"

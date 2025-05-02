@@ -762,7 +762,7 @@ interface SingletonBaseContext {
    * The language code that determines which translation of the singleton content should be returned.
    * If the singleton is not translatable, this value is `null`.
    */
-  readonly language: LanguageCode | null
+  readonly singletonLanguage: LanguageCode | null
 }
 
 export type SingletonContext = (
@@ -933,7 +933,7 @@ export function defineSingleton<
           )
           await Promise.allSettled(
             languages
-              .filter(({ code }) => code !== context.language)
+              .filter(({ code }) => code !== context.singletonLanguage)
               .map(({ code }) =>
                 updateSingleton(context.singletonName)
                   .set(syncInput)

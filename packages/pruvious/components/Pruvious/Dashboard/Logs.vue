@@ -174,6 +174,18 @@
         </PUIDropdownItem>
 
         <PUIDropdownItem
+          v-if="canDeleteLogs"
+          :title="__('pruvious-dashboard', 'Delete')"
+          @click="onDelete(row.id)"
+          destructive
+        >
+          <Icon mode="svg" name="tabler:trash-x" />
+          <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
+        </PUIDropdownItem>
+
+        <hr />
+
+        <PUIDropdownItem
           v-if="canDeleteLogs && selected[row.id]"
           :title="__('pruvious-dashboard', 'Deselect')"
           @click="deselect(row.id)"
@@ -189,16 +201,6 @@
         >
           <Icon mode="svg" name="tabler:checkbox" />
           <span>{{ __('pruvious-dashboard', 'Select') }}</span>
-        </PUIDropdownItem>
-
-        <PUIDropdownItem
-          v-if="canDeleteLogs"
-          :title="__('pruvious-dashboard', 'Delete')"
-          @click="onDelete(row.id)"
-          destructive
-        >
-          <Icon mode="svg" name="tabler:trash-x" />
-          <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
         </PUIDropdownItem>
       </template>
     </PUITable>

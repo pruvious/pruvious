@@ -1,5 +1,5 @@
 import { isArray } from '../array/is'
-import { isDefined } from '../common/is'
+import { isDefined, isNull } from '../common/is'
 import { isObject } from './is'
 
 /**
@@ -82,6 +82,101 @@ export function deepCompare(a: any, b: any): boolean {
 }
 
 /**
+ * Compares two objects and returns an array of objects containing the `path`, `oldValue`, and `newValue` for each change.
+ *
+ * The `path` is a string that represents the path to reach the changed property using dot notation.
+ *
+ * @example
+ * ```ts
+ * const oldObject = { foo: { bar: 1 }, baz: 2 }
+ * const newObject = { foo: { bar: 2 }, baz: 3 }
+ * const changes = diff(oldObject, newObject)
+ * // [
+ * //   { path: 'foo.bar', oldValue: 1, newValue: 2 },
+ * //   { path: 'baz', oldValue: 2, newValue: 3 }
+ * // ]
+ * ```
+ */
+export function diff(
+  oldObject: Record<string, any>,
+  newObject: Record<string, any>,
+): { path: string; oldValue: any; newValue: any }[] {
+  const changes: { path: string; oldValue: any; newValue: any }[] = []
+
+  function cmp(oldValue: any, newValue: any, path = '') {
+    if (typeof oldValue !== typeof newValue) {
+      changes.push({ path, oldValue, newValue })
+      return
+    }
+
+    if (isNull(oldValue) || isNull(newValue)) {
+      if (oldValue !== newValue) {
+        changes.push({ path, oldValue, newValue })
+      }
+      return
+    }
+
+    if (typeof oldValue !== 'object') {
+      if (oldValue !== newValue) {
+        changes.push({ path, oldValue, newValue })
+      }
+      return
+    }
+
+    const oldIsArray = isArray(oldValue)
+    const newIsArray = isArray(newValue)
+
+    if (oldIsArray !== newIsArray) {
+      changes.push({ path, oldValue, newValue })
+      return
+    }
+
+    if (oldIsArray && newIsArray) {
+      if (oldValue.length !== newValue.length) {
+        changes.push({ path, oldValue: [...oldValue], newValue: [...newValue] })
+      }
+
+      const maxLength = Math.max(oldValue.length, newValue.length)
+      for (let i = 0; i < maxLength; i++) {
+        const newPath = path ? `${path}.${i}` : `${i}`
+
+        if (i < oldValue.length && i < newValue.length) {
+          cmp(oldValue[i], newValue[i], newPath)
+        } else if (i < oldValue.length) {
+          changes.push({ path: newPath, oldValue: oldValue[i], newValue: undefined })
+        } else {
+          changes.push({ path: newPath, oldValue: undefined, newValue: newValue[i] })
+        }
+      }
+      return
+    }
+
+    const oldKeys = Object.keys(oldValue)
+    const newKeys = Object.keys(newValue)
+
+    for (const key of oldKeys) {
+      const newPath = path ? `${path}.${key}` : key
+
+      if (!newKeys.includes(key)) {
+        changes.push({ path: newPath, oldValue: oldValue[key], newValue: undefined })
+      } else {
+        cmp(oldValue[key], newValue[key], newPath)
+      }
+    }
+
+    for (const key of newKeys) {
+      if (!oldKeys.includes(key)) {
+        const newPath = path ? `${path}.${key}` : key
+        changes.push({ path: newPath, oldValue: undefined, newValue: newValue[key] })
+      }
+    }
+  }
+
+  cmp(oldObject, newObject)
+  return changes
+}
+
+/**
  * Returns the names of the enumerable string properties and methods of an `object`.
  *
  * @example
@@ -92,6 +187,39 @@ export function deepCompare(a: any, b: any): boolean {
  */
 export function keys<T extends object>(object: T): (keyof T)[] {
   return Object.keys(object) as (keyof T)[]
+}
+
+/**
+ * Returns the first key of an object, or `undefined` if the object has no keys.
+ *
+ * @example
+ * ```ts
+ * const object = { foo: 1, bar: 2, baz: 3 }
+ * const result = firstKey(object) // 'foo'
+ *
+ * const emptyObject = {}
+ * const emptyResult = firstKey(emptyObject) // undefined
+ * ```
+ */
+export function firstKey<T extends object>(object: T): keyof T | undefined {
+  return keys(object)[0]
+}
+
+/**
+ * Returns the last key of an object, or `undefined` if the object has no keys.
+ *
+ * @example
+ * ```ts
+ * const object = { foo: 1, bar: 2, baz: 3 }
+ * const result = lastKey(object) // 'baz'
+ *
+ * const emptyObject = {}
+ * const emptyResult = lastKey(emptyObject) // undefined
+ * ```
+ */
+export function lastKey<T extends object>(object: T): keyof T | undefined {
+  const keysArray = keys(object)
+  return keysArray[keysArray.length - 1]
 }
 
 /**

@@ -41,7 +41,12 @@
 
     <template v-if="!disabled" #footer>
       <div class="pui-justify-between">
-        <PruviousDashboardHistoryButtons v-if="isListening" v-model="data" :history="history" />
+        <PruviousDashboardHistoryButtons
+          v-if="isListening"
+          v-model="data"
+          :history="history"
+          @update:modelValue="errors = {}"
+        />
         <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()" class="pui-ml-auto">
           {{ __('pruvious-dashboard', 'Save') }}
         </PUIButton>

@@ -15,9 +15,20 @@ const link = withoutTrailingSlash(dashboardBasePath)
 .p-logo {
   display: block;
   width: auto;
-  height: 1.75rem;
+  height: 2.25rem;
+  margin: -0.25rem;
+  padding: 0.25rem;
+  border-radius: calc(var(--pui-radius) - 0.125rem);
   color: hsl(var(--pui-card));
   filter: brightness(0.8);
+  transition: var(--pui-transition);
+  transition-property: border-color, box-shadow;
+}
+
+.p-logo:focus-visible,
+.p-logo-focus-visible {
+  box-shadow: 0 0 0 0.125rem hsl(var(--pui-ring));
+  outline: none;
 }
 
 .dark .p-logo {

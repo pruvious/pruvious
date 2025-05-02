@@ -51,7 +51,7 @@
           </PUIButton>
 
           <PUIButton
-            v-pui-tooltip="__('pruvious-dashboard', 'Insert before')"
+            v-pui-tooltip="__('pruvious-dashboard', 'Add before')"
             :disabled="columns.length >= fieldChoices.length"
             :size="-2"
             @click="addColumn(index)"

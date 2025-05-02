@@ -5,44 +5,10 @@ import {
   type DynamicBlockFieldTypes,
   type GenericDatabase,
   type ResolveFieldUIOptions,
-  type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import { Field, type ConditionalLogic, type FieldModel, type GenericField } from '@pruvious/orm'
 import type { PropType } from 'vue'
 import { blockFieldModel, type BlockFieldModelOptions } from '../../modules/pruvious/blocks/blocksFieldModel'
-
-interface CustomOptions {
-  ui?: {
-    /**
-     * Sets the label for the "Add block" button.
-     *
-     * You can either provide a string or a function that returns a string.
-     * The function receives an object with `_` and `__` properties to access the translation functions.
-     *
-     * Important: When using a function, only use simple anonymous functions without context binding,
-     * since the option needs to be serialized for client-side use.
-     *
-     * @example
-     * ```ts
-     * // String (non-translatable)
-     * label: 'Add image'
-     *
-     * // Function (translatable)
-     * label: ({ __ }) => __('pruvious-dashboard', 'Add image')
-     * ```
-     *
-     * @default
-     * ({ __ }) => __('pruvious-dashboard', 'Add block')
-     */
-    addBlockLabel?: string | ((context: TranslatableStringCallbackContext) => string)
-  }
-}
-
-const customOptions: CustomOptions = {
-  ui: {
-    addBlockLabel: ({ __ }) => __('pruvious-dashboard', 'Add block'),
-  },
-}
 
 export default {
   /**
@@ -67,7 +33,7 @@ export default {
         undefined,
         { [$key in BlockName]: Record<string, GenericField> }
       >,
-      BlockFieldModelOptions & ResolveFieldUIOptions<undefined> & CustomOptions,
+      BlockFieldModelOptions & ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -85,7 +51,7 @@ export default {
       undefined,
       { [$key in BlockName]: Record<string, GenericField> }
     >,
-    BlockFieldModelOptions & ResolveFieldUIOptions<undefined> & CustomOptions,
+    BlockFieldModelOptions & ResolveFieldUIOptions<undefined>,
     false,
     TRequired,
     TImmutable,
@@ -95,7 +61,6 @@ export default {
   > {
     const bound = defineField({
       model: blockFieldModel(),
-      customOptions,
       castedTypeFn: () => `DynamicBlockFieldTypes['Casted'][BlockName][]`,
       populatedTypeFn: () => `DynamicBlockFieldTypes['Populated'][BlockName][]`,
       inputTypeFn: () => `DynamicBlockFieldTypes['Input'][BlockName][]`,
@@ -125,7 +90,7 @@ export default {
         undefined,
         { [$key in BlockName]: Record<string, GenericField> }
       >,
-      BlockFieldModelOptions & ResolveFieldUIOptions<undefined> & CustomOptions,
+      BlockFieldModelOptions & ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -144,7 +109,7 @@ export default {
         undefined,
         { [$key in BlockName]: Record<string, GenericField> }
       >,
-      BlockFieldModelOptions & ResolveFieldUIOptions<undefined> & CustomOptions,
+      BlockFieldModelOptions & ResolveFieldUIOptions<undefined>,
       false,
       TRequired,
       TImmutable,
@@ -171,7 +136,7 @@ export default {
       undefined,
       { [$key in BlockName]: Record<string, GenericField> }
     >,
-    BlockFieldModelOptions & ResolveFieldUIOptions<undefined> & CustomOptions,
+    BlockFieldModelOptions & ResolveFieldUIOptions<undefined>,
     false,
     boolean,
     boolean,

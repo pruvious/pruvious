@@ -126,6 +126,7 @@ defineProps({
   font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
+  user-select: none;
   transition: var(--pui-transition);
   transition-property: background-color, border-color, box-shadow, color;
 }

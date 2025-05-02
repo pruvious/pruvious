@@ -147,6 +147,8 @@
             <span>{{ __('pruvious-dashboard', 'Sync configuration') }}</span>
           </PUIDropdownItem>
 
+          <hr />
+
           <PUIDropdownItem
             v-if="canUpdate && !visibleActions.shared"
             :title="__('pruvious-dashboard', 'Share')"

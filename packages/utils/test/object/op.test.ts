@@ -5,8 +5,11 @@ import {
   clear,
   deepClone,
   deepCompare,
+  diff,
   filterObject,
+  firstKey,
   invertMap,
+  lastKey,
   omit,
   pick,
   remap,
@@ -45,6 +48,30 @@ test('deep compare', () => {
   expect(deepCompare([1, 2], [1, 2])).toBe(true)
   expect(deepCompare([1, 2], [2, 1])).toBe(false)
   expect(deepCompare([1, 2], [1, 2, 3])).toBe(false)
+})
+
+test('diff', () => {
+  expect(diff({ foo: 1 }, { foo: 1 })).toEqual([])
+  expect(diff({ foo: 1 }, { foo: 2 })).toEqual([{ path: 'foo', oldValue: 1, newValue: 2 }])
+  expect(diff({ foo: 1 }, { bar: 2 })).toEqual([
+    { path: 'foo', oldValue: 1, newValue: undefined },
+    { path: 'bar', oldValue: undefined, newValue: 2 },
+  ])
+  expect(diff({ foo: { bar: 1 } }, { foo: { bar: 2 } })).toEqual([{ path: 'foo.bar', oldValue: 1, newValue: 2 }])
+  expect(diff([1, 2], [1, 2])).toEqual([])
+  expect(diff([1, 2], [1, 3])).toEqual([{ path: '1', oldValue: 2, newValue: 3 }])
+  expect(diff({ foo: [1, 2] }, { foo: [1, 3] })).toEqual([{ path: 'foo.1', oldValue: 2, newValue: 3 }])
+  expect(diff({ foo: null }, { foo: undefined })).toEqual([{ path: 'foo', oldValue: null, newValue: undefined }])
+})
+
+test('first key', () => {
+  expect(firstKey({ foo: 1, bar: 2, baz: 3 })).toBe('foo')
+  expect(firstKey({})).toBeUndefined()
+})
+
+test('last key', () => {
+  expect(lastKey({ foo: 1, bar: 2, baz: 3 })).toBe('baz')
+  expect(lastKey({})).toBeUndefined()
 })
 
 test('pick', () => {

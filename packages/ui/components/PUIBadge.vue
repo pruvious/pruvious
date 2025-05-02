@@ -110,5 +110,6 @@ onMounted(() => {
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+  user-select: none;
 }
 </style>

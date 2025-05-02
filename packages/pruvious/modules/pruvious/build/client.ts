@@ -561,6 +561,7 @@ function getReExports() {
     `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
     `export { usePruviousHMR } from '${resolve('../../../utils/pruvious/dashboard/hmr')}'`,
     `export { maybeTranslate } from '${resolve('../../../utils/pruvious/dashboard/i18n')}'`,
+    `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard } from '${resolve('../../../utils/pruvious/dashboard/clipboard')}'`,
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
   ].join('\n')

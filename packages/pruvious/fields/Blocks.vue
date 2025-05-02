@@ -132,75 +132,41 @@
           >
             <PUIDropdownItem
               v-if="allowedBlocks.length && (options.maxItems === false || structuredValue.length < options.maxItems)"
-              :title="__('pruvious-dashboard', 'Insert before')"
+              :title="__('pruvious-dashboard', 'Add before')"
               @click.stop="
                 () => {
                   if (allowedBlocks.length > 1) {
                     addBlockPopupIndex = index
                   } else {
-                    addItem(allowedBlocks[0]!, index)
+                    addBlock(allowedBlocks[0]!, index)
                   }
                   visibleActions = -1
                 }
               "
             >
               <Icon mode="svg" name="tabler:arrow-bar-to-up" />
-              <span>{{ __('pruvious-dashboard', 'Insert before') }}</span>
+              <span>{{ __('pruvious-dashboard', 'Add before') }}</span>
             </PUIDropdownItem>
 
             <PUIDropdownItem
               v-if="allowedBlocks.length && (options.maxItems === false || structuredValue.length < options.maxItems)"
-              :title="__('pruvious-dashboard', 'Insert after')"
+              :title="__('pruvious-dashboard', 'Add after')"
               @click.stop="
                 () => {
                   if (allowedBlocks.length > 1) {
                     addBlockPopupIndex = index + 1
                   } else {
-                    addItem(allowedBlocks[0]!, index + 1)
+                    addBlock(allowedBlocks[0]!, index + 1)
                   }
                   visibleActions = -1
                 }
               "
             >
               <Icon mode="svg" name="tabler:arrow-bar-to-down" />
-              <span>{{ __('pruvious-dashboard', 'Insert after') }}</span>
+              <span>{{ __('pruvious-dashboard', 'Add after') }}</span>
             </PUIDropdownItem>
 
-            <PUIDropdownItem
-              v-if="!allExpanded"
-              :title="__('pruvious-dashboard', 'Expand all')"
-              @click="
-                () => {
-                  visibleActions = -1
-                  $nextTick(() => {
-                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: true }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
-                  })
-                }
-              "
-            >
-              <Icon mode="svg" name="tabler:maximize" />
-              <span>{{ __('pruvious-dashboard', 'Expand all') }}</span>
-            </PUIDropdownItem>
-
-            <PUIDropdownItem
-              v-if="!allCollapsed"
-              :title="__('pruvious-dashboard', 'Collapse all')"
-              @click="
-                () => {
-                  visibleActions = -1
-                  $nextTick(() => {
-                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: false }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
-                  })
-                }
-              "
-            >
-              <Icon mode="svg" name="tabler:minimize" />
-              <span>{{ __('pruvious-dashboard', 'Collapse all') }}</span>
-            </PUIDropdownItem>
+            <hr />
 
             <PUIDropdownItem
               v-if="
@@ -245,6 +211,44 @@
             >
               <Icon mode="svg" name="tabler:trash" />
               <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
+            </PUIDropdownItem>
+
+            <hr />
+
+            <PUIDropdownItem
+              v-if="!allExpanded"
+              :title="__('pruvious-dashboard', 'Expand all')"
+              @click="
+                () => {
+                  visibleActions = -1
+                  $nextTick(() => {
+                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: true }))
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                  })
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:maximize" />
+              <span>{{ __('pruvious-dashboard', 'Expand all') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="!allCollapsed"
+              :title="__('pruvious-dashboard', 'Collapse all')"
+              @click="
+                () => {
+                  visibleActions = -1
+                  $nextTick(() => {
+                    structuredValue = structuredValue.map((item) => ({ ...item, $expanded: false }))
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                  })
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:minimize" />
+              <span>{{ __('pruvious-dashboard', 'Collapse all') }}</span>
             </PUIDropdownItem>
           </PUIDropdown>
         </span>
@@ -311,7 +315,7 @@
             if (allowedBlocks.length > 1) {
               addBlockPopupIndex = structuredValue.length
             } else {
-              addItem(allowedBlocks[0]!)
+              addBlock(allowedBlocks[0]!)
             }
           }
         "
@@ -319,7 +323,7 @@
         variant="outline"
       >
         <Icon mode="svg" name="tabler:plus" />
-        <span>{{ addBlockLabel }}</span>
+        <span>{{ __('pruvious-dashboard', 'Add block') }}</span>
       </PUIButton>
 
       <PruviousDashboardBlockPickerPopup
@@ -328,7 +332,7 @@
         @close="$event().then(() => (addBlockPopupIndex = -1))"
         @pick="
           (blockName, close) => {
-            addItem(blockName, addBlockPopupIndex)
+            addBlock(blockName, addBlockPopupIndex)
             close().then(() => (addBlockPopupIndex = -1))
           }
         "
@@ -520,6 +524,8 @@ const emit = defineEmits<{
   'queueConditionalLogicUpdate': [path?: (string & {}) | string[] | '$resolve' | '$reset']
 }>()
 
+provide('isLivePreview', false)
+
 const dashboard = usePruviousDashboard()
 const root = useTemplateRef('root')
 const structure = useTemplateRef('structure')
@@ -598,9 +604,6 @@ const denyNestedBlocks = computed(() =>
       : Object.keys(dashboard.value!.blocks)),
   ]),
 )
-const addBlockLabel = isDefined(props.options.ui.addBlockLabel)
-  ? maybeTranslate(props.options.ui.addBlockLabel)
-  : __('pruvious-dashboard', 'Add block')
 const addBlockPopupIndex = ref(-1)
 const allowedBlocks = computed(
   () =>
@@ -639,10 +642,13 @@ watch(
   { immediate: true },
 )
 
-function addItem($key: string, index?: number) {
+function addBlock(blockName: string, index?: number) {
   const item = {
-    $blockName: $key,
-    ...remap(dashboard.value!.blocks[$key]!.fields, (fieldName, options) => [fieldName, deepClone(options.default)]),
+    $blockName: blockName,
+    ...remap(dashboard.value!.blocks[blockName]!.fields, (fieldName, options) => [
+      fieldName,
+      deepClone(options.default),
+    ]),
     $expanded: true,
     $key: nanoid(),
   }

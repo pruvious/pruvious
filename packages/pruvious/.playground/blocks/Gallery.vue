@@ -13,7 +13,6 @@ defineBlock({
 defineProps({
   blocks: blocksField({
     allowRootBlocks: ['Image'],
-    ui: { addBlockLabel: 'Add image' },
   }),
 })
 </script>

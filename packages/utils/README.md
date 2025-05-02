@@ -81,13 +81,16 @@ npm install @pruvious/utils
   - [deepClone](#deepclone)
   - [deepCompare](#deepcompare)
   - [deleteProperty](#deleteproperty)
+  - [diff](#diff)
   - [filterObject](#filterobject)
+  - [firstKey](#firstkey)
   - [getProperty](#getproperty)
   - [invertMap](#invertmap)
   - [isKeyOf](#iskeyof)
   - [isObject](#isobject)
   - [isSerializable](#isserializable)
   - [keys](#keys)
+  - [lastKey](#lastkey)
   - [omit](#omit)
   - [pick](#pick)
   - [remap](#remap)
@@ -965,6 +968,24 @@ deleteProperty({ foo: ['bar', 'baz']}, 'foo.1')   // true
 deleteProperty({ foo: { bar: 'baz' }}, 'bar')     // false
 ```
 
+### <a id="diff">`diff(oldObject, newObject)`</a>
+
+Compares two objects and returns an array of objects containing the `path`, `oldValue`, and `newValue` for each change.
+
+The `path` is a string that represents the path to reach the changed property using dot notation.
+
+**Example:**
+
+```ts
+const oldObject = { foo: { bar: 1 }, baz: 2 }
+const newObject = { foo: { bar: 2 }, baz: 3 }
+const changes = diff(oldObject, newObject)
+// [
+//   { path: 'foo.bar', oldValue: 1, newValue: 2 },
+//   { path: 'baz', oldValue: 2, newValue: 3 }
+// ]
+```
+
 ### <a id="filterobject">`filterObject(object, filter)`</a>
 
 Filters an `object` by applying a `filter` function to each of its properties.
@@ -977,6 +998,20 @@ filterObject({ a: 1, b: 2 }, (key, value) => value % 2 === 0)
 
 filterObject({ foo: 'bar', baz: 'qux' }, (key, value) => key === 'foo')
 // { foo: 'bar' }
+```
+
+### <a id="firstkey">`firstKey(object)`</a>
+
+Returns the first key of an object, or `undefined` if the object has no keys.
+
+**Example:**
+
+```ts
+const object = { foo: 1, bar: 2, baz: 3 }
+const result = firstKey(object) // 'foo'
+
+const emptyObject = {}
+const emptyResult = firstKey(emptyObject) // undefined
 ```
 
 ### <a id="getproperty">`getProperty(object, path, append)`</a>
@@ -1045,6 +1080,20 @@ Returns the names of the enumerable string properties and methods of an `object`
 ```ts
 const object = { foo: 1, bar: 2, baz: 3 }
 const result = keys(object) // ['foo', 'bar', 'baz']
+```
+
+### <a id="lastkey">`lastKey(object)`</a>
+
+Returns the last key of an object, or `undefined` if the object has no keys.
+
+**Example:**
+
+```ts
+const object = { foo: 1, bar: 2, baz: 3 }
+const result = lastKey(object) // 'baz'
+
+const emptyObject = {}
+const emptyResult = lastKey(emptyObject) // undefined
 ```
 
 ### <a id="omit">`omit(object, keys)`</a>

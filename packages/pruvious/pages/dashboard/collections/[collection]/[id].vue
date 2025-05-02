@@ -8,6 +8,9 @@
     :canUpdate="canUpdate"
     :collection="collection"
     :conditionalLogicResolver="conditionalLogicResolver"
+    :dataContainerName="collection.name"
+    :disabled="!canUpdate"
+    :fieldsLayout="fieldsLayout"
     :history="history"
     :id="id"
     :is="layout"
@@ -18,6 +21,7 @@
     @commit="history.push($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
+    dataContainerType="collection"
     operation="update"
   >
     <template #header>
@@ -44,7 +48,7 @@
       :disabled="!canUpdate"
       :errors="errors"
       :fields="collection.definition.fields"
-      :layout="fieldLayout"
+      :layout="fieldsLayout"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
       @commit="history.push($event)"
@@ -57,8 +61,13 @@
     <PruviousDashboardHistoryScrollState />
 
     <template v-if="canCreate || canUpdate || canDelete" #footer class="pui-row pui-ml-auto">
-      <div class="pui-row">
-        <PruviousDashboardHistoryButtons v-if="canUpdate && data" v-model="data" :history="history" />
+      <div class="pui-justify-between pui-w-full">
+        <PruviousDashboardHistoryButtons
+          v-if="canUpdate && data"
+          v-model="data"
+          :history="history"
+          @update:modelValue="errors = {}"
+        />
 
         <div class="pui-row pui-ml-auto">
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
@@ -93,14 +102,7 @@
               <span>{{ __('pruvious-dashboard', 'New') }}</span>
             </PUIDropdownItem>
 
-            <PUIDropdownItem
-              v-if="collection.definition.duplicate && canCreate"
-              :title="__('pruvious-dashboard', 'Duplicate')"
-              @click="duplicateRecord()"
-            >
-              <Icon mode="svg" name="tabler:copy" />
-              <span>{{ __('pruvious-dashboard', 'Duplicate') }}</span>
-            </PUIDropdownItem>
+            <hr />
 
             <PUIDropdownItem
               v-if="collection.definition.translatable"
@@ -109,6 +111,15 @@
             >
               <Icon mode="svg" name="tabler:language" />
               <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="collection.definition.duplicate && canCreate"
+              :title="__('pruvious-dashboard', 'Duplicate')"
+              @click="duplicateRecord()"
+            >
+              <Icon mode="svg" name="tabler:copy" />
+              <span>{{ __('pruvious-dashboard', 'Duplicate') }}</span>
             </PUIDropdownItem>
 
             <PUIDropdownItem
@@ -302,7 +313,7 @@ const canDelete = computed(() => {
 const isSubmitting = ref(false)
 const { listen } = usePUIHotkeys()
 const overlayCounter = usePUIOverlayCounter()
-const fieldLayout =
+const fieldsLayout =
   collection.definition.ui.updatePage.fieldsLayout === 'mirror'
     ? collection.definition.ui.createPage.fieldsLayout == 'mirror'
       ? undefined

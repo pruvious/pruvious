@@ -77,6 +77,8 @@ const { activate: activateFocusTrap, deactivate: deactivateFocusTrap } = useFocu
 
 let transitionTimeout: NodeJS.Timeout | undefined
 
+defineExpose({ sidebar, toggleSidebar })
+
 provide('sidebar', { el: sidebar, toggle: toggleSidebar })
 
 onMounted(() => {
@@ -119,7 +121,6 @@ async function toggleSidebar() {
   transition.value = true
   nextTick(() => {
     dashboardLayout.value.sidebarExpanded = !dashboardLayout.value.sidebarExpanded
-    overlayCounter.value += dashboardLayout.value.sidebarExpanded ? 1 : -1
     transitionTimeout = setTimeout(() => {
       transition.value = false
     }, getOverlayTransitionDuration())

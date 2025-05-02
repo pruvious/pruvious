@@ -107,6 +107,36 @@
           </PUIDropdownItem>
 
           <PUIDropdownItem
+            v-if="collection.definition.translatable"
+            :title="__('pruvious-dashboard', 'Translate')"
+            @click="isTranslationPopupVisible = true"
+          >
+            <Icon mode="svg" name="tabler:language" />
+            <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="collection.definition.duplicate && canCreate"
+            :title="__('pruvious-dashboard', 'Duplicate')"
+            @click="onDuplicate(row.id)"
+          >
+            <Icon mode="svg" name="tabler:copy" />
+            <span>{{ __('pruvious-dashboard', 'Duplicate') }}</span>
+          </PUIDropdownItem>
+
+          <PUIDropdownItem
+            v-if="resolvedPermissions?.[contentLanguage].canDelete"
+            :title="__('pruvious-dashboard', 'Delete')"
+            @click="onDelete(row.id)"
+            destructive
+          >
+            <Icon mode="svg" name="tabler:trash-x" />
+            <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
+          </PUIDropdownItem>
+
+          <hr />
+
+          <PUIDropdownItem
             v-if="selected[row.id]"
             :title="__('pruvious-dashboard', 'Deselect')"
             @click="deselect(row.id)"
@@ -122,34 +152,6 @@
           >
             <Icon mode="svg" name="tabler:checkbox" />
             <span>{{ __('pruvious-dashboard', 'Select') }}</span>
-          </PUIDropdownItem>
-
-          <PUIDropdownItem
-            v-if="collection.definition.duplicate && canCreate"
-            :title="__('pruvious-dashboard', 'Duplicate')"
-            @click="onDuplicate(row.id)"
-          >
-            <Icon mode="svg" name="tabler:copy" />
-            <span>{{ __('pruvious-dashboard', 'Duplicate') }}</span>
-          </PUIDropdownItem>
-
-          <PUIDropdownItem
-            v-if="collection.definition.translatable"
-            :title="__('pruvious-dashboard', 'Translate')"
-            @click="isTranslationPopupVisible = true"
-          >
-            <Icon mode="svg" name="tabler:language" />
-            <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
-          </PUIDropdownItem>
-
-          <PUIDropdownItem
-            v-if="resolvedPermissions?.[contentLanguage].canDelete"
-            :title="__('pruvious-dashboard', 'Delete')"
-            @click="onDelete(row.id)"
-            destructive
-          >
-            <Icon mode="svg" name="tabler:trash-x" />
-            <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
           </PUIDropdownItem>
         </template>
       </PUITable>

@@ -12,7 +12,6 @@ import {
   ConditionalLogicResolver,
   extractInputFilters,
   normalizeQueryString,
-  parseConditionalLogic,
   queryStringToUpdateQueryBuilderParams,
   SanitizedUpdateContext,
   UpdateContext,
@@ -43,6 +42,7 @@ import {
   type NonEmptyArray,
 } from '@pruvious/utils'
 import { hash } from 'ohash'
+import { parseConditionalLogic } from '../fields/utils.server'
 import { SingletonBaseQueryBuilder, type SingletonQueryBuilderParamsOptions } from './SingletonBaseQueryBuilder'
 
 /**
@@ -1078,7 +1078,7 @@ export class SingletonUpdateQueryBuilder<
     return Object.assign(context, {
       singleton: this.singleton,
       singletonName: this.singletonName,
-      language: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
+      singletonLanguage: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
     }) as any
   }
 
@@ -1090,7 +1090,7 @@ export class SingletonUpdateQueryBuilder<
     return Object.assign(context, {
       singleton: this.singleton,
       singletonName: this.singletonName,
-      language: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
+      singletonLanguage: this.singleton.translatable ? (this.languageCode ?? primaryLanguage) : null,
     })
   }
 

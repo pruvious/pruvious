@@ -277,7 +277,7 @@ export function blockFieldModel(): FieldModel<
           isArray(value) &&
           value.length === 0
         ) {
-          throw new Error(context.__('pruvious-orm', 'This field must contain at least one item'))
+          throw new Error(context.__('pruvious-dashboard' as any, 'This field must contain at least one block' as any))
         }
       },
       (value, { definition, context }) => {
@@ -498,7 +498,7 @@ export function blockFieldModel(): FieldModel<
           }
 
           if (hasDuplicates) {
-            throw new Error(context.__('pruvious-orm', 'Each item in this field must be unique'))
+            throw new Error(context.__('pruvious-dashboard' as any, 'Each block in this field must be unique' as any))
           }
         }
       },
@@ -510,19 +510,31 @@ export function blockFieldModel(): FieldModel<
           if (minItems !== false && minItems === maxItems) {
             if (value.length !== minItems) {
               throw new Error(
-                context.__('pruvious-orm', 'This field must contain exactly $exact items', { exact: minItems }),
+                context.__(
+                  'pruvious-dashboard' as any,
+                  'This field must contain exactly $exact blocks' as any,
+                  { exact: minItems } as any,
+                ),
               )
             }
           } else {
             if (minItems !== false && value.length < minItems) {
               throw new Error(
-                context.__('pruvious-orm', 'This field must contain at least $min items', { min: minItems }),
+                context.__(
+                  'pruvious-dashboard' as any,
+                  'This field must contain at least $min blocks' as any,
+                  { min: minItems } as any,
+                ),
               )
             }
 
             if (maxItems !== false && value.length > maxItems) {
               throw new Error(
-                context.__('pruvious-orm', 'This field must contain at most $max items', { max: maxItems }),
+                context.__(
+                  'pruvious-dashboard' as any,
+                  'This field must contain at most $max blocks' as any,
+                  { max: maxItems } as any,
+                ),
               )
             }
           }

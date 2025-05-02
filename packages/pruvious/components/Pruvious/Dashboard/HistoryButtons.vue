@@ -1,5 +1,5 @@
 <template>
-  <div class="pui-row">
+  <div class="p-history-buttons pui-row">
     <PUIButton
       v-pui-tooltip.watch.row.nomd="
         `<span>${__('pruvious-dashboard', 'Undo')}</span><code>${history.undoCount.value}</code>`
