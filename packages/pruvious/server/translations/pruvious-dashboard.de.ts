@@ -48,6 +48,8 @@ export default defineTranslation({
   'Auto (device settings)': 'Auto (Geräteeinstellungen)',
   'Auto width': 'Automatische Breite',
 
+  'Background clipboard monitoring for instant paste readiness. This feature will request browser permission to access your clipboard.':
+    'Hintergrund-Zwischenablageüberwachung für sofortige Einfügebereitschaft.\n\nDiese Funktion fordert die Berechtigung des Browsers an, auf Ihre Zwischenablage zuzugreifen.',
   'Base URL': 'Basis-URL',
   'Before': 'Vor',
   'Before or equal to': 'Vor oder gleich',
@@ -154,6 +156,7 @@ export default defineTranslation({
   'Dependencies': 'Abhängigkeiten',
   'Deselect': 'Abwählen',
   'Disable': 'Deaktivieren',
+  'Disabled': 'Deaktiviert',
   'Does not contain': 'Enthält nicht',
   'Does not contain (case-insensitive)': 'Enthält nicht (Groß-/Kleinschreibung ignorieren)',
   'Does not equal': 'Ungleich',
@@ -172,6 +175,7 @@ export default defineTranslation({
   'Email': 'E-Mail',
   'Empty': 'Leer',
   'Enable': 'Aktivieren',
+  'Enabled': 'Aktiviert',
   'Ends with': 'Endet mit',
   'Ends with (case-insensitive)': 'Endet mit (Groß-/Kleinschreibung ignorieren)',
   'Entry deleted': 'Eintrag gelöscht',
@@ -367,6 +371,9 @@ export default defineTranslation({
   'Sign out user from all active sessions': 'Benutzer von allen aktiven Sitzungen abmelden',
   'Signed out': 'Abgemeldet',
   'Singleton not found': 'Singleton nicht gefunden',
+  'Smart clipboard': 'Intelligente Zwischenablage',
+  'Some system settings have been updated. Please reload the page for the changes to take effect.':
+    'Einige Systemeinstellungen wurden aktualisiert. Bitte laden Sie die Seite neu, damit die Änderungen wirksam werden.',
   'Sort in ascending order': 'Aufsteigend sortieren',
   'Sort in descending order': 'Absteigend sortieren',
   'Sort NULL values first': 'Sortiere NULL-Werte zuerst',

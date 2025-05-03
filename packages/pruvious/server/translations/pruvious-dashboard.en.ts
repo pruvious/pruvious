@@ -48,6 +48,8 @@ export default defineTranslation({
   'Auto (device settings)': 'Auto (device settings)',
   'Auto width': 'Auto width',
 
+  'Background clipboard monitoring for instant paste readiness. This feature will request browser permission to access your clipboard.':
+    'Background clipboard monitoring for instant paste readiness.\n\nThis feature will request browser permission to access your clipboard.',
   'Base URL': 'Base URL',
   'Before': 'Before',
   'Before or equal to': 'Before or equal to',
@@ -155,6 +157,7 @@ export default defineTranslation({
   'Dependencies': 'Dependencies',
   'Deselect': 'Deselect',
   'Disable': 'Disable',
+  'Disabled': 'Disabled',
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',
   'Does not equal': 'Does not equal',
@@ -173,6 +176,7 @@ export default defineTranslation({
   'Email': 'Email',
   'Empty': 'Empty',
   'Enable': 'Enable',
+  'Enabled': 'Enabled',
   'Ends with': 'Ends with',
   'Ends with (case-insensitive)': 'Ends with (case-insensitive)',
   'Entry deleted': 'Entry deleted',
@@ -367,6 +371,9 @@ export default defineTranslation({
   'Sign out user from all active sessions': 'Sign out user from all active sessions',
   'Signed out': 'Signed out',
   'Singleton not found': 'Singleton not found',
+  'Smart clipboard': 'Smart clipboard',
+  'Some system settings have been updated. Please reload the page for the changes to take effect.':
+    'Some system settings have been updated. Please reload the page for the changes to take effect.',
   'Sort in ascending order': 'Sort in ascending order',
   'Sort in descending order': 'Sort in descending order',
   'Sort NULL values first': 'Sort NULL values first',

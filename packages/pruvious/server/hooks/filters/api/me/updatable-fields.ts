@@ -51,6 +51,7 @@ export function defaultMyAccountFields(): MyAccountFields {
       'timezone',
       'dateFormat',
       'timeFormat',
+      'smartClipboard',
       'bookmarks',
     ],
     fieldsLayout: [
@@ -60,6 +61,8 @@ export function defaultMyAccountFields(): MyAccountFields {
       '---',
       'timezone',
       { row: ['dateFormat', 'timeFormat'] },
+      '---',
+      'smartClipboard',
       '---',
       'password',
     ],

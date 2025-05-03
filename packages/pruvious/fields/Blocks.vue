@@ -169,6 +169,111 @@
             <hr />
 
             <PUIDropdownItem
+              :title="__('pruvious-dashboard', 'Copy')"
+              @click="
+                () => {
+                  clipboard.copy({
+                    pruviousClipboardDataType: 'blocks',
+                    data: [{ $key: item.$blockName, ...omit(item, ['$blockName', '$expanded', '$key']) }],
+                  })
+                  puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+                  visibleActions = -1
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:clipboard" />
+              <span>{{ __('pruvious-dashboard', 'Copy') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="!disabled"
+              :title="__('pruvious-dashboard', 'Cut')"
+              @click="
+                () => {
+                  clipboard.copy({
+                    pruviousClipboardDataType: 'blocks',
+                    data: [{ $key: item.$blockName, ...omit(item, ['$blockName', '$expanded', '$key']) }],
+                  })
+                  puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+                  const value = structuredValue.filter((_, i) => index !== i)
+                  updateModelValue(value)
+                  commitModelValue(value)
+                  localErrors = undefined
+                  visibleActions = -1
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:cut" />
+              <span>{{ __('pruvious-dashboard', 'Cut') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="
+                !disabled &&
+                clipboardData?.pruviousClipboardDataType === 'blocks' &&
+                clipboardData.data.every(({ $key }) => allowedBlocks.includes($key)) &&
+                (options.maxItems === false || structuredValue.length < options.maxItems)
+              "
+              :title="__('pruvious-dashboard', 'Paste before')"
+              @click="
+                () => {
+                  if (clipboardData?.pruviousClipboardDataType === 'blocks') {
+                    const items = clipboardData.data.map((blockValue) => ({
+                      $blockName: blockValue.$key,
+                      ...blockValue,
+                      $expanded: true,
+                      $key: nanoid(),
+                    }))
+                    structuredValue = [...structuredValue.slice(0, index), ...items, ...structuredValue.slice(index)]
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                    localErrors = undefined
+                  }
+                  visibleActions = -1
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:clipboard-plus" />
+              <span>{{ __('pruvious-dashboard', 'Paste before') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="
+                !disabled &&
+                clipboardData?.pruviousClipboardDataType === 'blocks' &&
+                clipboardData.data.every(({ $key }) => allowedBlocks.includes($key)) &&
+                (options.maxItems === false || structuredValue.length < options.maxItems)
+              "
+              :title="__('pruvious-dashboard', 'Paste after')"
+              @click="
+                () => {
+                  if (clipboardData?.pruviousClipboardDataType === 'blocks') {
+                    const items = clipboardData.data.map((blockValue) => ({
+                      $blockName: blockValue.$key,
+                      ...blockValue,
+                      $expanded: true,
+                      $key: nanoid(),
+                    }))
+                    structuredValue = [
+                      ...structuredValue.slice(0, index + 1),
+                      ...items,
+                      ...structuredValue.slice(index + 1),
+                    ]
+                    updateModelValue(structuredValue)
+                    commitModelValue(structuredValue)
+                    localErrors = undefined
+                  }
+                  visibleActions = -1
+                }
+              "
+            >
+              <Icon mode="svg" name="tabler:clipboard-plus" />
+              <span>{{ __('pruvious-dashboard', 'Paste after') }}</span>
+            </PUIDropdownItem>
+
+            <hr />
+
+            <PUIDropdownItem
               v-if="
                 !options.enforceUniqueItems && (options.maxItems === false || structuredValue.length < options.maxItems)
               "
@@ -345,7 +450,13 @@
 
 <script lang="ts" setup>
 import { PruviousDashboardBlockPickerPopup } from '#components'
-import { __, maybeTranslate, usePruviousDashboard } from '#pruvious/client'
+import {
+  __,
+  maybeTranslate,
+  usePruviousClipboard,
+  usePruviousClipboardData,
+  usePruviousDashboard,
+} from '#pruvious/client'
 import type {
   BlockGroupName,
   BlockName,
@@ -356,6 +467,7 @@ import type {
   Singletons,
 } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
+import { puiToast } from '@pruvious/ui/pui/toast'
 import {
   deepClone,
   deepCompare,
@@ -527,6 +639,8 @@ const emit = defineEmits<{
 provide('isLivePreview', false)
 
 const dashboard = usePruviousDashboard()
+const clipboard = usePruviousClipboard()
+const clipboardData = usePruviousClipboardData()
 const root = useTemplateRef('root')
 const structure = useTemplateRef('structure')
 const prevModelValue = ref<Record<string, any>[]>()

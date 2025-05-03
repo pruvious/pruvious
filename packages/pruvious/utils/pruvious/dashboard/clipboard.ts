@@ -1,6 +1,7 @@
 import type { BlockName } from '#pruvious/server'
 import { isString } from '@pruvious/utils'
-import { useClipboard } from '@vueuse/core'
+import { useClipboard, useEventListener, type UseClipboardReturn } from '@vueuse/core'
+import { getUser } from '../../../modules/pruvious/auth/utils.client'
 
 export type PruviousClipboardData =
   | {
@@ -9,8 +10,10 @@ export type PruviousClipboardData =
     }
   | {
       pruviousClipboardDataType: 'structure-item'
-      data: Record<string, any>
+      data: { $type: string } & Record<string, any>
     }
+
+let _clipboard: UseClipboardReturn<true>
 
 const usePruviousClipboardSource = () => useState<string>('pruvious-clipboard-source', () => 'null')
 
@@ -24,8 +27,7 @@ export const usePruviousClipboardData = () =>
  * Reactive clipboard API that provides the ability to respond to clipboard commands (cut, copy, and paste).
  */
 export function usePruviousClipboard() {
-  const source = usePruviousClipboardSource()
-  const { text, copy: _copy, copied } = useClipboard({ source })
+  const { text, copy: _copy, copied } = initClipboard()
 
   return {
     copy: (data: PruviousClipboardData | null) => {
@@ -45,4 +47,30 @@ export function usePruviousClipboard() {
       return null
     }),
   }
+}
+
+function initClipboard() {
+  if (!_clipboard) {
+    const source = usePruviousClipboardSource()
+    const user = getUser()
+
+    _clipboard = useClipboard({ source })
+
+    if (user?.smartClipboard) {
+      useEventListener(window, 'focus', inspectClipboard)
+      inspectClipboard()
+    }
+  }
+
+  return _clipboard
+}
+
+async function inspectClipboard() {
+  try {
+    const text = await navigator.clipboard.readText()
+    const parsed = JSON.parse(text) as PruviousClipboardData
+    if (isString(parsed.pruviousClipboardDataType)) {
+      usePruviousClipboardData().value = parsed
+    }
+  } catch {}
 }

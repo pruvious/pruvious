@@ -209,22 +209,22 @@ const saveData = lockAndLoad(isSubmitting, async () => {
       contentLanguage.value = data.value.contentLanguage
     }
 
-    if (isDefined(data.value.dashboardLanguage) && data.value.dashboardLanguage !== dashboardLanguage.value) {
+    const languageChanged =
+      isDefined(data.value.dashboardLanguage) && data.value.dashboardLanguage !== dashboardLanguage.value
+    const smartClipboardChanged =
+      isDefined(preparedData.smartClipboard) && preparedData.smartClipboard !== auth.value.user?.smartClipboard
+
+    if (languageChanged || smartClipboardChanged) {
       const action = await puiDialog({
         content: __(
           'pruvious-dashboard',
-          'The dashboard language has been updated. Please reload the page for the changes to take effect.',
+          languageChanged
+            ? 'The dashboard language has been updated. Please reload the page for the changes to take effect.'
+            : 'Some system settings have been updated. Please reload the page for the changes to take effect.',
         ),
         actions: [
-          {
-            name: 'later',
-            label: __('pruvious-dashboard', 'Later'),
-          },
-          {
-            name: 'reload',
-            label: __('pruvious-dashboard', 'Reload'),
-            variant: 'primary',
-          },
+          { name: 'later', label: __('pruvious-dashboard', 'Later') },
+          { name: 'reload', label: __('pruvious-dashboard', 'Reload'), variant: 'primary' },
         ],
       })
 

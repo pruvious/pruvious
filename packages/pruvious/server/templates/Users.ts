@@ -215,6 +215,19 @@ export default defineTemplate(() => ({
         },
       },
     }),
+    smartClipboard: trueFalseField({
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Smart clipboard'),
+        description: ({ __ }) =>
+          __(
+            'pruvious-dashboard',
+            'Background clipboard monitoring for instant paste readiness. This feature will request browser permission to access your clipboard.',
+          ),
+        yesLabel: ({ __ }) => __('pruvious-dashboard', 'Enabled'),
+        noLabel: ({ __ }) => __('pruvious-dashboard', 'Disabled'),
+        variant: 'accent',
+      },
+    }),
     bookmarks: recordsField({
       collection: 'Bookmarks',
       fields: ['id', 'name', 'data', 'collection', 'user', 'shared'],
@@ -318,6 +331,8 @@ export default defineTemplate(() => ({
         'timezone',
         { row: ['contentLanguage', 'dashboardLanguage'] },
         { row: ['dateFormat', 'timeFormat'] },
+        '---',
+        'smartClipboard',
       ],
     },
     updatePage: { fieldsLayout: 'mirror' },
