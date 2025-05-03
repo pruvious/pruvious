@@ -43,14 +43,14 @@
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20250404.0",
-    "@types/better-sqlite3": "7.6.12",
-    "@types/node": "22.14.0",
-    "@types/pg": "8.11.11",
+    "@cloudflare/workers-types": "4.20250503.0",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "22.15.3",
+    "@types/pg": "8.11.14",
     "get-port-please": "3.1.2",
-    "miniflare": "4.20250321.2",
-    "pg": "8.14.1",
-    "typescript": "5.8.2",
+    "miniflare": "4.20250428.1",
+    "pg": "8.15.6",
+    "typescript": "5.8.3",
     "unbuild": "3.5.0"
   }
 }
