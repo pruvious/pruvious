@@ -21,7 +21,7 @@ import {
 import { isArray, isDefined, isObject, setProperty } from '@pruvious/utils'
 import { hash } from 'ohash'
 import type { PropType } from 'vue'
-import type { ResolveFromLayersResult } from '../../modules/pruvious/utils/resolve'
+import type { ResolveFromLayersResultContextBinding } from '../../modules/pruvious/utils/resolve'
 
 interface CustomOptions<TSubfields extends Record<string, GenericField>> {
   /**
@@ -188,7 +188,7 @@ export default {
     TConditionalLogic,
     GenericDatabase
   > {
-    const { location }: { fieldType: string; location: ResolveFromLayersResult } = this as any
+    const { location }: { fieldType: string; location: ResolveFromLayersResultContextBinding } = this as any
 
     if (isArray(customOptions.ui?.subfieldsLayout)) {
       for (const { item, path } of walkFieldLayoutItems(customOptions.ui.subfieldsLayout)) {
@@ -201,7 +201,7 @@ export default {
                   resolveCustomComponentPath({
                     component: item.component,
                     file: location.file.absolute,
-                    srcDir: location.layer.config.srcDir,
+                    srcDir: location.srcDir,
                   }),
                 )
               : item.component,

@@ -56,7 +56,7 @@ import {
   type EditorsFieldPresetOptions,
   type UpdatedAtFieldPresetOptions,
 } from '../fields/presets'
-import type { ResolveFromLayersResult } from '../utils/resolve'
+import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { collectionPermissionGuard } from './guards'
 
 export type DefineCollectionOptions<
@@ -1327,7 +1327,7 @@ interface ResolveContext {
   /**
    * The `ResolveFromLayersResult` object containing the file location.
    */
-  location: ResolveFromLayersResult
+  location: ResolveFromLayersResultContextBinding
 }
 
 export type CollectionMeta = DeepRequired<
@@ -1655,7 +1655,7 @@ export function defineCollection<
             resolveCustomComponentPath({
               component: ui.indexPage.dashboardLayout,
               file: resolveContext.location.file.absolute,
-              srcDir: resolveContext.location.layer.config.srcDir,
+              srcDir: resolveContext.location.srcDir,
             }),
           )
         : ui.indexPage.dashboardLayout
@@ -1671,7 +1671,7 @@ export function defineCollection<
                   resolveCustomComponentPath({
                     component: column.component,
                     file: resolveContext.location.file.absolute,
-                    srcDir: resolveContext.location.layer.config.srcDir,
+                    srcDir: resolveContext.location.srcDir,
                   }),
                 )
               : column.component
@@ -1690,7 +1690,7 @@ export function defineCollection<
               resolveCustomComponentPath({
                 component: ui[page].dashboardLayout,
                 file: resolveContext.location.file.absolute,
-                srcDir: resolveContext.location.layer.config.srcDir,
+                srcDir: resolveContext.location.srcDir,
               }),
             )
           : ui[page].dashboardLayout
@@ -1707,7 +1707,7 @@ export function defineCollection<
                     resolveCustomComponentPath({
                       component: item.component,
                       file: resolveContext.location.file.absolute,
-                      srcDir: resolveContext.location.layer.config.srcDir,
+                      srcDir: resolveContext.location.srcDir,
                     }),
                   )
                 : item.component,

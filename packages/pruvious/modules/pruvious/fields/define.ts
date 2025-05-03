@@ -35,7 +35,7 @@ import { colorize } from 'consola/utils'
 import { hash } from 'ohash'
 import type { PropType } from 'vue'
 import { warnWithContext } from '../debug/console'
-import type { ResolveFromLayersResult } from '../utils/resolve'
+import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { transformFieldGuardsToValidators } from './guards'
 
 export interface DefineFieldOptions<
@@ -1088,7 +1088,8 @@ export function defineField<
       TConditionalLogic,
       GenericDatabase
     > {
-      const { fieldType, location }: { fieldType: string; location: ResolveFromLayersResult } = this as any
+      const { fieldType, location }: { fieldType: string; location: ResolveFromLayersResultContextBinding } =
+        this as any
       const defaultCustomOptions = fieldTypeOptions.customOptions ? deepClone(fieldTypeOptions.customOptions) : {}
 
       for (const reservedOption of [
@@ -1147,7 +1148,7 @@ export function defineField<
               resolveCustomComponentPath({
                 component: ui.customComponent,
                 file: location.file.absolute,
-                srcDir: location.layer.config.srcDir,
+                srcDir: location.srcDir,
               }),
             )
           : ui.customComponent
@@ -1163,7 +1164,7 @@ export function defineField<
               resolveCustomComponentPath({
                 component: ui.customTableComponent,
                 file: location.file.absolute,
-                srcDir: location.layer.config.srcDir,
+                srcDir: location.srcDir,
               }),
             )
           : ui.customTableComponent
@@ -1179,7 +1180,7 @@ export function defineField<
               resolveCustomComponentPath({
                 component: ui.customFilterComponent,
                 file: location.file.absolute,
-                srcDir: location.layer.config.srcDir,
+                srcDir: location.srcDir,
               }),
             )
           : ui.customFilterComponent

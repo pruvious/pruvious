@@ -73,7 +73,7 @@ function getServerFieldsFileContent() {
     `}`,
     ``,
     ...fieldDefinitionEntries.flatMap(([name, location]) => [
-      `export const ${camelCase(name)}Field = _${camelCase(name)}Field.serverFn.bind({ fieldType: '${camelCase(name)}', location: ${JSON.stringify(location)} })`,
+      `export const ${camelCase(name)}Field = _${camelCase(name)}Field.serverFn.bind({ fieldType: '${camelCase(name)}', location: ${JSON.stringify({ file: { absolute: location.file.absolute, relative: location.file.relative }, srcDir: location.layer.config.srcDir })} })`,
     ]),
   ].join('\n')
 }
@@ -1404,7 +1404,7 @@ function getServerFileContent() {
     `      Object.assign(collections, {`,
     ...collectionEntries.map(
       ([name, location]) =>
-        `          ${name}: await import('${location.file.import}').then(async (m) => applyCollectionDebugHooks((await m.default)({ collectionName: '${name}', location: ${JSON.stringify(location)} }) as any)),`,
+        `          ${name}: await import('${location.file.import}').then(async (m) => applyCollectionDebugHooks((await m.default)({ collectionName: '${name}', location: ${JSON.stringify({ file: { absolute: location.file.absolute, relative: location.file.relative }, srcDir: location.layer.config.srcDir })} }) as any)),`,
     ),
     `      })`,
     `      resolve()`,
@@ -1422,7 +1422,7 @@ function getServerFileContent() {
     `      Object.assign(singletons, {`,
     ...singletonEntries.map(
       ([name, location]) =>
-        `          ${name}: await import('${location.file.import}').then(async (m) => applySingletonDebugHooks(m.default({ singletonName: '${name}', location: ${JSON.stringify(location)} }) as any)),`,
+        `          ${name}: await import('${location.file.import}').then(async (m) => applySingletonDebugHooks(m.default({ singletonName: '${name}', location: ${JSON.stringify({ file: { absolute: location.file.absolute, relative: location.file.relative }, srcDir: location.layer.config.srcDir })} }) as any)),`,
     ),
     `      })`,
     `      resolve()`,

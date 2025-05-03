@@ -41,7 +41,7 @@ import { hash } from 'ohash'
 import { resolveCustomComponentPath } from '../components/utils.server'
 import { warnWithContext } from '../debug/console'
 import { updatedAtFieldPreset, type UpdatedAtFieldPresetOptions } from '../fields/presets'
-import type { ResolveFromLayersResult } from '../utils/resolve'
+import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { singletonPermissionGuard } from './guards'
 
 interface ISingleton {
@@ -834,9 +834,9 @@ interface ResolveContext {
   singletonName: string
 
   /**
-   * The `ResolveFromLayersResult` object containing the file location.
+   * The `ResolveFromLayersResultContextBinding` object containing the file location.
    */
-  location: ResolveFromLayersResult
+  location: ResolveFromLayersResultContextBinding
 }
 
 type MergeSingletonFields<
@@ -952,7 +952,7 @@ export function defineSingleton<
             resolveCustomComponentPath({
               component: ui.dashboardLayout,
               file: resolveContext.location.file.absolute,
-              srcDir: resolveContext.location.layer.config.srcDir,
+              srcDir: resolveContext.location.srcDir,
             }),
           )
         : ui.dashboardLayout
@@ -969,7 +969,7 @@ export function defineSingleton<
                   resolveCustomComponentPath({
                     component: item.component,
                     file: resolveContext.location.file.absolute,
-                    srcDir: resolveContext.location.layer.config.srcDir,
+                    srcDir: resolveContext.location.srcDir,
                   }),
                 )
               : item.component,

@@ -139,6 +139,18 @@ export interface ResolveFromLayersResult extends ResolveResult {
   pruviousDirNames: string[]
 }
 
+export interface ResolveFromLayersResultContextBinding {
+  /**
+   * The absolute and relative paths of the file.
+   */
+  file: Pick<Path, 'absolute' | 'relative'>
+
+  /**
+   * The source directory of the Nuxt layer where the `file` is located.
+   */
+  srcDir: string
+}
+
 /**
  * Resolves Pruvious files from a directory specified in the `options` object.
  *

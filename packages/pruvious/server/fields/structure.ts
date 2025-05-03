@@ -22,7 +22,7 @@ import {
 import { isArray, isDefined, isObject, setProperty } from '@pruvious/utils'
 import { hash } from 'ohash'
 import type { PropType } from 'vue'
-import type { ResolveFromLayersResult } from '../../modules/pruvious/utils/resolve'
+import type { ResolveFromLayersResultContextBinding } from '../../modules/pruvious/utils/resolve'
 
 interface CustomOptions<TStructure extends { [$key: string]: Record<string, GenericField> }> {
   /**
@@ -308,7 +308,7 @@ export default {
     TConditionalLogic,
     GenericDatabase
   > {
-    const { location }: { fieldType: string; location: ResolveFromLayersResult } = this as any
+    const { location }: { fieldType: string; location: ResolveFromLayersResultContextBinding } = this as any
 
     if (isDefined(customOptions.ui?.subfieldsLayout)) {
       for (const layout of Object.values(customOptions.ui.subfieldsLayout)) {
@@ -323,7 +323,7 @@ export default {
                       resolveCustomComponentPath({
                         component: item.component,
                         file: location.file.absolute,
-                        srcDir: location.layer.config.srcDir,
+                        srcDir: location.srcDir,
                       }),
                     )
                   : item.component,
