@@ -55,16 +55,11 @@ export function defaultMyAccountFields(): MyAccountFields {
       'bookmarks',
     ],
     fieldsLayout: [
-      { row: ['firstName', 'lastName'] },
-      '---',
-      { row: ['contentLanguage', 'dashboardLanguage'] },
-      '---',
-      'timezone',
-      { row: ['dateFormat', 'timeFormat'] },
-      '---',
-      'smartClipboard',
-      '---',
-      'password',
+      { card: [{ row: ['firstName', 'lastName'] }] },
+      { card: [{ row: ['contentLanguage', 'dashboardLanguage'] }] },
+      { card: ['timezone', { row: ['dateFormat', 'timeFormat'] }] },
+      { card: ['smartClipboard'] },
+      { card: ['password'] },
     ],
   }
 }
