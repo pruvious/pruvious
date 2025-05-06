@@ -65,6 +65,7 @@
       :class="{
         'p-fields-card-collapsible': item.collapsible,
         'p-fields-card-collapsed': !item.expanded,
+        'p-fields-card-has-errors': item.errors,
       }"
     >
       <template v-if="item.header !== null || item.collapsible" #header>
@@ -201,6 +202,7 @@ interface CardItem {
   header: string | null
   collapsible: boolean
   expanded: boolean
+  errors?: number
 }
 
 interface TabsItem {
@@ -541,6 +543,12 @@ function refreshErrors(items: Item[]): void {
             : undefined
         }
       }
+    } else if (item.type === 'card') {
+      item.errors = isEmpty(props.errors)
+        ? undefined
+        : Object.keys(props.errors).filter((key) =>
+            extractFieldNames(item.layout).some((name) => key === name || key.startsWith(`${name}.`)),
+          ).length
     }
   }
 }
@@ -615,6 +623,10 @@ function extractFieldNames(layout: FieldsLayout): string[] {
 
 .p-fields-card-collapsed > :deep(.pui-card-body) {
   display: none;
+}
+
+.p-fields-card-collapsed.p-fields-card-has-errors {
+  border-color: hsl(var(--pui-destructive));
 }
 
 .p-fields-hr {
