@@ -325,17 +325,12 @@ export default defineTemplate(() => ({
     },
     createPage: {
       fieldsLayout: [
-        { row: ['email', 'password'] },
-        { row: ['firstName', 'lastName'] },
-        '---',
-        { row: ['isActive', 'isAdmin'] },
-        'roles',
-        '---',
-        'timezone',
-        { row: ['contentLanguage', 'dashboardLanguage'] },
-        { row: ['dateFormat', 'timeFormat'] },
-        '---',
-        'smartClipboard',
+        { card: [{ row: ['email', 'password'] }, { row: ['firstName', 'lastName'] }] },
+        { card: [{ row: ['isActive', 'isAdmin'] }, 'roles'] },
+        {
+          card: ['timezone', { row: ['contentLanguage', 'dashboardLanguage'] }, { row: ['dateFormat', 'timeFormat'] }],
+        },
+        { card: ['smartClipboard'] },
       ],
     },
     updatePage: { fieldsLayout: 'mirror' },
