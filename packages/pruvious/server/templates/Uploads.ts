@@ -58,7 +58,7 @@ export default defineTemplate(() => ({
           }
           return 'The path must start with a slash'
         },
-        uniqueValidator(({ __ }) => __('pruvious-api', 'The path must be unique')),
+        uniqueValidator({ errorMessage: ({ __ }) => __('pruvious-api', 'The path must be unique') }),
       ],
       inputFilters: {
         beforeInputValidation: async (value, { context }) => {

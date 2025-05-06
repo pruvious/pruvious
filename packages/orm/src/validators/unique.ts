@@ -1,5 +1,5 @@
-import { deepCompare, isArray, isNull, isObject, isPrimitive, isUndefined, pick } from '@pruvious/utils'
-import type { GenericCollection, GenericValidator } from '../core'
+import { deepCompare, isArray, isNull, isObject, isPrimitive, isString, isUndefined, pick } from '@pruvious/utils'
+import type { GenericCollection, GenericDatabase, GenericValidator } from '../core'
 import type { CustomErrorMessage } from './types'
 import { resolveCustomErrorMessage } from './utils'
 
@@ -7,37 +7,34 @@ import { resolveCustomErrorMessage } from './utils'
  * Creates a validator to ensure that the field (or subfield) value is unique within a collection (or subfields array).
  *
  * - Works with a single (sub)field, where this validator is applied, or multiple `fields`, which are passed as an array of (sub)field names.
+ * - String comparison is done using the `=` operator for exact matches or `ilike` for case-insensitive matches (see `caseSensitive` option).
  * - Throws an error if the validation fails.
  * - The default error message is: 'The value must be unique'.
  * - A custom `errorMessage` can be provided as a parameter.
  *   - The `errorMessage` can be a string or a function that returns a string.
  *   - The function receives an object with `_` and `__` properties to access the translation functions.
  */
-export function uniqueValidator(errorMessage?: CustomErrorMessage): GenericValidator
 export function uniqueValidator<
-  TCollection extends GenericCollection,
+  TDatabase extends GenericDatabase = GenericDatabase,
+  TCollection extends GenericCollection = GenericCollection,
   TField extends string = TCollection['TColumnNames'],
->(fields: TField[], errorMessage?: CustomErrorMessage): GenericValidator
-export function uniqueValidator(
-  fieldsOrErrorMessage?: string[] | CustomErrorMessage,
-  errorMessage?: CustomErrorMessage,
-): GenericValidator {
+>(options?: UniqueValidatorOptions<TField, TDatabase>): GenericValidator {
   return async (_, { context, path, isSubfield }) => {
     if (
       isUndefined(context.collectionName) ||
-      ((!isArray(fieldsOrErrorMessage) || fieldsOrErrorMessage.length === 1) &&
-        isNull(context.getSanitizedInputValue(path)))
+      ((!options?.fields || options.fields.length === 1) && isNull(context.getSanitizedInputValue(path)))
     ) {
       return
     }
 
-    const customErrorMessage = !isArray(fieldsOrErrorMessage) ? fieldsOrErrorMessage : errorMessage
+    const customErrorMessage = options?.errorMessage
     const defaultErrorMessage = context.__('pruvious-orm', 'The value must be unique')
     const resolvedErrorMessage = resolveCustomErrorMessage(
       customErrorMessage,
       defaultErrorMessage,
       pick(context, ['_', '__']),
     )
+    const caseSensitive = options?.caseSensitive ?? true
 
     if (isSubfield) {
       const subfieldPathParts = path.split('.')
@@ -47,17 +44,28 @@ export function uniqueValidator(
         string,
         any
       >[]
-      const uniqueSubfieldNames = isArray(fieldsOrErrorMessage) ? fieldsOrErrorMessage : [subfieldName]
+      const uniqueSubfieldNames = options?.fields ?? [subfieldName]
 
       if (isObject(parentObject) && isArray(parentArray)) {
         for (const item of parentArray) {
-          if (item !== parentObject && uniqueSubfieldNames.every((field) => item[field] === parentObject[field])) {
+          if (
+            item !== parentObject &&
+            uniqueSubfieldNames.every((field) => {
+              if (!caseSensitive && isString(item[field]) && isString(parentObject[field])) {
+                return item[field].toLowerCase() === parentObject[field].toLowerCase()
+              } else if (isPrimitive(item[field])) {
+                return item[field] === parentObject[field]
+              } else {
+                return JSON.stringify(item[field]) === JSON.stringify(parentObject[field])
+              }
+            })
+          ) {
             throw new Error(resolvedErrorMessage)
           }
         }
       }
     } else if (context.operation === 'insert') {
-      const fields = isArray(fieldsOrErrorMessage) ? fieldsOrErrorMessage : [path]
+      const fields = options?.fields ?? [path]
 
       for (const [i, item] of context.sanitizedInput.entries()) {
         if (i !== context.inputIndex) {
@@ -71,7 +79,8 @@ export function uniqueValidator(
 
       for (const field of fields) {
         const value = context.getSanitizedInputValue(field)
-        qb.where(field as any, '=', isPrimitive(value) ? (value as any) : JSON.stringify(value))
+        const operator = caseSensitive ? '=' : 'ilike'
+        qb.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
       }
 
       const count = await qb.useCache(context.cache).count()
@@ -108,7 +117,7 @@ export function uniqueValidator(
       if (qr1.data.length === 2) {
         throw new Error(resolvedErrorMessage)
       } else if (qr1.data.length === 1) {
-        const fields = isArray(fieldsOrErrorMessage) ? fieldsOrErrorMessage : [path]
+        const fields = options?.fields ?? [path]
         const qb2 = context.database
           .queryBuilder()
           .selectFrom(context.collectionName as never)
@@ -118,7 +127,8 @@ export function uniqueValidator(
 
         for (const field of fields) {
           const value = context.getSanitizedInputValue(field)
-          qb2.where(field as any, '=', isPrimitive(value) ? (value as any) : JSON.stringify(value))
+          const operator = caseSensitive ? '=' : 'ilike'
+          qb2.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
         }
 
         const qr2 = await qb2.all()
@@ -137,4 +147,39 @@ export function uniqueValidator(
       }
     }
   }
+}
+
+export interface UniqueValidatorOptions<
+  TField extends string = string,
+  TDatabase extends GenericDatabase = GenericDatabase,
+> {
+  /**
+   * Optional array of field names to check for uniqueness.
+   * If not provided, the validator will check the field where this validator is applied.
+   *
+   * @default undefined
+   */
+  fields?: TField[]
+
+  /**
+   * The error message to be thrown if the validation fails.
+   * Can be a string or a function that returns a string.
+   * The function receives an object with `_` and `__` properties to access the translation functions.
+   *
+   * @default
+   * __('pruvious-orm', 'The value must be unique')
+   */
+  errorMessage?: CustomErrorMessage<TDatabase>
+
+  /**
+   * Controls whether the uniqueness check for strings is case-sensitive.
+   *
+   * - When `true` (default), `abc` and `ABC` are considered different values.
+   * - When `false`, `abc` and `ABC` are considered the same value.
+   *
+   * Warning: Only use this option with string fields.
+   *
+   * @default true
+   */
+  caseSensitive?: boolean
 }

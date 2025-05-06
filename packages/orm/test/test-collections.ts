@@ -19,7 +19,7 @@ export const Houses = new Collection({
       options: {},
       nullable: false,
       required: true,
-      validators: [uniqueValidator('The house already exists')],
+      validators: [uniqueValidator({ errorMessage: 'The house already exists', caseSensitive: false })],
     }),
     founder: new Field({
       model: textFieldModel(),
@@ -69,7 +69,7 @@ export const Clubs = new Collection({
       options: {},
       nullable: false,
       required: true,
-      validators: [uniqueValidator('The club already exists')],
+      validators: [uniqueValidator({ errorMessage: 'The club already exists' })],
     }),
   },
   indexes: [{ fields: ['name'], unique: true }],
@@ -117,7 +117,10 @@ export const Students = new Collection({
             }
           }
         },
-        uniqueValidator(['firstName', 'lastName'], 'A student with identical first and last names already exists'),
+        uniqueValidator({
+          fields: ['firstName', 'lastName'],
+          errorMessage: 'A student with identical first and last names already exists',
+        }),
       ],
     }),
     middleName: new Field({
@@ -164,7 +167,10 @@ export const Students = new Collection({
             }
           }
         },
-        uniqueValidator(['firstName', 'lastName'], 'A student with identical first and last names already exists'),
+        uniqueValidator({
+          fields: ['firstName', 'lastName'],
+          errorMessage: 'A student with identical first and last names already exists',
+        }),
       ],
     }),
     house: new Field({

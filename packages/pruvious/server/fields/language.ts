@@ -12,9 +12,10 @@ export default defineField({
         return context.__('pruvious-api', 'The language `$language` is not supported', { language: value })
       }
     },
-    uniqueValidator(['language', 'translations'], ({ __ }) =>
-      __('pruvious-api', 'A translation for this language already exists'),
-    ),
+    uniqueValidator({
+      fields: ['language', 'translations'],
+      errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
+    }),
   ],
   uiOptions: { placeholder: true },
 })

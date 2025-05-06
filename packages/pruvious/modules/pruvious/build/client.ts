@@ -459,7 +459,8 @@ function getClientFileContent() {
       `export const ${name}Validator: typeof _${name}Validator = _validatorFn`,
     ]),
     ``,
-    `import type { uniqueValidator as _uniqueValidator } from '@pruvious/orm'`,
+    `import type { uniqueValidator as _uniqueValidator, UniqueValidatorOptions, GenericCollection, GenericValidator } from '@pruvious/orm'`,
+    `import type { GenericDatabase } from '../server'`,
     ``,
     `/**`,
     ...validatorsMeta.find(({ name }) => name === 'unique')!.comment.map((line) => ` * ${line}`),
@@ -486,7 +487,7 @@ function getClientFileContent() {
     ` * </script>`,
     ` * \`\`\``,
     ` */`,
-    `export const uniqueValidator: typeof _uniqueValidator = _validatorFn`,
+    `export const uniqueValidator: <TCollection extends GenericCollection, TField extends string = TCollection['TColumnNames']>(options?: UniqueValidatorOptions<TField, GenericDatabase>) => GenericValidator = _validatorFn`,
     ``,
     getReExports(),
   ].join('\n')

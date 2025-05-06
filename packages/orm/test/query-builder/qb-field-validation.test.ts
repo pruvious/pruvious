@@ -15,6 +15,9 @@ test('basic query field validation', async () => {
     expect(await qb.insertInto('Houses').values({ name: 'Gryffindor' }).run()).toEqual(
       qbe([{ name: 'The house already exists' }]),
     )
+    expect(await qb.insertInto('Houses').values({ name: 'gryffindor' }).run()).toEqual(
+      qbe([{ name: 'The house already exists' }]),
+    )
     expect(
       await qb
         .insertInto('Houses')
@@ -73,6 +76,8 @@ test('basic query field validation', async () => {
         },
       ]),
     )
+    expect(await qb.insertInto('Students').values({ firstName: 'harry', lastName: 'Potter' }).run()).toEqual(qbo(1))
+    expect(await qb.deleteFrom('Students').where('firstName', '=', 'harry').run()).toEqual(qbo(1))
     expect(
       await qb
         .update('Students')

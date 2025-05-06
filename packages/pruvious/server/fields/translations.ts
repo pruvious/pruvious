@@ -7,9 +7,10 @@ export default defineField({
   nullable: true,
   default: null,
   validators: [
-    uniqueValidator(['language', 'translations'], ({ __ }) =>
-      __('pruvious-api', 'A translation for this language already exists'),
-    ),
+    uniqueValidator({
+      fields: ['language', 'translations'],
+      errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
+    }),
   ],
   populator: async (value, { context }) => {
     if (context.collection?.meta.translatable && isString(value)) {

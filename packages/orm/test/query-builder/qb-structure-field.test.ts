@@ -559,7 +559,7 @@ describe('structure field', () => {
                     baz: new Field({
                       model: textFieldModel(),
                       options: {},
-                      validators: [uniqueValidator(['baz', 'qux'], 'Duplicate!')],
+                      validators: [uniqueValidator({ fields: ['baz', 'qux'], errorMessage: 'Duplicate!' })],
                     }),
                     qux: new Field({
                       model: numberFieldModel(),
