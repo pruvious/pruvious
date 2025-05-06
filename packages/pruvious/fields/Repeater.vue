@@ -22,6 +22,7 @@
       "
       allowCrossDrop
       class="p-repeater"
+      :class="{ 'p-repeater-disabled': disabled }"
     >
       <template #header="{ item, index }">
         <span v-if="options.ui.itemLabelConfiguration?.subfieldValue" class="pui-muted pui-truncate">
@@ -705,6 +706,15 @@ function focusFirstSubfield() {
   > .p-repeater-actions,
 .p-repeater-actions-visible {
   display: flex;
+}
+
+.p-repeater-disabled
+  > *
+  > :where(.pui-repeater-items)
+  > :where(.pui-card)
+  > :where(.pui-card-header)
+  > :where(:first-child) {
+  margin-left: 0.25rem;
 }
 
 .p-repeater-next-item-has-error + * {

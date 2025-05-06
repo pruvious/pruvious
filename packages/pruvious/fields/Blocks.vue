@@ -23,6 +23,7 @@
       allowCrossDrop
       ref="structure"
       class="p-structure"
+      :class="{ 'p-structure-disabled': disabled }"
     >
       <template #header="{ item, index }">
         <span
@@ -856,6 +857,15 @@ function resolveAllowDenyItem(item: string) {
   > .p-structure-actions,
 .p-structure-actions-visible {
   display: flex;
+}
+
+.p-structure-disabled
+  > *
+  > :where(.pui-structure-items)
+  > :where(.pui-card)
+  > :where(.pui-card-header)
+  > :where(:first-child) {
+  margin-left: 0.25rem;
 }
 
 .p-structure-actions > * {
