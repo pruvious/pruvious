@@ -59,7 +59,31 @@
       />
     </div>
 
-    <PUICard v-else-if="item.type === 'card'" class="p-fields-item p-fields-card">
+    <PUICard
+      v-else-if="item.type === 'card'"
+      class="p-fields-item p-fields-card"
+      :class="{
+        'p-fields-card-collapsible': item.collapsible,
+        'p-fields-card-collapsed': !item.expanded,
+      }"
+    >
+      <template v-if="item.header !== null || item.collapsible" #header>
+        <span class="pui-truncate pui-muted">{{ item.header }}</span>
+        <PUIButton
+          v-if="item.collapsible"
+          v-pui-tooltip.watch="
+            item.expanded ? __('pruvious-dashboard', 'Collapse') : __('pruvious-dashboard', 'Expand')
+          "
+          :size="-2"
+          :variant="item.expanded ? 'ghost' : 'accent'"
+          @click="item.expanded = !item.expanded"
+          class="p-fields-card-toggle"
+        >
+          <Icon v-if="item.expanded" mode="svg" name="tabler:maximize" />
+          <Icon v-else mode="svg" name="tabler:minimize" />
+        </PUIButton>
+      </template>
+
       <PruviousFields
         :alwaysVisibleFields="alwaysVisibleFields"
         :conditionalLogic="conditionalLogic"
@@ -154,7 +178,7 @@ import type {
 } from '#pruvious/server'
 import type { ConditionalLogicResolver } from '@pruvious/orm'
 import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'
-import { isDefined, isEmpty, isObject, isString, uniqueArray } from '@pruvious/utils'
+import { isArray, isDefined, isEmpty, isObject, isString, uniqueArray } from '@pruvious/utils'
 import type { Component, StyleValue } from 'vue'
 
 type Item = DynamicFieldItem | RowItem | CardItem | TabsItem | ComponentItem | HRItem
@@ -168,12 +192,15 @@ interface DynamicFieldItem {
 
 interface RowItem {
   type: 'row'
-  layout: FieldsLayoutRow['row']
+  layout: FieldsLayout
 }
 
 interface CardItem {
   type: 'card'
-  layout: FieldsLayoutCard['card']
+  layout: FieldsLayoutCard['card'] & any[]
+  header: string | null
+  collapsible: boolean
+  expanded: boolean
 }
 
 interface TabsItem {
@@ -416,10 +443,23 @@ function parseLayout(layout: FieldsLayout): Item[] {
           const card = x[key] as FieldsLayoutCard['card']
 
           if (!isEmpty(card)) {
-            items.push({
-              type: 'card',
-              layout: card,
-            })
+            if (isArray(card)) {
+              items.push({
+                type: 'card',
+                layout: card,
+                header: null,
+                collapsible: false,
+                expanded: true,
+              })
+            } else {
+              items.push({
+                type: 'card',
+                layout: card.fields,
+                header: isDefined(card.header) ? maybeTranslate(card.header) : null,
+                collapsible: !!card.collapsible,
+                expanded: true,
+              })
+            }
           }
         } else if (key === 'tabs') {
           const tabs = x[key] as FieldsLayoutTabs['tabs']
@@ -552,6 +592,29 @@ function extractFieldNames(layout: FieldsLayout): string[] {
 
 :deep(.pui-tabs-content:not(:first-child) > div > .p-fields-card) {
   margin-top: calc(-1rem + 0.5em);
+}
+
+.p-fields-card > :deep(.pui-card-header) {
+  --pui-padding-header: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-left: 0.75rem;
+}
+
+.p-fields-card-collapsible:not(.p-fields-card-collapsed) > :deep(.pui-card-header > .p-fields-card-toggle) {
+  display: none;
+}
+
+.p-fields-card-collapsible:hover > :deep(.pui-card-header > .p-fields-card-toggle),
+.p-fields-card-collapsible:focus-within > :deep(.pui-card-header > .p-fields-card-toggle) {
+  display: inline-flex;
+}
+
+.p-fields-card-collapsed > :deep(.pui-card-body) {
+  display: none;
 }
 
 .p-fields-hr {

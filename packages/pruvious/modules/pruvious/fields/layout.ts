@@ -1,5 +1,5 @@
 import type { TranslatableStringCallbackContext } from '#pruvious/server'
-import { isObject, isString } from '@pruvious/utils'
+import { isArray, isObject, isString } from '@pruvious/utils'
 import type { StyleValue } from 'vue'
 
 export type FieldsLayout<TFieldNames extends string = string> = (
@@ -33,15 +33,66 @@ export interface FieldsLayoutCard<TFieldNames extends string = string> {
    * ```ts
    * // Card with two fields
    * ['comments', 'assignedTo']
+   *
+   * // Collapsible card with header and two fields
+   * {
+   *   collapsible: true,
+   *   header: ({ __ }) => __('pruvious-dashboard', 'Internal notes'),
+   *   fields: ['comments', 'assignedTo'],
+   * }
    * ```
    */
-  card: (
-    | FieldsLayoutRow<TFieldNames>
-    | FieldsLayoutCard<TFieldNames>
-    | FieldsLayoutTabs<TFieldNames>
-    | FieldsLayoutItem<TFieldNames>
-    | FieldsLayoutHR
-  )[]
+  card:
+    | (
+        | FieldsLayoutRow<TFieldNames>
+        | FieldsLayoutCard<TFieldNames>
+        | FieldsLayoutTabs<TFieldNames>
+        | FieldsLayoutItem<TFieldNames>
+        | FieldsLayoutHR
+      )[]
+    | {
+        /**
+         * Specifies whether the card is collapsible.
+         *
+         * @default false
+         */
+        collapsible?: boolean
+
+        /**
+         * The label for the card header.
+         * You can either provide a string or a function that returns a string.
+         * The function receives an object with `_` and `__` properties to access the translation functions.
+         *
+         * Important: When using a function, only use simple anonymous functions without context binding,
+         * since the option needs to be serialized for client-side use.
+         *
+         * @example
+         * ```ts
+         * // String (non-translatable)
+         * 'Internal notes'
+         *
+         * // Function (translatable)
+         * ({ __ }) => __('pruvious-dashboard', 'Internal notes'')
+         * ```
+         */
+        header?: string | ((context: TranslatableStringCallbackContext) => string)
+
+        /**
+         * The fields to display within this card.
+         *
+         * @example
+         * ```ts
+         * ['comments', 'assignedTo']
+         * ```
+         */
+        fields: (
+          | FieldsLayoutRow<TFieldNames>
+          | FieldsLayoutCard<TFieldNames>
+          | FieldsLayoutTabs<TFieldNames>
+          | FieldsLayoutItem<TFieldNames>
+          | FieldsLayoutHR
+        )[]
+      }
 }
 
 export interface FieldsLayoutTabs<TFieldNames extends string = string> {
@@ -275,7 +326,8 @@ export function* walkFieldLayoutItems(
         if (key === 'row') {
           yield* walkFieldLayoutItems((item as FieldsLayoutRow).row, `${parentPath}${i}.row.`)
         } else if (key === 'card') {
-          yield* walkFieldLayoutItems((item as FieldsLayoutCard).card, `${parentPath}${i}.card.`)
+          const card = (item as FieldsLayoutCard).card
+          yield* walkFieldLayoutItems(isArray(card) ? card : card.fields, `${parentPath}${i}.card.`)
         } else if (key === 'tabs') {
           for (const tab of (item as FieldsLayoutTabs).tabs) {
             yield* walkFieldLayoutItems(tab.fields, `${parentPath}${i}.tabs.`)
