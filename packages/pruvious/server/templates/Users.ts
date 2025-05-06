@@ -32,7 +32,10 @@ export default defineTemplate(() => ({
       required: true,
       validators: [
         emailValidator(),
-        uniqueValidator(({ __ }) => __('pruvious-api', 'The email address is already in use')),
+        uniqueValidator({
+          errorMessage: ({ __ }) => __('pruvious-api', 'The email address is already in use'),
+          caseSensitive: false,
+        }),
       ],
     }),
     password: textField({
