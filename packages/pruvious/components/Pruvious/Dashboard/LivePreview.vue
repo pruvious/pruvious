@@ -57,10 +57,12 @@
                 :addBlockContainer="width <= 1024 ? footerBeforeSlot : addBlockContainer"
                 :conditionalLogic="conditionalLogic"
                 :conditionalLogicResolver="conditionalLogicResolver"
+                :data="data"
                 :disabled="disabled"
                 :errors="errors"
                 :fieldName="name"
                 :fieldOptions="blocksFields[name]!"
+                :fields="fields"
                 :modelValue="data[name]"
                 @commit="emit('commit', Object.assign({}, data, { [name]: $event }))"
                 @queueConditionalLogicUpdate="emit('queueConditionalLogicUpdate', $event)"
@@ -252,6 +254,7 @@ import { __, History, resolveFieldLabel, usePruviousDashboard, usePruviousDashbo
 import type {
   Collections,
   FieldsLayout,
+  GenericSerializableFieldOptions,
   SerializableCollection,
   SerializableFieldOptions,
   SerializableSingleton,
@@ -288,6 +291,14 @@ const props = defineProps({
    */
   data: {
     type: Object as PropType<Record<string, any>>,
+    required: true,
+  },
+
+  /**
+   * A key-value pair of (sub)field names and their combined options defined in a collection, singleton, block, or field.
+   */
+  fields: {
+    type: Object as PropType<Record<string, GenericSerializableFieldOptions>>,
     required: true,
   },
 

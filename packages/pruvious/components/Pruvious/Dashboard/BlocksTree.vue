@@ -448,6 +448,7 @@
 import {
   __,
   maybeTranslate,
+  parseConditionalLogic,
   resolveFieldLabel,
   usePruviousClipboard,
   usePruviousClipboardData,
@@ -458,6 +459,7 @@ import type {
   BlockGroupName,
   BlockName,
   BlockTagName,
+  GenericSerializableFieldOptions,
   SerializableBlock,
   SerializableFieldOptions,
 } from '#pruvious/server'
@@ -514,6 +516,23 @@ const props = defineProps({
    */
   modelValue: {
     type: Object as PropType<BlockValue[]>,
+    required: true,
+  },
+
+  /**
+   * The current record data from a collection or singleton.
+   * Contains key-value pairs representing the record's fields and their values.
+   */
+  data: {
+    type: Object as PropType<Record<string, any>>,
+    required: true,
+  },
+
+  /**
+   * A key-value pair of (sub)field names and their combined options defined in a collection, singleton, block, or field.
+   */
+  fields: {
+    type: Object as PropType<Record<string, GenericSerializableFieldOptions>>,
     required: true,
   },
 
@@ -1240,8 +1259,15 @@ function addBlock(blockName: BlockName, parent: ExtendedBlockValue | null, index
   const { $children } = parent ? getLists(parent) : { $children: extendedModelValue }
   $children.splice(index, 0, extendedBlock)
   $children.splice(0, $children.length, ...repairExtendedBlocksValue($children, pathPrefix, parent))
-  prevModelValueStringified.value = JSON.stringify(retractExtendedBlocksValue(extendedModelValue))
+  const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+  prevModelValueStringified.value = JSON.stringify(newModelValue)
   localErrors.value = undefined
+  const newData = { ...props.data, [props.fieldName]: newModelValue }
+  props.conditionalLogicResolver
+    ?.setInput(newData)
+    .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+    .resolve()
+  Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
   refresh()
   setTimeout(() => {
     const treeItem = treeComponent.value?.flatItems().find((item) => item.id === extendedBlock.$id)!
@@ -1355,8 +1381,15 @@ function deleteItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: Even
       extendedModelValue.length,
       ...repairExtendedBlocksValue(extendedModelValue, props.fieldName),
     )
-    prevModelValueStringified.value = JSON.stringify(retractExtendedBlocksValue(extendedModelValue))
+    const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+    prevModelValueStringified.value = JSON.stringify(newModelValue)
     localErrors.value = undefined
+    const newData = { ...props.data, [props.fieldName]: newModelValue }
+    props.conditionalLogicResolver
+      ?.setInput(newData)
+      .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+      .resolve()
+    Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
     refresh()
     setTimeout(() => {
       emitValue()
@@ -1404,6 +1437,12 @@ function moveItems(direction: 'up' | 'down', items: PUITreeItemModel<ExtendedBlo
       )
       emitValue()
       emit('queueConditionalLogicUpdate', '$reset')
+      nextTick(() => {
+        treeComponent.value?.scrollToSelection()
+        setTimeout(() =>
+          (treeComponent.value?.root?.querySelector('.pui-tree-item-button-selected') as HTMLElement)?.focus(),
+        )
+      })
     })
   }
 }
@@ -1423,27 +1462,20 @@ function dropItems(
       const { $children } = newParent ? getLists(newParent.source) : { $children: extendedModelValue }
       $children.splice(newIndex, 0, item.source)
     }
-    for (const { item, oldIndex, newIndex } of dropped) {
-      const basePath = item.source.$path.split('.').slice(0, -1).join('.')
-      const oldConditionalLogic = Object.fromEntries(
-        Object.entries(props.conditionalLogic)
-          .filter(([key]) => key.startsWith(`${basePath}.${oldIndex}.`))
-          .map(([key, value]) => [key.replace(`${basePath}.${oldIndex}.`, `${basePath}.${newIndex}.`), value]),
-      )
-      const newConditionalLogic = Object.fromEntries(
-        Object.entries(props.conditionalLogic)
-          .filter(([key]) => key.startsWith(`${basePath}.${newIndex}.`))
-          .map(([key, value]) => [key.replace(`${basePath}.${newIndex}.`, `${basePath}.${oldIndex}.`), value]),
-      )
-      Object.assign(props.conditionalLogic, oldConditionalLogic, newConditionalLogic)
-    }
     extendedModelValue.splice(
       0,
       extendedModelValue.length,
       ...repairExtendedBlocksValue(extendedModelValue, props.fieldName),
     )
-    prevModelValueStringified.value = JSON.stringify(retractExtendedBlocksValue(extendedModelValue))
+    const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+    prevModelValueStringified.value = JSON.stringify(newModelValue)
     localErrors.value = undefined
+    const newData = { ...props.data, [props.fieldName]: newModelValue }
+    props.conditionalLogicResolver
+      ?.setInput(newData)
+      .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+      .resolve()
+    Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
     refresh()
     setTimeout(() => {
       emit(
@@ -1452,6 +1484,9 @@ function dropItems(
       )
       emitValue()
       emit('queueConditionalLogicUpdate', '$reset')
+      nextTick(() =>
+        (treeComponent.value?.root?.querySelector('.pui-tree-item-button-selected') as HTMLElement)?.focus(),
+      )
     })
   }
 }
@@ -1473,8 +1508,15 @@ function duplicateItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: E
       extendedModelValue.length,
       ...repairExtendedBlocksValue(extendedModelValue, props.fieldName),
     )
-    prevModelValueStringified.value = JSON.stringify(retractExtendedBlocksValue(extendedModelValue))
+    const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+    prevModelValueStringified.value = JSON.stringify(newModelValue)
     localErrors.value = undefined
+    const newData = { ...props.data, [props.fieldName]: newModelValue }
+    props.conditionalLogicResolver
+      ?.setInput(newData)
+      .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+      .resolve()
+    Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
     refresh()
     setTimeout(() => {
       emitValue()
@@ -1556,8 +1598,15 @@ function pasteItems(
       extendedModelValue.length,
       ...repairExtendedBlocksValue(extendedModelValue, props.fieldName),
     )
-    prevModelValueStringified.value = JSON.stringify(retractExtendedBlocksValue(extendedModelValue))
+    const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+    prevModelValueStringified.value = JSON.stringify(newModelValue)
     localErrors.value = undefined
+    const newData = { ...props.data, [props.fieldName]: newModelValue }
+    props.conditionalLogicResolver
+      ?.setInput(newData)
+      .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+      .resolve()
+    Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
     refresh()
     setTimeout(() => {
       const treeItems = treeComponent.value!.flatItems().filter((item) => newIds.includes(item.source.$id))

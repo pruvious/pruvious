@@ -10,6 +10,7 @@
     :conditionalLogicResolver="conditionalLogicResolver"
     :dataContainerName="collection.name"
     :disabled="!canUpdate"
+    :fields="collection.definition.fields"
     :fieldsLayout="fieldsLayout"
     :history="history"
     :id="id"

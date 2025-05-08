@@ -246,6 +246,7 @@ defineExpose({
   scrollToSelection,
   scrollable,
   updatePlaceholder,
+  root,
 })
 
 /**

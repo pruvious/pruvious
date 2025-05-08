@@ -9,6 +9,7 @@
     :conditionalLogicResolver="conditionalLogicResolver"
     :dataContainerName="singleton.name"
     :disabled="!canUpdate"
+    :fields="singleton.definition.fields"
     :history="history"
     :is="layout"
     :isSubmitting="isSubmitting"

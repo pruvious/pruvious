@@ -329,8 +329,6 @@
                   visibleActions = -1
                   $nextTick(() => {
                     structuredValue = structuredValue.map((item) => ({ ...item, $expanded: true }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
                   })
                 }
               "
@@ -347,8 +345,6 @@
                   visibleActions = -1
                   $nextTick(() => {
                     structuredValue = structuredValue.map((item) => ({ ...item, $expanded: false }))
-                    updateModelValue(structuredValue)
-                    commitModelValue(structuredValue)
                   })
                 }
               "
@@ -384,7 +380,12 @@
             @commit="commitModelValue(structuredValue.map((item, i) => (i === index ? $event : item)))"
             @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
             @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
-            @update:modelValue="updateModelValue(structuredValue.map((item, i) => (i === index ? $event : item)))"
+            @update:modelValue="
+              updateModelValue(
+                structuredValue.map((item, i) => (i === index ? $event : item)),
+                false,
+              )
+            "
           />
 
           <span v-else class="pui-muted">{{ __('pruvious-dashboard', 'No fields to display') }}</span>
@@ -454,6 +455,7 @@ import { PruviousDashboardBlockPickerPopup } from '#components'
 import {
   __,
   maybeTranslate,
+  parseConditionalLogic,
   usePruviousClipboard,
   usePruviousClipboardData,
   usePruviousDashboard,
@@ -795,13 +797,23 @@ function queueConditionalLogicUpdate(mValue: Record<string, any>[]) {
   }
 }
 
-function updateModelValue(sValue: Record<string, any>[]) {
+function updateModelValue(sValue: Record<string, any>[], refreshConditionalLogic = true) {
   const newModelValue = sValue.map((item) => ({
     $key: item.$blockName,
     ...omit(item, ['$blockName', '$expanded', '$key']),
   }))
   prevModelValue.value = newModelValue
   structuredValue.value = sValue
+
+  if (refreshConditionalLogic) {
+    const newData = { ...props.data, [props.name]: newModelValue }
+    props.conditionalLogicResolver
+      ?.setInput(newData)
+      .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
+      .resolve()
+    Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
+  }
+
   emit('update:modelValue', newModelValue)
   nextTick(() => queueConditionalLogicUpdate(newModelValue))
 }
