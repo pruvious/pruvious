@@ -98,6 +98,10 @@
         <div class="p-lp-panel-middle">
           <div ref="livePanel" class="p-lp-panel-live">
             <!-- @todo preview -->
+            <div class="pui-row pui-w-full pui-flex-1" style="flex-direction: column">
+              <pre style="width: 100%; overflow: auto">{{ tmp }}</pre>
+              <PruviousRichText v-model="tmp" tag="p" class="pui-w-full" />
+            </div>
           </div>
 
           <div class="p-lp-panel-middle-footer">
@@ -379,6 +383,12 @@ const emit = defineEmits<{
 
 provide('isLivePreview', true)
 
+// const tmp = ref('<em>Em <code>code <strong>bold</strong></code> <strong>strong</strong></em>') // @todo remove
+const tmp = ref(
+  '<a>something <span>hi</span> <span><em><code><strong>t</strong></code><strong>here</strong></em></span></a> outer',
+) // @todo remove
+// const tmp = ref('<em>something <code>code</code></em>') // @todo remove
+
 const dashboard = usePruviousDashboard()
 const dashboardLayout = usePruviousDashboardLayout()
 const layoutRef = useTemplateRef<any>('layoutRef')
@@ -550,6 +560,7 @@ function refreshErrors(): void {
 }
 
 .p-lp-panel-live {
+  position: relative;
   flex: 1;
   display: flex;
 }

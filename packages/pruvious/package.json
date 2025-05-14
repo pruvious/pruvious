@@ -63,6 +63,11 @@
     "pathe": "2.0.3",
     "pg": "8.15.6",
     "pkg-types": "2.1.0",
+    "prosemirror-commands": "1.7.1",
+    "prosemirror-keymap": "1.2.3",
+    "prosemirror-model": "1.25.1",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-view": "1.39.2",
     "safe-stringify": "1.1.1",
     "sharp": "0.34.1",
     "std-env": "3.9.0"
