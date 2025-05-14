@@ -31,7 +31,7 @@ export const traverse = isObject(_traverse) ? ((_traverse as any).default as typ
  *
  * @example
  * ```ts
- * const code = `resolvePruviousComponent('@/components/MyComponent.vue')`
+ * const code = `resolvePruviousComponent('~/components/MyComponent.vue')`
  * const matches = extractStringLiteralArguments({
  *   code,
  *   mode: 'ts',
@@ -42,7 +42,7 @@ export const traverse = isObject(_traverse) ? ((_traverse as any).default as typ
  * // [
  * //   {
  * //     functionName: 'resolvePruviousComponent',
- * //     args: ['@/components/MyComponent.vue']
+ * //     args: ['~/components/MyComponent.vue']
  * //   }
  * // ]
  * ```

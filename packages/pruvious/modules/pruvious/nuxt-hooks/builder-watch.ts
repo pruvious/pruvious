@@ -157,6 +157,12 @@ export async function watchPruviousFiles(event: WatchEvent, path: string) {
   }
 
   if (type === 'template-definition') {
+    resolveCustomComponentsInFile({
+      file: path,
+      srcDir: layer.config.srcDir,
+      srcDirs: nuxt.options._layers.map(({ config }) => config.srcDir),
+    })
+
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetTemplatesResolver()

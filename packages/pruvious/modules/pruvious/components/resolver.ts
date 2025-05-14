@@ -269,6 +269,48 @@ export function resolveCustomComponentsInFile(options: ResolveCustomComponentsIn
             warnWithContext(`Missing component path in ${colorize('yellow', 'resolveNamedPruviousComponent()')}`, [
               `Source: ${colorize('dim', relativeFilePath)}`,
             ])
+          } else if (componentPath.startsWith('@/') || componentPath.startsWith('~/')) {
+            let resolved = false
+
+            for (const _srcDir of srcDirs) {
+              const _componentPath = resolveCustomComponentPath({
+                component: '>/' + componentPath.slice(2),
+                file,
+                srcDir: _srcDir,
+              })
+
+              if (fs.existsSync(_componentPath)) {
+                nameMap[file].push(name)
+
+                if (!components[name]) {
+                  components[name] = _componentPath
+                  if (write) {
+                    debouncedWriteToFile()
+                  }
+                }
+
+                if (components[name] === _componentPath) {
+                  debug(`Resolved custom component \`${component}\` in <${relativeFilePath}>`)
+                } else {
+                  warnWithContext(
+                    `Two custom components named \`${component}\` pointing to different file locations:`,
+                    [
+                      relative(nuxt.options.workspaceDir, components[name]),
+                      relative(nuxt.options.workspaceDir, _componentPath),
+                    ],
+                  )
+                }
+
+                resolved = true
+                break
+              }
+            }
+
+            if (!resolved) {
+              warnWithContext(`Unable to resolve custom component ${colorize('yellow', component)}`, [
+                `Source: ${colorize('dim', relativeFilePath)}`,
+              ])
+            }
           } else if (fs.existsSync(componentPath)) {
             nameMap[file].push(name)
 

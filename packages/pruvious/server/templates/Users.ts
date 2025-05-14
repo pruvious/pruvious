@@ -146,7 +146,7 @@ export default defineTemplate(() => ({
       default: 'LL',
       validators: [nonEmptyValidator()],
       ui: {
-        customComponent: resolvePruviousComponent('@/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
+        customComponent: resolvePruviousComponent('~/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
         label: ({ __ }) => __('pruvious-dashboard', 'Date format'),
         placeholder: 'YYYY-MM-DD',
         description: {
@@ -186,7 +186,7 @@ export default defineTemplate(() => ({
       default: 'LTS',
       validators: [nonEmptyValidator()],
       ui: {
-        customComponent: resolvePruviousComponent('@/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
+        customComponent: resolvePruviousComponent('~/components/Pruvious/Dashboard/DateTimeFormatField.vue'),
         label: ({ __ }) => __('pruvious-dashboard', 'Time format'),
         placeholder: 'HH:mm:ss',
         description: {

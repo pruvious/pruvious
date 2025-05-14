@@ -23,6 +23,7 @@ export interface ResolveCustomComponentPathOptions {
  *
  * - `<srcDir>/<pruvious.dir.blocks>`
  * - `<serverDir>/<pruvious.dir.collections>`
+ * - `<serverDir>/<pruvious.dir.templates>`
  * - `<serverDir>/<pruvious.dir.singletons>`
  * - `<sharedDir>`
  *
@@ -70,6 +71,7 @@ export function resolvePruviousComponent(path: string) {
  *
  * - `<srcDir>/<pruvious.dir.blocks>`
  * - `<serverDir>/<pruvious.dir.collections>`
+ * - `<serverDir>/<pruvious.dir.templates>`
  * - `<serverDir>/<pruvious.dir.singletons>`
  * - `<sharedDir>`
  *
