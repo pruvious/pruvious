@@ -168,7 +168,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
 
     ast.program.body.unshift(
       template.statement(
-        `import { defineBlock } from '${createResolver(import.meta.url).resolve('../blocks/define.server')}'`,
+        `import { defineBlock } from '${createResolver(import.meta.url).resolve('./define.server')}'`,
       )(),
     )
 
@@ -277,7 +277,7 @@ function writeBlocks(): boolean {
   const content = [
     ...blocksTS,
     `import { uniqueArray } from '@pruvious/utils'`,
-    `import type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('../blocks/utils.server')}'`,
+    `import type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('./utils.server')}'`,
     `import { applyFilters } from '${resolve('../hooks/utils.server')}'`,
     ``,
     `/**`,

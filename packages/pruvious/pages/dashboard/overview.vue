@@ -10,7 +10,14 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, dashboardMiddleware } from '#pruvious/client'
+import { __, dashboardBasePath, dashboardMiddleware, defineDashboardPage } from '#pruvious/client'
+
+defineDashboardPage({
+  label: ({ __ }) => __('pruvious-dashboard', 'Overview'),
+  icon: 'dashboard',
+  group: 'general',
+  order: 1,
+})
 
 definePageMeta({
   path: dashboardBasePath + 'overview',

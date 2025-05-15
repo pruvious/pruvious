@@ -15,16 +15,21 @@ import {
   __,
   applyFilters,
   loadFilters,
+  maybeTranslate,
+  preloadTranslatableStrings,
   prepareDashboardMenu,
   useAuth,
+  useLanguage,
   usePruviousDashboard,
   usePruviousDashboardMenuExpanded,
   type DashboardMenuItem,
 } from '#pruvious/client'
+import { dashboardPages } from '#pruvious/client/dashboard-pages'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
-import { collator, isEmpty, slugify } from '@pruvious/utils'
+import { collator, isDefined, isEmpty, omit, slugify, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
+await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
 await loadFilters('dashboard:menu:utilities')
 
 const route = useRoute()
@@ -32,6 +37,13 @@ const auth = useAuth()
 const dashboard = usePruviousDashboard()
 const expanded = usePruviousDashboardMenuExpanded()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
+  ...Object.entries(dashboardPages)
+    .filter(([_, { group }]) => group === 'utilities')
+    .map(([_, d]) => ({
+      ...omit(d, ['_path']),
+      to: d.path ?? d._path,
+      label: isDefined(d.label) ? maybeTranslate(d.label) : __('pruvious-dashboard', titleCase(d._path, false) as any),
+    })),
   ...collectionsToMenuItems(dashboard.value?.collections).filter(({ group }) => group === 'utilities'),
   ...singletonsToMenuItems(dashboard.value?.singletons).filter(({ group }) => group === 'utilities'),
 ]

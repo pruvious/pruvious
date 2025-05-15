@@ -86,8 +86,6 @@ export const usePruvious = () => useState<PruviousState | null>('pruvious-state'
 export const usePruviousDashboard = () =>
   useState<PruviousDashboardState | null>('pruvious-dashboard-state', () => null)
 
-let unwantedStylesRemoved = false
-
 /**
  * Retrieves the current state of the Pruvious CMS from `/<pruvious.api.basePath>/pruvious`.
  * The HTTP request runs only if the state is not already present.
@@ -168,7 +166,7 @@ export async function refreshPruviousDashboardState(force = false) {
  * This function is automatically called by the `pruvious-dashboard` middleware.
  */
 export function removeUnwantedStylesFromDashboard() {
-  if (!unwantedStylesRemoved) {
+  if (!document.body.classList.contains('p-dashboard')) {
     for (const styleSheet of document.styleSheets) {
       let keep = false
 
@@ -190,7 +188,7 @@ export function removeUnwantedStylesFromDashboard() {
       }
     }
 
-    unwantedStylesRemoved = true
+    document.body.classList.add('p-dashboard')
   }
 }
 

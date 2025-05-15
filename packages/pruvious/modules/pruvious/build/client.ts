@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { relative } from 'pathe'
 import { resolveBlockFiles } from '../blocks/resolver'
+import { resolveDashboardPageFiles } from '../dashboard-pages/resolver'
 import { debug } from '../debug/console'
 import { resolveFieldComponentFiles, resolveFieldDefinitionFiles } from '../fields/resolver'
 import {
@@ -331,6 +332,8 @@ function getClientFileContent() {
   const blockEntries = Object.entries(blockFiles)
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
 
+  resolveDashboardPageFiles()
+
   return [
     `import { type Component, defineAsyncComponent } from 'vue'`,
     `import type { Blocks } from '../server'`,
@@ -565,5 +568,6 @@ function getReExports() {
     `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard } from '${resolve('../../../utils/pruvious/dashboard/clipboard')}'`,
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
+    `export { type DefineDashboardPageOptions, defineDashboardPage } from '${resolve('../dashboard-pages/define')}'`,
   ].join('\n')
 }

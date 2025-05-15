@@ -1,9 +1,9 @@
 <template>
   <div class="p-menu">
-    <PruviousDashboardMenuGeneral />
-    <PruviousDashboardMenuCollections />
-    <PruviousDashboardMenuManagement />
-    <PruviousDashboardMenuUtilities />
+    <PruviousDashboardMenuGeneral key="general" />
+    <PruviousDashboardMenuCollections key="collections" />
+    <PruviousDashboardMenuManagement key="management" />
+    <PruviousDashboardMenuUtilities key="utilities" />
   </div>
 </template>
 

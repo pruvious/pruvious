@@ -12,24 +12,30 @@ import {
   __,
   applyFilters,
   loadFilters,
+  maybeTranslate,
+  preloadTranslatableStrings,
   prepareDashboardMenu,
+  useLanguage,
   usePruviousDashboard,
   type DashboardMenuItem,
 } from '#pruvious/client'
-import { collator } from '@pruvious/utils'
+import { dashboardPages } from '#pruvious/client/dashboard-pages'
+import { collator, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
+await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
 await loadFilters('dashboard:menu:general')
 
 const route = useRoute()
 const dashboard = usePruviousDashboard()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
-  {
-    to: 'overview',
-    label: __('pruvious-dashboard', 'Overview'),
-    icon: 'dashboard',
-    order: 1,
-  },
+  ...Object.entries(dashboardPages)
+    .filter(([_, { group }]) => group === 'general')
+    .map(([_, d]) => ({
+      ...omit(d, ['_path']),
+      to: d.path ?? d._path,
+      label: isDefined(d.label) ? maybeTranslate(d.label) : __('pruvious-dashboard', titleCase(d._path, false) as any),
+    })),
   ...collectionsToMenuItems(dashboard.value?.collections).filter(({ group }) => group === 'general'),
   ...singletonsToMenuItems(dashboard.value?.singletons).filter(({ group }) => group === 'general'),
 ]

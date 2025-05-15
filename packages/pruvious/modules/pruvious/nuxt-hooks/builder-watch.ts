@@ -10,6 +10,12 @@ import { generateClientFiles } from '../build/client'
 import { generateServerFiles } from '../build/server'
 import { resetCollectionsResolver } from '../collections/resolver'
 import { resolveCustomComponentsInFile } from '../components/resolver'
+import {
+  debouncedWriteDashboardPages,
+  resetDashboardPagesResolver,
+  resolveDashboardPageDefinition,
+  resolveDashboardPageFiles,
+} from '../dashboard-pages/resolver'
 import { debug } from '../debug/console'
 import { resetFieldsResolver } from '../fields/resolver'
 import { clearCachedClientHooks, clearCachedServerHooks } from '../hooks/resolver'
@@ -36,6 +42,7 @@ type PruviousFileType =
   | 'client-filter'
   | 'server-filter'
   | 'shared-file'
+  | 'dashboard-page'
 
 const skipped: string[] = []
 
@@ -223,6 +230,25 @@ export async function watchPruviousFiles(event: WatchEvent, path: string) {
     })
     return
   }
+
+  if (type === 'dashboard-page') {
+    if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
+      remove(path, skipped)
+      resetDashboardPagesResolver()
+      resolveDashboardPageFiles(false)
+      const written = await debouncedWriteDashboardPages()
+      if (written) {
+        reloadOnNitroCompiled(event, path)
+      }
+    } else {
+      const written = await resolveDashboardPageDefinition({ vueFile: path, srcDir: layer.config.srcDir })
+      if (written) {
+        reloadOnNitroCompiled(event, path)
+      }
+    }
+
+    return
+  }
 }
 
 function resolvePruviousFile(
@@ -339,6 +365,11 @@ function resolvePruviousFile(
     // Shared files
     if (path.startsWith(join(layer.config.rootDir, layer.config.dir?.shared ?? 'shared') + '/')) {
       return { type: 'shared-file', layer }
+    }
+
+    // Dashboard pages
+    if (path.startsWith(join(layer.config.srcDir, layer.config.dir?.pages ?? 'pages') + '/')) {
+      return { type: 'dashboard-page', layer }
     }
   }
 
