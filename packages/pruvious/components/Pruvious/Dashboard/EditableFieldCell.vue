@@ -73,26 +73,26 @@ const props = defineProps({
 const root = useTemplateRef('root')
 const resolvedEditButtonPosition = ref(props.editButtonPosition === 'auto' ? 'relative' : props.editButtonPosition)
 
-watch(
-  () => props.editButtonPosition,
-  (position) => {
-    setTimeout(() => {
-      if (position === 'auto') {
-        const cell = root.value?.parentElement?.parentElement
-        const lastItem = root.value?.querySelector('.p-item:last-of-type')
+watch(() => props.editButtonPosition, updatePosition)
 
-        if (cell && lastItem) {
-          const { right: parentRight } = cell.getBoundingClientRect()
-          const { right: childRight } = lastItem.getBoundingClientRect()
-          resolvedEditButtonPosition.value = parentRight - childRight < 32 ? 'absolute' : 'relative'
-        }
-      } else {
-        resolvedEditButtonPosition.value = position
+onMounted(updatePosition)
+
+function updatePosition() {
+  setTimeout(() => {
+    if (props.editButtonPosition === 'auto') {
+      const cell = root.value?.parentElement?.parentElement
+      const lastItem = root.value?.querySelector('.p-item:last-of-type')
+
+      if (cell && lastItem) {
+        const { right: parentRight } = cell.getBoundingClientRect()
+        const { right: childRight } = lastItem.getBoundingClientRect()
+        resolvedEditButtonPosition.value = parentRight - childRight < 32 ? 'absolute' : 'relative'
       }
-    })
-  },
-  { immediate: true },
-)
+    } else {
+      resolvedEditButtonPosition.value = props.editButtonPosition
+    }
+  })
+}
 </script>
 
 <style scoped>
