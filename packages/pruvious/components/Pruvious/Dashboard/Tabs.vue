@@ -1,7 +1,7 @@
 <template>
   <PUITabs :active="active" :list="list" @change="$emit('change', $event)">
     <template #nav="{ active, choices, setActive }">
-      <div v-if="choices.length" class="p-tabs-list">
+      <div v-if="choices.length > 1" class="p-tabs-list">
         <div ref="nav" class="p-tabs-list-scrollable">
           <button
             v-for="(choice, index) of choices"
