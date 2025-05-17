@@ -1,4 +1,6 @@
 import {
+  dashboardBasePath,
+  filterStylesheets,
   hasPermission,
   isValidLanguageCode,
   preloadTranslatableStrings,
@@ -11,12 +13,12 @@ import {
   useLanguage,
 } from '#pruvious/client'
 import type { LanguageCode } from '#pruvious/server'
-import { removeUnwantedStylesFromDashboard } from '../pruvious/utils.client'
+import { getCleanupDashboardStylesheetsScript } from '../dashboard/stylesheets'
 
 /**
  * Pruvious client middleware intended for use in the dashboard.
  *
- * - Removes unwanted styles from the dashboard.
+ * - Removes unwanted styles from the dashboard (in production mode).
  * - Retrieves the CMS state from `/<pruvious.api.basePath>/pruvious` and stores it in the `usePruvious` composable.
  * - Retrieves the current user authentication state from `/<pruvious.api.basePath>/auth/state`
  *   and stores it in the `useAuth` composable.
@@ -27,8 +29,13 @@ import { removeUnwantedStylesFromDashboard } from '../pruvious/utils.client'
  */
 export const dashboardDefaultMiddleware = async () => {
   if (import.meta.client) {
-    // Remove unwanted styles
-    removeUnwantedStylesFromDashboard()
+    // Disable unwanted stylesheets
+    if (!import.meta.dev && !document.getElementById('pruvious-dashboard-stylesheets-filter')) {
+      const script = document.createElement('script')
+      script.id = 'pruvious-dashboard-stylesheets-filter'
+      script.innerHTML = getCleanupDashboardStylesheetsScript(filterStylesheets, dashboardBasePath)
+      document.head.appendChild(script)
+    }
 
     // CMS
     await refreshPruviousState()

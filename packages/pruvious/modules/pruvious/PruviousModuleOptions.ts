@@ -715,6 +715,24 @@ export interface PruviousModuleOptions {
      * '/hidden/dashboard/'
      */
     basePath?: string
+
+    /**
+     * Controls which stylesheets are retained in the dashboard by filtering based on selector or CSS content.
+     * Accepts an array of strings that must appear in at least one `selectorText` or `cssText` of a stylesheet's rules.
+     * Any stylesheet without rules containing these strings will be automatically disabled.
+     *
+     * @default
+     * [
+     *   '.p-',
+     *   '.pui-',
+     *   '--pui-',
+     *   '[data-sonner-toaster]',
+     *   '[data-tippy-root]',
+     *   '.vue-inspector-',
+     *   '.nuxt-devtools',
+     * ]
+     */
+    filterStylesheets?: string[]
   }
 
   /**

@@ -9,6 +9,7 @@ import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { addServerHandler, createResolver, defineNuxtModule } from 'nuxt/kit'
 import { join } from 'pathe'
+import { isDevelopment } from 'std-env'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
 import { resetBlocksResolver } from './pruvious/blocks/resolver'
@@ -16,6 +17,7 @@ import { generateClientFiles } from './pruvious/build/client'
 import { generateServerFiles } from './pruvious/build/server'
 import { resetCollectionsResolver } from './pruvious/collections/resolver'
 import { resolveCustomComponents } from './pruvious/components/resolver'
+import { getCleanupDashboardStylesheetsScript } from './pruvious/dashboard/stylesheets'
 import { debug, getErrorCount, info, resetErrorCount, setVerbose, success } from './pruvious/debug/console'
 import { resolveDebugLogsConfig } from './pruvious/debug/logs'
 import { resetFieldsResolver } from './pruvious/fields/resolver'
@@ -77,6 +79,15 @@ export default defineNuxtModule<PruviousModuleOptions>({
     },
     dashboard: {
       basePath: '/dashboard/',
+      filterStylesheets: [
+        '.p-',
+        '.pui-',
+        '--pui-',
+        '[data-sonner-toaster]',
+        '[data-tippy-root]',
+        '.vue-inspector-',
+        '.nuxt-devtools-',
+      ],
     },
     debug: {
       verbose: false,
@@ -147,6 +158,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       },
       dashboard: {
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.dashboard.basePath!)),
+        filterStylesheets: resolvedOptions.dashboard.filterStylesheets!,
       },
       dir: {
         actions: {
@@ -255,6 +267,17 @@ export default defineNuxtModule<PruviousModuleOptions>({
         }
       }
     })
+
+    // Disable unwanted stylesheets
+    if (isDevelopment) {
+      nuxt.options.app.head.script ??= []
+      nuxt.options.app.head.script.unshift({
+        innerHTML: getCleanupDashboardStylesheetsScript(
+          nuxt.options.runtimeConfig.pruvious.dashboard.filterStylesheets,
+          nuxt.options.runtimeConfig.pruvious.dashboard.basePath,
+        ),
+      })
+    }
 
     // Log build time
     if (getErrorCount() === 0) {

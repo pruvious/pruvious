@@ -492,6 +492,12 @@ function getClientFileContent() {
     ` */`,
     `export const uniqueValidator: <TCollection extends GenericCollection, TField extends string = TCollection['TColumnNames']>(options?: UniqueValidatorOptions<TField, GenericDatabase>) => GenericValidator = _validatorFn`,
     ``,
+    `/**`,
+    ` * Controls which stylesheets are retained in the dashboard by filtering based on selector content.`,
+    ` * Any stylesheet without rules containing these strings will be automatically disabled.`,
+    ` */`,
+    `export const filterStylesheets = ${JSON.stringify(nuxt.options.runtimeConfig.pruvious.dashboard.filterStylesheets)}`,
+    ``,
     getReExports(),
   ].join('\n')
 }
@@ -517,6 +523,7 @@ function getClientTypeFileContent() {
     `export const blockComponents: any`,
     ...validatorsMeta.map(({ name }) => `export function ${name}Validator(): any`),
     `export function uniqueValidator(): any`,
+    `export const filterStylesheets: any`,
     getReExports(),
   ].join('\n')
 }

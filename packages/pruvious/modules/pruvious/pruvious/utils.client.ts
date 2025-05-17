@@ -162,37 +162,6 @@ export async function refreshPruviousDashboardState(force = false) {
 }
 
 /**
- * Removes unwanted styles from the dashboard.
- * This function is automatically called by the `pruvious-dashboard` middleware.
- */
-export function removeUnwantedStylesFromDashboard() {
-  if (!document.body.classList.contains('p-dashboard')) {
-    for (const styleSheet of document.styleSheets) {
-      let keep = false
-
-      for (const rule of styleSheet.cssRules) {
-        if (
-          rule instanceof CSSStyleRule &&
-          (rule.selectorText.includes('.p-') ||
-            rule.selectorText.includes('.pui-') ||
-            rule.selectorText.includes('[data-sonner-toaster]') ||
-            rule.selectorText.includes('.vue-inspector-'))
-        ) {
-          keep = true
-          break
-        }
-      }
-
-      if (!keep) {
-        styleSheet.disabled = true
-      }
-    }
-
-    document.body.classList.add('p-dashboard')
-  }
-}
-
-/**
  * Deserializes translatable string functions that were serialized using the `serializeTranslatableStringCallbacks()` function.
  * This affects all functions in the provided `object`.
  */
