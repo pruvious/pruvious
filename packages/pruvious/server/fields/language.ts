@@ -3,7 +3,7 @@ import { textFieldModel } from '@pruvious/orm'
 import { isString } from '@pruvious/utils'
 
 export default defineField({
-  model: textFieldModel<string, LanguageCode, string>(),
+  model: textFieldModel<LanguageCode, LanguageCode, LanguageCode>(),
   nullable: true,
   default: null,
   validators: [
