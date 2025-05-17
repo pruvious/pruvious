@@ -46,7 +46,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       driver: 'sqlite://database.sqlite',
       sync: {
         dropNonCollectionTables: false,
-        dropNonFieldColumns: true,
+        dropNonFieldColumns: false,
       },
     },
     api: {

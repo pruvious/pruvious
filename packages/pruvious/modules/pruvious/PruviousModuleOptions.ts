@@ -31,7 +31,7 @@ export interface PruviousModuleOptions {
      * Additionally:
      *
      * - Existing tables not defined in the collection models are preserved.
-     * - Existing columns not defined in the field models of the collections are dropped.
+     * - Existing columns not defined in the field models are preserved.
      *
      * Provide an object to customize the sync behavior or set to `false` to disable the sync feature.
      *
@@ -49,7 +49,7 @@ export interface PruviousModuleOptions {
           /**
            * Indicates whether to drop existing columns not defined in the field models of the collections.
            *
-           * @default true
+           * @default false
            */
           dropNonFieldColumns?: boolean
         }
