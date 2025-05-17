@@ -82,7 +82,7 @@ export interface DefineDashboardPageOptions {
  * ```vue
  * <!-- app/pages/dashboard/crm-integration.vue -->
  * <template>
- *   <PruviousDashboardPage noMainPadding>
+ *   <PruviousDashboardPage>
  *     <div>...</div>
  *   </PruviousDashboardPage>
  * </template>
