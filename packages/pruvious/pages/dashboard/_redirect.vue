@@ -1,6 +1,9 @@
 <template></template>
 
 <script lang="ts" setup>
+import { dashboardBasePath } from '#pruvious/client'
+
 const route = useRoute()
-onBeforeMount(() => navigateTo(String(route.query.to) || '/', { replace: true }))
+
+onBeforeMount(() => navigateTo(route.query.to ? String(route.query.to) : dashboardBasePath, { replace: true }))
 </script>

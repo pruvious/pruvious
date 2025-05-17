@@ -18,6 +18,7 @@ export function usePruviousHMR() {
 
     try {
       const redirectURL = new URL(route.fullPath)
+      redirectURL.pathname = redirectURL.pathname.replace(/\/_redirect$/, '')
       redirectURL.searchParams.delete('_redirect')
       to = redirectURL.toString()
     } catch {
