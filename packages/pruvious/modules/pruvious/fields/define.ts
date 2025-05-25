@@ -882,7 +882,7 @@ export type ResolveFieldUIOptions<TUIOptions extends GenericPickFieldUIOptions |
        * Configures how this field is displayed in the user interface.
        */
       ui?: TUIOptions extends undefined
-        ? GenericFieldUIOptions
+        ? OmitUndefined<GenericFieldUIOptions>
         : TUIOptions extends GenericPickFieldUIOptions
           ? OmitUndefined<
               FieldUIOptions<
