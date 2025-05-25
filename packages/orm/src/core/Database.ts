@@ -132,6 +132,20 @@ export interface DatabaseOptions<TCollections extends Record<string, object>, TI
          * @default true
          */
         dropNonFieldColumns?: boolean
+
+        /**
+         * A function to run before the schema synchronization.
+         *
+         * @default null
+         */
+        beforeSync?: ((db: GenericDatabase) => Promise<any> | any) | null
+
+        /**
+         * A function to run after the schema synchronization.
+         *
+         * @default null
+         */
+        afterSync?: ((db: GenericDatabase) => Promise<any> | any) | null
       }
     | boolean
 
@@ -288,6 +302,8 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     enabled: true,
     dropNonCollectionTables: true,
     dropNonFieldColumns: true,
+    beforeSync: null,
+    afterSync: null,
   }
   protected instanceLocks: string[] = []
 
@@ -700,6 +716,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         // Ensure that the transaction uses the same client instance
         this.exec = exec
 
+        // Run `beforeSync` hook
+        await this.syncOptions.beforeSync?.(this as any)
+
         // Remove existing indexes and foreign keys
         for (const table of await this.listTables()) {
           for (const name of await this.listIndexes(table)) {
@@ -902,6 +921,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         `insert into "Options" (key, value) values ('_schemaMap', $value) on conflict (key) do update set value = $value`,
         { value: JSON.stringify(this.schemaMap) },
       )
+
+      // Run `afterSync` hook
+      await this.syncOptions.afterSync?.(this as any)
 
       // Finish
       this.log('Database schema synchronized', 'sync')
