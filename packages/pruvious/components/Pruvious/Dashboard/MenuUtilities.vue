@@ -27,7 +27,7 @@ import {
 } from '#pruvious/client'
 import { dashboardPages } from '#pruvious/client/dashboard-pages'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
-import { collator, isDefined, isEmpty, omit, slugify, titleCase } from '@pruvious/utils'
+import { collator, isArray, isDefined, isEmpty, omit, slugify, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
@@ -39,7 +39,13 @@ const dashboard = usePruviousDashboard()
 const expanded = usePruviousDashboardMenuExpanded()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
   ...Object.entries(dashboardPages)
-    .filter(([_, { group, permissions }]) => group === 'utilities' && hasPermission(permissions))
+    .filter(
+      ([_, { group, permissions }]) =>
+        group === 'utilities' &&
+        permissions.every((outer) =>
+          isArray(outer) ? outer.some((inner) => hasPermission(inner)) : hasPermission(outer),
+        ),
+    )
     .map(([_, d]) => ({
       ...omit(d, ['_path']),
       to: d.path ?? d._path,

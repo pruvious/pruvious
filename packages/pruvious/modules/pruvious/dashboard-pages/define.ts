@@ -72,11 +72,21 @@ export interface DefineDashboardPageOptions {
    * An array of user permissions required to display this page in the dashboard menu.
    * By default, no permissions are required.
    *
+   * The array structure works as follows:
+   *
+   * - Outer array: All conditions must be met (AND logic).
+   * - Inner arrays: User must have at least one permission (OR logic).
+   *
+   * The outer array can either be a single permission or an array of permissions.
+   *
    * Important: This does not control access to the page itself, only its visibility in the menu.
    *
    * @default []
+   *
+   * @example
+   * [['foo', 'bar'], 'baz'] // means: (foo OR bar) AND baz
    */
-  permissions?: Permission[]
+  permissions?: (Permission | Permission[])[]
 }
 
 /**

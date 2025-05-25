@@ -22,7 +22,7 @@ import {
   type DashboardMenuItem,
 } from '#pruvious/client'
 import { dashboardPages } from '#pruvious/client/dashboard-pages'
-import { collator, isDefined, omit, titleCase } from '@pruvious/utils'
+import { collator, isArray, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
@@ -32,7 +32,13 @@ const route = useRoute()
 const dashboard = usePruviousDashboard()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
   ...Object.entries(dashboardPages)
-    .filter(([_, { group, permissions }]) => group === 'management' && hasPermission(permissions))
+    .filter(
+      ([_, { group, permissions }]) =>
+        group === 'management' &&
+        permissions.every((outer) =>
+          isArray(outer) ? outer.some((inner) => hasPermission(inner)) : hasPermission(outer),
+        ),
+    )
     .map(([_, d]) => ({
       ...omit(d, ['_path']),
       to: d.path ?? d._path,
