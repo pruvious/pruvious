@@ -12,6 +12,7 @@
 import {
   __,
   applyFilters,
+  hasPermission,
   loadFilters,
   maybeTranslate,
   preloadTranslatableStrings,
@@ -31,7 +32,7 @@ const route = useRoute()
 const dashboard = usePruviousDashboard()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
   ...Object.entries(dashboardPages)
-    .filter(([_, { group }]) => group === 'collections')
+    .filter(([_, { group, permissions }]) => group === 'collections' && hasPermission(permissions))
     .map(([_, d]) => ({
       ...omit(d, ['_path']),
       to: d.path ?? d._path,

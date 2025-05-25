@@ -1,4 +1,4 @@
-import type { TranslatableStringCallbackContext } from '#pruvious/server'
+import type { Permission, TranslatableStringCallbackContext } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
 
 export interface DefineDashboardPageOptions {
@@ -67,6 +67,16 @@ export interface DefineDashboardPageOptions {
    * @default 10
    */
   order?: number
+
+  /**
+   * An array of user permissions required to display this page in the dashboard menu.
+   * By default, no permissions are required.
+   *
+   * Important: This does not control access to the page itself, only its visibility in the menu.
+   *
+   * @default []
+   */
+  permissions?: Permission[]
 }
 
 /**
@@ -88,19 +98,34 @@ export interface DefineDashboardPageOptions {
  * </template>
  *
  * <script lang="ts" setup>
- * import { __, dashboardMiddleware, defineDashboardPage } from '#pruvious/client'
+ * import { __, dashboardBasePath, dashboardMiddleware, defineDashboardPage } from '#pruvious/client'
  *
  * defineDashboardPage({
  *   label: ({ __ }) => __('pruvious-dashboard', 'CRM integration'),
  *   icon: 'bolt',
  *   group: 'general',
  *   order: 3,
+ *   permissions: ['manage-crm'],
  * })
  *
  * definePageMeta({
  *   middleware: [
  *     (to) => dashboardMiddleware(to, 'default'),
  *     (to) => dashboardMiddleware(to, 'auth-guard'),
+ *     (to) => dashboardMiddleware(to, ({ __, hasPermission, puiQueueToast }) => {
+ *       if (!hasPermission('manage-crm')) {
+ *         puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
+ *           type: 'error',
+ *           description: __(
+ *             'pruvious-dashboard',
+ *             'You do not have permission to access the page `$page`',
+ *             { page: to.path },
+ *           }),
+ *           showAfterRouteChange: true,
+ *         })
+ *         return navigateTo(dashboardBasePath + 'overview')
+ *       }
+ *     }),
  *   ],
  * })
  *
@@ -117,6 +142,7 @@ export function defineDashboardPage(options: DefineDashboardPageOptions) {
     icon: options.icon ?? 'tools',
     group: options.group ?? 'general',
     order: options.order ?? 10,
+    permissions: options.permissions ?? [],
     _path: (options as any)._path ?? '',
   }
 }

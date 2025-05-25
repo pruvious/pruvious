@@ -9,6 +9,7 @@ import {
   isString,
   isUndefined,
   kebabCase,
+  toArray,
   uniqueArray,
   type DeepRequired,
 } from '@pruvious/utils'
@@ -490,13 +491,16 @@ export function getUser(): PruviousContext['auth']['user'] {
  *
  * // Check multiple permissions (all must be present)
  * hasPermission('collection:users:create', 'collection:users:read')
+ * hasPermission(['collection:users:create', 'collection:users:read'])
  * ```
  */
-export function hasPermission(permission: Permission, ...permissions: Permission[]): boolean {
+export function hasPermission(permission: Permission | Permission[], ...permissions: Permission[]): boolean {
   const event = useEvent()
   return (
     event.context.pruvious.auth.isLoggedIn &&
-    [permission, ...permissions].every((p) => (event.context.pruvious.auth.permissions as Permission[]).includes(p))
+    [...toArray(permission), ...permissions].every((p) =>
+      (event.context.pruvious.auth.permissions as Permission[]).includes(p),
+    )
   )
 }
 

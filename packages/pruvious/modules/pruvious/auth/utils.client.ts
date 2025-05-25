@@ -1,4 +1,5 @@
 import type { Collections, Permission, PruviousContext } from '#pruvious/server'
+import { toArray } from '@pruvious/utils'
 import { pruviousGet } from '../api/utils.client'
 
 export type AuthState = PruviousContext<
@@ -208,12 +209,13 @@ export function getUser(): AuthState['user'] {
  *
  * // Check multiple permissions (all must be present)
  * hasPermission('collection:users:create', 'collection:users:read')
+ * hasPermission(['collection:users:create', 'collection:users:read'])
  * ```
  */
-export function hasPermission(permission: Permission, ...permissions: Permission[]): boolean {
+export function hasPermission(permission: Permission | Permission[], ...permissions: Permission[]): boolean {
   const auth = useAuth()
   return (
     auth.value.isLoggedIn &&
-    [permission, ...permissions].every((p) => (auth.value.permissions as Permission[]).includes(p))
+    [...toArray(permission), ...permissions].every((p) => (auth.value.permissions as Permission[]).includes(p))
   )
 }
