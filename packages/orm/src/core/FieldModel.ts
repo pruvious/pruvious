@@ -323,7 +323,7 @@ export type Populator<TCastedType, TPopulatedType> = (
   /**
    * The casted field value.
    */
-  value: TCastedType,
+  value: TCastedType | null,
 
   /**
    * The current context field object.

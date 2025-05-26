@@ -316,7 +316,7 @@ export interface DefineFieldOptions<
     /**
      * The casted field value.
      */
-    value: TModel['TCastedType'],
+    value: TModel['TCastedType'] | (DefaultFalse<TNullable> extends true ? null : never),
 
     /**
      * The current context field object.
