@@ -1,7 +1,13 @@
-import { isArray, isFunction, isObject, isString, type ExtractSQLParams } from '@pruvious/utils'
+import { deepClone, isArray, isFunction, isObject, isString, toArray, type ExtractSQLParams } from '@pruvious/utils'
 import { ExecError } from './ExecError'
 import type { GenericField, GenericInputFilter, GenericSanitizedInputFilter, OrderedInputFilter } from './Field'
-import type { ConditionalLogic, DataType } from './types'
+import type {
+  ConditionalLogic,
+  DataType,
+  ExtractCastedTypes,
+  ExtractDataTypes,
+  ResolveSerializedFieldTypes,
+} from './types'
 
 /**
  * Determines if a column's data type can be safely converted to another type.
@@ -185,4 +191,86 @@ export function extractInputFilters<
   }
 
   return filters.sort((a, b) => a.order - b.order) as any
+}
+
+/**
+ * Serializes `input` data based on the provided `fields` definitions.
+ * The serialized data will include only the `input` fields that are defined in the `fields` object.
+ * If the `input` is an array, it will serialize each item in the array.
+ * When serialization fails for a field, its default value is used instead.
+ */
+export async function serialize<
+  const TInputItem extends Record<string, any>,
+  const TInput extends TInputItem | TInputItem[],
+  const TFields extends Record<string, GenericField>,
+>(
+  input: TInput,
+  fields: TFields,
+): Promise<
+  TInput extends TInputItem[]
+    ? ResolveSerializedFieldTypes<Pick<ExtractDataTypes<TFields>, keyof TInput[number] & keyof TFields>>[]
+    : ResolveSerializedFieldTypes<Pick<ExtractDataTypes<TFields>, keyof TInput & keyof TFields>>
+> {
+  const serializedRows: Record<string, any>[] = []
+
+  for (const inputItem of toArray(input)) {
+    const serializedRow: Record<string, any> = {}
+
+    for (const [column, value] of Object.entries(inputItem)) {
+      if (fields[column]) {
+        try {
+          serializedRow[column] = await fields[column].model.serializer(value)
+        } catch {
+          serializedRow[column] = deepClone(fields[column].default)
+        }
+      } else if (column === 'id') {
+        serializedRow.id = Number((inputItem as any).id)
+      }
+    }
+
+    serializedRows.push(serializedRow)
+  }
+
+  return (isArray(input) ? serializedRows : serializedRows[0]) as any
+}
+
+/**
+ * Deserializes `rows` data based on the provided `fields` definitions.
+ * The deserialized data will include only the `fields` that are defined in the `fields` object.
+ * If the `rows` is an array, it will deserialize each item in the array.
+ * When deserialization fails for a field, its default value is used instead.
+ */
+export async function deserialize<
+  const TRow extends Record<string, any>,
+  const TRows extends TRow | TRow[],
+  const TFields extends Record<string, GenericField>,
+>(
+  rows: TRows,
+  fields: TFields,
+): Promise<
+  TRows extends TRow[]
+    ? Pick<ExtractCastedTypes<TFields>, keyof TRows[number] & keyof TFields>[]
+    : Pick<ExtractCastedTypes<TFields>, keyof TRows & keyof TFields>
+> {
+  const deserializedRows: Record<string, any>[] = []
+
+  for (const row of toArray(rows)) {
+    const deserializedRow: Record<string, any> = {}
+
+    for (const [column, value] of Object.entries(row)) {
+      if (fields[column]) {
+        try {
+          deserializedRow[column] = await fields[column].model.deserializer(value)
+        } catch {
+          deserializedRow[column] = deepClone(fields[column].default)
+        }
+      } else if (column === 'id') {
+        deserializedRow.id = Number(row.id)
+      }
+    }
+
+    deserializedRows.push(deserializedRow)
+  }
+
+  return (isArray(rows) ? deserializedRows : deserializedRows[0]) as any
 }

@@ -78,6 +78,10 @@ export interface SerializedType extends Record<DataType, any> {
   text: string
 }
 
+export type ResolveSerializedFieldTypes<TFieldsConfig extends Record<string, DataType>> = {
+  [K in keyof TFieldsConfig]: SerializedType[TFieldsConfig[K]]
+}
+
 export type ReferentialActions = [
   'ON UPDATE RESTRICT' | 'ON UPDATE CASCADE' | 'ON UPDATE SET NULL',
   'ON DELETE RESTRICT' | 'ON DELETE CASCADE' | 'ON DELETE SET NULL',
