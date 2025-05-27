@@ -12,6 +12,7 @@ export default defineTemplate(() => ({
     }),
   },
   indexes: [{ fields: ['name'], unique: true }],
+  translatable: false,
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'Roles'),
     icon: 'shield',

@@ -241,6 +241,7 @@ export default defineTemplate(() => ({
     exposeData: false,
   },
   indexes: [{ fields: ['email'], unique: true }, { fields: ['tokenSubject'], unique: true }, { fields: ['isActive'] }],
+  translatable: false,
   hooks: {
     beforeQueryPreparation: [
       denyWhere(['password', 'tokenSubject']),

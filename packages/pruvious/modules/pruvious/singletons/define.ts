@@ -587,7 +587,7 @@ export interface DefineSingletonOptions<
   fields: TFields
 
   /**
-   * @default false
+   * @default true
    */
   translatable?: TTranslatable
 
@@ -881,20 +881,13 @@ export function defineSingleton<
       beforeQueryExecution: options.hooks?.beforeQueryExecution ?? [],
       afterQueryExecution: options.hooks?.afterQueryExecution ?? [],
     }
-    const translatable = options.translatable ?? false
+    const translatable = options.translatable ?? true
     const syncedFields = options.syncedFields ?? []
     const updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions = defu(
       { enabled: options.updatedAt !== false },
       isObject(options.updatedAt) ? options.updatedAt : {},
     )
     const ui = deepClone(options.ui)
-
-    if (translatable && languages.length < 2) {
-      warnWithContext('Translatable singletons require at least two languages.', [
-        `Add more languages to \`pruvious.i18n.languages\` in your \`nuxt.config.ts\` file.`,
-        `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
-      ])
-    }
 
     for (const fieldName of Object.keys(fields)) {
       if (updatedAt.enabled && fieldName === 'updatedAt') {

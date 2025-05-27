@@ -315,6 +315,7 @@ export default defineCollection({
       ui: { label: 'Timestamp (min/max)' },
     }),
   },
+  translatable: false,
   createdAt: false,
   updatedAt: false,
   ui: {

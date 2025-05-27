@@ -176,6 +176,7 @@ export default defineTemplate(() => ({
   author: true,
   editors: true,
   indexes: [{ fields: ['path'], unique: true }, { fields: ['type'] }, { fields: ['level'] }, { fields: ['category'] }],
+  translatable: false,
   hooks: {
     beforeQueryExecution: [
       async ({ operation, customData }) => {

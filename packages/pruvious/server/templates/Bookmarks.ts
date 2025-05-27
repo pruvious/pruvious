@@ -43,6 +43,7 @@ export default defineTemplate(() => ({
   },
   indexes: [{ fields: ['collection'] }, { fields: ['user'] }, { fields: ['shared'] }],
   foreignKeys: [{ field: 'user', referencedCollection: 'Users', action: ['ON UPDATE RESTRICT', 'ON DELETE CASCADE'] }],
+  translatable: false,
   hooks: {
     beforeQueryPreparation: [
       ({ operation, queryBuilder }) => {
