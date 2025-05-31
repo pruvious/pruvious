@@ -1,4 +1,4 @@
-import { defineField, isValidLanguageCode, type LanguageCode, uniqueValidator } from '#pruvious/server'
+import { defineField, isValidLanguageCode, type LanguageCode, languages, uniqueValidator } from '#pruvious/server'
 import { textFieldModel } from '@pruvious/orm'
 import { isString } from '@pruvious/utils'
 
@@ -18,4 +18,7 @@ export default defineField({
     }),
   ],
   uiOptions: { placeholder: true },
+  castedTypeFn: () => languages.map(({ code }) => `'${code}' | `).join('') + 'null',
+  populatedTypeFn: () => languages.map(({ code }) => `'${code}' | `).join('') + 'null',
+  inputTypeFn: () => languages.map(({ code }) => `'${code}' | `).join('') + 'null',
 })
