@@ -144,8 +144,16 @@ export default {
         },
       ],
       populator: async (value, contextField) => {
+        if (isNull(value)) {
+          return null
+        }
+
         const { definition, context } = contextField
         const deepPopulate = definition.options.populate
+
+        if (definition.options.fields.length === 1 && definition.options.fields[0] === 'id') {
+          return { id: value }
+        }
 
         if (deepPopulate) {
           limitPopulation(value, contextField)
@@ -168,7 +176,7 @@ export default {
       },
       omitOptions: ['decimalPlaces', 'min', 'max'],
       populatedTypeFn: ({ field }) =>
-        `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName) => `'${fieldName}'`).join(' | ')}> | null`,
+        `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}> | null`,
     }).serverFn.bind(this)
     return bound(options as any) as any
   },

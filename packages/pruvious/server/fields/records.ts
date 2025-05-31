@@ -187,6 +187,10 @@ export default {
           const { definition, context } = contextField
           const deepPopulate = definition.options.populate
 
+          if (definition.options.fields.length === 1 && definition.options.fields[0] === 'id') {
+            return value.map((id) => ({ id }))
+          }
+
           if (deepPopulate) {
             limitPopulation(value, contextField)
           }
