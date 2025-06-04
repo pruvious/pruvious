@@ -527,6 +527,9 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.alias['#pruvious'] = resolveAppPath('./.pruvious')
     nuxt.options.ignore ||= []
     nuxt.options.pages = true
+    nuxt.options.vite = defu(nuxt.options.vite ?? {}, {
+      $server: { build: { rollupOptions: { output: { preserveModules: true } } } },
+    })
 
     const dbInfo = getDatabaseInfo()
 
