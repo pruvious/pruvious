@@ -402,6 +402,7 @@
 
       <template #itemAfter="{ index }">
         <PruviousFieldMessage
+          v-if="blockErrors?.[index]"
           :error="blockErrors?.[index]"
           :name="name"
           :options="options"

@@ -414,6 +414,7 @@
 
       <template #itemAfter="{ index }">
         <PruviousFieldMessage
+          v-if="itemErrors?.[index]"
           :error="itemErrors?.[index]"
           :name="name"
           :options="options"
