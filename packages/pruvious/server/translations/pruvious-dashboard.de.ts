@@ -274,7 +274,9 @@ export default defineTranslation({
   'Numeric': 'Numerisch',
   'Numeric (milliseconds precision)': 'Numerisch (Millisekunden-Präzision)',
 
+'Off': 'Aus',
   'OK': 'OK',
+  'On': 'Ein',
   'Open user menu': 'Benutzer-Menü öffnen',
   'Operation': 'Operation',
   'or': 'oder',
