@@ -364,8 +364,20 @@ function toModelValue(where: (WhereField | WhereAndGroup | WhereOrGroup)[]): (_W
       let operator = filterOperatorsMap[item.operator]
       let value = item.value
 
-      if (value === '' && operator !== '=' && operator !== '!=') {
-        continue
+      if (
+        value === '' &&
+        [
+          'contains',
+          'containsI',
+          'startsWith',
+          'startsWithI',
+          'endsWith',
+          'endsWithI',
+          'notContains',
+          'notContainsI',
+        ].includes(item.operator)
+      ) {
+        value = ' '
       }
 
       if (isString(value)) {
