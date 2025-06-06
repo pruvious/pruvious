@@ -4,12 +4,13 @@ import { textFieldModel } from '@pruvious/orm'
 const customOptions: {
   ui?: {
     /**
-     * Options for configuring the table view appearance.
-     *
      * @default
-     * { hyphenate: false, truncate: { lines: 1 } }
+     * {
+     *   hyphenate: false,
+     *   truncate: { lines: 1 },
+     * }
      */
-    table?: {
+    dataTable?: {
       /**
        * Controls whether long words should be hyphenated to fit in the cell.
        * When `true`, long words will be broken with hyphens to prevent overflow.
@@ -51,7 +52,7 @@ const customOptions: {
   }
 } = {
   ui: {
-    table: {
+    dataTable: {
       hyphenate: true,
       truncate: { lines: 1 },
     },
