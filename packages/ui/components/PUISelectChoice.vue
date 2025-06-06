@@ -39,6 +39,7 @@
       'pui-select-choice-selected': choice.value === selectedValue,
       'pui-select-choice-highlighted': choice.value === highlightedChoice?.value,
       'pui-select-choice-disabled': choice.disabled,
+      'pui-select-choice-muted': choice.muted,
     }"
   >
     <span v-if="choice.value === highlightedChoice?.value && choice.label && keywordTimeout.isPending.value">

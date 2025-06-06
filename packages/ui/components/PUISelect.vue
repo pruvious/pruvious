@@ -55,11 +55,17 @@
       }"
       :style="{ '--pui-size': size }"
     >
-      <span v-if="selectedChoice" class="pui-select-selected-choice">
+      <span
+        v-if="selectedChoice?.label || selectedChoice?.value"
+        class="pui-select-selected-choice"
+        :class="{ 'pui-select-selected-choice-muted': selectedChoice?.muted }"
+      >
         {{ selectedChoice.label ?? selectedChoice.value }}
       </span>
 
-      <span v-if="!selectedChoice && placeholder" class="pui-select-placeholder">{{ placeholder }}</span>
+      <span v-else-if="placeholder" class="pui-select-placeholder">
+        {{ placeholder }}
+      </span>
 
       <Icon mode="svg" name="tabler:selector" size="1.125em" class="pui-select-icon" />
 
@@ -148,6 +154,13 @@ export interface PUISelectChoiceModel {
    * @default false
    */
   disabled?: boolean
+
+  /**
+   * Indicates whether the choice is visually muted in the UI.
+   *
+   * @default false
+   */
+  muted?: boolean
 }
 
 export interface PUISelectChoiceGroupModel {
@@ -258,7 +271,7 @@ const props = defineProps({
   },
 
   /**
-   * An optional placeholder text to display when no (valid) choice is selected.
+   * An optional placeholder text to show when no other label or value is displayed in the select field.
    */
   placeholder: {
     type: String,
@@ -757,6 +770,7 @@ function unpauseMouseDelayed() {
   text-overflow: ellipsis;
 }
 
+.pui-select-selected-choice-muted,
 .pui-select-placeholder {
   color: hsl(var(--pui-muted-foreground));
 }
@@ -827,7 +841,8 @@ function unpauseMouseDelayed() {
   color: hsl(var(--pui-accent-foreground));
 }
 
-.pui-select-choice-disabled {
+.pui-select-choice-disabled,
+.pui-select-choice-muted {
   color: hsl(var(--pui-muted-foreground));
 }
 

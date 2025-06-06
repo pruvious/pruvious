@@ -10,8 +10,8 @@
       :modelValue="modelValue"
       :name="name"
       :placeholder="placeholder"
-      @commit="$emit('commit', String($event))"
-      @update:modelValue="$emit('update:modelValue', String($event))"
+      @commit="$emit('commit', isNull($event) ? null : String($event))"
+      @update:modelValue="$emit('update:modelValue', isNull($event) ? null : String($event))"
     />
 
     <PruviousFieldMessage :error="error" :name="name" :options="options" />
@@ -22,13 +22,14 @@
 import { maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
+import { isNull } from '@pruvious/utils'
 
 const props = defineProps({
   /**
    * The casted field value.
    */
   modelValue: {
-    type: String,
+    type: [String, null],
     required: true,
   },
 
@@ -44,7 +45,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'select'>>,
+    type: Object as PropType<SerializableFieldOptions<'nullableSelect'>>,
     required: true,
   },
 
@@ -95,21 +96,28 @@ const props = defineProps({
 })
 
 defineEmits<{
-  'commit': [value: string]
-  'update:modelValue': [value: string]
+  'commit': [value: string | null]
+  'update:modelValue': [value: string | null]
 }>()
 
 const id = useId()
 const placeholder = maybeTranslate(props.options.ui.placeholder)
-const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = props.options.choices.map((choice) =>
-  'value' in choice
-    ? { label: choice.label ? maybeTranslate(choice.label) : choice.value, value: choice.value }
-    : {
-        group: choice.group,
-        choices: choice.choices.map((subChoice) => ({
-          label: subChoice.label ? maybeTranslate(subChoice.label) : subChoice.value,
-          value: subChoice.value,
-        })),
-      },
-)
+const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = [
+  {
+    label: maybeTranslate(props.options.ui.nullChoiceLabel) ?? '',
+    value: null,
+    muted: true,
+  },
+  ...props.options.choices.map((choice) =>
+    'value' in choice
+      ? { label: choice.label ? maybeTranslate(choice.label) : choice.value, value: choice.value }
+      : {
+          group: choice.group,
+          choices: choice.choices.map((subChoice) => ({
+            label: subChoice.label ? maybeTranslate(subChoice.label) : subChoice.value,
+            value: subChoice.value,
+          })),
+        },
+  ),
+]
 </script>
