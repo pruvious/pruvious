@@ -9,7 +9,7 @@ export default defineField({
   validators: [
     (value, { context }) => {
       if (isString(value) && !isValidLanguageCode(value)) {
-        return context.__('pruvious-api', 'The language `$language` is not supported', { language: value })
+        throw new Error(context.__('pruvious-api', 'The language `$language` is not supported', { language: value }))
       }
     },
     uniqueValidator({
