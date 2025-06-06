@@ -124,10 +124,10 @@ defineEmits<{
 const id = useId()
 const offLabel = isDefined(props.options.ui.switch?.offLabel)
   ? maybeTranslate(props.options.ui.switch.offLabel)
-  : __('pruvious-dashboard', 'No')
+  : __('pruvious-dashboard', 'Off')
 const onLabel = isDefined(props.options.ui.switch?.onLabel)
   ? maybeTranslate(props.options.ui.switch.onLabel)
-  : __('pruvious-dashboard', 'Yes')
+  : __('pruvious-dashboard', 'On')
 const placeholder = maybeTranslate(props.options.ui.placeholder)
 </script>
 
