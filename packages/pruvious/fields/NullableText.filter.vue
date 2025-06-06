@@ -13,7 +13,7 @@
         :modelValue="modelValue.value === null ? '' : String(modelValue.value)"
         :name="id"
         :placeholder="modelValue.value === null ? 'NULL' : __('pruvious-dashboard', 'Empty')"
-        @commit="$emit('commit', { ...modelValue, value: $event })"
+        @blur="(_, value) => $emit('commit', { ...modelValue, value })"
         @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
         class="pui-flex-1"
       />
