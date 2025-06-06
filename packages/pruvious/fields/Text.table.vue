@@ -6,7 +6,7 @@
         :class="{
           'pui-truncate': truncate.lines === 1,
           'pui-clamp': truncate.lines && truncate.lines > 1,
-          'pui-hyphenate': options.ui.table?.hyphenate,
+          'pui-hyphenate': options.ui.dataTable?.hyphenate,
         }"
         :style="{ '--pui-clamp': truncate.lines }"
       >
@@ -99,7 +99,7 @@ const props = defineProps({
 
 const route = useRoute()
 const truncate = computed<{ characters?: number; lines?: number; words?: number }>(() => {
-  return isDefined(props.options.ui.table?.truncate) ? props.options.ui.table?.truncate : { lines: 1 }
+  return isDefined(props.options.ui.dataTable?.truncate) ? props.options.ui.dataTable?.truncate : { lines: 1 }
 })
 const formattedValue = computed(() => {
   let result = props.modelValue ?? ''
