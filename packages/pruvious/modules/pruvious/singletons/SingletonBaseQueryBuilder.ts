@@ -34,6 +34,7 @@ export class SingletonBaseQueryBuilder {
 
   constructor(protected singletonName: keyof Singletons) {
     this.singleton = singletons[singletonName] as any
+    this.customContextData._singletonName = singletonName
   }
 
   /**
