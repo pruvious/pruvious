@@ -1,3 +1,4 @@
+import { languages } from '#pruvious/client'
 import type { LanguageCode, i18n as _i18n } from '#pruvious/server'
 import type {
   ExtractDomains,
@@ -44,8 +45,8 @@ export const useLanguage = () => useState<LanguageCode>('pruvious-language', () 
  */
 export function extractLanguageCode(path: string): LanguageCode {
   const { primaryLanguage } = useRuntimeConfig().public.pruvious
-  // @todo implement
-  return primaryLanguage as LanguageCode
+  const subpaths = path.split('/').filter(Boolean)
+  return (languages.find(({ code }) => subpaths[0] === code)?.code ?? primaryLanguage) as LanguageCode
 }
 
 /**
