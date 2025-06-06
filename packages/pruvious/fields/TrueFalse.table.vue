@@ -1,7 +1,11 @@
 <template>
   <div>
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <PUIBadge :textColor="modelValue ? undefined : 'inherit'" color="secondary">
+      <PUIBadge
+        :textColor="modelValue ? undefined : 'inherit'"
+        :title="modelValue ? yesLabel : noLabel"
+        color="secondary"
+      >
         {{ modelValue ? yesLabel : noLabel }}
       </PUIBadge>
     </PruviousDashboardEditableFieldCell>
