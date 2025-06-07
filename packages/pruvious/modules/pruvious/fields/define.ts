@@ -17,6 +17,7 @@ import {
   type SanitizedContextField,
   type SanitizedInsertContext,
   type SanitizedUpdateContext,
+  type Sanitizer,
   type SelectContext,
   type UpdateContext,
   type Validator,
@@ -914,6 +915,28 @@ export type CombinedFieldOptions<
 > &
   Omit<TOptions, 'populator'> & {
     /**
+     * An array of callback functions that sanitize an input value for this field model.
+     * The functions receive the following arguments in order:
+     *
+     * - `value` - The input value to sanitize.
+     * - `contextField` - The current context field object.
+     *
+     * Sanitizers defined here run after the default sanitizers specified by the field's `model` and definition.
+     *
+     * @default []
+     *
+     * @example
+     * ```ts
+     * new FieldModel<{}, 'boolean', boolean, Booleanish>({
+     *   dataType: 'boolean',
+     *   sanitizers: [(value) => castToBoolean(value)],
+     *   // ...
+     * })
+     * ```
+     */
+    sanitizers?: Sanitizer<TModel['TCastedType'], any>[]
+
+    /**
      * An array of functions that control access to the field.
      * These functions are only executed during CRUD operations when using the following utility functions from `#pruvious/server`:
      *
@@ -1127,7 +1150,11 @@ export function defineField<
       const filteredOptions: Record<string, any> = omit(options as any, omitOptions)
       const model = {
         ...fieldTypeOptions.model,
-        sanitizers: [...fieldTypeOptions.model.sanitizers, ...(fieldTypeOptions.sanitizers ?? [])],
+        sanitizers: [
+          ...fieldTypeOptions.model.sanitizers,
+          ...(fieldTypeOptions.sanitizers ?? []),
+          ...(filteredOptions.sanitizers ?? []),
+        ],
       }
       const modelOptionKeys = Object.keys(model.defaultOptions)
       const ui: GenericFieldUIOptions = options.ui ? deepClone(options.ui) : {}
