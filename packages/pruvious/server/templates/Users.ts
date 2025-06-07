@@ -86,13 +86,11 @@ export default defineTemplate(() => ({
         label: ({ __ }) => __('pruvious-dashboard', 'Status'),
         noLabel: ({ __ }) => __('pruvious-dashboard', 'Inactive'),
         yesLabel: ({ __ }) => __('pruvious-dashboard', 'Active'),
-        variant: 'accent',
       },
     }),
     isAdmin: trueFalseField({
       ui: {
         label: ({ __ }) => __('pruvious-dashboard', 'Administrator'),
-        variant: 'accent',
       },
     }),
     roles: recordsField({
@@ -228,7 +226,6 @@ export default defineTemplate(() => ({
           ),
         yesLabel: ({ __ }) => __('pruvious-dashboard', 'Enabled'),
         noLabel: ({ __ }) => __('pruvious-dashboard', 'Disabled'),
-        variant: 'accent',
       },
     }),
     bookmarks: recordsField({

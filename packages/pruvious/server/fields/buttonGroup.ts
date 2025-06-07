@@ -54,10 +54,22 @@ interface CustomOptions<TChoices extends ButtonGroupChoice[]> {
    * ```
    */
   choices: TChoices
+
+  ui?: {
+    /**
+     * Defines the visual style variant of the button group.
+     *
+     * @default 'accent'
+     */
+    variant?: 'primary' | 'accent'
+  }
 }
 
 const customOptions: CustomOptions<ButtonGroupChoice[]> = {
   choices: [],
+  ui: {
+    variant: 'accent',
+  },
 }
 
 export default {

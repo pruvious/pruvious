@@ -6,13 +6,13 @@ const customOptions: {
     /**
      * Defines the visual style variant of the switch.
      *
-     * @default 'primary'
+     * @default 'accent'
      */
     variant?: 'primary' | 'accent'
   }
 } = {
   ui: {
-    variant: 'primary',
+    variant: 'accent',
   },
 }
 

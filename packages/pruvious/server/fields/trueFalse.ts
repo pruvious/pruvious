@@ -52,7 +52,7 @@ const customOptions: {
     /**
      * Defines the visual style variant of the switch.
      *
-     * @default 'primary'
+     * @default 'accent'
      */
     variant?: 'primary' | 'accent'
   }
@@ -60,7 +60,7 @@ const customOptions: {
   ui: {
     noLabel: ({ __ }) => __('pruvious-dashboard', 'No'),
     yesLabel: ({ __ }) => __('pruvious-dashboard', 'Yes'),
-    variant: 'primary',
+    variant: 'accent',
   },
 }
 

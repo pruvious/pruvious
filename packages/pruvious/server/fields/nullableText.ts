@@ -110,7 +110,7 @@ const customOptions: {
       /**
        * Defines the visual style variant of the switch.
        *
-       * @default 'primary'
+       * @default 'accent'
        */
       variant?: 'primary' | 'accent'
     }
@@ -124,7 +124,7 @@ const customOptions: {
     switch: {
       offLabel: ({ __ }) => __('pruvious-dashboard', 'Off'),
       onLabel: ({ __ }) => __('pruvious-dashboard', 'On'),
-      variant: 'primary',
+      variant: 'accent',
     },
   },
 }
