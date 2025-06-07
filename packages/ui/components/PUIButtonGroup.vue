@@ -30,7 +30,7 @@
       class="pui-button-group-item"
       :class="{ 'pui-button-group-item-active': value === modelValue }"
     >
-      <slot :index="i" :label="label" :value="value">{{ label }}</slot>
+      <slot :index="i" :label="label" :value="value">{{ label || value }}</slot>
     </span>
 
     <input :id="id" :name="name" :value="modelValue" hidden />
