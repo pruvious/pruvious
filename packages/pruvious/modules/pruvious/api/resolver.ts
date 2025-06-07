@@ -40,6 +40,7 @@ export async function resolveServerHandlers(): Promise<ServerHandlers> {
               nuxt.options.runtimeConfig.pruvious.api.basePath.slice(0, -1) +
               fullPath
                 .slice(apiDir.length, fullPath.length - ext.length - (method ? method.length + 1 : 0))
+                .replace('[...]', '**')
                 .replace(/\[([^\]]+)\]/g, ':$1')
                 .replace(/\/index$/, '')
 
