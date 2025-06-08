@@ -14,6 +14,7 @@
         { label: 'Calendar range', value: '/calendar-range' },
         { label: 'Card', value: '/card' },
         { label: 'Checkbox', value: '/checkbox' },
+        { label: 'Chips', value: '/chips' },
         { label: 'Code', value: '/code' },
         { label: 'Color mode', value: '/color-mode' },
         { label: 'Context menu', value: '/context-menu' },

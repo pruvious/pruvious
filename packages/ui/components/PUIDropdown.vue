@@ -93,6 +93,16 @@ const props = defineProps({
   },
 
   /**
+   * Whether the component should take control of keyboard and mouse events while mounted.
+   *
+   * @default true
+   */
+  handleControls: {
+    type: Boolean,
+    default: true,
+  },
+
+  /**
    * Adjusts the size of the component.
    *
    * Examples:
@@ -138,6 +148,8 @@ const {
       apply({ availableHeight, elements }) {
         if (availableHeight < inner.value!.scrollHeight) {
           elements.floating.style.height = `${Math.max(0, availableHeight)}px`
+        } else {
+          elements.floating.style.removeProperty('height')
         }
       },
       padding: 8,
@@ -157,59 +169,64 @@ defineExpose({
 })
 
 onMounted(() => {
-  document.body.classList.add('pui-no-interaction')
   prevFocus.value = document.activeElement as HTMLElement
   parentContainer.value = floating.value?.parentElement
-  setTimeout(() => floating.value?.focus())
 
-  while (
-    parentContainer.value &&
-    parentContainer.value.nodeName !== 'BODY' &&
-    !parentContainer.value.classList.contains('pui-popup')
-  ) {
-    parentContainer.value = parentContainer.value?.parentElement
-  }
+  if (props.handleControls) {
+    document.body.classList.add('pui-no-interaction')
+    setTimeout(() => floating.value?.focus())
 
-  parentContainer.value?.classList.add('pui-allow-interaction')
+    while (
+      parentContainer.value &&
+      parentContainer.value.nodeName !== 'BODY' &&
+      !parentContainer.value.classList.contains('pui-popup')
+    ) {
+      parentContainer.value = parentContainer.value?.parentElement
+    }
 
-  setTimeout(() => {
-    stop.push(
-      useEventListener(parentContainer.value, 'keydown', (event) => {
-        if (!['Enter', 'Escape', 'Space'].includes(event.code)) {
-          event.preventDefault()
-          event.stopPropagation()
-        }
+    parentContainer.value?.classList.add('pui-allow-interaction')
 
-        if (event.code === 'ArrowUp') {
-          focusPrevious()
-        } else if (event.code === 'ArrowDown') {
-          focusNext()
-        } else if (event.code === 'Tab') {
-          if (event.shiftKey) {
-            focusPrevious()
-          } else {
-            focusNext()
-          }
-        } else if (event.code === 'Escape') {
-          if (parentContainer.value?.nodeName !== 'BODY') {
+    setTimeout(() => {
+      stop.push(
+        useEventListener(parentContainer.value, 'keydown', (event) => {
+          if (!['Enter', 'Escape', 'Space'].includes(event.code)) {
             event.preventDefault()
             event.stopPropagation()
           }
-          emit('close')
-        }
-      }),
-      useEventListener(parentContainer, 'click', (event) => {
-        if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
-          emit('close')
-        }
-      }),
-      useEventListener(parentContainer, 'contextmenu', (event) => {
-        if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
-          emit('close')
-        }
-      }),
-    )
 
+          if (event.code === 'ArrowUp') {
+            focusPrevious()
+          } else if (event.code === 'ArrowDown') {
+            focusNext()
+          } else if (event.code === 'Tab') {
+            if (event.shiftKey) {
+              focusPrevious()
+            } else {
+              focusNext()
+            }
+          } else if (event.code === 'Escape') {
+            if (parentContainer.value?.nodeName !== 'BODY') {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+            emit('close')
+          }
+        }),
+        useEventListener(parentContainer, 'click', (event) => {
+          if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
+            emit('close')
+          }
+        }),
+        useEventListener(parentContainer, 'contextmenu', (event) => {
+          if (event.target instanceof HTMLElement && !isDescendant(event.target, floating.value!)) {
+            emit('close')
+          }
+        }),
+      )
+    })
+  }
+
+  setTimeout(() => {
     isMounted.value = true
   })
 
@@ -217,8 +234,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  document.body.classList.remove('pui-no-interaction')
-  parentContainer.value?.classList.remove('pui-allow-interaction')
+  if (props.handleControls) {
+    document.body.classList.remove('pui-no-interaction')
+    parentContainer.value?.classList.remove('pui-allow-interaction')
+  }
   stop.forEach((s) => s())
   if (props.restoreFocus) {
     setTimeout(() => {
