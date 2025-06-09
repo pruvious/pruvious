@@ -81,12 +81,12 @@ const data = computed<string[]>(() => {
   return isArray(v) && v.every(isString) ? (v as string[]) : []
 })
 const placeholder = maybeTranslate(props.options.ui.placeholder)
-const choices: PUIChipsChoiceModel[] = props.options.choices
+const choices: PUIChipsChoiceModel[] | false = props.options.choices
   ? props.options.choices.map((choice) => ({
       label: choice.label ? maybeTranslate(choice.label) : choice.value,
       value: choice.value,
     }))
-  : []
+  : false
 
 emit('commit', {
   ...props.modelValue,
