@@ -6,6 +6,7 @@
       'pui-chips-has-errors': error,
       'pui-chips-disabled': disabled,
       'pui-chips-focused': isFocused,
+      'pui-chips-dropdown-visible': isDropdownVisible && choices,
       'pui-chips-empty': !modelValue.length,
       'pui-chips-dragging': draggingIndex !== null,
       'pui-chips-dragging-touch': draggingIndex !== null && isTouchDragging,
@@ -112,7 +113,7 @@
           }
         "
         @keydown.enter="processInputValue()"
-        @keydown.escape="input?.blur()"
+        @keydown.escape.stop="input?.blur()"
         @keydown.tab="input?.blur()"
         autocomplete="off"
         ref="input"
@@ -125,16 +126,21 @@
     <PUIDropdown
       v-if="isDropdownVisible && choices"
       :handleControls="false"
+      :offset="7"
       :reference="root!"
       :restoreFocus="false"
-      @click="isDropdownVisible = false"
       @close="isDropdownVisible = false"
       ref="dropdown"
       class="pui-chips-dropdown"
+      :style="{
+        '--pui-background': undefined,
+        '--pui-foreground': undefined,
+      }"
     >
       <button
         v-for="(choice, i) of filteredChoices"
-        @mousedown="
+        @click.prevent
+        @mousedown.prevent="
           () => {
             $emit('update:modelValue', [...modelValue, choice.value])
             $nextTick(filterChoices)
@@ -158,7 +164,7 @@
 
 <script lang="ts" setup>
 import { clearArray, isDefined, isNotNull, isNull, searchByKeywords } from '@pruvious/utils'
-import { onKeyStroke, useEventListener } from '@vueuse/core'
+import { onClickOutside, onKeyStroke, useEventListener, useScrollLock } from '@vueuse/core'
 
 export interface PUIChipsChoiceModel {
   /**
@@ -198,7 +204,7 @@ const props = defineProps({
   },
 
   /**
-   * Indicates whether to trim whitespace from the input value.
+   * Controls whether to trim whitespace from the input value.
    *
    * @default true
    */
@@ -365,16 +371,34 @@ const labels = computed(() => {
   if (!props.choices) return {}
   return Object.fromEntries(props.choices.map((choice) => [choice.value, choice.label ?? choice.value]))
 })
-const erroredItemsMap = computed(() => {
-  return Object.fromEntries(props.erroredItems.map((index) => [index, true]))
-})
+const erroredItemsMap = ref<Record<number, boolean>>({})
 const backspaceIndex = ref<number | null>(null)
 const removeIndex = ref<number | null>(null)
 const draggingIndex = ref<number | null>(null)
 const isTouchDragging = ref(false)
 const dragEventListeners: (() => void)[] = []
+const container = inject<Ref<HTMLDivElement> | null>('root', null)
+const scrollLockWindow = isDefined(window) ? useScrollLock(window) : undefined
+const scrollLockContainer = useScrollLock(container)
 
 let touchTimeout: NodeJS.Timeout | undefined = undefined
+let stopOutsideClickListener: (() => void) | undefined
+let stopResizeListener: (() => void) | undefined
+
+watch(
+  () => props.modelValue,
+  () => {
+    erroredItemsMap.value = {}
+  },
+)
+
+watch(
+  () => props.erroredItems,
+  () => {
+    erroredItemsMap.value = Object.fromEntries(props.erroredItems.map((index) => [index, true]))
+  },
+  { immediate: true },
+)
 
 watch(draggingIndex, (index) => {
   if (isNull(index)) {
@@ -385,6 +409,20 @@ watch(draggingIndex, (index) => {
 })
 
 watch(inputValue, filterChoices, { immediate: true })
+
+watch(isDropdownVisible, (visible) => {
+  if (visible && props.choices) {
+    scrollLockWindow!.value = true
+    scrollLockContainer.value = true
+    stopOutsideClickListener = onClickOutside(root, () => input.value?.blur())
+    stopResizeListener = useEventListener('resize', () => input.value?.blur())
+  } else {
+    stopOutsideClickListener?.()
+    stopResizeListener?.()
+    scrollLockWindow!.value = false
+    scrollLockContainer.value = false
+  }
+})
 
 useEventListener('touchend', () => {
   clearTimeout(touchTimeout)
@@ -437,19 +475,32 @@ function filterChoices() {
 
 function focusPreviousChoice() {
   if (props.choices) {
-    highlightedIndex.value =
-      highlightedIndex.value - 1 < 0 ? filteredChoices.value.length - 1 : highlightedIndex.value - 1
-    const el = dropdown.value?.$el.querySelectorAll('.pui-chips-dropdown-item')[highlightedIndex.value]
-    el?.scrollIntoView({ block: 'center' })
+    highlightedIndex.value = highlightedIndex.value - 1 < 0 ? 0 : highlightedIndex.value - 1
+    scrollToHighlightedChoice()
   }
 }
 
 function focusNextChoice() {
   if (props.choices) {
     highlightedIndex.value =
-      highlightedIndex.value + 1 > filteredChoices.value.length - 1 ? 0 : highlightedIndex.value + 1
-    const el = dropdown.value?.$el.querySelectorAll('.pui-chips-dropdown-item')[highlightedIndex.value]
-    el?.scrollIntoView({ block: 'center' })
+      highlightedIndex.value + 1 >= filteredChoices.value.length
+        ? filteredChoices.value.length - 1
+        : highlightedIndex.value + 1
+    scrollToHighlightedChoice()
+  }
+}
+
+function scrollToHighlightedChoice() {
+  if (highlightedIndex.value > -1 && dropdown.value?.scrollable?.scroll.y) {
+    const { itemHeight, em } = dropdown.value.calcItemSizes()
+    let top = itemHeight * highlightedIndex.value
+    if (
+      top > 0 &&
+      (!dropdown.value.scrollable.scroll.arrivedState.top || !dropdown.value.scrollable.scroll.arrivedState.bottom)
+    ) {
+      top -= em
+    }
+    dropdown.value.scrollable.scroll.y.value = top
   }
 }
 
@@ -521,7 +572,8 @@ function stopDragging() {
   transition-property: border-color, box-shadow;
 }
 
-.pui-chips-focused:not(.pui-chips-disabled) {
+.pui-chips-focused:not(.pui-chips-disabled):not(.pui-chips-dropdown-visible),
+.pui-chips:not(.pui-chips-disabled):not(.pui-chips-dropdown-visible):focus-within {
   border-color: transparent;
   box-shadow: 0 0 0 0.125rem hsl(var(--pui-ring));
   outline: none;
@@ -615,7 +667,7 @@ function stopDragging() {
 .pui-chips-remove:focus-visible {
   box-shadow:
     0 0 0 0.125rem hsl(var(--pui-background)),
-    0 0 0 0.25rem hsl(var(--pui-ring)),
+    0 0 0 0.25rem hsl(var(--pui-destructive-foreground)),
     0 0 #0000;
   outline: 0.125rem solid transparent;
   outline-offset: 0.125rem;
@@ -690,7 +742,8 @@ function stopDragging() {
 }
 
 .pui-chips-dropdown-item-highlighted {
-  background-color: hsl(var(--pui-card) / 0.16);
+  background-color: hsl(var(--pui-accent));
+  color: hsl(var(--pui-accent-foreground));
 }
 
 .pui-chips-dropdown-no-results {
@@ -699,10 +752,16 @@ function stopDragging() {
   justify-content: center;
   width: 100%;
   height: 2em;
-  color: hsl(var(--pui-muted));
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-chips-dropdown-no-results span {
   font-size: calc(1em - 0.0625rem);
+}
+
+.pui-chips-dropdown .pui-dropdown-scrollable {
+  border-color: transparent;
+  box-shadow: 0 0 0 0.125rem hsl(var(--pui-ring));
+  outline: none;
 }
 </style>

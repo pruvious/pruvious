@@ -5,9 +5,14 @@
     tabindex="-1"
     class="pui-dropdown"
     :class="[{ 'pui-dropdown-mounted': isMounted }, `pui-dropdown-${floatingPlacement}`]"
-    :style="{ ...floatingStyles, '--pui-size': size }"
+    :style="{
+      ...floatingStyles,
+      '--pui-size': size,
+      '--pui-background': 'var(--pui-primary)',
+      '--pui-foreground': 'var(--pui-primary-foreground)',
+    }"
   >
-    <PUIScrollable :autoScroll="itemHeight" class="pui-dropdown-scrollable">
+    <PUIScrollable :autoScroll="itemHeight" ref="scrollable" class="pui-dropdown-scrollable">
       <div ref="inner" class="pui-dropdown-inner">
         <slot />
       </div>
@@ -125,6 +130,7 @@ const emit = defineEmits<{
 }>()
 
 const floating = useTemplateRef('floating')
+const scrollable = useTemplateRef('scrollable')
 const reference = computed(() => props.reference)
 const inner = useTemplateRef('inner')
 const isMounted = ref(false)
@@ -166,6 +172,8 @@ provide('parentContainer', parentContainer)
 
 defineExpose({
   update,
+  calcItemSizes,
+  scrollable,
 })
 
 onMounted(() => {
@@ -303,8 +311,6 @@ function calcItemSizes() {
 
 <style>
 .pui-dropdown {
-  --pui-background: var(--pui-primary);
-  --pui-foreground: var(--pui-primary-foreground);
   z-index: 99997;
   display: flex;
   flex-direction: column;
