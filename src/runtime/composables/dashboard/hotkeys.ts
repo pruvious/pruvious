@@ -102,10 +102,6 @@ export function getHotkeyAction(event: KeyboardEvent): HotkeyAction | null {
       window.dispatchEvent(new CustomEvent('pruvious-copy'))
       return 'cut'
     }
-  } else if (letter === 'v') {
-    if (!event.shiftKey && !isEditingText()) {
-      return 'paste'
-    }
   } else if (letter === 's') {
     if (!event.shiftKey) {
       return 'save'
