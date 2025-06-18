@@ -351,7 +351,7 @@ const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
 const contentLanguage = useDashboardContentLanguage()
 const canManage = hasPermission(`collection:${route.params.collection}:manage` as Permission)
 const canCreate =
-  collection.definition.api.update && hasPermission(`collection:${route.params.collection}:create` as Permission)
+  collection.definition.api.create && hasPermission(`collection:${route.params.collection}:create` as Permission)
 const canDelete =
   collection.definition.api.update && hasPermission(`collection:${route.params.collection}:delete` as Permission)
 const isManaged = collection.definition.authorField || collection.definition.editorsField
@@ -447,7 +447,11 @@ watch(data, () => {
   }
 })
 
-watch(contentLanguage, () => refresh(true))
+watch(contentLanguage, () => {
+  if (collection.definition.translatable) {
+    refresh(true)
+  }
+})
 
 onKeyStroke('ArrowLeft', (e) => {
   if (!puiHasModifierKey(e) && !puiIsEditingText() && !overlayCounter.value && paginated.value.currentPage > 1) {
