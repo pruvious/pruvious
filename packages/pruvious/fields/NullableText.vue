@@ -14,8 +14,8 @@
         :variant="options.ui.switch?.variant"
         @update:modelValue="
           (value) => {
-            $emit('update:modelValue', value ? '' : null)
-            $emit('commit', value ? '' : null)
+            $emit('update:modelValue', value ? lastString : null)
+            $emit('commit', value ? lastString : null)
           }
         "
         class="p-switch"
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { __, maybeTranslate } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isDefined } from '@pruvious/utils'
+import { isDefined, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -129,6 +129,17 @@ const onLabel = isDefined(props.options.ui.switch?.onLabel)
   ? maybeTranslate(props.options.ui.switch.onLabel)
   : __('pruvious-dashboard', 'On')
 const placeholder = maybeTranslate(props.options.ui.placeholder)
+const lastString = ref('')
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (isString(value)) {
+      lastString.value = value
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>

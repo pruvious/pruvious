@@ -30,8 +30,8 @@
         @update:modelValue="
           (value) => {
             const operator = !value && !['eq', 'ne'].includes(modelValue.operator) ? 'eq' : modelValue.operator
-            $emit('update:modelValue', { ...modelValue, value: value ? '' : null, operator })
-            $emit('commit', { ...modelValue, value: value ? '' : null, operator })
+            $emit('update:modelValue', { ...modelValue, value: value ? lastString : null, operator })
+            $emit('commit', { ...modelValue, value: value ? lastString : null, operator })
           }
         "
         class="p-switch"
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { __, getValidFilterOperators, maybeTranslate, type WhereField } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isDefined, isNull } from '@pruvious/utils'
+import { isDefined, isNull, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -76,6 +76,7 @@ const onLabel = isDefined(props.options.ui.switch?.onLabel)
   ? maybeTranslate(props.options.ui.switch.onLabel)
   : __('pruvious-dashboard', 'On')
 const operatorChoices: Ref<ReturnType<typeof getValidFilterOperators>> = ref([])
+const lastString = ref('')
 
 watch(
   () => props.modelValue.value,
@@ -87,6 +88,10 @@ watch(
     if (!operatorChoices.value.some(({ value }) => value === props.modelValue.operator)) {
       emit('update:modelValue', { ...props.modelValue, operator: 'eq' })
       emit('commit', { ...props.modelValue, operator: 'eq' })
+    }
+
+    if (isString(value)) {
+      lastString.value = value
     }
   },
   { immediate: true },
