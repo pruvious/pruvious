@@ -26,6 +26,7 @@
       @focus="$emit('focus', $event, ($event.target as HTMLInputElement).value)"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       @keydown.escape.stop="blurActiveElement()"
+      ref="input"
       class="pui-input-control"
     />
 
@@ -164,6 +165,10 @@ defineEmits<{
   'focus': [event: FocusEvent, value: string]
   'blur': [event: FocusEvent, value: string]
 }>()
+
+const input = useTemplateRef('input')
+
+defineExpose({ input })
 </script>
 
 <style>
