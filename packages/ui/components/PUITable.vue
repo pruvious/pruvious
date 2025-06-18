@@ -388,6 +388,10 @@ function onShiftSelect(id: number | string, value: boolean) {
   background-color: hsl(var(--pui-background));
 }
 
+.pui-table-selectable :where(th):first-child {
+  z-index: 13 !important;
+}
+
 .pui-table :where(th, td):last-child {
   padding-right: 0.75rem;
 }
