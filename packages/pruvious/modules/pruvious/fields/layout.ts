@@ -140,6 +140,29 @@ export interface FieldsLayoutTab<TFieldNames extends string = string> {
   label: string | ((context: TranslatableStringCallbackContext) => string)
 
   /**
+   * A URL query parameter to initially select this tab.
+   *
+   * You can provide either:
+   *
+   * - A string to match a query parameter name (with any value).
+   * - An object with a specific query parameter name and value.
+   *
+   * Note: Query parameters are only evaluated when the component mounts and won't react to URL changes afterward.
+   *
+   * @default undefined
+   *
+   * @example
+   * ```ts
+   * // Match any `advanced` parameter
+   * 'advanced'
+   *
+   * // Match specific parameter value
+   * { step: '2' }
+   * ```
+   */
+  queryParam?: string | { [name: string]: string } | undefined
+
+  /**
    * The fields to display within this tab.
    * Can include individual fields, rows, or nested tab groups.
    *

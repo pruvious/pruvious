@@ -108,7 +108,12 @@
       />
     </PUICard>
 
-    <PruviousDashboardTabs v-else-if="item.type === 'tabs'" :list="item.list" class="p-fields-item p-fields-tabs">
+    <PruviousDashboardTabs
+      v-else-if="item.type === 'tabs'"
+      :active="item.active"
+      :list="item.list"
+      class="p-fields-item p-fields-tabs"
+    >
       <PUITab v-for="(tabLayout, i) of item.layouts" :name="i">
         <PruviousFields
           :alwaysVisibleFields="alwaysVisibleFields"
@@ -208,6 +213,7 @@ interface CardItem {
 interface TabsItem {
   type: 'tabs'
   list: PUITabListItem<number>[]
+  active?: number
   layouts: FieldsLayoutTab['fields'][]
 }
 
@@ -361,6 +367,7 @@ defineEmits<{
 
 provide('floatingStrategy', 'absolute')
 
+const route = useRoute()
 const items = ref<Item[]>([])
 const isLivePreview = inject('isLivePreview', false)
 
@@ -467,9 +474,16 @@ function parseLayout(layout: FieldsLayout): Item[] {
           const tabs = x[key] as FieldsLayoutTabs['tabs']
 
           if (!isEmpty(tabs)) {
+            const activeIndex = tabs.findIndex(
+              (tab) =>
+                (isString(tab.queryParam) && isDefined(route.query[tab.queryParam])) ||
+                (isObject(tab.queryParam) &&
+                  Object.entries(tab.queryParam).some(([name, value]) => route.query[name] === value)),
+            )
             items.push({
               type: 'tabs',
               list: tabs.map((tab, i) => ({ name: i, label: maybeTranslate(tab.label) })),
+              active: activeIndex > -1 ? activeIndex : undefined,
               layouts: tabs.map((tab) => tab.fields),
             })
           }
