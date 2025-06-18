@@ -5,7 +5,7 @@
         :title="modelValue ? (modelValue === label ? modelValue : `${label || '-'} (${modelValue})`) : undefined"
         class="pui-truncate"
       >
-        {{ label || ' -' }}
+        {{ label || '-' }}
       </span>
     </PruviousDashboardEditableFieldCell>
 
