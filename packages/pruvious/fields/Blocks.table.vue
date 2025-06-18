@@ -13,7 +13,7 @@
               dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false ||
               dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration?.fieldValue
             "
-            class="pui-muted pui-truncate"
+            class="pui-truncate"
           >
             {{
               dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false
