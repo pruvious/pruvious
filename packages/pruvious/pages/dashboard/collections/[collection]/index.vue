@@ -236,7 +236,7 @@
       v-if="isTableSettingsPopupVisible"
       v-model:columns="columns"
       v-model:params="params"
-      :collection="collection"
+      :collection="collectionWithoutTranslationFields"
       :defaultColumns="defaultColumns"
       :defaultOrderBy="defaultOrderBy"
       :paginated="paginated"
@@ -336,6 +336,17 @@ puiTooltipInit()
 
 const route = useRoute()
 const collection = getCollectionBySlug(route.params.collection)!
+const collectionWithoutTranslationFields = computed(() => ({
+  name: collection.name,
+  definition: collection.definition.translatable
+    ? {
+        ...collection.definition,
+        fields: Object.fromEntries(
+          Object.entries(collection.definition.fields).filter(([k]) => k !== 'translations' && k !== 'language'),
+        ),
+      }
+    : collection.definition,
+}))
 const layout = resolveCollectionLayout('index', collection)
 const label = isDefined(collection.definition.ui.label)
   ? maybeTranslate(collection.definition.ui.label)
