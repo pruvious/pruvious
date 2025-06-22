@@ -70,7 +70,6 @@
               "
               @keydown.down.prevent
               @keydown.escape="onEscapeKey"
-              @keydown.tab="blurActiveElement"
               @keydown.up.prevent
               class="h-full w-full truncate bg-transparent text-sm outline-none transition placeholder:text-gray-300"
               :class="{
