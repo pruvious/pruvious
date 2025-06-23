@@ -113,7 +113,15 @@ export default {
   >(
     options: Omit<
       CombinedFieldOptions<
-        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
+        FieldModel<
+          TextFieldModelOptions<TValues, TValues>,
+          'text',
+          NoInfer<TValues>,
+          TValues,
+          TValues,
+          undefined,
+          undefined
+        >,
         TextFieldModelOptions<TValues, TValues> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
@@ -174,7 +182,15 @@ export default {
   >(
     options: Omit<
       CombinedFieldOptions<
-        FieldModel<TextFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
+        FieldModel<
+          TextFieldModelOptions<TValues, TValues>,
+          'text',
+          NoInfer<TValues>,
+          TValues,
+          TValues,
+          undefined,
+          undefined
+        >,
         TextFieldModelOptions<TValues, TValues> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
