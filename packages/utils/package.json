@@ -36,7 +36,7 @@
     "dot-prop": "9.0.0",
     "nanoid": "5.1.5",
     "ohash": "1.1.6",
-    "zeptomatch": "2.0.1"
+    "zeptomatch": "2.0.2"
   },
   "devDependencies": {
     "typescript": "5.8.3",
