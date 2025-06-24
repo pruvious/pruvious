@@ -1,2 +1,11 @@
 packages:
-  - 'packages/*'
+  - packages/*
+
+ignoredBuiltDependencies:
+  - esbuild
+  - sharp
+  - vue-demi
+  - workerd
+
+onlyBuiltDependencies:
+  - better-sqlite3
