@@ -33,7 +33,7 @@ let stop: (() => void) | undefined
 unsavedChanges.prompt = async () => {
   isVisible.value = true
   return new Promise<boolean>((resolve) => {
-    watchOnce(leaveCount, (newValue, oldValue) => resolve(newValue > oldValue))
+    watchOnce(leaveCount, (newValue, oldValue) => resolve(newValue > (oldValue ?? 0)))
   })
 }
 
