@@ -200,6 +200,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
+      languages: resolvedOptions.i18n.languages.map(({ code }) => code),
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
       routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,

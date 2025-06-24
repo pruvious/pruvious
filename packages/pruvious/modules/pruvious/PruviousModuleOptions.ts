@@ -1,3 +1,4 @@
+import type { LanguageCode } from '#pruvious/server'
 import type { DeepRequired } from '@pruvious/utils'
 
 export interface PruviousModuleOptions {
@@ -1349,11 +1350,17 @@ declare module 'nuxt/schema' {
       apiBasePath: string
 
       /**
+       * List of supported languages in the CMS.
+       * Each language is represented by its ISO code (e.g., 'en', 'de', 'fr').
+       */
+      languages: LanguageCode[]
+
+      /**
        * The primary language used by the CMS.
        *
        * This setting is derived from the Nuxt config `pruvious.i18n.primaryLanguage`.
        */
-      primaryLanguage: string
+      primaryLanguage: LanguageCode
 
       /**
        * Controls URL prefixing behavior for the primary language.
