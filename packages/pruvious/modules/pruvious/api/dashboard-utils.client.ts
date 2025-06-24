@@ -50,7 +50,7 @@ import {
  *
  * const { success, data } = await pruviousDashboardPost('auth/login', {
  *   body,
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -90,7 +90,7 @@ export function pruviousDashboardPost<TRoute extends PruviousPostRoute>(
  * const inputErrors = ref<Record<string, string>>({})
  *
  * const { success, data } = await pruviousDashboardGet('@todo', {
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -133,7 +133,7 @@ export function pruviousDashboardGet<TRoute extends PruviousGetRoute>(
  *
  * const { success, data } = await pruviousDashboardPatch('@todo', {
  *   body,
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -174,7 +174,7 @@ export function pruviousDashboardPatch<TRoute extends PruviousPatchRoute>(
  * const inputErrors = ref<Record<string, string>>({})
  *
  * const { success, data } = await pruviousDashboardDelete('@todo', {
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *

@@ -39,7 +39,7 @@ export interface PruviousFetchBaseOptions {
   inputErrors?: MaybeRef<Record<string, string>>
 
   /**
-   * A reactive reference to the form's disabled state.
+   * A reactive reference for a form's disabled state.
    * This is useful for disabling the form while the request is being processed.
    *
    * @example
@@ -58,12 +58,12 @@ export interface PruviousFetchBaseOptions {
    *
    * const { success, data, error } = await pruviousPost('auth/login', {
    *   body,
-   *   disableRef: isFormDisabled,
+   *   isDisabledRef: isFormDisabled,
    * })
    * </script>
    * ```
    */
-  disableRef?: Ref<boolean>
+  isDisabledRef?: Ref<boolean>
 }
 
 interface Body {
@@ -158,7 +158,7 @@ export type PruviousFetchError = (
  *
  * const { success, data, error } = await pruviousPost('auth/login', {
  *   body,
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -197,7 +197,7 @@ export function pruviousPost<TRoute extends PruviousPostRoute>(
  * const inputErrors = ref<Record<string, string>>({})
  *
  * const { success, data, error } = await pruviousGet('me', {
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -238,7 +238,7 @@ export function pruviousGet<TRoute extends PruviousGetRoute>(
  *
  * const { success, data, error } = await pruviousPatch('@todo', {
  *   body,
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -277,7 +277,7 @@ export function pruviousPatch<TRoute extends PruviousPatchRoute>(
  * const inputErrors = ref<Record<string, string>>({})
  *
  * const { success, data, error } = await pruviousDelete('@todo', {
- *   disableRef: isFormDisabled,
+ *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
@@ -347,8 +347,8 @@ async function pruviousFetch(
   }
 
   // Disable UI
-  if (options.disableRef) {
-    options.disableRef.value = true
+  if (options.isDisabledRef) {
+    options.isDisabledRef.value = true
   }
 
   await $fetch(apiBasePath + route, {
@@ -394,8 +394,8 @@ async function pruviousFetch(
   } satisfies NitroFetchOptions<string>)
 
   // Enable UI
-  if (options.disableRef) {
-    options.disableRef.value = false
+  if (options.isDisabledRef) {
+    options.isDisabledRef.value = false
   }
 
   return fetchResponse
@@ -422,8 +422,8 @@ export async function pfetch<
   TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
 >(route: TRoute, options?: TOptions) {
   // Disable UI
-  if (options?.disableRef) {
-    options.disableRef.value = true
+  if (options?.isDisabledRef) {
+    options.isDisabledRef.value = true
   }
 
   return $fetch(route, {
@@ -454,8 +454,8 @@ export async function pfetch<
     },
   } as TOptions).finally(() => {
     // Enable UI
-    if (options?.disableRef) {
-      options.disableRef.value = false
+    if (options?.isDisabledRef) {
+      options.isDisabledRef.value = false
     }
   })
 }
