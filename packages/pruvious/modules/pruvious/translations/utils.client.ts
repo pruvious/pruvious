@@ -73,16 +73,18 @@ export async function preloadTranslatableStrings<
 
   if (!i18n().hasDefinition(domain, language)) {
     const { apiBasePath } = useRuntimeConfig().public.pruvious
-    const nuxtApp = useNuxtApp()
     const handler = () => $fetch<TranslatableStrings>(apiBasePath + 'translations', { query: { domain, language } })
-    const strings = nuxtApp.isHydrating
-      ? await useAsyncData(`pruvious:translations:${domain}:${language}`, handler, {
-          getCachedData: (key, nuxt) => nuxt.payload.data[key] || nuxt.static.data[key],
-          dedupe: 'defer',
-        }).then(({ data }) => data.value ?? {})
-      : await handler()
+    const strings = await useAsyncData(`pruvious:translations:${domain}:${language}`, handler, {
+      dedupe: 'defer',
+    }).then(({ data }) => data.value ?? {})
 
     i18n().defineTranslatableStrings({ domain, language, strings })
+  } else if (import.meta.server) {
+    const nuxtApp = useNuxtApp()
+    nuxtApp.payload.data[`pruvious:translations:${domain}:${language}`] = i18n().getDefinition(
+      domain,
+      language,
+    )!.strings
   }
 
   return i18n().getDefinition(domain, language)!.strings
