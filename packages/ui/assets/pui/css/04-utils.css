@@ -6,6 +6,10 @@
   color: hsl(var(--pui-muted-foreground));
 }
 
+.pui-unmuted {
+  color: hsl(var(--pui-foreground));
+}
+
 .pui-medium {
   font-weight: 500;
 }

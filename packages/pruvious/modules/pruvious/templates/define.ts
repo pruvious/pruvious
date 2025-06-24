@@ -2,14 +2,20 @@ import type { GenericField } from '@pruvious/orm'
 import type {
   BaseAuthorFieldOptions,
   BaseCreatedAtFieldOptions,
-  BaseEditorsFielOptions,
+  BaseEditorsFieldOptions,
+  BaseIsPublicFieldOptions,
   BaseUpdatedAtFieldOptions,
+  CollectionRoutingOptions,
   DefineCollectionOptions,
+  PublicRoutingFieldNames,
 } from '../collections/define'
 import {
   type AuthorFieldPresetOptions,
   type CreatedAtFieldPresetOptions,
   type EditorsFieldPresetOptions,
+  type IsPublicFieldPresetOptions,
+  type ScheduledAtFieldPresetOptions,
+  type SEOFieldPresetOptions,
   type UpdatedAtFieldPresetOptions,
 } from '../fields/presets'
 
@@ -53,9 +59,53 @@ export function defineTemplate<
   const TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
   const TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
   const TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  const TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  const TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  const TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 >(
-  factory: () => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
-): () => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> {
+  factory: () => DefineCollectionOptions<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  >,
+): () => DefineCollectionOptions<
+  TFields,
+  TTranslatable,
+  TCreatedAt,
+  TUpdatedAt,
+  TAuthor,
+  TEditors,
+  TIsPublic,
+  TScheduledAt,
+  TSEO,
+  TRouting
+> {
   return factory
 }

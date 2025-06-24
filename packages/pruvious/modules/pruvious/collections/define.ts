@@ -1,5 +1,4 @@
 import {
-  languages,
   walkFieldLayoutItems,
   type FieldsLayout,
   type LanguageCode,
@@ -25,6 +24,7 @@ import {
   defu,
   isArray,
   isDefined,
+  isNull,
   isObject,
   isPositiveInteger,
   isString,
@@ -33,7 +33,6 @@ import {
   omit,
   setProperty,
   type DeepRequired,
-  type DefaultFalse,
   type DefaultFalseWithOptions,
   type DefaultTrue,
   type PartialMax4Levels,
@@ -48,24 +47,55 @@ import {
   authorFieldPreset,
   createdAtFieldPreset,
   editorsFieldPreset,
+  isPublicFieldPreset,
   languageFieldPreset,
+  scheduledAtFieldPreset,
+  seoFieldPreset,
+  subpathFieldPreset,
   translationsFieldPreset,
   updatedAtFieldPreset,
   type AuthorFieldPresetOptions,
   type CreatedAtFieldPresetOptions,
   type EditorsFieldPresetOptions,
+  type IsPublicFieldPresetOptions,
+  type ScheduledAtFieldPresetOptions,
+  type SEOFieldPresetOptions,
+  type SubpathFieldPresetOptions,
   type UpdatedAtFieldPresetOptions,
 } from '../fields/presets'
 import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { collectionPermissionGuard } from './guards'
+import { getSanitizedInput, patchSanitizedInput } from './utils.server'
 
 export type DefineCollectionOptions<
   TFields extends Record<string, GenericField>,
   TTranslatable extends boolean | undefined,
-  TCreatedAt extends boolean | CreatedAtFieldPresetOptions | undefined,
-  TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
-  TAuthor extends boolean | AuthorFieldPresetOptions | undefined,
-  TEditors extends boolean | EditorsFieldPresetOptions | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 > = Omit<CollectionDefinition<TFields, CollectionMeta>, 'meta'> & {
   /**
    * A key-value object of `Field` instances representing the structure of the collection.
@@ -91,7 +121,41 @@ export type DefineCollectionOptions<
    * ```
    */
   fields: TFields
-} & CollectionMetaOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
+} & CollectionMetaOptions<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  > & {
+    createdAt?: CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions
+    updatedAt?: UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions
+    author?: AuthorFieldPresetOptions & BaseAuthorFieldOptions
+    editors?: EditorsFieldPresetOptions & BaseEditorsFieldOptions
+    routing?: TRouting extends boolean
+      ? boolean
+      : CollectionRoutingOptions<
+          PublicRoutingFieldNames<
+            TFields,
+            TTranslatable,
+            TCreatedAt,
+            TUpdatedAt,
+            TAuthor,
+            TEditors,
+            TIsPublic,
+            TScheduledAt,
+            TSEO
+          >,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >
+  }
 
 export interface CollectionMetaOptions<
   TFields extends Record<string, GenericField>,
@@ -99,7 +163,29 @@ export interface CollectionMetaOptions<
   TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
   TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
   TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 > {
   /**
    * Specifies whether the collection is translatable.
@@ -126,7 +212,18 @@ export interface CollectionMetaOptions<
    *
    * @default []
    */
-  syncedFields?: (keyof MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> &
+  syncedFields?: (keyof MergeCollectionFields<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  > &
     string)[]
 
   /**
@@ -430,7 +527,18 @@ export interface CollectionMetaOptions<
    * ```
    */
   copyTranslation?: CollectionCopyTranslationFunction<
-    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
+    MergeCollectionFields<
+      TFields,
+      TTranslatable,
+      TCreatedAt,
+      TUpdatedAt,
+      TAuthor,
+      TEditors,
+      TIsPublic,
+      TScheduledAt,
+      TSEO,
+      TRouting
+    >
   > | null
 
   /**
@@ -457,7 +565,18 @@ export interface CollectionMetaOptions<
    */
   duplicate?: CollectionDuplicateFunction<
     TTranslatable,
-    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>
+    MergeCollectionFields<
+      TFields,
+      TTranslatable,
+      TCreatedAt,
+      TUpdatedAt,
+      TAuthor,
+      TEditors,
+      TIsPublic,
+      TScheduledAt,
+      TSEO,
+      TRouting
+    >
   > | null
 
   /**
@@ -530,16 +649,18 @@ export interface CollectionMetaOptions<
    *
    * Available options:
    *
-   * - `true` - Uses default field name and settings.
+   * - `true` - Enables the field with default options.
    * - `{...}` - Configures custom options for the field.
    * - `false` - Disables the field completely.
    *
    * @default
    * {
    *   index: true,
-   *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Created'),
-   *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
+   *   ui: {
+   *     hidden: true,
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Created'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
+   *   },
    * }
    */
   createdAt?: TCreatedAt
@@ -550,22 +671,24 @@ export interface CollectionMetaOptions<
    *
    * Available options:
    *
-   * - `true` - Uses default field name and settings.
+   * - `true` - Enables the field with default options.
    * - `{...}` - Configures custom options for the field.
    * - `false` - Disables the field completely.
    *
    * @default
    * {
    *   index: false,
-   *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
-   *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+   *   ui: {
+   *     hidden: true,
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+   *   },
    * }
    */
   updatedAt?: TUpdatedAt
 
   /**
-   * Controls if the collection includes an `author` field which assigns The user who created the record. automatically.
+   * Controls if the collection includes an `author` field that stores the user who owns the record.
    *
    * When enabled, a filter is applied to all **guarded** query builder functions to prevent unauthorized access to records.
    * Additionally, the `collection:{slug}:manage` permission becomes available for user role assignments.
@@ -585,7 +708,7 @@ export interface CollectionMetaOptions<
    *
    * Available options:
    *
-   * - `true` - Uses default field name and settings.
+   * - `true` - Enables the field with default options.
    * - `{...}` - Configures custom options for the field.
    * - `false` - Disables the field completely.
    *
@@ -594,7 +717,7 @@ export interface CollectionMetaOptions<
   author?: TAuthor
 
   /**
-   * Controls if the collection includes an `editors` field which assigns The users who can edit the record..
+   * Controls if the collection includes an `editors` field that stores the users assigned as editors for the record.
    *
    * When enabled, a filter is applied to all **guarded** query builder functions to prevent unauthorized access to records.
    * Additionally, the `collection:{slug}:manage` permission becomes available for user role assignments.
@@ -613,13 +736,46 @@ export interface CollectionMetaOptions<
    *
    * Available options:
    *
-   * - `true` - Uses default field name and settings.
+   * - `true` - Enables the field with default options.
    * - `{...}` - Configures custom options for the field.
    * - `false` - Disables the field completely.
    *
    * @default false
    */
   editors?: TEditors
+
+  /**
+   * Controls whether routes can be assigned to this collection.
+   * When a collection is referenced by a route, its records become accessible via the route's `$data` property.
+   *
+   * Available options:
+   *
+   * - `true` - Enables routing and exposes all custom collection `fields`,
+   *            including the `id`, `createdAt`, and `updatedAt` fields,
+   *            in the `$data` property of route records.
+   * - `{...}` - Configures custom routing options.
+   * - `false` - Disables routing completely.
+   *
+   * @see https://pruvious.com/docs/routing (@todo set up this link)
+   *
+   * @default false
+   *
+   * @example
+   * ```vue
+   * <template>
+   *   <NuxtLayout>
+   *     <pre>{{ proute }}</pre>
+   *   </NuxtLayout>
+   * </template>
+   *
+   * <script lang="ts" setup>
+   * import { usePruviousRoute } from '#pruvious/client'
+   *
+   * const proute = usePruviousRoute()
+   * </script>
+   * ```
+   */
+  routing?: TRouting
 
   /**
    * Controls how the collection is displayed in the dashboard user interface.
@@ -649,7 +805,19 @@ export interface CollectionMetaOptions<
    */
   ui?: PartialMax4Levels<
     CollectionUIOptions<
-      keyof MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors> & string
+      keyof MergeCollectionFields<
+        TFields,
+        TTranslatable,
+        TCreatedAt,
+        TUpdatedAt,
+        TAuthor,
+        TEditors,
+        TIsPublic,
+        TScheduledAt,
+        TSEO,
+        TRouting
+      > &
+        string
     >
   >
 }
@@ -703,7 +871,7 @@ type CollectionDuplicateFunction<
    * Object containing field names and their casted values from the source record.
    */
   source: ExtractCastedTypes<TFields> & { id: number }
-}) => DefaultFalse<TTranslatable> extends true
+}) => DefaultTrue<TTranslatable> extends true
   ? Omit<TInsertInput, 'language' | 'translations'> | Promise<Omit<TInsertInput, 'language' | 'translations'>>
   : TInsertInput | Promise<TInsertInput>
 
@@ -863,7 +1031,8 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
        *
        * When not explicitly configured:
        *
-       * - Shows first 4-5 visible (not `hidden`) fields in their original definition order.
+       * - If `routing` is enabled, the `subpath` and `isPublic` fields are always shown first.
+       * - Shows first 2-5 visible (not `hidden`) custom fields in their original definition order.
        * - If `createdAt` field is enabled, it appears as the rightmost column.
        *
        * @default undefined
@@ -1309,13 +1478,143 @@ export interface BaseAuthorFieldOptions {
   foreignKey?: boolean | string
 }
 
-export interface BaseEditorsFielOptions {
+export interface BaseEditorsFieldOptions {
   /**
    * Controls whether to create a database index for this field.
    *
    * @default false
    */
   index?: boolean
+}
+
+export interface BaseSubpathFieldOptions {
+  /**
+   * Controls whether to create a unique database index for this field.
+   * If the collection is `translatable`, a multi-column index is created for the `subpath` and `language` fields.
+   *
+   * @default true
+   */
+  index?: boolean
+}
+
+export interface BaseIsPublicFieldOptions {
+  /**
+   * Controls whether to create a database index for this field.
+   *
+   * @default true
+   */
+  index?: boolean
+}
+
+export type PublicRoutingFieldNames<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
+  TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
+  TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  TSEO extends boolean | SEOFieldPresetOptions | undefined,
+> =
+  | 'id'
+  | (keyof TFields & string)
+  | (DefaultTrue<TTranslatable> extends true ? 'translations' | 'language' : never)
+  | (DefaultTrue<TCreatedAt> extends false ? never : 'createdAt')
+  | (DefaultTrue<TUpdatedAt> extends false ? never : 'updatedAt')
+  | (DefaultFalseWithOptions<TAuthor> extends false ? never : 'author')
+  | (DefaultFalseWithOptions<TEditors> extends false ? never : 'editors')
+  | 'subpath'
+  | (DefaultFalseWithOptions<TIsPublic> extends false ? never : 'isPublic')
+  | (DefaultFalseWithOptions<TScheduledAt> extends false ? never : 'scheduledAt')
+  | (DefaultFalseWithOptions<TSEO> extends false ? never : 'seo')
+
+export type CollectionRoutingOptions<
+  TFieldNames extends string,
+  TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  TSEO extends boolean | SEOFieldPresetOptions | undefined,
+> = {
+  /**
+   * Specifies which fields will be exposed in the `$data` property of a route record.
+   *
+   * If not provided, all custom `fields` plus `id`, `createdAt`, and `updatedAt` (when available) will be included by default.
+   */
+  publicFields?: TFieldNames[]
+
+  /**
+   * Specifies the `subpath` field options for the collection.
+   *
+   * This field generates unique URLs for each record in the collection.
+   * It should be a string or numeric field that uniquely identifies each record (like a slug or ID).
+   * The value will be used as the last part of the URL path.
+   * The beginning of the URL path comes from the collection's route `path`.
+   *
+   * @default
+   * {
+   *   index: true,
+   *   ui: {
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Subpath'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'The last part of the URL path after the base URL.'),
+   *     placeholder: ({ __ }) => __('pruvious-dashboard', 'unique-subpath'),
+   *   },
+   * }
+   */
+  subpath?: SubpathFieldPresetOptions
+
+  /**
+   * Controls if the collection includes a `isPublic` boolean field.
+   * When enabled, it determines if a collection record is publicly accessible via its route.
+   * When disabled, the route is always accessible if it has a `subpath` value.
+   *
+   * Available options:
+   *
+   * - `true` - Enables the field with default options.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default
+   * {
+   *   index: true,
+   *   conditionalLogic: { subpath: { '!=': null } },
+   *   ui: {
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Status'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'Indicates whether this route is publicly accessible.'),
+   *     noLabel: ({ __ }) => __('pruvious-dashboard', 'Draft'),
+   *     yesLabel: ({ __ }) => __('pruvious-dashboard', 'Public'),
+   *   },
+   * }
+   *
+   * @default false
+   */
+  isPublic?: TIsPublic
+
+  /**
+   * Controls if the collection includes a `scheduledAt` boolean field.
+   * When enabled with `isPublic` set to `true`, allows content to be published automatically at a specified date and time.
+   * When `isPublic` is `false`, this field has no special behavior and can be used like any standard date-time field.
+   *
+   * Available options:
+   *
+   * - `true` - Enables the field with default options.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default
+   * {
+   *   conditionalLogic: { subpath: { '!=': null } },
+   *   ui: {
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Publish date'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'Sets when this content will be published. Use current date and time for immediate publication or a future date to schedule it.'),
+   *   },
+   * }
+   *
+   * @default false
+   */
+  scheduledAt?: TScheduledAt
+
+  // @todo seoField (use objectField)
+  seo?: TSEO
 }
 
 interface ResolveContext {
@@ -1330,12 +1629,46 @@ interface ResolveContext {
   location: ResolveFromLayersResultContextBinding
 }
 
+interface CollectionRoutingMeta {
+  enabled: boolean
+  publicFields: string[]
+  subpath: SubpathFieldPresetOptions & Required<BaseSubpathFieldOptions>
+  isPublic: AutoFieldEnabled & IsPublicFieldPresetOptions & Required<BaseIsPublicFieldOptions>
+  scheduledAt: AutoFieldEnabled & ScheduledAtFieldPresetOptions
+  seo: AutoFieldEnabled & SEOFieldPresetOptions
+}
+
 export type CollectionMeta = DeepRequired<
-  Pick<CollectionMetaOptions<any, undefined, undefined, undefined, undefined, undefined>, 'api'>
+  Pick<
+    CollectionMetaOptions<
+      any,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    >,
+    'api'
+  >
 > &
   Required<
     Pick<
-      CollectionMetaOptions<any, undefined, undefined, undefined, undefined, undefined>,
+      CollectionMetaOptions<
+        any,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      >,
       'translatable' | 'syncedFields' | 'guards' | 'authGuard' | 'copyTranslation' | 'duplicate'
     >
   > & {
@@ -1349,27 +1682,54 @@ export type CollectionMeta = DeepRequired<
     createdAt: AutoFieldEnabled & CreatedAtFieldPresetOptions & Required<BaseCreatedAtFieldOptions>
     updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions & Required<BaseUpdatedAtFieldOptions>
     author: AutoFieldEnabled & AuthorFieldPresetOptions & Required<BaseAuthorFieldOptions>
-    editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFielOptions>
+    editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFieldOptions>
+    routing: CollectionRoutingMeta
     ui: CollectionUIOptions
   }
 export type GenericMetaCollection = Collection<Record<string, GenericField>, CollectionMeta>
 export type MetaContext = Context<Database<Record<string, GenericMetaCollection>>>
 
-type MergeCollectionFields<
+export type MergeCollectionFields<
   TFields extends Record<string, GenericField>,
   TTranslatable extends boolean | undefined,
   TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
   TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
   TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 > = TFields &
-  (DefaultFalse<TTranslatable> extends true
+  (DefaultTrue<TTranslatable> extends true
     ? { translations: ReturnType<typeof translationsFieldPreset>; language: ReturnType<typeof languageFieldPreset> }
     : {}) &
   (DefaultTrue<TCreatedAt> extends false ? {} : { createdAt: ReturnType<typeof createdAtFieldPreset> }) &
   (DefaultTrue<TUpdatedAt> extends false ? {} : { updatedAt: ReturnType<typeof updatedAtFieldPreset> }) &
   (DefaultFalseWithOptions<TAuthor> extends false ? {} : { author: ReturnType<typeof authorFieldPreset> }) &
-  (DefaultFalseWithOptions<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> })
+  (DefaultFalseWithOptions<TEditors> extends false ? {} : { editors: ReturnType<typeof editorsFieldPreset> }) &
+  (DefaultFalseWithOptions<TRouting> extends false ? {} : { subpath: ReturnType<typeof subpathFieldPreset> }) &
+  (DefaultFalseWithOptions<TIsPublic> extends false ? {} : { isPublic: ReturnType<typeof subpathFieldPreset> }) &
+  (DefaultFalseWithOptions<TScheduledAt> extends false ? {} : { scheduledAt: ReturnType<typeof subpathFieldPreset> }) &
+  (DefaultFalseWithOptions<TSEO> extends false ? {} : { seo: ReturnType<typeof seoFieldPreset> })
 
 /**
  * Creates a new Pruvious collection.
@@ -1402,17 +1762,61 @@ export function defineCollection<
   const TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseCreatedAtFieldOptions) | undefined,
   const TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseUpdatedAtFieldOptions) | undefined,
   const TAuthor extends boolean | (AuthorFieldPresetOptions & BaseAuthorFieldOptions) | undefined,
-  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFielOptions) | undefined,
+  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  const TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  const TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  const TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 >(
-  options: DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+  options: DefineCollectionOptions<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  >,
 ): (
   resolveContext: ResolveContext,
 ) => Collection<
-  MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+  MergeCollectionFields<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  >,
   CollectionMeta
 > {
   return function (resolveContext: ResolveContext) {
-    const fields: Record<string, GenericField> = { ...options.fields }
+    let fields: Record<string, GenericField> = { ...options.fields }
     const hooks: Required<CollectionHooks> = {
       beforeQueryPreparation: options.hooks?.beforeQueryPreparation ?? [],
       beforeQueryExecution: options.hooks?.beforeQueryExecution ?? [],
@@ -1435,10 +1839,44 @@ export function defineCollection<
       isObject(options.author) ? options.author : {},
       { index: true, foreignKey: true },
     )
-    const editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFielOptions> = defu(
+    const editors: AutoFieldEnabled & EditorsFieldPresetOptions & Required<BaseEditorsFieldOptions> = defu(
       { enabled: !!options.editors },
       isObject(options.editors) ? options.editors : {},
       { index: false },
+    )
+    const routing: CollectionRoutingMeta = defu(
+      { enabled: !!options.routing },
+      isObject(options.routing)
+        ? {
+            ...(options.routing as unknown as CollectionRoutingMeta),
+            isPublic: isObject(options.routing.isPublic) ? options.routing.isPublic : {},
+            scheduledAt: isObject(options.routing.scheduledAt) ? options.routing.scheduledAt : {},
+            seo: isObject(options.routing.seo) ? options.routing.seo : {},
+          }
+        : {},
+      {
+        publicFields: [
+          'id',
+          ...Object.keys(options.fields),
+          ...(createdAt.enabled ? ['createdAt'] : []),
+          ...(updatedAt.enabled ? ['updatedAt'] : []),
+        ],
+        subpath: { index: true },
+        isPublic: {
+          enabled: isObject(options.routing) && !!options.routing.isPublic,
+          index: true,
+          conditionalLogic: { subpath: { '!=': null } },
+        },
+        scheduledAt: {
+          enabled: isObject(options.routing) && !!options.routing.scheduledAt,
+          conditionalLogic: { subpath: { '!=': null } },
+        },
+        seo: {
+          enabled: isObject(options.routing) && !!options.routing.seo,
+          subfields: {},
+          conditionalLogic: { subpath: { '!=': null } },
+        },
+      },
     )
     const ui = deepClone(options.ui)
     const indexes = [...(options.indexes ?? [])]
@@ -1489,7 +1927,31 @@ export function defineCollection<
           `You can disable this behavior by setting the \`editors\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
-        // @todo check for other reserved field names (deletedAt, language, translations, ...)
+      } else if (routing.enabled && fieldName === 'subpath') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`routing\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (routing.isPublic.enabled && fieldName === 'isPublic') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`routing.isPublic\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (routing.scheduledAt.enabled && fieldName === 'scheduledAt') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`routing.scheduledAt\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+      } else if (routing.seo.enabled && fieldName === 'seo') {
+        warnWithContext(`The field name ${colorize('yellow', fieldName)} is reserved.`, [
+          `This field is automatically generated by the collection.`,
+          `You can disable this behavior by setting the \`routing.seo\` option to \`false\` in your collection definition.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ])
+        // @todo check for other reserved field names (deletedAt, ...)
       } else if (camelCase(fieldName) !== fieldName || fieldName.length > 63) {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is invalid.`, [
           `Field names must be in camelCase format and maximum 63 characters long.`,
@@ -1501,21 +1963,21 @@ export function defineCollection<
     }
 
     if (createdAt.enabled) {
-      fields.createdAt = createdAtFieldPreset(omit(createdAt, ['enabled']))
+      fields.createdAt = createdAtFieldPreset(omit(createdAt, ['enabled', 'index']))
       if (createdAt.index) {
         indexes.push({ fields: ['createdAt'] })
       }
     }
 
     if (updatedAt.enabled) {
-      fields.updatedAt = updatedAtFieldPreset(omit(updatedAt, ['enabled']))
+      fields.updatedAt = updatedAtFieldPreset(omit(updatedAt, ['enabled', 'index']))
       if (updatedAt.index) {
         indexes.push({ fields: ['updatedAt'] })
       }
     }
 
     if (author.enabled) {
-      fields.author = authorFieldPreset(omit(author, ['enabled']))
+      fields.author = authorFieldPreset(omit(author, ['enabled', 'index', 'foreignKey']))
       if (author.index) {
         indexes.push({ fields: ['author'] })
       }
@@ -1528,10 +1990,47 @@ export function defineCollection<
     }
 
     if (editors.enabled) {
-      fields.editors = editorsFieldPreset(omit(editors, ['enabled']))
+      fields.editors = editorsFieldPreset(omit(editors, ['enabled', 'index']))
       if (editors.index) {
         indexes.push({ fields: ['editors'] })
       }
+    }
+
+    if (routing.enabled) {
+      const routingFields: Record<string, GenericField> = {
+        subpath: subpathFieldPreset(omit(routing.subpath, ['index']) as any),
+      }
+      if (routing.subpath?.index) {
+        indexes.push({ fields: translatable ? ['subpath', 'language'] : ['subpath'], unique: true })
+      }
+
+      if (routing.isPublic.enabled) {
+        routingFields.isPublic = isPublicFieldPreset(omit(routing.isPublic, ['enabled', 'index']) as any)
+        if (routing.isPublic.index) {
+          indexes.push({ fields: ['isPublic'] })
+        }
+      }
+
+      if (routing.scheduledAt.enabled) {
+        routingFields.scheduledAt = scheduledAtFieldPreset(omit(routing.scheduledAt, ['enabled']) as any)
+      }
+
+      if (routing.seo.enabled) {
+        routingFields.seo = seoFieldPreset(omit(routing.seo, ['enabled']) as any)
+      }
+
+      hooks.beforeQueryPreparation.push(({ operation, queryBuilder }) => {
+        if (operation === 'update' && isNull(getSanitizedInput(queryBuilder!).subpath)) {
+          if (routing.isPublic.enabled) {
+            patchSanitizedInput(queryBuilder!, { isPublic: false })
+          }
+          if (routing.scheduledAt.enabled) {
+            patchSanitizedInput(queryBuilder!, { scheduledAt: null })
+          }
+        }
+      })
+
+      fields = { ...routingFields, ...fields }
     }
 
     if (translatable) {
@@ -1717,7 +2216,7 @@ export function defineCollection<
       foreignKeys,
       hooks,
       meta: {
-        translatable: !!options.translatable as never,
+        translatable: (options.translatable ?? true) as never,
         syncedFields,
         api: defu(
           isUndefined(options.api) || options.api === true
@@ -1750,6 +2249,7 @@ export function defineCollection<
         updatedAt,
         author,
         editors,
+        routing,
         ui: defu(ui ?? {}, {
           hidden: false,
           label: undefined,
@@ -1798,20 +2298,64 @@ export async function defineCollectionFromTemplate<
   TTemplateName extends keyof Templates,
   const TFields extends Record<string, GenericField>,
   const TTranslatable extends boolean | undefined,
-  const TCreatedAt extends boolean | CreatedAtFieldPresetOptions | undefined,
-  const TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
-  const TAuthor extends boolean | AuthorFieldPresetOptions | undefined,
-  const TEditors extends boolean | EditorsFieldPresetOptions | undefined,
+  const TCreatedAt extends boolean | (CreatedAtFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TUpdatedAt extends boolean | (UpdatedAtFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TAuthor extends boolean | (AuthorFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TEditors extends boolean | (EditorsFieldPresetOptions & BaseEditorsFieldOptions) | undefined,
+  const TIsPublic extends boolean | (IsPublicFieldPresetOptions & BaseIsPublicFieldOptions) | undefined,
+  const TScheduledAt extends boolean | ScheduledAtFieldPresetOptions | undefined,
+  const TSEO extends boolean | SEOFieldPresetOptions | undefined,
+  const TRouting extends
+    | boolean
+    | CollectionRoutingOptions<
+        PublicRoutingFieldNames<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO
+        >,
+        TIsPublic,
+        TScheduledAt,
+        TSEO
+      >
+    | undefined,
 >(
   templateName: TTemplateName,
   callback: (
     template: Templates[TTemplateName],
-  ) => DefineCollectionOptions<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+  ) => DefineCollectionOptions<
+    TFields,
+    TTranslatable,
+    TCreatedAt,
+    TUpdatedAt,
+    TAuthor,
+    TEditors,
+    TIsPublic,
+    TScheduledAt,
+    TSEO,
+    TRouting
+  >,
 ): Promise<
   (
     resolveContext: ResolveContext,
   ) => Collection<
-    MergeCollectionFields<TFields, TTranslatable, TCreatedAt, TUpdatedAt, TAuthor, TEditors>,
+    MergeCollectionFields<
+      TFields,
+      TTranslatable,
+      TCreatedAt,
+      TUpdatedAt,
+      TAuthor,
+      TEditors,
+      TIsPublic,
+      TScheduledAt,
+      TSEO,
+      TRouting
+    >,
     CollectionMeta
   >
 > {

@@ -31,6 +31,6 @@ export default defineField({
 
     return value
   },
-  populatedTypeFn: () => `Record<${languages.map(({ code }) => `'${code}'`).join(' | ')}, number | null>`,
   uiOptions: { placeholder: true },
+  populatedTypeFn: () => `Record<${languages.map(({ code }) => `'${code}'`).join(' | ')}, number | null>`,
 })

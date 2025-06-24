@@ -28,6 +28,7 @@ export default defineTranslation({
   ),
   'Invalid input': 'Ungültige Eingabe',
   'Invalid path': 'Ungültiger Pfad',
+  'Invalid RegExp pattern': 'Ungültiges RegExp-Muster',
 
   'No': 'Nein',
   'No file parts uploaded': 'Keine Dateiteile wurden hochgeladen',

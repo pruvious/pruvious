@@ -86,6 +86,14 @@ export function resolveCollectionFiles(): Record<string, ResolveFromLayersResult
         continue
       }
 
+      if (collectionName === 'Routes') {
+        warnWithContext(`The collection name ${colorize('yellow', collectionName)} is reserved.`, [
+          `This is a system table utilized by the \`pruvious\` package.`,
+          `Source: ${colorize('dim', file.relative)}`,
+        ])
+        continue
+      }
+
       if (collectionName.length > 63) {
         warnWithContext(`The collection name ${colorize('yellow', collectionName)} is too long.`, [
           `Collection names must be 63 characters or fewer.`,

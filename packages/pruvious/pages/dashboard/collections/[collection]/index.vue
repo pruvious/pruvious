@@ -515,8 +515,42 @@ function resolveColumns(
     const filteredFieldEntries = Object.entries(collection.definition.fields).filter(([_, options]) =>
       'ui' in options ? !options.ui?.hidden : true,
     )
+    let sliceFrom = 0
+    let sliceLength = 5
 
-    for (const [fieldName, options] of filteredFieldEntries.slice(0, collection.definition.createdAtField ? 4 : 5)) {
+    if (collection.definition.routing.enabled) {
+      const options = collection.definition.fields.subpath!
+      columns.subpath = puiColumn({
+        label:
+          'ui' in options && isDefined(options.ui?.label)
+            ? maybeTranslate(options.ui.label)
+            : __('pruvious-dashboard', 'Subpath'),
+        sortable: 'text',
+        minWidth: '20rem',
+      })
+      sliceFrom++
+      sliceLength--
+
+      if (collection.definition.routing.isPublicField) {
+        const options = collection.definition.fields.isPublic!
+        columns.isPublic = puiColumn({
+          label:
+            'ui' in options && isDefined(options.ui?.label)
+              ? maybeTranslate(options.ui.label)
+              : __('pruvious-dashboard', 'Status'),
+          sortable: 'numeric',
+          minWidth: '16rem',
+        })
+        sliceFrom++
+        sliceLength--
+      }
+    }
+
+    if (collection.definition.createdAtField) {
+      sliceLength--
+    }
+
+    for (const [fieldName, options] of filteredFieldEntries.slice(sliceFrom, sliceFrom + sliceLength)) {
       columns[fieldName] = puiColumn({
         label:
           'ui' in options && isDefined(options.ui?.label)

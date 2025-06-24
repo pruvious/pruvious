@@ -52,6 +52,7 @@ npm install @pruvious/utils
   - [isFunction](#isfunction)
   - [lockAndLoad](#lockandload)
   - [retry](#retry)
+  - [toPromise](#topromise)
 - [Misc](#misc)
   - [blurActiveElement](#bluractiveelement)
   - [deselectAll](#deselectall)
@@ -654,6 +655,15 @@ resolve()
 { attempts: 5, delay: 100 },
 )
 ```
+
+### <a id="topromise">`toPromise(input)`</a>
+
+Ensures the `input` is a `Promise`.
+
+- If the input is a function, it is executed. Its return value is wrapped in a promise.
+- If the function throws an error, a rejected promise is returned.
+- If the input is already a promise, it's returned directly.
+- If the input is any other value, it's wrapped in a resolved promise.
 
 ## <a id="misc">Misc</a>
 

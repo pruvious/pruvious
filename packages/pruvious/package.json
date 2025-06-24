@@ -65,7 +65,8 @@
     "pkg-types": "2.1.0",
     "safe-stringify": "1.1.1",
     "sharp": "0.34.1",
-    "std-env": "3.9.0"
+    "std-env": "3.9.0",
+    "ufo": "1.6.1"
   },
   "devDependencies": {
     "@types/accept-language-parser": "1.5.7",

@@ -1,4 +1,4 @@
-import type { CollectionMeta, GenericSerializableFieldOptions } from '#pruvious/server'
+import type { CollectionMeta, CollectionRoutingOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 
 export interface SerializableCollection extends Pick<CollectionMeta, 'translatable' | 'syncedFields' | 'ui'> {
   /**
@@ -63,4 +63,25 @@ export interface SerializableCollection extends Pick<CollectionMeta, 'translatab
    * Indicates whether records can be duplicated in the collection.
    */
   duplicate: boolean
+
+  /**
+   * Controls whether routes can be assigned to this collection.
+   * When a collection is referenced by a route, its records become accessible via the route's `$data` property.
+   */
+  routing: Required<Pick<CollectionRoutingOptions<string, boolean, boolean, boolean>, 'publicFields'>> & {
+    /**
+     * Indicates whether routing is enabled for the collection.
+     */
+    enabled: boolean
+
+    /**
+     * Indicates whether the `isPublic` field is enabled in the collection.
+     */
+    isPublicField: boolean
+
+    /**
+     * Indicates whether the `scheduledAt` field is enabled in the collection.
+     */
+    scheduledAtField: boolean
+  }
 }

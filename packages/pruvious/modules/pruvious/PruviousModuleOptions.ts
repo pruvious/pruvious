@@ -86,9 +86,6 @@ export interface PruviousModuleOptions {
      * - Logs the request.
      * - Removes expired cache entries.
      * - Initiates the job queue processing sequence.
-     *
-     * This middleware is applied to all routes starting with `/api/` by default, except for the `/api/process-queue` route
-     * and routes starting with `/api/_`.
      */
     middleware?: {
       /**
@@ -120,7 +117,12 @@ export interface PruviousModuleOptions {
        * Any trailing slashes in the paths are automatically removed before pattern matching occurs.
        *
        * @default
-       * ['/api/_*', '/api/_*\/**', '/api/process-queue']
+       * [
+       *   '/api/_*',
+       *   '/api/_*\/**',
+       *   '/api/process-queue',
+       *   '/api/routes/**',
+       * ]
        *
        * @example
        * ```ts
@@ -583,13 +585,13 @@ export interface PruviousModuleOptions {
      *
      * When `false` (default):
      *
-     * - Primary language: example.com/page
-     * - Other languages: example.com/de/page
+     * - Primary language: `example.com/page`
+     * - Other languages: `example.com/de/page`
      *
      * When `true`:
      *
-     * - Primary language: example.com/en/page
-     * - Other languages: example.com/de/page
+     * - Primary language: `example.com/en/page`
+     * - Other languages: `example.com/de/page`
      *
      * @default false
      */
@@ -696,6 +698,42 @@ export interface PruviousModuleOptions {
         }
       | boolean
     >
+  }
+
+  /**
+   * Configuration options for routing behavior.
+   * Controls how routes are handled in the `pruvious` or `pruvious-route` client middleware.
+   *
+   * Default configuration:
+   *
+   * - Automatically follows redirects on client-side route resolution.
+   * - No trailing slashes on routes.
+   * - Adds SEO metadata to page headers.
+   */
+  routing: {
+    /**
+     * Whether to automatically follow redirects when resolving routes on the client side.
+     *
+     * @default true
+     */
+    followRedirects?: boolean
+
+    /**
+     * Whether to add a trailing slash to all routes.
+     *
+     * - When `true`: Routes end with a slash (e.g., `/page/`)
+     * - When `false`: Routes have no trailing slash (e.g., `/page`)
+     *
+     * @default false
+     */
+    trailingSlash?: boolean
+
+    /**
+     * Whether to add SEO metadata to the head section of pages using the `pruvious` or `pruvious-route` middleware.
+     *
+     * @default true
+     */
+    seo?: boolean
   }
 
   /**
@@ -1318,6 +1356,23 @@ declare module 'nuxt/schema' {
       primaryLanguage: string
 
       /**
+       * Controls URL prefixing behavior for the primary language.
+       *
+       * When `false` (default):
+       *
+       * - Primary language: `example.com/page`
+       * - Other languages: `example.com/de/page`
+       *
+       * When `true`:
+       *
+       * - Primary language: `example.com/en/page`
+       * - Other languages: `example.com/de/page`
+       *
+       * This setting is derived from the Nuxt config `pruvious.i18n.prefixPrimaryLanguage`.
+       */
+      prefixPrimaryLanguage: boolean
+
+      /**
        * Client-side token storage configuration.
        * Defines how authentication tokens are stored and sent by the client.
        *
@@ -1331,6 +1386,11 @@ declare module 'nuxt/schema' {
        * This setting is derived from the Nuxt config `pruvious.i18n.preloadTranslatableStrings`.
        */
       translatableStringsPreloadRules: Record<string, { include: string[]; exclude: string[] }>
+
+      /**
+       * Controls how routes are handled in the `pruvious` or `pruvious-route` client middleware.
+       */
+      routing: Required<PruviousModuleOptions['routing']>
     }
   }
 }

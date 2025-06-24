@@ -114,7 +114,7 @@ export interface DefineDashboardPageOptions {
  *   label: ({ __ }) => __('pruvious-dashboard', 'CRM integration'),
  *   icon: 'bolt',
  *   group: 'general',
- *   order: 3,
+ *   order: 4,
  *   permissions: ['manage-crm'],
  * })
  *

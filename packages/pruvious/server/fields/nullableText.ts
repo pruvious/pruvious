@@ -1,7 +1,7 @@
 import { defineField, type TranslatableStringCallbackContext } from '#pruvious/server'
 import { textFieldModel } from '@pruvious/orm'
 
-const customOptions: {
+export const nullableTextOptions: {
   ui?: {
     /**
      * @default
@@ -133,6 +133,6 @@ export default defineField({
   model: textFieldModel(),
   nullable: true,
   default: null,
-  customOptions,
+  customOptions: nullableTextOptions,
   uiOptions: { placeholder: true },
 })

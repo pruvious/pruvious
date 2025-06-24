@@ -1,5 +1,4 @@
 import {
-  languages,
   walkFieldLayoutItems,
   type FieldsLayout,
   type GenericDatabase,
@@ -32,7 +31,6 @@ import {
   isUndefined,
   omit,
   setProperty,
-  type DefaultFalse,
   type DefaultTrue,
   type PartialMax2Levels,
 } from '@pruvious/utils'
@@ -194,11 +192,28 @@ interface ISingleton {
    *
    * Available options:
    *
-   * - `true` - Uses default field name and settings.
+   * - `true` - Enables the field with default options.
    * - `{...}` - Configures custom options for the field.
    * - `false` - Disables the field completely.
    */
   updatedAt: any
+
+  /**
+   * Controls whether routes can be assigned to this singleton.
+   * When a route is assigned, certain singleton fields become publicly accessible via the route's `$data` property.
+   *
+   * Unlike collections, where the last part of the URL path comes from an auto-generated `subpath` field,
+   * singletons use the route's `path` field directly as the URL path.
+   *
+   * Available options:
+   *
+   * - `true` - Enables routing and exposes all singleton fields in the `$data` property of route records.
+   * - `{...}` - Configures custom routing options.
+   * - `false` - Disables routing completely.
+   *
+   * @see https://pruvious.com/docs/routing (@todo set up this link)
+   */
+  routing: any
 
   /**
    * Controls how the singleton is displayed in the dashboard user interface.
@@ -507,6 +522,7 @@ export interface Singleton<
   readonly copyTranslation: SingletonCopyTranslationFunction<MergeSingletonFields<TFields, TUpdatedAt>> | null
   readonly logs: SingletonLogsOptions
   readonly updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions
+  readonly routing: AutoFieldEnabled & Required<SingletonRoutingOptions>
   readonly ui: SingletonUIOptions<keyof MergeSingletonFields<TFields, TUpdatedAt> & string>
 
   /**
@@ -722,12 +738,34 @@ export interface DefineSingletonOptions<
   /**
    * @default
    * {
-   *   hidden: true,
-   *   label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
-   *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+   *   ui: {
+   *     hidden: true,
+   *     label: ({ __ }) => __('pruvious-dashboard', 'Updated'),
+   *     description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
+   *   },
    * }
    */
   updatedAt?: TUpdatedAt
+
+  /**
+   * @default false
+   *
+   * @example
+   * ```vue
+   * <template>
+   *   <NuxtLayout>
+   *     <pre>{{ data }}</pre>
+   *   </NuxtLayout>
+   * </template>
+   *
+   * <script lang="ts" setup>
+   * import { resolveRoute } from '#pruvious/client'
+   *
+   * const { data } = resolveRoute()
+   * </script>
+   * ```
+   */
+  routing?: SingletonRoutingOptions<PublicRoutingFieldNames<TFields, TTranslatable, TUpdatedAt>>
 
   /**
    * @default
@@ -820,6 +858,24 @@ export type SingletonGuard = (
   context: SingletonContext,
 ) => any
 
+type PublicRoutingFieldNames<
+  TFields extends Record<string, GenericField>,
+  TTranslatable extends boolean | undefined,
+  TUpdatedAt extends boolean | UpdatedAtFieldPresetOptions | undefined,
+> =
+  | (keyof TFields & string)
+  | (DefaultTrue<TTranslatable> extends true ? 'translations' | 'language' : never)
+  | (DefaultTrue<TUpdatedAt> extends false ? never : 'updatedAt')
+
+export type SingletonRoutingOptions<TFieldNames extends string = string> = {
+  /**
+   * Specifies which fields will be exposed in the `$data` property.
+   *
+   * If not provided, all custom `fields` plus `updatedAt` (when available) will be included by default.
+   */
+  publicFields?: TFieldNames[]
+}
+
 interface AutoFieldEnabled {
   /**
    * Specifies whether this singleton has the field activated.
@@ -873,7 +929,7 @@ export function defineSingleton<
   options: DefineSingletonOptions<TFields, TTranslatable, TUpdatedAt>,
 ): (
   resolveContext: ResolveContext,
-) => Singleton<MergeSingletonFields<TFields, TUpdatedAt>, DefaultFalse<TTranslatable>, DefaultTrue<TUpdatedAt>> {
+) => Singleton<MergeSingletonFields<TFields, TUpdatedAt>, DefaultTrue<TTranslatable>, DefaultTrue<TUpdatedAt>> {
   return function (resolveContext: ResolveContext) {
     const fields: Record<string, GenericField> = { ...options.fields }
     const hooks: Required<SingletonHooks> = {
@@ -886,6 +942,11 @@ export function defineSingleton<
     const updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions = defu(
       { enabled: options.updatedAt !== false },
       isObject(options.updatedAt) ? options.updatedAt : {},
+    )
+    const routing: AutoFieldEnabled & Required<SingletonRoutingOptions> = defu(
+      { enabled: !!options.routing },
+      isObject(options.routing) ? options.routing : {},
+      { publicFields: [...Object.keys(options.fields), ...(updatedAt.enabled ? ['updatedAt'] : [])] },
     )
     const ui = deepClone(options.ui)
 
@@ -1001,6 +1062,7 @@ export function defineSingleton<
         }),
       },
       updatedAt,
+      routing,
       ui: defu(ui ?? {}, {
         hidden: false,
         label: undefined,

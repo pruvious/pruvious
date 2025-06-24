@@ -33,7 +33,7 @@ import {
 defineProps({
   text: textField({ required: true }),
   buttonGroup: buttonGroupField({ choices: [{ label: 'a', value: 'a' }, { value: 'b' }] }),
-  chips: chipsField({ allowValues: ['a', 'b', 'c'], default: ['a', 'b'] }),
+  chips: chipsField({ choices: [{ value: 'a' }, { value: 'b' }, { value: 'c' }], default: ['a', 'b'] }),
   records: recordsField({ collection: 'Users', fields: ['roles', 'tokenSubject'], populate: true }),
   repeater: repeaterField({
     subfields: {

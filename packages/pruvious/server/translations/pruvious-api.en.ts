@@ -26,6 +26,7 @@ export default defineTranslation({
   }),
   'Invalid input': 'Invalid input',
   'Invalid path': 'Invalid path',
+  'Invalid RegExp pattern': 'Invalid RegExp pattern',
 
   'Missing file parts: $parts': createPattern('Missing file parts: $parts', { parts: 'string' }),
 

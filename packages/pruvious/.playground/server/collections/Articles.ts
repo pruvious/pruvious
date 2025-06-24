@@ -34,6 +34,9 @@ export default defineCollection({
   },
   author: { strict: true },
   editors: { strict: true },
+  routing: {
+    publicFields: ['name'],
+  },
   ui: {
     indexPage: {
       table: {

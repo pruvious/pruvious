@@ -14,7 +14,7 @@ import {
 } from '@pruvious/orm'
 import { type ExtractValues, isNotNull } from '@pruvious/utils'
 import type { PropType } from 'vue'
-import { SelectChoice, SelectChoiceGroup } from './select'
+import type { SelectChoice, SelectChoiceGroup } from './select'
 
 interface CustomOptions<TChoices extends (SelectChoice | SelectChoiceGroup)[]> {
   /**

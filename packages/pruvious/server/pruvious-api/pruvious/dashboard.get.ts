@@ -43,6 +43,12 @@ export default defineEventHandler(async () => {
           updatedAtField: collection.meta.updatedAt.enabled,
           authorField: collection.meta.author.enabled,
           editorsField: collection.meta.editors.enabled,
+          routing: {
+            enabled: collection.meta.routing.enabled,
+            publicFields: collection.meta.routing.enabled ? collection.meta.routing.publicFields : [],
+            isPublicField: collection.meta.routing.isPublic.enabled,
+            scheduledAtField: collection.meta.routing.scheduledAt.enabled,
+          },
           fields: serializeFields(collection.fields),
           api: collection.meta.api as any,
           ui: serializeTranslatableStringCallbacks(collection.meta.ui),
@@ -75,6 +81,10 @@ export default defineEventHandler(async () => {
           translatable: singleton.translatable,
           syncedFields: singleton.syncedFields,
           copyTranslation: !!singleton.copyTranslation,
+          routing: {
+            enabled: singleton.routing.enabled,
+            publicFields: singleton.routing.enabled ? singleton.routing.publicFields : [],
+          },
           fields: serializeFields(singleton.fields),
           api: singleton.api as any,
           ui: serializeTranslatableStringCallbacks(singleton.ui),

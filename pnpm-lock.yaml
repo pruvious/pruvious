@@ -193,6 +193,9 @@ importers:
       std-env:
         specifier: 3.9.0
         version: 3.9.0
+      ufo:
+        specifier: 1.6.1
+        version: 1.6.1
     devDependencies:
       '@types/accept-language-parser':
         specifier: 1.5.7
@@ -258,6 +261,9 @@ importers:
       '@floating-ui/vue':
         specifier: 1.1.6
         version: 1.1.6(vue@3.5.13(typescript@5.8.3))
+      '@formkit/drag-and-drop':
+        specifier: 0.5.3
+        version: 0.5.3
       '@iconify-json/tabler':
         specifier: 1.2.17
         version: 1.2.17
@@ -1308,6 +1314,9 @@ packages:
 
   '@floating-ui/vue@1.1.6':
     resolution: {integrity: sha512-XFlUzGHGv12zbgHNk5FN2mUB7ROul3oG2ENdTpWdE+qMFxyNxWSRmsoyhiEnpmabNm6WnUvR1OvJfUfN4ojC1A==}
+
+  '@formkit/drag-and-drop@0.5.3':
+    resolution: {integrity: sha512-VGQsKYc350OOMbz7wYt69YqDbn49x7RJ32eqiJieNke54nGZYmx18XEqTw0lBiJmH3RaiH6V45gB1u+tvI/TNw==}
 
   '@iconify-json/tabler@1.2.17':
     resolution: {integrity: sha512-Jfk20IC/n7UOQQSXM600BUhAwEfg8KU1dNUF+kg4eRhbET5w1Ktyax7CDx8Z8y0H6+J/8//AXpJOEgG8YoP8rw==}
@@ -7252,6 +7261,8 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
+  '@formkit/drag-and-drop@0.5.3': {}
+
   '@iconify-json/tabler@1.2.17':
     dependencies:
       '@iconify/types': 2.0.0
@@ -7691,7 +7702,7 @@ snapshots:
       scule: 1.3.0
       semver: 7.7.0
       std-env: 3.9.0
-      ufo: 1.5.4
+      ufo: 1.6.1
       unctx: 2.4.1
       unimport: 4.0.0(rollup@4.40.2)
       untyped: 1.5.2
@@ -7720,7 +7731,7 @@ snapshots:
       scule: 1.3.0
       semver: 7.7.1
       std-env: 3.9.0
-      ufo: 1.5.4
+      ufo: 1.6.1
       unctx: 2.4.1
       unimport: 4.1.3
       untyped: 2.0.0
@@ -10331,7 +10342,7 @@ snapshots:
       iron-webcrypto: 1.2.1
       node-mock-http: 1.0.0
       radix3: 1.1.2
-      ufo: 1.5.4
+      ufo: 1.6.1
       uncrypto: 0.1.3
 
   h3@1.15.3:
@@ -10838,7 +10849,7 @@ snapshots:
       acorn: 8.14.0
       pathe: 2.0.3
       pkg-types: 1.3.1
-      ufo: 1.5.4
+      ufo: 1.6.1
 
   mocked-exports@0.1.1: {}
 
@@ -11175,7 +11186,7 @@ snapshots:
       pathe: 2.0.3
       pkg-types: 1.3.1
       tinyexec: 0.3.2
-      ufo: 1.5.4
+      ufo: 1.6.1
 
   nypm@0.6.0:
     dependencies:

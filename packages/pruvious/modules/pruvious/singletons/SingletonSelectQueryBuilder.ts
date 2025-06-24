@@ -22,7 +22,16 @@ import {
   type QueryDetails,
   type SelectQueryBuilderParamsOptions,
 } from '@pruvious/orm'
-import { deepCompare, isArray, isDefined, isNull, toArray, uniqueArray, type NonEmptyArray } from '@pruvious/utils'
+import {
+  deepCompare,
+  isArray,
+  isDefined,
+  isNull,
+  toArray,
+  toPromise,
+  uniqueArray,
+  type NonEmptyArray,
+} from '@pruvious/utils'
 import { hash } from 'ohash'
 import { SingletonBaseQueryBuilder, type SingletonQueryBuilderParamsOptions } from './SingletonBaseQueryBuilder'
 
@@ -556,7 +565,7 @@ export class SingletonSelectQueryBuilder<
 
           if (populator) {
             promises.push(
-              populator(value, fields[fieldName]!.withContext(context as any, { path: fieldName })).then(
+              toPromise(populator(value, fields[fieldName]!.withContext(context as any, { path: fieldName }))).then(
                 (populatedValue: any) => {
                   populatedRow[fieldName] = populatedValue
                 },

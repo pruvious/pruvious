@@ -13,6 +13,7 @@ export const privateCollectionMeta: CollectionMeta = {
   updatedAt: { enabled: false } as any,
   author: { enabled: false } as any,
   editors: { enabled: false } as any,
+  routing: { enabled: false } as any,
   ui: {
     hidden: true,
     label: '',

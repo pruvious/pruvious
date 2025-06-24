@@ -1,16 +1,22 @@
 import {
+  dateTimeField,
   languageField,
+  objectField,
   primaryLanguage,
   recordField,
   recordsField,
+  subpathField,
+  textField,
   timestampField,
   translationsField,
+  trueFalseField,
+  uniqueValidator,
   type FieldUIOptions,
   type Permission,
   type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import { createdAtFieldBeforeQueryExecution, updatedAtFieldBeforeQueryExecution } from '@pruvious/orm'
-import { defu, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
+import { defu, isNull, isString, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
 import type { TimestampFieldOptions } from '../../../server/fields/timestamp'
 
 export interface LanguageFieldPresetOptions {
@@ -111,6 +117,70 @@ export interface EditorsFieldPresetOptions {
   ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
 }
 
+export type SubpathFieldPresetOptions = Parameters<typeof subpathField>[0] & {
+  /**
+   * The UI options for the field.
+   *
+   * @default
+   * {
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Subpath'),
+   *   description: ({ __ }) => __('pruvious-dashboard', 'The last part of the URL path after the base URL.'),
+   *   placeholder: ({ __ }) => __('pruvious-dashboard', 'unique-subpath'),
+   * }
+   */
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+}
+
+export type IsPublicFieldPresetOptions = Parameters<typeof trueFalseField>[0] & {
+  /**
+   * The UI options for the field.
+   *
+   * @default
+   * {
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Status'),
+   *   description: ({ __ }) => __('pruvious-dashboard', 'Indicates whether this route is publicly accessible.'),
+   *   noLabel: ({ __ }) => __('pruvious-dashboard', 'Draft'),
+   *   yesLabel: ({ __ }) => __('pruvious-dashboard', 'Public'),
+   * }
+   */
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+}
+
+export type ScheduledAtFieldPresetOptions = Parameters<typeof dateTimeField>[0] & {
+  /**
+   * The UI options for the field.
+   *
+   * @default
+   * {
+   *   label: ({ __ }) => __('pruvious-dashboard', 'Publish date'),
+   *   description: ({ __ }) => __('pruvious-dashboard', 'Sets when this content will be published. Use current date and time for immediate publication or a future date to schedule it.'),
+   * }
+   */
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+}
+
+export type SEOFieldPresetOptions = Omit<Parameters<typeof objectField>[0], 'subfields'> & {
+  /**
+   * The UI options for the field.
+   *
+   * @default
+   * {
+   *   label: ({ __ }) => __('pruvious-dashboard', 'SEO'),
+   *   subfieldsLayout: [
+   *     {
+   *       tabs: [
+   *         {
+   *           label: ({ __ }) => __('pruvious-dashboard', 'General'),
+   *           fields: ['title', 'baseTitle', 'description', 'isIndexable'],
+   *         },
+   *       ],
+   *     },
+   *   ],
+   * }
+   */
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
+}
+
 /**
  * Generates a `language` field that stores the language code of a record.
  */
@@ -119,6 +189,17 @@ export function languageFieldPreset(options: LanguageFieldPresetOptions) {
     required: true,
     immutable: true,
     default: primaryLanguage,
+    validators: [
+      (value, { context }) => {
+        if (isNull(value)) {
+          throw new Error(context.__('pruvious-orm', 'This field is required'))
+        }
+      },
+      uniqueValidator({
+        fields: ['language', 'translations'],
+        errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
+      }),
+    ],
     ui: defu(options.ui ?? {}, {
       hidden: true,
       label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Language'),
@@ -250,5 +331,132 @@ export function editorsFieldPreset(options: EditorsFieldPresetOptions) {
       description: ({ __ }: TranslatableStringCallbackContext) =>
         __('pruvious-dashboard', 'The users who can edit the record.'),
     } satisfies EditorsFieldPresetOptions['ui']),
+  })
+}
+
+/**
+ * Generates a `subpath` field that stores the last portion of a URL path.
+ * This field is intended to be used in collections referenced by routes.
+ */
+export function subpathFieldPreset(options: SubpathFieldPresetOptions) {
+  return subpathField({
+    required: true,
+    ...options,
+    ui: defu(options.ui ?? {}, {
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Subpath'),
+      description: ({ __ }: TranslatableStringCallbackContext) =>
+        __('pruvious-dashboard', 'The last part of the URL path after the base URL.'),
+      placeholder: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'unique-subpath'),
+    } satisfies SubpathFieldPresetOptions['ui']),
+  })
+}
+
+/**
+ * Generates an `isPublic` field that stores a boolean value indicating whether a routed collection record is public.
+ * This field is intended to be used in collections referenced by routes.
+ */
+export function isPublicFieldPreset(options: IsPublicFieldPresetOptions) {
+  return trueFalseField({
+    ...options,
+    ui: defu(options.ui ?? {}, {
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Status'),
+      description: ({ __ }: TranslatableStringCallbackContext) =>
+        __('pruvious-dashboard', 'Indicates whether this route is publicly accessible.'),
+      noLabel: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Draft'),
+      yesLabel: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Public'),
+    } satisfies IsPublicFieldPresetOptions['ui']),
+  })
+}
+
+/**
+ * Generates an `scheduledAt` field that stores a timestamp indicating when a routed collection record is scheduled to be published.
+ * This field is intended to be used in collections referenced by routes and requires the `isPublic` field to be present.
+ */
+export function scheduledAtFieldPreset(options: ScheduledAtFieldPresetOptions) {
+  return dateTimeField({
+    ...options,
+    ui: defu(options.ui ?? {}, {
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Publish date'),
+      description: ({ __ }: TranslatableStringCallbackContext) =>
+        __(
+          'pruvious-dashboard',
+          'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.',
+        ),
+    } satisfies ScheduledAtFieldPresetOptions['ui']),
+  })
+}
+
+/**
+ * Generates an `seo` field that contains metadata for search engine optimization.
+ * This field is intended to be used in collections referenced by routes.
+ */
+export function seoFieldPreset(options: SEOFieldPresetOptions) {
+  return objectField({
+    ...(options as {}),
+    subfields: {
+      title: textField({
+        sanitizers: [(value) => (isString(value) ? value.replace(/\s+/g, ' ') : value)],
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Page title'),
+          description: ({ __ }) =>
+            __(
+              'pruvious-dashboard',
+              'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.',
+            ),
+          placeholder: ({ __ }) => __('pruvious-dashboard', 'Untitled'),
+        },
+      }),
+      baseTitle: trueFalseField({
+        default: true,
+        ui: {
+          yesLabel: ({ __ }) => __('pruvious-dashboard', 'Show'),
+          noLabel: ({ __ }) => __('pruvious-dashboard', 'Hide'),
+          label: ({ __ }) => __('pruvious-dashboard', 'Base title'),
+          description: ({ __ }) =>
+            __(
+              'pruvious-dashboard',
+              'Controls whether to combine the page title with the base title defined in the SEO settings.',
+            ),
+        },
+      }),
+      // @todo textAreaField
+      description: textField({
+        sanitizers: [(value) => (isString(value) ? value.replace(/\s+/g, ' ') : value)],
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Meta description'),
+          description: ({ __ }) =>
+            __(
+              'pruvious-dashboard',
+              'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.',
+            ),
+          placeholder: ({ __ }) => __('pruvious-dashboard', 'No description'),
+        },
+      }),
+      isIndexable: trueFalseField({
+        default: true,
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Search engine visibility'),
+          yesLabel: ({ __ }) => __('pruvious-dashboard', 'Visible'),
+          noLabel: ({ __ }) => __('pruvious-dashboard', 'Hidden'),
+          description: ({ __ }) =>
+            __('pruvious-dashboard', 'Controls whether search engines are allowed to index this page.'),
+        },
+      }),
+      // @todo sharingImage
+      // @todo metaTags
+    },
+    ui: defu((options.ui as any) ?? {}, {
+      label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'SEO'),
+      subfieldsLayout: [
+        {
+          tabs: [
+            {
+              label: ({ __ }) => __('pruvious-dashboard', 'General'),
+              fields: ['title', 'baseTitle', 'description', 'isIndexable'],
+            },
+          ],
+        },
+      ],
+    } satisfies SEOFieldPresetOptions['ui']),
   })
 }

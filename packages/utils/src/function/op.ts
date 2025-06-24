@@ -18,3 +18,20 @@ export function executeOrReturn<T, Args extends T extends (...args: any[]) => an
 ): T extends (...args: any[]) => any ? ReturnType<T> : T {
   return isFunction(fn) ? fn(...args) : (fn as any)
 }
+
+/**
+ * Ensures the `input` is a `Promise`.
+ *
+ * - If the input is a function, it is executed. Its return value is wrapped in a promise.
+ *   - If the function throws an error, a rejected promise is returned.
+ * - If the input is already a promise, it's returned directly.
+ * - If the input is any other value, it's wrapped in a resolved promise.
+ */
+export function toPromise(input: any) {
+  try {
+    const result = typeof input === 'function' ? input() : input
+    return Promise.resolve(result)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}

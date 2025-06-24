@@ -8,6 +8,10 @@ export default defineTranslation({
     { subject: [{ conditions: [{ count: 1 }], output: 'Block konnte' }, 'Blöcke konnten'] },
   ),
 
+  '/example/path': '/beispiel/pfad',
+
+  'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.':
+    'Eine kurze Beschreibung des Seiteninhalts, die normalerweise in den Suchergebnissen angezeigt wird. Suchmaschinen zeigen normalerweise etwa 150-160 Zeichen dieses Textes an.',
   'A translation for language `$language` already exists': createPattern(
     'Eine Übersetzung für die Sprache `$language` existiert bereits',
     { language: 'string' },
@@ -18,11 +22,13 @@ export default defineTranslation({
   'Add after': 'Danach hinzufügen',
   'Add before': 'Davor hinzufügen',
   'Add block': 'Block hinzufügen',
+  'Add collection': 'Collection hinzufügen',
   'Add condition': 'Bedingung hinzufügen',
   'Add condition group': 'Bedingungsgruppe hinzufügen',
   'Add inside': 'Innen hinzufügen',
   'Add item': 'Eintrag hinzufügen',
   'Add nested block': 'Verschachtelten Block hinzufügen',
+  'Add redirect': 'Weiterleitung hinzufügen',
   'Add top-level block': 'Block auf oberster Ebene hinzufügen',
   'Administrator': 'Administrator',
   'After': 'Nach',
@@ -50,6 +56,8 @@ export default defineTranslation({
 
   'Background clipboard monitoring for instant paste readiness. This feature will request browser permission to access your clipboard.':
     'Hintergrund-Zwischenablageüberwachung für sofortige Einfügebereitschaft.\n\nDiese Funktion fordert die Berechtigung des Browsers an, auf Ihre Zwischenablage zuzugreifen.',
+  'Base title': 'Basistitel',
+  'Base title position': 'Position des Basistitels',
   'Base URL': 'Basis-URL',
   'Before': 'Vor',
   'Before or equal to': 'Vor oder gleich',
@@ -78,11 +86,17 @@ export default defineTranslation({
     'Änderungen an diesem Feld werden automatisch in allen Übersetzungen synchronisiert.',
   'Changes that you made may not be saved.':
     'Änderungen, die Sie vorgenommen haben, werden möglicherweise nicht gespeichert.',
+  'Character(s) used to separate the page title from the base title.':
+    'Zeichen, die verwendet werden, um den Seitentitel vom Basistitel zu trennen.',
+  'Choose `301` for permanent redirects or `302` for temporary redirects.':
+    'Wählen Sie `301` für permanente Weiterleitungen oder `302` für temporäre Weiterleitungen.',
   'Clear': 'Löschen',
   'Close': 'Schließen',
   'Collapse': 'Einklappen',
   'Collapse all': 'Alle einklappen',
   'Collections': 'Collections',
+  'Collections are resolved in the order they are provided.':
+    'Collections werden in der Reihenfolge aufgelöst, in der sie bereitgestellt werden.',
   'Column': 'Spalte',
   'Columns': 'Spalten',
   'Completed at': 'Abgeschlossen am',
@@ -92,6 +106,16 @@ export default defineTranslation({
   'Contains': 'Enthält',
   'Contains (case-insensitive)': 'Enthält (Groß-/Kleinschreibung ignorieren)',
   'Content language': 'Inhaltssprache',
+  'Controls whether query parameters from the current URL are added to the redirect URL.':
+    'Steuert, ob Query-Parameter aus der aktuellen URL zur Weiterleitungs-URL hinzugefügt werden.',
+  'Controls whether search engines are allowed to index this page.':
+    'Steuert, ob Suchmaschinen diese Seite indexieren dürfen.',
+  'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).':
+    'Regelt, ob Ihre Website von Suchmaschinen indexiert werden darf. Ist die Indexierung deaktiviert, erhalten Suchmaschinen die Anweisung, die Website zu ignorieren. Diese Vorgabe wird jedoch nicht von allen Suchmaschinen garantiert befolgt.',
+  'Controls whether the base title appears before or after the page title.':
+    'Steuert, ob der Basistitel vor oder nach dem Seitentitel angezeigt wird.',
+  'Controls whether to combine the page title with the base title defined in the SEO settings.':
+    'Steuert, ob der Seitentitel mit dem Basistitel von den SEO-Einstellungen kombiniert wird.',
   'Copied': 'Kopiert',
   'Copy': 'Kopieren',
   'Copy $from to $to': createPattern('$from nach $to kopieren', { from: 'string', to: 'string' }),
@@ -156,10 +180,12 @@ export default defineTranslation({
   'Dependencies': 'Abhängigkeiten',
   'Deselect': 'Abwählen',
   'Disable': 'Deaktivieren',
+  'Disable to use the exact route path.': 'Deaktivieren Sie dies, um den genauen Routenpfad zu verwenden.',
   'Disabled': 'Deaktiviert',
   'Does not contain': 'Enthält nicht',
   'Does not contain (case-insensitive)': 'Enthält nicht (Groß-/Kleinschreibung ignorieren)',
   'Does not equal': 'Ungleich',
+  'Draft': 'Entwurf',
   'Drag to adjust value': 'Ziehen, um den Wert anzupassen',
   'Drop items here': 'Hier einfügen',
   'Duplicate': 'Duplizieren',
@@ -170,8 +196,11 @@ export default defineTranslation({
   'Edit field value': 'Feldwert bearbeiten',
   'Edit translation': 'Übersetzung bearbeiten',
   'Editors': 'Editoren',
-  'e.g., https://pruvious.com': 'z.B. https://pruvious.com',
+  'e.g. .+-legacy$': 'z.B. .+-legacy$',
+  'e.g. archive/reports/2024/$1': 'z.B. archiv/berichte/2024/$1',
+  'e.g. https://pruvious.com': 'z.B. https://pruvious.com',
   'e.g. Recently updated': 'z.B. Zuletzt aktualisiert',
+  'e.g. report-(.+)-2024$': 'z.B. report-(.+)-2024$',
   'Email': 'E-Mail',
   'Empty': 'Leer',
   'Enable': 'Aktivieren',
@@ -194,6 +223,7 @@ export default defineTranslation({
   'First name': 'Vorname',
   'Fixed width': 'Feste Breite',
   'Forgot password?': 'Passwort vergessen?',
+  'Forward query parameters': 'Query-Parameter weiterleiten',
   'Found $count $errors': createPattern(
     '$count $errors gefunden',
     { count: 'number' },
@@ -208,19 +238,24 @@ export default defineTranslation({
   'Greater than or equal to': 'Größer oder gleich',
 
   'Headers': 'Headers',
+  'Hidden': 'Versteckt',
+  'Hide': 'Verbergen',
   'Hide description': 'Beschreibung verbergen',
   'Hide password': 'Passwort verbergen',
+  'https://example.com': 'https://beispiel.de',
   'HTTP Method': 'HTTP Methode',
 
   'ID': 'ID',
   'Inactive': 'Inaktiv',
   'Includes all': 'Enthält alle',
   'Includes any': 'Enthält mindestens eines',
+  'Indicates whether this route is publicly accessible.': 'Gibt an, ob diese Route öffentlich zugänglich ist.',
   'Insert': 'Einfügen',
   'Installation': 'Installation',
   'installWelcomeMessage':
     'Willkommen bei Pruvious! Geben Sie Ihre Daten ein, um Ihr Hauptadministrator-Konto zu erstellen.',
   'Invalid `$param` parameter': createPattern('Parameter `$param` ist ungültig', { param: 'string' }),
+  'It matches the URL portion after the current route path.': 'Es matcht den URL-Teil nach dem aktuellen Routenpfad.',
 
   'Job': 'Auftrag',
   'Job debug ID': 'Auftrags-Debug-ID',
@@ -234,6 +269,7 @@ export default defineTranslation({
   'Last name': 'Nachname',
   'Later': 'Später',
   'Leave': 'Verlassen',
+  'Leave empty to redirect to the current route path.': 'Leer lassen, um zur aktuellen Route weiterzuleiten.',
   'Less than': 'Weniger als',
   'Less than or equal to': 'Weniger oder gleich',
   'Light mode': 'Heller Modus',
@@ -243,8 +279,10 @@ export default defineTranslation({
   'Logs': 'Logs',
 
   'Management': 'Management',
+  'Match pattern': 'Abgleichungsmuster',
   'Media': 'Medien',
   'Message': 'Nachricht',
+  'Meta description': 'Meta-Beschreibung',
   'More actions': 'Weitere Aktionen',
   'Move down': 'Nach unten verschieben',
   'Move up': 'Nach oben verschieben',
@@ -252,6 +290,8 @@ export default defineTranslation({
   'My bookmarks': 'Meine Merklisten',
 
   'Name': 'Name',
+  'Nested subpaths with forward slashes (`/`) are not allowed in this collection':
+    'Verschachtelte Subpfade mit Schrägstrichen (`/`) sind in dieser Collection nicht erlaubt',
   'New': 'Neu',
   'New bookmark': 'Neue Merkliste',
   'New name': 'Neuer Name',
@@ -267,14 +307,16 @@ export default defineTranslation({
   'No blocks match your search criteria': 'Keine Blöcke entsprechen Ihren Suchkriterien',
   'No conditions set': 'Keine Bedingungen festgelegt',
   'No data available': 'Keine Daten verfügbar',
+  'No description': 'Keine Beschreibung',
   'No entries were deleted': 'Es wurden keine Einträge gelöscht',
   'No fields to display': 'Keine Felder zum Anzeigen',
+  'No results found': 'Keine Ergebnisse gefunden',
   'No sorting applied': 'Keine Sortierung angewendet',
   'None': 'Keine',
   'Numeric': 'Numerisch',
   'Numeric (milliseconds precision)': 'Numerisch (Millisekunden-Präzision)',
 
-'Off': 'Aus',
+  'Off': 'Aus',
   'OK': 'OK',
   'On': 'Ein',
   'Open user menu': 'Benutzer-Menü öffnen',
@@ -289,6 +331,8 @@ export default defineTranslation({
   'Page': 'Seite',
   'Page ($count)': createPattern('Seite ($count)', { count: 'number' }),
   'Page not found': 'Seite nicht gefunden',
+  'Page title': 'Seitentitel',
+  'Pages': 'Seiten',
   'Parameters': 'Parameter',
   'Password': 'Passwort',
   'Paste after': 'Danach Einfügen',
@@ -303,6 +347,8 @@ export default defineTranslation({
   'Previous month': 'Vorheriger Monat',
   'Previous page': 'Vorherige Seite',
   'Priority': 'Priorität',
+  'Public': 'Öffentlich',
+  'Publish date': 'Veröffentlichungsdatum',
 
   'Queries': 'Abfragen',
   'Query': 'Abfrage',
@@ -312,12 +358,17 @@ export default defineTranslation({
 
   'Raw result': 'Rohergebnis',
   'Record not found': 'Eintrag nicht gefunden',
+  'Redirect': 'Weiterleitung',
+  'Redirect URL': 'Weiterleitungs-URL',
   'Redirected': 'Weitergeleitet',
   'Redirects': 'Weiterleitungen',
+  'Redirects take priority over all other routing configurations.':
+    'Weiterleitungen haben Vorrang vor allen anderen Routing-Konfigurationen.',
   'Redo': 'Wiederherstellen',
   'Refresh': 'Refresh',
   'Reload': 'Neu laden',
   'Remember me': 'Angemeldet bleiben',
+  'Remove': 'Entfernen',
   'Rename': 'Umbenennen',
   'Rename bookmark': 'Merkliste umbenennen',
   'Replace with current': 'Mit aktuellem ersetzen',
@@ -329,12 +380,19 @@ export default defineTranslation({
   'Restore defaults': 'Standardeinstellungen wiederherstellen',
   'Result': 'Ergebnis',
   'Roles': 'Rollen',
+  'Route': 'Route',
+  'Routes': 'Routen',
 
   'Save': 'Speichern',
   'Saved': 'Gespeichert',
-  'Search...': 'Suchen...',
   'Scheduled at': 'Geplant am',
+  'Search engine visibility': 'Sichtbarkeit für Suchmaschinen',
+  'Search...': 'Suchen...',
   'Select': 'Auswählen',
+  'Select a routable collection to create child routes from its records.':
+    'Wählen Sie eine routingfähige Collection aus, um aus deren Datensätzen untergeordnete Routen zu erstellen.',
+  'Select a routable singleton to use its data for this specific route.':
+    'Wählen Sie einen routingfähigen Singleton aus, um dessen Daten für diese spezifische Route zu verwenden.',
   'Select block': 'Block auswählen',
   'Select date': 'Datum auswählen',
   'selected': 'ausgewählt',
@@ -358,11 +416,14 @@ export default defineTranslation({
   ),
   'Session expired': 'Sitzung abgelaufen',
   'Set as default': 'Als Standard festlegen',
+  'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.':
+    'Legt fest, wann die Route veröffentlicht wird. Verwenden Sie das aktuelle Datum und die Uhrzeit für eine sofortige Veröffentlichung oder ein zukünftiges Datum, um sie zu planen.',
   'SEO': 'SEO',
   'Severity': 'Schweregrad',
   'Share': 'Teilen',
   'shared': 'geteilt',
   'Shared bookmarks': 'Geteilte Merklisten',
+  'Show': 'Anzeigen',
   'Show description': 'Beschreibung anzeigen',
   'Show details': 'Details anzeigen',
   'Show password': 'Passwort anzeigen',
@@ -372,6 +433,7 @@ export default defineTranslation({
   'Sign out from all other devices': 'Von allen anderen Geräten abmelden',
   'Sign out user from all active sessions': 'Benutzer von allen aktiven Sitzungen abmelden',
   'Signed out': 'Abgemeldet',
+  'Singleton': 'Singleton',
   'Singleton not found': 'Singleton nicht gefunden',
   'Smart clipboard': 'Intelligente Zwischenablage',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
@@ -389,6 +451,7 @@ export default defineTranslation({
   'Status code': 'Statuscode',
   'Status message': 'Statusmeldung',
   'Stop sharing': 'Teilen beenden',
+  'Subpath': 'Unterpfad',
   'Success': 'Erfolg',
   'Switched content language to `$language`': createPattern('Inhaltssprache auf `$language` umgeschaltet', {
     language: 'string',
@@ -396,6 +459,8 @@ export default defineTranslation({
   'Sync configuration': 'Konfiguration synchronisieren',
 
   'Tags': 'Tags',
+  'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).':
+    'Text, der in Browsern vor oder nach dem regulären Seitentitel angezeigt wird (z. B. Seitentitel | Basistitel).',
   'The `$language` translation does not exist': createPattern(
     'Die Übersetzung für die Sprache `$language` existiert nicht.',
     { language: 'string' },
@@ -410,8 +475,17 @@ export default defineTranslation({
   'The date and time when the record was created.': 'Das Datum und die Uhrzeit, wann der Eintrag erstellt wurde.',
   'The date and time when the record was last updated.':
     'Das Datum und die Uhrzeit, wann der Eintrag zuletzt aktualisiert wurde.',
+  'The last part of the URL path after the base URL.': 'Der letzte Teil des URL-Pfads nach der Basis-URL.',
   'The password must be at least 8 characters long': 'Das Passwort muss mindestens 8 Zeichen lang sein',
+  'The portion of the URL path after the base URL.': 'Der Teil des URL-Pfads nach der Basis-URL.',
+  'The RegExp pattern to match incoming requests.': 'Das RegExp-Muster, um eingehende Anfragen zu matchen.',
+  'The root URL of your website used for generating full URLs in SEO metadata and sitemaps.':
+    'Die Basis-URL Ihrer Website, die für die Generierung vollständiger URLs in SEO-Metadaten und Sitemaps verwendet wird.',
+  'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.':
+    'Der Titel der Seite, der in Suchergebnissen und Browser-Tabs angezeigt wird. Suchmaschinen zeigen in der Regel etwa die ersten 55-60 Zeichen eines Seitentitels an. Text darüber hinaus könnte verloren gehen, daher sollten Titel nicht länger als das sein.',
   'The unique identifier for translations.': 'Der eindeutige Bezeichner für Übersetzungen.',
+  'The URL or full path where users will be redirected.':
+    'Die URL oder der vollständige Pfad, auf den die Benutzer weitergeleitet werden.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
   'This block is not allowed here': 'Dieser Block ist hier nicht erlaubt',
@@ -433,6 +507,10 @@ export default defineTranslation({
   ),
   'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
     'Dieses Feld speichert Zeit mit Millisekunden-Präzision. Wenn Sie den Kalender-Selektor verwenden (der nur Sekunden-Präzision bietet), nutzen Sie die Operatoren `⁠<=` und ⁠`>=`, um sicherzustellen, dass Sie alle relevanten Einträge erfassen. Für exakte Vergleiche auf Millisekunden-Ebene verwenden Sie stattdessen das numerische Eingabefeld.',
+  'This path is already in use.': 'Dieser Pfad ist bereits in Verwendung.',
+  'This subpath is already in use.': 'Dieser Unterpfad ist bereits in Verwendung.',
+  'They are resolved in the order they are provided.':
+    'Sie werden in der Reihenfolge aufgelöst, in der sie bereitgestellt werden.',
   'Time': 'Zeit',
   'Time format': 'Zeitformat',
   'Time zone': 'Zeitzone',
@@ -460,6 +538,7 @@ export default defineTranslation({
   'timeSuffix:h': 'h',
   'timeSuffix:m': 'm',
   'timeSuffix:s': 's',
+  'Title separator': 'Titel-Trennzeichen',
   'To': 'Bis',
   'Toggle menu': 'Menü umschalten',
   'Toggle relation': 'Verbindung umschalten',
@@ -470,9 +549,15 @@ export default defineTranslation({
   'Type': 'Typ',
 
   'Undo': 'Rückgängig',
+  'unique-subpath': 'eindeutiger-unterpfad',
+  'Untitled': 'Unbenannt',
   'Update': 'Aktualisieren',
   'Updated': 'Aktualisiert',
   'Updated at': 'Aktualisiert am',
+  'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
+    'Verwenden Sie `$1`, `$2` usw., um Capture-Gruppen aus dem Abgleichungsmuster zu referenzieren.',
+  'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
+    'Verwenden Sie Capture-Gruppen (z.B. `(.+)`), um Teile des gematchten Pfads für die Weiterleitungs-URL zu extrahieren.',
   'User': 'Benutzer',
   'Users': 'Benutzer',
   'Utilities': 'Werkzeuge',
@@ -481,7 +566,10 @@ export default defineTranslation({
   'View configuration': 'Ansichtskonfiguration',
   'View field value': 'Feldwert anzeigen',
   'View translation': 'Übersetzung anzeigen',
+  'Visible': 'Sichtbar',
 
+  'When enabled, this option takes priority over all other routing configurations.':
+    'Wenn aktiviert, hat diese Option Vorrang vor allen anderen Routing-Konfigurationen.',
   'Would you like to duplicate all translations or only the current one?':
     'Möchten Sie alle Übersetzungen duplizieren oder nur die aktuelle?',
   'Would you like to select $perPage $perPageEntries on this page or all $total entries?': createPattern(

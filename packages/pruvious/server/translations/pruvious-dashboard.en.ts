@@ -8,6 +8,10 @@ export default defineTranslation({
     { subject: [{ conditions: [{ count: 1 }], output: 'block' }, 'blocks'] },
   ),
 
+  '/example/path': '/example/path',
+
+  'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.':
+    'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.',
   'A translation for language `$language` already exists': createPattern(
     'A translation for language `$language` already exists',
     { language: 'string' },
@@ -18,11 +22,13 @@ export default defineTranslation({
   'Add after': 'Add after',
   'Add before': 'Add before',
   'Add block': 'Add block',
+  'Add collection': 'Add collection',
   'Add condition': 'Add condition',
   'Add condition group': 'Add condition group',
   'Add inside': 'Add inside',
   'Add item': 'Add item',
   'Add nested block': 'Add nested block',
+  'Add redirect': 'Add redirect',
   'Add top-level block': 'Add top-level block',
   'Administrator': 'Administrator',
   'After': 'After',
@@ -50,6 +56,8 @@ export default defineTranslation({
 
   'Background clipboard monitoring for instant paste readiness. This feature will request browser permission to access your clipboard.':
     'Background clipboard monitoring for instant paste readiness.\n\nThis feature will request browser permission to access your clipboard.',
+  'Base title': 'Base title',
+  'Base title position': 'Base title position',
   'Base URL': 'Base URL',
   'Before': 'Before',
   'Before or equal to': 'Before or equal to',
@@ -77,11 +85,17 @@ export default defineTranslation({
   'Changes made to this field will automatically sync across all translations.':
     'Changes made to this field will automatically sync across all translations.',
   'Changes that you made may not be saved.': 'Changes that you made may not be saved.',
+  'Character(s) used to separate the page title from the base title.':
+    'Character(s) used to separate the page title from the base title.',
+  'Choose `301` for permanent redirects or `302` for temporary redirects.':
+    'Choose `301` for permanent redirects or `302` for temporary redirects.',
   'Clear': 'Clear',
   'Close': 'Close',
   'Collapse': 'Collapse',
   'Collapse all': 'Collapse all',
   'Collections': 'Collections',
+  'Collections are resolved in the order they are provided.':
+    'Collections are resolved in the order they are provided.',
   'Column': 'Column',
   'Columns': 'Columns',
   'Completed at': 'Completed at',
@@ -91,6 +105,16 @@ export default defineTranslation({
   'Contains': 'Contains',
   'Contains (case-insensitive)': 'Contains (case-insensitive)',
   'Content language': 'Content language',
+  'Controls whether query parameters from the current URL are added to the redirect URL.':
+    'Controls whether query parameters from the current URL are added to the redirect URL.',
+  'Controls whether search engines are allowed to index this page.':
+    'Controls whether search engines are allowed to index this page.',
+  'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).':
+    'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).',
+  'Controls whether the base title appears before or after the page title.':
+    'Controls whether the base title appears before or after the page title.',
+  'Controls whether to combine the page title with the base title defined in the SEO settings.':
+    'Controls whether to combine the page title with the base title defined in the SEO settings.',
   'Copied': 'Copied',
   'Copy': 'Copy',
   'Copy $from to $to': createPattern('Copy $from to $to', { from: 'string', to: 'string' }),
@@ -157,10 +181,12 @@ export default defineTranslation({
   'Dependencies': 'Dependencies',
   'Deselect': 'Deselect',
   'Disable': 'Disable',
+  'Disable to use the exact route path.': 'Disable to use the exact route path.',
   'Disabled': 'Disabled',
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',
   'Does not equal': 'Does not equal',
+  'Draft': 'Draft',
   'Drag to adjust value': 'Drag to adjust value',
   'Drop items here': 'Drop items here',
   'Duplicate': 'Duplicate',
@@ -171,8 +197,11 @@ export default defineTranslation({
   'Edit field value': 'Edit field value',
   'Edit translation': 'Edit translation',
   'Editors': 'Editors',
-  'e.g., https://pruvious.com': 'e.g., https://pruvious.com',
+  'e.g. .+-legacy$': 'e.g. .+-legacy$',
+  'e.g. archive/reports/2024/$1': 'e.g. archive/reports/2024/$1',
+  'e.g. https://pruvious.com': 'e.g. https://pruvious.com',
   'e.g. Recently updated': 'e.g. Recently updated',
+  'e.g. report-(.+)-2024$': 'e.g. report-(.+)-2024$',
   'Email': 'Email',
   'Empty': 'Empty',
   'Enable': 'Enable',
@@ -195,6 +224,7 @@ export default defineTranslation({
   'First name': 'First name',
   'Fixed width': 'Fixed width',
   'Forgot password?': 'Forgot password?',
+  'Forward query parameters': 'Forward query parameters',
   'Found $count $errors': createPattern(
     'Found $count $errors',
     { count: 'number' },
@@ -209,18 +239,24 @@ export default defineTranslation({
   'Greater than or equal to': 'Greater than or equal to',
 
   'Headers': 'Headers',
+  'Hidden': 'Hidden',
+  'Hide': 'Hide',
   'Hide description': 'Hide description',
   'Hide password': 'Hide password',
+  'https://example.com': 'https://example.com',
   'HTTP Method': 'HTTP Method',
 
   'ID': 'ID',
   'Inactive': 'Inactive',
   'Includes all': 'Includes all',
   'Includes any': 'Includes any',
+  'Indicates whether this route is publicly accessible.': 'Indicates whether this route is publicly accessible.',
   'Insert': 'Insert',
   'Installation': 'Installation',
   'installWelcomeMessage': 'Welcome to Pruvious! Enter your details to create your primary administrator account.',
   'Invalid `$param` parameter': createPattern('Invalid `$param` parameter', { param: 'string' }),
+  'It matches the URL portion after the current route path.':
+    'It matches the URL portion after the current route path.',
 
   'Job': 'Job',
   'Job debug ID': 'Job debug ID',
@@ -234,6 +270,7 @@ export default defineTranslation({
   'Last name': 'Last name',
   'Later': 'Later',
   'Leave': 'Leave',
+  'Leave empty to redirect to the current route path.': 'Leave empty to redirect to the current route path.',
   'Less than': 'Less than',
   'Less than or equal to': 'Less than or equal to',
   'Light mode': 'Light mode',
@@ -243,8 +280,10 @@ export default defineTranslation({
   'Logs': 'Logs',
 
   'Management': 'Management',
+  'Match pattern': 'Match pattern',
   'Media': 'Media',
   'Message': 'Message',
+  'Meta description': 'Meta description',
   'More actions': 'More actions',
   'Move down': 'Move down',
   'Move up': 'Move up',
@@ -252,6 +291,8 @@ export default defineTranslation({
   'My bookmarks': 'My bookmarks',
 
   'Name': 'Name',
+  'Nested subpaths with forward slashes (`/`) are not allowed in this collection':
+    'Nested subpaths with forward slashes (`/`) are not allowed in this collection',
   'New': 'New',
   'New bookmark': 'New bookmark',
   'New name': 'New name',
@@ -267,16 +308,18 @@ export default defineTranslation({
   'No blocks match your search criteria': 'No blocks match your search criteria',
   'No conditions set': 'No conditions set',
   'No data available': 'No data available',
+  'No description': 'No description',
   'No entries were deleted': 'No entries were deleted',
   'No fields to display': 'No fields to display',
+  'No results found': 'No results found',
   'No sorting applied': 'No sorting applied',
   'None': 'None',
   'Numeric': 'Numeric',
   'Numeric (milliseconds precision)': 'Numeric (milliseconds precision)',
 
-'Off': 'Off',
+  'Off': 'Off',
   'OK': 'OK',
-'On': 'On',
+  'On': 'On',
   'Open user menu': 'Open user menu',
   'Operation': 'Operation',
   'or': 'or',
@@ -289,6 +332,8 @@ export default defineTranslation({
   'Page': 'Page',
   'Page ($count)': createPattern('Page ($count)', { count: 'number' }),
   'Page not found': 'Page not found',
+  'Page title': 'Page title',
+  'Pages': 'Pages',
   'Parameters': 'Parameters',
   'Password': 'Password',
   'Paste after': 'Paste after',
@@ -303,6 +348,8 @@ export default defineTranslation({
   'Previous month': 'Previous month',
   'Previous page': 'Previous page',
   'Priority': 'Priority',
+  'Public': 'Public',
+  'Publish date': 'Publish date',
 
   'Queries': 'Queries',
   'Query': 'Query',
@@ -312,12 +359,17 @@ export default defineTranslation({
 
   'Raw result': 'Raw result',
   'Record not found': 'Record not found',
+  'Redirect': 'Redirect',
+  'Redirect URL': 'Redirect URL',
   'Redirected': 'Redirected',
   'Redirects': 'Redirects',
+  'Redirects take priority over all other routing configurations.':
+    'Redirects take priority over all other routing configurations.',
   'Redo': 'Redo',
   'Refresh': 'Refresh',
   'Reload': 'Reload',
   'Remember me': 'Remember me',
+  'Remove': 'Remove',
   'Rename': 'Rename',
   'Rename bookmark': 'Rename bookmark',
   'Replace with current': 'Replace with current',
@@ -329,12 +381,19 @@ export default defineTranslation({
   'Restore defaults': 'Restore defaults',
   'Result': 'Result',
   'Roles': 'Roles',
+  'Route': 'Route',
+  'Routes': 'Routes',
 
   'Save': 'Save',
   'Saved': 'Saved',
   'Scheduled at': 'Scheduled at',
+  'Search engine visibility': 'Search engine visibility',
   'Search...': 'Search...',
   'Select': 'Select',
+  'Select a routable collection to create child routes from its records.':
+    'Select a routable collection to create child routes from its records.',
+  'Select a routable singleton to use its data for this specific route.':
+    'Select a routable singleton to use its data for this specific route.',
   'Select block': 'Select block',
   'Select date': 'Select date',
   'selected': 'selected',
@@ -359,10 +418,13 @@ export default defineTranslation({
   'SEO': 'SEO',
   'Session expired': 'Session expired',
   'Set as default': 'Set as default',
+  'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.':
+    'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.',
   'Severity': 'Severity',
   'Share': 'Share',
   'shared': 'shared',
   'Shared bookmarks': 'Shared bookmarks',
+  'Show': 'Show',
   'Show description': 'Show description',
   'Show details': 'Show details',
   'Show password': 'Show password',
@@ -372,6 +434,7 @@ export default defineTranslation({
   'Sign out from all other devices': 'Sign out from all other devices',
   'Sign out user from all active sessions': 'Sign out user from all active sessions',
   'Signed out': 'Signed out',
+  'Singleton': 'Singleton',
   'Singleton not found': 'Singleton not found',
   'Smart clipboard': 'Smart clipboard',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
@@ -389,6 +452,7 @@ export default defineTranslation({
   'Status code': 'Status code',
   'Status message': 'Status message',
   'Stop sharing': 'Stop sharing',
+  'Subpath': 'Subpath',
   'Success': 'Success',
   'Switched content language to `$language`': createPattern('Switched content language to `$language`', {
     language: 'string',
@@ -396,6 +460,8 @@ export default defineTranslation({
   'Sync configuration': 'Sync configuration',
 
   'Tags': 'Tags',
+  'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).':
+    'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).',
   'The `$language` translation does not exist': createPattern('The `$language` translation does not exist', {
     language: 'string',
   }),
@@ -408,8 +474,16 @@ export default defineTranslation({
     'The dashboard language has been updated. Please reload the page for the changes to take effect.',
   'The date and time when the record was created.': 'The date and time when the record was created.',
   'The date and time when the record was last updated.': 'The date and time when the record was last updated.',
+  'The last part of the URL path after the base URL.': 'The last part of the URL path after the base URL.',
   'The password must be at least 8 characters long': 'The password must be at least 8 characters long',
+  'The portion of the URL path after the base URL.': 'The portion of the URL path after the base URL.',
+  'The RegExp pattern to match incoming requests.': 'The RegExp pattern to match incoming requests.',
+  'The root URL of your website used for generating full URLs in SEO metadata and sitemaps.':
+    'The root URL of your website used for generating full URLs in SEO metadata and sitemaps.',
+  'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.':
+    'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.',
   'The unique identifier for translations.': 'The unique identifier for translations.',
+  'The URL or full path where users will be redirected.': 'The URL or full path where users will be redirected.',
   'The user who created the record.': 'The user who created the record.',
   'The users who can edit the record.': 'The users who can edit the record.',
   'This block is not allowed here': 'This block is not allowed here',
@@ -431,6 +505,9 @@ export default defineTranslation({
   ),
   'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
     'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.',
+  'This path is already in use.': 'This path is already in use.',
+  'This subpath is already in use.': 'This subpath is already in use.',
+  'They are resolved in the order they are provided.': 'They are resolved in the order they are provided.',
   'Time': 'Time',
   'Time format': 'Time format',
   'Time zone': 'Time zone',
@@ -458,6 +535,7 @@ export default defineTranslation({
   'timeSuffix:h': 'h',
   'timeSuffix:m': 'm',
   'timeSuffix:s': 's',
+  'Title separator': 'Title separator',
   'To': 'To',
   'Toggle menu': 'Toggle menu',
   'Toggle relation': 'Toggle relation',
@@ -468,9 +546,15 @@ export default defineTranslation({
   'Type': 'Type',
 
   'Undo': 'Undo',
+  'unique-subpath': 'unique-subpath',
+  'Untitled': 'Untitled',
   'Update': 'Update',
   'Updated': 'Updated',
   'Updated at': 'Updated at',
+  'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
+    'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.',
+  'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
+    'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.',
   'User': 'User',
   'Users': 'Users',
   'Utilities': 'Utilities',
@@ -479,6 +563,7 @@ export default defineTranslation({
   'View configuration': 'View configuration',
   'View field value': 'View field value',
   'View translation': 'View translation',
+  'Visible': 'Visible',
 
   'Would you like to duplicate all translations or only the current one?':
     'Would you like to duplicate all translations or only the current one?',

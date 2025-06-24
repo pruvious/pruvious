@@ -77,6 +77,11 @@ export default defineNuxtModule<PruviousModuleOptions>({
         bcrypt: { rounds: 12 },
       },
     },
+    routing: {
+      followRedirects: true,
+      trailingSlash: false,
+      seo: true,
+    },
     dashboard: {
       basePath: '/dashboard/',
       filterStylesheets: [
@@ -125,7 +130,12 @@ export default defineNuxtModule<PruviousModuleOptions>({
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.api.basePath!)),
         middleware: {
           include: resolvedOptions.api.middleware?.include ?? ['/api/**'],
-          exclude: resolvedOptions.api.middleware?.exclude ?? ['/api/_*', '/api/_*/**', '/api/process-queue'],
+          exclude: resolvedOptions.api.middleware?.exclude ?? [
+            '/api/_*',
+            '/api/_*/**',
+            '/api/process-queue',
+            '/api/routes/**',
+          ],
         },
       },
       uploads: {
@@ -191,6 +201,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage,
+      prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
+      routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,
       tokenStorage: nuxt.options.runtimeConfig.pruvious.auth.tokenStorage,
       translatableStringsPreloadRules: nuxt.options.runtimeConfig.pruvious.i18n.preloadTranslatableStrings,
     }

@@ -1,4 +1,6 @@
-import { __, type Collections } from '#pruvious/server'
+import { __, SingletonUpdateQueryBuilder, type Collections, type Singletons } from '#pruvious/server'
+import type { I18n } from '@pruvious/i18n'
+import type { GenericCollection, InsertQueryBuilder, UpdateQueryBuilder } from '@pruvious/orm'
 import { isDefined, isString, kebabCase } from '@pruvious/utils'
 import { pruviousError } from '../api/utils.server'
 import type { GenericMetaCollection } from './define'
@@ -77,4 +79,86 @@ export async function getCollectionFromEvent(): Promise<{
   }
 
   return getCollectionBySlug(collectionSlug)
+}
+
+/**
+ * Retrieves the sanitized input from an INSERT or UPDATE query builder instance.
+ *
+ * **Important:** Use this function  with caution, as it accesses internal properties of the query builder.
+ *                Use it as the last resort when you need to access the sanitized input directly.
+ */
+export function getSanitizedInput(
+  queryBuilder:
+    | InsertQueryBuilder<
+        Record<string, GenericCollection>,
+        string,
+        GenericCollection,
+        I18n,
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >
+    | UpdateQueryBuilder<
+        Record<string, GenericCollection>,
+        string,
+        GenericCollection,
+        I18n,
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >
+    | SingletonUpdateQueryBuilder<
+        keyof Singletons,
+        Singletons[keyof Singletons],
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >,
+) {
+  return (queryBuilder as any).sanitizedInput
+}
+
+/**
+ * Patches the sanitized input of an INSERT or UPDATE query builder instance with the provided `sanitizedInput`.
+ *
+ * **Important:** Use this function with caution, as it modifies internal properties of the query builder.
+ *                Use it as the last resort when you need to patch the sanitized input directly.
+ */
+export function patchSanitizedInput(
+  queryBuilder:
+    | InsertQueryBuilder<
+        Record<string, GenericCollection>,
+        string,
+        GenericCollection,
+        I18n,
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >
+    | UpdateQueryBuilder<
+        Record<string, GenericCollection>,
+        string,
+        GenericCollection,
+        I18n,
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >
+    | SingletonUpdateQueryBuilder<
+        keyof Singletons,
+        Singletons[keyof Singletons],
+        'rows' | 'count',
+        any,
+        boolean,
+        boolean
+      >,
+  sanitizedInput: Record<string, any>,
+) {
+  Object.assign((queryBuilder as any).sanitizedInput, sanitizedInput)
+  return (queryBuilder as any).sanitizedInput
 }
