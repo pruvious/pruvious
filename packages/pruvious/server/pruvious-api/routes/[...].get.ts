@@ -35,6 +35,7 @@ export async function resolveRouteEventHandler(event: H3Event, path: string): Pr
   }
 
   const resolvedRoute = await resolveRoute(path)
+  console.log(resolvedRoute)
 
   if (!resolvedRoute) {
     throw pruviousError(event, {

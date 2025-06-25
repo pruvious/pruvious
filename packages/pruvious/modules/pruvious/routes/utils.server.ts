@@ -211,8 +211,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
               code,
               exactRoute![`path${otherLanguageSuffixes[i]!}`] && exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
                 ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
-                    code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '',
-                  ) + exactRoute![`path${otherLanguageSuffixes[i]!}`]
+                    (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') +
+                      exactRoute![`path${otherLanguageSuffixes[i]!}`],
+                  ) || '/'
                 : null,
             ]),
           ) as any,
@@ -311,7 +312,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             isNotNull(data[`_${code}`])
               ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
                   (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') + `/${data[`_${code}`]}`,
-                )
+                ) || '/'
               : null,
           ]),
         ) as any,
