@@ -145,7 +145,9 @@ const onLabel = isDefined(props.options.ui.switch?.onLabel)
   : __('pruvious-dashboard', 'On')
 const placeholder = maybeTranslate(props.options.ui.placeholder)
 const language = props.name.replace('path', '').toLowerCase()
-const resolvedPrefix = props.prefix ?? (language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : '')
+const resolvedPrefix = computed(
+  () => props.prefix ?? (language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''),
+)
 const lastString = ref('')
 
 watch(

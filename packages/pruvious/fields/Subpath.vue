@@ -96,5 +96,7 @@ defineEmits<{
 
 const language = useDashboardContentLanguage()
 const { prefixPrimaryLanguage } = useRuntimeConfig().public.pruvious
-const prefix = language.value !== primaryLanguage || prefixPrimaryLanguage ? `/${language.value}/.../` : '/.../'
+const prefix = computed(() =>
+  language.value !== primaryLanguage || prefixPrimaryLanguage ? `/${language.value}/.../` : '/.../',
+)
 </script>
