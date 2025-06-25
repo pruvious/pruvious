@@ -24,7 +24,6 @@ import {
   defu,
   isArray,
   isDefined,
-  isNull,
   isObject,
   isPositiveInteger,
   isString,
@@ -65,7 +64,6 @@ import {
 } from '../fields/presets'
 import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { collectionPermissionGuard } from './guards'
-import { getSanitizedInput, patchSanitizedInput } from './utils.server'
 
 export type DefineCollectionOptions<
   TFields extends Record<string, GenericField>,
@@ -2018,17 +2016,6 @@ export function defineCollection<
       if (routing.seo.enabled) {
         routingFields.seo = seoFieldPreset(omit(routing.seo, ['enabled']) as any)
       }
-
-      hooks.beforeQueryPreparation.push(({ operation, queryBuilder }) => {
-        if (operation === 'update' && isNull(getSanitizedInput(queryBuilder!).subpath)) {
-          if (routing.isPublic.enabled) {
-            patchSanitizedInput(queryBuilder!, { isPublic: false })
-          }
-          if (routing.scheduledAt.enabled) {
-            patchSanitizedInput(queryBuilder!, { scheduledAt: null })
-          }
-        }
-      })
 
       fields = { ...routingFields, ...fields }
     }

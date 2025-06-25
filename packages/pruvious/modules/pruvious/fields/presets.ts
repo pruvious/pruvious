@@ -352,6 +352,7 @@ export function subpathFieldPreset(options: SubpathFieldPresetOptions) {
  */
 export function isPublicFieldPreset(options: IsPublicFieldPresetOptions) {
   return trueFalseField({
+    default: true,
     ...options,
     ui: defu(options.ui ?? {}, {
       label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Status'),
