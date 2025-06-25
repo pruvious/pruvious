@@ -2152,7 +2152,7 @@ function getReExports() {
     `export { collectionGuards } from '${resolve('../collections/guards')}'`,
     `export { removeWhere, denyWhere, removeOrderBy, denyOrderBy, removeGroupBy, denyGroupBy, excludeFields, maskFields, resetFields } from '${resolve('../collections/hooks')}'`,
     `export { getCollectionBySlug, getCollectionFromEvent, getSanitizedInput, patchSanitizedInput } from '${resolve('../collections/utils.server')}'`,
-    `export { type GenericRouteReference, type GenericRouteData, type ResolvedRouteSEO, type ResolvedRoute, type RouteRedirect, resolveRoute } from '${resolve('../routes/utils.server')}'`,
+    `export { type GenericRouteReference, type GenericRouteData, type ResolvedRouteSEO, type ResolvedRoute, type RouteRedirect, resolveRoute, normalizeRoutePath } from '${resolve('../routes/utils.server')}'`,
     `export { resolvePath } from '${resolve('../routes/utils.shared')}'`,
     `export type { SerializableCollection } from '${resolve('../collections/utils.client')}'`,
     `export { defineSingleton, type SingletonUIOptions, type Singleton, type GenericSingleton, type DefineSingletonOptions, type SingletonContext, type SingletonHooks, type SingletonGuard, type SingletonRoutingOptions } from '${resolve('../singletons/define')}'`,

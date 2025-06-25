@@ -12,7 +12,8 @@ import { isProduction } from 'std-env'
 import { logRequest } from '../../../modules/pruvious/debug/logs'
 
 export default defineEventHandler(async (event) => {
-  return resolveRouteEventHandler(event, event.context.params?._ ?? '')
+  const { basePath } = useRuntimeConfig().pruvious.api
+  return resolveRouteEventHandler(event, event.path.slice((basePath + 'routes').length))
 })
 
 export async function resolveRouteEventHandler(event: H3Event, path: string): Promise<ResolvedRoute | RouteRedirect> {
@@ -35,7 +36,6 @@ export async function resolveRouteEventHandler(event: H3Event, path: string): Pr
   }
 
   const resolvedRoute = await resolveRoute(path)
-  console.log(resolvedRoute)
 
   if (!resolvedRoute) {
     throw pruviousError(event, {

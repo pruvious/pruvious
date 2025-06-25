@@ -149,19 +149,21 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   path: string,
 ): Promise<ResolvedRoute<TRef> | RouteRedirect | null> {
   const subpaths = path.split('/').filter(Boolean)
-  const runtimeConfig = useRuntimeConfig()
-  const { languages, primaryLanguage, prefixPrimaryLanguage } = runtimeConfig.pruvious.i18n
-  const { trailingSlash } = runtimeConfig.pruvious.routing
-  const language = (languages.find(({ code }) => subpaths[0] === code)?.code ?? primaryLanguage) as LanguageCode
+  const { languages, primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const language = (languages.find(({ code }) => subpaths[0]?.toLowerCase() === code.toLowerCase())?.code ??
+    primaryLanguage) as LanguageCode
   const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
   const languageSuffix = language.toUpperCase() as Uppercase<LanguageCode>
-  const normalizedPath = ('/' + subpaths.join('/')).slice(languagePrefix.length) || '/'
+  const normalizedRoutePath = normalizeRoutePath(
+    subpaths[0]?.toLowerCase() === language.toLowerCase() ? subpaths.slice(1).join('/') : subpaths.join('/'),
+    false,
+  )
   const otherLanguages = languages.filter(({ code }) => code !== language)
   const otherLanguageSuffixes = otherLanguages.map(({ code }) => code.toUpperCase() as Uppercase<LanguageCode>)
   const tryPaths: string[] = ['/']
   const routeReferences = await getRouteReferences()
 
-  if (subpaths[0] === language) {
+  if (subpaths[0]?.toLowerCase() === language.toLowerCase()) {
     subpaths.shift()
   }
 
@@ -187,7 +189,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   for (const route of routeCandidates) {
     if (route) {
       for (const { match, to, code, forwardQueryParams } of route[`redirects${languageSuffix}`]) {
-        if (!match || new RegExp(match, 'im').test(normalizedPath)) {
+        if (!match || new RegExp(match, 'im').test(normalizedRoutePath)) {
           return { to, code: code as 301 | 302, forwardQueryParams }
         }
       }
@@ -203,17 +205,16 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
 
       if (singletonReference) {
         const routeSEO = exactRoute[`seo${languageSuffix}`]
+        const realPath = normalizeRoutePath(languagePrefix + exactRoute[`path${languageSuffix}`])
 
         return {
           language,
           translations: Object.fromEntries(
             otherLanguages.map(({ code }, i) => [
               code,
-              exactRoute![`path${otherLanguageSuffixes[i]!}`] && exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
-                ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
-                    (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') +
-                      exactRoute![`path${otherLanguageSuffixes[i]!}`],
-                  ) || '/'
+              isNotNull(exactRoute![`path${otherLanguageSuffixes[i]!}`]) &&
+              exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
+                ? normalizeRoutePath(code + exactRoute![`path${otherLanguageSuffixes[i]!}`])
                 : null,
             ]),
           ) as any,
@@ -226,9 +227,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
                 : routeSEO.title
               : baseSEO.baseTitle,
             description: exactRoute[`seo${languageSuffix}`].description,
-            url: (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
-              baseSEO.baseURL + languagePrefix + exactRoute[`path${languageSuffix}`]!,
-            ),
+            url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
             isIndexable: exactRoute[`seo${languageSuffix}`].isIndexable,
           },
           ref: singletonReference[0] as TRef,
@@ -236,10 +235,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             .select(Object.keys(singletonReference[1].publicFields) as any)
             .language(language)
             .get()) as any,
-          softRedirect:
-            languagePrefix + exactRoute[`path${languageSuffix}`] !== withLeadingSlash(path)
-              ? languagePrefix + exactRoute[`path${languageSuffix}`]!
-              : undefined,
+          softRedirect: realPath !== withLeadingSlash(path) ? realPath! : undefined,
         }
       }
     }
@@ -260,8 +256,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         const collection = collections[collectionName as keyof Collections]
         const query = selectFrom(collectionName as any)
         const select = ['id', 'subpath', ...collection.meta.routing.publicFields]
-        const basePath = route![`path${languageSuffix}`]!
-        const subpath = normalizedPath.slice(basePath.length)
+        const subpath = normalizedRoutePath.slice(withTrailingSlash(route![`path${languageSuffix}`]!).length)
 
         if (collection.meta.routing.isPublic.enabled) {
           query.where('isPublic', '=', true)
@@ -299,7 +294,8 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   for (const record of collectionRecords) {
     if (record?.data) {
       const { ref, collection, data, route } = record
-      const realPath = `${languagePrefix}${route[`path${languageSuffix}`]}/${data.subpath}`.replaceAll('//', '/')
+      const basePath = route[`path${languageSuffix}`]
+      const realPath = normalizeRoutePath(`${languagePrefix}/${basePath}/${data.subpath}`)
       const seo = collection.meta.routing.seo.enabled ? data.seo : {}
       const routeSEO = route[`seo${languageSuffix}`]
       const title = seo.title || routeSEO.title
@@ -309,11 +305,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         translations: Object.fromEntries(
           otherLanguages.map(({ code }) => [
             code,
-            isNotNull(data[`_${code}`])
-              ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
-                  (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') + `/${data[`_${code}`]}`,
-                ) || '/'
-              : null,
+            isNotNull(data[`_${code}`]) ? normalizeRoutePath(`${code}/${basePath}/${data[`_${code}`]}`) : null,
           ]),
         ) as any,
         seo: {
@@ -325,7 +317,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
               : title
             : baseSEO.baseTitle,
           description: seo.description || routeSEO.description,
-          url: (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(baseSEO.baseURL + realPath),
+          url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
           isIndexable: seo.isIndexable ?? routeSEO.isIndexable,
         },
         ref,
@@ -336,4 +328,31 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   }
 
   return null
+}
+
+/**
+ * Normalizes a route path based on various Pruvious settings from `nuxt.config.ts`.
+ *
+ * The `trailingSlash` parameter controls how trailing slashes are handled:
+ *
+ * - `'auto'` - Uses the `pruvious.routing.trailingSlash` configuration setting (default).
+ * - `true` - Adds a trailing slash to the path.
+ * - `false` - Removes any trailing slash from the path.
+ */
+export function normalizeRoutePath(path: string, trailingSlash: boolean | 'auto' = 'auto'): string {
+  path = withLeadingSlash(withTrailingSlash(path.replace(/\/+/g, '/')))
+
+  const runtimeConfig = useRuntimeConfig()
+  const { primaryLanguage, prefixPrimaryLanguage } = runtimeConfig.pruvious.i18n
+  const ts = trailingSlash === 'auto' ? runtimeConfig.pruvious.routing.trailingSlash : trailingSlash
+
+  if (!prefixPrimaryLanguage && path.startsWith(`/${primaryLanguage}/`)) {
+    path = path.slice(primaryLanguage.length + 1)
+  }
+
+  if (!ts && path.endsWith('/')) {
+    path = withoutTrailingSlash(path)
+  }
+
+  return path || '/'
 }
