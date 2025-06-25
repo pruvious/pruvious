@@ -72,6 +72,7 @@ export default defineField({
       }
     },
     uniqueValidator({
+      perLanguage: true,
       caseSensitive: false,
       errorMessage: ({ __ }) => __('pruvious-dashboard', 'This subpath is already in use.'),
     }),
