@@ -1328,7 +1328,7 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     pruvious: Pick<
       DeepRequired<PruviousModuleOptions>,
-      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'dashboard' | 'dir'
+      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'routing' | 'dashboard' | 'dir'
     > & {
       auth: Pick<DeepRequired<PruviousModuleOptions['auth']>, 'jwt' | 'hash'> & {
         tokenResolution: DeepRequired<ServerTokenSource>[]

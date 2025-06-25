@@ -10,7 +10,7 @@ import {
   type Singletons,
 } from '#pruvious/server'
 import type { ExtractPopulatedTypes, GenericField } from '@pruvious/orm'
-import { isNotNull, pick, withLeadingSlash } from '@pruvious/utils'
+import { isNotNull, pick, withLeadingSlash, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
 
 export interface GenericRouteReference {
   /**
@@ -149,7 +149,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   path: string,
 ): Promise<ResolvedRoute<TRef> | RouteRedirect | null> {
   const subpaths = path.split('/').filter(Boolean)
-  const { languages, primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const runtimeConfig = useRuntimeConfig()
+  const { languages, primaryLanguage, prefixPrimaryLanguage } = runtimeConfig.pruvious.i18n
+  const { trailingSlash } = runtimeConfig.pruvious.routing
   const language = (languages.find(({ code }) => subpaths[0] === code)?.code ?? primaryLanguage) as LanguageCode
   const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
   const languageSuffix = language.toUpperCase() as Uppercase<LanguageCode>
@@ -201,6 +203,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
 
       if (singletonReference) {
         const routeSEO = exactRoute[`seo${languageSuffix}`]
+
         return {
           language,
           translations: Object.fromEntries(
@@ -220,7 +223,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
                 : routeSEO.title
               : baseSEO.baseTitle,
             description: exactRoute[`seo${languageSuffix}`].description,
-            url: baseSEO.baseURL + languagePrefix + exactRoute[`path${languageSuffix}`]!,
+            url: (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
+              baseSEO.baseURL + languagePrefix + exactRoute[`path${languageSuffix}`]!,
+            ),
             isIndexable: exactRoute[`seo${languageSuffix}`].isIndexable,
           },
           ref: singletonReference[0] as TRef,
@@ -315,7 +320,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
               : title
             : baseSEO.baseTitle,
           description: seo.description || routeSEO.description,
-          url: baseSEO.baseURL + realPath,
+          url: (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(baseSEO.baseURL + realPath),
           isIndexable: seo.isIndexable ?? routeSEO.isIndexable,
         },
         ref,

@@ -1,3 +1,4 @@
+import type { LanguageCode } from '#pruvious/server'
 import {
   generateSecureRandomString,
   isString,
@@ -162,13 +163,14 @@ export default defineNuxtModule<PruviousModuleOptions>({
         hash: resolvedOptions.auth.hash as any,
       },
       i18n: resolveTranslationsConfig(resolvedOptions.i18n),
-      debug: {
-        verbose,
-        logs: resolveDebugLogsConfig(resolvedOptions.debug.logs),
-      },
+      routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,
       dashboard: {
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.dashboard.basePath!)),
         filterStylesheets: resolvedOptions.dashboard.filterStylesheets!,
+      },
+      debug: {
+        verbose,
+        logs: resolveDebugLogsConfig(resolvedOptions.debug.logs),
       },
       dir: {
         actions: {
@@ -200,8 +202,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
-      languages: resolvedOptions.i18n.languages.map(({ code }) => code),
-      primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage,
+      languages: resolvedOptions.i18n.languages.map(({ code }) => code) as LanguageCode[],
+      primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage as LanguageCode,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
       routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,
       tokenStorage: nuxt.options.runtimeConfig.pruvious.auth.tokenStorage,
