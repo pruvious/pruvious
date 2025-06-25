@@ -188,9 +188,28 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
 
   for (const route of routeCandidates) {
     if (route) {
+      const routePath = route[`path${languageSuffix}`]!
+
       for (const { match, to, code, forwardQueryParams } of route[`redirects${languageSuffix}`]) {
-        if (!match || new RegExp(match, 'im').test(normalizedRoutePath)) {
-          return { to, code: code as 301 | 302, forwardQueryParams }
+        let redirectTo: string | null = !match ? to : null
+
+        if (match) {
+          const matches = new RegExp(match, 'im').exec(normalizedRoutePath.slice(routePath.length))
+          if (matches) {
+            redirectTo = to.replace(/\$(\d+)/g, (placeholder, index) => matches[parseInt(index, 10)] ?? placeholder)
+          }
+        }
+
+        if (isNotNull(redirectTo)) {
+          if (redirectTo === '') {
+            redirectTo = normalizeRoutePath(languagePrefix + routePath)
+          } else if (redirectTo.startsWith('/')) {
+            redirectTo = normalizeRoutePath(redirectTo)
+          } else if (!redirectTo.startsWith('http://') && !redirectTo.startsWith('https://')) {
+            redirectTo = normalizeRoutePath(`${languagePrefix}/${routePath}/${redirectTo}`)
+          }
+
+          return { to: redirectTo, code: code as 301 | 302, forwardQueryParams }
         }
       }
     }

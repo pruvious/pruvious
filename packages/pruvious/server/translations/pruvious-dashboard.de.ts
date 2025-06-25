@@ -484,8 +484,8 @@ export default defineTranslation({
   'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.':
     'Der Titel der Seite, der in Suchergebnissen und Browser-Tabs angezeigt wird. Suchmaschinen zeigen in der Regel etwa die ersten 55-60 Zeichen eines Seitentitels an. Text darüber hinaus könnte verloren gehen, daher sollten Titel nicht länger als das sein.',
   'The unique identifier for translations.': 'Der eindeutige Bezeichner für Übersetzungen.',
-  'The URL or full path where users will be redirected.':
-    'Die URL oder der vollständige Pfad, auf den die Benutzer weitergeleitet werden.',
+  'The URL or path where users will be redirected.':
+    'Die URL oder der Pfad, auf den die Benutzer weitergeleitet werden.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
   'This block is not allowed here': 'Dieser Block ist hier nicht erlaubt',
@@ -556,6 +556,8 @@ export default defineTranslation({
   'Updated at': 'Aktualisiert am',
   'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
     'Verwenden Sie `$1`, `$2` usw., um Capture-Gruppen aus dem Abgleichungsmuster zu referenzieren.',
+  'Use a relative path (without leading slash) to append to the current route path.':
+    'Verwenden Sie einen relativen Pfad (ohne führenden Schrägstrich), um an den aktuellen Routenpfad anzuhängen.',
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Verwenden Sie Capture-Gruppen (z.B. `(.+)`), um Teile des gematchten Pfads für die Weiterleitungs-URL zu extrahieren.',
   'User': 'Benutzer',

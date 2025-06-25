@@ -483,7 +483,7 @@ export default defineTranslation({
   'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.':
     'The title of the page displayed in search results and browser tabs. Search engines typically display about the first 55-60 characters of a page title. Text beyond that may be lost, so try not to have titles longer than that.',
   'The unique identifier for translations.': 'The unique identifier for translations.',
-  'The URL or full path where users will be redirected.': 'The URL or full path where users will be redirected.',
+  'The URL or path where users will be redirected.': 'The URL or path where users will be redirected.',
   'The user who created the record.': 'The user who created the record.',
   'The users who can edit the record.': 'The users who can edit the record.',
   'This block is not allowed here': 'This block is not allowed here',
@@ -553,6 +553,8 @@ export default defineTranslation({
   'Updated at': 'Updated at',
   'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
     'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.',
+  'Use a relative path (without leading slash) to append to the current route path.':
+    'Use a relative path (without leading slash) to append to the current route path.',
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.',
   'User': 'User',
