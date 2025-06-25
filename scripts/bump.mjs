@@ -7,6 +7,7 @@ const dependencyBlockPattern = /"((?:dev)?[Dd]ependencies)":\s*{([^}]*)}/g
 const dependencyPattern = /"([^"]+)":\s*"([^"]+)"/g
 const packageVersionCache = {}
 const files = [{ path: resolve('package.json'), content: fs.readFileSync(resolve('package.json'), 'utf-8') }]
+const ignoreDependencies = ['ohash', 'vue-sonner']
 
 for (const dir of fs.readdirSync(resolve('packages'))) {
   if (fs.statSync(resolve('packages', dir)).isDirectory()) {
@@ -42,24 +43,26 @@ for (const { path, content } of files) {
 
   for (const blockType in allDependencies) {
     for (const packageName in allDependencies[blockType]) {
-      const currentVersion = allDependencies[blockType][packageName]
+      if (!ignoreDependencies.includes(packageName)) {
+        const currentVersion = allDependencies[blockType][packageName]
 
-      if (!currentVersion.startsWith('workspace:')) {
-        const latestVersion = await getLatestVersion(packageName)
+        if (!currentVersion.startsWith('workspace:')) {
+          const latestVersion = await getLatestVersion(packageName)
 
-        if (latestVersion && latestVersion !== currentVersion) {
-          allDependencies[blockType][packageName] = latestVersion
-          consola.info(
-            `Updating ${colorize('green', packageName)} from ${colorize('dim', currentVersion)} to ${colorize('green', latestVersion)} in ${colorize('dim', path)}`,
-          )
-          newContent = newContent.replace(
-            `"${packageName}": "${currentVersion}"`,
-            `"${packageName}": "${latestVersion}"`,
-          )
-        } else if (latestVersion === null) {
-          consola.warn(
-            `Could not fetch version for ${colorize('red', packageName)}. Keeping current version: ${colorize('dim', currentVersion)}`,
-          )
+          if (latestVersion && latestVersion !== currentVersion) {
+            allDependencies[blockType][packageName] = latestVersion
+            consola.info(
+              `Updating ${colorize('green', packageName)} from ${colorize('dim', currentVersion)} to ${colorize('green', latestVersion)} in ${colorize('dim', path)}`,
+            )
+            newContent = newContent.replace(
+              `"${packageName}": "${currentVersion}"`,
+              `"${packageName}": "${latestVersion}"`,
+            )
+          } else if (latestVersion === null) {
+            consola.warn(
+              `Could not fetch version for ${colorize('red', packageName)}. Keeping current version: ${colorize('dim', currentVersion)}`,
+            )
+          }
         }
       }
     }
