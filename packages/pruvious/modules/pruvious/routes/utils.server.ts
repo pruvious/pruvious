@@ -207,13 +207,15 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         return {
           language,
           translations: Object.fromEntries(
-            otherLanguages.map((code, i) => [
+            otherLanguages.map(({ code }, i) => [
               code,
-              exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
-                ? exactRoute![`path${otherLanguageSuffixes[i]!}`]
+              exactRoute![`path${otherLanguageSuffixes[i]!}`] && exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
+                ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
+                    code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '',
+                  ) + exactRoute![`path${otherLanguageSuffixes[i]!}`]
                 : null,
             ]),
-          ),
+          ) as any,
           seo: {
             title: routeSEO.title
               ? routeSEO.baseTitle
@@ -307,7 +309,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
           otherLanguages.map(({ code }) => [
             code,
             isNotNull(data[`_${code}`])
-              ? (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') + `/${data[`_${code}`]}`
+              ? (trailingSlash ? withTrailingSlash : withoutTrailingSlash)(
+                  (code !== primaryLanguage || prefixPrimaryLanguage ? `/${code}` : '') + `/${data[`_${code}`]}`,
+                )
               : null,
           ]),
         ) as any,
