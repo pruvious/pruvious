@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage, useDashboardContentLanguage } from '#pruvious/client'
-import type { SerializableFieldOptions } from '#pruvious/server'
+import { primaryLanguage, usePruviousDashboard } from '#pruvious/client'
+import type { Collections, SerializableFieldOptions, Singletons } from '#pruvious/server'
 
-defineProps({
+const props = defineProps({
   /**
    * The casted field value.
    */
@@ -41,6 +41,30 @@ defineProps({
   options: {
     type: Object as PropType<SerializableFieldOptions<'nullableText'>>,
     required: true,
+  },
+
+  /**
+   * Defines whether this data container is a `collection` (manages multiple items) or a `singleton` (manages a single item).
+   */
+  dataContainerType: {
+    type: String as PropType<'collection' | 'singleton'>,
+    required: true,
+  },
+
+  /**
+   * The name of the data container in PascalCase format.
+   */
+  dataContainerName: {
+    type: String as PropType<keyof Collections | keyof Singletons>,
+    required: true,
+  },
+
+  /**
+   * The current record data from a collection or singleton.
+   * Contains key-value pairs representing the record's fields and their values.
+   */
+  data: {
+    type: Object as PropType<Record<string, any>>,
   },
 
   /**
@@ -94,9 +118,13 @@ defineEmits<{
   'update:modelValue': [value: string | null]
 }>()
 
-const language = useDashboardContentLanguage()
+const dashboard = usePruviousDashboard()
 const { prefixPrimaryLanguage } = useRuntimeConfig().public.pruvious
-const prefix = computed(() =>
-  language.value !== primaryLanguage || prefixPrimaryLanguage ? `/${language.value}/.../` : '/.../',
-)
+const prefix =
+  props.dataContainerType === 'collection' &&
+  dashboard.value?.collections[props.dataContainerName]?.translatable &&
+  props.data?.language &&
+  (props.data?.language !== primaryLanguage || prefixPrimaryLanguage)
+    ? `/${props.data.language}/.../`
+    : '/.../'
 </script>

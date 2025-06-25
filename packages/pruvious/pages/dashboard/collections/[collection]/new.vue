@@ -258,7 +258,9 @@ provide('showContentLanguageSwitcher', collection.definition.translatable)
 provide('disableContentLanguageSwitcher', collection.definition.translatable && isDefined(translationOf))
 
 const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
-const data = ref<Record<string, any>>(fillFieldData({}, collection.definition.fields))
+const data = ref<Record<string, any>>(
+  fillFieldData(collection.definition.translatable ? { language: resolvedLanguage } : {}, collection.definition.fields),
+)
 const conditionalLogicResolver = new ConditionalLogicResolver()
 let conditionalLogicDependencies: Record<string, boolean> = {}
 const conditionalLogic = ref(resolveConditionalLogic())
