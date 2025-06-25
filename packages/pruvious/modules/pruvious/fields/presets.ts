@@ -10,7 +10,6 @@ import {
   timestampField,
   translationsField,
   trueFalseField,
-  uniqueValidator,
   type FieldUIOptions,
   type Permission,
   type TranslatableStringCallbackContext,
@@ -195,10 +194,6 @@ export function languageFieldPreset(options: LanguageFieldPresetOptions) {
           throw new Error(context.__('pruvious-orm', 'This field is required'))
         }
       },
-      uniqueValidator({
-        fields: ['language', 'translations'],
-        errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
-      }),
     ],
     ui: defu(options.ui ?? {}, {
       hidden: true,
