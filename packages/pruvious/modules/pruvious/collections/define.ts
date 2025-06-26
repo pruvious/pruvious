@@ -792,11 +792,11 @@ export interface CollectionMetaOptions<
    *     dashboardLayout: 'standard', // Standard dashboard layout with header and sidebar
    *   },
    *   createPage: {
-   *     dashboardLayout: 'auto',     // Automatic layout selection based on block support
+   *     dashboardLayout: 'auto',     // Automatic layout selection based on routing support
    *     fieldsLayout: undefined,     // Display all fields in the order they are defined
    *   },
    *   updatePage: {
-   *     dashboardLayout: 'auto',     // Automatic layout selection based on block support
+   *     dashboardLayout: 'auto',     // Automatic layout selection based on routing support
    *     fieldsLayout: undefined,     // Display all fields in the order they are defined
    *   },
    * }
@@ -1199,7 +1199,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   dashboardLayout: 'auto', // Automatic layout selection based on routing support
    *   fieldsLayout: undefined, // Display all fields in the order they are defined
    * }
    */
@@ -1207,14 +1207,14 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
     /**
      * The dashboard layout used when creating a new collection record.
      *
-     * When set to 'auto', the layout is determined based on block support:
+     * When set to 'auto', the layout is determined based on routing support:
      *
-     * - With `blocksField({})`: Uses 'live-preview' layout
-     * - Without `blocksField({})`: Uses 'standard' layout
+     * - With `routing`: Uses 'live-preview' layout
+     * - Without `routing`: Uses 'standard' layout
      *
      * Available options:
      *
-     * - `'auto'` - Automatic layout selection based on block support.
+     * - `'auto'` - Automatic layout selection based on routing support.
      * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
      * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
      * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
@@ -1315,7 +1315,7 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
    *
    * @default
    * {
-   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   dashboardLayout: 'auto', // Automatic layout selection based on routing support
    *   fieldsLayout: undefined, // Display all fields in the order they are defined
    * }
    */
@@ -1323,14 +1323,14 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
     /**
      * The dashboard layout used when editing a collection record.
      *
-     * When set to 'auto', the layout is determined based on block support:
+     * When set to 'auto', the layout is determined based on routing support:
      *
-     * - With `blocksField({})`: Uses 'live-preview' layout
-     * - Without `blocksField({})`: Uses 'standard' layout
+     * - With `routing`: Uses 'live-preview' layout
+     * - Without `routing`: Uses 'standard' layout
      *
      * Available options:
      *
-     * - `'auto'` - Automatic layout selection based on block support.
+     * - `'auto'` - Automatic layout selection based on routing support.
      * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
      * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
      * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.

@@ -55,7 +55,7 @@ export function resolveCollectionLayout(
     }
   } else {
     if (collection.definition.ui[`${page}Page`].dashboardLayout === 'auto') {
-      if (Object.values(collection.definition.fields).some((field) => field._fieldType === 'blocks')) {
+      if (collection.definition.routing.enabled) {
         return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))
       } else {
         return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))
@@ -85,7 +85,7 @@ export function resolveSingletonLayout(singleton: {
   definition: SerializableSingleton
 }): Component | string {
   if (singleton.definition.ui.dashboardLayout === 'auto') {
-    if (Object.values(singleton.definition.fields).some((field) => field._fieldType === 'blocks')) {
+    if (singleton.definition.routing.enabled) {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/LivePreview.vue'))
     } else {
       return defineAsyncComponent(() => import('../../../components/Pruvious/Dashboard/Page.vue'))

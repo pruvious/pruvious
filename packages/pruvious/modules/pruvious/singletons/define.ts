@@ -406,14 +406,14 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    * The dashboard layout configuration for this singleton.
    * Controls how the singleton content is displayed in the admin interface.
    *
-   * When set to 'auto', the layout is determined based on block support:
+   * When set to 'auto', the layout is determined based on routing support:
    *
-   * - With `blocksField({})`: Uses 'live-preview' layout
-   * - Without `blocksField({})`: Uses 'standard' layout
+   * - With `routing`: Uses 'live-preview' layout
+   * - Without `routing`: Uses 'standard' layout
    *
    * Available options:
    *
-   * - `'auto'` - Automatic layout selection based on block support.
+   * - `'auto'` - Automatic layout selection based on routing support.
    * - `'standard'` - Standard dashboard layout with header and sidebar (`PruviousDashboardPage.vue`).
    * - `'live-preview'` - Split view with live preview (`PruviousDashboardLivePreview.vue`).
    * - `resolvePruviousComponent('>/components/MyComponent.vue')` - Custom Vue component.
@@ -772,7 +772,7 @@ export interface DefineSingletonOptions<
    * {
    *   hidden: false,           // Visible in the dashboard
    *   label: undefined,        // Automatically generated from the singleton name
-   *   dashboardLayout: 'auto', // Automatic layout selection based on block support
+   *   dashboardLayout: 'auto', // Automatic layout selection based on routing support
    *   fieldsLayout: undefined, // Stacked vertically in the order they are defined
    *   icon: 'folder',
    *   menu: {
