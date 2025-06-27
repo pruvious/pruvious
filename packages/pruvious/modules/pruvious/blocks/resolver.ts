@@ -232,7 +232,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
       }) + '\n'
 
     if (write) {
-      return debouncedWriteBlocks()
+      return !!(await debouncedWriteBlocks())
     }
   } catch {
     blockDefinitions[blockName] = [

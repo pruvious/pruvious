@@ -170,7 +170,7 @@ export async function resolveDashboardPageDefinition(options: ResolveDashboardPa
   }
 
   if (write) {
-    return debouncedWriteDashboardPages()
+    return !!(await debouncedWriteDashboardPages())
   }
 
   return false
