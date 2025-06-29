@@ -1043,9 +1043,9 @@ function extendBlocksValue(
               )
             }
           }
-        }
 
-        extendedBlocksValue.push(extendedBlockValue)
+          extendedBlocksValue.push(extendedBlockValue)
+        }
       }
     }
   }
