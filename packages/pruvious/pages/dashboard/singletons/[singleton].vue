@@ -55,7 +55,12 @@
           v-if="canUpdate && data"
           v-model="data"
           :history="history"
-          @update:modelValue="errors = {}"
+          @update:modelValue="
+            () => {
+              errors = {}
+              queueConditionalLogicUpdate('$reset')
+            }
+          "
         />
 
         <div class="pui-row pui-ml-auto">

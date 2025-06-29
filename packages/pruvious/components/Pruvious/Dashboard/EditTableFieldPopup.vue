@@ -45,7 +45,12 @@
           v-if="isListening"
           v-model="data"
           :history="history"
-          @update:modelValue="errors = {}"
+          @update:modelValue="
+            () => {
+              errors = {}
+              queueConditionalLogicUpdate('$reset')
+            }
+          "
         />
         <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()" class="pui-ml-auto">
           {{ __('pruvious-dashboard', 'Save') }}
