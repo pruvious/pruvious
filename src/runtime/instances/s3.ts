@@ -58,7 +58,7 @@ export async function s3MoveObject(from: string, to: string) {
   const response = await s3Client().send(
     new CopyObjectCommand({
       Bucket: (getModuleOption('uploads').drive as any).bucket,
-      CopySource: `${(getModuleOption('uploads').drive as any).bucket}/${from}`,
+      CopySource: (getModuleOption('uploads').drive as any).bucket + from,
       Key: to.replace(/^\//, ''),
       ACL: 'public-read',
     }),
