@@ -69,17 +69,20 @@ export async function preloadTranslatableStrings<
   TLanguage extends ExtractLanguagesByDomain<TDomain, ExtractTranslatableStringsDefinitions<typeof _i18n>>,
 >(domain: TDomain, language: TLanguage): Promise<TranslatableStrings> {
   const { i18n } = await import('#pruvious/client')
+  const nuxtApp = useNuxtApp()
 
   if (!i18n().hasDefinition(domain, language)) {
     const { apiBasePath } = useRuntimeConfig().public.pruvious
     const handler = () => $fetch<TranslatableStrings>(apiBasePath + 'translations', { query: { domain, language } })
-    const strings = await useAsyncData(`pruvious:translations:${domain}:${language}`, handler, {
-      dedupe: 'defer',
-    }).then(({ data }) => data.value ?? {})
+    const strings =
+      import.meta.server || nuxtApp.isHydrating
+        ? await useAsyncData(`pruvious:translations:${domain}:${language}`, handler, {
+            dedupe: 'defer',
+          }).then(({ data }) => data.value ?? {})
+        : await handler()
 
     i18n().defineTranslatableStrings({ domain, language, strings })
   } else if (import.meta.server) {
-    const nuxtApp = useNuxtApp()
     nuxtApp.payload.data[`pruvious:translations:${domain}:${language}`] = i18n().getDefinition(
       domain,
       language,

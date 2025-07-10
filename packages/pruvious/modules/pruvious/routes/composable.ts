@@ -67,9 +67,10 @@ export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric
     $fetch<ResolvedRoute | RouteRedirect>(apiBasePath + 'routes' + route.path, {
       headers: { 'Accept-Language': language.value },
     })
-  const response = await useAsyncData(`pruvious:routes:${route.path}`, handler, { dedupe: 'defer' }).then(
-    ({ data }) => data.value,
-  )
+  const response =
+    import.meta.server || nuxtApp.isHydrating
+      ? await useAsyncData(`pruvious:routes:${route.path}`, handler, { dedupe: 'defer' }).then(({ data }) => data.value)
+      : await handler()
 
   if (!response) {
     pruviousRoute.value = null
