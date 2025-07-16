@@ -263,17 +263,17 @@ async function initPlayground() {
       `\n})\n`,
   )
 
-  fs.rmSync(resolve(playgroundDir, 'app.vue'))
+  fs.rmSync(resolve(playgroundDir, 'app/app.vue'))
 
   for (const path of [
-    'actions',
-    'assets',
-    'blocks',
-    'components',
-    'filters',
-    'hooks',
-    'layouts',
-    'pages',
+    'app/actions',
+    'app/assets',
+    'app/blocks',
+    'app/components',
+    'app/filters',
+    'app/hooks',
+    'app/layouts',
+    'app/pages',
     'server/actions',
     'server/api',
     'server/collections',
