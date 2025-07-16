@@ -90,6 +90,8 @@ function getClientBlocksFileContent() {
   const blockEntries = Object.entries(blockFiles)
 
   return [
+    `import type { Blocks } from '../server'`,
+    ``,
     `/**`,
     ` * Key-value object mapping block names to their corresponding Vue components.`,
     ` *`,
@@ -466,7 +468,6 @@ function getClientFileContent() {
 
   return [
     `import { type Component, defineAsyncComponent } from 'vue'`,
-    `import type { Blocks } from '../server'`,
     ``,
     `/**`,
     ` * Key-value object mapping field names to their corresponding Vue components.`,

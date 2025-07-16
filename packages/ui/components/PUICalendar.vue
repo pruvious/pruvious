@@ -46,7 +46,7 @@
           :size="typeof size === 'number' ? size - 2 : -3"
           :title="resolvedLabels.clear"
           @click.stop="
-            (event) => {
+            (event: Event) => {
               $emit('update:modelValue', null)
               $emit('commit', null)
               $nextTick(() => root?.close(event))
