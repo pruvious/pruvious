@@ -3,8 +3,8 @@ import { i18n } from '#pruvious/client/i18n'
 import { clear } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { isDevelopment } from 'std-env'
-import { refreshAuthState } from '../../../modules/pruvious/auth/utils.client'
-import { refreshPruviousDashboardState, refreshPruviousState } from '../../../modules/pruvious/pruvious/utils.client'
+import { refreshAuthState } from '../../../../modules/pruvious/auth/utils.client'
+import { refreshPruviousDashboardState, refreshPruviousState } from '../../../../modules/pruvious/pruvious/utils.client'
 
 let isListening = false
 

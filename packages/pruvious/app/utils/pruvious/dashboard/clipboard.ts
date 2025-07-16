@@ -1,7 +1,7 @@
 import type { BlockName } from '#pruvious/server'
 import { isString } from '@pruvious/utils'
 import { useClipboard, useEventListener, type UseClipboardReturn } from '@vueuse/core'
-import { getUser } from '../../../modules/pruvious/auth/utils.client'
+import { getUser } from '../../../../modules/pruvious/auth/utils.client'
 
 export type PruviousClipboardData =
   | {

@@ -7,7 +7,7 @@ import isoWeek from 'dayjs/esm/plugin/isoWeek'
 import localizedFormat from 'dayjs/esm/plugin/localizedFormat'
 import relativeTime from 'dayjs/esm/plugin/relativeTime'
 import weekOfYear from 'dayjs/esm/plugin/weekOfYear'
-import { getUser } from '../../../modules/pruvious/auth/utils.client'
+import { getUser } from '../../../../modules/pruvious/auth/utils.client'
 
 const _dayjs = puiDayjs()
 

@@ -10,6 +10,7 @@ import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model'
 import { EditorState, Plugin, TextSelection } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { LinkNodeView } from '../../utils/pruvious/dashboard/rich-text/link'
+import { ToolbarPluginView } from '../../utils/pruvious/dashboard/rich-text/toolbar'
 
 const props = defineProps({
   /**
@@ -124,6 +125,7 @@ const focusPlugin = new Plugin({
     },
   },
 })
+const toolbarPlugin = new Plugin({ view: (view) => new ToolbarPluginView(view, focused) })
 const emitModelValue = (state: EditorState) => emit('update:modelValue', getHTML(state))
 const commit = (state: EditorState) => emit('commit', getHTML(state))
 const commitDebounced = useDebounceFn((state: EditorState) => {
@@ -191,7 +193,7 @@ function createState(content: string) {
   return EditorState.create({
     schema,
     doc: DOMParser.fromSchema(schema).parse(element),
-    plugins: [focusPlugin, keymapPlugin],
+    plugins: [focusPlugin, keymapPlugin, toolbarPlugin],
   })
 }
 
@@ -246,7 +248,7 @@ function saveSelection() {
   white-space: pre-wrap;
 }
 
-.p-rich-text-tooltip {
+.p-rich-text-toolbar {
   position: absolute;
   z-index: 999999;
   display: none;

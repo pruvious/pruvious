@@ -575,7 +575,7 @@ function getClientDayjsFileContent() {
   const { resolve } = createResolver(import.meta.url)
 
   return [
-    `export { dayjsLocales, dayjs, dayjsUTC, dayjsConfig, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative, dayjsResolveTimezone } from '${resolve('../../../utils/pruvious/dashboard/dayjs')}'`,
+    `export { dayjsLocales, dayjs, dayjsUTC, dayjsConfig, dayjsFormatDateTime, dayjsFormatDate, dayjsFormatTime, dayjsRelative, dayjsResolveTimezone } from '${resolve('../../../app/utils/pruvious/dashboard/dayjs')}'`,
   ].join('\n')
 }
 
@@ -615,16 +615,16 @@ function getReExports() {
     `export { dashboardGuestGuard } from '${resolve('../middleware/pruvious-dashboard-guest-guard')}'`,
     `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolve('../middleware/utils.client')}'`,
     `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, parseConditionalLogic, parseFields } from '${resolve('../fields/utils.client')}'`,
-    `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
-    `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
-    `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,
-    `export { usePruviousLoginPopup } from '${resolve('../../../utils/pruvious/dashboard/login')}'`,
-    `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../utils/pruvious/dashboard/slugs')}'`,
-    `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissions } from '${resolve('../../../utils/pruvious/dashboard/permissions')}'`,
-    `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../utils/pruvious/dashboard/fields')}'`,
-    `export { usePruviousHMR } from '${resolve('../../../utils/pruvious/dashboard/hmr')}'`,
-    `export { maybeTranslate } from '${resolve('../../../utils/pruvious/dashboard/i18n')}'`,
-    `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard } from '${resolve('../../../utils/pruvious/dashboard/clipboard')}'`,
+    `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../app/utils/pruvious/dashboard/menu')}'`,
+    `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../app/utils/pruvious/dashboard/history')}'`,
+    `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../app/utils/pruvious/dashboard/layout')}'`,
+    `export { usePruviousLoginPopup } from '${resolve('../../../app/utils/pruvious/dashboard/login')}'`,
+    `export { getCollectionBySlug, getSingletonBySlug } from '${resolve('../../../app/utils/pruvious/dashboard/slugs')}'`,
+    `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissions } from '${resolve('../../../app/utils/pruvious/dashboard/permissions')}'`,
+    `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolve('../../../app/utils/pruvious/dashboard/fields')}'`,
+    `export { usePruviousHMR } from '${resolve('../../../app/utils/pruvious/dashboard/hmr')}'`,
+    `export { maybeTranslate } from '${resolve('../../../app/utils/pruvious/dashboard/i18n')}'`,
+    `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard } from '${resolve('../../../app/utils/pruvious/dashboard/clipboard')}'`,
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
     `export { type DefineDashboardPageOptions, defineDashboardPage } from '${resolve('../dashboard-pages/define')}'`,

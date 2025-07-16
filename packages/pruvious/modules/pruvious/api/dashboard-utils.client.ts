@@ -2,7 +2,7 @@ import type { StandardRoutes } from '#pruvious/server'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isFunction } from '@pruvious/utils'
 import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
-import { usePruviousLoginPopup } from '../../../utils/pruvious/dashboard/login'
+import { usePruviousLoginPopup } from '../../../app/utils/pruvious/dashboard/login'
 import {
   pfetch,
   pruviousDelete,

@@ -319,7 +319,7 @@ import {
   titleCase,
 } from '@pruvious/utils'
 import { useElementSize, useEventListener, useStorage, useWindowSize } from '@vueuse/core'
-import { usePruviousDashboardSerialized } from '../../../modules/pruvious/pruvious/utils.client'
+import { usePruviousDashboardSerialized } from '../../../../modules/pruvious/pruvious/utils.client'
 import type { ExtendedBlockValue } from './BlocksTree.vue'
 
 const props = defineProps({

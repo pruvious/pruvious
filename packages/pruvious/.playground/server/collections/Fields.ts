@@ -17,7 +17,7 @@ import {
   timeRangeField,
   timestampField,
 } from '#pruvious/server'
-import { repeaterTestField } from '~/shared/repeaterTestField'
+import { repeaterTestField } from '#shared/repeaterTestField'
 
 export default defineCollection({
   fields: {
