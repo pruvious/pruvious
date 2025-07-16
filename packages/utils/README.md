@@ -83,6 +83,7 @@ npm install @pruvious/utils
   - [deepCompare](#deepcompare)
   - [deleteProperty](#deleteproperty)
   - [diff](#diff)
+  - [dotNotationsToObject](#dotnotationstoobject)
   - [filterObject](#filterobject)
   - [firstKey](#firstkey)
   - [getProperty](#getproperty)
@@ -994,6 +995,17 @@ const changes = diff(oldObject, newObject)
 //   { path: 'foo.bar', oldValue: 1, newValue: 2 },
 //   { path: 'baz', oldValue: 2, newValue: 3 }
 // ]
+```
+
+### <a id="dotnotationstoobject">`dotNotationsToObject(dotNotations)`</a>
+
+Converts an object with dot notation keys into a nested object structure.
+
+**Example:**
+
+```ts
+dotNotationsToObject({ 'foo.bar': 'baz', 'foo.baz.qux': 'quux' })
+// { foo: { bar: 'baz', baz: { qux: 'quux' } } }
 ```
 
 ### <a id="filterobject">`filterObject(object, filter)`</a>

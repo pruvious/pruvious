@@ -5,6 +5,7 @@ import type {
   httpStatusCodeMessages,
   PruviousDashboardState,
   PruviousState,
+  RouteReferenceName,
   StandardRoutes,
 } from '#pruvious/server'
 import { clear, isFunction } from '@pruvious/utils'
@@ -71,6 +72,7 @@ interface Body {
   'auth/logout': undefined
   'auth/logout/others': undefined
   'auth/renew-token': undefined
+  'populate': { ref: RouteReferenceName; data: Record<string, any> }
   'pruvious/install': { firstName?: string; lastName?: string; email: string; password: string }
 }
 
@@ -79,6 +81,7 @@ interface PostResponse {
   'auth/logout': { success: true }
   'auth/logout/others': { token: string }
   'auth/renew-token': { token: string }
+  'populate': { data: Record<string, any> }
   'pruvious/install': { token: string }
 }
 

@@ -8,21 +8,10 @@
       @copyItems="
         (items, event) => {
           event.preventDefault()
-          const data = retractExtendedBlocksValue(items.map(({ source }) => source))
-          clipboard.copy({ pruviousClipboardDataType: 'blocks', data })
-          puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+          copyItems(items)
         }
       "
-      @cutItems="
-        (items, event) => {
-          if (!disabled) {
-            const data = retractExtendedBlocksValue(items.map(({ source }) => source))
-            clipboard.copy({ pruviousClipboardDataType: 'blocks', data })
-            puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
-            deleteItems(items, event)
-          }
-        }
-      "
+      @cutItems="cutItems"
       @deleteItems="deleteItems"
       @dropItems="dropItems"
       @duplicateItems="
@@ -211,7 +200,7 @@
 
       <template #item-icon="{ item }">
         <Icon
-          :name="`tabler:${item.selectable === false ? 'stack' : dashboard!.blocks[item.source.$key]?.ui.icon}`"
+          :name="`tabler:${item.selectable === false ? 'stack' : typeof dashboard!.blocks[item.source.$key]?.ui.icon === 'object' ? ((dashboard!.blocks[item.source.$key]!.ui.icon as any).iconMap[item.source[(dashboard!.blocks[item.source.$key]!.ui.icon as any).fieldName]] ?? (dashboard!.blocks[item.source.$key]!.ui.icon as any).defaultIcon ?? 'cube') : dashboard!.blocks[item.source.$key]?.ui.icon}`"
           mode="svg"
         />
       </template>
@@ -230,23 +219,7 @@
       <PUIDropdownItem
         v-if="selectedBlocks.length === 1 && canHaveSiblings(selectedBlocks[0]!.source)"
         :title="__('pruvious-dashboard', 'Add before')"
-        @click="
-          () => {
-            const nestedBlocksField = getParentNestedBlocksField(selectedBlocks[0]!.source)
-            const parent = selectedBlocks[0]!.source.$parent
-            const { $children } = getParentLists(selectedBlocks[0]!.source)
-            const pathPrefix = selectedBlocks[0]!.source.$path.split('.').slice(0, -1).join('.')
-            const index = $children.indexOf(toRaw(selectedBlocks[0]!.source))
-            const _allowedBlocks = nestedBlocksField?.$allowedBlocks ?? allowedBlocks
-            if (_allowedBlocks.length > 1) {
-              addBlockPopup = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
-            } else {
-              addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
-            }
-            emitValue()
-            $emit('queueConditionalLogicUpdate', '$reset')
-          }
-        "
+        @click="addBlockBefore(selectedBlocks[0]!.source)"
       >
         <Icon mode="svg" name="tabler:arrow-bar-to-up" />
         <span>{{ __('pruvious-dashboard', 'Add before') }}</span>
@@ -285,23 +258,7 @@
       <PUIDropdownItem
         v-if="selectedBlocks.length === 1 && canHaveSiblings(selectedBlocks[0]!.source)"
         :title="__('pruvious-dashboard', 'Add after')"
-        @click="
-          () => {
-            const nestedBlocksField = getParentNestedBlocksField(selectedBlocks[0]!.source)
-            const parent = selectedBlocks[0]!.source.$parent
-            const { $children } = getParentLists(selectedBlocks[0]!.source)
-            const pathPrefix = selectedBlocks[0]!.source.$path.split('.').slice(0, -1).join('.')
-            const index = $children.indexOf(toRaw(selectedBlocks[0]!.source)) + 1
-            const _allowedBlocks = nestedBlocksField?.$allowedBlocks ?? allowedBlocks
-            if (_allowedBlocks.length > 1) {
-              addBlockPopup = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
-            } else {
-              addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
-            }
-            emitValue()
-            $emit('queueConditionalLogicUpdate', '$reset')
-          }
-        "
+        @click="addBlockAfter(selectedBlocks[0]!.source)"
       >
         <Icon mode="svg" name="tabler:arrow-bar-to-down" />
         <span>{{ __('pruvious-dashboard', 'Add after') }}</span>
@@ -614,14 +571,10 @@ const props = defineProps({
 const emit = defineEmits<{
   'commit': [value: BlockValue[]]
   'update:modelValue': [value: BlockValue[]]
-  'queueConditionalLogicUpdate': [path: '$reset']
+  'queueConditionalLogicUpdate': [path: (string & {}) | string[] | '$reset']
   'update:selectedBlocks': [value: PUITreeItemModel<ExtendedBlockValue>[]]
   'update:highlightedBlock': [value: PUITreeItemModel<ExtendedBlockValue> | undefined]
 }>()
-
-defineExpose({
-  updateTreePlaceholder,
-})
 
 const dashboard = usePruviousDashboard()
 const clipboard = usePruviousClipboard()
@@ -876,6 +829,21 @@ const clearScrollPosition = useDebounceFn(() => {
   scrollPosition = undefined
 }, 250)
 
+defineExpose({
+  tree,
+  updateTreePlaceholder,
+  addBlockBefore,
+  addBlockAfter,
+  copyItems,
+  cutItems,
+  pasteItems,
+  moveItems,
+  deleteItems,
+  duplicateItems,
+  canHaveSiblings,
+  scrollToSelection: () => treeComponent.value?.scrollToSelection(),
+})
+
 refreshTree()
 
 watchDebounced(
@@ -892,10 +860,12 @@ watchDebounced(
           extendedModelValue.length,
           ...extendBlocksValue(props.modelValue, props.fieldName, null, true),
         )
+        emit('queueConditionalLogicUpdate', '$reset')
       } else {
         for (const { path, newValue } of diff) {
           if (pathMap[`${props.fieldName}.${path}`]) {
             setProperty({ [props.fieldName]: extendedModelValue }, pathMap[`${props.fieldName}.${path}`]!, newValue)
+            emit('queueConditionalLogicUpdate', `${props.fieldName}.${path}`)
           }
         }
       }
@@ -1017,6 +987,11 @@ function extendBlocksValue(
               reuseIds,
               _extendedPath,
             )
+            for (const [i, children] of Object.entries(blockValue[keys[0]!])) {
+              for (const fieldName of Object.keys(children as any)) {
+                pathMap[`${$path}.${i}.${fieldName}`] = `${_extendedPath}.${i}.${fieldName}`
+              }
+            }
           } else if (keys.length > 1) {
             extendedBlockValue.$children = keys.map((fieldName, i) => {
               const $path = `${extendedBlockValue.$path}.${fieldName}`
@@ -1041,6 +1016,12 @@ function extendBlocksValue(
                 reuseIds,
                 `${extendedPath}.$children.${i}`,
               )
+              for (const [j, children] of Object.entries(blockValue[virtualSlot.$virtualSlotName!])) {
+                for (const fieldName of Object.keys(children as any)) {
+                  pathMap[`${virtualSlot.$path}.${j}.${fieldName}`] =
+                    `${extendedPath}.$children.${i}.$children.${j}.${fieldName}`
+                }
+              }
             }
           }
 
@@ -1277,6 +1258,38 @@ function addBlock(blockName: BlockName, parent: ExtendedBlockValue | null, index
   })
 }
 
+function addBlockBefore(block: ExtendedBlockValue) {
+  const nestedBlocksField = getParentNestedBlocksField(block)
+  const parent = block.$parent
+  const { $children } = getParentLists(block)
+  const pathPrefix = block.$path.split('.').slice(0, -1).join('.')
+  const index = $children.indexOf(toRaw(block))
+  const _allowedBlocks = nestedBlocksField?.$allowedBlocks ?? allowedBlocks
+  if (_allowedBlocks.length > 1) {
+    addBlockPopup.value = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
+  } else {
+    addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
+  }
+  emitValue()
+  emit('queueConditionalLogicUpdate', '$reset')
+}
+
+function addBlockAfter(block: ExtendedBlockValue) {
+  const nestedBlocksField = getParentNestedBlocksField(block)
+  const parent = block.$parent
+  const { $children } = getParentLists(block)
+  const pathPrefix = block.$path.split('.').slice(0, -1).join('.')
+  const index = $children.indexOf(toRaw(block)) + 1
+  const _allowedBlocks = nestedBlocksField?.$allowedBlocks ?? allowedBlocks
+  if (_allowedBlocks.length > 1) {
+    addBlockPopup.value = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
+  } else {
+    addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
+  }
+  emitValue()
+  emit('queueConditionalLogicUpdate', '$reset')
+}
+
 function createBlock(blockName: BlockName) {
   return {
     $key: blockName,
@@ -1399,7 +1412,12 @@ function deleteItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: Even
   }
 }
 
-function moveItems(direction: 'up' | 'down', items: PUITreeItemModel<ExtendedBlockValue>[], event?: Event) {
+function moveItems(
+  direction: 'up' | 'down',
+  items: PUITreeItemModel<ExtendedBlockValue>[],
+  event?: Event,
+  updateSelectedBlocks = true,
+) {
   if (!props.disabled) {
     event?.preventDefault()
     const moved = puiMoveTreeItems(items, tree.value, direction)
@@ -1431,10 +1449,12 @@ function moveItems(direction: 'up' | 'down', items: PUITreeItemModel<ExtendedBlo
     localErrors.value = undefined
     refresh()
     setTimeout(() => {
-      emit(
-        'update:selectedBlocks',
-        treeComponent.value!.flatItems().filter((_item) => items.some((item) => item.id === _item.id)),
-      )
+      if (updateSelectedBlocks) {
+        emit(
+          'update:selectedBlocks',
+          treeComponent.value!.flatItems().filter((_item) => items.some((item) => item.id === _item.id)),
+        )
+      }
       emitValue()
       emit('queueConditionalLogicUpdate', '$reset')
       nextTick(() => {
@@ -1526,6 +1546,21 @@ function duplicateItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: E
       )
       emit('queueConditionalLogicUpdate', '$reset')
     })
+  }
+}
+
+function copyItems(items: PUITreeItemModel<ExtendedBlockValue>[]) {
+  const data = retractExtendedBlocksValue(items.map(({ source }) => source))
+  clipboard.copy({ pruviousClipboardDataType: 'blocks', data })
+  puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+}
+
+function cutItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: Event) {
+  if (!props.disabled) {
+    const data = retractExtendedBlocksValue(items.map(({ source }) => source))
+    clipboard.copy({ pruviousClipboardDataType: 'blocks', data })
+    puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+    deleteItems(items, event)
   }
 }
 

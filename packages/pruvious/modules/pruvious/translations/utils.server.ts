@@ -5,7 +5,7 @@ import {
   type Pattern,
   type Replacement,
 } from '@pruvious/i18n'
-import { isArray, isDefined, isFunction, isObject } from '@pruvious/utils'
+import { isDefined } from '@pruvious/utils'
 import parser from 'accept-language-parser'
 import type { PruviousModuleOptions, ResolvedI18nConfig } from '../PruviousModuleOptions'
 
@@ -170,24 +170,6 @@ export async function resolveContextLanguage() {
     ) || primaryLanguage
 
   return event.context.pruvious.language
-}
-
-/**
- * Serializes translatable string functions to a format that can be sent to the client.
- * This affects all functions in the provided `object`.
- */
-export function serializeTranslatableStringCallbacks<T>(object: T): T {
-  if (isObject(object)) {
-    return Object.fromEntries(
-      Object.entries(object).map(([key, value]) => [key, serializeTranslatableStringCallbacks(value)]),
-    ) as T
-  } else if (isArray(object)) {
-    return object.map(serializeTranslatableStringCallbacks) as T
-  } else if (isFunction(object)) {
-    return `EVAL::${object.toString()}` as T
-  }
-
-  return object
 }
 
 /**

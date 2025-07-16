@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <div>@todo</div>
 </template>
 
 <script lang="ts" setup>

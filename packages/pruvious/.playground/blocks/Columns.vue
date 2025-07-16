@@ -1,5 +1,18 @@
 <template>
-  <div></div>
+  <div class="columns">
+    <div class="column">
+      <PruviousBlocks field="column1" />
+    </div>
+    <div v-if="columns > 1" class="column">
+      <PruviousBlocks field="column2" />
+    </div>
+    <div v-if="columns > 2" class="column">
+      <PruviousBlocks field="column3" />
+    </div>
+    <div v-if="columns > 3" class="column">
+      <PruviousBlocks field="column4" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -29,3 +42,18 @@ defineProps({
   }),
 })
 </script>
+
+<style scoped>
+.columns {
+  display: flex;
+  gap: 1rem;
+}
+
+.column {
+  flex: 1;
+  padding: 0.5rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+</style>

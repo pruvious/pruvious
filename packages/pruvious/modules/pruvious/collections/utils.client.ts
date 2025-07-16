@@ -83,5 +83,16 @@ export interface SerializableCollection extends Pick<CollectionMeta, 'translatab
      * Indicates whether the `scheduledAt` field is enabled in the collection.
      */
     scheduledAtField: boolean
+
+    /**
+     * Indicates whether the `seo` field is enabled in the collection.
+     */
+    seoField: boolean
+
+    /**
+     * The layout key used to render the collection's route.
+     * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
+     */
+    layout?: string
   }
 }

@@ -45,9 +45,11 @@ export default defineTranslation({
     type: 'string',
   }),
   'Resource not found': 'Ressource nicht gefunden',
+  'Route reference not found': 'Routenreferenz nicht gefunden',
 
   'Singleton not found': 'Singleton nicht gefunden',
 
+  'The `$param` parameter is invalid': createPattern('Der Parameter `$param` ist ungültig', { param: 'string' }),
   'The `$param` parameter is required': createPattern('Der Parameter `$param` ist erforderlich', { param: 'string' }),
   'The `$param` parameter must be a boolean': createPattern('Der Parameter `$param` muss ein boolescher Wert sein', {
     param: 'string',

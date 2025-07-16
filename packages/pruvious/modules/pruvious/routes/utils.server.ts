@@ -1,3 +1,4 @@
+import type { LayoutKey } from '#build/types/layouts'
 import {
   collections,
   getRouteReferences,
@@ -21,12 +22,18 @@ export interface GenericRouteReference {
   /**
    * The name of the collection or singleton.
    */
-  dataContainerName: string
+  dataContainerName: keyof Collections | keyof Singletons
 
   /**
    * A key-value object of `Field` instances representing the `routing.publicFields` of the collection or singleton.
    */
   publicFields: Record<string, GenericField>
+
+  /**
+   * The layout key used to render the collection's route.
+   * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
+   */
+  layout?: LayoutKey
 }
 
 export interface GenericRouteData {
@@ -95,6 +102,12 @@ export type ResolvedRoute<TRef extends RouteReferenceName = RouteReferenceName> 
    * The `routing.publicFields` values of the referenced collection or singleton.
    */
   data: ExtractPopulatedTypes<RouteReferences[TRef]['publicFields']>
+
+  /**
+   * The layout key used to render the collection's route.
+   * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
+   */
+  layout?: LayoutKey
 
   /**
    * Optional path for a 302 redirect that standardizes the letter case in the route path.
@@ -254,6 +267,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             .select(Object.keys(singletonReference[1].publicFields) as any)
             .language(language)
             .get()) as any,
+          layout: singletonReference[1].layout,
           softRedirect: realPath !== withLeadingSlash(path) ? realPath! : undefined,
         }
       }
@@ -341,6 +355,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         },
         ref,
         data: pick(data, collection.meta.routing.publicFields) as any,
+        layout: collection.meta.routing.layout,
         softRedirect: realPath !== withLeadingSlash(path) ? realPath : undefined,
       }
     }

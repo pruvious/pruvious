@@ -92,7 +92,7 @@
 import { Icon } from '#components'
 import { __, maybeTranslate, usePruviousDashboard } from '#pruvious/client'
 import type { BlockName } from '#pruvious/server'
-import { isDefined, searchByKeywords, titleCase } from '@pruvious/utils'
+import { isDefined, isObject, searchByKeywords, titleCase } from '@pruvious/utils'
 
 interface BlockItem {
   name: BlockName
@@ -142,7 +142,9 @@ const groups = computed<BlockGroupItem[]>(() => {
       description,
       group: dashboard.value!.blocks[blockName]!.group,
       tags: dashboard.value!.blocks[blockName]!.tags,
-      icon: dashboard.value!.blocks[blockName]!.ui.icon!,
+      icon: isObject(dashboard.value!.blocks[blockName]!.ui.icon)
+        ? (dashboard.value!.blocks[blockName]!.ui.icon.defaultIcon ?? 'cube')
+        : dashboard.value!.blocks[blockName]!.ui.icon!,
       _search: [label.padEnd(63), blockName.padEnd(63), description].join(' '),
     }
   })

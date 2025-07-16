@@ -10,5 +10,6 @@ export default defineTemplate(() => ({
     isPublic: true,
     scheduledAt: true,
     seo: true,
+    layout: 'page',
   },
 }))

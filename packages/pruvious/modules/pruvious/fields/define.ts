@@ -839,7 +839,7 @@ export interface FieldUIOptions<
    *       `app/fields/collections/Products/variants/[n]/color.filter.vue`.
    *       The structure `app/fields/collections/Products/variants[n].color.filter.vue` will not work.
    *     - Use `[n]` as a placeholder for array indexes.
-   * - It then tries to render the `customfilterComponent` specified in this field's options.
+   * - It then tries to render the `customFilterComponent` specified in this field's options.
    * - Finally, it attempts to render the component `<srcDir>/<pruvious.dir.fields.components>/<fieldType>.filter.vue`.
    *   - For example, if the field type is `text`, it will try to render the component `app/fields/text.filter.vue`.
    *
@@ -1245,7 +1245,7 @@ export function defineField<
               }
             : ({} as any),
           { populator: fieldTypeOptions.populator },
-          { _fieldType: fieldType, _dataType: model.dataType },
+          { _fieldType: fieldType, _dataType: model.dataType, _hasPopulator: !!fieldTypeOptions.populator },
         ) as any,
         nullable: fieldTypeOptions.nullable ?? false,
         default: fieldTypeOptions.default,

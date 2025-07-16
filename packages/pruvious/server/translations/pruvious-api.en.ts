@@ -43,9 +43,11 @@ export default defineTranslation({
   'Record does not exist': 'Record does not exist',
   'Request content type must be `$type`': createPattern('Request content type must be `$type`', { type: 'string' }),
   'Resource not found': 'Resource not found',
+  'Route reference not found': 'Route reference not found',
 
   'Singleton not found': 'Singleton not found',
 
+  'The `$param` parameter is invalid': createPattern('The `$param` parameter is invalid', { param: 'string' }),
   'The `$param` parameter is required': createPattern('The `$param` parameter is required', { param: 'string' }),
   'The `$param` parameter must be a boolean': createPattern('The `$param` parameter must be a boolean', {
     param: 'string',

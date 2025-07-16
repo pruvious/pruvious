@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <pre>{{ page || 'empty' }}</pre>
 </template>
 
 <script lang="ts" setup>
@@ -11,6 +11,6 @@ defineBlock({
 
 defineProps({
   slot: blocksField({}),
-  page: recordField({ collection: 'Pages', fields: ['blocks'], populate: true }),
+  page: recordField({ collection: 'Pages', fields: ['id', 'subpath', 'seo'] }),
 })
 </script>

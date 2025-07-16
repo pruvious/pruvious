@@ -1,6 +1,9 @@
 <template>
-  <NuxtLayout>
-    <pre>{{ proute }}</pre>
+  <NuxtLayout :name="proute?.layout">
+    <Header />
+    <PruviousBlocks field="blocks" />
+    <Footer />
+    <PruviousWidgets />
   </NuxtLayout>
 </template>
 
@@ -11,5 +14,5 @@ definePageMeta({
   middleware: ['pruvious'],
 })
 
-const proute = usePruviousRoute<'Pages'>()
+const proute = usePruviousRoute()
 </script>

@@ -181,7 +181,7 @@ const component = computed(() => {
       return customComponents[customComponent]()
     } else {
       console.warn(
-        `Unable to resolve custom component \`${customComponent}\` for field \`${props.name}\` in \`${props.collection.name}\` collection. Available custom components:`,
+        `Unable to resolve custom table component \`${customComponent}\` for field \`${props.name}\` in \`${props.collection.name}\` collection. Available custom components:`,
         toRaw(customComponents),
       )
     }

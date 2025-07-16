@@ -64,6 +64,6 @@ const expanded = ref(description?.type === 'expandable' && description.expanded)
 }
 
 .p-field-description-content {
-  margin: 0.25rem 0 0 1.25rem;
+  margin: 0.25rem 0 0 calc(1em + 0.0625rem + 0.25rem);
 }
 </style>

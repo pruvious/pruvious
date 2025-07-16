@@ -24,6 +24,9 @@ export function generateClientFiles() {
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
 
   fs.writeFileSync(`${buildDir}/client/base.ts`, getClientBaseFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/client/fields.ts`, getClientFieldsFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/client/blocks.ts`, getClientBlocksFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/client/validators.ts`, getClientValidatorsFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/client/i18n.ts`, getClientI18nFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/client/hooks.ts`, getClientHooksFileContent() + '\n')
   fs.writeFileSync(`${buildDir}/client/index.ts`, getClientFileContent() + '\n')
@@ -46,6 +49,138 @@ function getClientBaseFileContent() {
     ` * This setting comes from the Nuxt config \`pruvious.dashboard.basePath\` and is formatted to always start and end with a forward slash.`,
     ` */`,
     `export const dashboardBasePath = '${pruviousOptions.dashboard.basePath}'`,
+    ``,
+  ].join('\n')
+}
+
+/**
+ * Generates the `#pruvious/client/fields.ts` file content.
+ */
+function getClientFieldsFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/fields.ts>`)
+
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
+
+  return [
+    ...fieldDefinitionEntries.map(([name, { file }]) => `import type _${name}Field from '${file.import}'`),
+    ``,
+    `const _fieldFn = () => null`,
+    ``,
+    ...fieldDefinitionEntries.flatMap(([name]) => [
+      `export const ${name}Field = _fieldFn as unknown as typeof _${name}Field.clientFn`,
+    ]),
+    ``,
+  ].join('\n')
+}
+
+/**
+ * Generates the `#pruvious/client/blocks.ts` file content.
+ */
+function getClientBlocksFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/blocks.ts>`)
+
+  const blockFiles = resolveBlockFiles()
+  const blockEntries = Object.entries(blockFiles)
+
+  return [
+    `/**`,
+    ` * Key-value object mapping block names to their corresponding Vue components.`,
+    ` *`,
+    ` * Components are loaded asynchronously using Vue's \`defineAsyncComponent\` function.`,
+    ` * They are automatically registered by creating \`.vue\` files in the \`app/blocks/\` directory of the project.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`vue`,
+    ` * <template>`,
+    ` *   <component v-if="blockComponents[blockName]" :is="blockComponents[blockName]" v-model="props" />`,
+    ` * </template>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const blockComponents: Record<keyof Blocks, () => Component> = {`,
+    ...blockEntries.map(
+      ([name, { file }]) => `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}')),`,
+    ),
+    `}`,
+    ``,
+  ].join('\n')
+}
+
+/**
+ * Generates the `#pruvious/client/validators.ts` file content.
+ */
+function getClientValidatorsFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/validators.ts>`)
+
+  const simpleValidatorsMeta = getSimpleValidatorsMeta()
+
+  return [
+    `const _validatorFn: any = () => null`,
+    ...simpleValidatorsMeta.flatMap(({ name, comment, exampleField }) => [
+      ``,
+      `import type { ${name}Validator as _${name}Validator } from '@pruvious/orm'`,
+      ``,
+      `/**`,
+      ...comment.map((line) => ` * ${line}`),
+      ` *`,
+      ` * This validator should only be used within the \`validators\` array when defining block fields.`,
+      ` * The imported function is a meta function that does not execute any actual validation logic.`,
+      ` * The real validation is performed on the server side and \`${name}Validator\` is removed from the Vue component during compilation.`,
+      ` *`,
+      ` * @example`,
+      ` * \`\`\`vue`,
+      ` * <script lang="ts" setup>`,
+      ` * import { ${exampleField}, ${name}Validator } from '#pruvious/client'`,
+      ` *`,
+      ` * defineProps({`,
+      ` *   foo: ${exampleField}({`,
+      ` *     validators: [${name}Validator()],`,
+      ` *   }),`,
+      ` * })`,
+      ` * </script>`,
+      ` * \`\`\``,
+      ` */`,
+      `export const ${name}Validator: typeof _${name}Validator = _validatorFn`,
+    ]),
+    ``,
+    `import type { uniqueValidator as _uniqueValidator, UniqueValidatorOptions, GenericCollection, GenericValidator } from '@pruvious/orm'`,
+    `import type { GenericDatabase } from '../server'`,
+    ``,
+    `/**`,
+    ...validatorsMeta.find(({ name }) => name === 'unique')!.comment.map((line) => ` * ${line}`),
+    ` *`,
+    ` * This validator should only be used within the \`validators\` array when defining **repeater** fields in blocks.`,
+    ` * The imported function is a meta function that does not execute any actual validation logic.`,
+    ` * The real validation is performed on the server side and \`uniqueValidator\` is removed from the Vue component during compilation.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`ts`,
+    ` * <script lang="ts" setup>`,
+    ` * import { repeaterField, textField, uniqueValidator } from '#pruvious/client'`,
+    ` *`,
+    ` * defineProps({`,
+    ` *   variants: repeaterField({`,
+    ` *     subfields: {`,
+    ` *       name: textField({`,
+    ` *         required: true,`,
+    ` *         validators: [uniqueValidator()],`,
+    ` *       }),`,
+    ` *     },`,
+    ` *   }),`,
+    ` * })`,
+    ` * </script>`,
+    ` * \`\`\``,
+    ` */`,
+    `export const uniqueValidator: <TCollection extends GenericCollection, TField extends string = TCollection['TColumnNames']>(options?: UniqueValidatorOptions<TField, GenericDatabase>) => GenericValidator = _validatorFn`,
     ``,
   ].join('\n')
 }
@@ -324,26 +459,14 @@ function getClientFileContent() {
 
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/index.ts>`)
 
-  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
-  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
   const fieldComponentFiles = resolveFieldComponentFiles()
   const fieldComponentEntries = Object.entries(fieldComponentFiles)
-  const blockFiles = resolveBlockFiles()
-  const blockEntries = Object.entries(blockFiles)
-  const simpleValidatorsMeta = getSimpleValidatorsMeta()
 
   resolveDashboardPageFiles()
 
   return [
     `import { type Component, defineAsyncComponent } from 'vue'`,
     `import type { Blocks } from '../server'`,
-    ...fieldDefinitionEntries.map(([name, { file }]) => `import type _${name}Field from '${file.import}'`),
-    ``,
-    `const _fieldFn = () => null`,
-    ``,
-    ...fieldDefinitionEntries.flatMap(([name]) => [
-      `export const ${name}Field = _fieldFn as unknown as typeof _${name}Field.clientFn`,
-    ]),
     ``,
     `/**`,
     ` * Key-value object mapping field names to their corresponding Vue components.`,
@@ -416,83 +539,6 @@ function getClientFileContent() {
     `}`,
     ``,
     `/**`,
-    ` * Key-value object mapping block names to their corresponding Vue components.`,
-    ` *`,
-    ` * Components are loaded asynchronously using Vue's \`defineAsyncComponent\` function.`,
-    ` * They are automatically registered by creating \`.vue\` files in the \`app/blocks/\` directory of the project.`,
-    ` *`,
-    ` * @example`,
-    ` * \`\`\`vue`,
-    ` * <template>`,
-    ` *   <component v-if="blockComponents[blockName]" :is="blockComponents[blockName]" v-model="props" />`,
-    ` * </template>`,
-    ` * \`\`\``,
-    ` */`,
-    `export const blockComponents: Record<keyof Blocks, () => Component> = {`,
-    ...blockEntries.map(
-      ([name, { file }]) => `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}')),`,
-    ),
-    `}`,
-    ``,
-    `const _validatorFn: any = () => null`,
-    ...simpleValidatorsMeta.flatMap(({ name, comment, exampleField }) => [
-      ``,
-      `import type { ${name}Validator as _${name}Validator } from '@pruvious/orm'`,
-      ``,
-      `/**`,
-      ...comment.map((line) => ` * ${line}`),
-      ` *`,
-      ` * This validator should only be used within the \`validators\` array when defining block fields.`,
-      ` * The imported function is a meta function that does not execute any actual validation logic.`,
-      ` * The real validation is performed on the server side and \`${name}Validator\` is removed from the Vue component during compilation.`,
-      ` *`,
-      ` * @example`,
-      ` * \`\`\`vue`,
-      ` * <script lang="ts" setup>`,
-      ` * import { ${exampleField}, ${name}Validator } from '#pruvious/client'`,
-      ` *`,
-      ` * defineProps({`,
-      ` *   foo: ${exampleField}({`,
-      ` *     validators: [${name}Validator()],`,
-      ` *   }),`,
-      ` * })`,
-      ` * </script>`,
-      ` * \`\`\``,
-      ` */`,
-      `export const ${name}Validator: typeof _${name}Validator = _validatorFn`,
-    ]),
-    ``,
-    `import type { uniqueValidator as _uniqueValidator, UniqueValidatorOptions, GenericCollection, GenericValidator } from '@pruvious/orm'`,
-    `import type { GenericDatabase } from '../server'`,
-    ``,
-    `/**`,
-    ...validatorsMeta.find(({ name }) => name === 'unique')!.comment.map((line) => ` * ${line}`),
-    ` *`,
-    ` * This validator should only be used within the \`validators\` array when defining **repeater** fields in blocks.`,
-    ` * The imported function is a meta function that does not execute any actual validation logic.`,
-    ` * The real validation is performed on the server side and \`uniqueValidator\` is removed from the Vue component during compilation.`,
-    ` *`,
-    ` * @example`,
-    ` * \`\`\`ts`,
-    ` * <script lang="ts" setup>`,
-    ` * import { repeaterField, textField, uniqueValidator } from '#pruvious/client'`,
-    ` *`,
-    ` * defineProps({`,
-    ` *   variants: repeaterField({`,
-    ` *     subfields: {`,
-    ` *       name: textField({`,
-    ` *         required: true,`,
-    ` *         validators: [uniqueValidator()],`,
-    ` *       }),`,
-    ` *     },`,
-    ` *   }),`,
-    ` * })`,
-    ` * </script>`,
-    ` * \`\`\``,
-    ` */`,
-    `export const uniqueValidator: <TCollection extends GenericCollection, TField extends string = TCollection['TColumnNames']>(options?: UniqueValidatorOptions<TField, GenericDatabase>) => GenericValidator = _validatorFn`,
-    ``,
-    `/**`,
     ` * Controls which stylesheets are retained in the dashboard by filtering based on selector content.`,
     ` * Any stylesheet without rules containing these strings will be automatically disabled.`,
     ` */`,
@@ -511,18 +557,11 @@ function getClientTypeFileContent() {
 
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/index.d.ts>`)
 
-  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
-  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
-
   return [
-    ...fieldDefinitionEntries.map(([name]) => `export function ${name}Field(): any`),
     `export const tokenStorage: any`,
     `export const fieldComponents: any`,
     `export const tableFieldComponents: any`,
     `export const filterFieldComponents: any`,
-    `export const blockComponents: any`,
-    ...validatorsMeta.map(({ name }) => `export function ${name}Validator(): any`),
-    `export function uniqueValidator(): any`,
     `export const filterStylesheets: any`,
     getReExports(),
   ].join('\n')
@@ -542,17 +581,26 @@ function getClientDayjsFileContent() {
 function getReExports() {
   const { resolve } = createResolver(import.meta.url)
 
+  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
+  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
+
   return [
     `export { dashboardBasePath } from './base'`,
+    `export { blockComponents } from './blocks'`,
+    ...fieldDefinitionEntries.map(([name]) => `export { ${name}Field } from './fields'`),
+    ...validatorsMeta.map(({ name }) => `export { ${name}Validator } from './validators'`),
     `export { i18n, _, __, languages, primaryLanguage, dashboardLanguages, isValidLanguageCode } from './i18n'`,
     `export { type Actions, type Filters, actions, filters, loadActions, loadFilters } from './hooks'`,
     `export { pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, pfetch, type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError } from '${resolve('../api/utils.client')}'`,
     `export { useAuth, refreshAuthState, getAuthTokenPayload, getAuthTokenExpiresIn, storeAuthToken, removeAuthToken, isLoggedIn, getUser, hasPermission, type AuthState } from '${resolve('../auth/utils.client')}'`,
-    `export { usePruviousRoute, resolvePruviousRoute } from '${resolve('../routes/composable')}'`,
-    `export { getRouteReferences, isPreview } from '${resolve('../routes/utils.client')}'`,
+    `export { usePruviousRoute, resolvePruviousRoute, isPreview } from '${resolve('../routes/composable')}'`,
+    `export { getRouteReferences } from '${resolve('../routes/utils.client')}'`,
     `export { resolvePath } from '${resolve('../routes/utils.shared')}'`,
+    `export { usePruviousPreviewKey } from '${resolve('../preview/composable')}'`,
+    `export { usePruviousPreviewParsedFields, usePruviousPreviewHighlightedBlocks, usePruviousPreviewFocusedBlocks, usePruviousPreviewFields, usePruviousPreviewBlocks, usePruviousPreviewBlockLabels, usePruviousPreviewRouteReferences, usePruviousPreviewIsEditable, usePruviousPreviewFocusNext, usePruviousPreviewDashboardLanguage, initializePreview } from '${resolve('../preview/utils.client')}'`,
     `export { usePruvious, usePruviousDashboard, refreshPruviousState, refreshPruviousDashboardState, deserializeTranslatableStringCallbacks } from '${resolve('../pruvious/utils.client')}'`,
     `export { useLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath } from '${resolve('../translations/utils.client')}'`,
+    `export { serializeTranslatableStringCallbacks } from '${resolve('../translations/utils.shared')}'`,
     `export { useDashboardContentLanguage } from '${resolve('../translations/dashboard-utils.client')}'`,
     `export { pruviousDashboardPost, pruviousDashboardGet, pruviousDashboardPatch, pruviousDashboardDelete, pfetchDashboard } from '${resolve('../api/dashboard-utils.client')}'`,
     `export { defineAction, defineFilter } from '${resolve('../hooks/define.client')}'`,
@@ -565,7 +613,7 @@ function getReExports() {
     `export { dashboardAuthGuard } from '${resolve('../middleware/pruvious-dashboard-auth-guard')}'`,
     `export { dashboardGuestGuard } from '${resolve('../middleware/pruvious-dashboard-guest-guard')}'`,
     `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolve('../middleware/utils.client')}'`,
-    `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, parseConditionalLogic } from '${resolve('../fields/utils.client')}'`,
+    `export { fillFieldData, prepareFieldData, getTopLevelFieldDependencies, parseConditionalLogic, parseFields } from '${resolve('../fields/utils.client')}'`,
     `export { type DashboardMenuItem, usePruviousDashboardMenuExpanded, prepareDashboardMenu } from '${resolve('../../../utils/pruvious/dashboard/menu')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolve('../../../utils/pruvious/dashboard/history')}'`,
     `export { usePruviousDashboardLayout, getOverlayTransitionDuration } from '${resolve('../../../utils/pruvious/dashboard/layout')}'`,

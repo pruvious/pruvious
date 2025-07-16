@@ -202,10 +202,10 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
-      languages: resolvedOptions.i18n.languages.map(({ code }) => code) as LanguageCode[],
+      languages: nuxt.options.runtimeConfig.pruvious.i18n.languages.map(({ code }) => code) as LanguageCode[],
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage as LanguageCode,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
-      routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,
+      routing: nuxt.options.runtimeConfig.pruvious.routing,
       tokenStorage: nuxt.options.runtimeConfig.pruvious.auth.tokenStorage,
       translatableStringsPreloadRules: nuxt.options.runtimeConfig.pruvious.i18n.preloadTranslatableStrings,
     }
@@ -277,10 +277,16 @@ export default defineNuxtModule<PruviousModuleOptions>({
     // Remove dynamic imports from entry points
     nuxt.hook('build:manifest', (manifest) => {
       for (const item of Object.values(manifest)) {
-        if (item.isEntry || item.isDynamicEntry) {
-          item.dynamicImports = []
-        }
+        item.dynamicImports = []
+        item.prefetch = false
+        item.preload = false
       }
+    })
+
+    // Disable module preload
+    nuxt.hook('vite:extendConfig', (config) => {
+      config.build ??= {}
+      config.build.modulePreload = false
     })
 
     // Disable unwanted stylesheets

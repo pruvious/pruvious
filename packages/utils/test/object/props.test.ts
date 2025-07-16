@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { deleteProperty, getProperty, setProperty } from '../../src'
+import { deleteProperty, dotNotationsToObject, getProperty, setProperty } from '../../src'
 
 test('gets object property by dot notation', () => {
   expect(getProperty({ foo: { bar: 'baz' } }, 'foo.bar')).toBe('baz')
@@ -45,4 +45,13 @@ test('deletes object property by dot notation', () => {
   expect(a).toEqual({ foo: {} })
   expect(b).toEqual({ foo: { bar: 'baz' } })
   expect(c).toEqual({ foo: ['bar'] })
+})
+
+test('convert dot notations to object', () => {
+  expect(dotNotationsToObject({ foo: 123 })).toEqual({ foo: 123 })
+  expect(dotNotationsToObject({ 'foo': 123, 'foo.bar': 456 })).toEqual({ foo: { bar: 456 } })
+  expect(dotNotationsToObject({ 'foo.bar': 'baz', 'foo.baz.qux': 'quux' })).toEqual({
+    foo: { bar: 'baz', baz: { qux: 'quux' } },
+  })
+  expect(dotNotationsToObject({ 'foo.1.bar': 456 })).toEqual({ foo: [undefined, { bar: 456 }] })
 })

@@ -54,13 +54,48 @@ export interface Block<TFields extends Record<string, GenericField>> {
   ui?: {
     /**
      * The icon associated with the block.
-     * Must be a valid Tabler icon name.
+     * Can be provided as a Tabler icon name (e.g., 'cube', 'typography') or an object for dynamic icon selection.
+     *
+     * For dynamic icons, use an object with these properties:
+     *
+     * - `fieldName` - The field name used to determine the icon dynamically.
+     * - `iconMap` - An object mapping field values to icon names (e.g., `{ 'image': 'photo', 'video': 'movie' }`).
+     * - `defaultIcon` - The default icon to use when the field value does not match any key in the `iconMap`.
      *
      * @see https://tabler-icons.io for available icons
      *
      * @default 'cube'
      */
-    icon?: keyof typeof icons
+    icon?:
+      | keyof typeof icons
+      | {
+          /**
+           * The field name used to determine the icon dynamically.
+           * The field's value is used to look up the corresponding icon in the `iconMap`.
+           *
+           * @example
+           * 'type'
+           */
+          fieldName: keyof TFields & string
+
+          /**
+           * Maps field values to their corresponding icon names.
+           * Keys represent field values, values represent icon names.
+           *
+           * @example
+           * { 'image': 'photo', 'video': 'movie' }
+           */
+          iconMap: Record<string, keyof typeof icons>
+
+          /**
+           * The default icon to use when the field value does not match any key in the `iconMap`.
+           * This icon is always used in the block picker popup.
+           *
+           * @default 'cube'
+           */
+          defaultIcon?: keyof typeof icons
+        }
+      | undefined
 
     /**
      * Sets the visible label text for the block in the dashboard.

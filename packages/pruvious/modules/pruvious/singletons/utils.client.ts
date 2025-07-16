@@ -39,5 +39,6 @@ export interface SerializableSingleton extends Pick<GenericSingleton, 'translata
      * Indicates whether routing is enabled for the singleton.
      */
     enabled: boolean
-  } & Required<SingletonRoutingOptions>
+  } & Required<Pick<SingletonRoutingOptions, 'publicFields'>> &
+    Omit<SingletonRoutingOptions, 'publicFields'>
 }

@@ -42,6 +42,11 @@ type BaseSerializableFieldOptions = Required<
      * - `text`
      */
     _dataType: DataType
+
+    /**
+     * Indicates if the field has a populator function.
+     */
+    _hasPopulator: boolean
   }
 
 export type SerializableFieldOptions<TField extends keyof Fields> = Readonly<
@@ -152,4 +157,68 @@ export function parseConditionalLogic(
   }
 
   return parsedConditionalLogic
+}
+
+/**
+ * Parses fields from a list of serializable `fields` and some collection or singleton `data`.
+ *
+ * Returns an object where:
+ *
+ * - Keys are field paths (using dot notation for nested fields).
+ * - Values are the corresponding field options.
+ */
+export function parseFields(
+  fields: Record<string, GenericField>,
+  input: Record<string, any>,
+): Record<string, GenericField> {
+  const parsedFields: Record<string, GenericField> = {}
+
+  for (const [fieldName, field] of Object.entries(fields)) {
+    const item = input[fieldName]
+    parsedFields[fieldName] = field
+
+    if (field.model.subfields) {
+      if (isObject(item)) {
+        for (const [sfp, sfpcl] of Object.entries(parseFields(field.model.subfields, item))) {
+          parsedFields[`${fieldName}.${sfp}`] = sfpcl
+        }
+      } else if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            for (const [sfp, sfpcl] of Object.entries(parseFields(field.model.subfields, arrayItem))) {
+              parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+            }
+          }
+        }
+      }
+    } else if (field.model.structure) {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const subfields = isString(arrayItem.$key) ? field.model.structure[arrayItem.$key] : undefined
+            if (subfields) {
+              for (const [sfp, sfpcl] of Object.entries(parseFields(subfields, arrayItem))) {
+                parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    } else if (field.options._fieldType === 'blocks') {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const block = isString(arrayItem.$key) ? blocks[arrayItem.$key as BlockName] : undefined
+            if (block) {
+              for (const [sfp, sfpcl] of Object.entries(parseFields(block.fields, arrayItem))) {
+                parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return parsedFields
 }

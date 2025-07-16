@@ -184,3 +184,68 @@ export function parseConditionalLogic(
 
   return parsedConditionalLogic
 }
+
+/**
+ * Parses fields from a list of serializable `fields` and some collection or singleton `data`.
+ *
+ * Returns an object where:
+ *
+ * - Keys are field paths (using dot notation for nested fields).
+ * - Values are the corresponding field options.
+ */
+export function parseFields(
+  fields: Record<string, GenericSerializableFieldOptions>,
+  data: Record<string, unknown>,
+): Record<string, GenericSerializableFieldOptions> {
+  const parsedFields: Record<string, GenericSerializableFieldOptions> = {}
+
+  for (const [fieldName, field] of Object.entries(fields)) {
+    const item = data[fieldName]
+    parsedFields[fieldName] = field
+
+    if (field.subfields) {
+      if (isObject(item)) {
+        for (const [sfp, sfpcl] of Object.entries(parseFields(field.subfields, item))) {
+          parsedFields[`${fieldName}.${sfp}`] = sfpcl
+        }
+      } else if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            for (const [sfp, sfpcl] of Object.entries(parseFields(field.subfields, arrayItem))) {
+              parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+            }
+          }
+        }
+      }
+    } else if (field.structure) {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const subfields = isString(arrayItem.$key) ? field.structure[arrayItem.$key] : undefined
+            if (subfields) {
+              for (const [sfp, sfpcl] of Object.entries(parseFields(subfields, arrayItem))) {
+                parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    } else if (field._fieldType === 'blocks') {
+      if (isArray(item)) {
+        for (const [index, arrayItem] of item.entries()) {
+          if (isObject(arrayItem)) {
+            const blocks = usePruviousDashboard().value?.blocks ?? {}
+            const block = isString(arrayItem.$key) ? blocks[arrayItem.$key as BlockName] : undefined
+            if (block) {
+              for (const [sfp, sfpcl] of Object.entries(parseFields(block.fields, arrayItem))) {
+                parsedFields[`${fieldName}.${index}.${sfp}`] = sfpcl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return parsedFields
+}

@@ -47,6 +47,7 @@
               (tab) => {
                 activeBlocksFieldsTab = tab
                 selectedBlocks = []
+                updateFocusedBlocksInPreview([])
               }
             "
           >
@@ -64,9 +65,11 @@
                 :fieldOptions="blocksFields[name]!"
                 :fields="fields"
                 :modelValue="data[name]"
-                @commit="emit('commit', Object.assign({}, data, { [name]: $event }))"
-                @queueConditionalLogicUpdate="emit('queueConditionalLogicUpdate', $event)"
-                @update:modelValue="emit('update:data', Object.assign({}, data, { [name]: $event }))"
+                @commit="$emit('commit', Object.assign({}, data, { [name]: $event }))"
+                @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
+                @update:highlightedBlock="updateHighlightedBlockInPreview($event)"
+                @update:modelValue="$emit('update:data', Object.assign({}, data, { [name]: $event }))"
+                @update:selectedBlocks="updateFocusedBlocksInPreview($event)"
                 ref="blocksTree"
               />
             </PUITab>
@@ -80,6 +83,7 @@
                 (data) => {
                   $emit('update:data', data)
                   $emit('update:errors', {})
+                  $emit('queueConditionalLogicUpdate', '$reset')
                 }
               "
             />
@@ -97,15 +101,20 @@
 
         <div class="p-lp-panel-middle">
           <div ref="livePanel" class="p-lp-panel-live">
-            <!-- @todo preview -->
+            <iframe
+              :src="`${runtimeConfig.app.baseURL}?pruviousPreview`"
+              @mouseleave="updateHighlightedBlockInPreview(undefined)"
+              ref="iframe"
+              class="p-lp-iframe"
+            ></iframe>
           </div>
 
           <div class="p-lp-panel-middle-footer">
             <div class="pui-row pui-ml-auto">
               <Teleport :disabled="!footerBeforeSlot || width > 1024" :to="footerBeforeSlot">
                 <PUIButton
-                  v-pui-tooltip="__('pruvious-dashboard', 'Refresh')"
-                  @click="console.log('@todo')"
+                  v-pui-tooltip="__('pruvious-dashboard', 'Reload')"
+                  @click="reloadIframe()"
                   data-panel="2"
                   variant="outline"
                 >
@@ -123,13 +132,19 @@
         >
           <div v-if="selectedBlocks.length === 1" class="p-lp-panel-blocks">
             <div class="p-lp-panel-blocks-header">
-              <Icon
-                :name="`tabler:${dashboard!.blocks[selectedBlocks[0]!.source.$key]!.ui.icon}`"
-                mode="svg"
-                class="pui-shrink-0 pui-muted"
-              />
+              <Icon :name="`tabler:${selectedBlockIcon}`" mode="svg" class="pui-shrink-0 pui-muted" />
               <span :title="selectedBlocks[0]!.label" class="pui-truncate">{{ selectedBlocks[0]!.label }}</span>
-              <PUIButton :size="-2" @click="selectedBlocks = []" variant="secondary" class="pui-ml-auto">
+              <PUIButton
+                :size="-2"
+                @click="
+                  () => {
+                    selectedBlocks = []
+                    updateFocusedBlocksInPreview([])
+                  }
+                "
+                variant="secondary"
+                class="pui-ml-auto"
+              >
                 <Icon mode="svg" name="tabler:x" />
                 <span>{{ __('pruvious-dashboard', 'Close') }}</span>
               </PUIButton>
@@ -143,7 +158,7 @@
                   :conditionalLogicResolver="conditionalLogicResolver"
                   :data="data"
                   :dataContainerName="container.name"
-                  :dataContainerType="container ? 'collection' : 'singleton'"
+                  :dataContainerType="containerType"
                   :disabled="disabled"
                   :errors="selectedBlockFieldErrors"
                   :fields="dashboard!.blocks[selectedBlocks[0]!.source.$key]!.fields"
@@ -155,18 +170,22 @@
                   :translatable="container.definition.translatable"
                   @commit="
                     (value) => {
-                      const newData = deepClone(data)
-                      setProperty(newData, selectedBlocks[0]!.source.$path, value)
-                      $emit('commit', newData)
+                      if (selectedBlocks[0]) {
+                        const newData = deepClone(data)
+                        setProperty(newData, selectedBlocks[0].source.$path, value)
+                        $emit('commit', newData)
+                      }
                     }
                   "
                   @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
                   @update:conditionalLogic="$emit('update:conditionalLogic', $event)"
                   @update:modelValue="
                     (value) => {
-                      const newData = deepClone(data)
-                      setProperty(newData, selectedBlocks[0]!.source.$path, value)
-                      $emit('update:data', newData)
+                      if (selectedBlocks[0]) {
+                        const newData = deepClone(data)
+                        setProperty(newData, selectedBlocks[0].source.$path, value)
+                        $emit('update:data', newData)
+                      }
                     }
                   "
                 />
@@ -185,7 +204,7 @@
               :conditionalLogicResolver="conditionalLogicResolver"
               :data="data"
               :dataContainerName="container.name"
-              :dataContainerType="container ? 'collection' : 'singleton'"
+              :dataContainerType="containerType"
               :disabled="disabled"
               :errors="errors"
               :fields="container.definition.fields"
@@ -236,6 +255,7 @@
               (data) => {
                 $emit('update:data', data)
                 $emit('update:errors', {})
+                $emit('queueConditionalLogicUpdate', '$reset')
               }
             "
             class="pui-shrink-0"
@@ -250,11 +270,29 @@
 
 <script lang="ts" setup>
 import type { PruviousDashboardBlocksTree } from '#components'
-import { __, History, resolveFieldLabel, usePruviousDashboard, usePruviousDashboardLayout } from '#pruvious/client'
+import {
+  __,
+  getRouteReferences,
+  History,
+  languages,
+  maybeTranslate,
+  parseFields,
+  primaryLanguage,
+  pruviousDashboardPost,
+  resolveFieldLabel,
+  serializeTranslatableStringCallbacks,
+  useLanguage,
+  usePruviousClipboardData,
+  usePruviousDashboard,
+  usePruviousDashboardLayout,
+} from '#pruvious/client'
 import type {
   Collections,
+  Fields,
   FieldsLayout,
   GenericSerializableFieldOptions,
+  ResolvedRoute,
+  RouteReferenceName,
   SerializableCollection,
   SerializableFieldOptions,
   SerializableSingleton,
@@ -264,8 +302,24 @@ import type { ConditionalLogicResolver } from '@pruvious/orm'
 import type { PUIIconGroupChoiceModel } from '@pruvious/ui/components/PUIIconGroup.vue'
 import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'
 import type { PUITreeItemModel } from '@pruvious/ui/components/PUITreeItem.vue'
-import { deepClone, getProperty, isEmpty, remap, setProperty } from '@pruvious/utils'
+import { puiToast } from '@pruvious/ui/pui/toast'
+import { puiFlatTreeItems } from '@pruvious/ui/pui/tree'
+import {
+  deepClone,
+  getProperty,
+  isArray,
+  isDefined,
+  isEmpty,
+  isObject,
+  isString,
+  omit,
+  pick,
+  remap,
+  setProperty,
+  titleCase,
+} from '@pruvious/utils'
 import { useElementSize, useEventListener, useStorage, useWindowSize } from '@vueuse/core'
+import { usePruviousDashboardSerialized } from '../../../modules/pruvious/pruvious/utils.client'
 import type { ExtendedBlockValue } from './BlocksTree.vue'
 
 const props = defineProps({
@@ -311,9 +365,9 @@ const props = defineProps({
   },
 
   /**
-   * Specifies whether the user can delete the current data record.
+   * Specifies whether the user can update the current data record.
    */
-  canDelete: {
+  canUpdate: {
     type: Boolean,
     required: true,
   },
@@ -370,6 +424,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
+  'save': []
   'commit': [value: Record<string, any>]
   'update:data': [value: Record<string, any>]
   'update:conditionalLogic': [value: Record<string, boolean>]
@@ -379,9 +434,12 @@ const emit = defineEmits<{
 
 provide('isLivePreview', true)
 
+const runtimeConfig = useRuntimeConfig()
 const dashboard = usePruviousDashboard()
+const dashboardSerialized = usePruviousDashboardSerialized()
 const dashboardLayout = usePruviousDashboardLayout()
 const layoutRef = useTemplateRef<any>('layoutRef')
+const iframe = useTemplateRef('iframe')
 const blocksTree = useTemplateRef<InstanceType<typeof PruviousDashboardBlocksTree>[]>('blocksTree')
 const addBlockContainer = useTemplateRef('addBlockContainer')
 const livePanel = useTemplateRef('livePanel')
@@ -393,6 +451,7 @@ const state = useStorage<{ activeTab: 1 | 2 | 3; leftPanelWidth: number; rightPa
   { activeTab: 2, leftPanelWidth: 272, rightPanelWidth: 400 },
 )
 const container = props.collection ?? props.singleton!
+const containerType = props.collection ? 'collection' : 'singleton'
 const blocksFields = Object.fromEntries(
   Object.entries(container.definition.fields).filter(([_, { _fieldType }]) => _fieldType === 'blocks'),
 ) as Record<string, SerializableFieldOptions<'blocks'>>
@@ -440,8 +499,142 @@ const selectedBlockFieldErrors = computed(() =>
       )
     : {},
 )
+const selectedBlockIcon = computed(() => {
+  const block = dashboard.value!.blocks[selectedBlocks.value[0]!.source.$key]
+  if (isString(block?.ui.icon)) {
+    return block.ui.icon
+  } else if (isObject(block?.ui.icon)) {
+    const fieldValue = getProperty(props.data, `${selectedBlocks.value[0]!.source.$path}.${block.ui.icon.fieldName}`)
+    if (isString(fieldValue) && block.ui.icon.iconMap[fieldValue]) {
+      return block.ui.icon.iconMap[fieldValue]
+    } else if (block.ui.icon.defaultIcon) {
+      return block.ui.icon.defaultIcon
+    }
+  }
+  return 'cube'
+})
+const routeReferences = getRouteReferences()
+const previewKey = ref<string>()
+const populatedDataCache: Record<string, any> = {}
 
-watch(() => props.errors, refreshErrors)
+let updatingPreviewRoute = false
+let updatePreviewRouteDebounced = false
+
+watch(
+  () => props.errors,
+  () => refreshErrors(),
+)
+
+watch(
+  () => props.data,
+  () => updatePreviewRoute(),
+)
+
+useEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !event.defaultPrevented && selectedBlocks.value.length) {
+    selectedBlocks.value = []
+    updateFocusedBlocksInPreview([])
+  }
+})
+
+useEventListener('message', (event) => {
+  if (event.origin === window.location.origin) {
+    if (event.data.name === 'iframe:ready') {
+      setUpPreview()
+      updatePreviewRoute()
+    } else if (event.data.name === 'iframe:update') {
+      if (isDefined(getProperty(props.data, event.data.path))) {
+        previewKey.value = event.data.key
+        const newData = deepClone(props.data)
+        setProperty(newData, event.data.path, event.data.value)
+        emit('update:data', newData)
+        emit('commit', newData)
+        emit('update:errors', {})
+        emit('queueConditionalLogicUpdate', event.data.path)
+      } else {
+        puiToast(__('pruvious-dashboard', 'Live editing misconfiguration'), {
+          id: 'live-editing-misconfiguration',
+          type: 'info',
+          description: __('pruvious-dashboard', 'Unable to resolve field path `$path`.', {
+            path: event.data.path,
+          }),
+        })
+      }
+    } else if (event.data.name === 'iframe:addBlockBefore') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block && treeRef.canHaveSiblings(block.source)) {
+        treeRef.addBlockBefore(block.source)
+      }
+    } else if (event.data.name === 'iframe:addBlockAfter') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block && treeRef.canHaveSiblings(block.source)) {
+        treeRef.addBlockAfter(block.source)
+      }
+    } else if (event.data.name === 'iframe:redo') {
+      const redoState = props.history.redo()
+      if (redoState) {
+        emit('update:data', redoState)
+        emit('update:errors', {})
+      }
+    } else if (event.data.name === 'iframe:undo') {
+      const undoState = props.history.undo()
+      if (undoState) {
+        emit('update:data', undoState)
+        emit('update:errors', {})
+      }
+    } else if (event.data.name === 'iframe:deleteBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        treeRef.deleteItems([block])
+      }
+    } else if (event.data.name === 'iframe:duplicateBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block && treeRef.canHaveSiblings(block.source)) {
+        treeRef.duplicateItems([block])
+      }
+    } else if (event.data.name === 'iframe:copyBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        treeRef.copyItems([block])
+      }
+    } else if (event.data.name === 'iframe:cutBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        treeRef.cutItems([block])
+      }
+    } else if (event.data.name === 'iframe:pasteBlocks') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      const clipboardData = usePruviousClipboardData()
+      if (
+        clipboardData.value?.pruviousClipboardDataType === 'blocks' &&
+        block &&
+        treeRef.canHaveSiblings(block.source)
+      ) {
+        treeRef.pasteItems(clipboardData.value.data, [block], 'after')
+      }
+    } else if (event.data.name === 'iframe:save') {
+      setTimeout(() => emit('save'), 250)
+    } else if (event.data.name === 'iframe:moveUpBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        treeRef.moveItems('up', [block])
+      }
+    } else if (event.data.name === 'iframe:moveDownBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        treeRef.moveItems('down', [block])
+      }
+    } else if (event.data.name === 'iframe:selectBlock') {
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      if (block) {
+        selectedBlocks.value = [block]
+        treeRef.scrollToSelection()
+      }
+    } else if (event.data.name === 'iframe:deselectBlocks') {
+      selectedBlocks.value = []
+    }
+  }
+})
 
 useEventListener('resize', () => {
   nextTick(() => {
@@ -456,6 +649,159 @@ useEventListener('resize', () => {
   })
 })
 
+function setUpPreview() {
+  iframe.value?.contentWindow?.postMessage(
+    deepClone({
+      name: 'dashboard:setup',
+      fields:
+        dashboardSerialized.value![containerType === 'collection' ? 'collections' : 'singletons'][container.name]!
+          .fields,
+      blocks: dashboardSerialized.value!.blocks,
+      blockLabels: Object.fromEntries(
+        Object.entries(dashboard.value!.blocks)
+          .map(([blockName, block]) => ({
+            blockName,
+            label: isDefined(block.ui.label)
+              ? maybeTranslate(block.ui.label)
+              : __('pruvious-dashboard', titleCase(blockName, false) as any),
+          }))
+          .map(({ blockName, label }) => [blockName, label]),
+      ),
+      routeReferences: remap(routeReferences, (key, value) => [key, omit(value, ['publicFields'])]),
+      editable: props.canUpdate,
+      dashboardLanguage: useLanguage().value,
+    }),
+    window.location.origin,
+  )
+}
+
+async function updatePreviewRoute() {
+  if (updatingPreviewRoute) {
+    updatePreviewRouteDebounced = true
+    return
+  }
+
+  updatingPreviewRoute = true
+
+  const ref = Object.entries(routeReferences).find(
+    ([_, { dataContainerType, dataContainerName }]) =>
+      dataContainerType === containerType && dataContainerName === container.name,
+  )
+  const publicFields = ref![1].publicFields
+  const publicData = pick(props.data, container.definition.routing.publicFields)
+  const data = {} as any
+  const parsedFields = parseFields(publicFields, publicData)
+  const populate: { fieldPath: string; fieldType: keyof Fields; fieldValue: any }[] = []
+  const populatedData: Record<string, { fieldType: keyof Fields; value: any }> = {}
+
+  for (const [key, { _fieldType, _hasPopulator }] of Object.entries(parsedFields).sort(
+    ([a], [b]) => b.length - a.length,
+  )) {
+    const value = deepClone(getProperty(props.data, key))
+    const hasPopulatedSubfield = populate.some(({ fieldPath }) => fieldPath.startsWith(`${key}.`))
+    if (_hasPopulator && !hasPopulatedSubfield) {
+      populate.push({ fieldPath: key, fieldType: _fieldType, fieldValue: value })
+    }
+    if (hasPopulatedSubfield && isArray(value)) {
+      for (const [i, subItem] of value.entries()) {
+        if (isObject(subItem)) {
+          for (const [subKey, subValue] of Object.entries(subItem)) {
+            if (subKey.startsWith('$')) {
+              populate.push({ fieldPath: `${key}.${i}.${subKey}`, fieldType: _fieldType, fieldValue: subValue })
+            }
+          }
+        }
+      }
+    }
+    data[key] = value
+    populatedData[key] = { fieldType: _fieldType, value }
+  }
+
+  for (let i = populate.length - 1; i >= 0; i--) {
+    const { fieldPath, fieldType, fieldValue } = populate[i]!
+    const cacheKey = JSON.stringify({ fieldPath: fieldPath.replace(/\.\d+\./g, '[n].'), fieldType, fieldValue })
+    if (isDefined(populatedDataCache[cacheKey])) {
+      setProperty(data, fieldPath, populatedDataCache[cacheKey])
+      populate.splice(i, 1)
+    }
+  }
+
+  if (populate.length && populate.some(({ fieldPath }) => !fieldPath.split('.').pop()!.startsWith('$'))) {
+    const populateResponse = await pruviousDashboardPost('populate', {
+      body: {
+        ref: ref?.[0] as RouteReferenceName,
+        data: Object.fromEntries(populate.map(({ fieldPath, fieldValue }) => [fieldPath, fieldValue])),
+      },
+    })
+
+    if (populateResponse.success) {
+      for (const [path, value] of Object.entries(populateResponse.data)) {
+        if (isDefined(value)) {
+          setProperty(data, path, value)
+          const dataItem = populate.find(({ fieldPath }) => fieldPath === path)!
+          const cacheKey = JSON.stringify({
+            fieldPath: path.replace(/\.\d+\./g, '[n].'),
+            fieldType: dataItem.fieldType,
+            fieldValue: dataItem.fieldValue,
+          })
+          populatedDataCache[cacheKey] = value
+        }
+      }
+    }
+  }
+
+  data._casted = publicData
+
+  iframe.value?.contentWindow?.postMessage(
+    deepClone({
+      name: 'dashboard:route',
+      key: previewKey.value,
+      parsedFields: serializeTranslatableStringCallbacks(parsedFields),
+      route: {
+        language: container.definition.translatable ? props.data.language : primaryLanguage,
+        translations: Object.fromEntries(languages.map(({ code }) => [code, null])) as any,
+        seo: {
+          title: __('pruvious-dashboard', 'Live Preview'),
+          description: '',
+          url: '',
+          isIndexable: false,
+        },
+        ref: ref?.[0] as RouteReferenceName,
+        data,
+        layout: ref?.[1].layout,
+      } satisfies ResolvedRoute,
+    }),
+    window.location.origin,
+  )
+
+  updatingPreviewRoute = false
+
+  if (updatePreviewRouteDebounced) {
+    updatePreviewRouteDebounced = false
+    updatePreviewRoute()
+  }
+}
+
+function updateHighlightedBlockInPreview(block: PUITreeItemModel<ExtendedBlockValue> | undefined) {
+  iframe.value?.contentWindow?.postMessage(
+    block ? { name: 'dashboard:highlightBlock', block: block.source.$path } : { name: 'dashboard:unhighlightBlock' },
+    window.location.origin,
+  )
+}
+
+function updateFocusedBlocksInPreview(blocks: PUITreeItemModel<ExtendedBlockValue>[]) {
+  iframe.value?.contentWindow?.postMessage(
+    blocks.length
+      ? { name: 'dashboard:focusBlocks', blocks: blocks.filter(Boolean).map((block) => block.source.$path) }
+      : { name: 'dashboard:unfocusBlocks' },
+    window.location.origin,
+  )
+}
+
+function reloadIframe() {
+  iframe.value?.contentWindow?.postMessage({ name: 'dashboard:reload' }, window.location.origin)
+}
+
 function refreshErrors(): void {
   for (const item of blocksFieldsTabsList.value) {
     const count = Object.keys(props.errors).filter((key) => key === item.name || key.startsWith(`${item.name}.`)).length
@@ -467,6 +813,19 @@ function refreshErrors(): void {
         }
       : undefined
   }
+}
+
+function getBlockTreeItemByPath(path: string) {
+  const blocksField = path.split('.')[0]
+  const index = Object.entries(blocksFields).findIndex(([name]) => name === blocksField)
+  const treeRef = blocksTree.value?.[index]
+  if (treeRef) {
+    const block = puiFlatTreeItems(treeRef.tree).find(({ source }) => source.$path === path)
+    if (block) {
+      return { block, treeRef }
+    }
+  }
+  return { block: null, treeRef: null }
 }
 </script>
 
@@ -550,8 +909,19 @@ function refreshErrors(): void {
 }
 
 .p-lp-panel-live {
+  position: relative;
   flex: 1;
   display: flex;
+  padding: 0.75rem;
+}
+
+.p-lp-iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: white;
+  border-radius: var(--pui-radius);
 }
 
 .p-lp-panel-right {

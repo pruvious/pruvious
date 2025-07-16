@@ -54,15 +54,7 @@ export function getRouteReferences(): Record<
       publicFields: pick(fields, routing.publicFields),
       dataContainerType,
       dataContainerName,
+      layout: routing.layout,
     },
   ])
-}
-
-/**
- * Checks if the current route is being viewed in preview mode.
- * This is determined by the presence of the `__p` query parameter in the URL.
- */
-export function isPreview(): boolean {
-  const route = useRoute()
-  return !!route.query.__p
 }

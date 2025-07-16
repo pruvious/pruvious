@@ -48,6 +48,8 @@ export default defineEventHandler(async () => {
             publicFields: collection.meta.routing.enabled ? collection.meta.routing.publicFields : [],
             isPublicField: collection.meta.routing.isPublic.enabled,
             scheduledAtField: collection.meta.routing.scheduledAt.enabled,
+            seoField: collection.meta.routing.seo.enabled,
+            layout: collection.meta.routing.layout,
           },
           fields: serializeFields(collection.fields),
           api: collection.meta.api as any,
@@ -67,6 +69,7 @@ export default defineEventHandler(async () => {
           ui: { hidden: true, label: 'EVAL::({ __ }) => __("pruvious-dashboard", "ID")' },
           _fieldType: 'number',
           _dataType: 'bigint',
+          _hasPopulator: false,
         }
       }
     }
@@ -84,6 +87,7 @@ export default defineEventHandler(async () => {
           routing: {
             enabled: singleton.routing.enabled,
             publicFields: singleton.routing.enabled ? singleton.routing.publicFields : [],
+            layout: singleton.routing.layout,
           },
           fields: serializeFields(singleton.fields),
           api: singleton.api as any,

@@ -379,6 +379,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'ID') },
       _fieldType: 'number',
       _dataType: 'bigint',
+      _hasPopulator: false,
     },
     queryDebugId: {
       nullable: false,
@@ -386,6 +387,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Query debug ID') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     requestDebugId: {
       nullable: true,
@@ -393,6 +395,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Request debug ID') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     method: {
       nullable: false,
@@ -401,6 +404,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'HTTP Method') },
       _fieldType: 'select',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     path: {
       nullable: false,
@@ -408,6 +412,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Path') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     queryString: {
       nullable: false,
@@ -415,6 +420,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Query string') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     sql: {
       nullable: false,
@@ -422,6 +428,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'SQL') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     params: {
       nullable: false,
@@ -429,6 +436,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Parameters') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     executionTime: {
       nullable: false,
@@ -439,6 +447,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Execution time') },
       _fieldType: 'number',
       _dataType: 'numeric',
+      _hasPopulator: false,
     },
     rawResult: {
       nullable: true,
@@ -446,6 +455,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Raw result') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     result: {
       nullable: false,
@@ -453,6 +463,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Result') },
       _fieldType: 'text',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     operation: {
       nullable: false,
@@ -466,6 +477,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Operation') },
       _fieldType: 'select',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     success: {
       nullable: false,
@@ -475,6 +487,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Status') },
       _fieldType: 'trueFalse',
       _dataType: 'boolean',
+      _hasPopulator: false,
     },
     user: {
       nullable: true,
@@ -484,6 +497,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'User') },
       _fieldType: 'record',
       _dataType: 'text',
+      _hasPopulator: false,
     },
     createdAt: {
       nullable: false,
@@ -491,6 +505,7 @@ const logCollectionDefinition = {
       ui: { label: __('pruvious-dashboard', 'Date') },
       _fieldType: 'timestamp',
       _dataType: 'numeric',
+      _hasPopulator: false,
     },
   } as Record<string, Partial<GenericSerializableFieldOptions>>,
   ui: {

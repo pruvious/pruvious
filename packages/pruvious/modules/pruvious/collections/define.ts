@@ -1,3 +1,4 @@
+import type { LayoutKey } from '#build/types/layouts'
 import {
   walkFieldLayoutItems,
   type FieldsLayout,
@@ -1611,8 +1612,52 @@ export type CollectionRoutingOptions<
    */
   scheduledAt?: TScheduledAt
 
-  // @todo seoField (use objectField)
+  /**
+   * Controls if the collection includes a `seo` field.
+   * When enabled, it allows setting SEO metadata for the collection record.
+   *
+   * Available options:
+   *
+   * - `true` - Enables the field with default options.
+   * - `{...}` - Configures custom options for the field.
+   * - `false` - Disables the field completely.
+   *
+   * @default false
+   */
   seo?: TSEO
+
+  /**
+   * The layout key used to render the collection's route.
+   * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
+   *
+   * @example
+   *
+   * If you have a layout in `app/layouts/page.vue`, set this to `page` and use it like:
+   *
+   * ```vue
+   * <template>
+   *   <NuxtLayout :name="route?.layout">
+   *     <Header />
+   *     <PruviousBlocks field="blocks" />
+   *     <Footer />
+   *     <PruviousWidgets />
+   *   </NuxtLayout>
+   * </template>
+   *
+   * <script setup>
+   * import { usePruviousRoute } from '#pruvious/client'
+   *
+   * definePageMeta({
+   *   middleware: ['pruvious'],
+   * })
+   *
+   * const route = usePruviousRoute()
+   * </script>
+   * ```
+   *
+   * @default undefined
+   */
+  layout?: LayoutKey
 }
 
 interface ResolveContext {
@@ -1634,6 +1679,7 @@ interface CollectionRoutingMeta {
   isPublic: AutoFieldEnabled & IsPublicFieldPresetOptions & Required<BaseIsPublicFieldOptions>
   scheduledAt: AutoFieldEnabled & ScheduledAtFieldPresetOptions
   seo: AutoFieldEnabled & SEOFieldPresetOptions
+  layout?: LayoutKey
 }
 
 export type CollectionMeta = DeepRequired<
@@ -1850,6 +1896,7 @@ export function defineCollection<
             isPublic: isObject(options.routing.isPublic) ? options.routing.isPublic : {},
             scheduledAt: isObject(options.routing.scheduledAt) ? options.routing.scheduledAt : {},
             seo: isObject(options.routing.seo) ? options.routing.seo : {},
+            layout: options.routing.layout,
           }
         : {},
       {

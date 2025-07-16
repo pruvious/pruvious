@@ -67,6 +67,27 @@ export function deleteProperty(object: Record<string, any>, path: string): any {
   return _deleteProperty(object, prop)
 }
 
+/**
+ * Converts an object with dot notation keys into a nested object structure.
+ *
+ * @example
+ * ```ts
+ * dotNotationsToObject({ 'foo.bar': 'baz', 'foo.baz.qux': 'quux' })
+ * // { foo: { bar: 'baz', baz: { qux: 'quux' } } }
+ * ```
+ */
+export function dotNotationsToObject(dotNotations: Record<string, any>): Record<string, any> {
+  const result = {}
+
+  for (const path in dotNotations) {
+    if (Object.prototype.hasOwnProperty.call(dotNotations, path)) {
+      setProperty(result, path, dotNotations[path])
+    }
+  }
+
+  return result
+}
+
 function convertDotToBracket(path: string) {
   if (/^\d+$/.test(path)) {
     return `[${path}]`

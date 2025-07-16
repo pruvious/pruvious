@@ -68,7 +68,7 @@ export async function preloadTranslatableStrings<
   TDomain extends ExtractDomains<ExtractTranslatableStringsDefinitions<typeof _i18n>>,
   TLanguage extends ExtractLanguagesByDomain<TDomain, ExtractTranslatableStringsDefinitions<typeof _i18n>>,
 >(domain: TDomain, language: TLanguage): Promise<TranslatableStrings> {
-  const { i18n } = await import('#pruvious/client')
+  const { i18n } = await import('#pruvious/client/i18n')
   const nuxtApp = useNuxtApp()
 
   if (!i18n().hasDefinition(domain, language)) {

@@ -1,3 +1,4 @@
+import type { LayoutKey } from '#build/types/layouts'
 import {
   walkFieldLayoutItems,
   type FieldsLayout,
@@ -522,7 +523,9 @@ export interface Singleton<
   readonly copyTranslation: SingletonCopyTranslationFunction<MergeSingletonFields<TFields, TUpdatedAt>> | null
   readonly logs: SingletonLogsOptions
   readonly updatedAt: AutoFieldEnabled & UpdatedAtFieldPresetOptions
-  readonly routing: AutoFieldEnabled & Required<SingletonRoutingOptions>
+  readonly routing: AutoFieldEnabled &
+    Required<Pick<SingletonRoutingOptions, 'publicFields'>> &
+    Omit<SingletonRoutingOptions, 'publicFields'>
   readonly ui: SingletonUIOptions<keyof MergeSingletonFields<TFields, TUpdatedAt> & string>
 
   /**
@@ -874,6 +877,39 @@ export type SingletonRoutingOptions<TFieldNames extends string = string> = {
    * If not provided, all custom `fields` plus `updatedAt` (when available) will be included by default.
    */
   publicFields?: TFieldNames[]
+
+  /**
+   * The layout key used to render the singleton's route.
+   * Defines which Vue component will be used in `<NuxtLayout>` when displaying this singleton.
+   *
+   * @example
+   *
+   * If you have a layout in `app/layouts/my-account.vue`, set this to `my-account` and use it like:
+   *
+   * ```vue
+   * <template>
+   *   <NuxtLayout :name="route?.layout">
+   *     <Header />
+   *     <PruviousBlocks field="blocks" />
+   *     <Footer />
+   *     <PruviousWidgets />
+   *   </NuxtLayout>
+   * </template>
+   *
+   * <script setup>
+   * import { usePruviousRoute } from '#pruvious/client'
+   *
+   * definePageMeta({
+   *   middleware: ['pruvious'],
+   * })
+   *
+   * const route = usePruviousRoute()
+   * </script>
+   * ```
+   *
+   * @default undefined
+   */
+  layout?: LayoutKey
 }
 
 interface AutoFieldEnabled {
@@ -943,7 +979,9 @@ export function defineSingleton<
       { enabled: options.updatedAt !== false },
       isObject(options.updatedAt) ? options.updatedAt : {},
     )
-    const routing: AutoFieldEnabled & Required<SingletonRoutingOptions> = defu(
+    const routing: AutoFieldEnabled &
+      Required<Pick<SingletonRoutingOptions, 'publicFields'>> &
+      Omit<SingletonRoutingOptions, 'publicFields'> = defu(
       { enabled: !!options.routing },
       isObject(options.routing) ? options.routing : {},
       { publicFields: [...Object.keys(options.fields), ...(updatedAt.enabled ? ['updatedAt'] : [])] },

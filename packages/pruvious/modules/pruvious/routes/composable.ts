@@ -1,5 +1,5 @@
 import type { ResolvedRoute, RouteRedirect, RouteReferenceName } from '#pruvious/server'
-import { withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
+import { isDefined, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
 import { stringifyQuery } from 'ufo'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
 import { useLanguage } from '../translations/utils.client'
@@ -45,8 +45,14 @@ export const usePruviousRoute = <TRef extends RouteReferenceName = RouteReferenc
  * @returns a `SimpleRedirect` object or `null` if no redirect is needed.
  */
 export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric): Promise<SimpleRedirect | null> {
-  // @todo check if current page is used in a preview, and if so, resolve the route data from the window.parent object (client-side only)
-  // @todo isPreview() helper in routes/utils.client.ts
+  if (isPreview(route)) {
+    if (import.meta.client) {
+      const { initializePreview } = await import('../preview/utils.client')
+      initializePreview()
+    }
+    useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
+    return null
+  }
 
   const { apiBasePath, routing } = useRuntimeConfig().public.pruvious
   const pruviousRoute = usePruviousRoute()
@@ -131,4 +137,13 @@ export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric
   }
 
   return null
+}
+
+/**
+ * Checks if the current `route` is being viewed in preview mode.
+ * This is determined by the presence of the `pruviousPreview` query parameter in the URL.
+ * If the `route` is not provided, it defaults to the current route using `useRoute()`.
+ */
+export function isPreview(route?: RouteLocationNormalizedGeneric): boolean {
+  return isDefined((route ?? useRoute()).query.pruviousPreview)
 }

@@ -1,5 +1,5 @@
 import type { BlockGroupDefinition, BlockTagDefinition } from '#pruvious/server'
-import { isArray, isObject, isString } from '@pruvious/utils'
+import { deepClone, isArray, isObject, isString } from '@pruvious/utils'
 import { pruviousGet } from '../api/utils.client'
 import type { SerializableBlock } from '../blocks/utils.client'
 import type { SerializableCollection } from '../collections/utils.client'
@@ -80,11 +80,18 @@ export interface PruviousDashboardState {
 export const usePruvious = () => useState<PruviousState | null>('pruvious-state', () => null)
 
 /**
- * Composable that manages the Pruvious dashboard state and data.
+ * Composable that manages the Pruvious dashboard data.
  * Contains dashboard data based on user authentication status and role permissions.
  */
 export const usePruviousDashboard = () =>
   useState<PruviousDashboardState | null>('pruvious-dashboard-state', () => null)
+
+/**
+ * Composable that manages the Pruvious serialized dashboard data.
+ * Contains dashboard data based on user authentication status and role permissions.
+ */
+export const usePruviousDashboardSerialized = () =>
+  useState<PruviousDashboardState | null>('pruvious-dashboard-state-serialized', () => null)
 
 /**
  * Retrieves the current state of the Pruvious CMS from `/<pruvious.api.basePath>/pruvious`.
@@ -118,11 +125,14 @@ export async function refreshPruviousState(force = false) {
  */
 export async function refreshPruviousDashboardState(force = false) {
   const dashboard = usePruviousDashboard()
+  const dashboardSerialized = usePruviousDashboardSerialized()
 
   if (!dashboard.value || force) {
     const { success, data, error } = await pruviousGet('pruvious/dashboard')
 
     if (success) {
+      dashboardSerialized.value = deepClone(data)
+
       for (const collection of Object.values(data.collections)) {
         for (const options of Object.values(collection.fields)) {
           Object.assign(options, deserializeTranslatableStringCallbacks(options))
