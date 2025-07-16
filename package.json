@@ -25,13 +25,13 @@
     "typecheck": "pnpm --filter @pruvious/utils typecheck && pnpm --filter @pruvious/i18n typecheck && pnpm --filter @pruvious/orm typecheck && pnpm --filter @pruvious/storage typecheck && pnpm --filter @pruvious/ui typecheck && pnpm --filter pruvious typecheck"
   },
   "devDependencies": {
-    "@nuxt/test-utils": "3.19.1",
+    "@nuxt/test-utils": "3.19.2",
     "consola": "3.4.2",
-    "dotenv": "16.5.0",
+    "dotenv": "17.2.0",
     "execa": "9.6.0",
     "ofetch": "1.4.1",
-    "pkg-pr-new": "0.0.53",
-    "prettier": "3.6.0",
+    "pkg-pr-new": "0.0.54",
+    "prettier": "3.6.2",
     "prettier-plugin-organize-attributes": "1.0.0",
     "typescript": "5.8.3",
     "vitest": "3.2.4"

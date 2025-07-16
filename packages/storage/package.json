@@ -28,15 +28,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.835.0",
+    "@aws-sdk/client-s3": "3.846.0",
     "@pruvious/utils": "workspace:*",
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20250620.0",
-    "@types/node": "24.0.4",
-    "get-port-please": "3.1.2",
-    "miniflare": "4.20250617.4",
+    "@cloudflare/workers-types": "4.20250715.0",
+    "@types/node": "24.0.14",
+    "get-port-please": "3.2.0",
+    "miniflare": "4.20250712.0",
     "typescript": "5.8.3",
     "unbuild": "3.5.0"
   }

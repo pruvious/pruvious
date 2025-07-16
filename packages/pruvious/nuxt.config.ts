@@ -1,7 +1,6 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2025-03-20',
+  compatibilityDate: '2025-07-16',
   extends: ['@pruvious/ui'],
-  future: { compatibilityVersion: 4 },
   nitro: {
     experimental: { asyncContext: true },
     unenv: { external: ['node:async_hooks'] },
