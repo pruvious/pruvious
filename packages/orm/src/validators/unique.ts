@@ -116,7 +116,7 @@ export function uniqueValidator<
       const qr1 = await context.database
         .queryBuilder()
         .selectFrom(context.collectionName as never)
-        .select('id')
+        .select(['id', ...fields] as any)
         .setWhereCondition(context.whereCondition)
         .limit(2)
         .useCache(context.cache)
@@ -141,12 +141,10 @@ export function uniqueValidator<
           .useCache(context.cache)
 
         for (const field of fields) {
-          const value = context.getSanitizedInputValue(field)
-
-          if (isDefined(value)) {
-            const operator = caseSensitive ? '=' : 'ilike'
-            qb2.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
-          }
+          const _value = context.getSanitizedInputValue(field)
+          const value = isDefined(_value) ? _value : qr1.data[0][field]
+          const operator = caseSensitive ? '=' : 'ilike'
+          qb2.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
         }
 
         const qr2 = await qb2.all()
