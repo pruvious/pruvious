@@ -13,7 +13,7 @@ import {
   uniqueArray,
   type DeepRequired,
 } from '@pruvious/utils'
-import { compareSync, hashSync } from 'bcrypt-edge'
+import { compareSync, hashSync } from 'bcrypt-ts'
 import { decodeJwt, jwtVerify, SignJWT } from 'jose'
 import { isProduction } from 'std-env'
 import type { ClientTokenStorage, PruviousModuleOptions, ServerTokenSource } from '../PruviousModuleOptions'
