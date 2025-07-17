@@ -107,7 +107,8 @@ function getClientBlocksFileContent() {
     ` */`,
     `export const blockComponents: Record<keyof Blocks, () => Component> = {`,
     ...blockEntries.map(
-      ([name, { file }]) => `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}')),`,
+      ([name, { file }]) =>
+        `  '${name}': () => defineAsyncComponent(() => import('${file.absolute}').then((m) => m.default || m)),`,
     ),
     `}`,
     ``,
