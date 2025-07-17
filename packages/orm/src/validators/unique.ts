@@ -47,16 +47,6 @@ export function uniqueValidator<
     const caseSensitive = options?.caseSensitive ?? true
     const fields = options?.fields ?? [path]
 
-    if (isSubfield || context.operation === 'insert') {
-      for (const field of fields) {
-        if (isUndefined(context.getSanitizedInputValue(field))) {
-          throw new Error(
-            context.__('pruvious-orm', 'This field requires `$field` to be present in the input data', { field }),
-          )
-        }
-      }
-    }
-
     if (isSubfield) {
       const subfieldPathParts = path.split('.')
       const subfieldName = subfieldPathParts.pop()!
@@ -98,6 +88,13 @@ export function uniqueValidator<
 
       for (const field of fields) {
         const value = context.getSanitizedInputValue(field)
+
+        if (isUndefined(value)) {
+          throw new Error(
+            context.__('pruvious-orm', 'This field requires `$field` to be present in the input data', { field }),
+          )
+        }
+
         const operator = caseSensitive ? '=' : 'ilike'
         qb.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
       }
