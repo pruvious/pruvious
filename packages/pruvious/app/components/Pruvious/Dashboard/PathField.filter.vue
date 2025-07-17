@@ -9,9 +9,9 @@
     <div v-if="modelValue.value !== undefined" class="pui-row">
       <PUIInput
         v-if="modelValue.value !== null"
-        :id="id"
+        :id="`${id}--input`"
         :modelValue="modelValue.value === null ? '' : String(modelValue.value)"
-        :name="id"
+        :name="`${id}--input`"
         :placeholder="modelValue.value === null ? 'NULL' : placeholder"
         @blur="(_, value) => $emit('commit', { ...modelValue, value })"
         @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"

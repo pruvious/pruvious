@@ -1,6 +1,12 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+    <PruviousFieldLabel
+      :id="`${id}--switch`"
+      :name="name"
+      :options="options"
+      :synced="synced"
+      :translatable="translatable"
+    />
 
     <div class="pui-row">
       <PUIButtonGroup
@@ -25,7 +31,7 @@
         v-if="modelValue !== null"
         :disabled="disabled"
         :error="!!error"
-        :id="id"
+        :id="`${id}--input`"
         :maxLength="options.maxLength || undefined"
         :minLength="options.minLength || undefined"
         :modelValue="modelValue ?? ''"
