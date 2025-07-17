@@ -1,4 +1,14 @@
-import { deepCompare, isArray, isNull, isObject, isPrimitive, isString, isUndefined, pick } from '@pruvious/utils'
+import {
+  deepCompare,
+  isArray,
+  isDefined,
+  isNull,
+  isObject,
+  isPrimitive,
+  isString,
+  isUndefined,
+  pick,
+} from '@pruvious/utils'
 import type { GenericCollection, GenericDatabase, GenericValidator } from '../core'
 import type { CustomErrorMessage } from './types'
 import { resolveCustomErrorMessage } from './utils'
@@ -35,6 +45,17 @@ export function uniqueValidator<
       pick(context, ['_', '__']),
     )
     const caseSensitive = options?.caseSensitive ?? true
+    const fields = options?.fields ?? [path]
+
+    if (isSubfield || context.operation === 'insert') {
+      for (const field of fields) {
+        if (isUndefined(context.getSanitizedInputValue(field))) {
+          throw new Error(
+            context.__('pruvious-orm', 'This field requires `$field` to be present in the input data', { field }),
+          )
+        }
+      }
+    }
 
     if (isSubfield) {
       const subfieldPathParts = path.split('.')
@@ -65,8 +86,6 @@ export function uniqueValidator<
         }
       }
     } else if (context.operation === 'insert') {
-      const fields = options?.fields ?? [path]
-
       for (const [i, item] of context.sanitizedInput.entries()) {
         if (i !== context.inputIndex) {
           if (fields.every((field) => deepCompare((item as any)[field], context.getSanitizedInputValue(field)))) {
@@ -117,7 +136,6 @@ export function uniqueValidator<
       if (qr1.data.length === 2) {
         throw new Error(resolvedErrorMessage)
       } else if (qr1.data.length === 1) {
-        const fields = options?.fields ?? [path]
         const qb2 = context.database
           .queryBuilder()
           .selectFrom(context.collectionName as never)
@@ -127,8 +145,11 @@ export function uniqueValidator<
 
         for (const field of fields) {
           const value = context.getSanitizedInputValue(field)
-          const operator = caseSensitive ? '=' : 'ilike'
-          qb2.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
+
+          if (isDefined(value)) {
+            const operator = caseSensitive ? '=' : 'ilike'
+            qb2.where(field as any, operator, isPrimitive(value) ? (value as any) : JSON.stringify(value))
+          }
         }
 
         const qr2 = await qb2.all()
