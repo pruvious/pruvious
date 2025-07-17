@@ -274,6 +274,7 @@ async function initPlayground() {
     'app/hooks',
     'app/layouts',
     'app/pages',
+    'app/app.vue',
     'server/actions',
     'server/api',
     'server/collections',
