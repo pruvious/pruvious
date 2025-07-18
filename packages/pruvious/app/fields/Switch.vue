@@ -1,5 +1,14 @@
 <template>
-  <PUIField v-if="!options.ui.hidden" class="p-field-no-label">
+  <PUIField v-if="!options.ui.hidden" :class="{ 'p-field-no-label': !options.ui.fieldLabel }">
+    <PruviousFieldLabel
+      v-if="options.ui.fieldLabel"
+      :id="id"
+      :name="name"
+      :options="{ ...options, ui: { ...options.ui, label: options.ui.fieldLabel } }"
+      :synced="synced"
+      :translatable="translatable"
+    />
+
     <PUISwitch
       :disabled="disabled"
       :error="!!error"
@@ -71,6 +80,26 @@ const props = defineProps({
    * @default false
    */
   disabled: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * Specifies whether the current data record is translatable.
+   *
+   * @default false
+   */
+  translatable: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * Indicates if the field value remains synchronized between all translations of the current data record.
+   *
+   * @default false
+   */
+  synced: {
     type: Boolean,
     default: false,
   },
