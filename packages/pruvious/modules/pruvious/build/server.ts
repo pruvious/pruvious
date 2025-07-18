@@ -3,7 +3,6 @@ import { camelCase, isArray, kebabCase, pascalCase } from '@pruvious/utils'
 import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { basename, extname, isAbsolute, relative, resolve } from 'pathe'
-import { isDevelopment } from 'std-env'
 import { resolveCollectionFiles } from '../collections/resolver'
 import { debug } from '../debug/console'
 import { resolveFieldDefinitionFiles } from '../fields/resolver'
@@ -2252,7 +2251,7 @@ function getServerFileContentPatch() {
     ].join('\n'),
   )
 
-  if (isDevelopment) {
+  if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
     content.push(
       ``,
       `import fs from 'node:fs'`,

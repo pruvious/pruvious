@@ -10,7 +10,6 @@ import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { addServerHandler, createResolver, defineNuxtModule } from 'nuxt/kit'
 import { join } from 'pathe'
-import { isDevelopment } from 'std-env'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
 import { resetBlocksResolver } from './pruvious/blocks/resolver'
@@ -290,7 +289,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     })
 
     // Disable unwanted stylesheets
-    if (isDevelopment) {
+    if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
       nuxt.options.app.head.script ??= []
       nuxt.options.app.head.script.unshift({
         innerHTML: getCleanupDashboardStylesheetsScript(

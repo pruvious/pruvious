@@ -1,4 +1,4 @@
-import { isTest } from 'std-env'
+const isTest = process.env.NODE_ENV === 'test' || (process.env.TEST ? process.env.TEST !== 'false' : false)
 
 export default defineNuxtConfig({
   extends: ['..'],
