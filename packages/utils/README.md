@@ -103,6 +103,7 @@ npm install @pruvious/utils
   - [capitalize](#capitalize)
   - [castToNumericString](#casttonumericstring)
   - [castToString](#casttostring)
+  - [excerpt](#excerpt)
   - [extractKeywords](#extractkeywords)
   - [generateSecureRandomString](#generatesecurerandomstring)
   - [isAlphanumeric](#isalphanumeric)
@@ -1239,6 +1240,18 @@ castToString('foo') // 'foo'
 castToString(1)     // '1'
 castToString(NaN)   // NaN
 castToString(true)  // true
+```
+
+### <a id="excerpt">`excerpt(string, options)`</a>
+
+Generates an excerpt from the given `string` based on the provided `options`.
+By default, it will return the first 50 words.
+
+**Example:**
+
+```ts
+excerpt('Lorem ipsum dolor sit amet', { words: 3 }) // 'Lorem ipsum dolor'
+excerpt('Lorem ipsum dolor sit amet', { characters: 10 }) // 'Lorem ipsu'
 ```
 
 ### <a id="extractkeywords">`extractKeywords(string)`</a>
