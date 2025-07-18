@@ -209,8 +209,11 @@ defineProps({
 }
 
 .pui-button-disabled {
+  --pui-foreground: var(--pui-muted-foreground);
   pointer-events: none;
-  opacity: 0.5;
+  background-color: hsl(var(--pui-muted));
+  border-color: transparent;
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-button-inner {

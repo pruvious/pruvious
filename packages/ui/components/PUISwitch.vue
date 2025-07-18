@@ -176,7 +176,7 @@ const input = useTemplateRef('input')
   --pui-ring: var(--pui-destructive);
 }
 
-.pui-switch-has-errors .pui-switch-control[data-checked='true'] + .pui-switch-button {
+.pui-switch-has-errors .pui-switch-control[data-checked] + .pui-switch-button {
   background-color: hsl(var(--pui-destructive));
 }
 
@@ -189,8 +189,12 @@ const input = useTemplateRef('input')
   outline-offset: 0.125rem;
 }
 
+.pui-switch-disabled,
+.pui-switch-disabled .pui-switch-label {
+  cursor: not-allowed;
+}
+
 .pui-switch-disabled .pui-switch-button {
-  opacity: 0.5;
   pointer-events: none;
 }
 

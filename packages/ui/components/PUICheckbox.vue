@@ -214,8 +214,12 @@ const input = useTemplateRef('input')
   outline-offset: 0.125rem;
 }
 
+.pui-checkbox-disabled,
+.pui-checkbox-disabled .pui-checkbox-label {
+  cursor: not-allowed;
+}
+
 .pui-checkbox-disabled .pui-checkbox-button {
-  opacity: 0.5;
   pointer-events: none;
 }
 

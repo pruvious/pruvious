@@ -757,9 +757,11 @@ function unpauseMouseDelayed() {
 }
 
 .pui-select-disabled {
-  box-shadow: none;
+  --pui-foreground: var(--pui-muted-foreground);
   cursor: default;
-  opacity: 0.5;
+  background-color: hsl(var(--pui-muted));
+  box-shadow: none;
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-select-selected-choice,

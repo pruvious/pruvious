@@ -246,7 +246,6 @@ watch(
 
 .pui-icon-group-disabled {
   pointer-events: none;
-  opacity: 0.5;
 }
 
 .pui-icon-group-item {
@@ -287,6 +286,16 @@ watch(
 .pui-icon-group-has-errors .pui-icon-group-item-active {
   background-color: hsl(var(--pui-destructive));
   color: hsl(var(--pui-destructive-foreground));
+}
+
+.pui-icon-group-disabled .pui-icon-group-item {
+  color: hsl(var(--pui-muted-foreground) / 0.64);
+  font-weight: 400;
+}
+
+.pui-icon-group-disabled .pui-icon-group-item-active {
+  background-color: hsl(var(--pui-muted));
+  color: hsl(var(--pui-muted-foreground));
 }
 
 .pui-icon-group-icon {
