@@ -1,4 +1,4 @@
-import { remove } from '@pruvious/utils'
+import { isDefined, remove } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import fs from 'node:fs'
 import { useNitro, useNuxt } from 'nuxt/kit'
@@ -47,9 +47,41 @@ type PruviousFileType =
 const skipped: string[] = []
 
 /**
+ * Adds Pruvious server files to the Nuxt watcher.
+ */
+export function watchPruviousServerFiles() {
+  const nuxt = useNuxt()
+
+  for (const layer of nuxt.options._layers) {
+    if (isDefined(layer.config.serverDir)) {
+      const serverDirs = [
+        layer.config.pruvious?.dir?.collections ?? 'collections',
+        layer.config.pruvious?.dir?.singletons ?? 'singletons',
+        layer.config.pruvious?.dir?.fields?.definitions ?? 'fields',
+        layer.config.pruvious?.dir?.jobs ?? 'jobs',
+        layer.config.pruvious?.dir?.templates ?? 'templates',
+        layer.config.pruvious?.dir?.translations ?? 'translations',
+        layer.config.pruvious?.dir?.api ?? 'pruvious-api',
+        layer.config.pruvious?.dir?.hooks?.server ?? 'hooks',
+        layer.config.pruvious?.dir?.actions?.server ?? 'actions',
+        layer.config.pruvious?.dir?.filters?.server ?? 'filters',
+      ]
+
+      for (const dir of serverDirs) {
+        const dirPath = join(layer.config.serverDir, dir)
+
+        if (!nuxt.options.watch.includes(dirPath)) {
+          nuxt.options.watch.push(dirPath)
+        }
+      }
+    }
+  }
+}
+
+/**
  * Watches Pruvious files for changes.
  */
-export async function watchPruviousFiles(event: WatchEvent, path: string) {
+export async function pruviousWatchHandler(event: WatchEvent, path: string) {
   const nuxt = useNuxt()
   const { type, layer } = resolvePruviousFile(path)
 

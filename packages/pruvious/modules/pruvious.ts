@@ -22,7 +22,7 @@ import { debug, getErrorCount, info, resetErrorCount, setVerbose, success } from
 import { resolveDebugLogsConfig } from './pruvious/debug/logs'
 import { resetFieldsResolver } from './pruvious/fields/resolver'
 import { resetHooksResolver } from './pruvious/hooks/resolver'
-import { watchPruviousFiles } from './pruvious/nuxt-hooks/builder-watch'
+import { pruviousWatchHandler, watchPruviousServerFiles } from './pruvious/nuxt-hooks/builder-watch'
 import { optimizeServerTsConfig } from './pruvious/nuxt-hooks/nitro-build-before'
 import { disableDashboardSSR } from './pruvious/nuxt-hooks/nitro-config'
 import { optimizeTsConfig } from './pruvious/nuxt-hooks/prepare-types'
@@ -265,7 +265,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
     nuxt.hook('vite:serverCreated', onViteServerCreated)
 
     // Watch Pruvious files
-    nuxt.hook('builder:watch', watchPruviousFiles)
+    watchPruviousServerFiles()
+    nuxt.hook('builder:watch', pruviousWatchHandler)
 
     // Exclude dashboard routes from SSR
     nuxt.hook('nitro:config', disableDashboardSSR)
