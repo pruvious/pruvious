@@ -155,6 +155,17 @@ export default defineCollection({
       },
     }),
 
+    // select
+    select: selectField({
+      choices: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+        { label: 'Option 3', value: 'option3' },
+      ],
+      default: 'option2',
+      ui: { label: 'Select', description: 'Description', placeholder: 'Placeholder' },
+    }),
+
     // structure
     structure: structureField({
       structure: {
@@ -328,22 +339,6 @@ export default defineCollection({
               fields: ['blocks', 'blocksMinMax', 'blocksUnique', 'blocksDeduplicate', 'blocksAllowedRoot'],
             },
             {
-              label: 'Nullable object',
-              fields: ['nullableObject', 'nullableObjectNested'],
-            },
-            {
-              label: 'Object',
-              fields: ['object', 'objectNested'],
-            },
-            {
-              label: 'Structure',
-              fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
-            },
-            {
-              label: 'Repeater',
-              fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
-            },
-            {
               label: 'Date',
               fields: ['date', 'dateMinMax'],
             },
@@ -365,6 +360,26 @@ export default defineCollection({
                 'dateTimeRangeBerlinMinMax',
                 'dateTimeRangeBerlinBounded',
               ],
+            },
+            {
+              label: 'Nullable object',
+              fields: ['nullableObject', 'nullableObjectNested'],
+            },
+            {
+              label: 'Object',
+              fields: ['object', 'objectNested'],
+            },
+            {
+              label: 'Repeater',
+              fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
+            },
+            {
+              label: 'Select',
+              fields: ['select'],
+            },
+            {
+              label: 'Structure',
+              fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
             },
             {
               label: 'Time',
