@@ -55,7 +55,7 @@ const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = [
   {
     label: maybeTranslate(props.options.ui.nullChoiceLabel) ?? '',
     value: null,
-    muted: true,
+    muted: props.options.ui.nullChoiceMuted ?? true,
   },
   ...props.options.choices.map((choice) =>
     'value' in choice
