@@ -7,6 +7,7 @@ import {
   dateTimeRangeField,
   defineCollection,
   nullableObjectField,
+  nullableSelectField,
   numberField,
   objectField,
   repeaterField,
@@ -113,6 +114,17 @@ export default defineCollection({
           ui: { label: 'Object (nested with default)' },
         }),
       },
+    }),
+
+    // nullableSelect
+    nullableSelect: nullableSelectField({
+      choices: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+        { label: 'Option 3', value: 'option3' },
+      ],
+      default: 'option2',
+      ui: { nullChoiceLabel: 'Select an option', nullChoiceMuted: false, description: 'Description' },
     }),
 
     // object
@@ -380,6 +392,10 @@ export default defineCollection({
             {
               label: 'Nullable object',
               fields: ['nullableObject', 'nullableObjectNested'],
+            },
+            {
+              label: 'Nullable select',
+              fields: ['nullableSelect'],
             },
             {
               label: 'Object',
