@@ -1,5 +1,6 @@
 import {
   blocksField,
+  buttonGroupField,
   dateField,
   dateRangeField,
   dateTimeField,
@@ -42,6 +43,17 @@ export default defineCollection({
     }),
     blocksAllowedRoot: blocksField({
       allowRootBlocks: ['Container', 'Nesting'],
+    }),
+
+    // buttonGroup
+    buttonGroup: buttonGroupField({
+      choices: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+        { label: 'Option 3', value: 'option3' },
+      ],
+      default: 'option2',
+      ui: { description: 'Description' },
     }),
 
     // nullableObject
@@ -337,6 +349,10 @@ export default defineCollection({
             {
               label: 'Blocks',
               fields: ['blocks', 'blocksMinMax', 'blocksUnique', 'blocksDeduplicate', 'blocksAllowedRoot'],
+            },
+            {
+              label: 'Button Group',
+              fields: ['buttonGroup'],
             },
             {
               label: 'Date',
