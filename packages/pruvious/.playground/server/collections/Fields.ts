@@ -8,6 +8,7 @@ import {
   defineCollection,
   nullableObjectField,
   nullableSelectField,
+  nullableTextField,
   numberField,
   objectField,
   repeaterField,
@@ -125,6 +126,26 @@ export default defineCollection({
       ],
       default: 'option2',
       ui: { nullChoiceLabel: 'Select an option', nullChoiceMuted: false, description: 'Description' },
+    }),
+
+    // nullableText
+    nullableText: nullableTextField({
+      default: 'Default',
+      ui: {
+        switch: { onLabel: 'ON', offLabel: 'OFF' },
+        placeholder: 'Enter text...',
+        description: 'Description',
+      },
+    }),
+    nullableTextMinMax: nullableTextField({
+      minLength: 6,
+      maxLength: 8,
+    }),
+    nullableTextAllowEmptyString: nullableTextField({
+      allowEmptyString: true,
+    }),
+    nullableTextNoTrim: nullableTextField({
+      trim: false,
     }),
 
     // object
@@ -396,6 +417,10 @@ export default defineCollection({
             {
               label: 'Nullable select',
               fields: ['nullableSelect'],
+            },
+            {
+              label: 'Nullable text',
+              fields: ['nullableText', 'nullableTextMinMax', 'nullableTextAllowEmptyString', 'nullableTextNoTrim'],
             },
             {
               label: 'Object',
