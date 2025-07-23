@@ -58,6 +58,54 @@ export default defineCollection({
       ui: { description: 'Description' },
     }),
 
+    // date
+    date: dateField({ ui: { label: 'Date', placeholder: 'Select a date' } }),
+    dateMinMax: dateField({ min: Date.parse('2025-03-01'), max: '2025-03-31', ui: { label: 'Date (min/max)' } }),
+
+    // dateRange
+    dateRange: dateRangeField({ ui: { label: 'Date range' } }),
+    dateRangeMinMax: dateRangeField({
+      min: Date.parse('2025-03-01'),
+      max: '2025-03-31',
+      ui: { label: 'Date range (min/max)' },
+    }),
+    dateRangeBounded: dateRangeField({
+      minRange: { days: 1 },
+      maxRange: '10 days',
+      ui: { label: 'Date range (bounded)' },
+    }),
+
+    // dateTime
+    dateTimeUTC: dateTimeField({ ui: { timezone: 'UTC', label: 'Date-time (UTC)' } }),
+    dateTimeLocal: dateTimeField({ ui: { timezone: 'local', label: 'Date-time (Local)' } }),
+    dateTimeBerlin: dateTimeField({ ui: { timezone: 'Europe/Berlin', label: 'Date-time (Europe/Berlin)' } }),
+    dateTimeNewYork: dateTimeField({ ui: { timezone: 'America/New_York', label: 'Date-time (America/New_York)' } }),
+    dateTimeBerlinMinMax: dateTimeField({
+      min: Date.parse('2025-03-01 GMT+1'),
+      max: '2025-03-31 GMT+2',
+      ui: { timezone: 'Europe/Berlin', label: 'Date-time (Europe/Berlin, min/max)' },
+    }),
+
+    // dateTimeRange
+    dateTimeRangeUTC: dateTimeRangeField({ ui: { timezone: 'UTC', label: 'Date-time range (UTC)' } }),
+    dateTimeRangeLocal: dateTimeRangeField({ ui: { timezone: 'local', label: 'Date-time range (Local)' } }),
+    dateTimeRangeBerlin: dateTimeRangeField({
+      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin)' },
+    }),
+    dateTimeRangeNewYork: dateTimeRangeField({
+      ui: { timezone: 'America/New_York', label: 'Date-time range (America/New_York)' },
+    }),
+    dateTimeRangeBerlinMinMax: dateTimeRangeField({
+      min: Date.parse('2025-03-01 GMT+1'),
+      max: '2025-03-31 GMT+2',
+      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, min/max)' },
+    }),
+    dateTimeRangeBerlinBounded: dateTimeRangeField({
+      minRange: { days: 1 },
+      maxRange: '10 days',
+      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, bounded)' },
+    }),
+
     // nullableObject
     nullableObject: nullableObjectField({
       subfields: {
@@ -140,12 +188,15 @@ export default defineCollection({
     nullableTextMinMax: nullableTextField({
       minLength: 6,
       maxLength: 8,
+      ui: { label: 'Nullable text (min/max)' },
     }),
     nullableTextAllowEmptyString: nullableTextField({
       allowEmptyString: true,
+      ui: { label: 'Nullable text (allow empty string)' },
     }),
     nullableTextNoTrim: nullableTextField({
       trim: false,
+      ui: { label: 'Nullable text (no trim)' },
     }),
 
     // object
@@ -295,52 +346,24 @@ export default defineCollection({
       ui: { label: 'Repeater (nested)' },
     }),
 
-    // date
-    date: dateField({ ui: { label: 'Date', placeholder: 'Select a date' } }),
-    dateMinMax: dateField({ min: Date.parse('2025-03-01'), max: '2025-03-31', ui: { label: 'Date (min/max)' } }),
-
-    // dateRange
-    dateRange: dateRangeField({ ui: { label: 'Date range' } }),
-    dateRangeMinMax: dateRangeField({
-      min: Date.parse('2025-03-01'),
-      max: '2025-03-31',
-      ui: { label: 'Date range (min/max)' },
+    // text
+    text: textField({
+      default: 'Default',
+      ui: { placeholder: 'Enter text...', description: 'Description' },
     }),
-    dateRangeBounded: dateRangeField({
-      minRange: { days: 1 },
-      maxRange: '10 days',
-      ui: { label: 'Date range (bounded)' },
+    textMinMax: textField({
+      minLength: 6,
+      maxLength: 8,
+      default: 'foobar',
+      ui: { label: 'Text (min/max)' },
     }),
-
-    // dateTime
-    dateTimeUTC: dateTimeField({ ui: { timezone: 'UTC', label: 'Date-time (UTC)' } }),
-    dateTimeLocal: dateTimeField({ ui: { timezone: 'local', label: 'Date-time (Local)' } }),
-    dateTimeBerlin: dateTimeField({ ui: { timezone: 'Europe/Berlin', label: 'Date-time (Europe/Berlin)' } }),
-    dateTimeNewYork: dateTimeField({ ui: { timezone: 'America/New_York', label: 'Date-time (America/New_York)' } }),
-    dateTimeBerlinMinMax: dateTimeField({
-      min: Date.parse('2025-03-01 GMT+1'),
-      max: '2025-03-31 GMT+2',
-      ui: { timezone: 'Europe/Berlin', label: 'Date-time (Europe/Berlin, min/max)' },
+    textAllowEmptyString: textField({
+      allowEmptyString: true,
+      ui: { label: 'Text (allow empty string)' },
     }),
-
-    // dateTimeRange
-    dateTimeRangeUTC: dateTimeRangeField({ ui: { timezone: 'UTC', label: 'Date-time range (UTC)' } }),
-    dateTimeRangeLocal: dateTimeRangeField({ ui: { timezone: 'local', label: 'Date-time range (Local)' } }),
-    dateTimeRangeBerlin: dateTimeRangeField({
-      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin)' },
-    }),
-    dateTimeRangeNewYork: dateTimeRangeField({
-      ui: { timezone: 'America/New_York', label: 'Date-time range (America/New_York)' },
-    }),
-    dateTimeRangeBerlinMinMax: dateTimeRangeField({
-      min: Date.parse('2025-03-01 GMT+1'),
-      max: '2025-03-31 GMT+2',
-      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, min/max)' },
-    }),
-    dateTimeRangeBerlinBounded: dateTimeRangeField({
-      minRange: { days: 1 },
-      maxRange: '10 days',
-      ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, bounded)' },
+    textNoTrim: textField({
+      trim: false,
+      ui: { label: 'Text (no trim)' },
     }),
 
     // time
@@ -437,6 +460,10 @@ export default defineCollection({
             {
               label: 'Structure',
               fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
+            },
+            {
+              label: 'Text',
+              fields: ['text', 'textMinMax', 'textAllowEmptyString', 'textNoTrim'],
             },
             {
               label: 'Time',
