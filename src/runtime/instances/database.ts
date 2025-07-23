@@ -11,7 +11,6 @@ import {
   type Options as SequelizeOptions,
 } from 'sequelize'
 import 'sqlite3'
-import { isDevelopment } from 'std-env'
 import type { ResolvedCollectionDefinition } from '../collections/collection.definition'
 import type { ResolvedFieldDefinition } from '../fields/field.definition'
 import { clearArray, isArray } from '../utils/array'
@@ -45,6 +44,8 @@ export const opMapSqlite = {
   iLike: Op.like,
   notILike: Op.notLike,
 }
+
+const isDevelopment = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
 
 let instance: Sequelize | undefined
 let status: 'initial' | 'rebuilding' | 'ready' = 'initial'
