@@ -265,6 +265,30 @@ export default defineCollection({
       },
     }),
 
+    // repeater
+    repeater: repeaterTestField(),
+    repeaterMinMax: repeaterField({
+      subfields: { foo: textField({}) },
+      minItems: 2,
+      maxItems: 3,
+      default: [{ foo: 'FOO' }, { foo: 'BAR' }],
+      ui: { label: 'Repeater (min/max)', itemLabelConfiguration: { subfieldValue: 'foo' } },
+    }),
+    repeaterUnique: repeaterField({
+      subfields: { foo: textField({}) },
+      enforceUniqueItems: true,
+      ui: { label: 'Repeater (unique items)' },
+    }),
+    repeaterDeduplicate: repeaterField({
+      subfields: { foo: textField({}) },
+      deduplicateItems: true,
+      ui: { label: 'Repeater (deduplicate items)' },
+    }),
+    repeaterNested: repeaterField({
+      subfields: { foo: textField({ required: true }), nested: repeaterTestField() },
+      ui: { label: 'Repeater (nested)' },
+    }),
+
     // select
     select: selectField({
       choices: [
@@ -336,28 +360,17 @@ export default defineCollection({
       ui: { label: 'Structure (nested)' },
     }),
 
-    // repeater
-    repeater: repeaterTestField(),
-    repeaterMinMax: repeaterField({
-      subfields: { foo: textField({}) },
-      minItems: 2,
-      maxItems: 3,
-      default: [{ foo: 'FOO' }, { foo: 'BAR' }],
-      ui: { label: 'Repeater (min/max)', itemLabelConfiguration: { subfieldValue: 'foo' } },
+    // switch
+    switch: switchField({
+      requireTrue: true,
+      ui: { fieldLabel: 'Switch', description: 'Description' },
     }),
-    repeaterUnique: repeaterField({
-      subfields: { foo: textField({}) },
-      enforceUniqueItems: true,
-      ui: { label: 'Repeater (unique items)' },
-    }),
-    repeaterDeduplicate: repeaterField({
-      subfields: { foo: textField({}) },
-      deduplicateItems: true,
-      ui: { label: 'Repeater (deduplicate items)' },
-    }),
-    repeaterNested: repeaterField({
-      subfields: { foo: textField({ required: true }), nested: repeaterTestField() },
-      ui: { label: 'Repeater (nested)' },
+    switchRequireTrue: switchField({
+      required: true,
+      requireTrue: true,
+      default: true,
+      conditionalLogic: { switch: { '=': true } },
+      ui: { label: 'Switch (required, true)' },
     }),
 
     // text
@@ -478,6 +491,10 @@ export default defineCollection({
             {
               label: 'Structure',
               fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
+            },
+            {
+              label: 'Switch',
+              fields: ['switch', 'switchRequireTrue'],
             },
             {
               label: 'Text',
