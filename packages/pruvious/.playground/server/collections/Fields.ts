@@ -1,6 +1,7 @@
 import {
   blocksField,
   buttonGroupField,
+  checkboxField,
   dateField,
   dateRangeField,
   dateTimeField,
@@ -56,6 +57,19 @@ export default defineCollection({
       ],
       default: 'option2',
       ui: { description: 'Description' },
+    }),
+
+    // checkbox
+    checkbox: checkboxField({
+      requireTrue: true,
+      ui: { fieldLabel: 'Checkbox', description: 'Description' },
+    }),
+    checkboxRequireTrue: checkboxField({
+      required: true,
+      requireTrue: true,
+      default: true,
+      conditionalLogic: { checkbox: { '=': true } },
+      ui: { label: 'Checkbox (required, true)' },
     }),
 
     // date
@@ -409,6 +423,10 @@ export default defineCollection({
             {
               label: 'Button Group',
               fields: ['buttonGroup'],
+            },
+            {
+              label: 'Checkbox',
+              fields: ['checkbox', 'checkboxRequireTrue'],
             },
             {
               label: 'Date',
