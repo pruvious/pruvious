@@ -26,8 +26,10 @@ export interface BooleanFieldModelOptions<TCastedType, TPopulatedType> {
   populator?: Populator<TCastedType, TPopulatedType> | null
 
   /**
-   * Specifies if only `true` is considered valid when this field is required.
-   * When set to `false`, both `true` and `false` are valid values for a required field.
+   * Specifies if only `true` is considered valid when this field is `required`.
+   * When set to `false`, both `true` and `false` are accepted.
+   *
+   * Note: This option is only relevant when the field is `required`.
    *
    * @default true
    */
