@@ -96,7 +96,11 @@ const props = defineProps({
 const route = useRoute()
 const label = computed(() => {
   if (isNull(props.modelValue)) {
-    return maybeTranslate(props.options.ui.nullChoiceLabel) ?? ''
+    if (props.options.ui.nullChoiceMuted) {
+      return ''
+    } else {
+      return maybeTranslate(props.options.ui.nullChoiceLabel) ?? ''
+    }
   }
   for (const choice of props.options.choices) {
     if ('value' in choice) {
