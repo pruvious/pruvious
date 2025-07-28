@@ -461,7 +461,7 @@ function processInputValue() {
 function filterChoices() {
   if (props.choices) {
     filteredChoices.value = searchByKeywords(
-      props.choices.filter(({ value }) => !props.modelValue.includes(value)),
+      props.enforceUniqueItems ? props.choices.filter(({ value }) => !props.modelValue.includes(value)) : props.choices,
       inputValue.value,
       ['label', 'value'],
     )

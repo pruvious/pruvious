@@ -62,6 +62,13 @@ interface CustomOptions<TChoices extends ChipsChoice[] | false> {
   choices?: TChoices
 
   /**
+   * Ensures all items in the array are unique.
+   *
+   * @default true
+   */
+  enforceUniqueItems?: boolean
+
+  /**
    * Determines if whitespace should be trimmed from array items before database storage.
    *
    * @default true
@@ -82,6 +89,7 @@ type ExtractValues<T> = [T] extends [any[]] ? (T extends Array<{ value: infer V 
 
 const customOptions: CustomOptions<ChipsChoice[] | false> = {
   choices: false,
+  enforceUniqueItems: true,
   trim: true,
   ui: {
     variant: 'accent',
@@ -114,7 +122,7 @@ export default {
           undefined,
           undefined
         >,
-        ArrayFieldModelOptions<TValues, TValues> &
+        Omit<ArrayFieldModelOptions<TValues, TValues>, 'enforceUniqueItems'> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         false,
@@ -128,7 +136,9 @@ export default {
     >,
   ): Field<
     FieldModel<ArrayFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
-    ArrayFieldModelOptions<TValues, TValues> & CustomOptions<TChoices> & ResolveFieldUIOptions<{ placeholder: true }>,
+    Omit<ArrayFieldModelOptions<TValues, TValues>, 'enforceUniqueItems'> &
+      CustomOptions<TChoices> &
+      ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     TRequired,
     TImmutable,
@@ -140,7 +150,7 @@ export default {
       model: arrayFieldModel(),
       customOptions: {
         ...customOptions,
-        allowValues: options.choices ? options.choices.map(({ value }) => value) : undefined, // @todo test if this works
+        allowValues: options.choices ? options.choices.map(({ value }) => value) : undefined,
       },
       omitOptions: ['allowValues', 'denyValues'],
       castedTypeFn: ({ field }) =>
@@ -184,7 +194,7 @@ export default {
           undefined,
           undefined
         >,
-        ArrayFieldModelOptions<TValues, TValues> &
+        Omit<ArrayFieldModelOptions<TValues, TValues>, 'enforceUniqueItems'> &
           CustomOptions<TChoices> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         false,
@@ -199,7 +209,9 @@ export default {
   ): { type: PropType<TValues>; required: true } & {
     field: Field<
       FieldModel<ArrayFieldModelOptions<TValues, TValues>, 'text', TValues, TValues, TValues, undefined, undefined>,
-      ArrayFieldModelOptions<TValues, TValues> & CustomOptions<TChoices> & ResolveFieldUIOptions<{ placeholder: true }>,
+      Omit<ArrayFieldModelOptions<TValues, TValues>, 'enforceUniqueItems'> &
+        CustomOptions<TChoices> &
+        ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
       TImmutable,
@@ -219,7 +231,7 @@ export default {
   TOptions: undefined as unknown as Omit<
     CombinedFieldOptions<
       FieldModel<ArrayFieldModelOptions<string, string>, 'text', string, string, string, undefined, undefined>,
-      ArrayFieldModelOptions<string, string> &
+      Omit<ArrayFieldModelOptions<string, string>, 'enforceUniqueItems'> &
         CustomOptions<ChipsChoice[] | false> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
