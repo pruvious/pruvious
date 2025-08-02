@@ -17,7 +17,7 @@
         :id="`${id}--switch`"
         :modelValue="modelValue !== null"
         :name="`${name}--switch`"
-        :variant="options.ui.switch?.variant"
+        :variant="options.ui.switch?.variant ?? 'accent'"
         @update:modelValue="
           (value) => {
             $emit('update:modelValue', value ? lastString : null)
