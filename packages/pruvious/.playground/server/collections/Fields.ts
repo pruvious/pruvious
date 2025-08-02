@@ -16,6 +16,7 @@ import {
   repeaterField,
   selectField,
   structureField,
+  subpathField,
   switchField,
   textField,
   timeField,
@@ -430,6 +431,28 @@ export default defineCollection({
       ui: { label: 'Structure (nested)' },
     }),
 
+    // subpath
+    subpath: subpathField({
+      ui: {
+        description: 'Description',
+        placeholder: 'enter/subpath',
+        switch: { onLabel: 'Public', offLabel: 'Private' },
+      },
+    }),
+    subpathAllowNesting: subpathField({
+      allowNesting: true,
+      ui: { label: 'Subpath (allow nesting)' },
+    }),
+    subpathForceLowercase: subpathField({
+      forceLowercase: true,
+      ui: { label: 'Subpath (force lowercase)' },
+    }),
+    subpathMinMax: subpathField({
+      minLength: 3,
+      maxLength: 6,
+      ui: { label: 'Subpath (min/max)' },
+    }),
+
     // switch
     switch: switchField({
       requireTrue: true,
@@ -596,6 +619,10 @@ export default defineCollection({
             {
               label: 'Structure',
               fields: ['structure', 'structureMinMax', 'structureUnique', 'structureDeduplicate', 'structureNested'],
+            },
+            {
+              label: 'Subpath',
+              fields: ['subpath', 'subpathAllowNesting', 'subpathForceLowercase', 'subpathMinMax'],
             },
             {
               label: 'Switch',
