@@ -72,6 +72,13 @@ export default defineCollection({
       conditionalLogic: { checkbox: { '=': true } },
       ui: { label: 'Checkbox (required, true)' },
     }),
+    checkboxRequireAny: checkboxField({
+      required: true,
+      requireTrue: false,
+      default: true,
+      conditionalLogic: { checkbox: { '=': true } },
+      ui: { label: 'Checkbox (required, any)' },
+    }),
 
     // chips
     chips: chipsField({
@@ -477,7 +484,7 @@ export default defineCollection({
             },
             {
               label: 'Checkbox',
-              fields: ['checkbox', 'checkboxRequireTrue'],
+              fields: ['checkbox', 'checkboxRequireTrue', 'checkboxRequireAny'],
             },
             {
               label: 'Chips',
