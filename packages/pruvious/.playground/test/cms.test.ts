@@ -35,6 +35,7 @@ describe('cms', async () => {
   await import('./cms/fields/nullableObject')
   await import('./cms/fields/nullableSelect')
   await import('./cms/fields/nullableText')
+  await import('./cms/fields/number')
   await import('./cms/fields/object')
   await import('./cms/fields/repeater')
   await import('./cms/fields/select')

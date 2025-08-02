@@ -259,6 +259,30 @@ export default defineCollection({
       ui: { label: 'Nullable text (no trim)' },
     }),
 
+    // number
+    number: numberField({
+      ui: {
+        description: 'Description',
+        placeholder: 'Enter a number...',
+        autoWidth: true,
+        showDragButton: true,
+        suffix: 'px',
+        dragDirection: 'vertical',
+        padZeros: 3,
+        increment: 2,
+      },
+    }),
+    numberMinMax: numberField({
+      min: 1,
+      max: 100,
+      default: 50,
+      ui: { label: 'Number (min/max)', showSteppers: true, increment: 2 },
+    }),
+    numberDecimals: numberField({
+      decimalPlaces: 2,
+      ui: { label: 'Number (decimals)', increment: 0.1 },
+    }),
+
     // object
     object: objectField({
       subfields: {
@@ -552,6 +576,10 @@ export default defineCollection({
             {
               label: 'Nullable text',
               fields: ['nullableText', 'nullableTextMinMax', 'nullableTextAllowEmptyString', 'nullableTextNoTrim'],
+            },
+            {
+              label: 'Number',
+              fields: ['number', 'numberMinMax', 'numberDecimals'],
             },
             {
               label: 'Object',
