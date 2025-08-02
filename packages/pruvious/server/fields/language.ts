@@ -17,6 +17,19 @@ export default defineField({
   model: textFieldModel<LanguageCode, LanguageCode, LanguageCode>(),
   nullable: true,
   default: null,
+  sanitizers: [
+    (value) => {
+      if (isString(value)) {
+        const lowercasedValue = value.toLowerCase()
+        for (const { code } of languages) {
+          if (lowercasedValue === code.toLowerCase()) {
+            return code
+          }
+        }
+      }
+      return value
+    },
+  ],
   validators: [
     (value, { context }) => {
       if (isString(value) && !isValidLanguageCode(value)) {
@@ -26,7 +39,7 @@ export default defineField({
     (value, sanitizedFieldContext, errors) => {
       return uniqueValidator({
         fields: [sanitizedFieldContext.path, sanitizedFieldContext.definition.options.translationsField],
-      errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
+        errorMessage: ({ __ }) => __('pruvious-api', 'A translation for this language already exists'),
       })(value, sanitizedFieldContext, errors)
     },
   ],
