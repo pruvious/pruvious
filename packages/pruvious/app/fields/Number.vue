@@ -10,6 +10,7 @@
       :dragDirection="options.ui.dragDirection"
       :error="!!error"
       :id="id"
+      :increment="options.ui.increment"
       :max="options.max"
       :min="options.min"
       :modelValue="modelValue"
