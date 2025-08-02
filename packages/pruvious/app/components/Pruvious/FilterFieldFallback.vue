@@ -37,10 +37,12 @@
       v-else
       :decimalPlaces="options.decimalPlaces"
       :id="id"
+      :increment="options.ui?.increment"
       :max="options.max"
       :min="options.min"
       :modelValue="Number(modelValue.value)"
       :name="id"
+      :padZeros="options.ui?.padZeros"
       :suffix="options.ui?.suffix"
       @commit="$emit('commit', { ...modelValue, value: $event })"
       @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
