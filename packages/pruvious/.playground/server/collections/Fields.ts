@@ -2,6 +2,7 @@ import {
   blocksField,
   buttonGroupField,
   checkboxField,
+  chipsField,
   dateField,
   dateRangeField,
   dateTimeField,
@@ -70,6 +71,43 @@ export default defineCollection({
       default: true,
       conditionalLogic: { checkbox: { '=': true } },
       ui: { label: 'Checkbox (required, true)' },
+    }),
+
+    // chips
+    chips: chipsField({
+      ui: { label: 'Chips', description: 'Description', placeholder: 'Placeholder' },
+    }),
+    chipsChoices: chipsField({
+      choices: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+        { label: 'Option 3', value: 'option3' },
+      ],
+      default: ['option2'],
+      ui: { label: 'Chips (choices)' },
+    }),
+    chipsMinMax: chipsField({
+      minItems: 2,
+      maxItems: 3,
+      default: ['foo', 'bar'],
+      ui: { label: 'Chips (min/max)' },
+    }),
+    chipsAllowDuplicates: chipsField({
+      enforceUniqueItems: false,
+      ui: { label: 'Chips (allow duplicates)' },
+    }),
+    chipsChoicesAllowDuplicates: chipsField({
+      choices: [
+        { label: 'Option 1', value: 'option1' },
+        { label: 'Option 2', value: 'option2' },
+        { label: 'Option 3', value: 'option3' },
+      ],
+      enforceUniqueItems: false,
+      ui: { label: 'Chips (choices, allow duplicates)' },
+    }),
+    chipsDeduplicate: chipsField({
+      deduplicateItems: true,
+      ui: { label: 'Chips (deduplicate items)' },
     }),
 
     // date
@@ -440,6 +478,17 @@ export default defineCollection({
             {
               label: 'Checkbox',
               fields: ['checkbox', 'checkboxRequireTrue'],
+            },
+            {
+              label: 'Chips',
+              fields: [
+                'chips',
+                'chipsChoices',
+                'chipsMinMax',
+                'chipsAllowDuplicates',
+                'chipsChoicesAllowDuplicates',
+                'chipsDeduplicate',
+              ],
             },
             {
               label: 'Date',
