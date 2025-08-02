@@ -264,7 +264,7 @@ const inputShadow = useTemplateRef('inputShadow')
 const { width: inputWidth, update: updateInputWidth } = useElementBounding(inputShadow)
 const dragEventListeners: (() => void)[] = []
 
-useEventListener('pui-overlay-animated' as any, updateInputWidth)
+useEventListener('pui-overlay-animated' as any, () => setTimeout(updateInputWidth))
 
 /**
  * Updates the `stringified` value when the `modelValue` changes.
