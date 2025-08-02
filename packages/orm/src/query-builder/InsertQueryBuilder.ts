@@ -3,12 +3,14 @@ import {
   deepClone,
   getProperty,
   isArray,
+  isBoolean,
   isDefined,
   isEmpty,
   isObject,
   isPrimitive,
   isUndefined,
   omit,
+  remap,
   resolveRelativeDotNotation,
   toArray,
   uniqueArray,
@@ -1200,8 +1202,10 @@ export class InsertQueryBuilder<
 
     sql += this.rawInjections.afterReturningClause ? ` ${this.rawInjections.afterReturningClause.raw}` : ''
 
-    this.logSQL(sql, params)
+    const preparedParams = remap(params, (k, v) => [k, isBoolean(v) ? +v : v])
 
-    return { sql, params }
+    this.logSQL(sql, preparedParams)
+
+    return { sql, params: preparedParams }
   }
 }

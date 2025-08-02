@@ -2,7 +2,9 @@ import type { I18n } from '@pruvious/i18n'
 import {
   deepClone,
   isArray,
+  isBoolean,
   isDefined,
+  remap,
   toArray,
   uniqueArray,
   type ExtractSQLParams,
@@ -747,8 +749,10 @@ export class DeleteQueryBuilder<
 
     sql += this.rawInjections.afterReturningClause ? ` ${this.rawInjections.afterReturningClause.raw}` : ''
 
-    this.logSQL(sql, params)
+    const preparedParams = remap(params, (k, v) => [k, isBoolean(v) ? +v : v])
 
-    return { sql, params }
+    this.logSQL(sql, preparedParams)
+
+    return { sql, params: preparedParams }
   }
 }

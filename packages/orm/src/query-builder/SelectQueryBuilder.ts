@@ -3,10 +3,12 @@ import {
   deepClone,
   deepCompare,
   isArray,
+  isBoolean,
   isDefined,
   isInteger,
   isNull,
   isPositiveInteger,
+  remap,
   toArray,
   uniqueArray,
   type ExtractSQLParams,
@@ -1788,8 +1790,10 @@ export class SelectQueryBuilder<
 
     sql += this.rawInjections.afterOffsetClause?.raw ? ` ${this.rawInjections.afterOffsetClause.raw}` : ''
 
-    this.logSQL(sql, params)
+    const preparedParams = remap(params, (k, v) => [k, isBoolean(v) ? +v : v])
 
-    return { sql, params }
+    this.logSQL(sql, preparedParams)
+
+    return { sql, params: preparedParams }
   }
 }
