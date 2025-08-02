@@ -44,4 +44,5 @@ describe('cms', async () => {
   await import('./cms/fields/time')
   await import('./cms/fields/timeRange')
   await import('./cms/fields/timestamp')
+  await import('./cms/fields/trueFalse')
 })

@@ -21,6 +21,7 @@ import {
   timeField,
   timeRangeField,
   timestampField,
+  trueFalseField,
 } from '#pruvious/server'
 import { repeaterTestField } from '#shared/repeaterTestField'
 
@@ -465,6 +466,26 @@ export default defineCollection({
       default: Date.parse('2025-03-01'),
       ui: { label: 'Timestamp (min/max)' },
     }),
+
+    // trueFalse
+    trueFalse: trueFalseField({
+      requireTrue: true,
+      ui: { label: 'True/false', description: 'Description', yesLabel: 'True', noLabel: 'False' },
+    }),
+    trueFalseRequireTrue: trueFalseField({
+      required: true,
+      requireTrue: true,
+      default: true,
+      conditionalLogic: { trueFalse: { '=': true } },
+      ui: { label: 'True/false (required, true)' },
+    }),
+    trueFalseRequireAny: trueFalseField({
+      required: true,
+      requireTrue: false,
+      default: true,
+      conditionalLogic: { trueFalse: { '=': true } },
+      ui: { label: 'True/false (required, any)' },
+    }),
   },
   translatable: false,
   createdAt: false,
@@ -567,6 +588,10 @@ export default defineCollection({
             {
               label: 'Timestamp',
               fields: ['timestamp', 'timestampMinMax'],
+            },
+            {
+              label: 'True/false',
+              fields: ['trueFalse', 'trueFalseRequireTrue', 'trueFalseRequireAny'],
             },
           ],
         },
