@@ -19,6 +19,7 @@ describe('cms', async () => {
   await import('./cms/auth')
 
   // Collections
+  await import('./cms/collections/roles')
   await import('./cms/collections/users')
   await import('./cms/collections/public')
 

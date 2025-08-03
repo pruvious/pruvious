@@ -70,6 +70,7 @@
     "@types/babel__traverse": "7.20.7",
     "@types/babel__generator": "7.27.0",
     "@types/pg": "8.15.4",
+    "nitropack": "2.12.4",
     "nuxt": "4.0.0",
     "typescript": "5.8.3",
     "vue": "3.5.17",
