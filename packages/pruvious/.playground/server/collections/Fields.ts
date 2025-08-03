@@ -13,6 +13,8 @@ import {
   nullableTextField,
   numberField,
   objectField,
+  recordField,
+  recordsField,
   repeaterField,
   selectField,
   structureField,
@@ -336,6 +338,47 @@ export default defineCollection({
       },
     }),
 
+    // record
+    record: recordField({
+      collection: 'Users',
+      ui: { description: 'Select a user' },
+    }),
+    recordPopulate: recordField({
+      collection: 'Users',
+      fields: ['id', 'email', 'roles'],
+      populate: true,
+      ui: { label: 'Record (populate)' },
+    }),
+
+    // records
+    records: recordsField({
+      collection: 'Users',
+      ui: { description: 'Select users' },
+    }),
+    recordsMinMax: recordsField({
+      collection: 'Users',
+      minItems: 2,
+      maxItems: 3,
+      default: [1, 2],
+      ui: { label: 'Records (min/max)' },
+    }),
+    recordsAllowDuplicates: recordsField({
+      collection: 'Users',
+      enforceUniqueItems: false,
+      ui: { label: 'Records (allow duplicates)' },
+    }),
+    recordsDeduplicate: recordsField({
+      collection: 'Users',
+      deduplicateItems: true,
+      ui: { label: 'Records (deduplicate)' },
+    }),
+    recordsPopulate: recordsField({
+      collection: 'Users',
+      fields: ['id', 'email', 'roles'],
+      populate: true,
+      ui: { label: 'Records (populate)' },
+    }),
+
     // repeater
     repeater: repeaterTestField(),
     repeaterMinMax: repeaterField({
@@ -611,6 +654,14 @@ export default defineCollection({
             {
               label: 'Repeater',
               fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
+            },
+            {
+              label: 'Record',
+              fields: ['record', 'recordPopulate'],
+            },
+            {
+              label: 'Records',
+              fields: ['records', 'recordsMinMax', 'recordsAllowDuplicates', 'recordsDeduplicate', 'recordsPopulate'],
             },
             {
               label: 'Select',

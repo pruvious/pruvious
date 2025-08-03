@@ -1079,6 +1079,14 @@ test('query string to conditional query builder params', () => {
     where: [{ field: 'middleName', operator: 'like', value: '[$]' }],
   })
 
+  expect(queryStringToConditionalQueryBuilderParams('where=middleName[=][[1]]')).toEqual({
+    where: [{ field: 'middleName', operator: '=', value: '[1]' }],
+  })
+
+  expect(queryStringToConditionalQueryBuilderParams('where=middleName[=][[$[1$]]]')).toEqual({
+    where: [{ field: 'middleName', operator: '=', value: '[[1]]' }],
+  })
+
   expect(queryStringToConditionalQueryBuilderParams('where')).toEqual({ where: [] })
 
   expect(queryStringToConditionalQueryBuilderParams('where=')).toEqual({ where: [] })
@@ -1370,6 +1378,14 @@ test('conditional query builder params to query string', () => {
   expect(
     conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: 'like', value: '[$]' }] }),
   ).toBe('where=middleName[like][[$$]]')
+
+  expect(
+    conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: '=', value: '[1]' }] }),
+  ).toBe('where=middleName[=][[1]]')
+
+  expect(
+    conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: '=', value: '[[1]]' }] }),
+  ).toBe('where=middleName[=][[$[1$]]]')
 
   expect(conditionalQueryBuilderParamsToQueryString({ where: [] })).toBe('where=')
 

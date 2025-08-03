@@ -8,7 +8,6 @@ describe('chips field', () => {
   const chipsAllowDuplicates = '/api/collections/fields?returning=chipsAllowDuplicates'
   const chipsChoicesAllowDuplicates = '/api/collections/fields?returning=chipsChoicesAllowDuplicates'
   const chipsDeduplicate = '/api/collections/fields?returning=chipsDeduplicate'
-  const chipsNested = '/api/collections/fields?returning=chipsNested'
 
   test('create, filter, update', async () => {
     const t1 = ['foo', 'bar']
