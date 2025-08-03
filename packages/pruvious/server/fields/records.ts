@@ -27,6 +27,13 @@ interface CustomOptions<
   collection: TCollection & string
 
   /**
+   * Ensures all items in the array are unique.
+   *
+   * @default true
+   */
+  enforceUniqueItems?: boolean
+
+  /**
    * Fields to return from the selected `collection` when populating this field.
    *
    * By default, only the 'id' field is returned.
@@ -48,6 +55,7 @@ interface CustomOptions<
 
 const customOptions: CustomOptions<any, string, boolean> = {
   collection: '',
+  enforceUniqueItems: true,
   fields: ['id'],
   populate: false,
 }
@@ -82,7 +90,7 @@ export default {
         undefined,
         undefined
       >,
-      MatrixFieldModelOptions<number[], TPopulatedType> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<undefined>,
       false,
@@ -102,7 +110,7 @@ export default {
       undefined,
       undefined
     >,
-    MatrixFieldModelOptions<number[], TPopulatedType> &
+    Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
       CustomOptions<TCollection, TFields, TPopulate> &
       ResolveFieldUIOptions<undefined>,
     false,
@@ -253,7 +261,7 @@ export default {
         undefined,
         undefined
       >,
-      MatrixFieldModelOptions<number[], TPopulatedType> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<undefined>,
       false,
@@ -274,7 +282,7 @@ export default {
         undefined,
         undefined
       >,
-      MatrixFieldModelOptions<number[], TPopulatedType> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<undefined>,
       false,
@@ -303,7 +311,7 @@ export default {
       undefined,
       undefined
     >,
-    MatrixFieldModelOptions<number[], Record<string, any>[]> &
+    Omit<MatrixFieldModelOptions<number[], Record<string, any>[]>, 'enforceUniqueItems'> &
       CustomOptions<keyof DynamicCollectionFieldTypes['Casted' | 'Populated'], any, boolean | undefined> &
       ResolveFieldUIOptions<undefined>,
     false,
