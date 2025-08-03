@@ -408,13 +408,13 @@ export class ConditionalQueryBuilder<
         } else if (isNull(condition.value) && (condition.operator === '=' || condition.operator === '!=')) {
           const sqlOperator = condition.operator === '=' ? 'is' : 'is not'
           sql.push(`${this.escapeIdentifier(columnName)} ${sqlOperator} null`)
-        } else if (condition.operator === 'includes' || condition.operator === 'excludesAny') {
+        } else if (condition.operator === 'includes' || condition.operator === 'excludes') {
           const sqlOperator = condition.operator === 'includes' ? 'like' : 'not like'
           for (const v of toArray(condition.value)) {
             sql.push(`${this.escapeIdentifier(columnName)} ${sqlOperator} $p${++index}`)
             params[`p${index}`] = isNumber(v) ? `%[${v}]%` : `%["${v}"]%`
           }
-        } else if (condition.operator === 'includesAny' || condition.operator === 'excludes') {
+        } else if (condition.operator === 'includesAny' || condition.operator === 'excludesAny') {
           const sqlOperator = condition.operator === 'includesAny' ? 'like' : 'not like'
           const orGroupSQL: string[] = []
           for (const v of toArray(condition.value)) {

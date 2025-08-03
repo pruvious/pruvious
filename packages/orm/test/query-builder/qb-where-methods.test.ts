@@ -299,7 +299,7 @@ test('query builder where methods', async () => {
 
     expect(
       await qb.selectFrom('Students').where('clubs', 'excludes', [1, 2]).select('firstName').orderBy('firstName').all(),
-    ).toEqual(qbo([{ firstName: 'Draco' }, { firstName: 'Hermione' }]))
+    ).toEqual(qbo([{ firstName: 'Draco' }]))
 
     expect(
       await qb
@@ -308,7 +308,7 @@ test('query builder where methods', async () => {
         .select('firstName')
         .orderBy('firstName')
         .all(),
-    ).toEqual(qbo([{ firstName: 'Draco' }, { firstName: 'Harry' }, { firstName: 'Hermione' }]))
+    ).toEqual(qbo([{ firstName: 'Draco' }]))
 
     expect(
       await qb.selectFrom('Students').where('clubs', 'excludesAny', [1]).select('firstName').orderBy('firstName').all(),
@@ -329,7 +329,7 @@ test('query builder where methods', async () => {
         .select('firstName')
         .orderBy('firstName')
         .all(),
-    ).toEqual(qbo([{ firstName: 'Draco' }]))
+    ).toEqual(qbo([{ firstName: 'Draco' }, { firstName: 'Hermione' }]))
 
     expect(
       await qb
@@ -338,7 +338,7 @@ test('query builder where methods', async () => {
         .select('firstName')
         .orderBy('firstName')
         .all(),
-    ).toEqual(qbo([{ firstName: 'Draco' }]))
+    ).toEqual(qbo([{ firstName: 'Draco' }, { firstName: 'Harry' }, { firstName: 'Hermione' }]))
 
     // `whereRaw`
 
