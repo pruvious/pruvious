@@ -10,11 +10,11 @@
         <code>{{ type }}</code>
         is missing. Create the component at the specified path:
       </p>
-      <!-- @todo resolve real path (<srcDir>/<...>) via /api/dev.get.ts (only available in dev mode) -->
       <pre><code>app/fields/{{ pascalCase(type) }}.vue</code></pre>
       <p>
-        For more information, refer to the documentation:
-        <a href="#components" target="_blank">Custom fields (@todo)</a>
+        Check the
+        <a href="https://pruvious.com/docs/custom-fields#components" target="_blank">Pruvious documentation</a>
+        for more details on implementation.
       </p>
     </PUIProse>
   </PUIAlert>
