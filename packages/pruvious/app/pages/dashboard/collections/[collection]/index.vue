@@ -364,7 +364,7 @@ const canManage = hasPermission(`collection:${route.params.collection}:manage` a
 const canCreate =
   collection.definition.api.create && hasPermission(`collection:${route.params.collection}:create` as Permission)
 const canDelete =
-  collection.definition.api.update && hasPermission(`collection:${route.params.collection}:delete` as Permission)
+  collection.definition.api.delete && hasPermission(`collection:${route.params.collection}:delete` as Permission)
 const isManaged = collection.definition.authorField || collection.definition.editorsField
 const recordsPermissions = useCollectionRecordPermissions(collection)
 const { listen } = usePUIHotkeys()
