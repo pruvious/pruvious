@@ -92,7 +92,7 @@
                 v-model:highlightedChoice="highlightedChoice"
                 v-model:mousePaused="mousePaused"
                 :choice="_choice"
-                :keywordHiglight="keywordHiglight"
+                :keywordHighlight="keywordHighlight"
                 :keywordTimeout="keywordTimeout"
                 :selectedValue="modelValue"
                 @close="close"
@@ -105,7 +105,7 @@
               v-model:highlightedChoice="highlightedChoice"
               v-model:mousePaused="mousePaused"
               :choice="choice"
-              :keywordHiglight="keywordHiglight"
+              :keywordHighlight="keywordHighlight"
               :keywordTimeout="keywordTimeout"
               :selectedValue="modelValue"
               @close="close"
@@ -327,7 +327,7 @@ const choicesHeight = ref<number>()
 const choicesTopOffset = ref(0)
 const scrollable = ref<InstanceType<typeof PUIScrollable>>()
 const mousePaused = ref(false)
-const keywordHiglight = ref<[number, number]>([-1, -1])
+const keywordHighlight = ref<[number, number]>([-1, -1])
 const keywordTimeout = useTimeout(750, { controls: true })
 const container = inject<Ref<HTMLDivElement> | null>('root', null)
 
@@ -673,7 +673,7 @@ function search(event: KeyboardEvent) {
     // Reset keyword buffer
     if (keywordTimeout.ready.value) {
       keyword = ''
-      keywordHiglight.value = [-1, -1]
+      keywordHighlight.value = [-1, -1]
     }
 
     // Append the entered key to the keyword buffer
@@ -694,9 +694,9 @@ function search(event: KeyboardEvent) {
         scrollToHighlighted()
 
         mousePaused.value = true
-        keywordHiglight.value = keywordIndex > -1 ? [keywordIndex, keywordIndex + keyword.length - 1] : [-1, -1]
+        keywordHighlight.value = keywordIndex > -1 ? [keywordIndex, keywordIndex + keyword.length - 1] : [-1, -1]
       } else {
-        keywordHiglight.value = [-1, -1]
+        keywordHighlight.value = [-1, -1]
       }
 
       // Extend the timeout

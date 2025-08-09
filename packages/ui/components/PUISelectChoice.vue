@@ -45,7 +45,7 @@
     <span v-if="choice.value === highlightedChoice?.value && choice.label && keywordTimeout.isPending.value">
       <component
         v-for="(char, i) of choice.label"
-        :is="i >= keywordHiglight[0] && i <= keywordHiglight[1] ? 'u' : 'span'"
+        :is="i >= keywordHighlight[0] && i <= keywordHighlight[1] ? 'u' : 'span'"
       >
         {{ char }}
       </component>
@@ -97,7 +97,7 @@ defineProps({
   /**
    * The start and end index of the keyword to highlight in the choice label.
    */
-  keywordHiglight: {
+  keywordHighlight: {
     type: Object as PropType<[number, number]>,
     required: true,
   },
