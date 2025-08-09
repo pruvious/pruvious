@@ -1,6 +1,7 @@
 <template>
   <component
     :is="is ?? (to ? NuxtLink : 'button')"
+    :target="target ?? (to && openLinksInNewTab ? '_blank' : undefined)"
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     @keydown.space="$el.click()"
@@ -48,6 +49,13 @@ defineProps({
   },
 
   /**
+   * Defines the target attribute for the link when the component is rendered as a `NuxtLink`.
+   */
+  target: {
+    type: String,
+  },
+
+  /**
    * Defines the type of button behavior.
    *
    * - When component `is` rendered as a `button`, defaults to `button`.
@@ -81,6 +89,7 @@ defineProps({
 })
 
 const parentContainer = inject<HTMLElement | null | undefined>('parentContainer', null)
+const openLinksInNewTab = inject<boolean>('openLinksInNewTab', false)
 </script>
 
 <style>

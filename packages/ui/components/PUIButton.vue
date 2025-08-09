@@ -2,6 +2,7 @@
   <component
     :is="is ?? (to ? NuxtLink : 'button')"
     :tabindex="disabled ? -1 : undefined"
+    :target="target ?? (to && openLinksInNewTab ? '_blank' : undefined)"
     :to="to"
     :type="type ?? (!is || is === 'button' ? 'button' : undefined)"
     class="pui-button pui-raw"
@@ -47,6 +48,13 @@ defineProps({
    */
   to: {
     type: [String, Object] as PropType<string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric>,
+  },
+
+  /**
+   * Defines the target attribute for the link when the component is rendered as a `NuxtLink`.
+   */
+  target: {
+    type: String,
   },
 
   /**
@@ -106,6 +114,8 @@ defineProps({
     type: Number,
   },
 })
+
+const openLinksInNewTab = inject<boolean>('openLinksInNewTab', false)
 </script>
 
 <style>
