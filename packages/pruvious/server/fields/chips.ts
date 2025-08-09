@@ -152,6 +152,7 @@ export default {
         ...customOptions,
         allowValues: options.choices ? options.choices.map(({ value }) => value) : undefined,
       },
+      uiOptions: { placeholder: true },
       omitOptions: ['allowValues', 'denyValues'],
       castedTypeFn: ({ field }) =>
         field.options.choices
