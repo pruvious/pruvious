@@ -20,6 +20,7 @@
         { label: 'Context menu', value: '/context-menu' },
         { label: 'Dialog', value: '/dialog' },
         { label: 'Dropdown', value: '/dropdown' },
+        { label: 'Dynamic chips', value: '/dynamic-chips' },
         { label: 'Dynamic select', value: '/dynamic-select' },
         { label: 'Field', value: '/field' },
         { label: 'Field label', value: '/field-label' },
