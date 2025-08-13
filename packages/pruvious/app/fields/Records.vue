@@ -1,19 +1,11 @@
 <template>
-  <PruviousFilterField
-    :modelValue="modelValue"
-    :operatorChoices="[
-      { value: 'includes', label: __('pruvious-dashboard', 'Includes all') },
-      { value: 'includesAny', label: __('pruvious-dashboard', 'Includes any') },
-      { value: 'excludes', label: __('pruvious-dashboard', 'Excludes all') },
-      { value: 'excludesAny', label: __('pruvious-dashboard', 'Excludes any') },
-    ]"
-    :options="options"
-    @commit="$emit('commit', $event)"
-    @update:modelValue="$emit('update:modelValue', $event)"
-  >
+  <PUIField v-if="!options.ui.hidden">
+    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+
     <div class="pui-row">
       <PUIButton
         v-pui-tooltip="__('pruvious-dashboard', 'Table overview')"
+        :disabled="disabled"
         @click="isDataTablePopupVisible = true"
         variant="outline"
       >
@@ -22,12 +14,15 @@
 
       <PUIDynamicChips
         :choicesResolver="choicesResolver"
+        :disabled="disabled"
         :enforceUniqueItems="options.enforceUniqueItems"
+        :error="!!error"
+        :erroredItems="erroredItems"
         :id="id"
         :maxItems="options.maxItems"
         :minItems="options.minItems"
-        :modelValue="(modelValue as any).value"
-        :name="id"
+        :modelValue="modelValue"
+        :name="path"
         :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
         :removeItemLabel="__('pruvious-dashboard', 'Remove')"
@@ -36,8 +31,8 @@
         @dblclick="open(+$event!)"
         @update:modelValue="
           (value: any) => {
-            $emit('update:modelValue', { ...modelValue, value })
-            $emit('commit', { ...modelValue, value })
+            $emit('update:modelValue', value)
+            $emit('commit', value)
           }
         "
       />
@@ -47,18 +42,20 @@
       v-if="isDataTablePopupVisible"
       :collectionName="options.collection"
       :languages="options.languages"
-      :modelValue="modelValue.value ? (modelValue.value as any) : []"
+      :modelValue="modelValue"
       :title="label"
       @close="$event().then(() => (isDataTablePopupVisible = false))"
       @update:modelValue="
-        (value) => {
-          $emit('update:modelValue', { ...modelValue, value })
-          $emit('commit', { ...modelValue, value })
+        (ids) => {
+          $emit('update:modelValue', ids)
+          $emit('commit', ids)
         }
       "
       multiSelect
     />
-  </PruviousFilterField>
+
+    <PruviousFieldMessage :error="fieldError" :name="name" :options="options" />
+  </PUIField>
 </template>
 
 <script lang="ts" setup>
@@ -69,26 +66,25 @@ import {
   resolveFieldLabel,
   selectFrom,
   usePruviousDashboard,
-  type WhereField,
 } from '#pruvious/client'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type {
   PUIDynamicChipsChoiceModel,
   PUIDynamicChipsPaginatedChoices,
 } from '@pruvious/ui/components/PUIDynamicChips.vue'
-import { isArray, isDefined, slugify, toArray } from '@pruvious/utils'
+import { castToNumber, isArray, isDefined, isInteger, isObject, isString, slugify, toArray } from '@pruvious/utils'
 
 const props = defineProps({
   /**
-   * The current where condition.
+   * The casted field value.
    */
   modelValue: {
-    type: Object as PropType<WhereField>,
+    type: Array as PropType<number[]>,
     required: true,
   },
 
   /**
-   * The field name defined in a collection.
+   * The field name defined in a collection, singleton, or block.
    */
   name: {
     type: String,
@@ -96,18 +92,65 @@ const props = defineProps({
   },
 
   /**
-   * The combined field options defined in a collection.
+   * The combined field options defined in a collection, singleton, or block.
    */
   options: {
     type: Object as PropType<SerializableFieldOptions<'records'>>,
     required: true,
   },
+
+  /**
+   * The field path, expressed in dot notation, represents the exact location of the field within the current data structure.
+   */
+  path: {
+    type: String,
+    required: true,
+  },
+
+  /**
+   * Represents an error message that can be displayed to the user.
+   */
+  error: {
+    type: String,
+  },
+
+  /**
+   * Controls whether the field is disabled.
+   *
+   * @default false
+   */
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * Specifies whether the current data record is translatable.
+   *
+   * @default false
+   */
+  translatable: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * Indicates if the field value remains synchronized between all translations of the current data record.
+   *
+   * @default false
+   */
+  synced: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 defineEmits<{
-  'commit': [where: WhereField]
-  'update:modelValue': [where: WhereField]
+  'commit': [value: number[]]
+  'update:modelValue': [value: number[]]
 }>()
+
+provide('openLinksInNewTab', true)
 
 const id = useId()
 const label = resolveFieldLabel(props.options.ui.label, props.name)
@@ -119,11 +162,11 @@ const collection = {
   slug: slugify(props.options.collection),
   definition: dashboard.value!.collections[props.options.collection]!,
 }
+const fieldError = computed(() => (isString(props.error) ? props.error : props.error?.[props.path]))
+const erroredItems = computed<number[]>(() =>
+  isObject(props.error) ? Object.keys(props.error).map(castToNumber).filter(isInteger) : [],
+)
 const choicesCache: Record<number, PUIDynamicChipsChoiceModel> = {}
-
-provide('openLinksInNewTab', true)
-provide('hideViewConfiguration', true)
-provide('hideEditableFieldCellActions', true)
 
 async function choicesResolver(page: number, keyword: string): Promise<PUIDynamicChipsPaginatedChoices> {
   const displayFields = toArray(props.options.ui.displayFields!)
@@ -173,7 +216,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
 }
 
 async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> {
-  const ids = [...(props.modelValue.value as number[])]
+  const ids = [...props.modelValue]
 
   if (ids.length) {
     const displayFields = toArray(props.options.ui.displayFields!)
@@ -182,7 +225,7 @@ async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> 
     const query = missingIds.length
       ? await selectFrom(collection.name)
           .select(['id', ...select] as any)
-          .where('id', 'in', missingIds)
+          .where('id', 'in', ids)
           .all()
       : { success: true, data: [] }
 

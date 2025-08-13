@@ -285,7 +285,7 @@ function focusRoot() {
 }
 
 .pui-popup:not(.pui-popup-full-height) .pui-popup-content,
-.pui-popup-content .pui-container-content {
+.pui-popup:not(.pui-popup-no-padding) .pui-popup-content .pui-container-content {
   padding: 0.75rem;
 }
 

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, getOverlayTransitionDuration, unsavedChanges } from '#pruvious/client'
+import { __, getOverlayTransitionDuration, History, unsavedChanges } from '#pruvious/client'
 import { puiIsEditingText, puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { blurActiveElement, isDefined } from '@pruvious/utils'
 import { useEventListener, watchOnce } from '@vueuse/core'
@@ -29,6 +29,7 @@ const destination = ref<RouteLocationNormalized>()
 const leaveCount = ref(0)
 
 let stop: (() => void) | undefined
+let prevHistory: History | null = null
 
 unsavedChanges.prompt = async () => {
   isVisible.value = true
@@ -75,8 +76,19 @@ useEventListener(window, 'beforeunload', async (event) => {
   }
 })
 
-function leaveGuard(to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) {
-  if (unsavedChanges.history?.isDirty.value) {
+function leaveGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+  const [shorterPath, longerPath] =
+    to.fullPath.length > from.fullPath.length ? [from.fullPath, to.fullPath] : [to.fullPath, from.fullPath]
+
+  if (longerPath.startsWith(shorterPath) && longerPath.slice(shorterPath.length).match(/^[\?&]edit=/)) {
+    if (longerPath === to.fullPath) {
+      prevHistory = unsavedChanges.history
+    } else if (prevHistory) {
+      unsavedChanges.history = prevHistory
+      prevHistory = null
+    }
+    next()
+  } else if (unsavedChanges.history?.isDirty.value) {
     isVisible.value = true
     destination.value = to
     next(false)

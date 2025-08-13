@@ -139,6 +139,7 @@
     >
       <button
         v-for="(choice, i) of filteredChoices"
+        :title="choice.label || choice.value"
         @click.prevent
         @mousedown.prevent="
           () => {
@@ -146,7 +147,20 @@
             $nextTick(filterChoices)
           }
         "
-        @mouseenter="highlightedIndex = i"
+        @mouseenter="
+          () => {
+            if (pointerEvents) {
+              highlightedIndex = i
+            }
+          }
+        "
+        @mousemove="
+          () => {
+            if (pointerEvents) {
+              highlightedIndex = i
+            }
+          }
+        "
         class="pui-chips-dropdown-item pui-raw"
         :class="{ 'pui-chips-dropdown-item-highlighted': highlightedIndex === i }"
       >
@@ -380,6 +394,7 @@ const dragEventListeners: (() => void)[] = []
 const container = inject<Ref<HTMLDivElement> | null>('root', null)
 const scrollLockWindow = isDefined(window) ? useScrollLock(window) : undefined
 const scrollLockContainer = useScrollLock(container)
+const pointerEvents = ref(true)
 
 let touchTimeout: NodeJS.Timeout | undefined = undefined
 let stopOutsideClickListener: (() => void) | undefined
@@ -500,7 +515,11 @@ function scrollToHighlightedChoice() {
     ) {
       top -= em
     }
+    pointerEvents.value = false
     dropdown.value.scrollable.scroll.y.value = top
+    setTimeout(() => {
+      pointerEvents.value = true
+    })
   }
 }
 

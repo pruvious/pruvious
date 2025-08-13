@@ -440,6 +440,23 @@ export function useSelectQueryBuilderParams(options: {
    * ['where', 'orderBy', 'perPage']
    */
   checkDirty?: ('where' | 'orderBy' | 'perPage' | 'page')[]
+
+  /**
+   * The route object to use for monitoring URL query parameters.
+   * If not provided, `useRoute()` will be used to get the current route.
+   */
+  route?: { query: Record<string, any> }
+
+  /**
+   * Determines how the URL query parameters should be synchronized with the current route.
+   *
+   * - `navigateTo` - Uses `navigateTo(<query>)` to update the URL query parameters.
+   * - `mutate` - Directly mutates the `route.query` object to update the URL query parameters.
+   * - `false` - Disables synchronization with the URL query parameters.
+   *
+   * @default 'navigateTo'
+   */
+  syncRoute?: 'navigateTo' | 'mutate' | false
 }): {
   /**
    * Ref that contains the current `SelectQueryBuilderParams`.
@@ -470,7 +487,7 @@ export function useSelectQueryBuilderParams(options: {
    */
   isDirty: Ref<boolean>
 } {
-  const route = useRoute()
+  const route = options.route ?? useRoute()
   const defaultParams = options.defaultParams ?? { page: 1, perPage: 50 }
   const stringifiedDefaultParams = Object.fromEntries(
     selectQueryBuilderParamsToQueryString(defaultParams)
@@ -485,6 +502,7 @@ export function useSelectQueryBuilderParams(options: {
   const hideDefaultParams = options.hideDefaultParams ?? true
   const usedParams = ['where', 'orderBy', 'perPage', 'page']
   const isDirty = ref(false)
+  const syncRoute = options.syncRoute ?? 'navigateTo'
 
   let prevQueryString: string | undefined
 
@@ -529,7 +547,13 @@ export function useSelectQueryBuilderParams(options: {
       }
     }
 
-    nextTick(() => navigateTo({ query, replace }))
+    if (syncRoute === 'navigateTo') {
+      nextTick(() => navigateTo({ query, replace }))
+    } else if (syncRoute === 'mutate') {
+      nextTick(() => {
+        route.query = query
+      })
+    }
   }
 
   async function refresh(force = false) {

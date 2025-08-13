@@ -2,7 +2,11 @@
   <div ref="root" class="p-editable-field-cell" :class="{ 'p-editable-field-cell-wrap': wrap }">
     <slot>-</slot>
 
-    <div class="p-editable-field-cell-button" :class="`p-editable-field-cell-button-${resolvedEditButtonPosition}`">
+    <div
+      v-if="!hideEditableFieldCellActions"
+      class="p-editable-field-cell-button"
+      :class="`p-editable-field-cell-button-${resolvedEditButtonPosition}`"
+    >
       <PUIButton
         :size="-3"
         :title="editable ? __('pruvious-dashboard', 'Edit field value') : __('pruvious-dashboard', 'View field value')"
@@ -68,10 +72,19 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+
+  /**
+   * Forces the edit button to be displayed.
+   */
+  force: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const root = useTemplateRef('root')
 const resolvedEditButtonPosition = ref(props.editButtonPosition === 'auto' ? 'relative' : props.editButtonPosition)
+const hideEditableFieldCellActions = inject('hideEditableFieldCellActions', false) && !props.force
 
 watch(() => props.editButtonPosition, updatePosition)
 

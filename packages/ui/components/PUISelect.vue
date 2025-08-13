@@ -744,6 +744,10 @@ function unpauseMouseDelayed() {
   transition-property: border-color, box-shadow;
 }
 
+.pui-select-expanded {
+  cursor: default;
+}
+
 .pui-select-has-errors {
   --pui-ring: var(--pui-destructive);
   border-color: hsl(var(--pui-destructive));
@@ -828,7 +832,7 @@ function unpauseMouseDelayed() {
   padding: 0 calc(0.5em - 1px);
   border: 1px solid hsl(var(--pui-background));
   border-radius: calc(var(--pui-radius) - 0.125rem);
-  cursor: default;
+  cursor: pointer;
 }
 
 .pui-select-choice-selected {

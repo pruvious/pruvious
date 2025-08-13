@@ -159,6 +159,13 @@ const props = defineProps({
     type: [Boolean, String] as PropType<boolean | 'auto'>,
     default: false,
   },
+
+  /**
+   * A function called when the popup is initialized.
+   */
+  onInit: {
+    type: Function as PropType<() => void>,
+  },
 })
 
 const emit = defineEmits<{
@@ -230,6 +237,8 @@ const layout: FieldsLayout =
     : [props.name]
 
 let transitionDuration = 300
+
+props.onInit?.()
 
 watch(
   () => route.query,

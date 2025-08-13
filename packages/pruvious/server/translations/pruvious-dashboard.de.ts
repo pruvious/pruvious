@@ -92,6 +92,7 @@ export default defineTranslation({
   'Choose `301` for permanent redirects or `302` for temporary redirects.':
     'Wählen Sie `301` für permanente Weiterleitungen oder `302` für temporäre Weiterleitungen.',
   'Clear': 'Löschen',
+  'Clear selection': 'Auswahl löschen',
   'Close': 'Schließen',
   'Collapse': 'Einklappen',
   'Collapse all': 'Alle einklappen',
@@ -178,6 +179,7 @@ export default defineTranslation({
     { count: 'number' },
     { entries: [{ conditions: [{ count: 1 }], output: 'Eintrag' }, 'Einträge'] },
   ),
+  'Deleted record': 'Gelöschter Eintrag',
   'Dependencies': 'Abhängigkeiten',
   'Deselect': 'Abwählen',
   'Disable': 'Deaktivieren',
@@ -471,6 +473,7 @@ export default defineTranslation({
   }),
   'Sync configuration': 'Konfiguration synchronisieren',
 
+  'Table overview': 'Tabellenübersicht',
   'Tag': 'Tag',
   'Tags': 'Tags',
   'Text': 'Text',

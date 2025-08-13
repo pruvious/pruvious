@@ -38,6 +38,7 @@
             @update:modelValue="$emit('selectAll', $event)"
             strict
             variant="accent"
+            class="pui-table-select-all"
           />
         </th>
         <th v-for="(column, key, columnIndex) in columns" :key="key" scope="col">

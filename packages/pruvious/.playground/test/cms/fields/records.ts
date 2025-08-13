@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { $422, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
+import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
 
 describe('records field', () => {
   const records = '/api/collections/fields?returning=records'
@@ -85,5 +85,27 @@ describe('records field', () => {
         ],
       },
     ])
+  })
+
+  test('recovery', async () => {
+    const user = (await $postAsAdmin('/api/collections/users?returning=id', {
+      email: 'tmp@pruvious.com',
+      password: 12345678,
+    })) as [{ id: number }]
+    expect(user).toEqual([{ id: expect.any(Number) }])
+    const result = (await $postAsAdmin(`${records},id`, { records: [1, user[0].id, 3] })) as [
+      { records: number[]; id: number },
+    ]
+    expect(result).toEqual([{ records: [1, user[0].id, 3], id: expect.any(Number) }])
+    expect(await $deleteAsAdmin(`/api/collections/users/${user[0].id}`)).toEqual(1)
+    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=records`)).toEqual({
+      records: [1, user[0].id, 3],
+    })
+    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=records&populate=1`)).toEqual({
+      records: [
+        { id: 1, email: 'admin@pruvious.com', roles: [] },
+        { id: 3, email: 'author@pruvious.com', roles: [1] },
+      ],
+    })
   })
 })

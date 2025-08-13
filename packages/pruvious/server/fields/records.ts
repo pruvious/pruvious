@@ -1,5 +1,6 @@
 import {
   defineField,
+  LanguageCode,
   limitPopulation,
   type CombinedFieldOptions,
   type DynamicCollectionFieldTypes,
@@ -13,7 +14,7 @@ import {
   type FieldModel,
   type MatrixFieldModelOptions,
 } from '@pruvious/orm'
-import { isEmpty, isPositiveInteger, type DefaultFalse, type NonEmptyArray } from '@pruvious/utils'
+import { isEmpty, isPositiveInteger, StringKeys, type DefaultFalse, type NonEmptyArray } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
 interface CustomOptions<
@@ -44,6 +45,13 @@ interface CustomOptions<
   fields?: NonEmptyArray<TFields & string>
 
   /**
+   * Specifies which languages to show when selecting collection records.
+   *
+   * @default 'current'
+   */
+  languages?: 'all' | 'current' | LanguageCode[]
+
+  /**
    * Controls whether to populate the selected `fields` from the related `collection`.
    *
    * Use this option with care to avoid infinite population loops that can occur when related fields require additional population chains.
@@ -51,13 +59,72 @@ interface CustomOptions<
    * @default false
    */
   populate?: TPopulate
+
+  ui?: {
+    /**
+     * Defines the field or fields from the `collection` to display in the data table and select options.
+     * Accepts a single field name for a standard display, or a tuple of two field names to create a primary line and a secondary, grayed-out subtitle.
+     * The first field in the tuple is always considered the primary field for simplified one-line displays.
+     *
+     * For advanced customization and string concatenation, you can provide subarrays within tuples:
+     *
+     * - Field names (strings) get replaced with their corresponding field values (e.g. [['firstName', ' ', 'lastName']]).
+     * - The final label combines all subarray items through concatenation (e.g. John Doe).
+     *
+     * @default 'id'
+     *
+     * @example
+     * 'title'
+     * ['title', 'description']
+     * [['firstName', ' ', 'lastName'], 'email']
+     */
+    displayFields?:
+      | keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection]
+      | [
+          (
+            | keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection]
+            | (keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection] | (string & {}))[]
+          ),
+          (
+            | keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection]
+            | (keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection] | (string & {}))[]
+          ),
+        ]
+
+    /**
+     * An array of field names to be searched when the user types into the select.
+     * The select options will be filtered to include only the items that have a match in at least one of the specified fields.
+     *
+     * @default 'id'
+     *
+     * @example
+     * 'title'
+     * ['title', 'description']
+     */
+    searchFields?:
+      | StringKeys<DynamicCollectionFieldTypes['Serialized'][TCollection]>
+      | NonEmptyArray<StringKeys<DynamicCollectionFieldTypes['Serialized'][TCollection]>>
+
+    /**
+     * Defines the visual style variant of the component.
+     *
+     * @default 'accent'
+     */
+    variant?: 'primary' | 'secondary' | 'accent'
+  }
 }
 
 const customOptions: CustomOptions<any, string, boolean> = {
   collection: '',
   enforceUniqueItems: true,
   fields: ['id'],
+  languages: 'current',
   populate: false,
+  ui: {
+    displayFields: 'id',
+    searchFields: 'id',
+    variant: 'accent',
+  },
 }
 
 export default {
@@ -92,7 +159,7 @@ export default {
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
-        ResolveFieldUIOptions<undefined>,
+        ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
       TImmutable,
@@ -112,7 +179,7 @@ export default {
     >,
     Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
       CustomOptions<TCollection, TFields, TPopulate> &
-      ResolveFieldUIOptions<undefined>,
+      ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     TRequired,
     TImmutable,
@@ -123,6 +190,7 @@ export default {
     const bound = defineField({
       model: matrixFieldModel<'number', number, number[], TPopulatedType>(),
       customOptions,
+      uiOptions: { placeholder: true },
       validators: [
         (value, { context, path }, errors) => {
           let hasErrors = false
@@ -263,7 +331,7 @@ export default {
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
-        ResolveFieldUIOptions<undefined>,
+        ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
       TImmutable,
@@ -284,7 +352,7 @@ export default {
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
         CustomOptions<TCollection, TFields, TPopulate> &
-        ResolveFieldUIOptions<undefined>,
+        ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
       TImmutable,
@@ -313,7 +381,7 @@ export default {
     >,
     Omit<MatrixFieldModelOptions<number[], Record<string, any>[]>, 'enforceUniqueItems'> &
       CustomOptions<keyof DynamicCollectionFieldTypes['Casted' | 'Populated'], any, boolean | undefined> &
-      ResolveFieldUIOptions<undefined>,
+      ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     boolean,
     boolean,

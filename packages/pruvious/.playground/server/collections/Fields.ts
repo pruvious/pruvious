@@ -341,31 +341,54 @@ export default defineCollection({
     // record
     record: recordField({
       collection: 'Users',
-      ui: { description: 'Select a user' },
+      ui: {
+        description: 'Select a user',
+        placeholder: 'Select a user',
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
     }),
     recordPopulate: recordField({
       collection: 'Users',
       fields: ['id', 'email', 'roles'],
       populate: true,
-      ui: { label: 'Record (populate)' },
+      ui: {
+        label: 'Record (populate)',
+        displayFields: 'lastName',
+        searchFields: 'lastName',
+      },
     }),
 
     // records
     records: recordsField({
       collection: 'Users',
-      ui: { description: 'Select users' },
+      fields: ['id', 'email', 'roles'],
+      ui: {
+        description: 'Select users',
+        placeholder: 'Select users',
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
     }),
     recordsMinMax: recordsField({
       collection: 'Users',
       minItems: 2,
       maxItems: 3,
       default: [1, 2],
-      ui: { label: 'Records (min/max)' },
+      ui: {
+        label: 'Records (min/max)',
+        displayFields: 'lastName',
+        searchFields: 'lastName',
+      },
     }),
     recordsAllowDuplicates: recordsField({
       collection: 'Users',
       enforceUniqueItems: false,
-      ui: { label: 'Records (allow duplicates)' },
+      ui: {
+        label: 'Records (allow duplicates)',
+        displayFields: ['firstName', 'email'],
+        searchFields: 'email',
+      },
     }),
     recordsDeduplicate: recordsField({
       collection: 'Users',

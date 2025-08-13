@@ -83,7 +83,9 @@
               :name="name ? `${name}--keyword` : undefined"
               :placeholder="searchLabel"
               @input="onKeywordInput()"
+              autocomplete="off"
               ref="keywordInput"
+              spellcheck="false"
               type="text"
               class="pui-dynamic-select-keyword-input"
             />
