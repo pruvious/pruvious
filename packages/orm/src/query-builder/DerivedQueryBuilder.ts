@@ -239,7 +239,7 @@ export class DerivedQueryBuilder<
             } catch {
               deserializedRow[column] = deepClone(fields[column].default)
             }
-          } else {
+          } else if (!column.startsWith('_')) {
             deserializedRow[column] = value
           }
         }

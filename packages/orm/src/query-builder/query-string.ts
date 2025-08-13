@@ -10,6 +10,7 @@ import {
   isString,
   isUndefined,
   last,
+  uniqueArray,
 } from '@pruvious/utils'
 import type {
   ConditionalQueryBuilderParams,
@@ -118,7 +119,7 @@ export function insertQueryBuilderParamsToQueryString(
     queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
-  return queryString.map(encodeQueryString).join('&')
+  return queryString.filter(Boolean).map(encodeQueryString).join('&')
 }
 
 /**
@@ -128,8 +129,10 @@ export function insertQueryBuilderParamsToQueryString(
  *
  * - `select` - Comma-separated list of fields to retrieve.
  * - `where` - Filtering condition for the results (excluding raw queries).
+ * - `search` - Search condition for the results.
  * - `groupBy` - Comma-separated list of fields to group the results by.
  * - `orderBy` - Comma-separated list of fields to order the results by.
+ * - `orderByRelevance` - Controls search result ordering based on relevance.
  * - `limit` - Maximum number of results to return.
  * - `offset` - Number of results to skip.
  * - `page` - Page number to retrieve.
@@ -175,6 +178,11 @@ export function queryStringToSelectQueryBuilderParams(
     params.where = queryStringToConditionalQueryBuilderParams(normalizedQS, options).where!
   }
 
+  if (options?.search !== false && isDefined(normalizedQS.search)) {
+    const tokens = parseSearchTokens([...tokenizeSearchQueryStringValue(normalizedQS.search)])
+    params.search = buildSearchCondition(tokens, options)
+  }
+
   if (options?.groupBy !== false && isDefined(normalizedQS.groupBy)) {
     params.groupBy = normalizedQS.groupBy
       .split(',')
@@ -214,6 +222,16 @@ export function queryStringToSelectQueryBuilderParams(
       } else {
         params.orderBy = params.orderBy.filter(({ field }) => !deny.includes(field))
       }
+    }
+  }
+
+  if (options?.orderByRelevance !== false && isDefined(normalizedQS.orderByRelevance)) {
+    const value = normalizedQS.orderByRelevance.trim().toLowerCase()
+
+    if (value === 'high' || value === 'low') {
+      params.orderByRelevance = value
+    } else if (castToBoolean(normalizedQS.orderByRelevance) === false) {
+      params.orderByRelevance = false
     }
   }
 
@@ -274,8 +292,10 @@ export function queryStringToSelectQueryBuilderParams(
  *
  * - `select` - Comma-separated list of fields to retrieve.
  * - `where` - Filtering condition for the results (excluding raw queries).
+ * - `search` - Search condition for the results.
  * - `groupBy` - Comma-separated list of fields to group the results by.
  * - `orderBy` - Comma-separated list of fields to order the results by.
+ * - `orderByRelevance` - Controls search result ordering based on relevance.
  * - `limit` - Maximum number of results to return.
  * - `offset` - Number of results to skip.
  * - `page` - Page number to retrieve.
@@ -319,6 +339,10 @@ export function selectQueryBuilderParamsToQueryString(
     queryString.push(conditionalQueryBuilderParamsToQueryString({ where: params.where }, options))
   }
 
+  if (options?.search !== false && isDefined(params.search)) {
+    queryString.push(buildSearchQueryString(params.search, options))
+  }
+
   if (options?.groupBy !== false && isDefined(params.groupBy)) {
     let groupBy = [...params.groupBy]
 
@@ -360,6 +384,14 @@ export function selectQueryBuilderParamsToQueryString(
     )
   }
 
+  if (options?.orderByRelevance !== false && isDefined(params.orderByRelevance)) {
+    if (params.orderByRelevance === 'high' || params.orderByRelevance === 'low') {
+      queryString.push(`orderByRelevance=${params.orderByRelevance}`)
+    } else if (castToBoolean(params.orderByRelevance) === false) {
+      queryString.push('orderByRelevance=0')
+    }
+  }
+
   let limit: number | undefined
   let hasPerPage = false
 
@@ -394,7 +426,7 @@ export function selectQueryBuilderParamsToQueryString(
     queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
-  return queryString.map(encodeQueryString).join('&')
+  return queryString.filter(Boolean).map(encodeQueryString).join('&')
 }
 
 /**
@@ -502,7 +534,7 @@ export function updateQueryBuilderParamsToQueryString(
     queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
-  return queryString.map(encodeQueryString).join('&')
+  return queryString.filter(Boolean).map(encodeQueryString).join('&')
 }
 
 /**
@@ -610,7 +642,7 @@ export function deleteQueryBuilderParamsToQueryString(
     queryString.push(params.populate ? 'populate=1' : 'populate=0')
   }
 
-  return queryString.map(encodeQueryString).join('&')
+  return queryString.filter(Boolean).map(encodeQueryString).join('&')
 }
 
 /**
@@ -740,6 +772,10 @@ function buildWhereCondition(
   tokens: Token[],
   options?: ConditionalQueryBuilderParamsOptions,
 ): (WhereField | ExplicitWhereOrGroup)[] {
+  if (options?.where === false) {
+    return []
+  }
+
   const whereCondition: (WhereField | ExplicitWhereOrGroup)[] = []
 
   let token: Token | undefined
@@ -1014,6 +1050,171 @@ function buildWhereQueryString(
   }
 
   return queryString.endsWith(',') ? queryString.slice(0, -1) : queryString
+}
+
+function parseSearchTokens(tokens: Token[]): Token[] {
+  const result: Token[] = []
+
+  let token: Token | undefined
+
+  while ((token = tokens.shift())) {
+    if (token === ']') {
+      return result
+    }
+
+    result.push(token === '[' ? parseSearchTokens(tokens) : token)
+  }
+
+  return result
+}
+
+function* tokenizeSearchQueryStringValue(value: string) {
+  let token = ''
+  let c: string | undefined = ''
+  let escape = false
+
+  const characters = value.split('')
+
+  while ((c = characters.shift())) {
+    if ((c === '[' || c === ']') && !escape) {
+      if (token) {
+        yield token
+        token = ''
+      }
+      yield c
+    } else if ((c === '\\' || c === '$') && !escape) {
+      escape = true
+    } else {
+      token += c
+      escape = false
+    }
+  }
+
+  if (token) {
+    yield token
+  }
+}
+
+function buildSearchCondition(
+  tokens: Token[],
+  options?: SelectQueryBuilderParamsOptions,
+): { fields: string[]; keywords: string[] }[] {
+  if (options?.search === false) {
+    return []
+  }
+
+  const searchCondition: { fields: string[]; keywords: string[] }[] = []
+
+  let token: Token | undefined
+  let current: { fields: string[]; keywords: string[] } | undefined
+  let inUsed: boolean = false
+
+  while ((token = tokens.shift())) {
+    if (isString(token)) {
+      let trimmedToken = token.trim()
+
+      if (!current) {
+        const startsWithComma = trimmedToken.startsWith(',')
+
+        if (searchCondition.length && !startsWithComma) {
+          continue
+        }
+
+        if (startsWithComma) {
+          trimmedToken = trimmedToken.replace(/^,\s*/, '')
+        }
+
+        current = {
+          fields: [],
+          keywords: uniqueArray(
+            trimmedToken
+              .split(' ')
+              .map((keyword) => keyword.trim())
+              .filter(Boolean),
+          ),
+        }
+      }
+    } else if (isArray(token) && current) {
+      if (token.length === 1 && isString(token[0])) {
+        if (!inUsed && token[0].toLowerCase() === 'in') {
+          inUsed = true
+          continue
+        } else if (inUsed) {
+          const fields = token[0]
+            .split(',')
+            .map((field) => field.trim())
+            .filter(Boolean)
+          const filteredFields: string[] = []
+
+          if (isObject(options?.search)) {
+            const allow = options.search.allow || fields
+            const deny = options.search.deny || []
+
+            for (const field of fields) {
+              if (allow.includes(field) && !deny.includes(field)) {
+                filteredFields.push(field)
+              }
+            }
+          } else {
+            filteredFields.push(...fields)
+          }
+
+          current.fields.push(...uniqueArray(filteredFields))
+
+          if (current.fields.length && current.keywords.length) {
+            searchCondition.push(current)
+            current = undefined
+            inUsed = false
+            continue
+          }
+        } else {
+          current = undefined
+          inUsed = false
+          continue
+        }
+      } else {
+        current = undefined
+        inUsed = false
+        continue
+      }
+    }
+  }
+
+  return searchCondition
+}
+
+function buildSearchQueryString(
+  search: { fields: string[]; keywords: string[] }[],
+  options?: SelectQueryBuilderParamsOptions,
+): string {
+  if (options?.search === false) {
+    return ''
+  }
+
+  const queryStringParts: string[] = []
+
+  for (const { fields, keywords } of search) {
+    const filteredFields: string[] = []
+
+    if (isObject(options?.search)) {
+      const allow = options.search.allow || fields
+      const deny = options.search.deny || []
+
+      for (const field of fields) {
+        if (allow.includes(field) && !deny.includes(field)) {
+          filteredFields.push(field)
+        }
+      }
+    } else {
+      filteredFields.push(...fields)
+    }
+
+    if (filteredFields.length && keywords.length) {
+      queryStringParts.push(`${keywords.join(' ')}[in][${filteredFields.join(',')}]`)
+    }
+  }
+
+  return queryStringParts.length ? 'search=' + queryStringParts.join(',') : ''
 }
 
 /**

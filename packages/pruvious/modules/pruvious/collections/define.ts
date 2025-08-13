@@ -339,8 +339,10 @@ export interface CollectionMetaOptions<
          * Multi-record query parameters:
          *
          * - `where` - Filtering conditions for the query (e.g. `?where=category[=][2]`).
+         * - `search` - Search condition for the results (e.g. `?search=keyword[in][name]`).
          * - `groupBy` - Fields to group by (e.g. `?groupBy=category`).
          * - `orderBy` - Fields to order by (e.g. `?orderBy=name:asc`).
+         * - `orderByRelevance` - Whether to order search results by relevance (e.g. `?orderByRelevance=high`).
          * - `limit` - The maximum number of rows to return (e.g. `?limit=10`).
          * - `offset` - The number of rows to skip before returning results (e.g. `?offset=10`).
          * - `page` - The page number for paginated results (e.g. `?page=2`).

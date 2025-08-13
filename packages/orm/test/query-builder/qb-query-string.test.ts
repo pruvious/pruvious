@@ -167,6 +167,41 @@ test('query string to select query builder params', () => {
     where: [],
   })
 
+  expect(queryStringToSelectQueryBuilderParams('search=harry[in][firstName]')).toEqual({
+    search: [{ fields: ['firstName'], keywords: ['harry'] }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('search=harry[in][firstName],potter[in][lastName]')).toEqual({
+    search: [
+      { fields: ['firstName'], keywords: ['harry'] },
+      { fields: ['lastName'], keywords: ['potter'] },
+    ],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('search=harry potter[in][firstName,lastName]')).toEqual({
+    search: [{ fields: ['firstName', 'lastName'], keywords: ['harry', 'potter'] }],
+  })
+
+  expect(
+    queryStringToSelectQueryBuilderParams('search=harry potter[in][firstName,lastName]', { search: false }),
+  ).toEqual({})
+
+  expect(
+    queryStringToSelectQueryBuilderParams('search=harry potter[in][firstName,lastName]', {
+      search: { allow: ['firstName'] },
+    }),
+  ).toEqual({
+    search: [{ fields: ['firstName'], keywords: ['harry', 'potter'] }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('search= h a r r y p o t t e r [in][ firstName, lastName ]')).toEqual({
+    search: [{ fields: ['firstName', 'lastName'], keywords: ['h', 'a', 'r', 'y', 'p', 'o', 't', 'e'] }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('search= [in][firstName]')).toEqual({
+    search: [],
+  })
+
   expect(queryStringToSelectQueryBuilderParams('select')).toEqual({
     select: [],
   })
@@ -264,6 +299,30 @@ test('query string to select query builder params', () => {
 
   expect(queryStringToSelectQueryBuilderParams('orderBy=')).toEqual({
     orderBy: [],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance')).toEqual({})
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=high')).toEqual({
+    orderByRelevance: 'high',
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=low')).toEqual({
+    orderByRelevance: 'low',
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=medium')).toEqual({})
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=false')).toEqual({
+    orderByRelevance: false,
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=0')).toEqual({
+    orderByRelevance: false,
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('orderByRelevance=F')).toEqual({
+    orderByRelevance: false,
   })
 
   expect(queryStringToSelectQueryBuilderParams('limit=1')).toEqual({
@@ -414,6 +473,39 @@ test('select query builder params to query string', () => {
     selectQueryBuilderParamsToQueryString({ where: [{ field: 'firstName', operator: '=', value: 'Harry' }] }),
   ).toBe('where=firstName[=][Harry]')
 
+  expect(selectQueryBuilderParamsToQueryString({ search: [{ fields: ['firstName'], keywords: ['harry'] }] })).toBe(
+    'search=harry[in][firstName]',
+  )
+
+  expect(
+    selectQueryBuilderParamsToQueryString({
+      search: [
+        { fields: ['firstName'], keywords: ['harry'] },
+        { fields: ['lastName'], keywords: ['potter'] },
+      ],
+    }),
+  ).toBe('search=harry[in][firstName],potter[in][lastName]')
+
+  expect(
+    selectQueryBuilderParamsToQueryString({
+      search: [{ fields: ['firstName', 'lastName'], keywords: ['harry', 'potter'] }],
+    }),
+  ).toBe('search=harry potter[in][firstName,lastName]')
+
+  expect(
+    selectQueryBuilderParamsToQueryString(
+      { search: [{ fields: ['firstName', 'lastName'], keywords: ['harry', 'potter'] }] },
+      { search: false },
+    ),
+  ).toBe('')
+
+  expect(
+    selectQueryBuilderParamsToQueryString(
+      { search: [{ fields: ['firstName', 'lastName'], keywords: ['harry', 'potter'] }] },
+      { search: { allow: ['firstName'] } },
+    ),
+  ).toBe('search=harry potter[in][firstName]')
+
   expect(selectQueryBuilderParamsToQueryString({ select: [] })).toBe('select=')
 
   expect(selectQueryBuilderParamsToQueryString({ groupBy: ['firstName'] })).toBe('groupBy=firstName')
@@ -529,6 +621,18 @@ test('select query builder params to query string', () => {
   ).toBe('orderBy=lastName:nullsLast')
 
   expect(selectQueryBuilderParamsToQueryString({ orderBy: [] })).toBe('orderBy=')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: 'high' })).toBe('orderByRelevance=high')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: 'low' })).toBe('orderByRelevance=low')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: 'medium' as any })).toBe('')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: false })).toBe('orderByRelevance=0')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: 'high' }, { orderByRelevance: false })).toBe('')
+
+  expect(selectQueryBuilderParamsToQueryString({ orderByRelevance: '' as any })).toBe('')
 
   expect(selectQueryBuilderParamsToQueryString({ limit: 1 })).toBe('limit=1')
 
@@ -1458,14 +1562,14 @@ test('query builder query string methods', () => {
     'returning=firstName,lastName&populate=0',
   )
   expect(qb.selectFrom('Students').fromQueryString(qss).toQueryString({ withDefaults: true })).toBe(
-    `${qss}&where=&groupBy=&orderBy=&limit=-1&offset=0&populate=0`,
+    `${qss}&where=&groupBy=&orderBy=&orderByRelevance=high&limit=-1&offset=0&populate=0`,
   )
   expect(qb.update('Students').fromQueryString(qsr).toQueryString({ withDefaults: true })).toBe(`${qsr}&populate=0`)
   expect(qb.deleteFrom('Students').fromQueryString(qsr).toQueryString({ withDefaults: true })).toBe(`${qsr}&populate=0`)
 
   expect(qb.insertInto('Students').toQueryString({ withDefaults: true })).toBe('populate=0')
   expect(qb.selectFrom('Students').toQueryString({ withDefaults: true })).toBe(
-    'select=*&where=&groupBy=&orderBy=&limit=-1&offset=0&populate=0',
+    'select=*&where=&groupBy=&orderBy=&orderByRelevance=high&limit=-1&offset=0&populate=0',
   )
   expect(qb.update('Students').toQueryString({ withDefaults: true })).toBe('where=&populate=0')
   expect(qb.deleteFrom('Students').toQueryString({ withDefaults: true })).toBe('where=&populate=0')

@@ -1,6 +1,7 @@
 import type { GenericDatabase, i18n } from '#pruvious/server'
 import {
   isPaginatedQueryBuilderResultData,
+  SelectQueryBuilder,
   type Database,
   type DeleteContext,
   type GenericCollection,
@@ -72,6 +73,18 @@ export function removeWhere(
       }
     })
 
+    if (queryBuilder instanceof SelectQueryBuilder) {
+      for (const { fields } of (
+        queryBuilder as unknown as { searchCondition: { fields: string[]; keywords: string[] }[] }
+      ).searchCondition) {
+        for (const [i, field] of fields.entries()) {
+          if (fieldsArray.includes(field)) {
+            toRemove.unshift({ parent: fields, index: i })
+          }
+        }
+      }
+    }
+
     for (const { parent, index } of toRemove) {
       parent.splice(index, 1)
     }
@@ -138,6 +151,19 @@ export function denyWhere(
         )
       }
     })
+
+    if (queryBuilder instanceof SelectQueryBuilder) {
+      for (const { fields } of (
+        queryBuilder as unknown as { searchCondition: { fields: string[]; keywords: string[] }[] }
+      ).searchCondition) {
+        for (const [i, field] of fields.entries()) {
+          if (fieldsArray.includes(field)) {
+            setResponseStatus(useEvent(), 403, httpStatusCodeMessages[403])
+            throw new Error(__('pruvious-api', 'The field `$field` cannot be used for filtering', { field }))
+          }
+        }
+      }
+    }
   }
 }
 

@@ -494,6 +494,21 @@ export interface SelectQueryBuilderParams<TColumnNames extends string = string>
   select?: TColumnNames[]
 
   /**
+   * Search criteria.
+   */
+  search?: {
+    /**
+     * The fields to search in.
+     */
+    fields: TColumnNames[]
+
+    /**
+     * The keywords to search for.
+     */
+    keywords: string[]
+  }[]
+
+  /**
    * Fields to group by.
    */
   groupBy?: TColumnNames[]
@@ -525,6 +540,11 @@ export interface SelectQueryBuilderParams<TColumnNames extends string = string>
      */
     nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
   }[]
+
+  /**
+   * Controls search result ordering based on relevance.
+   */
+  orderByRelevance?: 'high' | 'low' | false
 
   /**
    * The maximum number of rows to return.
@@ -571,6 +591,17 @@ export interface SelectQueryBuilderParamsOptions<TColumnNames extends string = s
   select?: boolean | FieldAccessControl<TColumnNames>
 
   /**
+   * Controls how to handle the `search` parameter.
+   *
+   * - Set to `true` to handle all fields.
+   * - Set to `false` to ignore the `search` parameter completely.
+   * - Provide an object to define a custom allowlist or denylist of fields.
+   *
+   * @default true
+   */
+  search?: boolean | FieldAccessControl<TColumnNames>
+
+  /**
    * Controls how to handle the `groupBy` parameter.
    *
    * - Set to `true` to handle all fields.
@@ -591,6 +622,16 @@ export interface SelectQueryBuilderParamsOptions<TColumnNames extends string = s
    * @default true
    */
   orderBy?: boolean | FieldAccessControl<TColumnNames>
+
+  /**
+   * Controls how to handle the `orderByRelevance` parameter.
+   *
+   * - Set to `true` to handle all fields.
+   * - Set to `false` to ignore the `orderByRelevance` parameter completely.
+   *
+   * @default true
+   */
+  orderByRelevance?: boolean
 
   /**
    * Controls how to handle the `limit` parameter.

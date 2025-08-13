@@ -86,6 +86,11 @@ export type Serializable = Primitive | Primitive[] | { [key: string]: Serializab
 export type Booleanish = boolean | 1 | '1' | 'true' | 't' | 'yes' | 'y' | 0 | '0' | 'false' | 'f' | 'no' | 'n'
 
 /**
+ * Extracts the keys of an object type that are strings.
+ */
+export type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T]
+
+/**
  * Represents a non-empty array of elements of type `T`.
  */
 export type NonEmptyArray<T> = T[] & [T, ...T[]]

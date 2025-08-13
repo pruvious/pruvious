@@ -11,7 +11,17 @@ import {
   queryStringToSelectQueryBuilderParams,
   selectQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
-import { deepClone, isDefined, isNull, isUndefined, toArray, uniqueArray, type NonEmptyArray } from '@pruvious/utils'
+import {
+  deepClone,
+  isArray,
+  isDefined,
+  isNull,
+  isUndefined,
+  toArray,
+  uniqueArray,
+  type NonEmptyArray,
+  type StringKeys,
+} from '@pruvious/utils'
 import { ConditionalQueryBuilder } from './ConditionalQueryBuilder'
 import type { QueryBuilderOptions } from './QueryBuilder'
 
@@ -101,11 +111,13 @@ export class SelectQueryBuilder<
   TPopulateFields extends boolean = false,
 > extends ConditionalQueryBuilder<TCollections, TCollectionName, TCollection> {
   protected selectedFields: string[] | undefined
+  protected searchCondition: { fields: string[]; keywords: string[] }[] = []
   protected groupByFields: string[] = []
   protected orderByClauses: (
     | { field: string; direction: 'asc' | 'desc'; nulls: 'nullsAuto' | 'nullsFirst' | 'nullsLast' }
     | { raw: string; params: Record<string, any> }
   )[] = []
+  protected orderByRelevanceValue: 'high' | 'low' | false = 'high'
   protected limitValue: number | null = null
   protected offsetValue: number | null = null
   protected populateFields: boolean = false
@@ -126,8 +138,10 @@ export class SelectQueryBuilder<
    *
    * - `select` - Comma-separated list of fields to retrieve.
    * - `where` - Filtering condition for the results (excluding raw queries).
+   * - `search` - Search condition for the results.
    * - `groupBy` - Comma-separated list of fields to group the results by.
    * - `orderBy` - Comma-separated list of fields to order the results by.
+   * - `orderByRelevance` - Controls search result ordering based on relevance.
    * - `limit` - Maximum number of results to return.
    * - `offset` - Number of results to skip.
    * - `page` - Page number for paginated results.
@@ -174,6 +188,12 @@ export class SelectQueryBuilder<
       this.clearWhere()
     }
 
+    if (params.search) {
+      this.searchCondition = params.search
+    } else if (options?.withDefaults) {
+      this.clearSearch()
+    }
+
     if (params.groupBy) {
       this.groupByFields = params.groupBy
     } else if (options?.withDefaults) {
@@ -188,6 +208,12 @@ export class SelectQueryBuilder<
       }))
     } else if (options?.withDefaults) {
       this.clearOrderBy()
+    }
+
+    if (params.orderByRelevance) {
+      this.orderByRelevanceValue = params.orderByRelevance
+    } else if (options?.withDefaults) {
+      this.orderByRelevanceValue = 'high'
     }
 
     let hasPerPage = false
@@ -223,8 +249,10 @@ export class SelectQueryBuilder<
    *
    * - `select` - Comma-separated list of fields to retrieve.
    * - `where` - Filtering condition for the results (excluding raw queries).
+   * - `search` - Search condition for the results.
    * - `groupBy` - Comma-separated list of fields to group the results by.
    * - `orderBy` - Comma-separated list of fields to order the results by.
+   * - `orderByRelevance` - Controls search result ordering based on relevance.
    * - `limit` - Maximum number of results to return.
    * - `offset` - Number of results to skip.
    * - `populate` - Whether to populate related fields.
@@ -251,8 +279,10 @@ export class SelectQueryBuilder<
       {
         select: this.selectedFields ?? (wd ? ['*'] : undefined),
         where: this.whereCondition.length ? (this.whereCondition as any) : wd ? [] : undefined,
+        search: this.searchCondition.length ? (this.searchCondition as any) : wd ? [] : undefined,
         groupBy: this.groupByFields.length ? this.groupByFields : wd ? [] : undefined,
         orderBy: this.orderByClauses.length ? (this.orderByClauses as any) : wd ? [] : undefined,
+        orderByRelevance: this.orderByRelevanceValue !== 'high' ? this.orderByRelevanceValue : wd ? 'high' : undefined,
         limit: this.limitValue ?? (wd ? -1 : undefined),
         offset: this.offsetValue ?? (wd ? 0 : undefined),
         populate: this.populateFields === true ? this.populateFields : wd ? false : undefined,
@@ -270,6 +300,8 @@ export class SelectQueryBuilder<
     clone.whereCondition = deepClone(this.whereCondition)
 
     clone.selectedFields = isUndefined(this.selectedFields) ? undefined : [...this.selectedFields]
+    clone.searchCondition = deepClone(this.searchCondition)
+    clone.orderByRelevanceValue = this.orderByRelevanceValue
     clone.groupByFields = [...this.groupByFields]
     clone.orderByClauses = deepClone(this.orderByClauses)
     clone.limitValue = this.limitValue
@@ -386,6 +418,92 @@ export class SelectQueryBuilder<
   }
 
   /**
+   * Adds a search condition to filter results based on `keywords` in specific `fields`.
+   *
+   * How it works:
+   *
+   * - The `keywords` are split by whitespace.
+   * - Each keyword is matched against the specified `fields` (case-insensitive).
+   * - All keywords must match at least one of the specified `fields`.
+   *
+   * Ordering results:
+   *
+   * - By default, results are ordered by relevance (most relevant first; `orderByRelevance = 'high'`).
+   * - Relevance is determined by:
+   *   - Position of first keyword match (earlier positions rank higher).
+   *   - Order of `fields` specified (earlier fields have higher priority).
+   *   - Order of chained `search()` calls (earlier calls have higher priority).
+   * - You can customize ordering with the `orderByRelevance` parameter.
+   *   - Each consecutive `search()` call with defined `orderByRelevance` will override the previous one.
+   *   - If additional `orderBy()` calls are made, they will be applied after the relevance-based ordering.
+   *   - Set to `false` to disable relevance-based ordering.
+   *
+   * This method can be chained to add multiple search conditions to the query.
+   * All conditions will be combined with AND logic (all conditions must be satisfied).
+   *
+   * @example
+   * ```ts
+   * const students = await this.selectFrom('Students')
+   *   .search('er h', ['firstName', 'lastName'])
+   *   .all()
+   *
+   * console.log(students)
+   * // {
+   * //   success: true,
+   * //   data: [
+   * //     { firstName: 'Harry', lastName: 'Potter' },
+   * //     { firstName: 'Hermione', lastName: 'Granger' },
+   * //   ],
+   * //   runtimeError: undefined,
+   * //   inputErrors: undefined,
+   * // }
+   * ```
+   */
+  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+    keywords: string | number | (string | number)[],
+    fields: NonEmptyArray<TField>,
+    orderByRelevance?: 'high' | 'low' | false,
+  ): this
+  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+    keywords: string | number | (string | number)[],
+    field: TField,
+    orderByRelevance?: 'high' | 'low' | false,
+  ): this
+  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+    keywords: string | number | (string | number)[],
+    fields: NonEmptyArray<TField> | TField,
+    orderByRelevance?: 'high' | 'low' | false,
+  ) {
+    const keywordsArray = isArray(keywords) ? keywords : keywords.toString().split(' ')
+    const finalKeywords: string[] = []
+
+    for (const keyword of keywordsArray) {
+      const trimmedKeyword = keyword.toString().trim().toLowerCase()
+      if (trimmedKeyword && !finalKeywords.includes(trimmedKeyword)) {
+        finalKeywords.push(trimmedKeyword)
+      }
+    }
+
+    if (finalKeywords.length) {
+      this.searchCondition.push({ fields: isArray(fields) ? uniqueArray(fields) : [fields], keywords: finalKeywords })
+    }
+
+    if (isDefined(orderByRelevance)) {
+      this.orderByRelevanceValue = orderByRelevance
+    }
+
+    return this
+  }
+
+  /**
+   * Removes all previously set search conditions from the query.
+   */
+  clearSearch(): this {
+    this.searchCondition = []
+    return this
+  }
+
+  /**
    * Groups the query results by one or more fields.
    *
    * This method will override any previous grouping.
@@ -473,6 +591,49 @@ export class SelectQueryBuilder<
     nulls: 'nullsAuto' | 'nullsFirst' | 'nullsLast' = 'nullsAuto',
   ): this {
     this.orderByClauses.push({ field: field as string, direction, nulls })
+    return this
+  }
+
+  /**
+   * Sets the order of search results based on relevance.
+   *
+   * Only applies when using the `search()` method.
+   * You can also set relevance ordering directly in the `search()` method as the 3rd parameter.
+   * If additional `orderBy()` calls are made, they will be applied after the relevance-based ordering.
+   *
+   * - `'high'` sorts most relevant results first.
+   * - `'low'` sorts least relevant first.
+   * - `false` disables relevance sorting.
+   *
+   * @example
+   * ```ts
+   * const students = await this.selectFrom('Students')
+   *   .search('er h', ['firstName', 'lastName'])
+   *   .orderByRelevance('low')
+   *   .all()
+   *
+   * console.log(students)
+   * // {
+   * //   success: true,
+   * //   data: [
+   * //     { firstName: 'Hermione', lastName: 'Granger' },
+   * //     { firstName: 'Harry', lastName: 'Potter' },
+   * //   ],
+   * //   runtimeError: undefined,
+   * //   inputErrors: undefined,
+   * // }
+   * ```
+   */
+  orderByRelevance(order: 'high' | 'low' | false): this {
+    this.orderByRelevanceValue = order
+    return this
+  }
+
+  /**
+   * Resets the search results ordering to the default relevance setting (`high`).
+   */
+  clearOrderByRelevance(): this {
+    this.orderByRelevanceValue = 'high'
     return this
   }
 

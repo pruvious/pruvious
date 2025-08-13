@@ -591,7 +591,7 @@ test('query builder where methods', async () => {
 
     // SQL injection
 
-    expect(await qb.selectFrom('Students').where('firstName', '=', "Harry'; drop table Students;").all()).toEqual(
+    expect(await qb.selectFrom('Students').where('firstName', '=', `Harry'; drop table "Students";`).all()).toEqual(
       qbo([]),
     )
 
@@ -599,11 +599,11 @@ test('query builder where methods', async () => {
       await qb
         .selectFrom('Students')
         .select('firstName')
-        .whereRaw('"firstName" = $1', { '1': "Harry'; drop table Students;" })
+        .whereRaw('"firstName" = $1', { '1': `Harry'; drop table "Students";` })
         .all(),
     ).toEqual(qbo([]))
 
-    expect(await qb.selectFrom('Students').select('firstName').count()).toEqual(qbo(3))
+    expect(await qb.selectFrom('Students').count()).toEqual(qbo(3))
 
     await db.close()
     await close?.()
