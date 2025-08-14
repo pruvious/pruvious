@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedSelectFrom(collection.name)
+  const query = await guardedSelectFrom(collection.name as any)
     .fromQueryString(event.path, { where: false, groupBy: false, orderBy: false, limit: false, offset: false })
     .where('id', '=', idParam)
     .first()

@@ -13,7 +13,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedSelectFrom(collection.name).fromQueryString(event.path).paginate()
+  const query = await guardedSelectFrom(collection.name as any)
+    .fromQueryString(event.path)
+    .paginate()
 
   assertQuery(query)
 

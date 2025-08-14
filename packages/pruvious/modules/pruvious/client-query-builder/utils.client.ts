@@ -1,4 +1,4 @@
-import type { Collections, Singletons } from '#pruvious/server'
+import type { CollectionAPI, Collections, Singletons } from '#pruvious/server'
 import type { SelectQueryBuilderParams } from '@pruvious/orm/'
 import {
   decodeQueryString,
@@ -79,7 +79,7 @@ import type { UpdateQueryBuilder } from './UpdateQueryBuilder'
  */
 export function insertInto<
   TCollections extends Collections,
-  TCollectionName extends keyof TCollections,
+  TCollectionName extends CollectionAPI['any']['create'],
   // @ts-expect-error
 >(collectionName: TCollectionName): InsertQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
   return new QueryBuilder().insertInto(collectionName as any) as any
@@ -168,7 +168,7 @@ export function insertInto<
  */
 export function selectFrom<
   TCollections extends Collections,
-  TCollectionName extends keyof TCollections,
+  TCollectionName extends CollectionAPI['any']['read'],
   // @ts-expect-error
 >(collectionName: TCollectionName): SelectQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
   return new QueryBuilder().selectFrom(collectionName as any) as any
@@ -233,7 +233,7 @@ export function selectFrom<
  */
 export function update<
   TCollections extends Collections,
-  TCollectionName extends keyof TCollections,
+  TCollectionName extends CollectionAPI['any']['update'],
   // @ts-expect-error
 >(collectionName: TCollectionName): UpdateQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
   return new QueryBuilder().update(collectionName as any) as any
@@ -287,7 +287,7 @@ export function update<
  */
 export function deleteFrom<
   TCollections extends Collections,
-  TCollectionName extends keyof TCollections,
+  TCollectionName extends CollectionAPI['any']['delete'],
   // @ts-expect-error
 >(collectionName: TCollectionName): DeleteQueryBuilder<TCollections, TCollectionName, TCollections[TCollectionName]> {
   return new QueryBuilder().deleteFrom(collectionName as any) as any

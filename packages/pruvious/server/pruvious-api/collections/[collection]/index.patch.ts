@@ -13,7 +13,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedUpdate(collection.name).fromQueryString(event.path).set(event.context.pruvious.input).run()
+  const query = await guardedUpdate(collection.name as any)
+    .fromQueryString(event.path)
+    .set(event.context.pruvious.input as any)
+    .run()
 
   assertQuery(query)
 

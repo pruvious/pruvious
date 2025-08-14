@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const input = await parseBody(event, 'object').then(({ input }) => input)
-  const query = await guardedUpdate(collection.name)
+  const query = await guardedUpdate(collection.name as any)
     .fromQueryString(input.query ?? {})
     .set(input.data ?? {})
     .run()

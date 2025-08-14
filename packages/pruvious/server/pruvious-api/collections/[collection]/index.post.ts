@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedInsertInto(collection.name)
+  const query = await guardedInsertInto(collection.name as any)
     .fromQueryString(event.path)
     .values(event.context.pruvious.input)
     .run()

@@ -13,7 +13,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedDeleteFrom(collection.name).fromQueryString(event.path).run()
+  const query = await guardedDeleteFrom(collection.name as any)
+    .fromQueryString(event.path)
+    .run()
 
   assertQuery(query)
 

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const query = await guardedDeleteFrom(collection.name)
+  const query = await guardedDeleteFrom(collection.name as any)
     .fromQueryString(event.path, { where: false })
     .where('id', '=', idParam)
     .run()
