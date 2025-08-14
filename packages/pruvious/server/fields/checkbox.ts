@@ -1,4 +1,4 @@
-import { defineField, TranslatableStringCallbackContext } from '#pruvious/server'
+import { defineField, type TranslatableStringCallbackContext } from '#pruvious/server'
 import { booleanFieldModel } from '@pruvious/orm'
 
 const customOptions: {
