@@ -1,4 +1,4 @@
-import { type Collections, defineField, type LanguageCode, languages, uniqueValidator } from '#pruvious/server'
+import { defineField, type LanguageCode, languages, uniqueValidator } from '#pruvious/server'
 import { textFieldModel } from '@pruvious/orm'
 import { isString } from '@pruvious/utils'
 
@@ -29,7 +29,7 @@ export default defineField({
     if (context.collection?.meta.translatable && isString(value)) {
       const query = await context.database
         .queryBuilder()
-        .selectFrom(context.collectionName as keyof Collections)
+        .selectFrom(context.collectionName as any)
         .select(['id', definition.options.languageField])
         .where(path, '=', value)
         .useCache(context.cache)

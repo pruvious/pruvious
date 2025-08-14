@@ -1,5 +1,5 @@
 import { primaryLanguage } from '#pruvious/client/i18n'
-import type { LanguageCode, Singletons } from '#pruvious/server'
+import type { LanguageCode, SingletonAPI, Singletons } from '#pruvious/server'
 import type {
   DefaultQueryBuilderParamsOptions,
   ExtractCastedTypes,
@@ -52,7 +52,7 @@ import type { QueryBuilderOptions } from './QueryBuilder'
  * ```
  */
 export class SingletonSelectQueryBuilder<
-  const TSingletonName extends keyof Singletons,
+  const TSingletonName extends SingletonAPI['any']['read'],
   TSingleton extends Singletons[TSingletonName] = Singletons[TSingletonName],
   TSelectedFields extends TSingleton['TFieldNames'] = TSingleton['TFieldNames'],
   TKnownSelectedFields extends boolean = true,

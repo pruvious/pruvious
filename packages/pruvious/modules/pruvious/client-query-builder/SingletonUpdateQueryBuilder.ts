@@ -1,5 +1,5 @@
 import { primaryLanguage } from '#pruvious/client/i18n'
-import type { LanguageCode, Singletons } from '#pruvious/server'
+import type { LanguageCode, SingletonAPI, Singletons } from '#pruvious/server'
 import type {
   DefaultQueryBuilderParamsOptions,
   ExtractCastedTypes,
@@ -57,7 +57,7 @@ import type { QueryBuilderOptions } from './QueryBuilder'
  * ```
  */
 export class SingletonUpdateQueryBuilder<
-  const TSingletonName extends keyof Singletons,
+  const TSingletonName extends SingletonAPI['any']['update'],
   TSingleton extends Singletons[TSingletonName] = Singletons[TSingletonName],
   TReturnType extends 'rows' | 'count' = 'count',
   TReturningFields extends TSingleton['TFieldNames'] = never,

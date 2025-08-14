@@ -1,4 +1,4 @@
-import type { CollectionAPI, Collections, Singletons } from '#pruvious/server'
+import type { CollectionAPI, Collections, SingletonAPI } from '#pruvious/server'
 import type { SelectQueryBuilderParams } from '@pruvious/orm/'
 import {
   decodeQueryString,
@@ -331,7 +331,7 @@ export function deleteFrom<
  * // }
  * ```
  */
-export function selectSingleton<const TSingletonName extends keyof Singletons>(
+export function selectSingleton<const TSingletonName extends SingletonAPI['any']['read']>(
   name: TSingletonName,
 ): SingletonSelectQueryBuilder<TSingletonName> {
   return new SingletonSelectQueryBuilder(name)
@@ -379,7 +379,7 @@ export function selectSingleton<const TSingletonName extends keyof Singletons>(
  * // }
  * ```
  */
-export function updateSingleton<const TSingletonName extends keyof Singletons>(
+export function updateSingleton<const TSingletonName extends SingletonAPI['any']['update']>(
   name: TSingletonName,
 ): SingletonUpdateQueryBuilder<TSingletonName> {
   return new SingletonUpdateQueryBuilder(name)

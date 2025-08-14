@@ -1,4 +1,4 @@
-import { __, SingletonUpdateQueryBuilder, type Collections, type Singletons } from '#pruvious/server'
+import { __, SingletonUpdateQueryBuilder, type Collections, type SingletonAPI, type Singletons } from '#pruvious/server'
 import type { I18n } from '@pruvious/i18n'
 import type { GenericCollection, InsertQueryBuilder, UpdateQueryBuilder } from '@pruvious/orm'
 import { isDefined, isString, kebabCase } from '@pruvious/utils'
@@ -110,8 +110,8 @@ export function getSanitizedInput(
         boolean
       >
     | SingletonUpdateQueryBuilder<
-        keyof Singletons,
-        Singletons[keyof Singletons],
+        SingletonAPI['any']['update'],
+        Singletons[SingletonAPI['any']['update']],
         'rows' | 'count',
         any,
         boolean,
@@ -150,8 +150,8 @@ export function patchSanitizedInput(
         boolean
       >
     | SingletonUpdateQueryBuilder<
-        keyof Singletons,
-        Singletons[keyof Singletons],
+        SingletonAPI['any']['update'],
+        Singletons[SingletonAPI['any']['update']],
         'rows' | 'count',
         any,
         boolean,

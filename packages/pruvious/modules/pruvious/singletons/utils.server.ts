@@ -1,4 +1,4 @@
-import { __, pruviousError, type Singletons } from '#pruvious/server'
+import { __, pruviousError, type SingletonAPI, type Singletons } from '#pruvious/server'
 import { isDefined, isString, kebabCase } from '@pruvious/utils'
 import { SingletonSelectQueryBuilder } from './SingletonSelectQueryBuilder'
 import { SingletonUpdateQueryBuilder } from './SingletonUpdateQueryBuilder'
@@ -44,7 +44,7 @@ let singletonSlugMap: Record<string, { name: keyof Singletons; definition: Gener
  * // }
  * ```
  */
-export function selectSingleton<const TSingletonName extends keyof Singletons>(
+export function selectSingleton<const TSingletonName extends SingletonAPI['any']['read']>(
   name: TSingletonName,
 ): SingletonSelectQueryBuilder<TSingletonName> {
   return new SingletonSelectQueryBuilder(name)
@@ -88,7 +88,7 @@ export function selectSingleton<const TSingletonName extends keyof Singletons>(
  * // }
  * ```
  */
-export function guardedSelectSingleton<const TSingletonName extends keyof Singletons>(
+export function guardedSelectSingleton<const TSingletonName extends SingletonAPI['any']['read']>(
   name: TSingletonName,
 ): SingletonSelectQueryBuilder<TSingletonName> {
   return new SingletonSelectQueryBuilder(name).prepare(singletonGuards())
@@ -135,7 +135,7 @@ export function guardedSelectSingleton<const TSingletonName extends keyof Single
  * // }
  * ```
  */
-export function updateSingleton<const TSingletonName extends keyof Singletons>(
+export function updateSingleton<const TSingletonName extends SingletonAPI['any']['update']>(
   name: TSingletonName,
 ): SingletonUpdateQueryBuilder<TSingletonName> {
   return new SingletonUpdateQueryBuilder(name)
@@ -183,7 +183,7 @@ export function updateSingleton<const TSingletonName extends keyof Singletons>(
  * // }
  * ```
  */
-export function guardedUpdateSingleton<const TSingletonName extends keyof Singletons>(
+export function guardedUpdateSingleton<const TSingletonName extends SingletonAPI['any']['update']>(
   name: TSingletonName,
 ): SingletonUpdateQueryBuilder<TSingletonName> {
   return new SingletonUpdateQueryBuilder(name).prepare(singletonGuards())
