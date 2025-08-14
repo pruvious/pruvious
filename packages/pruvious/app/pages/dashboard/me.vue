@@ -95,7 +95,7 @@ definePageMeta({
     (to) => dashboardMiddleware(to, 'auth-guard'),
     (to) =>
       dashboardMiddleware(to, ({ __, hasPermission, puiQueueToast }) => {
-        if (!hasPermission('update-account')) {
+        if (!hasPermission('update-own-account')) {
           puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
             type: 'error',
             description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {

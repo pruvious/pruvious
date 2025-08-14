@@ -3,7 +3,7 @@ import { isEmpty } from '@pruvious/utils'
 import { defaultMyAccountFields } from '../../hooks/filters/api/me/updatable-fields'
 
 export default defineEventHandler(async (event) => {
-  assertUserPermissions(event, ['update-account'])
+  assertUserPermissions(event, ['update-own-account'])
 
   const { fields } = await applyFilters('api:me:updatable-fields', defaultMyAccountFields(), {})
 

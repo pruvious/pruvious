@@ -50,7 +50,7 @@ const contentLanguage = useDashboardContentLanguage()
 const button = useTemplateRef('button')
 const isVisible = ref(false)
 
-let preferredContentLanguage = hasPermission('update-account')
+let preferredContentLanguage = hasPermission('update-own-account')
   ? auth.value.user?.contentLanguage
   : localStorage.getItem('contentLanguage')
 
@@ -61,7 +61,7 @@ const stop = watch(
       preferredContentLanguage = contentLanguage
 
       if (!silentContentLanguageSwitcher || isUndefined(oldValue)) {
-        if (hasPermission('update-account')) {
+        if (hasPermission('update-own-account')) {
           const query = await pruviousDashboardPatch('me', { body: { contentLanguage } })
 
           if (query.success) {

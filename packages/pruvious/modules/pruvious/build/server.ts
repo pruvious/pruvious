@@ -501,7 +501,7 @@ function getServerFileContent() {
   const iconNames = getIconNames()
   const permissions = [
     'access-dashboard',
-    'update-account',
+    'update-own-account',
     'read-logs',
     'delete-logs',
     'clear-page-cache',

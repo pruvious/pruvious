@@ -46,7 +46,7 @@ describe('roles collection', () => {
           name: 'Editor',
           permissions: [
             'access-dashboard',
-            'update-account',
+            'update-own-account',
             'collection:bookmarks:create',
             'collection:bookmarks:read',
             'collection:bookmarks:update',
@@ -69,7 +69,7 @@ describe('roles collection', () => {
           name: 'Manager',
           permissions: [
             'access-dashboard',
-            'update-account',
+            'update-own-account',
             'collection:bookmarks:create',
             'collection:bookmarks:read',
             'collection:bookmarks:update',

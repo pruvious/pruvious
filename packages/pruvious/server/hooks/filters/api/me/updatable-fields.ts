@@ -3,7 +3,7 @@ import { defineFilter } from '#pruvious/server'
 
 export interface MyAccountFields {
   /**
-   * The fields that any active user can update on their own account when they have the `update-account` permission.
+   * The fields that any active user can update on their own account when they have the `update-own-account` permission.
    *
    * @default
    * [

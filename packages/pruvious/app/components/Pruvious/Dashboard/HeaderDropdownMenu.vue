@@ -55,7 +55,7 @@ const groups = computedAsync<Omit<DashboardMenuItem, 'active' | 'submenu'>[][]>(
       },
     ],
     [
-      ...(hasPermission('update-account')
+      ...(hasPermission('update-own-account')
         ? [{ to: 'me', label: __('pruvious-dashboard', 'My account'), icon: 'user' } as const]
         : []),
       {

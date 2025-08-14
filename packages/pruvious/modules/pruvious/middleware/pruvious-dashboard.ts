@@ -53,7 +53,9 @@ export const dashboardDefaultMiddleware = async () => {
         ? auth.value.user.dashboardLanguage
         : (useLanguage().value ?? 'en')
     const contentLanguage =
-      auth.value.isLoggedIn && hasPermission('update-account') && isValidLanguageCode(auth.value.user!.contentLanguage)
+      auth.value.isLoggedIn &&
+      hasPermission('update-own-account') &&
+      isValidLanguageCode(auth.value.user!.contentLanguage)
         ? auth.value.user.contentLanguage
         : (useDashboardContentLanguage().value ??
           (isValidLanguageCode(localStorage.getItem('contentLanguage'))
