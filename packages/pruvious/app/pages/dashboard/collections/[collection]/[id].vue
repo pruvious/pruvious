@@ -225,10 +225,7 @@ definePageMeta({
             showAfterRouteChange: true,
           })
           return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-        } else if (
-          !hasPermission(`collection:${to.params.collection}:read` as Permission) &&
-          !hasPermission(`collection:${to.params.collection}:update` as Permission)
-        ) {
+        } else if (!hasPermission(`collection:${to.params.collection}:read` as Permission)) {
           puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
             type: 'error',
             description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
