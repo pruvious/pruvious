@@ -538,11 +538,6 @@ function getServerFileContent() {
     'collections/:collection/validate/create',
     'collections/:collection/validate/update',
     'collections/:collection/validate/update/:id',
-    'collections/uploads',
-    'collections/uploads/:id',
-    'collections/uploads/move/:id',
-    'collections/uploads/multipart',
-    'collections/uploads/multipart/:key',
     'logs/custom',
     'logs/custom/:id',
     'logs/custom/query/delete',
@@ -576,6 +571,11 @@ function getServerFileContent() {
     'singletons/:singleton/copy-translation',
     'singletons/:singleton/validate',
     'translations',
+    'uploads',
+    'uploads/:id',
+    'uploads/move/:id',
+    'uploads/multipart',
+    'uploads/multipart/:key',
   ]
 
   return [
