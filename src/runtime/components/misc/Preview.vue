@@ -19,6 +19,7 @@
 import { ref, useRoute } from '#imports'
 import { useEventListener } from '@vueuse/core'
 import { debounce } from 'perfect-debounce'
+import { useClipboardText } from '../../composables/dashboard/clipboard'
 import { getHotkeyAction } from '../../composables/dashboard/hotkeys'
 import { usePage } from '../../composables/page'
 import { __, loadTranslatableStrings } from '../../composables/translatable-strings'
@@ -126,6 +127,13 @@ if (process.client) {
     useEventListener(window, 'focus', () => messageParent('focus'))
     useEventListener(window, 'blur', () => messageParent('blur'))
 
+    useEventListener(window, 'paste', (e) => {
+      const text = useClipboardText(e)
+      if (text) {
+        messageParent('paste', { text })
+      }
+    })
+
     useEventListener('keydown', (event) => {
       const action = getHotkeyAction(event)
 
@@ -140,8 +148,6 @@ if (process.client) {
           messageParent('copy')
         } else if (action === 'cut') {
           messageParent('cut')
-        } else if (action === 'paste') {
-          messageParent('paste')
         } else if (action === 'delete') {
           messageParent('delete')
         } else if (action === 'duplicate') {

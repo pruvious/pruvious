@@ -361,7 +361,12 @@ import { useEventListener } from '@vueuse/core'
 import { useSortable } from '@vueuse/integrations/useSortable'
 import { nanoid } from 'nanoid'
 import { debounce } from 'perfect-debounce'
-import { copyToClipboard, usePruviousClipboard } from '../../composables/dashboard/clipboard'
+import {
+  copyToClipboard,
+  setClipboardState,
+  useClipboardText,
+  usePruviousClipboard,
+} from '../../composables/dashboard/clipboard'
 import { useCollectionLanguage } from '../../composables/dashboard/collection-language'
 import { confirmClick, useClickConfirmation } from '../../composables/dashboard/confirm-click'
 import { navigateToPruviousDashboardPath, usePruviousDashboard } from '../../composables/dashboard/dashboard'
@@ -491,6 +496,16 @@ if (previewResponse.success) {
 
 useHead({ title })
 
+useEventListener(window, 'paste', (event) => {
+  if (blockFocused.value && selectedBlock.value) {
+    const text = useClipboardText(event)
+    if (text) {
+      setClipboardState(text)
+      pasteBlockAfter(selectedBlock.value)
+    }
+  }
+})
+
 useEventListener('keydown', (event) => {
   const action = getHotkeyAction(event)
 
@@ -513,10 +528,6 @@ useEventListener('keydown', (event) => {
         cutBlock(selectedBlock.value)
       } else {
         return
-      }
-    } else if (action === 'paste') {
-      if (blockFocused.value && selectedBlock.value) {
-        pasteBlockAfter(selectedBlock.value)
       }
     } else if (action === 'delete') {
       if (blockFocused.value && selectedBlock.value) {
@@ -973,6 +984,8 @@ useEventListener(window, 'message', async (event) => {
         break
       case 'pruvious:paste':
         if (selectedBlock.value) {
+          const { text } = event.data.data as { text: string }
+          setClipboardState(text)
           pasteBlockAfter(selectedBlock.value)
         }
         break
