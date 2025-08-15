@@ -8,6 +8,7 @@ test('normalize path', () => {
   expect(normalizePath('foo.')).toBe('/foo')
   expect(normalizePath('foo/bar')).toBe('/foo/bar')
   expect(normalizePath('//foo///bar//')).toBe('/foo/bar')
+  expect(normalizePath('[]/foo')).toBe('/foo')
   expect(normalizePath('path/TO//MyImage.webp')).toBe('/path/to/my-image.webp')
   expect(normalizePath('/folder/SUB%20Folder/doc%20file.PDF')).toBe('/folder/sub-folder/doc-file.pdf')
   expect(normalizePath('foo_bar/foo_bar')).toBe('/foo-bar/foo_bar')

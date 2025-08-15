@@ -48,6 +48,7 @@ export function normalizePath(path: string) {
 
       return slugify(part)
     })
+    .filter(Boolean)
     .join('/')
 
   if (!normalized) {
