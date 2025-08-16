@@ -1110,7 +1110,6 @@ export async function moveUpload<
     }
   }
 
-  // @todo test: custom where clause checking if no `${path}/%` uploads exist
   const updateQueryBuilder = update('Uploads')
     .set({ path: newPath, etag, isLocked: false })
     .where('id', '=', id)
@@ -1124,10 +1123,11 @@ export async function moveUpload<
   let updateQuery = await updateQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).run()
 
   if (!updateQuery.success && type === 'directory') {
+    // Delete current directory if a directory already exists at the target path
     const deleteQuery = await deleteFrom('Uploads')
       .where('id', '=', id)
       .whereRaw('not exists(select 1 from "Uploads" where "path" like $path)', { path: `${path}/%` })
-      .whereRaw('exists(select 1 from "Uploads" where "path" = $newPath)', { newPath })
+      .whereRaw('exists(select 1 from "Uploads" where "path" = $newPath and "type" = $type)', { newPath, type })
       .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
