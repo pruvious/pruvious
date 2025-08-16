@@ -1085,10 +1085,7 @@ export async function moveUpload<
     if (!isEmpty(images)) {
       const oldBasePath = ext ? path.slice(0, -ext.length) : path
       const newBasePath = ext ? newPath.slice(0, -ext.length) : newPath
-
-      for (const image of images) {
-        await moveFile(oldBasePath + image, newBasePath + image)
-      }
+      await Promise.all(images.map((image) => moveFile(oldBasePath + image, newBasePath + image)))
     }
   } else if (type === 'directory') {
     const selectQuery = await selectFrom('Uploads')
@@ -1105,6 +1102,11 @@ export async function moveUpload<
           results.push(...(res as any)),
         )
       }
+      await Promise.all(
+        selectQuery.data.map(({ id, path: nestedPath }) =>
+          moveUpload(id, newPath + nestedPath.slice(path.length), { guarded, returning, populate, overwrite }),
+        ),
+      ).then((res) => results.push(...(res as any).flat()))
     }
   }
 
