@@ -20,7 +20,9 @@
     "play": "node scripts/play.mjs",
     "postinstall": "pnpm build",
     "test": "vitest",
+    "test:i18n": "vitest packages/i18n",
     "test:orm": "vitest packages/orm",
+    "test:storage": "vitest packages/storage",
     "test:utils": "vitest packages/utils",
     "typecheck": "pnpm --filter @pruvious/utils typecheck && pnpm --filter @pruvious/i18n typecheck && pnpm --filter @pruvious/orm typecheck && pnpm --filter @pruvious/storage typecheck && pnpm --filter @pruvious/ui typecheck && pnpm --filter pruvious typecheck"
   },
