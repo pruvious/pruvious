@@ -198,7 +198,7 @@ export default defineTemplate(() => ({
 
               while (parts.pop() && parts.length) {
                 await insertInto('Uploads')
-                  .values({ path: `/${parts.join('/')}`, type: 'directory' })
+                  .values({ path: `/${parts.join('/')}`, type: 'directory', author: item.author })
                   .withCustomContextData({ _allowUploadsQueries: true })
                   .run()
               }
