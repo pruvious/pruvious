@@ -177,7 +177,7 @@ export function pruviousPost<TRoute extends PruviousPostRoute>(
   route: TRoute,
   options: PruviousPostOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousPostResponse<TRoute>>> {
-  return pruviousFetch(route, 'post', options)
+  return _pruviousFetch(route, 'post', options)
 }
 
 /**
@@ -216,7 +216,7 @@ export function pruviousGet<TRoute extends PruviousGetRoute>(
   route: TRoute,
   options?: PruviousGetOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousGetResponse<TRoute>>> {
-  return pruviousFetch(route, 'get', options ?? {})
+  return _pruviousFetch(route, 'get', options ?? {})
 }
 
 /**
@@ -257,7 +257,7 @@ export function pruviousPatch<TRoute extends PruviousPatchRoute>(
   route: TRoute,
   options: PruviousPatchOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousPatchResponse<TRoute>>> {
-  return pruviousFetch(route, 'patch', options)
+  return _pruviousFetch(route, 'patch', options)
 }
 
 /**
@@ -296,7 +296,7 @@ export function pruviousDelete<TRoute extends PruviousDeleteRoute>(
   route: TRoute,
   options?: PruviousDeleteOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousDeleteResponse<TRoute>>> {
-  return pruviousFetch(route, 'delete', options ?? {})
+  return _pruviousFetch(route, 'delete', options ?? {})
 }
 
 /**
@@ -337,7 +337,7 @@ export function pruviousFetchHeaders(headers?: HeadersInit): HeadersInit {
   }
 }
 
-async function pruviousFetch(
+async function _pruviousFetch(
   route: string,
   method: 'post' | 'get' | 'patch' | 'delete',
   options: NitroFetchOptions<string> & PruviousFetchBaseOptions,
@@ -462,3 +462,8 @@ export async function pfetch<
     }
   })
 }
+
+/**
+ * @alias pfetch
+ */
+export const pruviousFetch = pfetch

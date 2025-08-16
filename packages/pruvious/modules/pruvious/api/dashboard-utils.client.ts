@@ -65,7 +65,7 @@ export function pruviousDashboardPost<TRoute extends PruviousPostRoute>(
   route: TRoute,
   options: PruviousPostOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousPostResponse<TRoute>>> {
-  return pruviousDashboardFetch(route, 'post', options)
+  return _pruviousDashboardFetch(route, 'post', options)
 }
 
 /**
@@ -106,7 +106,7 @@ export function pruviousDashboardGet<TRoute extends PruviousGetRoute>(
   route: TRoute,
   options?: PruviousGetOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousGetResponse<TRoute>>> {
-  return pruviousDashboardFetch(route, 'get', options ?? {})
+  return _pruviousDashboardFetch(route, 'get', options ?? {})
 }
 
 /**
@@ -149,7 +149,7 @@ export function pruviousDashboardPatch<TRoute extends PruviousPatchRoute>(
   route: TRoute,
   options: PruviousPatchOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousPatchResponse<TRoute>>> {
-  return pruviousDashboardFetch(route, 'patch', options)
+  return _pruviousDashboardFetch(route, 'patch', options)
 }
 
 /**
@@ -190,10 +190,10 @@ export function pruviousDashboardDelete<TRoute extends PruviousDeleteRoute>(
   route: TRoute,
   options?: PruviousDeleteOptions<TRoute>,
 ): Promise<PruviousFetchResponse<PruviousDeleteResponse<TRoute>>> {
-  return pruviousDashboardFetch(route, 'delete', options ?? {})
+  return _pruviousDashboardFetch(route, 'delete', options ?? {})
 }
 
-function pruviousDashboardFetch(
+function _pruviousDashboardFetch(
   route: string,
   method: 'post' | 'get' | 'patch' | 'delete',
   options: NitroFetchOptions<string> & PruviousFetchBaseOptions,
@@ -275,3 +275,8 @@ export async function pfetchDashboard<
     },
   } as TOptions)
 }
+
+/**
+ * @alias pfetchDashboard
+ */
+export const pruviousDashboardFetch = pfetchDashboard
