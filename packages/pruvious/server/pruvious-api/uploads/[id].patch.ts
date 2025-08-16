@@ -1,6 +1,6 @@
 import { __, assertUserPermissions, parseBody, pruviousError, updateUpload } from '#pruvious/server'
 import { queryStringToUpdateQueryBuilderParams } from '@pruvious/orm'
-import { castToBoolean, isEmpty, isPositiveInteger } from '@pruvious/utils'
+import { castToBoolean, isEmpty, isPositiveInteger, omit } from '@pruvious/utils'
 import { isDevelopment } from 'std-env'
 
 export default defineEventHandler(async (event) => {
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const { returning, populate } = queryStringToUpdateQueryBuilderParams(event.path) as any
   const recursive = castToBoolean(getQuery(event).recursive) === true
   const { input } = await parseBody(event, 'object')
-  const updateResults = await updateUpload(idParam, input, { returning, populate, recursive })
+  const updateResults = await updateUpload(idParam, omit(input, ['isLocked']), { returning, populate, recursive })
 
   if (isEmpty(updateResults)) {
     throw pruviousError(event, {
