@@ -711,7 +711,7 @@ export function prepareUploadsInput<TInput extends Record<string, any> | Record<
       type: 'files'
       items: { file: Buffer; path: string; type: 'file'; author?: any; editors?: any }[]
     } {
-  if (isEmpty(files)) {
+  if (isEmpty(files) && !isEmpty(input)) {
     return {
       type: 'directories',
       items: toArray(input).map((item: Record<string, any>) => ({
@@ -726,7 +726,7 @@ export function prepareUploadsInput<TInput extends Record<string, any> | Record<
   return {
     type: 'files',
     items: Object.entries(files).map(([originalPath, file], i) => {
-      const path = tryNormalizePath(originalPath)
+      const path = tryNormalizePath((isArray<Record<string, any>>(input) ? input[i]?.path : input.path) ?? originalPath)
       const author = isArray<Record<string, any>>(input) ? input[i]?.author : input.author
       const editors = isArray<Record<string, any>>(input) ? input[i]?.editors : input.editors
       return { file, path, type: 'file', author, editors }
