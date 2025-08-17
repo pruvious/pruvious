@@ -1096,12 +1096,6 @@ export async function moveUpload<
       .all()
 
     if (selectQuery.success) {
-      for (const { id, path: nestedPath } of selectQuery.data) {
-        const newNestedPath = newPath + nestedPath.slice(path.length)
-        await moveUpload(id, newNestedPath, { guarded, returning, populate, overwrite }).then((res) =>
-          results.push(...(res as any)),
-        )
-      }
       await Promise.all(
         selectQuery.data.map(({ id, path: nestedPath }) =>
           moveUpload(id, newPath + nestedPath.slice(path.length), { guarded, returning, populate, overwrite }),
