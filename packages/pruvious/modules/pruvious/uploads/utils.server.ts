@@ -959,7 +959,10 @@ export async function moveUpload<
   const overwrite = !!options?.overwrite
   const lockQueryBuilder = update('Uploads').set({ isLocked: true }).where('isLocked', '=', false)
 
+  newPath = tryNormalizePath(newPath)
+
   if (isString(pathOrId)) {
+    pathOrId = tryNormalizePath(pathOrId)
     lockQueryBuilder.where('path', '=', pathOrId)
   } else {
     lockQueryBuilder.where('id', '=', pathOrId)
@@ -1279,11 +1282,12 @@ export async function updateUpload<
     }
 
     if (isString(path)) {
+      path = tryNormalizePath(path)
       updateQueryBuilder.orGroup([(eb) => eb.where('path', '=', path), (eb) => eb.where('path', 'like', `${path}/%`)])
     }
   } else {
     if (isString(pathOrId)) {
-      updateQueryBuilder.where('path', '=', pathOrId)
+      updateQueryBuilder.where('path', '=', tryNormalizePath(pathOrId))
     } else {
       updateQueryBuilder.where('id', '=', pathOrId)
     }
@@ -1383,6 +1387,7 @@ export async function deleteUpload<
   const lockQueryBuilder = update('Uploads').set({ isLocked: true }).where('isLocked', '=', false)
 
   if (isString(pathOrId)) {
+    pathOrId = tryNormalizePath(pathOrId)
     lockQueryBuilder.where('path', '=', pathOrId)
   } else {
     lockQueryBuilder.where('id', '=', pathOrId)
@@ -1460,7 +1465,6 @@ export async function deleteUpload<
     }
   }
 
-  // @todo test: custom where clause checking if no `${path}/%` uploads exist
   const deleteQueryBuilder = deleteFrom('Uploads')
     .where('id', '=', id)
     .whereRaw('not exists(select 1 from "Uploads" where "path" like $path)', { path: `${path}/%` })
