@@ -10,7 +10,7 @@ export default defineNuxtConfig({
       sync: { dropNonCollectionTables: true, dropNonFieldColumns: true },
     },
     uploads: {
-      driver: 'fs://.playground/.uploads',
+      driver: isTest ? 'fs://packages/pruvious/.playground/test/tmp/.uploads' : 'fs://.playground/.uploads',
     },
     auth: {
       jwt: {

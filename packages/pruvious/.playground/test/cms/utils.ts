@@ -92,6 +92,24 @@ export function $postAsManager(
   })
 }
 
+export function $postFormData(
+  request: NitroFetchRequest,
+  body: Record<string, any> = {},
+  opts?: Omit<NitroFetchOptions<NitroFetchRequest, 'post'>, 'method' | 'body'> | undefined,
+) {
+  const formData = new FormData()
+  for (const [key, value] of Object.entries(body)) {
+    formData.append(key, value)
+  }
+  return $fetch(request, {
+    ignoreResponseError: true,
+    ...opts,
+    method: 'post',
+    headers: withAuth(opts, 'admin'),
+    body: formData,
+  })
+}
+
 export function $get(
   request: NitroFetchRequest,
   opts?: Omit<NitroFetchOptions<NitroFetchRequest, 'get'>, 'method'> | undefined,

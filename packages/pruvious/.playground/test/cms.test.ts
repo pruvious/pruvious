@@ -22,6 +22,7 @@ describe('cms', async () => {
   await import('./cms/collections/roles')
   await import('./cms/collections/users')
   await import('./cms/collections/public')
+  await import('./cms/collections/uploads')
 
   // Fields
   await import('./cms/fields/blocks')
@@ -50,4 +51,10 @@ describe('cms', async () => {
   await import('./cms/fields/timeRange')
   await import('./cms/fields/timestamp')
   await import('./cms/fields/trueFalse')
+
+  // Uploads
+  await import('./cms/uploads/create')
+  await import('./cms/uploads/update')
+  await import('./cms/uploads/move')
+  await import('./cms/uploads/delete')
 })

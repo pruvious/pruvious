@@ -13,6 +13,7 @@ test('normalize path', () => {
   expect(normalizePath('/folder/SUB%20Folder/doc%20file.PDF')).toBe('/folder/sub-folder/doc-file.pdf')
   expect(normalizePath('foo_bar/foo_bar')).toBe('/foo-bar/foo_bar')
   expect(normalizePath('foo_bar/foo_bar.baz')).toBe('/foo-bar/foo_bar.baz')
+  expect(normalizePath('/foo.bar/foo.bar.txt')).toBe('/foo-bar/foo-bar.txt')
 })
 
 test('parse path', () => {
