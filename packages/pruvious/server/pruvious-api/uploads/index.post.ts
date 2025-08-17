@@ -2,6 +2,7 @@ import {
   __,
   assertQuery,
   assertUserPermissions,
+  collections,
   guardedInsertInto,
   parseBody,
   prepareUploadsInput,
@@ -9,6 +10,7 @@ import {
   putUpload,
 } from '#pruvious/server'
 import { queryStringToInsertQueryBuilderParams } from '@pruvious/orm'
+import { isUndefined, toArray } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
   assertUserPermissions(event, ['collection:uploads:create'])
@@ -22,6 +24,11 @@ export default defineEventHandler(async (event) => {
     const query = await guardedInsertInto('Uploads')
       .fromQueryString(event.path)
       .values(preparedInput.items)
+      .returning(
+        isUndefined(returning) || toArray(returning).includes('*' as any)
+          ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
+          : returning,
+      )
       .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
