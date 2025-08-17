@@ -1,6 +1,6 @@
 import { __, assertUserPermissions, deleteUpload, pruviousError } from '#pruvious/server'
 import { queryStringToDeleteQueryBuilderParams } from '@pruvious/orm'
-import { isEmpty, isPositiveInteger } from '@pruvious/utils'
+import { castToBoolean, isEmpty, isPositiveInteger } from '@pruvious/utils'
 import { isDevelopment } from 'std-env'
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +16,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const { returning, populate } = queryStringToDeleteQueryBuilderParams(event.path) as any
-  const deleteResults = await deleteUpload(idParam, { returning, populate })
+  const recursive = castToBoolean(getQuery(event).recursive) === true
+  const deleteResults = await deleteUpload(idParam, { returning, populate, recursive })
 
   if (isEmpty(deleteResults)) {
     throw pruviousError(event, {

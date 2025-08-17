@@ -109,7 +109,7 @@ export interface DeleteUploadOptions<
    * Controls whether to delete all nested files and directories.
    * This option is only applicable when the upload is a directory.
    *
-   * @default true
+   * @default false
    */
   recursive?: boolean
 }
@@ -1383,7 +1383,7 @@ export async function deleteUpload<
       ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
       : options.returning
   const populate = !!options?.populate
-  const recursive = options?.recursive !== false
+  const recursive = !!options?.recursive
   const lockQueryBuilder = update('Uploads').set({ isLocked: true }).where('isLocked', '=', false)
 
   if (isString(pathOrId)) {
