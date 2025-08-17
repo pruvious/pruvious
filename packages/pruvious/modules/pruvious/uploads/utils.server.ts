@@ -177,9 +177,9 @@ export type MoveUploadResult<
     id?: number
 
     /**
-     * The path of the upload being moved.
+     * The old path of the upload being moved.
      */
-    path?: string
+    oldPath?: string
 
     /**
      * The new path of the upload being moved.
@@ -986,7 +986,7 @@ export async function moveUpload<
         ...lockQuery,
         details: {
           id: isNumber(pathOrId) ? pathOrId : undefined,
-          path: isString(pathOrId) ? pathOrId : undefined,
+          oldPath: isString(pathOrId) ? pathOrId : undefined,
           newPath,
         },
       },
@@ -1034,7 +1034,7 @@ export async function moveUpload<
                 : __('pruvious-api', 'The new path cannot be a subdirectory of the current path'),
         },
         runtimeError: undefined,
-        details: { id, path, newPath, type },
+        details: { id, oldPath: path, newPath, type },
       },
     ]
   }
@@ -1060,7 +1060,7 @@ export async function moveUpload<
         .withCustomContextData({ _allowUploadsQueries: true })
         .run()
 
-      return [{ ...updatePathQuery, details: { id, path, newPath, type } }]
+      return [{ ...updatePathQuery, details: { id, oldPath: path, newPath, type } }]
     }
 
     const moveResult = await moveFile(path, newPath)
@@ -1078,7 +1078,7 @@ export async function moveUpload<
           data: undefined,
           inputErrors: undefined,
           runtimeError: __('pruvious-api', moveResult.error as any),
-          details: { id, path, newPath, type },
+          details: { id, oldPath: path, newPath, type },
         },
       ]
     }
@@ -1148,7 +1148,7 @@ export async function moveUpload<
       data: updateQuery.data[0] as any,
       inputErrors: undefined,
       runtimeError: undefined,
-      details: { id, path, newPath, type },
+      details: { id, oldPath: path, newPath, type },
     })
   } else {
     await update('Uploads')
@@ -1163,10 +1163,10 @@ export async function moveUpload<
         data: undefined,
         inputErrors: undefined,
         runtimeError: __('pruvious-api', 'This directory contains nested files or directories that cannot be moved'),
-        details: { id, path, newPath, type },
+        details: { id, oldPath: path, newPath, type },
       })
     } else {
-      results.push({ ...updateQuery, details: { id, path, newPath, type } })
+      results.push({ ...updateQuery, details: { id, oldPath: path, newPath, type } })
     }
   }
 
