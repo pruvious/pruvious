@@ -51,6 +51,7 @@ npm install @pruvious/utils
   - [executeOrReturn](#executeorreturn)
   - [isFunction](#isfunction)
   - [lockAndLoad](#lockandload)
+  - [promiseAllInBatches](#promiseallinbatches)
   - [retry](#retry)
   - [toPromise](#topromise)
 - [Misc](#misc)
@@ -636,6 +637,37 @@ The `lock` object is used to prevent multiple calls of the same function.
 ```ts
 const isFormDisabled = { value: false } // or ref(false)
 const submit = lockAndLoad(isFormDisabled, async (event: Event) => { ... })
+```
+
+### <a id="promiseallinbatches">`promiseAllInBatches(promiseFns, batchSize)`</a>
+
+Processes an array of promise-generating functions in batches.
+It ensures that only a specific number of promises are running concurrently.
+
+**Example:**
+
+```ts
+// Example of a function that returns a promise
+const createDummyTask = (id: number) => () =>
+new Promise<string>(resolve => {
+const delay = Math.random() * 1000
+setTimeout(() => {
+console.log(`Task ${id} completed.`)
+resolve(`Result of task ${id}`)
+}, delay)
+})
+
+// Create 10 tasks
+const tasks = Array.from({ length: 10 }, (_, i) => createDummyTask(i + 1))
+
+// Run the tasks in batches of 3
+promiseAllInBatches(tasks, 3)
+.then(results => {
+console.log('All tasks finished!')
+console.log(results)
+// Expected output: ['Result of task 1', 'Result of task 2', ..., 'Result of task 10']
+})
+.catch(console.error)
 ```
 
 ### <a id="retry">`retry(fn, options)`</a>
