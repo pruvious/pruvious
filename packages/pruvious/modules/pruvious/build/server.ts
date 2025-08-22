@@ -574,8 +574,10 @@ function getServerFileContent() {
     'uploads',
     'uploads/:id',
     'uploads/move/:id',
+    'uploads/move/path/**',
     'uploads/multipart',
     'uploads/multipart/:key',
+    'uploads/path/**',
   ]
 
   return [
