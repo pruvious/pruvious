@@ -1,6 +1,5 @@
 import {
   __,
-  assertQuery,
   assertUserPermissions,
   collections,
   guardedInsertInto,
@@ -10,7 +9,7 @@ import {
   putUpload,
 } from '#pruvious/server'
 import { queryStringToInsertQueryBuilderParams } from '@pruvious/orm'
-import { isUndefined, toArray } from '@pruvious/utils'
+import { isUndefined, omit, toArray } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
   assertUserPermissions(event, ['collection:uploads:create'])
@@ -21,19 +20,34 @@ export default defineEventHandler(async (event) => {
 
   // Directories
   if (preparedInput.type === 'directories') {
+    const fields: string[] =
+      isUndefined(returning) || toArray(returning).includes('*' as any)
+        ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
+        : returning
     const query = await guardedInsertInto('Uploads')
       .fromQueryString(event.path)
       .values(preparedInput.items)
-      .returning(
-        isUndefined(returning) || toArray(returning).includes('*' as any)
-          ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
-          : returning,
-      )
+      .returning([...fields, 'id', 'path'] as any)
       .withCustomContextData({ _allowUploadsQueries: true })
       .run()
 
-    assertQuery(query)
-    return query
+    if (query.success) {
+      return preparedInput.items.map((_, i) => ({
+        success: true,
+        data: omit(query.data[i], [
+          ...(fields.includes('id') ? [] : ['id']),
+          ...(fields.includes('path') ? [] : ['path']),
+        ]),
+        details: { id: query.data[i].id, path: query.data[i].path, type: 'directory' },
+      }))
+    } else {
+      return preparedInput.items.map((item, i) => ({
+        success: false,
+        inputErrors: query.inputErrors?.[i],
+        runtimeError: query.runtimeError,
+        details: { path: item.path, type: 'directory' },
+      }))
+    }
   }
 
   // Files

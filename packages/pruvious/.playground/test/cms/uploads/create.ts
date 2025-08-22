@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import { $422, $get, $getAsAdmin, $paginated, $postAsAdmin, $postFormData } from '../utils'
+import { $get, $getAsAdmin, $paginated, $postAsAdmin, $postFormData } from '../utils'
 
 describe('create uploads', () => {
   const txtFile = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.txt')], 'test.txt')
@@ -64,28 +64,13 @@ describe('create uploads', () => {
   })
 
   test('create directory', async () => {
-    expect(await $postFormData('/api/uploads', { path: 'bar' })).toEqual({
-      success: true,
-      data: [
-        {
-          id: 6,
-          path: '/bar',
-          type: 'directory',
-          level: 0,
-          category: '',
-          mime: '',
-          size: 0,
-          etag: '',
-          images: [],
-          multipart: {},
-          isLocked: false,
-          createdAt: expect.any(Number),
-          updatedAt: expect.any(Number),
-          author: 1,
-          editors: [],
-        },
-      ],
-    })
+    expect(await $postFormData('/api/uploads?returning=path', { path: 'bar' })).toEqual([
+      {
+        success: true,
+        data: { path: '/bar' },
+        details: { id: 6, path: '/bar', type: 'directory' },
+      },
+    ])
   })
 
   test('create many directories', async () => {
@@ -94,14 +79,23 @@ describe('create uploads', () => {
         { path: 'baz' },
         { path: 'qux/nested', author: 2, editors: [3] },
       ]),
-    ).toEqual({
-      success: true,
-      data: [
-        { id: 7, path: '/baz', level: 0 },
-        { id: 8, path: '/qux/nested', level: 1 },
-        // { id: 9, path: '/qux', level: 0 },
-      ],
-    })
+    ).toEqual([
+      {
+        success: true,
+        data: { id: 7, path: '/baz', level: 0 },
+        details: { id: 7, path: '/baz', type: 'directory' },
+      },
+      {
+        success: true,
+        data: { id: 8, path: '/qux/nested', level: 1 },
+        details: { id: 8, path: '/qux/nested', type: 'directory' },
+      },
+      // {
+      //   success: true,
+      //   data: { id: 9, path: '/qux', level: 0 },
+      //   details: { id: 9, path: '/qux', type: 'directory' },
+      // },
+    ])
     expect(await $getAsAdmin('/api/collections/uploads?select=level&where=path[=][/qux]')).toEqual(
       $paginated([{ level: 0 }]),
     )
@@ -110,8 +104,19 @@ describe('create uploads', () => {
         { path: 'bar' },
         { path: 'baz' },
         { path: 'qux/nested', author: 2, editors: [3] },
+        { path: 'quux' },
       ]),
-    ).toEqual($422([{ path: expect.any(String) }, { path: expect.any(String) }, { path: expect.any(String) }]))
+    ).toEqual([
+      { success: false, inputErrors: { path: expect.any(String) }, details: { path: '/bar', type: 'directory' } },
+      { success: false, inputErrors: { path: expect.any(String) }, details: { path: '/baz', type: 'directory' } },
+      {
+        success: false,
+        inputErrors: { path: expect.any(String) },
+        details: { path: '/qux/nested', type: 'directory' },
+      },
+      { success: false, details: { path: '/quux', type: 'directory' } },
+    ])
+    expect(await $getAsAdmin('/api/collections/uploads?where=path[=][/quux]')).toEqual($paginated([]))
   })
 
   test('uploads txt file in existing directory', async () => {

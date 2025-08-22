@@ -26,7 +26,7 @@ describe('delete uploads', () => {
   })
 
   test('delete directory by id', async () => {
-    const id = await $postFormData('/api/uploads', { path: 'tmp' }).then((res: any) => res.data[0]?.id)
+    const id = await $postFormData('/api/uploads', { path: 'tmp' }).then((res: any) => res[0].data.id)
     expect(await $deleteAsAdmin(`/api/uploads/${id}?returning=id`)).toEqual([
       { success: true, data: { id }, details: { id, path: '/tmp', type: 'directory' } },
     ])
@@ -34,7 +34,7 @@ describe('delete uploads', () => {
   })
 
   test('delete directory by path', async () => {
-    const id = await $postFormData('/api/uploads', { path: 'tmp' }).then((res: any) => res.data[0]?.id)
+    const id = await $postFormData('/api/uploads', { path: 'tmp' }).then((res: any) => res[0].data.id)
     expect(await $deleteAsAdmin('/api/uploads/path/tmp?returning=id')).toEqual([
       { success: true, data: { id }, details: { id, path: '/tmp', type: 'directory' } },
     ])
@@ -42,7 +42,7 @@ describe('delete uploads', () => {
   })
 
   test('delete recursively', async () => {
-    const id = await $postFormData('/api/uploads', { 'tmp-dir': txtFile }).then((res: any) => res[0]?.data.id)
+    const id = await $postFormData('/api/uploads', { 'tmp-dir': txtFile }).then((res: any) => res[0].data.id)
     expect(await $deleteAsAdmin('/api/uploads/path/tmp-dir')).toEqual([
       {
         success: false,
