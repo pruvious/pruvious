@@ -4,7 +4,7 @@ import { isFunction } from '@pruvious/utils'
 import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
 import { usePruviousLoginPopup } from '../../../app/utils/pruvious/dashboard/login'
 import {
-  pfetch,
+  $pfetch,
   pruviousDelete,
   pruviousFetchHeaders,
   pruviousGet,
@@ -247,11 +247,11 @@ function _pruviousDashboardFetch(
  * - `pruviousDashboardPatch()`
  * - `pruviousDashboardDelete()`
  */
-export async function pfetchDashboard<
+export async function $pfetchDashboard<
   TRoute extends Exclude<Parameters<$Fetch>['0'], StandardRoutes>,
   TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
 >(route: TRoute, options?: TOptions) {
-  return pfetch(route, {
+  return $pfetch(route, {
     ...options,
     headers: pruviousFetchHeaders(options?.headers),
     onResponse: async (payload) => {
@@ -277,6 +277,6 @@ export async function pfetchDashboard<
 }
 
 /**
- * @alias pfetchDashboard
+ * @alias $pfetchDashboard
  */
-export const pruviousDashboardFetch = pfetchDashboard
+export const pruviousDashboardFetch = $pfetchDashboard

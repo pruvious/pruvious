@@ -420,7 +420,7 @@ async function _pruviousFetch(
  * - `pruviousPatch()`
  * - `pruviousDelete()`
  */
-export async function pfetch<
+export async function $pfetch<
   TRoute extends Exclude<Parameters<$Fetch>['0'], StandardRoutes>,
   TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
 >(route: TRoute, options?: TOptions) {
@@ -464,6 +464,6 @@ export async function pfetch<
 }
 
 /**
- * @alias pfetch
+ * @alias $pfetch
  */
-export const pruviousFetch = pfetch
+export const pruviousFetch = $pfetch
