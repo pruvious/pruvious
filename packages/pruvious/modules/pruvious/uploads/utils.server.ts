@@ -14,6 +14,7 @@ import {
   isNumber,
   isString,
   isUndefined,
+  omit,
   pick,
   randomString,
   sleep,
@@ -798,7 +799,7 @@ export async function putUpload<
   const TPopulateFields extends boolean = false,
 >(
   file: Buffer,
-  input: Pick<InsertInput<Collections['Uploads']>, 'author' | 'editors' | 'path'>,
+  input: Omit<InsertInput<Collections['Uploads']>, 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'>,
   options?: PutUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<PutUploadResult<TReturningFields, TPopulateFields>> {
   const event = useEvent()
@@ -818,7 +819,12 @@ export async function putUpload<
       : options.returning
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
-    .values({ ...input, path: normalizedPath as any, type: 'file', isLocked: true })
+    .values({
+      ...omit(input, ['type', 'etag', 'images', 'isLocked', 'multipart', 'size'] as any),
+      path: normalizedPath as any,
+      type: 'file',
+      isLocked: true,
+    })
     .returning(['id', 'path'])
     .withCustomContextData({ _allowUploadsQueries: true })
     .run()
@@ -1574,7 +1580,7 @@ export async function deleteUpload<
  * ```
  */
 export async function createMultipartUpload(
-  input: Pick<InsertInput<Collections['Uploads']>, 'author' | 'editors' | 'path'>,
+  input: Omit<InsertInput<Collections['Uploads']>, 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'>,
   options?: CreateMultipartUploadOptions,
 ): Promise<CreateMultipartUploadResult> {
   const event = useEvent()
@@ -1588,7 +1594,12 @@ export async function createMultipartUpload(
   const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString()) : undefined
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
-    .values({ path: normalizedPath as any, type: 'file', isLocked: true })
+    .values({
+      ...omit(input, ['type', 'etag', 'images', 'isLocked', 'multipart', 'size'] as any),
+      path: normalizedPath as any,
+      type: 'file',
+      isLocked: true,
+    })
     .returning(['id', 'path'])
     .withCustomContextData({ _allowUploadsQueries: true })
     .run()
