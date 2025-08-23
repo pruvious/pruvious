@@ -75,7 +75,14 @@ interface ReturnableUploadOptions<
 export interface PutUploadOptions<
   TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id',
   TPopulateFields extends boolean,
-> extends ReturnableUploadOptions<TReturningFields, TPopulateFields> {}
+> extends ReturnableUploadOptions<TReturningFields, TPopulateFields> {
+  /**
+   * Controls whether to overwrite an existing file with the same path.
+   *
+   * @default false
+   */
+  overwrite?: boolean
+}
 
 export interface MoveUploadOptions<
   TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id',
@@ -817,6 +824,7 @@ export async function putUpload<
     isUndefined(options?.returning) || toArray(options?.returning).includes('*' as any)
       ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
       : options.returning
+  const overwrite = !!options?.overwrite
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
     .values({
@@ -826,7 +834,7 @@ export async function putUpload<
       isLocked: true,
     })
     .returning(['id', 'path'])
-    .withCustomContextData({ _allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true, _overwrite: overwrite })
     .run()
 
   if (!insertQuery.success) {

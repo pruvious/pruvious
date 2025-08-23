@@ -10,7 +10,7 @@ describe('create uploads', () => {
       {
         success: true,
         data: {
-          id: expect.any(Number),
+          id: 1,
           path: '/foo.txt',
           type: 'file',
           level: 0,
@@ -137,5 +137,36 @@ describe('create uploads', () => {
         { id: 10, path: '/qux/nested/bar.txt', type: 'file' },
       ]),
     )
+  })
+
+  test('creates duplicate file', async () => {
+    expect(await $postFormData('/api/uploads?returning=id', { '': txtFile, 'path': 'foo.txt' })).toEqual([
+      {
+        success: true,
+        data: { id: expect.any(Number) },
+        details: { id: expect.any(Number), path: '/foo-1.txt', type: 'file' },
+      },
+    ])
+  })
+
+  test('overwrites existing file', async () => {
+    const oldTxtFile = new File(['bar'], 'bar.txt')
+    const newTxtFile = new File(['BAR'], 'bar.txt')
+    expect(await $postFormData('/api/uploads?returning=id&overwrite=true', { '': oldTxtFile })).toEqual([
+      {
+        success: true,
+        data: { id: expect.any(Number) },
+        details: { id: expect.any(Number), path: '/bar.txt', type: 'file' },
+      },
+    ])
+    expect(await $get('/uploads/bar.txt')).toBe('bar')
+    expect(await $postFormData('/api/uploads?returning=id&overwrite=true', { '': newTxtFile })).toEqual([
+      {
+        success: true,
+        data: { id: expect.any(Number) },
+        details: { id: expect.any(Number), path: '/bar.txt', type: 'file' },
+      },
+    ])
+    expect(await $get('/uploads/bar.txt')).toBe('BAR')
   })
 })

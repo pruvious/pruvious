@@ -9,7 +9,7 @@ import {
   putUpload,
 } from '#pruvious/server'
 import { queryStringToInsertQueryBuilderParams } from '@pruvious/orm'
-import { isUndefined, omit, toArray } from '@pruvious/utils'
+import { castToBoolean, isUndefined, omit, toArray } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
   assertUserPermissions(event, ['collection:uploads:create'])
@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
   const { input, files } = await parseBody(event)
   const preparedInput = prepareUploadsInput(input, files)
   const { returning, populate } = queryStringToInsertQueryBuilderParams(event.path) as any
+  const overwrite = castToBoolean(getQuery(event).overwrite) === true
 
   // Directories
   if (preparedInput.type === 'directories') {
@@ -60,7 +61,7 @@ export default defineEventHandler(async (event) => {
 
   return Promise.all(
     preparedInput.items.map(({ file, path, author, editors }) =>
-      putUpload(file, { path, author, editors }, { returning, populate }),
+      putUpload(file, { path, author, editors }, { returning, populate, overwrite }),
     ),
   )
 })

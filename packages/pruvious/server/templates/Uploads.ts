@@ -2,6 +2,7 @@ import {
   buttonGroupField,
   chipsField,
   defineTemplate,
+  deleteUpload,
   insertInto,
   numberField,
   resolveMediaCategory,
@@ -64,6 +65,7 @@ export default defineTemplate(() => ({
         beforeInputValidation: async (value, { context }) => {
           if (context.operation === 'insert' && isString(value) && context.getSanitizedInputValue('type') === 'file') {
             const ext = extname(value)
+            const overwrite = !!context.customData._overwrite
             let path = value
             let index = 0
 
@@ -78,8 +80,15 @@ export default defineTemplate(() => ({
             while (true) {
               const uploadsCountQuery = await selectFrom('Uploads').where('path', '=', path).count()
               const existsInCache = context.cache['_tmp']['_resolvedUploadsPaths'].includes(path)
-              if ((!uploadsCountQuery.success || uploadsCountQuery.data === 0) && !existsInCache) break
-              path = (ext ? value.slice(0, -ext.length) : value) + `-${++index}` + ext
+              if ((!uploadsCountQuery.success || uploadsCountQuery.data === 0) && !existsInCache) {
+                break
+              }
+              if (overwrite) {
+                await deleteUpload(path)
+                break
+              } else {
+                path = (ext ? value.slice(0, -ext.length) : value) + `-${++index}` + ext
+              }
             }
 
             context.cache['_tmp']['_resolvedUploadsPaths'].push(path)
