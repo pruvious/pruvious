@@ -121,7 +121,14 @@ export interface DeleteUploadOptions<
   recursive?: boolean
 }
 
-export type CreateMultipartUploadOptions = GuardedUploadOptions
+export type CreateMultipartUploadOptions = GuardedUploadOptions & {
+  /**
+   * Controls whether to overwrite an existing file with the same path.
+   *
+   * @default false
+   */
+  overwrite?: boolean
+}
 
 export type GetMultipartUploadOptions = GuardedUploadOptions
 
@@ -1599,6 +1606,7 @@ export async function createMultipartUpload(
 
   const { __, deleteFrom, guardedInsertInto, insertInto, storage, update } = await import('#pruvious/server')
   const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString()) : undefined
+  const overwrite = !!options?.overwrite
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
     .values({
@@ -1608,7 +1616,7 @@ export async function createMultipartUpload(
       isLocked: true,
     })
     .returning(['id', 'path'])
-    .withCustomContextData({ _allowUploadsQueries: true })
+    .withCustomContextData({ _allowUploadsQueries: true, _overwrite: overwrite })
     .run()
 
   if (!insertQuery.success) {
