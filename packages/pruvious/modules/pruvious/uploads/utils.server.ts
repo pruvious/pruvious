@@ -59,8 +59,7 @@ interface ReturnableUploadOptions<
 > extends GuardedUploadOptions {
   /**
    * An array of fields to return in the result data.
-   *
-   * @default ['id']
+   * If not specified, all fields will be returned.
    */
   returning?: NonEmptyArray<TReturningFields> | TReturningFields
 
