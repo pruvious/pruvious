@@ -260,6 +260,11 @@ export type CreateMultipartUploadResult =
        * The error message.
        */
       error: string
+
+      /**
+       * Any validation errors that occurred during the upload.
+       */
+      inputErrors?: Record<string, string>
     }
 
 export type ResumeMultipartUploadResult =
@@ -1623,6 +1628,7 @@ export async function createMultipartUpload(
     return {
       success: false,
       error: insertQuery.runtimeError ?? __('pruvious-api', 'Failed to create multipart upload'),
+      inputErrors: insertQuery.inputErrors?.[0],
     }
   }
 
@@ -1652,6 +1658,7 @@ export async function createMultipartUpload(
     return {
       success: false,
       error: updateQuery.runtimeError ?? __('pruvious-api', 'Failed to create multipart upload'),
+      inputErrors: updateQuery.inputErrors,
     }
   }
 

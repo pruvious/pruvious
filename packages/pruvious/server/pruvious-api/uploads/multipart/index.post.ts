@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
     throw pruviousError(event, {
       statusCode: 400,
       message: result.error,
+      data: result.inputErrors,
     })
   }
 
