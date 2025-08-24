@@ -1,5 +1,5 @@
 import { __, assertUserPermissions, parseBody, pruviousError, resumeMultipartUpload } from '#pruvious/server'
-import { isEmpty, isPositiveInteger, isString } from '@pruvious/utils'
+import { isPositiveInteger, isString } from '@pruvious/utils'
 import { isDevelopment } from 'std-env'
 
 export default defineEventHandler(async (event) => {
@@ -28,14 +28,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!isEmpty(filesArray)) {
+  if (filesArray.length === 0) {
     throw pruviousError(event, {
       statusCode: 400,
       message: __('pruvious-api', 'No file parts uploaded'),
     })
-  }
-
-  if (filesArray.length > 1) {
+  } else if (filesArray.length > 1) {
     throw pruviousError(event, {
       statusCode: 400,
       message: __('pruvious-api', 'Only one file part can be uploaded at a time'),
