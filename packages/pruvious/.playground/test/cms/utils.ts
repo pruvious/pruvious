@@ -110,6 +110,24 @@ export function $postFormData(
   })
 }
 
+export function $putFormData(
+  request: NitroFetchRequest,
+  body: Record<string, any> = {},
+  opts?: Omit<NitroFetchOptions<NitroFetchRequest, 'put'>, 'method' | 'body'> | undefined,
+) {
+  const formData = new FormData()
+  for (const [key, value] of Object.entries(body)) {
+    formData.append(key, value)
+  }
+  return $fetch(request, {
+    ignoreResponseError: true,
+    ...opts,
+    method: 'put',
+    headers: withAuth(opts, 'admin'),
+    body: formData,
+  })
+}
+
 export function $get(
   request: NitroFetchRequest,
   opts?: Omit<NitroFetchOptions<NitroFetchRequest, 'get'>, 'method'> | undefined,

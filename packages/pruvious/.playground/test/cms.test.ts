@@ -57,4 +57,5 @@ describe('cms', async () => {
   await import('./cms/uploads/update')
   await import('./cms/uploads/move')
   await import('./cms/uploads/delete')
+  await import('./cms/uploads/multipart')
 })
