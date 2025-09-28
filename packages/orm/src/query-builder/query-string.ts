@@ -1042,7 +1042,12 @@ function buildWhereQueryString(
 
       queryString += `${field}[${operator}][${escapedValue}]`
     } else if ('or' in condition) {
-      const orGroup = condition.or.map((group) => buildWhereQueryString(group, options)).join(',')
+      const orGroup = condition.or
+        .map((group) => {
+          const str = buildWhereQueryString(group, options)
+          return group.length > 1 ? `[${str}]` : str
+        })
+        .join(',')
       queryString += `orGroup[${orGroup}]`
     }
 

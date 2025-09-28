@@ -383,6 +383,7 @@ test('query builder where methods', async () => {
               .where('firstName', '=', 'Harry')
               .orGroup([(eb) => eb.where('lastName', '=', 'Otter'), (eb) => eb.where('lastName', '=', 'Potter')]),
           (eb) => eb.where('firstName', '=', 'Hermione').whereRaw('lower("lastName") like lower($1)', { '1': '%NG%' }),
+          (eb) => eb.where('firstName', '=', 'Hermione').where('lastName', '=', 'Malfoy'),
         ])
         .orderBy('firstName')
         .all(),

@@ -1360,7 +1360,7 @@ test('conditional query builder params to query string', () => {
       ],
     }),
   ).toBe(
-    'where=orGroup[firstName[=][Harry],orGroup[lastName[=][Otter],lastName[=][Potter]],firstName[=][Hermione],lastName[ilike][%NG%]]',
+    'where=orGroup[[firstName[=][Harry],orGroup[lastName[=][Otter],lastName[=][Potter]]],[firstName[=][Hermione],lastName[ilike][%NG%]]]',
   )
 
   expect(
