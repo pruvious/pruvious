@@ -383,7 +383,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
+import { __, dashboardBasePath, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
 import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { CollectionUIOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
@@ -477,6 +477,10 @@ const defaultOrderBy = resolveOrderBy()
 const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   watch: ['columns'],
   callback: async ({ queryString, params }) => {
+    if (!route.path.startsWith(dashboardBasePath + 'logs/')) {
+      return
+    }
+
     columns.value = resolveColumns()
     columnsDirty.value = !compareColumns(columns.value, defaultColumns)
 
