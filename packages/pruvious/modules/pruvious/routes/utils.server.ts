@@ -308,7 +308,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
           for (const { code } of languages) {
             if (code !== language) {
               select.push(
-                `(select "subpath" from "${collectionName}" as "${collectionName}_${code}" where "${collectionName}_${code}"."translations" = "${collectionName}"."translations" and "language" = '${code}'${whereIsPublic(code)}) as "_${code}"`,
+                `(select "subpath" from "${collectionName}" as "${collectionName}_${code}" where "${collectionName}_${code}"."translations" = "${collectionName}"."translations" and "language" = '${code}'${whereIsPublic(code)}) as "subpath_${code}"`,
               )
             }
           }
@@ -338,7 +338,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         translations: Object.fromEntries(
           otherLanguages.map(({ code }) => [
             code,
-            isNotNull(data[`_${code}`]) ? normalizeRoutePath(`${code}/${basePath}/${data[`_${code}`]}`) : null,
+            isNotNull(data[`subpath_${code}`])
+              ? normalizeRoutePath(`${code}/${basePath}/${data[`subpath_${code}`]}`)
+              : null,
           ]),
         ) as any,
         seo: {
