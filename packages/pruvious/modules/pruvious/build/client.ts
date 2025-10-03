@@ -629,5 +629,8 @@ function getReExports() {
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
     `export { type DefineDashboardPageOptions, defineDashboardPage } from '${resolve('../dashboard-pages/define')}'`,
+    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, putUpload, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks } from '${resolve('../uploads/utils.client')}'`,
+    `export { type DashboardUploadNotification, type DashboardUploadNotificationWidget, usePruviousDashboardUploadNotifications, usePruviousDashboardUploadNotificationsWidget } from '${resolve('../../../app/utils/pruvious/dashboard/upload-notifications')}'`,
+    `export { type DashboardMediaLibraryState, usePruviousDashboardMediaLibraryPopup, getDefaultDashboardMediaLibraryState } from '${resolve('../../../app/utils/pruvious/dashboard/media-library')}'`,
   ].join('\n')
 }

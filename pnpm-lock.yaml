@@ -151,6 +151,9 @@ importers:
       bcrypt-ts:
         specifier: 7.1.0
         version: 7.1.0
+      bytes:
+        specifier: 3.1.2
+        version: 3.1.2
       consola:
         specifier: 3.4.2
         version: 3.4.2
@@ -224,6 +227,9 @@ importers:
       '@types/babel__traverse':
         specifier: 7.20.7
         version: 7.20.7
+      '@types/bytes':
+        specifier: 3.1.5
+        version: 3.1.5
       '@types/pg':
         specifier: 8.15.4
         version: 8.15.4
@@ -3089,6 +3095,9 @@ packages:
   '@types/better-sqlite3@7.6.13':
     resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
 
+  '@types/bytes@3.1.5':
+    resolution: {integrity: sha512-VgZkrJckypj85YxEsEavcMmmSOIzkUHqWmM4CCyia5dc54YwsXzJ5uT4fYxBQNEXx+oF1krlhgCbvfubXqZYsQ==}
+
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
 
@@ -3582,6 +3591,10 @@ packages:
   bundle-name@4.1.0:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
     engines: {node: '>=18'}
+
+  bytes@3.1.2:
+    resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
+    engines: {node: '>= 0.8'}
 
   c12@2.0.1:
     resolution: {integrity: sha512-Z4JgsKXHG37C6PYUtIxCfLJZvo6FyhHJoClwwb9ftUkLpPSkuYqn6Tr+vnaN8hymm0kIbcg6Ey3kv/Q71k5w/A==}
@@ -9968,6 +9981,8 @@ snapshots:
     dependencies:
       '@types/node': 24.0.14
 
+  '@types/bytes@3.1.5': {}
+
   '@types/chai@5.2.2':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -10547,6 +10562,8 @@ snapshots:
   bundle-name@4.1.0:
     dependencies:
       run-applescript: 7.0.0
+
+  bytes@3.1.2: {}
 
   c12@2.0.1(magicast@0.3.5):
     dependencies:

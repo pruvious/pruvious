@@ -152,10 +152,12 @@ const {
     }),
     autoSize({
       apply({ availableHeight, elements }) {
-        if (availableHeight < inner.value!.scrollHeight) {
-          elements.floating.style.height = `${Math.max(0, availableHeight)}px`
-        } else {
-          elements.floating.style.removeProperty('height')
+        if (inner.value) {
+          if (availableHeight < inner.value.scrollHeight) {
+            elements.floating.style.height = `${Math.max(0, availableHeight)}px`
+          } else {
+            elements.floating.style.removeProperty('height')
+          }
         }
       },
       padding: 8,

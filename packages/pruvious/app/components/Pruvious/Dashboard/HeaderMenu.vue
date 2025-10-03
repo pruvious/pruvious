@@ -1,5 +1,5 @@
 <template>
   <PruviousDashboardContentLanguageSwitcher />
-  <PruviousDashboardHeaderNotifications />
+  <PruviousDashboardHeaderUploadNotifications />
   <PruviousDashboardHeaderDropdownMenu />
 </template>

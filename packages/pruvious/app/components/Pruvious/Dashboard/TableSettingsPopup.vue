@@ -214,6 +214,14 @@ const props = defineProps({
     type: Array as PropType<TableSettings['orderBy']>,
     required: true,
   },
+
+  /**
+   * Whether to hide the "Columns" tab.
+   */
+  hideColumnsTab: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -229,11 +237,11 @@ const route = useRoute()
 const popup = useTemplateRef('popup')
 const activeTab = ref<Tab>('filters')
 const tabsList = computed<PUITabListItem<Tab>[]>(() => {
-  const list: PUITabListItem<Tab>[] = [
-    { name: 'filters', label: __('pruvious-dashboard', 'Filters') },
-    { name: 'columns', label: __('pruvious-dashboard', 'Columns') },
-    { name: 'sorting', label: __('pruvious-dashboard', 'Sorting') },
-  ]
+  const list: PUITabListItem<Tab>[] = [{ name: 'filters', label: __('pruvious-dashboard', 'Filters') }]
+  if (!props.hideColumnsTab) {
+    list.push({ name: 'columns', label: __('pruvious-dashboard', 'Columns') })
+  }
+  list.push({ name: 'sorting', label: __('pruvious-dashboard', 'Sorting') })
   if (hasPermission('collection:bookmarks:read')) {
     list.push({ name: 'bookmarks', label: __('pruvious-dashboard', 'Bookmarks') })
   }

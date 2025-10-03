@@ -9,6 +9,7 @@
     <PruviousTokenRenewer :fetcher="pruviousDashboardPost" />
     <PruviousDashboardUnsavedChanges />
     <PruviousDashboardLoginPopup />
+    <PruviousDashboardDropUploader />
   </PUIBase>
 </template>
 

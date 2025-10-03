@@ -1,27 +1,29 @@
 <template>
-  <PUIButton
-    :title="__('pruvious-dashboard', 'Open user menu')"
-    :variant="isVisible ? 'primary' : 'outline'"
-    @click="isVisible = true"
-    ref="button"
-  >
-    <Icon mode="svg" name="tabler:dots-vertical" />
-  </PUIButton>
-  <PUIDropdown v-if="isVisible" :reference="button?.$el" @click="isVisible = false" @close="isVisible = false">
-    <template v-for="(items, i) of groups">
-      <hr v-if="i > 0" />
-      <PUIDropdownItem
-        v-for="({ label, action, icon, to }, i) of items"
-        :destructive="to === dashboardBasePath + 'logout'"
-        :to="to"
-        @click="(action?.($event), (isVisible = false))"
-      >
-        <Icon v-if="typeof icon === 'string'" :name="`tabler:${icon}`" mode="svg" />
-        <component v-else-if="icon" :is="icon" />
-        <span>{{ label }}</span>
-      </PUIDropdownItem>
-    </template>
-  </PUIDropdown>
+  <div>
+    <PUIButton
+      :title="__('pruvious-dashboard', 'Open user menu')"
+      :variant="isVisible ? 'primary' : 'outline'"
+      @click="isVisible = true"
+      ref="button"
+    >
+      <Icon mode="svg" name="tabler:dots-vertical" />
+    </PUIButton>
+    <PUIDropdown v-if="isVisible" :reference="button?.$el" @click="isVisible = false" @close="isVisible = false">
+      <template v-for="(items, i) of groups">
+        <hr v-if="i > 0" />
+        <PUIDropdownItem
+          v-for="({ label, action, icon, to }, i) of items"
+          :destructive="to === dashboardBasePath + 'logout'"
+          :to="to"
+          @click="(action?.($event), (isVisible = false))"
+        >
+          <Icon v-if="typeof icon === 'string'" :name="`tabler:${icon}`" mode="svg" />
+          <component v-else-if="icon" :is="icon" />
+          <span>{{ label }}</span>
+        </PUIDropdownItem>
+      </template>
+    </PUIDropdown>
+  </div>
 </template>
 
 <script lang="ts" setup>

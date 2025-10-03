@@ -2154,7 +2154,7 @@ function getReExports() {
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
 
   return [
-    `export { defineCollection, defineCollectionFromTemplate, type DefineCollectionOptions, type CollectionMetaOptions, type CollectionGuard, type CollectionRoutingOptions, type CollectionUIOptions, type CollectionMeta, type GenericMetaCollection, type MetaContext } from '${resolve('../collections/define')}'`,
+    `export { defineCollection, defineCollectionFromTemplate, type DefineCollectionOptions, type CollectionMetaOptions, type CollectionGuard, type OrderBy, type CollectionRoutingOptions, type CollectionUIOptions, type CollectionMeta, type GenericMetaCollection, type MetaContext } from '${resolve('../collections/define')}'`,
     `export { collectionGuards } from '${resolve('../collections/guards')}'`,
     `export { removeWhere, denyWhere, removeOrderBy, denyOrderBy, removeGroupBy, denyGroupBy, excludeFields, maskFields, resetFields } from '${resolve('../collections/hooks')}'`,
     `export { getCollectionBySlug, getCollectionFromEvent, getSanitizedInput, patchSanitizedInput } from '${resolve('../collections/utils.server')}'`,

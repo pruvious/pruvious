@@ -876,7 +876,7 @@ type CollectionDuplicateFunction<
   ? Omit<TInsertInput, 'language' | 'translations'> | Promise<Omit<TInsertInput, 'language' | 'translations'>>
   : TInsertInput | Promise<TInsertInput>
 
-interface OrderBy<TFieldNames extends string> {
+export interface OrderBy<TFieldNames extends string> {
   /**
    * The field (column) name to order by.
    */

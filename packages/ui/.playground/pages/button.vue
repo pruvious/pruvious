@@ -8,7 +8,7 @@
       <PUIButton :destructiveHover="destructiveHover" :disabled="disabled" :size="state.size" :variant="variant">
         <Icon mode="svg" name="tabler:power" />
         <template v-if="bubble" #bubble>
-          <PUIBubble :size="state.size" :variant="variant === 'primary' ? 'destructive' : 'primary'"></PUIBubble>
+          <PUIBubble :size="state.size" :variant="variant === 'primary' ? 'destructive' : 'primary'" />
         </template>
       </PUIButton>
     </div>
