@@ -243,7 +243,7 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
 
       for (const res of resolve({ dir, extensions: options.extensions })) {
         const pruviousDirNames = relative(dir, res.dir.absolute).split('/').filter(Boolean)
-        yield { ...res, layer, layers: nuxt.options._layers, pruviousDirNames }
+        yield { ...res, layer, layers: nuxt.options._layers as any, pruviousDirNames }
       }
     }
   }

@@ -35,11 +35,11 @@ export default defineEventHandler(async (event) => {
     if (query.success) {
       return preparedInput.items.map((_, i) => ({
         success: true,
-        data: omit(query.data[i], [
+        data: omit(query.data[i]!, [
           ...(fields.includes('id') ? [] : ['id']),
           ...(fields.includes('path') ? [] : ['path']),
         ]),
-        details: { id: query.data[i].id, path: query.data[i].path, type: 'directory' },
+        details: { id: query.data[i]!.id, path: query.data[i]!.path, type: 'directory' },
       }))
     } else {
       return preparedInput.items.map((item, i) => ({

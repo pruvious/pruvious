@@ -30,7 +30,7 @@ import {
 import { parse } from 'bytes'
 import {
   usePruviousDashboardUploadNotifications,
-  type DashboardNotification,
+  type DashboardUploadNotification,
 } from '../../../app/utils/pruvious/dashboard/upload-notifications'
 import { $pfetchDashboard } from '../api/dashboard-utils.client'
 import { $pfetch } from '../api/utils.client'
@@ -189,7 +189,7 @@ export async function upload<
   const concurrentUploads = useConcurrentUploads()
   const uploadSpeed = useUploadSpeed()
   const notifications = usePruviousDashboardUploadNotifications()
-  const newNotifications: DashboardNotification[] = []
+  const newNotifications: DashboardUploadNotification[] = []
   const abortControllers = fileItems.map((_item, i) => _.abortController?.[i] ?? new AbortController())
 
   for (const [i, item] of fileItems.entries()) {

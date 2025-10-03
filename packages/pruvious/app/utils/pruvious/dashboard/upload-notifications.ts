@@ -1,4 +1,4 @@
-export interface DashboardNotification {
+export interface DashboardUploadNotification {
   /**
    * A unique identifier for the notification.
    */
@@ -43,7 +43,7 @@ export interface DashboardNotification {
   error?: string
 }
 
-export interface DashboardNotificationUploadWidget {
+export interface DashboardUploadNotificationWidget {
   /**
    * Controls if the notification widget is open or closed.
    */
@@ -54,13 +54,13 @@ export interface DashboardNotificationUploadWidget {
  * Composable containing dashboard upload notifications.
  */
 export const usePruviousDashboardUploadNotifications = () =>
-  useState<DashboardNotification[]>('pruvious-dashboard-upload-notifications', () => [])
+  useState<DashboardUploadNotification[]>('pruvious-dashboard-upload-notifications', () => [])
 
 /**
  * Composable containing the state of the upload notifications widget.
  */
 export const usePruviousDashboardUploadNotificationsWidget = () =>
-  useState<DashboardNotificationUploadWidget>('pruvious-dashboard-upload-notifications-widget', () => ({
+  useState<DashboardUploadNotificationWidget>('pruvious-dashboard-upload-notifications-widget', () => ({
     isVisible: false,
     isOpen: false,
   }))
