@@ -29,15 +29,15 @@
   "devDependencies": {
     "@nuxt/test-utils": "3.19.2",
     "consola": "3.4.2",
-    "dotenv": "17.2.0",
+    "dotenv": "17.2.3",
     "execa": "9.6.0",
     "ofetch": "1.4.1",
-    "pkg-pr-new": "0.0.54",
+    "pkg-pr-new": "0.0.60",
     "prettier": "3.6.2",
     "prettier-plugin-organize-attributes": "1.0.0",
-    "typescript": "5.8.3",
+    "typescript": "5.9.3",
     "vitest": "3.2.4"
   },
-  "packageManager": "pnpm@10.12.2",
+  "packageManager": "pnpm@10.18.0",
   "private": true
 }

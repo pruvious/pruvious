@@ -33,13 +33,13 @@
   },
   "dependencies": {
     "defu": "6.1.4",
-    "dot-prop": "9.0.0",
-    "nanoid": "5.1.5",
+    "dot-prop": "10.0.0",
+    "nanoid": "5.1.6",
     "ohash": "1.1.6",
     "zeptomatch": "2.0.2"
   },
   "devDependencies": {
-    "typescript": "5.8.3",
-    "unbuild": "3.5.0"
+    "typescript": "5.9.3",
+    "unbuild": "3.6.1"
   }
 }
