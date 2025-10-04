@@ -2,13 +2,21 @@ import { __ } from '#pruvious/client/i18n'
 import type {
   Collections,
   DeleteUploadOptions,
+  DeleteUploadResult,
   MoveUploadOptions,
+  MoveUploadResult,
   PutUploadOptions,
   PutUploadResult,
   UpdateUploadOptions,
 } from '#pruvious/server'
-import type { InsertInput, UpdateInput } from '@pruvious/orm'
-import { tryNormalizePath } from '@pruvious/storage'
+import type {
+  ExtractCastedTypes,
+  ExtractPopulatedTypes,
+  InsertInput,
+  QueryBuilderResult,
+  UpdateInput,
+} from '@pruvious/orm'
+import { normalizePath, tryNormalizePath } from '@pruvious/storage'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import {
   clamp,
@@ -675,39 +683,47 @@ export async function createUploadDirectory<TDirectory extends string | string[]
 }
 
 /**
- * @todo description and example
- */
-export async function putUpload<
-  const TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id' =
-    | Collections['Uploads']['TColumnNames']
-    | 'id',
-  const TPopulateFields extends boolean = false,
->(
-  file: File,
-  input?: Omit<InsertInput<Collections['Uploads']>, 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'>,
-  options?: Omit<PutUploadOptions<TReturningFields, TPopulateFields>, 'guarded'>,
-) {
-  const runtimeConfig = useRuntimeConfig()
-  const body = new FormData()
-  body.append('', file)
-  Object.entries(input ?? {})
-    .filter((_, v) => isNotNull(v))
-    .forEach(([k, v]) => body.append(k, isObject(v) ? JSON.stringify(v) : v!.toString()))
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads', { method: 'post', body, query: options })
-}
-
-/**
- * @todo
+ * Moves an upload (file or directory) to a `newPath`.
+ * If the upload is a directory, all its contents will be moved recursively.
+ *
+ * Set `options.overwrite` to `true` to overwrite existing uploads at the destination path.
+ * By default, the operation will fail if a conflict is detected.
+ *
+ * @example
+ * ```ts
+ * await moveUpload('/old-folder/image.jpg', '/new-folder/image.jpg')
+ * await moveUpload('/old-folder', '/new-folder')
+ * ```
  */
 export async function moveUpload<
   const TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id' =
     | Collections['Uploads']['TColumnNames']
     | 'id',
   const TPopulateFields extends boolean = false,
->(path: string, newPath: string, options?: MoveUploadOptions<TReturningFields, TPopulateFields>) {}
+>(
+  oldPath: string,
+  newPath: string,
+  options?: MoveUploadOptions<TReturningFields, TPopulateFields>,
+): Promise<MoveUploadResult<TReturningFields, TPopulateFields>[]> {
+  const runtimeConfig = useRuntimeConfig()
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + normalizePath(oldPath), {
+    method: 'patch',
+    body: { path: newPath },
+    query: pick(options ?? {}, ['overwrite', 'returning', 'populate']),
+  }) as any
+}
 
 /**
- * @todo
+ * Updates the `author` and/or `editors` of an existing upload (file or directory).
+ *
+ * Set `options.recursive` to `true` to apply the changes to all nested uploads if the target is a directory.
+ * By default, only the upload at the specified `path` will be updated.
+ *
+ * @example
+ * ```ts
+ * await updateUpload('/path/to/upload.jpg', { author: 2, editors: [3, 4] })
+ * await updateUpload('/path/to/directory', { editors: [5] }, { recursive: true })
+ * ```
  */
 export async function updateUpload<
   const TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id' =
@@ -716,19 +732,52 @@ export async function updateUpload<
   const TPopulateFields extends boolean = false,
 >(
   path: string,
-  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'isLocked'>,
+  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors'>,
   options?: UpdateUploadOptions<TReturningFields, TPopulateFields>,
-) {}
+): Promise<
+  QueryBuilderResult<
+    TPopulateFields extends true
+      ? Pick<ExtractPopulatedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>
+      : Pick<ExtractCastedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>,
+    Record<string, string>
+  >
+> {
+  const runtimeConfig = useRuntimeConfig()
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + normalizePath(path), {
+    method: 'patch',
+    body: input,
+    query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
+  }) as any
+}
 
 /**
- * @todo
+ * Deletes an upload (file or directory) from the server.
+ *
+ * Set `options.recursive` to `true` to delete all nested uploads if the target is a directory.
+ * By default, only the upload at the specified `path` will be deleted.
+ * If the upload is a non-empty directory and `options.recursive` is not set, the operation will fail.
+ *
+ * @example
+ * ```ts
+ * await deleteUpload('/path/to/upload.jpg')
+ * await deleteUpload('/path/to/directory', { recursive: true })
+ * ```
  */
 export async function deleteUpload<
   const TReturningFields extends Collections['Uploads']['TColumnNames'] | 'id' =
     | Collections['Uploads']['TColumnNames']
     | 'id',
   const TPopulateFields extends boolean = false,
->(path: string, options?: DeleteUploadOptions<TReturningFields, TPopulateFields>) {}
+>(
+  path: string,
+  options?: DeleteUploadOptions<TReturningFields, TPopulateFields>,
+): Promise<DeleteUploadResult<TReturningFields, TPopulateFields>[]> {
+  const runtimeConfig = useRuntimeConfig()
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + normalizePath(path), {
+    method: 'delete',
+    query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
+  }) as any
+}
 
 /**
  * Checks if one or more uploads exist based on their path or ID.
