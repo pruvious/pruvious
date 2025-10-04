@@ -620,9 +620,27 @@ export function useUpload<
 }
 
 /**
- * @todo
+ * Creates one or more upload directories on the server.
+ *
+ * @example
+ * ```ts
+ * await createUploadDirectory('/blog/images')
+ * ```
  */
-export async function createUploadDirectory(directory: string | string[]) {}
+export async function createUploadDirectory<TDirectory extends string | string[]>(
+  directory: TDirectory,
+): Promise<
+  TDirectory extends any[]
+    ? PutUploadResult<Collections['Uploads']['TColumnNames'] | 'id', false>[]
+    : PutUploadResult<Collections['Uploads']['TColumnNames'] | 'id', false>
+> {
+  const runtimeConfig = useRuntimeConfig()
+  const results = (await $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads', {
+    method: 'post',
+    body: toArray(directory).map((path) => ({ path, type: 'directory' })),
+  })) as any
+  return isArray(directory) ? results : results[0]
+}
 
 /**
  * @todo description and example

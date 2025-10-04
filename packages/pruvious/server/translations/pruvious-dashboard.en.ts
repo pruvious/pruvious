@@ -40,6 +40,7 @@ export default defineTranslation({
   'All of the following conditions must be met': 'All of the following conditions must be met',
   'An error occurred during duplication': 'An error occurred during duplication',
   'An error occurred while copying the translation': 'An error occurred while copying the translation',
+  'An error occurred while creating the folder': 'An error occurred while creating the folder',
   'and': 'and',
   'Apply': 'Apply',
   'Are you sure you want to delete $count $entries?': createPattern(
@@ -209,6 +210,7 @@ export default defineTranslation({
   'e.g. .+-legacy$': 'e.g. .+-legacy$',
   'e.g. archive/reports/2024/$1': 'e.g. archive/reports/2024/$1',
   'e.g. https://pruvious.com': 'e.g. https://pruvious.com',
+  'e.g. my-folder': 'e.g. my-folder',
   'e.g. Recently updated': 'e.g. Recently updated',
   'e.g. report-(.+)-2024$': 'e.g. report-(.+)-2024$',
   'Email': 'Email',
@@ -235,6 +237,8 @@ export default defineTranslation({
   'Filters': 'Filters',
   'First name': 'First name',
   'Fixed width': 'Fixed width',
+  'Folder `$name` has been created': createPattern('Folder `$name` has been created', { name: 'string' }),
+  'Folder name': 'Folder name',
   'Forgot password?': 'Forgot password?',
   'Forward query parameters': 'Forward query parameters',
   'Found $count $errors': createPattern(
@@ -502,6 +506,8 @@ export default defineTranslation({
     'The dashboard language has been updated. Please reload the page for the changes to take effect.',
   'The date and time when the record was created.': 'The date and time when the record was created.',
   'The date and time when the record was last updated.': 'The date and time when the record was last updated.',
+  'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
+    'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).',
   'The HTML tag name to use for this element.': 'The HTML tag name to use for this element.',
   'The last part of the URL path after the base URL.': 'The last part of the URL path after the base URL.',
   'The password must be at least 8 characters long': 'The password must be at least 8 characters long',
