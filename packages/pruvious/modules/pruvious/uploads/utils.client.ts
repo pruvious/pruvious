@@ -568,7 +568,39 @@ export async function upload<
 }
 
 /**
- * @todo description and example
+ * A Vue composable that provides a reactive way to manage file uploads.
+ * It wraps the `⁠upload` function, returning a reactive state object that updates throughout the upload lifecycle.
+ * If you only need the final result after the upload completes and do not require reactive tracking, you can use the `⁠upload` function directly.
+ *
+ * @example
+ * ```vue
+ * <template>
+ *   <div>
+ *     <input v-on:change="onFileChange" multiple type="file" />
+ *     <div v-for="upload in uploads">
+ *       <p>{{ upload.file.file.name }}</p>
+ *       <p>Status: {{ upload.status }}</p>
+ *       <p>Progress: {{ (upload.progress * 100).toFixed(0) }}%</p>
+ *       <button :disabled="upload.status !== 'uploading'" v-on:click="upload.abort">Abort</button>
+ *       <p v-if="upload.result?.success">Upload complete! Path: {{ upload.result.details.path }}</p>
+ *       <p v-else-if="upload.result?.success === false">Upload failed.</p>
+ *     </div>
+ *   </div>
+ * </template>
+ *
+ * <script lang="ts" setup>
+ * import { useUpload, type UseUploadResult } from '#pruvious/client'
+ *
+ * const uploads = ref<UseUploadResult[]>([])
+ *
+ * function onFileChange(event: Event) {
+ *   const input = event.target as HTMLInputElement
+ *   if (input.files?.length) {
+ *     uploads.value = useUpload([...input.files])
+ *   }
+ * }
+ * </script>
+ * ```
  */
 export function useUpload<
   TFile extends File | File[] | PruviousFile | PruviousFile[],
