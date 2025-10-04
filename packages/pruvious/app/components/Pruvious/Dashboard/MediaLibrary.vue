@@ -56,7 +56,7 @@ async function refresh() {
     query.where('path', 'like', `${currentDirectory}/%`)
   }
 
-  // @todo show folder in upload items if we are showing uploads from subfolders
+  // @todo show folder in upload items if we are showing uploads from subfolders (filtered view)
   query.where('level', where.length ? '>=' : '=', level)
 
   const result = await query.paged(props.state.page, props.state.perPage).paginate()

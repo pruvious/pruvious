@@ -368,11 +368,11 @@
 
           <PUIButton
             v-pui-tooltip="__('pruvious-dashboard', 'Configure view')"
-            :variant="isDirty || columnsDirty ? 'accent' : 'outline'"
+            :variant="isDirty ? 'accent' : 'outline'"
             @click="isTableSettingsPopupVisible = true"
           >
             <Icon mode="svg" name="tabler:adjustments" />
-            <template v-if="isDirty || columnsDirty" #bubble>
+            <template v-if="isDirty" #bubble>
               <PUIBubble></PUIBubble>
             </template>
           </PUIButton>
@@ -511,6 +511,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
     page: 1,
     perPage: 50,
   },
+  checkDirty: ['where'],
 })
 
 let scrollTop = false

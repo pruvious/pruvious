@@ -76,7 +76,7 @@ const props = defineProps({
     required: true,
   },
   defaultParams: {
-    type: Object as PropType<Pick<DashboardMediaLibraryState, 'where' | 'orderBy' | 'page' | 'perPage'>>,
+    type: Object as PropType<Pick<DashboardMediaLibraryState, 'orderBy' | 'page' | 'perPage'>>,
     required: true,
   },
   isDirty: {

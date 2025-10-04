@@ -77,8 +77,7 @@ puiTooltipInit()
 const route = useRoute()
 const state = ref<DashboardMediaLibraryState>(getDefaultDashboardMediaLibraryState())
 const defaultOrderBy = deepClone(state.value.orderBy)
-const defaultParams: Pick<DashboardMediaLibraryState, 'where' | 'orderBy' | 'page' | 'perPage'> = {
-  where: [],
+const defaultParams: Pick<DashboardMediaLibraryState, 'orderBy' | 'page' | 'perPage'> = {
   orderBy: defaultOrderBy,
   page: 1,
   perPage: 5, // @todo make dynamic based on screen size (update from resize watcher but init here also)
@@ -94,7 +93,7 @@ const { params, push, isDirty } = useSelectQueryBuilderParams({
     queryString.value = _queryString
   },
   defaultParams,
-  checkDirty: ['where', 'orderBy'],
+  checkDirty: ['where'],
 })
 
 watch(
