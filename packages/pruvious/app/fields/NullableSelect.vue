@@ -8,7 +8,7 @@
       :error="!!error"
       :id="id"
       :modelValue="modelValue"
-      :name="name"
+      :name="path"
       :placeholder="placeholder"
       @commit="$emit('commit', isNull($event) ? null : String($event))"
       @update:modelValue="$emit('update:modelValue', isNull($event) ? null : String($event))"

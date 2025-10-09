@@ -16,7 +16,7 @@
         ]"
         :id="`${id}--switch`"
         :modelValue="modelValue !== null"
-        :name="`${name}--switch`"
+        :name="`${path}--switch`"
         :variant="options.ui.switch?.variant ?? 'accent'"
         @update:modelValue="
           (value) => {

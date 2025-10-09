@@ -11,7 +11,7 @@
       :error="!!error"
       :id="id"
       :modelValue="modelValue"
-      :name="name"
+      :name="path"
       :variant="options.ui.variant"
       @update:modelValue="
         (value) => {

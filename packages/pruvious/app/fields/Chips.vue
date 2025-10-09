@@ -12,7 +12,7 @@
       :maxItems="options.maxItems"
       :minItems="options.minItems"
       :modelValue="modelValue"
-      :name="name"
+      :name="path"
       :noResultsLabel="__('pruvious-dashboard', 'No results found')"
       :placeholder="placeholder"
       :removeItemLabel="__('pruvious-dashboard', 'Remove')"
