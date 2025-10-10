@@ -20,6 +20,9 @@ export default defineTranslation({
   'File not found': 'Die Datei wurde nicht gefunden',
 
   'Missing file parts: $parts': createPattern('Fehlende Dateiteile: $parts', { parts: 'string' }),
+  'Missing property for language code `$code`': createPattern('Fehlende Eigenschaft für den Sprachcode `$code`', {
+    code: 'string',
+  }),
 
   'Incorrect credentials': 'Falsche Anmeldedaten',
   'Invalid `$param` value. Must be one of: $values': createPattern(
@@ -27,6 +30,7 @@ export default defineTranslation({
     { param: 'string', values: 'string' },
   ),
   'Invalid input': 'Ungültige Eingabe',
+  'Invalid language code': 'Ungültiger Sprachcode',
   'Invalid path': 'Ungültiger Pfad',
   'Invalid RegExp pattern': 'Ungültiges RegExp-Muster',
 

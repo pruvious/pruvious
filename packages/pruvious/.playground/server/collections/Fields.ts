@@ -24,6 +24,7 @@ import {
   timeField,
   timeRangeField,
   timestampField,
+  translatableTextField,
   trueFalseField,
 } from '#pruvious/server'
 import { repeaterTestField } from '#shared/repeaterTestField'
@@ -580,6 +581,29 @@ export default defineCollection({
       ui: { label: 'Timestamp (min/max)' },
     }),
 
+    // translatableText
+    translatableText: translatableTextField({
+      default: { en: 'Default', de: 'Standard', bs: 'Zadano' },
+      ui: {
+        placeholder: ({ __ }) => __('pruvious-dashboard', 'Enter text...'),
+        description: ({ __ }) => __('pruvious-dashboard', 'Description'),
+      },
+    }),
+    translatableTextMinMax: translatableTextField({
+      minLength: 6,
+      maxLength: 8,
+      default: { en: 'foobar', de: 'foobar', bs: 'foobar' },
+      ui: { label: 'Translatable text (min/max)' },
+    }),
+    translatableTextAllowEmptyString: translatableTextField({
+      allowEmptyString: true,
+      ui: { label: 'Translatable text (allow empty string)' },
+    }),
+    translatableTextNoTrim: translatableTextField({
+      trim: false,
+      ui: { label: 'Translatable text (no trim)' },
+    }),
+
     // trueFalse
     trueFalse: trueFalseField({
       requireTrue: true,
@@ -717,6 +741,15 @@ export default defineCollection({
             {
               label: 'Timestamp',
               fields: ['timestamp', 'timestampMinMax'],
+            },
+            {
+              label: 'Translatable text',
+              fields: [
+                'translatableText',
+                'translatableTextMinMax',
+                'translatableTextAllowEmptyString',
+                'translatableTextNoTrim',
+              ],
             },
             {
               label: 'True/false',

@@ -25,10 +25,14 @@ export default defineTranslation({
     values: 'string',
   }),
   'Invalid input': 'Invalid input',
+  'Invalid language code': 'Invalid language code',
   'Invalid path': 'Invalid path',
   'Invalid RegExp pattern': 'Invalid RegExp pattern',
 
   'Missing file parts: $parts': createPattern('Missing file parts: $parts', { parts: 'string' }),
+  'Missing property for language code `$code`': createPattern('Missing property for language code `$code`', {
+    code: 'string',
+  }),
 
   'No': 'No',
   'No file parts uploaded': 'No file parts uploaded',

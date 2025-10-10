@@ -318,6 +318,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
           .selectRaw(select.join(', '))
           .where('subpath', 'ilike', subpath)
           .populate()
+          .withCustomContextData({ language })
           .first()
           .then(({ data }) => ({ ref: collectionReference![0] as TRef, collection, data, route: route! }))
       })

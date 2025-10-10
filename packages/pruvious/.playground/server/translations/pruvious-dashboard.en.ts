@@ -3,6 +3,8 @@ import { defineTranslation } from '#pruvious/server'
 export default defineTranslation({
   'Column 1': 'Column 1',
 
+  'Enter text...': 'Enter text...',
+
   'Group test': 'Group test',
 
   'Large': 'Large',
