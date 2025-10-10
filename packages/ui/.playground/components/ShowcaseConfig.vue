@@ -36,6 +36,7 @@
         { label: 'Switch', value: '/switch' },
         { label: 'Table', value: '/table' },
         { label: 'Tabs', value: '/tabs' },
+        { label: 'Text area', value: '/text-area' },
         { label: 'Time', value: '/time' },
         { label: 'Time range', value: '/time-range' },
         { label: 'Tooltip', value: '/tooltip' },
