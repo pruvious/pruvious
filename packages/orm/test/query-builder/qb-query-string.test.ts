@@ -450,6 +450,14 @@ test('query string to select query builder params', () => {
   expect(queryStringToSelectQueryBuilderParams('populate', { populate: false })).toEqual({})
 
   expect(queryStringToSelectQueryBuilderParams('')).toEqual({})
+
+  expect(queryStringToSelectQueryBuilderParams('where=text[like][%25Default%25]')).toEqual({
+    where: [{ field: 'text', operator: 'like', value: '%Default%' }],
+  })
+
+  expect(queryStringToSelectQueryBuilderParams('where=text[like][%$Default%]')).toEqual({
+    where: [{ field: 'text', operator: 'like', value: '%Default%' }],
+  })
 })
 
 test('select query builder params to query string', () => {
@@ -1477,11 +1485,23 @@ test('conditional query builder params to query string', () => {
 
   expect(
     conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: 'like', value: '%foo]' }] }),
-  ).toBe('where=middleName[like][%foo$]]')
+  ).toBe('where=middleName[like][%$foo$]]')
 
   expect(
     conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: 'like', value: '[$]' }] }),
   ).toBe('where=middleName[like][[$$]]')
+
+  expect(
+    conditionalQueryBuilderParamsToQueryString({
+      where: [{ field: 'middleName', operator: 'like', value: '[%Default%]' }],
+    }),
+  ).toBe('where=middleName[like][[%Default%]]')
+
+  expect(
+    conditionalQueryBuilderParamsToQueryString({
+      where: [{ field: 'middleName', operator: 'like', value: '[%25Default%25]' }],
+    }),
+  ).toBe('where=middleName[like][[%25Default%25]]')
 
   expect(
     conditionalQueryBuilderParamsToQueryString({ where: [{ field: 'middleName', operator: '=', value: '[1]' }] }),

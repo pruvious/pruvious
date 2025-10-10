@@ -1040,6 +1040,15 @@ function buildWhereQueryString(
         continue
       }
 
+      if (
+        ['like', 'notLike', 'ilike', 'notIlike'].includes(operator!) &&
+        isString(escapedValue) &&
+        escapedValue.startsWith('%') &&
+        escapedValue[1]?.match(/[0-9A-Fa-f]/)
+      ) {
+        escapedValue = '%$' + escapedValue.slice(1)
+      }
+
       queryString += `${field}[${operator}][${escapedValue}]`
     } else if ('or' in condition) {
       const orGroup = condition.or
