@@ -20,6 +20,7 @@ import {
   structureField,
   subpathField,
   switchField,
+  textAreaField,
   textField,
   timeField,
   timeRangeField,
@@ -553,6 +554,30 @@ export default defineCollection({
       ui: { label: 'Text (no trim)' },
     }),
 
+    // textArea
+    textArea: textAreaField({
+      default: 'Default',
+      ui: { placeholder: 'Enter text...', description: 'Description' },
+    }),
+    textAreaMinMax: textAreaField({
+      minLength: 6,
+      maxLength: 8,
+      default: 'foobar',
+      ui: { label: 'Text (min/max)' },
+    }),
+    textAreaAllowEmptyString: textAreaField({
+      allowEmptyString: true,
+      ui: { label: 'Text (allow empty string)' },
+    }),
+    textAreaNoTrim: textAreaField({
+      trim: false,
+      ui: { label: 'Text (no trim)', resize: 'manual' },
+    }),
+    textAreaDisallowLineBreaks: textAreaField({
+      allowLineBreaks: false,
+      ui: { label: 'Text area (disallow line breaks)', rows: 4, resize: false },
+    }),
+
     // time
     time: timeField({ ui: { label: 'Time' } }),
     timeMinMax: timeField({ min: 3600000, max: '23:00', ui: { label: 'Time (min/max)' }, default: 3600000 }),
@@ -729,6 +754,16 @@ export default defineCollection({
             {
               label: 'Text',
               fields: ['text', 'textMinMax', 'textAllowEmptyString', 'textNoTrim'],
+            },
+            {
+              label: 'Text Area',
+              fields: [
+                'textArea',
+                'textAreaMinMax',
+                'textAreaAllowEmptyString',
+                'textAreaNoTrim',
+                'textAreaDisallowLineBreaks',
+              ],
             },
             {
               label: 'Time',

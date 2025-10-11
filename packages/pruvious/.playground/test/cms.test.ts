@@ -47,6 +47,7 @@ describe('cms', async () => {
   await import('./cms/fields/subpath')
   await import('./cms/fields/switch')
   await import('./cms/fields/text')
+  await import('./cms/fields/textArea')
   await import('./cms/fields/time')
   await import('./cms/fields/timeRange')
   await import('./cms/fields/timestamp')

@@ -3,7 +3,6 @@
     <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
 
     <PUITextArea
-      :allowLineBreaks="options.ui.allowLineBreaks"
       :disabled="disabled"
       :error="!!error"
       :id="id"
