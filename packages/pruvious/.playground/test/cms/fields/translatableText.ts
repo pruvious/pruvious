@@ -6,6 +6,7 @@ describe('translatable text field', () => {
   const translatableTextMinMax = '/api/collections/fields?returning=translatableTextMinMax'
   const translatableTextAllowEmptyString = '/api/collections/fields?returning=translatableTextAllowEmptyString'
   const translatableTextNoTrim = '/api/collections/fields?returning=translatableTextNoTrim'
+  const translatableTextDisallowLineBreaks = '/api/collections/fields?returning=translatableTextDisallowLineBreaks'
 
   test('create, filter, update', async () => {
     expect(await $postAsAdmin(translatableText, { translatableText: undefined })).toEqual([
@@ -108,5 +109,17 @@ describe('translatable text field', () => {
     expect(await $postAsAdmin(translatableTextNoTrim, { translatableTextNoTrim: undefined })).toEqual([
       { translatableTextNoTrim: { en: '', de: '', bs: '' } },
     ])
+
+    // disallowLineBreaks
+    expect(
+      await $postAsAdmin(translatableTextDisallowLineBreaks, {
+        translatableTextDisallowLineBreaks: { en: 'foo\nbar', de: '', bs: '' },
+      }),
+    ).toEqual([{ translatableTextDisallowLineBreaks: { en: 'foo bar', de: '', bs: '' } }])
+    expect(
+      await $postAsAdmin(translatableTextDisallowLineBreaks, {
+        translatableTextDisallowLineBreaks: { en: ' \n foo \n \n bar \n ', de: '', bs: '' },
+      }),
+    ).toEqual([{ translatableTextDisallowLineBreaks: { en: 'foo bar', de: '', bs: '' } }])
   })
 })

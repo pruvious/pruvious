@@ -14,12 +14,10 @@
           :translatable="translatable"
         />
 
-        <PUIInput
+        <PUITextArea
           :disabled="disabled"
           :error="!!subfieldErrors?.[language.code]"
           :id="`${id}--${language.code}`"
-          :maxLength="options.maxLength || undefined"
-          :minLength="options.minLength || undefined"
           :modelValue="modelValue[language.code] || ''"
           :name="`${path}--${language.code}`"
           :placeholder="placeholder"

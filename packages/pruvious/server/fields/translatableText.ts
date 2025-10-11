@@ -11,6 +11,14 @@ const customOptions: {
   allowEmptyString?: boolean
 
   /**
+   * Controls if line breaks are allowed in translatable texts.
+   * When set to `false`, all line breaks will be automatically removed from the input.
+   *
+   * @default false
+   */
+  allowLineBreaks?: boolean
+
+  /**
    * The maximum length of a translatable text.
    * Set to `false` to disable this validation.
    *
@@ -34,6 +42,7 @@ const customOptions: {
   trim?: boolean
 } = {
   allowEmptyString: false,
+  allowLineBreaks: false,
   maxLength: false,
   minLength: false,
   trim: true,
@@ -52,6 +61,13 @@ export default defineField({
     (value, { definition }) =>
       definition.options.trim && isObject(value)
         ? remap(value, (language, text) => [language, isString(text) ? text.trim() : text])
+        : value,
+    (value, { definition }) =>
+      !definition.options.allowLineBreaks && isObject(value)
+        ? remap(value, (language, text) => [
+            language,
+            isString(text) ? text.replace(/[ \t\n]*\n+[ \t\n]*/g, ' ') : text,
+          ])
         : value,
   ],
   validators: [

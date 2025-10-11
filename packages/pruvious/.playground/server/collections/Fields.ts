@@ -628,6 +628,10 @@ export default defineCollection({
       trim: false,
       ui: { label: 'Translatable text (no trim)' },
     }),
+    translatableTextDisallowLineBreaks: translatableTextField({
+      allowLineBreaks: false,
+      ui: { label: 'Translatable text (disallow line breaks)' },
+    }),
 
     // trueFalse
     trueFalse: trueFalseField({
@@ -784,6 +788,7 @@ export default defineCollection({
                 'translatableTextMinMax',
                 'translatableTextAllowEmptyString',
                 'translatableTextNoTrim',
+                'translatableTextDisallowLineBreaks',
               ],
             },
             {
