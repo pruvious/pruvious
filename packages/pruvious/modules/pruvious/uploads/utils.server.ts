@@ -1224,7 +1224,7 @@ export async function updateUpload<
   const TPopulateFields extends boolean = false,
 >(
   path: string,
-  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'isLocked'>,
+  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'description' | 'isLocked'>,
   options?: UpdateUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<
   QueryBuilderResult<
@@ -1241,7 +1241,7 @@ export async function updateUpload<
   const TPopulateFields extends boolean = false,
 >(
   id: number,
-  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'isLocked'>,
+  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'description' | 'isLocked'>,
   options?: UpdateUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<
   QueryBuilderResult<
@@ -1258,7 +1258,7 @@ export async function updateUpload<
   const TPopulateFields extends boolean = false,
 >(
   pathOrId: string | number,
-  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'isLocked'>,
+  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'description' | 'isLocked'>,
   options?: UpdateUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<
   QueryBuilderResult<
@@ -1287,7 +1287,7 @@ export async function updateUpload<
   const recursive = !!options?.recursive
   const updateQueryBuilder = guarded ? guardedUpdate('Uploads') : update('Uploads')
 
-  updateQueryBuilder.set(pick(input, ['author', 'editors', 'isLocked']))
+  updateQueryBuilder.set(pick(input, ['author', 'editors', 'description', 'isLocked']))
 
   if (recursive) {
     let path = pathOrId

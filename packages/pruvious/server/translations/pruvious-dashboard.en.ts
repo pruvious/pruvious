@@ -187,6 +187,7 @@ export default defineTranslation({
   ),
   'Deleted record': 'Deleted record',
   'Dependencies': 'Dependencies',
+  'Description': 'Description',
   'Deselect': 'Deselect',
   'Disable': 'Disable',
   'Disable to use the exact route path.': 'Disable to use the exact route path.',
@@ -452,6 +453,8 @@ export default defineTranslation({
   'Share': 'Share',
   'shared': 'shared',
   'Shared bookmarks': 'Shared bookmarks',
+  'Short description of the file used for alt text in images and accessibility purposes.':
+    'Short description of the file used for alt text in images and accessibility purposes.',
   'Show': 'Show',
   'Show description': 'Show description',
   'Show details': 'Show details',

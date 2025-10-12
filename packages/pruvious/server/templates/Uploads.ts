@@ -10,6 +10,7 @@ import {
   selectFrom,
   switchField,
   textField,
+  translatableTextField,
   uniqueValidator,
   uploadPathValidator,
 } from '#pruvious/server'
@@ -176,6 +177,17 @@ export default defineTemplate(() => ({
     size: numberField({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'Size'), suffix: 'bytes' },
       min: 0,
+    }),
+    description: translatableTextField({
+      allowLineBreaks: false,
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Description'),
+        description: ({ __ }) =>
+          __(
+            'pruvious-dashboard',
+            'Short description of the file used for alt text in images and accessibility purposes.',
+          ),
+      },
     }),
     etag: textField({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'ETag') },

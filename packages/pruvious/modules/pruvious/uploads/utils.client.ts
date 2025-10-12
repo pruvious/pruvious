@@ -3,6 +3,7 @@ import type {
   Collections,
   DeleteUploadOptions,
   DeleteUploadResult,
+  LanguageCode,
   MoveUploadOptions,
   MoveUploadResult,
   PutUploadOptions,
@@ -78,6 +79,21 @@ export interface PruviousFile
    * If not specified, only the author will have edit access.
    */
   editors?: number[]
+
+  /**
+   * The description of the upload in multiple languages.
+   * It is used for alt text in images and accessibility purposes.
+   *
+   * @example
+   * ```ts
+   * {
+   *   en: 'A beautiful sunrise',
+   *   de: 'Ein wunderschöner Sonnenaufgang',
+   *   fr: 'Un beau lever de soleil',
+   * }
+   * ```
+   */
+  description?: Record<LanguageCode, string>
 }
 
 interface StandardUploadOptions {
@@ -714,7 +730,7 @@ export async function moveUpload<
 }
 
 /**
- * Updates the `author` and/or `editors` of an existing upload (file or directory).
+ * Updates the `author`, `editors`, and/or `description` of an existing upload (file or directory).
  *
  * Set `options.recursive` to `true` to apply the changes to all nested uploads if the target is a directory.
  * By default, only the upload at the specified `path` will be updated.
@@ -732,7 +748,7 @@ export async function updateUpload<
   const TPopulateFields extends boolean = false,
 >(
   path: string,
-  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors'>,
+  input: Pick<UpdateInput<Collections['Uploads']>, 'author' | 'editors' | 'description'>,
   options?: UpdateUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<
   QueryBuilderResult<

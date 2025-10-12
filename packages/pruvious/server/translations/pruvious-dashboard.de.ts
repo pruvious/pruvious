@@ -186,6 +186,7 @@ export default defineTranslation({
   ),
   'Deleted record': 'Gelöschter Eintrag',
   'Dependencies': 'Abhängigkeiten',
+  'Description': 'Beschreibung',
   'Deselect': 'Abwählen',
   'Disable': 'Deaktivieren',
   'Disable to use the exact route path.': 'Deaktivieren Sie dies, um den genauen Routenpfad zu verwenden.',
@@ -451,6 +452,8 @@ export default defineTranslation({
   'Share': 'Teilen',
   'shared': 'geteilt',
   'Shared bookmarks': 'Geteilte Merklisten',
+  'Short description of the file used for alt text in images and accessibility purposes.':
+    'Kurze Beschreibung der Datei, die als Alt-Text in Bildern und für Barrierefreiheitszwecke verwendet wird.',
   'Show': 'Anzeigen',
   'Show description': 'Beschreibung anzeigen',
   'Show details': 'Details anzeigen',
