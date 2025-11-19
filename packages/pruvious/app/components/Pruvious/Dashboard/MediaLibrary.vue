@@ -83,4 +83,8 @@ watch(
 )
 
 useEventListener('pruvious:upload-complete' as any, refreshDebounced)
+useEventListener('pruvious:create-upload-directory-complete' as any, refreshDebounced)
+useEventListener('pruvious:move-upload-complete' as any, refreshDebounced)
+useEventListener('pruvious:update-upload-complete' as any, refreshDebounced)
+useEventListener('pruvious:delete-upload-complete' as any, refreshDebounced)
 </script>

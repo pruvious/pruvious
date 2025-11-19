@@ -695,6 +695,7 @@ export async function createUploadDirectory<TDirectory extends string | string[]
     method: 'post',
     body: toArray(directory).map((path) => ({ path, type: 'directory' })),
   })) as any
+  window.dispatchEvent(new CustomEvent('pruvious:create-upload-directory-complete'))
   return isArray(directory) ? results : results[0]
 }
 
@@ -726,7 +727,7 @@ export async function moveUpload<
     method: 'patch',
     body: { path: newPath },
     query: pick(options ?? {}, ['overwrite', 'returning', 'populate']),
-  }) as any
+  }).finally(() => window.dispatchEvent(new CustomEvent('pruvious:move-upload-complete'))) as any
 }
 
 /**
@@ -763,7 +764,7 @@ export async function updateUpload<
     method: 'patch',
     body: input,
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
-  }) as any
+  }).finally(() => window.dispatchEvent(new CustomEvent('pruvious:update-upload-complete'))) as any
 }
 
 /**
@@ -792,7 +793,7 @@ export async function deleteUpload<
   return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + normalizePath(path), {
     method: 'delete',
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
-  }) as any
+  }).finally(() => window.dispatchEvent(new CustomEvent('pruvious:delete-upload-complete'))) as any
 }
 
 /**
