@@ -53,7 +53,7 @@ const PruviousStringFieldPreview = dashboardMiscComponent.StringFieldPreview()
 watch(
   () => props.value,
   () => {
-    formattedValue.value = isNull(props.value) ? '' : dayjs(props.value).format(format)
+    formattedValue.value = isNull(props.value) ? '' : dayjs.utc(props.value).format(format)
   },
   { immediate: true },
 )
