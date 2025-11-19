@@ -5,7 +5,7 @@ import {
   queryStringToSelectQueryBuilderParams,
   selectQueryBuilderParamsToQueryString,
 } from '@pruvious/orm/query-string'
-import { deepClone, isArray, isEmpty, isNull, omit, pick } from '@pruvious/utils'
+import { deepClone, deepCompare, isArray, isEmpty, isNull, omit, pick } from '@pruvious/utils'
 import type { DeleteQueryBuilder } from './DeleteQueryBuilder'
 import type { InsertQueryBuilder } from './InsertQueryBuilder'
 import { QueryBuilder } from './QueryBuilder'
@@ -548,7 +548,11 @@ export function useSelectQueryBuilderParams(options: {
     }
 
     if (syncRoute === 'navigateTo') {
-      nextTick(() => navigateTo({ query, replace }))
+      nextTick(() => {
+        if (!deepCompare(query, route.query)) {
+          navigateTo({ query, replace })
+        }
+      })
     } else if (syncRoute === 'mutate') {
       nextTick(() => {
         route.query = query
