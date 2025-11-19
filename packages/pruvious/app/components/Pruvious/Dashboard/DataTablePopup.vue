@@ -155,7 +155,7 @@
       v-if="isTableSettingsPopupVisible"
       v-model:columns="columns"
       v-model:params="params"
-      :collection="collectionWithoutTranslationFields"
+      :collection="collection"
       :defaultColumns="defaultColumns"
       :defaultOrderBy="defaultOrderBy"
       :paginated="paginated"
@@ -339,17 +339,6 @@ const collection = {
   slug: slugify(props.collectionName),
   definition: dashboard.value!.collections[props.collectionName]!,
 }
-const collectionWithoutTranslationFields = computed(() => ({
-  name: collection.name,
-  definition: collection.definition.translatable
-    ? {
-        ...collection.definition,
-        fields: Object.fromEntries(
-          Object.entries(collection.definition.fields).filter(([k]) => k !== 'translations' && k !== 'language'),
-        ),
-      }
-    : collection.definition,
-}))
 const hideViewConfiguration = inject('hideViewConfiguration', false)
 const storedQueryStrings = hideViewConfiguration
   ? ref<Record<string, { query: Record<string, string | null | undefined> }>>({ [collection.name]: { query: {} } })

@@ -20,7 +20,7 @@
         <PruviousDashboardWhereFilters
           v-model="data.where"
           v-model:initialized="filtersInitialized"
-          :collection="collection"
+          :collection="collectionWithoutTranslationFields"
           :fieldChoices="whereFieldChoices"
           @commit="
             (where) => {
@@ -250,9 +250,20 @@ const tabsList = computed<PUITabListItem<Tab>[]>(() => {
 const data = ref<TableSettings>({ where: [], columns: {}, orderBy: [], activeTab: activeTab.value })
 const appliedData = ref<TableSettings>(deepClone(data.value))
 const initialized = ref(false)
+const collectionWithoutTranslationFields = computed(() => ({
+  name: props.collection.name,
+  definition: props.collection.definition.translatable
+    ? {
+        ...props.collection.definition,
+        fields: Object.fromEntries(
+          Object.entries(props.collection.definition.fields).filter(([k]) => k !== 'translations' && k !== 'language'),
+        ),
+      }
+    : props.collection.definition,
+}))
 const whereFieldChoices = computed(() =>
   sortNaturallyByProp(
-    Object.entries(props.collection.definition.fields)
+    Object.entries(collectionWithoutTranslationFields.value.definition.fields)
       .filter(
         ([_, definition]) =>
           !(
