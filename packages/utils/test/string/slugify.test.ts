@@ -10,6 +10,7 @@ test('slugify', () => {
   expect(slugify('niđeČekića')).toBe('nidje-cekica')
   expect(slugify('NIĐE Čekića')).toBe('nidje-cekica')
   expect(slugify('niđe ČEKIĆA')).toBe('nidje-cekica')
+  expect(slugify('/foo.bar')).toBe('foo-bar')
 
   // Test cases from `kebabCase`
   expect(slugify('foo-bar')).toBe('foo-bar')
@@ -35,4 +36,9 @@ test('slugify', () => {
   expect(slugify('A-')).toBe('a')
   expect(slugify('-A')).toBe('a')
   expect(slugify('Ä')).toBe('ae')
+
+  // Custom character map
+  expect(slugify('Hello, World!', { O: 'Ö' })).toBe('hellö-wörld')
+  expect(slugify('/foo.bar', { '.': '.' })).toBe('foo.bar')
+  expect(slugify('/foo.bar', { '.': '.', '/': '#' })).toBe('#foo.bar')
 })

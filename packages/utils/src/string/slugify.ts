@@ -1,3 +1,5 @@
+import { remap } from '../object/op'
+
 const slugifyCharMap: Record<string, string> = {
   'َ': 'a',
   'ً': 'an',
@@ -372,28 +374,45 @@ const slugifyCharMap: Record<string, string> = {
 /**
  * Converts a `string` to a URL-friendly slug.
  *
+ * You can provide a `customCharMap` to override specific character mappings.
+ * For example, to keep umlauts, you can pass `{ 'o': 'ö', 'u': 'ü' }`.
+ * The keys in `customCharMap` are case-insensitive.
+ *
  * @example
  * ```ts
  * slugify('Hello, World!') // hello-world
+ * slugify('Hello, World!', { 'O': 'Ö' }) // hellö-wörld
  * ```
  */
-export function slugify(string: string) {
+export function slugify(string: string, customCharMap: Record<string, string> = {}): string {
   let result = ''
   let split = false
   let index = 0
   let prev: string | undefined = undefined
 
+  const customCharMapLowerCase = remap(customCharMap, (key, value) => [
+    key.toLocaleLowerCase(),
+    value.toLocaleLowerCase(),
+  ])
+
   for (const curr of string.trim()) {
+    const lower = curr.toLowerCase()
     const isPrevLower = prev && prev.toLowerCase() === prev
 
     if ((curr >= '0' && curr <= '9') || (curr >= 'a' && curr <= 'z')) {
-      result += split && index && (!prev || isPrevLower) ? `-${curr}` : curr
+      const char = customCharMapLowerCase[lower] ?? curr
+      result += split && index && (!prev || isPrevLower) ? `-${char}` : char
       split = false
       index++
     } else {
-      const lower = curr.toLowerCase()
-
-      if (curr >= 'A' && curr <= 'Z') {
+      if (customCharMapLowerCase[lower]) {
+        result +=
+          curr !== lower && index && (!prev || isPrevLower)
+            ? `-${customCharMapLowerCase[lower]}`
+            : customCharMapLowerCase[lower]
+        split = false
+        index++
+      } else if (curr >= 'A' && curr <= 'Z') {
         result += index && (!prev || isPrevLower) ? `-${lower}` : lower
         split = false
         index++
