@@ -33,7 +33,6 @@ import {
   useSelectQueryBuilderParams,
   type DashboardMediaLibraryState,
 } from '#pruvious/client'
-import { tryNormalizePath } from '@pruvious/storage'
 import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import { deepClone, isArray } from '@pruvious/utils'
@@ -105,8 +104,7 @@ watch(
 )
 
 function getDirectoryFromRoute() {
-  const subpath = isArray(route.params.catchAll) ? route.params.catchAll.join('/') : route.params.catchAll || '/'
-  return tryNormalizePath(subpath)
+  return isArray(route.params.catchAll) ? route.params.catchAll.join('/') : route.params.catchAll || '/'
 }
 
 function getPagedFromParams(params: Record<string, any>) {

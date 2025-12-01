@@ -10,17 +10,17 @@ import type { StorageFileLocation } from './types'
  *
  * @example
  * ```ts
- * const normalized = normalizePath('file.txt')
+ * normalizePath('file.txt', 'file')
  * //=> '/file.txt'
  *
- * const normalized = normalizePath('path/TO//MyImage.webp')
+ * normalizePath('path/TO//MyImage.webp', 'file')
  * //=> '/path/to/my-image.webp'
  *
- * const normalized = normalizePath('/folder/SUB%20Folder/doc%20file.PDF')
+ * normalizePath('/folder/SUB%20Folder/doc%20file.PDF', 'file')
  * //=> '/folder/sub-folder/doc-file.pdf'
  * ```
  */
-export function normalizePath(path: string) {
+export function normalizePath(path: string, type: 'file' | 'directory') {
   if (!isString(path)) {
     throw new Error('Invalid path')
   }
@@ -31,19 +31,18 @@ export function normalizePath(path: string) {
 
   const normalized = parts
     .map((part, i) => {
-      if (i === parts.length - 1) {
-        const dotIndex = part.lastIndexOf('.')
+      if (type === 'file' && i === parts.length - 1) {
+        const lastDotIndex = part.lastIndexOf('.')
 
-        if (dotIndex > -1 && dotIndex < part.length - 1) {
-          const name = part.slice(0, dotIndex)
-          const ext = part.slice(dotIndex + 1)
-          const slugName = slugify(name)
-          const slugExt = snakeCase(ext)
-          return `${slugName === name.replaceAll('_', '-') ? name : slugName}.${slugExt}`
+        if (lastDotIndex > -1 && lastDotIndex < part.length - 1) {
+          const name = part.slice(0, lastDotIndex)
+          const ext = part.slice(lastDotIndex + 1)
+          const nameSlug = slugify(name, { '.': '.', '_': '_' })
+          const extSnake = snakeCase(ext)
+          return `${nameSlug}.${extSnake}`
         }
 
-        const slug = slugify(part)
-        return slug === part.replaceAll('_', '-') ? part : slug
+        return slugify(part, { _: '_' })
       }
 
       return slugify(part)
@@ -63,10 +62,25 @@ export function normalizePath(path: string) {
  * and converting all parts to URL-friendly slugs.
  *
  * If the `path` cannot be normalized, it is returned as-is.
+ *
+ * @example
+ * ```ts
+ * tryNormalizePath('file.txt', 'file')
+ * //=> '/file.txt'
+ *
+ * tryNormalizePath('path/TO//MyImage.webp', 'file')
+ * //=> '/path/to/my-image.webp'
+ *
+ * tryNormalizePath('/folder/SUB%20Folder/doc%20file.PDF', 'file')
+ * //=> '/folder/sub-folder/doc-file.pdf'
+ *
+ * tryNormalizePath('???', 'file')
+ * //=> '???' (returned as-is)
+ * ```
  */
-export function tryNormalizePath(path: string) {
+export function tryNormalizePath(path: string, type: 'file' | 'directory'): string {
   try {
-    return normalizePath(path)
+    return normalizePath(path, type)
   } catch {
     return path
   }
@@ -77,7 +91,7 @@ export function tryNormalizePath(path: string) {
  *
  * @example
  * ```ts
- * const parsed = instance.parse('file.txt')
+ * parsePath('file.txt')
  * // {
  * //   path: '/file.txt',
  * //   dir: '/',
@@ -86,7 +100,7 @@ export function tryNormalizePath(path: string) {
  * // }
  *
  *
- * const sanitized = instance.parse('path/TO//MyImage.webp')
+ * parsePath('path/TO//MyImage.webp')
  * // {
  * //   path: '/path/to/my-image.webp',
  * //   dir: '/path/to',
@@ -95,8 +109,8 @@ export function tryNormalizePath(path: string) {
  * // }
  * ```
  */
-export function parsePath(path: string): StorageFileLocation {
-  const normalizedPath = normalizePath(path)
+export function parsePath(path: string, type: 'file' | 'directory' = 'file'): StorageFileLocation {
+  const normalizedPath = normalizePath(path, type)
 
   return {
     path: normalizedPath,

@@ -734,7 +734,7 @@ export function prepareUploadsInput<TInput extends Record<string, any> | Record<
     return {
       type: 'directories',
       items: toArray(input).map((item: Record<string, any>) => ({
-        path: tryNormalizePath(item.path),
+        path: tryNormalizePath(item.path, 'directory'),
         type: 'directory',
         author: item.author,
         editors: item.editors,
@@ -745,7 +745,10 @@ export function prepareUploadsInput<TInput extends Record<string, any> | Record<
   return {
     type: 'files',
     items: Object.entries(files).map(([originalPath, file], i) => {
-      const path = tryNormalizePath((isArray<Record<string, any>>(input) ? input[i]?.path : input.path) ?? originalPath)
+      const path = tryNormalizePath(
+        (isArray<Record<string, any>>(input) ? input[i]?.path : input.path) ?? originalPath,
+        'file',
+      )
       const author = isArray<Record<string, any>>(input) ? input[i]?.author : input.author
       const editors = isArray<Record<string, any>>(input) ? input[i]?.editors : input.editors
       return { file, path, type: 'file', author, editors }
@@ -830,7 +833,7 @@ export async function putUpload<
   const { __, collections, deleteFile, deleteFrom, guardedInsertInto, insertInto, putFile, update } = await import(
     '#pruvious/server'
   )
-  const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString()) : undefined
+  const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString(), 'file') : undefined
   const returning =
     isUndefined(options?.returning) || toArray(options?.returning).includes('*' as any)
       ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
@@ -984,10 +987,10 @@ export async function moveUpload<
   const overwrite = !!options?.overwrite
   const lockQueryBuilder = update('Uploads').set({ isLocked: true }).where('isLocked', '=', false)
 
-  newPath = tryNormalizePath(newPath)
+  newPath = tryNormalizePath(newPath, 'file')
 
   if (isString(pathOrId)) {
-    pathOrId = tryNormalizePath(pathOrId)
+    pathOrId = tryNormalizePath(pathOrId, 'file')
     lockQueryBuilder.where('path', '=', pathOrId)
   } else {
     lockQueryBuilder.where('id', '=', pathOrId)
@@ -1307,12 +1310,12 @@ export async function updateUpload<
     }
 
     if (isString(path)) {
-      path = tryNormalizePath(path)
+      path = tryNormalizePath(path, 'file')
       updateQueryBuilder.orGroup([(eb) => eb.where('path', '=', path), (eb) => eb.where('path', 'like', `${path}/%`)])
     }
   } else {
     if (isString(pathOrId)) {
-      updateQueryBuilder.where('path', '=', tryNormalizePath(pathOrId))
+      updateQueryBuilder.where('path', '=', tryNormalizePath(pathOrId, 'file'))
     } else {
       updateQueryBuilder.where('id', '=', pathOrId)
     }
@@ -1412,7 +1415,7 @@ export async function deleteUpload<
   const lockQueryBuilder = update('Uploads').set({ isLocked: true }).where('isLocked', '=', false)
 
   if (isString(pathOrId)) {
-    pathOrId = tryNormalizePath(pathOrId)
+    pathOrId = tryNormalizePath(pathOrId, 'file')
     lockQueryBuilder.where('path', '=', pathOrId)
   } else {
     lockQueryBuilder.where('id', '=', pathOrId)
@@ -1610,7 +1613,7 @@ export async function createMultipartUpload(
   }
 
   const { __, deleteFrom, guardedInsertInto, insertInto, storage, update } = await import('#pruvious/server')
-  const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString()) : undefined
+  const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString(), 'file') : undefined
   const overwrite = !!options?.overwrite
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder

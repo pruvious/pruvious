@@ -1,19 +1,26 @@
 import { expect, test } from 'vitest'
-import { normalizePath, parsePath } from '../src'
+import { normalizePath, parsePath, tryNormalizePath } from '../src'
 
 test('normalize path', () => {
-  expect(normalizePath('foo')).toBe('/foo')
-  expect(normalizePath(' FOO ')).toBe('/foo')
-  expect(normalizePath('foo . txt')).toBe('/foo.txt')
-  expect(normalizePath('foo.')).toBe('/foo')
-  expect(normalizePath('foo/bar')).toBe('/foo/bar')
-  expect(normalizePath('//foo///bar//')).toBe('/foo/bar')
-  expect(normalizePath('[]/foo')).toBe('/foo')
-  expect(normalizePath('path/TO//MyImage.webp')).toBe('/path/to/my-image.webp')
-  expect(normalizePath('/folder/SUB%20Folder/doc%20file.PDF')).toBe('/folder/sub-folder/doc-file.pdf')
-  expect(normalizePath('foo_bar/foo_bar')).toBe('/foo-bar/foo_bar')
-  expect(normalizePath('foo_bar/foo_bar.baz')).toBe('/foo-bar/foo_bar.baz')
-  expect(normalizePath('/foo.bar/foo.bar.txt')).toBe('/foo-bar/foo-bar.txt')
+  expect(normalizePath('foo', 'directory')).toBe('/foo')
+  expect(normalizePath(' FOO ', 'directory')).toBe('/foo')
+  expect(normalizePath('foo . txt', 'file')).toBe('/foo.txt')
+  expect(normalizePath('foo . txt', 'directory')).toBe('/foo-txt')
+  expect(normalizePath('foo.', 'file')).toBe('/foo')
+  expect(normalizePath('foo/bar', 'directory')).toBe('/foo/bar')
+  expect(normalizePath('//foo///bar//', 'directory')).toBe('/foo/bar')
+  expect(normalizePath('[]/foo', 'directory')).toBe('/foo')
+  expect(normalizePath('path/TO//MyImage.webp', 'file')).toBe('/path/to/my-image.webp')
+  expect(normalizePath('/folder/SUB%20Folder/doc%20file.PDF', 'file')).toBe('/folder/sub-folder/doc-file.pdf')
+  expect(normalizePath('foo_bar/foo_bar', 'file')).toBe('/foo-bar/foo_bar')
+  expect(normalizePath('foo_bar/foo_bar', 'directory')).toBe('/foo-bar/foo-bar')
+  expect(normalizePath('foo_bar/foo_bar.baz', 'file')).toBe('/foo-bar/foo_bar.baz')
+  expect(normalizePath('/foo.bar/foo.bar.txt', 'file')).toBe('/foo-bar/foo.bar.txt')
+  expect(normalizePath('/foo.bar/foo.bar.txt', 'directory')).toBe('/foo-bar/foo-bar-txt')
+  expect(() => normalizePath('???', 'file')).toThrow()
+
+  expect(tryNormalizePath('foo/BAR', 'file')).toBe('/foo/bar')
+  expect(tryNormalizePath('???', 'file')).toBe('???')
 })
 
 test('parse path', () => {

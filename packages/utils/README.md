@@ -1437,14 +1437,19 @@ The identifier is 23 characters long and contains letters (uppercase and lowerca
 randomString() // '4KRhkhoxpU2hPDvmVf4zWD9'
 ```
 
-### <a id="slugify">`slugify(string)`</a>
+### <a id="slugify">`slugify(string, customCharMap)`</a>
 
 Converts a `string` to a URL-friendly slug.
+
+You can provide a `customCharMap` to override specific character mappings.
+For example, to keep umlauts, you can pass `{ 'o': 'ö', 'u': 'ü' }`.
+The keys in `customCharMap` are case-insensitive.
 
 **Example:**
 
 ```ts
 slugify('Hello, World!') // hello-world
+slugify('Hello, World!', { 'O': 'Ö' }) // hellö-wörld
 ```
 
 ### <a id="snakecase">`snakeCase(string)`</a>

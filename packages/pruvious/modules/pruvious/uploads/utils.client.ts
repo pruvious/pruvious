@@ -17,7 +17,6 @@ import type {
   QueryBuilderResult,
   UpdateInput,
 } from '@pruvious/orm'
-import { normalizePath, tryNormalizePath } from '@pruvious/storage'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import {
   clamp,
@@ -251,7 +250,7 @@ export async function upload<
               method: 'post',
               body: {
                 ...omit(item, ['file', 'directory']),
-                path: item.path ?? tryNormalizePath(`${item.directory ?? ''}/${item.file.name}`),
+                path: item.path ?? `${item.directory ?? ''}/${item.file.name}`,
               },
               query: pick(options ?? {}, ['overwrite']),
               ignoreResponseError: true,
@@ -723,7 +722,7 @@ export async function moveUpload<
   options?: MoveUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<MoveUploadResult<TReturningFields, TPopulateFields>[]> {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + normalizePath(oldPath), {
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + oldPath, {
     method: 'patch',
     body: { path: newPath },
     query: pick(options ?? {}, ['overwrite', 'returning', 'populate']),
@@ -760,7 +759,7 @@ export async function updateUpload<
   >
 > {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + normalizePath(path), {
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
     method: 'patch',
     body: input,
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
@@ -790,7 +789,7 @@ export async function deleteUpload<
   options?: DeleteUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<DeleteUploadResult<TReturningFields, TPopulateFields>[]> {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + normalizePath(path), {
+  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
     method: 'delete',
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
   }).finally(() => window.dispatchEvent(new CustomEvent('pruvious:delete-upload-complete'))) as any
