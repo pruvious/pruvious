@@ -1078,7 +1078,7 @@ export async function moveUpload<
     const updatePathQuery = await update('Uploads')
       .set({ path: newPath })
       .where('id', '=', id)
-      .withCustomContextData({ _allowUploadsQueries: true })
+      .withCustomContextData({ _allowUploadsQueries: true, _uploadType: 'file' })
       .run()
 
     if (!updatePathQuery.success) {
@@ -1097,7 +1097,7 @@ export async function moveUpload<
       await update('Uploads')
         .set({ path, isLocked: false })
         .where('id', '=', id)
-        .withCustomContextData({ _allowUploadsQueries: true })
+        .withCustomContextData({ _allowUploadsQueries: true, _uploadType: 'file' })
         .run()
 
       return [
@@ -1139,6 +1139,7 @@ export async function moveUpload<
     .set({ path: newPath, etag, isLocked: false })
     .where('id', '=', id)
     .whereRaw('not exists(select 1 from "Uploads" where "path" like $path)', { path: `${path}/%` })
+    .withCustomContextData({ _uploadType: type })
     .returning(returning)
 
   if (populate) {

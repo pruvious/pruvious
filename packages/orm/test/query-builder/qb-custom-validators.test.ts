@@ -7,7 +7,6 @@ import {
   numberFieldModel,
   textFieldModel,
   timestampValidator,
-  uploadPathValidator,
   urlValidator,
 } from '../../src'
 import { initAllDrivers, qbe, qbo } from '../utils'
@@ -84,53 +83,6 @@ test('timestamp validator', async () => {
         .values([{ bar: 0 }])
         .run(),
     ).toEqual(qbo(1))
-
-    await db.close()
-    await close?.()
-  }
-})
-
-test('upload path validator', async () => {
-  for (const { driver, PGPool, close } of await initAllDrivers('qb_upload_path_validator')) {
-    const db = new Database({
-      driver,
-      PGPool,
-      collections: {
-        Foo: new Collection({
-          fields: {
-            bar: new Field({
-              model: textFieldModel(),
-              options: { trim: false },
-              validators: [uploadPathValidator()],
-            }),
-          },
-        }),
-      },
-    })
-    const qb = db.queryBuilder()
-    await db.connect()
-
-    expect(
-      await qb
-        .insertInto('Foo')
-        .values([{ bar: '/image.webp' }])
-        .run(),
-    ).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: '/image' }).run()).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: '/my-dir/my-image.webp' }).run()).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: '/foo/bar/image.webp' }).run()).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: '/my.image.webp' }).run()).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: '/my.image-001.webp' }).run()).toEqual(qbo(1))
-    expect(await qb.update('Foo').set({ bar: 'My-Image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: 'image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/my.dir/image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/my_dir/image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/my.image_001.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/my_image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/Dir/image.webp' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/dir/' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '/' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
-    expect(await qb.update('Foo').set({ bar: '//' }).run()).toEqual(qbe({ bar: 'Invalid path' }))
 
     await db.close()
     await close?.()

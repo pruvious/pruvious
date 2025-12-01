@@ -12,9 +12,9 @@ import {
   textField,
   translatableTextField,
   uniqueValidator,
-  uploadPathValidator,
 } from '#pruvious/server'
 import { Field, objectFieldModel } from '@pruvious/orm'
+import { normalizePath } from '@pruvious/storage'
 import { isArray, isDefined, isNull, isObject, isPositiveInteger, isString, toArray } from '@pruvious/utils'
 import mime from 'mime'
 import { extname } from 'pathe'
@@ -51,16 +51,18 @@ export default defineTemplate(() => ({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'Path'), placeholder: 'e.g. /folder/file.jpg' },
       required: true,
       validators: [
-        uploadPathValidator(),
         (value, { context }) => {
-          if (
-            context.operation === 'insert' &&
-            context.getSanitizedInputValue('type') === 'directory' &&
-            value.includes('.')
-          ) {
+          try {
+            const type =
+              context.customData._uploadType ??
+              (context.getSanitizedInputValue('type') === 'file' ? 'file' : 'directory')
+            const normalizedPath = normalizePath(value, type)
+            if (normalizedPath === value) {
+              return
+            }
+            console.log(normalizedPath, value)
+          } catch {}
             throw new Error(context.__('pruvious-api', 'Invalid path'))
-          }
-          return 'The path must start with a slash'
         },
         uniqueValidator({ errorMessage: ({ __ }) => __('pruvious-api', 'The path must be unique') }),
       ],
