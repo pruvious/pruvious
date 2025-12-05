@@ -1489,7 +1489,7 @@ export async function deleteUpload<
 
     if (selectQuery.success) {
       for (const { id } of selectQuery.data) {
-        await deleteUpload(id, { guarded, returning, populate }).then((res) => results.push(...(res as any)))
+        await deleteUpload(id, { guarded, returning, populate, recursive }).then((res) => results.push(...(res as any)))
       }
     }
   }
