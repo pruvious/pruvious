@@ -104,7 +104,11 @@
         <PruviousDashboardHistoryButtons
           v-model="data"
           :history="history"
-          @update:modelValue="nextTick(whereFiltersComponent?.refresh)"
+          @update:modelValue="
+            nextTick(() => {
+              whereFiltersComponent?.refresh()
+            })
+          "
         />
 
         <div class="pui-row">
@@ -393,11 +397,13 @@ watch(
   async () => {
     data.value.where = castWhereCondition(props.params.where ?? [])
     data.value.orderBy = props.params.orderBy ?? []
-    await nextTick(whereFiltersComponent.value?.refresh)
-    if (!initialized.value) {
-      appliedData.value = deepClone(data.value)
-    }
-    initialized.value = true
+    nextTick(() => {
+      whereFiltersComponent.value?.refresh()
+      if (!initialized.value) {
+        appliedData.value = deepClone(data.value)
+      }
+      initialized.value = true
+    })
   },
   { immediate: true },
 )

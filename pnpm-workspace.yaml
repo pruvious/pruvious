@@ -2,6 +2,7 @@ packages:
   - packages/*
 
 ignoredBuiltDependencies:
+  - '@parcel/watcher'
   - esbuild
   - sharp
   - vue-demi

@@ -1007,7 +1007,9 @@ function push(replace = false) {
     }
   }
 
-  nextTick(() => navigateTo({ query, replace }))
+  nextTick(() => {
+    navigateTo({ query, replace })
+  })
 }
 </script>
 

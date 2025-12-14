@@ -573,7 +573,9 @@ function filterChoices() {
     filteredChoices.value.length - 1,
     highlightedIndex.value > -1 ? highlightedIndex.value : 0,
   )
-  nextTick(dropdown.value?.update)
+  nextTick(() => {
+    dropdown.value?.update()
+  })
 }
 
 function focusPreviousChoice() {

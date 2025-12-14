@@ -164,9 +164,14 @@ async function publish(dir) {
  */
 async function unpublish(dir) {
   const execaOptions = { cwd: resolve(rootDir, `packages/${dir}`), shell: true }
+  const packageName = JSON.parse(fs.readFileSync(resolve(rootDir, `packages/${dir}/package.json`)).toString()).name
 
   try {
-    await execa('pnpm', ['unpublish', '--registry', process.env.PRIVATE_REGISTRY_BASE_URL, '--force'], execaOptions)
+    await execa(
+      'pnpm',
+      ['unpublish', '--registry', process.env.PRIVATE_REGISTRY_BASE_URL, packageName, '--force'],
+      execaOptions,
+    )
     return true
   } catch {
     return false
@@ -194,6 +199,8 @@ async function initPlayground() {
       '.',
       '--packageManager',
       'pnpm',
+      '--template',
+      'minimal',
       '--gitInit',
       'false',
       '--preferOffline',
@@ -203,6 +210,7 @@ async function initPlayground() {
   )
 
   fs.writeFileSync(resolve(playgroundDir, '.npmrc'), `registry=${process.env.PRIVATE_REGISTRY_BASE_URL}\n`)
+  fs.writeFileSync(resolve(playgroundDir, 'pnpm-workspace.yaml'), `onlyBuiltDependencies:\n  - better-sqlite3\n`)
 
   consola.success('Initialization completed')
 
@@ -238,7 +246,7 @@ async function initPlayground() {
             `    },`,
             `  },`,
             `  nitro: {`,
-            `    preset: 'cloudflare_module',`,
+            `    preset: 'cloudflare-module',`,
             `  },`,
           ].join('\n')
         : [
