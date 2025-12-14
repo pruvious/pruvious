@@ -106,6 +106,7 @@ npm install @pruvious/utils
   - [castToString](#casttostring)
   - [excerpt](#excerpt)
   - [extractKeywords](#extractkeywords)
+  - [formatBytes](#formatbytes)
   - [generateSecureRandomString](#generatesecurerandomstring)
   - [isAlphanumeric](#isalphanumeric)
   - [isIdentifier](#isidentifier)
@@ -115,6 +116,7 @@ npm install @pruvious/utils
   - [isStringInteger](#isstringinteger)
   - [kebabCase](#kebabcase)
   - [normalizeCase](#normalizecase)
+  - [parseBytes](#parsebytes)
   - [pascalCase](#pascalcase)
   - [randomIdentifier](#randomidentifier)
   - [randomString](#randomstring)
@@ -1297,6 +1299,20 @@ extractKeywords('foo bar')    // ['foo', 'bar']
 extractKeywords(' Foo  BAR ') // ['foo', 'bar']
 ```
 
+### <a id="formatbytes">`formatBytes(value)`</a>
+
+Formats a number of bytes into a human-readable string.
+If the input `value` cannot be parsed, `null` is returned.
+
+@remarks This function is adapted from the `bytes` package (https://www.npmjs.com/package/bytes).
+
+**Example:**
+
+```ts
+formatBytes(2097152) // '2 MB'
+formatBytes('1048576') // '1 MB'
+```
+
 ### <a id="generatesecurerandomstring">`generateSecureRandomString(length)`</a>
 
 Generates a cryptographically secure random string.
@@ -1398,6 +1414,19 @@ Splits a `string` by a casing pattern and join it with a custom function.
 
 ```ts
 normalizeCase('foo-bar', ({ curr }) => curr.toUpperCase()) // 'FooBar'
+```
+
+### <a id="parsebytes">`parseBytes(value)`</a>
+
+Parses a human-readable byte string into a number of bytes.
+
+@remarks This function is adapted from the `bytes` package (https://www.npmjs.com/package/bytes).
+
+**Example:**
+
+```ts
+parseBytes('2 MB') // 2097152
+parseBytes(1048576) // 1048576
 ```
 
 ### <a id="pascalcase">`pascalCase(string)`</a>
