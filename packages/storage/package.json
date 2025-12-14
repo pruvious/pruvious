@@ -30,6 +30,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.948.0",
     "@pruvious/utils": "workspace:*",
+    "mime": "4.1.0",
     "pathe": "2.0.3"
   },
   "devDependencies": {

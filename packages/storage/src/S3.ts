@@ -13,6 +13,8 @@ import {
   type UploadPartCommandOutput,
 } from '@aws-sdk/client-s3'
 import { castToBoolean, isInteger, randomString } from '@pruvious/utils'
+import mime from 'mime'
+import { extname } from 'pathe'
 import type {
   AbortMultipartUploadResult,
   CompleteMultipartUploadResult,
@@ -237,10 +239,12 @@ export class S3 implements Instance {
   async createMultipartUpload(path: string): Promise<CreateMultipartUploadResult> {
     try {
       const parsed = parsePath(path)
+      const ext = extname(path)
       const output = await this.client.send(
         new CreateMultipartUploadCommand({
           Bucket: this.bucket,
           Key: parsed.path.slice(1),
+          ContentType: mime.getType(ext) || 'application/octet-stream',
           ACL: 'public-read',
         }),
       )

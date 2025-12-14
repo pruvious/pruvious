@@ -1,5 +1,7 @@
 import type { R2Bucket, R2GetOptions } from '@cloudflare/workers-types'
 import { isDefined, isInteger, isString, pick } from '@pruvious/utils'
+import mime from 'mime'
+import { extname } from 'pathe'
 import type {
   AbortMultipartUploadResult,
   CompleteMultipartUploadResult,
@@ -171,7 +173,9 @@ export class R2 implements Instance {
   async createMultipartUpload(path: string): Promise<CreateMultipartUploadResult> {
     try {
       const parsed = parsePath(path)
-      const mpu = await this.bucket.createMultipartUpload(parsed.path.slice(1))
+      const ext = extname(path)
+      const httpMetadata = { contentType: mime.getType(ext) || 'application/octet-stream' }
+      const mpu = await this.bucket.createMultipartUpload(parsed.path.slice(1), { httpMetadata })
       return { success: true, data: { key: mpu.uploadId } }
     } catch (error: any) {
       return { success: false, error: error.message }
