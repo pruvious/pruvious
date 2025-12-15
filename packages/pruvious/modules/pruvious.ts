@@ -274,15 +274,6 @@ export default defineNuxtModule<PruviousModuleOptions>({
     // Enable async context
     nuxt.options.experimental.asyncContext = true
 
-    // Remove dynamic imports from entry points
-    nuxt.hook('build:manifest', (manifest) => {
-      for (const item of Object.values(manifest)) {
-        item.dynamicImports = []
-        item.prefetch = false
-        item.preload = false
-      }
-    })
-
     // Disable unwanted stylesheets
     if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
       nuxt.options.app.head.script ??= []
