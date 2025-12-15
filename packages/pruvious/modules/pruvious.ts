@@ -8,7 +8,7 @@ import {
 } from '@pruvious/utils'
 import { colorize } from 'consola/utils'
 import fs from 'node:fs'
-import { addServerHandler, addVitePlugin, createResolver, defineNuxtModule } from 'nuxt/kit'
+import { addServerHandler, createResolver, defineNuxtModule } from 'nuxt/kit'
 import { join } from 'pathe'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
@@ -282,15 +282,6 @@ export default defineNuxtModule<PruviousModuleOptions>({
         item.preload = false
       }
     })
-
-    // Disable module preload
-    addVitePlugin(() => ({
-      name: 'pruvious-disable-module-preload',
-      config(config) {
-        config.build ??= {}
-        config.build.modulePreload = false
-      },
-    }))
 
     // Disable unwanted stylesheets
     if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development') {
