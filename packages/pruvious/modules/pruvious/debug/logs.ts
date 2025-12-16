@@ -332,6 +332,71 @@ export const logsCollections = {
     ],
     meta: privateCollectionMeta,
   }),
+  Errors: new Collection({
+    fields: {
+      requestDebugId: new Field({
+        model: textFieldModel(),
+        required: true,
+        nullable: false,
+        options: {},
+      }),
+      method: new Field({
+        model: textFieldModel(),
+        required: true,
+        nullable: false,
+        options: {},
+      }),
+      path: new Field({
+        model: textFieldModel(),
+        required: true,
+        nullable: false,
+        options: {},
+      }),
+      queryString: new Field({
+        model: textFieldModel(),
+        nullable: false,
+        options: { allowEmptyString: true },
+      }),
+      category: new Field({
+        model: textFieldModel(),
+        required: true,
+        nullable: false,
+        options: {},
+      }),
+      severity: new Field({
+        model: numberFieldModel(),
+        required: true,
+        nullable: false,
+        options: { min: 0 },
+      }),
+      message: new Field({
+        model: textFieldModel(),
+        required: true,
+        nullable: false,
+        options: {},
+      }),
+      payload: new Field({
+        model: objectFieldModel(),
+        options: {},
+      }),
+      user: new Field({
+        model: numberFieldModel(),
+        default: null,
+        options: { min: 1 },
+      }),
+      createdAt: createdAtField(),
+    },
+    indexes: [
+      { fields: ['requestDebugId'] },
+      { fields: ['method'] },
+      { fields: ['path'] },
+      { fields: ['category'] },
+      { fields: ['severity'] },
+      { fields: ['message'] },
+      { fields: ['createdAt'] },
+    ],
+    meta: privateCollectionMeta,
+  }),
   Custom: new Collection({
     fields: {
       requestDebugId: new Field({
@@ -419,6 +484,7 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
       exclude: ['/api/logs/**'],
     },
     queue: false,
+    errors: false,
     custom: false,
   }
 
@@ -427,6 +493,7 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     config.api.enabled = config.enabled
     config.queries.enabled = config.enabled
     config.queue = config.enabled
+    config.errors = config.enabled
     config.custom = config.enabled
   } else if (isObject(logs)) {
     config.enabled = true
@@ -434,6 +501,7 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     config.api.enabled = logs.api !== false
     config.queries.enabled = logs.queries !== false
     config.queue = logs.queue !== false
+    config.errors = logs.errors !== false
     config.custom = logs.custom !== false
 
     if (isObject(logs.api)) {
@@ -563,15 +631,7 @@ export function logResponseHandler(event?: H3Event, response?: { body?: any; err
                 ),
                 statusCode: event.node.res.statusCode,
                 statusMessage: event.node.res.statusMessage,
-                body: isObject(response?.body)
-                  ? JSON.stringify(api.exposeResponseData ? response.body : anonymizeObject(response.body))
-                  : isString(response?.body)
-                    ? api.exposeResponseData
-                      ? response.body
-                      : response.body
-                        ? 'string'
-                        : ''
-                    : undefined,
+                body: anonymizeBody(response?.body, api.exposeResponseData),
                 errorMessage: response?.errorMessage,
                 user: event.context.pruvious.auth.user?.id,
               })
@@ -611,4 +671,29 @@ function anonymizeCookie(cookie: string) {
   const [name] = main!.split('=')
 
   return [name + '=***', ...rest].join(';')
+}
+
+/**
+ * Anonymizes the response body by removing sensitive data.
+ */
+function anonymizeBody(body: any, exposeResponseData: boolean) {
+  if (isObject(body) || isArray(body)) {
+    if (exposeResponseData) {
+      return JSON.stringify(body)
+    } else {
+      return JSON.stringify(anonymizeObject(body))
+    }
+  } else if (isString(body)) {
+    if (exposeResponseData) {
+      return body
+    } else {
+      if (body) {
+        return 'string'
+      } else {
+        return ''
+      }
+    }
+  } else {
+    return undefined
+  }
 }

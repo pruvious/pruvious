@@ -73,6 +73,10 @@ if (dashboard.value?.logs) {
     logItems.push({ to: resolveLogRoute('Queue'), label: __('pruvious-dashboard', 'Queue') })
   }
 
+  if (dashboard.value.logs.errors) {
+    logItems.push({ to: resolveLogRoute('Errors'), label: __('pruvious-dashboard', 'Errors') })
+  }
+
   if (dashboard.value.logs.custom) {
     logItems.push({ to: resolveLogRoute('Custom'), label: __('pruvious-dashboard', 'Custom') })
   }

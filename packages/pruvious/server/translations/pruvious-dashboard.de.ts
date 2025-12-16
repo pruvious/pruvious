@@ -224,6 +224,7 @@ export default defineTranslation({
   'Equals': 'Gleich',
   'Equals (case-insensitive)': 'Gleich (Groß-/Kleinschreibung ignorieren)',
   'Error': 'Fehler',
+  'Errors': 'Fehler',
   'ETag': 'ETag',
   'Excludes all': 'Schließt alle aus',
   'Excludes any': 'Schließt mindestens eines aus',

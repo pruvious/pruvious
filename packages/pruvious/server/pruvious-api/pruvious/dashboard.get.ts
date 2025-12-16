@@ -107,6 +107,7 @@ export default defineEventHandler(async () => {
         api: runtimeConfig.pruvious.debug.logs.api.enabled,
         queries: runtimeConfig.pruvious.debug.logs.queries.enabled,
         queue: runtimeConfig.pruvious.debug.logs.queue,
+        errors: runtimeConfig.pruvious.debug.logs.errors,
         custom: runtimeConfig.pruvious.debug.logs.custom,
       }
     }

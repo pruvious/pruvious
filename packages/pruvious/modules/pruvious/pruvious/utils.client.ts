@@ -67,6 +67,11 @@ export interface PruviousDashboardState {
     queue: boolean
 
     /**
+     * Indicates whether the current user can access error logs.
+     */
+    errors: boolean
+
+    /**
      * Indicates whether the current user can access custom logs.
      */
     custom: boolean

@@ -5,32 +5,32 @@
       v-model:detailsId="detailsId"
       :canDeleteLogs="canDeleteLogs"
       :logCollectionDefinition="logCollectionDefinition"
-      logCollectionName="Responses"
+      logCollectionName="Errors"
     >
       <template v-if="details" #detailsHeader>
         <PUIBadge
           :color="
-            details.response.method === 'GET'
+            details.error.method === 'GET'
               ? 'hsl(var(--p-green))'
-              : details.response.method === 'POST'
+              : details.error.method === 'POST'
                 ? 'hsl(var(--p-purple))'
-                : details.response.method === 'PUT'
+                : details.error.method === 'PUT'
                   ? 'hsl(var(--p-yellow))'
-                  : details.response.method === 'PATCH'
+                  : details.error.method === 'PATCH'
                     ? 'hsl(var(--p-orange))'
-                    : details.response.method === 'DELETE'
+                    : details.error.method === 'DELETE'
                       ? 'destructive'
                       : 'secondary'
           "
         >
-          {{ details.response.method }}
+          {{ details.error.method }}
         </PUIBadge>
         <span
-          :title="details.response.path + (details.response.queryString ? '?' + details.response.queryString : '')"
+          :title="details.error.path + (details.error.queryString ? '?' + details.error.queryString : '')"
           class="p-details-title"
         >
-          <strong>{{ details.response.path }}</strong>
-          <span class="pui-muted">{{ details.response.queryString ? '?' + details.response.queryString : '' }}</span>
+          <strong>{{ details.error.path }}</strong>
+          <span class="pui-muted">{{ details.error.queryString ? '?' + details.error.queryString : '' }}</span>
         </span>
       </template>
 
@@ -38,12 +38,11 @@
         <PUITabs
           :list="[
             ...(details.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
-            { name: 'response', label: __('pruvious-dashboard', 'Response') },
-            ...(details.queries?.length ? [{ name: 'queries', label: __('pruvious-dashboard', 'Queries') }] : []),
-            ...(details.errors?.length ? [{ name: 'errors', label: __('pruvious-dashboard', 'Errors') }] : []),
+            ...(details.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
+            { name: 'error', label: __('pruvious-dashboard', 'Error') },
           ]"
           @change="scrollToTop()"
-          active="response"
+          active="error"
         >
           <PUITab v-if="details.request" name="request">
             <div class="p-details-field">
@@ -108,7 +107,7 @@
             </div>
           </PUITab>
 
-          <PUITab name="response">
+          <PUITab v-if="details.response" name="response">
             <div class="p-details-field">
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'Status') }}</span>
@@ -192,24 +191,71 @@
             </div>
           </PUITab>
 
-          <PUITab v-if="details.queries?.length" name="queries">
-            <div v-for="(query, i) of details.queries" class="p-details-field">
+          <PUITab name="error">
+            <div class="p-details-field">
               <PUIFieldLabel>
-                <span class="pui-label">{{ __('pruvious-dashboard', 'Query') }} #{{ i + 1 }}</span>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Category') }}</span>
+              </PUIFieldLabel>
+              <PUIBadge color="accent">
+                {{ details.error.category }}
+              </PUIBadge>
+            </div>
+            <div class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Severity') }}</span>
+              </PUIFieldLabel>
+              <PUIBadge color="secondary">
+                {{ details.error.severity }}
+              </PUIBadge>
+            </div>
+            <div class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Message') }}</span>
               </PUIFieldLabel>
               <PUICode
-                :code="beautifyQuery(query)"
+                :code="details.error.message"
                 :copiedTooltip="__('pruvious-dashboard', 'Copied')"
                 :copyTooltip="__('pruvious-dashboard', 'Copy to clipboard')"
                 language="markdown"
               />
             </div>
-          </PUITab>
-
-          <PUITab v-if="details.errors?.length" name="errors">
-            <div v-for="(error, i) of details.errors" class="p-details-field">
-              <!-- @todo -->
-              <pre>{{ error }}</pre>
+            <div v-if="!isEmpty(details.error.payload)" class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Payload') }}</span>
+              </PUIFieldLabel>
+              <PUICode
+                :code="JSON.stringify(details.error.payload, null, 2)"
+                :copiedTooltip="__('pruvious-dashboard', 'Copied')"
+                :copyTooltip="__('pruvious-dashboard', 'Copy to clipboard')"
+                language="json"
+              />
+            </div>
+            <div class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Date') }}</span>
+              </PUIFieldLabel>
+              <div>
+                {{ dayjsFormatDateTime(details.error.createdAt) }}
+                <span class="pui-muted">({{ dayjsRelative(details.error.createdAt) }})</span>
+              </div>
+            </div>
+            <div v-if="details.error.user" class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
+              </PUIFieldLabel>
+              <!-- @todo record preview -->
+              <div>{{ details.error.user }}</div>
+            </div>
+            <div class="p-details-field">
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Request debug ID') }}</span>
+              </PUIFieldLabel>
+              <PUICode
+                :code="details.error.requestDebugId"
+                :copiedTooltip="__('pruvious-dashboard', 'Copied')"
+                :copyTooltip="__('pruvious-dashboard', 'Copy to clipboard')"
+                language="markdown"
+              />
             </div>
           </PUITab>
         </PUITabs>
@@ -222,17 +268,18 @@
 import { __, dashboardBasePath, dashboardMiddleware, hasPermission, usePruviousDashboard } from '#pruvious/client'
 import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
-import { beautifyCode, beautifyQuery, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
+import { isEmpty } from '@pruvious/utils'
+import { beautifyCode, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
 
 definePageMeta({
-  path: dashboardBasePath + 'logs/responses',
+  path: dashboardBasePath + 'logs/errors',
   middleware: [
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
     (to) =>
       dashboardMiddleware(to, ({ __, puiQueueToast, usePruviousDashboard }) => {
-        if (!usePruviousDashboard().value?.logs?.api) {
+        if (!usePruviousDashboard().value?.logs?.errors) {
           puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
             type: 'error',
             description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
@@ -247,7 +294,7 @@ definePageMeta({
 })
 
 useHead({
-  title: __('pruvious-dashboard', 'Responses') + ' - ' + __('pruvious-dashboard', 'Logs'),
+  title: __('pruvious-dashboard', 'Errors') + ' - ' + __('pruvious-dashboard', 'Logs'),
 })
 
 const route = useRoute()
@@ -256,10 +303,10 @@ const canDeleteLogs = computed(() => hasPermission('delete-logs'))
 const detailsId = ref<number | null>(null)
 const details = ref<{
   request?: ({ id: number } & LogsDatabase['collections']['Requests']['TCastedTypes']) | null
-  response: { id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']
-  queries?: ({ id: number } & LogsDatabase['collections']['Queries']['TCastedTypes'])[]
-  errors?: ({ id: number } & LogsDatabase['collections']['Errors']['TCastedTypes'])[]
+  response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
+  error: { id: number } & LogsDatabase['collections']['Errors']['TCastedTypes']
 } | null>(null)
+
 const logCollectionDefinition = {
   translatable: false,
   syncedFields: [] as any,
@@ -308,45 +355,37 @@ const logCollectionDefinition = {
       _dataType: 'text',
       _hasPopulator: false,
     },
-    statusCode: {
+    category: {
       nullable: false,
-      default: 200,
+      default: '',
+      ui: { label: __('pruvious-dashboard', 'Category') },
+      _fieldType: 'text',
+      _dataType: 'text',
+      _hasPopulator: false,
+    },
+    severity: {
+      nullable: false,
+      default: 0,
       decimalPlaces: 0,
-      max: 599,
-      min: 100,
-      ui: { label: __('pruvious-dashboard', 'Status code') },
+      max: Number.MAX_SAFE_INTEGER,
+      min: 0,
+      ui: { label: __('pruvious-dashboard', 'Severity') },
       _fieldType: 'number',
       _dataType: 'numeric',
       _hasPopulator: false,
     },
-    statusMessage: {
+    message: {
       nullable: false,
       default: '',
-      ui: { label: __('pruvious-dashboard', 'Status message') },
+      ui: { label: __('pruvious-dashboard', 'Message') },
       _fieldType: 'text',
       _dataType: 'text',
       _hasPopulator: false,
     },
-    headers: {
-      nullable: false,
-      default: '',
-      ui: { label: __('pruvious-dashboard', 'Headers') },
-      _fieldType: 'text',
-      _dataType: 'text',
-      _hasPopulator: false,
-    },
-    body: {
+    payload: {
       nullable: true,
-      default: '',
-      ui: { label: __('pruvious-dashboard', 'Body') },
-      _fieldType: 'text',
-      _dataType: 'text',
-      _hasPopulator: false,
-    },
-    errorMessage: {
-      nullable: true,
-      default: '',
-      ui: { label: __('pruvious-dashboard', 'Error') },
+      default: 'null',
+      ui: { label: __('pruvious-dashboard', 'Payload') },
       _fieldType: 'text',
       _dataType: 'text',
       _hasPopulator: false,
@@ -373,7 +412,7 @@ const logCollectionDefinition = {
   ui: {
     indexPage: {
       table: {
-        columns: ['method | 150px', 'path', 'queryString | 150px', 'statusCode | 150px', 'createdAt | 220px'],
+        columns: ['category | 150px', 'message', 'severity | 150px', 'user | 150px', 'createdAt | 220px'],
         orderBy: 'createdAt:desc',
       },
     },
@@ -385,31 +424,21 @@ watch(detailsId, async () => {
   delete query.details
 
   if (detailsId.value) {
-    const response = await logsQueryBuilder.selectFrom('Responses').where('id', '=', detailsId.value).first()
+    const error = await logsQueryBuilder.selectFrom('Errors').where('id', '=', detailsId.value).first()
 
-    if (response.success && response.data) {
+    if (error.success && error.data) {
       const related = await Promise.all([
-        logsQueryBuilder.selectFrom('Requests').where('requestDebugId', '=', response.data.requestDebugId).first(),
-        dashboard.value?.logs?.queries
-          ? logsQueryBuilder
-              .selectFrom('Queries')
-              .where('requestDebugId', '=', response.data.requestDebugId)
-              .orderBy('createdAt', 'asc')
-              .all()
-          : undefined,
-        dashboard.value?.logs?.errors
-          ? logsQueryBuilder
-              .selectFrom('Errors')
-              .where('requestDebugId', '=', response.data.requestDebugId)
-              .orderBy('createdAt', 'asc')
-              .all()
-          : undefined,
+        dashboard.value?.logs?.api && error.data.requestDebugId
+          ? logsQueryBuilder.selectFrom('Requests').where('requestDebugId', '=', error.data.requestDebugId).first()
+          : null,
+        dashboard.value?.logs?.api && error.data.requestDebugId
+          ? logsQueryBuilder.selectFrom('Responses').where('requestDebugId', '=', error.data.requestDebugId).first()
+          : null,
       ])
       details.value = {
-        request: related[0].data,
-        response: response.data,
-        queries: related[1]?.data,
-        errors: related[2]?.data,
+        request: related[0]?.data,
+        response: related[1]?.data,
+        error: error.data,
       }
       query = { details: String(detailsId.value), ...query }
     } else {

@@ -19,6 +19,8 @@ definePageMeta({
           redirect = 'logs/queries'
         } else if (dashboard.value?.logs?.queue) {
           redirect = 'logs/queue'
+        } else if (dashboard.value?.logs?.errors) {
+          redirect = 'logs/errors'
         } else if (dashboard.value?.logs?.custom) {
           redirect = 'logs/custom'
         }

@@ -151,7 +151,7 @@
               }}
             </PUIBadge>
 
-            <PUIBadge v-else-if="key === 'type'" color="accent">{{ row[key] }}</PUIBadge>
+            <PUIBadge v-else-if="key === 'type' || key === 'category'" color="accent">{{ row[key] }}</PUIBadge>
 
             <PUIBadge v-else-if="key === 'severity'" color="secondary">{{ row[key] }}</PUIBadge>
 

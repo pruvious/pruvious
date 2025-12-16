@@ -225,6 +225,7 @@ export default defineTranslation({
   'Equals': 'Equals',
   'Equals (case-insensitive)': 'Equals (case-insensitive)',
   'Error': 'Error',
+'Errors': 'Errors',
   'ETag': 'ETag',
   'Excludes all': 'Excludes all',
   'Excludes any': 'Excludes any',

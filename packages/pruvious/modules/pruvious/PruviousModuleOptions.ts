@@ -971,16 +971,24 @@ export interface PruviousModuleOptions {
           queue?: boolean
 
           /**
-           * Controls whether to enable custom logs on the server side using the `insertCustomLog()` function.
+           * Controls whether to log server-side errors.
+           * These error logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+           *
+           * @default true
+           */
+          errors?: boolean
+
+          /**
+           * Controls whether to enable custom logs on the server side using the `customLog()` function.
            * These logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
            *
            * @default true
            *
            * @example
            * ```ts
-           * import { insertCustomLog } from '#pruvious/server'
+           * import { customLog } from '#pruvious/server'
            *
-           * await insertCustomLog('New user registered', {
+           * await customLog('New user registered', {
            *   type: 'info',
            *   payload: { email: 'foo@bar.baz' },
            * })
@@ -1309,6 +1317,7 @@ export interface ResolvedDebugConfig {
       exclude: string[]
     }
     queue: boolean
+    errors: boolean
     custom: boolean
   }
 }

@@ -40,6 +40,7 @@
             { name: 'request', label: __('pruvious-dashboard', 'Request') },
             ...(details.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
             ...(details.queries?.length ? [{ name: 'queries', label: __('pruvious-dashboard', 'Queries') }] : []),
+            ...(details.errors?.length ? [{ name: 'errors', label: __('pruvious-dashboard', 'Errors') }] : []),
           ]"
           @change="scrollToTop()"
           active="request"
@@ -204,6 +205,13 @@
               />
             </div>
           </PUITab>
+
+          <PUITab v-if="details.errors?.length" name="errors">
+            <div v-for="(error, i) of details.errors" class="p-details-field">
+              <!-- @todo -->
+              <pre>{{ error }}</pre>
+            </div>
+          </PUITab>
         </PUITabs>
       </template>
     </PruviousDashboardLogs>
@@ -250,6 +258,7 @@ const details = ref<{
   request: { id: number } & LogsDatabase['collections']['Requests']['TCastedTypes']
   response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
   queries?: ({ id: number } & LogsDatabase['collections']['Queries']['TCastedTypes'])[]
+  errors?: ({ id: number } & LogsDatabase['collections']['Errors']['TCastedTypes'])[]
 } | null>(null)
 const logCollectionDefinition = {
   translatable: false,
@@ -361,11 +370,19 @@ watch(detailsId, async () => {
               .orderBy('createdAt', 'asc')
               .all()
           : undefined,
+        dashboard.value?.logs?.errors
+          ? logsQueryBuilder
+              .selectFrom('Errors')
+              .where('requestDebugId', '=', request.data.requestDebugId)
+              .orderBy('createdAt', 'asc')
+              .all()
+          : undefined,
       ])
       details.value = {
         request: request.data,
         response: related[0].data,
         queries: related[1]?.data,
+        errors: related[2]?.data,
       }
       query = { details: String(detailsId.value), ...query }
     } else {
