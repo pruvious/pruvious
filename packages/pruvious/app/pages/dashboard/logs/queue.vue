@@ -5,6 +5,7 @@
       v-model:detailsId="detailsId"
       :canDeleteLogs="canDeleteLogs"
       :logCollectionDefinition="logCollectionDefinition"
+      :tabbed="tabList.length > 1"
       logCollectionName="Queue"
     >
       <template v-if="details" #detailsHeader>
@@ -35,15 +36,7 @@
       </template>
 
       <template v-if="details" #details="{ scrollToTop }">
-        <PUITabs
-          :list="[
-            ...(details.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
-            ...(details.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
-            { name: 'job', label: __('pruvious-dashboard', 'Job') },
-          ]"
-          @change="scrollToTop()"
-          active="job"
-        >
+        <PUITabs :list="tabList" @change="scrollToTop()" active="job">
           <PUITab v-if="details.request" name="request">
             <div class="p-details-field">
               <PUIFieldLabel>
@@ -88,11 +81,8 @@
               </div>
             </div>
             <div v-if="details.request.user" class="p-details-field">
-              <PUIFieldLabel>
-                <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
-              </PUIFieldLabel>
-              <!-- @todo record preview -->
-              <div>{{ details.request.user }}</div>
+              <!-- @todo instead record and record.table fields use just integers with edit button since they dont log new requests... -->
+              {{ details.request.user }}
             </div>
             <div class="p-details-field">
               <PUIFieldLabel>
@@ -175,7 +165,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.response.user }}</div>
             </div>
             <div class="p-details-field">
@@ -301,7 +290,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.job.user }}</div>
             </div>
             <div class="p-details-field">
@@ -375,6 +363,11 @@ const details = ref<{
   response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
   job: { id: number } & LogsDatabase['collections']['Queue']['TCastedTypes']
 } | null>(null)
+const tabList = computed(() => [
+  ...(details.value?.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
+  ...(details.value?.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
+  { name: 'job', label: __('pruvious-dashboard', 'Job') },
+])
 
 const logCollectionDefinition = {
   translatable: false,
@@ -520,7 +513,11 @@ const logCollectionDefinition = {
       default: null,
       collection: 'Users',
       fields: ['id', 'email', 'firstName', 'lastName'],
-      ui: { label: __('pruvious-dashboard', 'User') },
+      ui: {
+        label: __('pruvious-dashboard', 'User'),
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
       _fieldType: 'record',
       _dataType: 'text',
       _hasPopulator: false,

@@ -155,8 +155,6 @@
 
             <PUIBadge v-else-if="key === 'severity'" color="secondary">{{ row[key] }}</PUIBadge>
 
-            <!-- @todo 'user' key -->
-
             <span v-else :title="row[key] ? String(row[key]) : undefined" class="pui-truncate">
               {{ typeof row[key] === 'string' ? row[key] || '-' : (row[key] ?? '-') }}
             </span>
@@ -228,7 +226,7 @@
         </div>
       </template>
 
-      <div class="p-details">
+      <div class="p-details" :class="{ 'p-details-tabbed': tabbed }">
         <slot :scrollToTop="scrollToTop" name="details" />
       </div>
 
@@ -446,6 +444,14 @@ const props = defineProps({
   canDeleteLogs: {
     type: Boolean,
     required: true,
+  },
+
+  /**
+   * Specifies whether the details popup has a tabbed layout.
+   */
+  tabbed: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -934,7 +940,7 @@ function scrollToTop() {
   margin-bottom: 0.5em;
 }
 
-.p-details :deep(.pui-tabs::before) {
+.p-details-tabbed :deep(.pui-tabs::before) {
   content: '';
   position: sticky;
   z-index: 3;

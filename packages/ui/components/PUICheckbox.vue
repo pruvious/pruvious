@@ -17,7 +17,7 @@
       :data-checked="modelValue"
       :id="localId"
       :name="name"
-      @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
+      @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked, $event)"
       hidden
       ref="input"
       type="checkbox"
@@ -137,7 +137,7 @@ const props = defineProps({
 })
 
 defineEmits<{
-  'update:modelValue': [value: boolean]
+  'update:modelValue': [value: boolean, event?: Event]
 }>()
 
 const nuxtId = useId()

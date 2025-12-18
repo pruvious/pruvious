@@ -36,7 +36,6 @@
             :indeterminate="selectAllState === 'indeterminate'"
             :modelValue="!!selectAllState"
             @update:modelValue="$emit('selectAll', $event)"
-            strict
             variant="accent"
             class="pui-table-select-all"
           />
@@ -101,7 +100,6 @@
             :disabled="shift && selectOrigin === row.id"
             :modelValue="!!selected[row.id]"
             @update:modelValue="shift ? onShiftSelect(row.id, $event) : onSelect(row.id, $event)"
-            strict
             variant="accent"
           />
         </td>

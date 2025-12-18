@@ -64,7 +64,7 @@ defineProps({
 .p-page-header {
   padding: calc(0.75rem + 1px) 0.75rem 0.75rem;
   border-bottom-width: 1px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 

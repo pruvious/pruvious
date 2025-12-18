@@ -445,7 +445,7 @@ export function useSelectQueryBuilderParams(options: {
    * The route object to use for monitoring URL query parameters.
    * If not provided, `useRoute()` will be used to get the current route.
    */
-  route?: { query: Record<string, any> }
+  route?: { path?: string; query: Record<string, any> }
 
   /**
    * Determines how the URL query parameters should be synchronized with the current route.

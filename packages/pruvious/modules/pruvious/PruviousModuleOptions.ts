@@ -1389,6 +1389,11 @@ declare module 'nuxt/schema' {
       prefixPrimaryLanguage: boolean
 
       /**
+       * Controls how routes are handled in the `pruvious` or `pruvious-route` client middleware.
+       */
+      routing: Required<PruviousModuleOptions['routing']>
+
+      /**
        * Client-side token storage configuration.
        * Defines how authentication tokens are stored and sent by the client.
        *

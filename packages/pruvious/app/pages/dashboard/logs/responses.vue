@@ -92,7 +92,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.request.user }}</div>
             </div>
             <div class="p-details-field">
@@ -176,7 +175,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.response.user }}</div>
             </div>
             <div class="p-details-field">
@@ -208,8 +206,15 @@
 
           <PUITab v-if="details.errors?.length" name="errors">
             <div v-for="(error, i) of details.errors" class="p-details-field">
-              <!-- @todo -->
-              <pre>{{ error }}</pre>
+              <PUIFieldLabel>
+                <span class="pui-label">{{ __('pruvious-dashboard', 'Error') }} #{{ i + 1 }}</span>
+              </PUIFieldLabel>
+              <PUICode
+                :code="beautifyCode(error.string)"
+                :copiedTooltip="__('pruvious-dashboard', 'Copied')"
+                :copyTooltip="__('pruvious-dashboard', 'Copy to clipboard')"
+                language="json"
+              />
             </div>
           </PUITab>
         </PUITabs>
@@ -222,6 +227,7 @@
 import { __, dashboardBasePath, dashboardMiddleware, hasPermission, usePruviousDashboard } from '#pruvious/client'
 import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
 import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
+import { pick } from '@pruvious/utils'
 import { beautifyCode, beautifyQuery, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'
 import { logsQueryBuilder } from '../../../utils/pruvious/dashboard/logs'
 
@@ -258,7 +264,7 @@ const details = ref<{
   request?: ({ id: number } & LogsDatabase['collections']['Requests']['TCastedTypes']) | null
   response: { id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']
   queries?: ({ id: number } & LogsDatabase['collections']['Queries']['TCastedTypes'])[]
-  errors?: ({ id: number } & LogsDatabase['collections']['Errors']['TCastedTypes'])[]
+  errors?: ({ id: number; string: string } & LogsDatabase['collections']['Errors']['TCastedTypes'])[]
 } | null>(null)
 const logCollectionDefinition = {
   translatable: false,
@@ -356,7 +362,11 @@ const logCollectionDefinition = {
       default: null,
       collection: 'Users',
       fields: ['id', 'email', 'firstName', 'lastName'],
-      ui: { label: __('pruvious-dashboard', 'User') },
+      ui: {
+        label: __('pruvious-dashboard', 'User'),
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
       _fieldType: 'record',
       _dataType: 'text',
       _hasPopulator: false,
@@ -365,7 +375,7 @@ const logCollectionDefinition = {
       nullable: false,
       default: '',
       ui: { label: __('pruvious-dashboard', 'Date') },
-      _fieldType: 'timestamp',
+      _fieldType: 'dateTime',
       _dataType: 'numeric',
       _hasPopulator: false,
     },
@@ -409,7 +419,13 @@ watch(detailsId, async () => {
         request: related[0].data,
         response: response.data,
         queries: related[1]?.data,
-        errors: related[2]?.data,
+        errors: related[2]?.data?.map((error) => ({
+          string: JSON.stringify({
+            ...pick(error, ['id', 'category', 'severity', 'message', 'payload', 'user']),
+            createdAt: dayjsFormatDateTime(error.createdAt) + ' (' + dayjsRelative(error.createdAt) + ')',
+          }),
+          ...error,
+        })),
       }
       query = { details: String(detailsId.value), ...query }
     } else {

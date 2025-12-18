@@ -5,6 +5,7 @@
       v-model:detailsId="detailsId"
       :canDeleteLogs="canDeleteLogs"
       :logCollectionDefinition="logCollectionDefinition"
+      :tabbed="tabList.length > 1"
       logCollectionName="Errors"
     >
       <template v-if="details" #detailsHeader>
@@ -35,15 +36,7 @@
       </template>
 
       <template v-if="details" #details="{ scrollToTop }">
-        <PUITabs
-          :list="[
-            ...(details.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
-            ...(details.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
-            { name: 'error', label: __('pruvious-dashboard', 'Error') },
-          ]"
-          @change="scrollToTop()"
-          active="error"
-        >
+        <PUITabs :list="tabList" @change="scrollToTop()" active="error">
           <PUITab v-if="details.request" name="request">
             <div class="p-details-field">
               <PUIFieldLabel>
@@ -91,7 +84,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.request.user }}</div>
             </div>
             <div class="p-details-field">
@@ -175,7 +167,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.response.user }}</div>
             </div>
             <div class="p-details-field">
@@ -243,10 +234,9 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.error.user }}</div>
             </div>
-            <div class="p-details-field">
+            <div v-if="details.error.requestDebugId" class="p-details-field">
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'Request debug ID') }}</span>
               </PUIFieldLabel>
@@ -306,6 +296,11 @@ const details = ref<{
   response?: ({ id: number } & LogsDatabase['collections']['Responses']['TCastedTypes']) | null
   error: { id: number } & LogsDatabase['collections']['Errors']['TCastedTypes']
 } | null>(null)
+const tabList = computed(() => [
+  ...(details.value?.request ? [{ name: 'request', label: __('pruvious-dashboard', 'Request') }] : []),
+  ...(details.value?.response ? [{ name: 'response', label: __('pruvious-dashboard', 'Response') }] : []),
+  { name: 'error', label: __('pruvious-dashboard', 'Error') },
+])
 
 const logCollectionDefinition = {
   translatable: false,
@@ -395,7 +390,11 @@ const logCollectionDefinition = {
       default: null,
       collection: 'Users',
       fields: ['id', 'email', 'firstName', 'lastName'],
-      ui: { label: __('pruvious-dashboard', 'User') },
+      ui: {
+        label: __('pruvious-dashboard', 'User'),
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
       _fieldType: 'record',
       _dataType: 'text',
       _hasPopulator: false,
@@ -404,7 +403,7 @@ const logCollectionDefinition = {
       nullable: false,
       default: '',
       ui: { label: __('pruvious-dashboard', 'Date') },
-      _fieldType: 'timestamp',
+      _fieldType: 'dateTime',
       _dataType: 'numeric',
       _hasPopulator: false,
     },

@@ -1,4 +1,4 @@
-import { defineField, LanguageCode, languages, primaryLanguage } from '#pruvious/server'
+import { defineField, type LanguageCode, languages, primaryLanguage } from '#pruvious/server'
 import { objectFieldModel } from '@pruvious/orm'
 import { castToString, isObject, isString, isUndefined, remap } from '@pruvious/utils'
 

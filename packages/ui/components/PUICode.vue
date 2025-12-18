@@ -1,11 +1,5 @@
 <template>
-  <div
-    @keydown.left.prevent
-    @keydown.right.prevent
-    @mouseleave="copied = false"
-    class="pui-code"
-    :style="{ '--pui-size': size }"
-  >
+  <div @keydown.left.prevent @keydown.right.prevent class="pui-code" :style="{ '--pui-size': size }">
     <div v-html="html"></div>
     <PUIButton
       v-if="copyCode && ready"

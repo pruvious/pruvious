@@ -91,7 +91,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.request.user }}</div>
             </div>
             <div class="p-details-field">
@@ -175,7 +174,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.response.user }}</div>
             </div>
             <div class="p-details-field">
@@ -292,7 +290,6 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <!-- @todo record preview -->
               <div>{{ details.query.user }}</div>
             </div>
             <div class="p-details-field">
@@ -494,7 +491,11 @@ const logCollectionDefinition = {
       default: null,
       collection: 'Users',
       fields: ['id', 'email', 'firstName', 'lastName'],
-      ui: { label: __('pruvious-dashboard', 'User') },
+      ui: {
+        label: __('pruvious-dashboard', 'User'),
+        displayFields: [['firstName', ' ', 'lastName'], 'email'],
+        searchFields: ['firstName', 'lastName', 'email'],
+      },
       _fieldType: 'record',
       _dataType: 'text',
       _hasPopulator: false,
@@ -503,7 +504,7 @@ const logCollectionDefinition = {
       nullable: false,
       default: '',
       ui: { label: __('pruvious-dashboard', 'Date') },
-      _fieldType: 'timestamp',
+      _fieldType: 'dateTime',
       _dataType: 'numeric',
       _hasPopulator: false,
     },

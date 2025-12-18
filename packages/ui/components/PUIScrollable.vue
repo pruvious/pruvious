@@ -7,6 +7,9 @@
     :style="{ '--pui-size': size }"
   >
     <div
+      @dragenter.prevent="startStepScroll('up')"
+      @dragleave="stopStepScroll()"
+      @dragover.prevent
       @mouseenter="!($event as any).sourceCapabilities?.firesTouchEvents && $event && startStepScroll('up')"
       @mouseleave="stopStepScroll()"
       class="pui-scrollable-button"
@@ -26,6 +29,9 @@
     </div>
 
     <div
+      @dragenter.prevent="startStepScroll('down')"
+      @dragleave="stopStepScroll()"
+      @dragover.prevent
       @mouseenter="!($event as any).sourceCapabilities?.firesTouchEvents && $event && startStepScroll('down')"
       @mouseleave="stopStepScroll()"
       class="pui-scrollable-button"
