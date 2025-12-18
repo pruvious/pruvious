@@ -37,12 +37,12 @@ export function normalizePath(path: string, type: 'file' | 'directory') {
         if (lastDotIndex > -1 && lastDotIndex < part.length - 1) {
           const name = part.slice(0, lastDotIndex)
           const ext = part.slice(lastDotIndex + 1)
-          const nameSlug = slugify(name, { '.': '.', '_': '_' })
+          const nameSlug = slugify(name, { '.': '.' })
           const extSnake = snakeCase(ext)
           return `${nameSlug}.${extSnake}`
         }
 
-        return slugify(part, { _: '_' })
+        return slugify(part)
       }
 
       return slugify(part)
