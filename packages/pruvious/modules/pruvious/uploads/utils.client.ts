@@ -41,7 +41,6 @@ import {
   type DashboardUploadNotification,
 } from '../../../app/utils/pruvious/dashboard/upload-notifications'
 import { $pfetchDashboard } from '../api/dashboard-utils.client'
-import { $pfetch } from '../api/utils.client'
 import { selectFrom } from '../client-query-builder/utils.client'
 
 export interface PruviousFile
@@ -689,7 +688,7 @@ export async function createUploadDirectory<TDirectory extends string | string[]
     : PutUploadResult<Collections['Uploads']['TColumnNames'] | 'id', false>
 > {
   const runtimeConfig = useRuntimeConfig()
-  const results = (await $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads', {
+  const results = (await $pfetchDashboard(runtimeConfig.public.pruvious.apiBasePath + 'uploads', {
     method: 'post',
     body: toArray(directory).map((path) => ({ path, type: 'directory' })),
   })) as any
@@ -721,7 +720,7 @@ export async function moveUpload<
   options?: MoveUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<MoveUploadResult<TReturningFields, TPopulateFields>[]> {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + oldPath, {
+  return $pfetchDashboard(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + oldPath, {
     method: 'patch',
     body: { path: newPath },
     query: pick(options ?? {}, ['overwrite', 'returning', 'populate']),
@@ -758,7 +757,7 @@ export async function updateUpload<
   >
 > {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
+  return $pfetchDashboard(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
     method: 'patch',
     body: input,
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
@@ -788,7 +787,7 @@ export async function deleteUpload<
   options?: DeleteUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<DeleteUploadResult<TReturningFields, TPopulateFields>[]> {
   const runtimeConfig = useRuntimeConfig()
-  return $pfetch(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
+  return $pfetchDashboard(runtimeConfig.public.pruvious.apiBasePath + 'uploads/path' + path, {
     method: 'delete',
     query: pick(options ?? {}, ['recursive', 'returning', 'populate']),
   }).finally(() => window.dispatchEvent(new CustomEvent('pruvious:delete-upload-complete'))) as any
