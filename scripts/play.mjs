@@ -95,12 +95,13 @@ if (isTest) {
       `main = ".output/server/index.mjs"`,
       `assets = { directory = ".output/public" }`,
       `workers_dev = true`,
+      `preview_urls = true`,
       ...(process.env.CF_CUSTOM_DOMAIN
         ? [`routes = [`, `  { pattern = "${process.env.CF_CUSTOM_DOMAIN}", custom_domain = true }`, `]`]
         : []),
       ``,
       `compatibility_flags = [ "nodejs_compat" ]`,
-      `compatibility_date = "2024-11-03"`,
+      `compatibility_date = "2025-12-15"`,
       ``,
       `[[d1_databases]]`,
       `binding = "DB"`,
