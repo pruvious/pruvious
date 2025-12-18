@@ -104,6 +104,7 @@ import {
   dashboardMiddleware,
   fillFieldData,
   getCollectionBySlug,
+  getUser,
   History,
   loadFilters,
   maybeTranslate,
@@ -264,7 +265,13 @@ provide('disableContentLanguageSwitcher', collection.definition.translatable && 
 
 const queryBuilder = new QueryBuilder({ fetcher: pruviousDashboardPost })
 const data = ref<Record<string, any>>(
-  fillFieldData(collection.definition.translatable ? { language: resolvedLanguage } : {}, collection.definition.fields),
+  fillFieldData(
+    {
+      ...(collection.definition.translatable ? { translations: translationKey.value } : {}),
+      ...(collection.definition.authorField ? { author: getUser()?.id } : {}),
+    },
+    collection.definition.fields,
+  ),
 )
 const conditionalLogicResolver = new ConditionalLogicResolver()
 let conditionalLogicDependencies: Record<string, boolean> = {}
@@ -353,6 +360,10 @@ const saveData = lockAndLoad(isSubmitting, async () => {
   if (collection.definition.translatable) {
     preparedData.language = contentLanguage.value
     preparedData.translations = translationKey.value
+  }
+
+  if (collection.definition.authorField) {
+    preparedData.author = data.value.author
   }
 
   const query = await queryBuilder.insertInto(collection.name).values(preparedData).returningAll().run()
