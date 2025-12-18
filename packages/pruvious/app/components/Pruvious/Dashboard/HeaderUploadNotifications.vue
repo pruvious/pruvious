@@ -18,7 +18,7 @@
           {{ __('pruvious-dashboard', 'Upload history') }}
         </span>
         <span v-if="uploadSpeed" :title="__('pruvious-dashboard', 'Upload speed')">
-          {{ format(uploadSpeed, { unitSeparator: ' ' }) }}/s
+          {{ formatBytes(uploadSpeed) }}/s
         </span>
       </div>
 
@@ -77,7 +77,7 @@
             {{ __('pruvious-dashboard', 'Aborted') }}
           </span>
           <span v-else class="p-upload-notification-detail">
-            {{ format(notification.size, { unitSeparator: ' ' }) }}
+            {{ formatBytes(notification.size) }}
           </span>
         </div>
 
@@ -119,7 +119,7 @@ import {
   usePruviousDashboardUploadNotificationsWidget,
   useUploadSpeed,
 } from '#pruvious/client'
-import { format } from 'bytes'
+import { formatBytes } from '@pruvious/utils'
 
 const button = useTemplateRef('button')
 const dropdown = useTemplateRef('dropdown')

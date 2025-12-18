@@ -30,12 +30,12 @@ import {
   isString,
   nanoid,
   omit,
+  parseBytes,
   pick,
   promiseAllInBatches,
   remove,
   toArray,
 } from '@pruvious/utils'
-import { parse } from 'bytes'
 import {
   usePruviousDashboardUploadNotifications,
   type DashboardUploadNotification,
@@ -102,7 +102,6 @@ interface StandardUploadOptions {
    * This is particularly useful for large files, as it allows for resumable uploads and better error handling.
    *
    * You can provide this value as a string (e.g., '32 MB') or as an integer representing the byte count.
-   * String-based sizes are parsed using the [`bytes`](https://www.npmjs.com/package/bytes) npm package.
    *
    * To disable multipart uploads entirely, set this option to `false` or `0`.
    *
@@ -205,7 +204,7 @@ export async function upload<
   const runtimeConfig = useRuntimeConfig()
   const apiBasePath = runtimeConfig.public.pruvious.apiBasePath
   const multipartThreshold = options?.multipartThreshold ?? '8 MB'
-  const multipartThresholdBytes = isString(multipartThreshold) ? parse(multipartThreshold) : multipartThreshold
+  const multipartThresholdBytes = isString(multipartThreshold) ? parseBytes(multipartThreshold) : multipartThreshold
   const pruviousFiles: PruviousFile[] = []
   const fileItems = toArray<File | PruviousFile>(file)
   const _ = (options as any)?._ ?? {}
