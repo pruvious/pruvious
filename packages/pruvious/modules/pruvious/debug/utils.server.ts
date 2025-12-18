@@ -97,7 +97,7 @@ export async function customLog(
       type: options?.type ?? 'info',
       severity: options?.severity ?? 0,
       message,
-      payload: options?.payload ?? null,
+      payload: options?.payload,
       user: event.context.pruvious.auth.user?.id,
     })
     .run()
@@ -137,15 +137,15 @@ export async function logError(
     .queryBuilder()
     .insertInto('Errors')
     .values({
-      requestDebugId: event.context.pruvious.requestDebugId,
+      requestDebugId: event.context.pruvious?.requestDebugId,
       method: event.method,
       path,
       queryString: event.path.split('?')[1],
       category: options?.category ?? 'general',
       severity: options?.severity ?? 0,
       message,
-      payload: options?.payload ?? null,
-      user: event.context.pruvious.auth.user?.id,
+      payload: options?.payload,
+      user: event.context.pruvious?.auth?.user?.id,
     })
     .run()
 }

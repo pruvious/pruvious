@@ -12,6 +12,7 @@ import {
 import { anonymizeObject, isArray, isBoolean, isNumber, isObject, isString } from '@pruvious/utils'
 import { PathMatcher } from '@pruvious/utils/path-matcher'
 import type { H3Event } from 'h3'
+import safeStringify from 'safe-stringify'
 import type { PruviousModuleOptions, ResolvedDebugConfig } from '../PruviousModuleOptions'
 import { privateCollectionMeta } from '../collections/meta'
 
@@ -191,7 +192,7 @@ export const logsCollections = {
         nullable: false,
         options: {},
         inputFilters: {
-          beforeInputValidation: (value) => (isObject(value) ? JSON.parse(JSON.stringify(value)) : value),
+          beforeInputValidation: (value) => (isObject(value) ? JSON.parse(safeStringify(value)) : value),
         },
       }),
       operation: new Field({
@@ -268,6 +269,9 @@ export const logsCollections = {
         model: objectFieldModel(),
         default: null,
         options: {},
+        inputFilters: {
+          beforeInputValidation: (value) => (isObject(value) ? JSON.parse(safeStringify(value)) : value),
+        },
       }),
       priority: new Field({
         model: numberFieldModel(),
@@ -336,7 +340,6 @@ export const logsCollections = {
     fields: {
       requestDebugId: new Field({
         model: textFieldModel(),
-        required: true,
         nullable: false,
         options: {},
       }),
@@ -377,7 +380,11 @@ export const logsCollections = {
       }),
       payload: new Field({
         model: objectFieldModel(),
+        default: null,
         options: {},
+        inputFilters: {
+          beforeInputValidation: (value) => (isObject(value) ? JSON.parse(safeStringify(value)) : value),
+        },
       }),
       user: new Field({
         model: numberFieldModel(),
@@ -442,7 +449,11 @@ export const logsCollections = {
       }),
       payload: new Field({
         model: objectFieldModel(),
+        default: null,
         options: {},
+        inputFilters: {
+          beforeInputValidation: (value) => (isObject(value) ? JSON.parse(safeStringify(value)) : value),
+        },
       }),
       user: new Field({
         model: numberFieldModel(),
@@ -566,7 +577,7 @@ export async function logRequest() {
             ),
             queryString: event.path.split('?')[1],
             body: ['patch', 'post', 'put'].includes(event.method.toLowerCase())
-              ? JSON.stringify({
+              ? safeStringify({
                   input: api.exposeRequestData
                     ? event.context.pruvious.input
                     : anonymizeObject(event.context.pruvious.input),
@@ -679,9 +690,9 @@ function anonymizeCookie(cookie: string) {
 function anonymizeBody(body: any, exposeResponseData: boolean) {
   if (isObject(body) || isArray(body)) {
     if (exposeResponseData) {
-      return JSON.stringify(body)
+      return safeStringify(body)
     } else {
-      return JSON.stringify(anonymizeObject(body))
+      return safeStringify(anonymizeObject(body))
     }
   } else if (isString(body)) {
     if (exposeResponseData) {
