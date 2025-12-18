@@ -18,7 +18,7 @@ import {
 import { isEmpty, isPositiveInteger, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
-interface CustomOptions<
+export interface CustomRecordsFieldOptions<
   TCollection extends CollectionAPI['any']['read'],
   TFields extends keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection],
   TPopulate extends boolean | undefined,
@@ -115,7 +115,7 @@ interface CustomOptions<
   }
 }
 
-const customOptions: CustomOptions<any, string, boolean> = {
+const customOptions: CustomRecordsFieldOptions<any, string, boolean> = {
   collection: '',
   enforceUniqueItems: true,
   fields: ['id'],
@@ -159,7 +159,7 @@ export default {
         undefined
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
-        CustomOptions<TCollection, TFields, TPopulate> &
+        CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
@@ -179,7 +179,7 @@ export default {
       undefined
     >,
     Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
-      CustomOptions<TCollection, TFields, TPopulate> &
+      CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     TRequired,
@@ -331,7 +331,7 @@ export default {
         undefined
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
-        CustomOptions<TCollection, TFields, TPopulate> &
+        CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
@@ -352,7 +352,7 @@ export default {
         undefined
       >,
       Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
-        CustomOptions<TCollection, TFields, TPopulate> &
+        CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
       TRequired,
@@ -381,7 +381,7 @@ export default {
       undefined
     >,
     Omit<MatrixFieldModelOptions<number[], Record<string, any>[]>, 'enforceUniqueItems'> &
-      CustomOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
+      CustomRecordsFieldOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     false,
     boolean,

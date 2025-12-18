@@ -18,7 +18,7 @@ import {
 import { isNull, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
-interface CustomOptions<
+export interface CustomRecordFieldOptions<
   TCollection extends CollectionAPI['any']['read'],
   TFields extends keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection],
   TPopulate extends boolean | undefined,
@@ -101,7 +101,7 @@ interface CustomOptions<
   }
 }
 
-const customOptions: CustomOptions<any, string, boolean> = {
+const customOptions: CustomRecordFieldOptions<any, string, boolean> = {
   collection: '',
   fields: ['id'],
   languages: 'current',
@@ -144,7 +144,7 @@ export default {
           undefined
         >,
         NumberFieldModelOptions<number, TPopulatedType> &
-          CustomOptions<TCollection, TFields, TPopulate> &
+          CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         true,
         TRequired,
@@ -166,7 +166,7 @@ export default {
       undefined
     >,
     NumberFieldModelOptions<number, TPopulatedType> &
-      CustomOptions<TCollection, TFields, TPopulate> &
+      CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     true,
     TRequired,
@@ -269,7 +269,7 @@ export default {
           undefined
         >,
         NumberFieldModelOptions<number, TPopulatedType> &
-          CustomOptions<TCollection, TFields, TPopulate> &
+          CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         true,
         TRequired,
@@ -292,7 +292,7 @@ export default {
         undefined
       >,
       NumberFieldModelOptions<number, TPopulatedType> &
-        CustomOptions<TCollection, TFields, TPopulate> &
+        CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       true,
       TRequired,
@@ -322,7 +322,7 @@ export default {
         undefined
       >,
       NumberFieldModelOptions<number, Record<string, any>> &
-        CustomOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
+        CustomRecordFieldOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       true,
       boolean,

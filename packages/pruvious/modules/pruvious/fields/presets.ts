@@ -16,6 +16,8 @@ import {
 } from '#pruvious/server'
 import { createdAtFieldBeforeQueryExecution, updatedAtFieldBeforeQueryExecution } from '@pruvious/orm'
 import { defu, isNull, isString, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
+import type { CustomRecordFieldOptions } from '../../../server/fields/record'
+import type { CustomRecordsFieldOptions } from '../../../server/fields/records'
 import type { TimestampFieldOptions } from '../../../server/fields/timestamp'
 
 export interface LanguageFieldPresetOptions {
@@ -90,9 +92,12 @@ export interface AuthorFieldPresetOptions {
    * {
    *   label: ({ __ }) => __('pruvious-dashboard', 'Author'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'The user who created the record.'),
+   *   displayFields: [['firstName', ' ', 'lastName'], 'email'],
+   *   searchFields: ['firstName', 'lastName', 'email'],
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>> &
+    CustomRecordFieldOptions<any, string, boolean>['ui']
 }
 
 export interface EditorsFieldPresetOptions {
@@ -113,7 +118,8 @@ export interface EditorsFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The users who can edit the record.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>> &
+    CustomRecordsFieldOptions<any, string, boolean>['ui']
 }
 
 export type SubpathFieldPresetOptions = Parameters<typeof subpathField>[0] & {
@@ -306,10 +312,12 @@ export function authorFieldPreset(options: AuthorFieldPresetOptions) {
         return value
       },
     },
-    ui: defu(options.ui ?? {}, {
+    ui: defu((options.ui ?? {}) as any, {
       label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Author'),
       description: ({ __ }: TranslatableStringCallbackContext) =>
         __('pruvious-dashboard', 'The user who created the record.'),
+      displayFields: [['firstName', ' ', 'lastName'], 'email'],
+      searchFields: ['firstName', 'lastName', 'email'],
     } satisfies AuthorFieldPresetOptions['ui']),
   })
 }
@@ -321,10 +329,12 @@ export function editorsFieldPreset(options: EditorsFieldPresetOptions) {
   return recordsField({
     collection: 'Users',
     fields: ['id', 'firstName', 'lastName'],
-    ui: defu(options.ui ?? {}, {
+    ui: defu((options.ui ?? {}) as any, {
       label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Editors'),
       description: ({ __ }: TranslatableStringCallbackContext) =>
         __('pruvious-dashboard', 'The users who can edit the record.'),
+      displayFields: [['firstName', ' ', 'lastName'], 'email'],
+      searchFields: ['firstName', 'lastName', 'email'],
     } satisfies EditorsFieldPresetOptions['ui']),
   })
 }
