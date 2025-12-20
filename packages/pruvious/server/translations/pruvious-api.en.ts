@@ -8,6 +8,7 @@ export default defineTranslation({
   'Directory': 'Directory',
 
   'Failed to abort multipart upload': 'Failed to abort multipart upload',
+  'Failed to create image variant': 'Failed to create image variant',
   'Failed to create multipart upload': 'Failed to create multipart upload',
   'Failed to fetch image': 'Failed to fetch image',
   'Failed to resume multipart upload': 'Failed to resume multipart upload',
@@ -19,6 +20,7 @@ export default defineTranslation({
   'File': 'File',
   'File not found': 'File not found',
 
+  'Image variant not found': 'Image variant not found',
   'Incorrect credentials': 'Incorrect credentials',
   'Invalid `$param` value. Must be one of: $values': createPattern('Invalid `$param` value. Must be one of: $values', {
     param: 'string',
@@ -30,6 +32,7 @@ export default defineTranslation({
   'Invalid RegExp pattern': 'Invalid RegExp pattern',
 
   'Missing file parts: $parts': createPattern('Missing file parts: $parts', { parts: 'string' }),
+  'Missing image optimization parameters': 'Missing image optimization parameters',
   'Missing property for language code `$code`': createPattern('Missing property for language code `$code`', {
     code: 'string',
   }),
@@ -103,8 +106,8 @@ export default defineTranslation({
   'The new path cannot be the root directory': 'The new path cannot be the root directory',
   'The new path must be different from the current path': 'The new path must be different from the current path',
   'The file part has already been uploaded': 'The file part has already been uploaded',
-  'The image has already been registered': 'The image has already been registered',
-  'The image has not been registered': 'The image has not been registered',
+  'The image variant has already been registered': 'The image variant has already been registered',
+  'The image variant has not been registered': 'The image variant has not been registered',
   'The path must be unique': 'The path must be unique',
   'The singleton `$singleton` does not exist': createPattern('The singleton `$singleton` does not exist', {
     singleton: 'string',

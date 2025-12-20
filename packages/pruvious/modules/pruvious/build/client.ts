@@ -1,5 +1,5 @@
 import { validatorsMeta } from '@pruvious/orm'
-import { camelCase } from '@pruvious/utils'
+import { camelCase, remap } from '@pruvious/utils'
 import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { relative } from 'pathe'
@@ -14,6 +14,7 @@ import {
   resolveFilterDefinitionFiles,
 } from '../hooks/resolver'
 import { resolveTranslationFiles } from '../translations/resolver'
+import { stringifyImageTransformOptions } from '../uploads/images'
 import { getSimpleValidatorsMeta } from './validators'
 
 /**
@@ -546,6 +547,11 @@ function getClientFileContent() {
     ` */`,
     `export const filterStylesheets = ${JSON.stringify(nuxt.options.runtimeConfig.pruvious.dashboard.filterStylesheets)}`,
     ``,
+    `/**`,
+    ` * Key-value object defining image variants for uploaded images in the CMS.`,
+    ` */`,
+    `export const imageVariants = ${JSON.stringify(remap(nuxt.options.runtimeConfig.pruvious.images.variants, (key, options) => [key, { ...options, suffix: stringifyImageTransformOptions({ ...options, originalExtension: '' }) }]))}`,
+    ``,
     getReExports(),
   ].join('\n')
 }
@@ -565,6 +571,7 @@ function getClientTypeFileContent() {
     `export const tableFieldComponents: any`,
     `export const filterFieldComponents: any`,
     `export const filterStylesheets: any`,
+    `export const imageVariants: any`,
     getReExports(),
   ].join('\n')
 }
@@ -629,8 +636,9 @@ function getReExports() {
     `export { defineBlock } from '${resolve('../blocks/define.client')}'`,
     `export { customComponents } from './custom-components'`,
     `export { type DefineDashboardPageOptions, defineDashboardPage } from '${resolve('../dashboard-pages/define')}'`,
-    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks } from '${resolve('../uploads/utils.client')}'`,
+    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath } from '${resolve('../uploads/utils.client')}'`,
     `export { type DashboardUploadNotification, type DashboardUploadNotificationWidget, usePruviousDashboardUploadNotifications, usePruviousDashboardUploadNotificationsWidget } from '${resolve('../../../app/utils/pruvious/dashboard/upload-notifications')}'`,
-    `export { type DashboardMediaLibraryState, usePruviousDashboardMediaLibraryPopup, getDefaultDashboardMediaLibraryState } from '${resolve('../../../app/utils/pruvious/dashboard/media-library')}'`,
+    `export { type UploadItem, type DashboardMediaLibraryState, type DashboardMediaLibraryPopupState, usePruviousDashboardMediaLibraryPopup, getDefaultDashboardMediaLibraryState } from '${resolve('../../../app/utils/pruvious/dashboard/media-library')}'`,
+    `export { usePruviousDashboardDragImageLabel, usePruviousDashboardIsMoving, startMoving, stopMoving } from '${resolve('../../../app/utils/pruvious/dashboard/move')}'`,
   ].join('\n')
 }

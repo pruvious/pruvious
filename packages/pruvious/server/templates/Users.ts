@@ -98,6 +98,8 @@ export default defineTemplate(() => ({
       fields: ['id', 'name', 'permissions'],
       ui: {
         label: ({ __ }) => __('pruvious-dashboard', 'Roles'),
+        displayFields: 'name',
+        searchFields: ['name', 'permissions'],
       },
     }),
     firstName: textField({

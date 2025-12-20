@@ -3,6 +3,8 @@ import type { ExplicitWhereOrGroup, WhereField } from '@pruvious/orm'
 import { isArray, isObject, isString } from '@pruvious/utils'
 import { usePruviousDashboard } from '../../../../modules/pruvious/pruvious/utils.client'
 
+export type UploadItem = Collections['Uploads']['TCastedTypes'] & { id: number }
+
 export interface DashboardMediaLibraryState<
   TColumnNames extends string = Collections['Uploads']['TColumnNames'] | 'id',
 > {
@@ -41,16 +43,37 @@ export interface DashboardMediaLibraryState<
    */
   total: number
 
-  // @todo selected
+  /**
+   * The currently selected uploads.
+   */
+  selectedUploads: UploadItem[]
+
+  /**
+   * Whether the selected uploads can be updated by the current user.
+   */
+  canUpdateSelection: boolean
+
+  /**
+   * Whether the selected uploads can be deleted by the current user.
+   */
+  canDeleteSelection: boolean
+}
+
+export interface DashboardMediaLibraryPopupState extends DashboardMediaLibraryState {
+  /**
+   * Whether the media library popup is opened.
+   */
+  isOpen: boolean
 }
 
 /**
  * Composable containing the current state of the media library popup.
  */
 export const usePruviousDashboardMediaLibraryPopup = () =>
-  useState<DashboardMediaLibraryState>('pruvious-dashboard-media-library-popup', () =>
-    getDefaultDashboardMediaLibraryState(),
-  )
+  useState<DashboardMediaLibraryPopupState>('pruvious-dashboard-media-library-popup', () => ({
+    ...getDefaultDashboardMediaLibraryState(),
+    isOpen: false,
+  }))
 
 /**
  * Returns the default state of the media library.
@@ -80,6 +103,8 @@ export function getDefaultDashboardMediaLibraryState(): DashboardMediaLibrarySta
     perPage: 50,
     lastPage: 1,
     total: 0,
-    // @todo selected
+    selectedUploads: [],
+    canUpdateSelection: false,
+    canDeleteSelection: false,
   }
 }

@@ -293,10 +293,10 @@ const canUpdate = computed(() => {
     if (!isManaged || canManage) {
       return true
     }
-    if (collection.definition.authorField && data.value.author === auth.value.user?.id) {
+    if (collection.definition.authorField && data.value?.author === auth.value.user?.id) {
       return true
     }
-    if (collection.definition.editorsField && data.value.editors?.includes(auth.value.user?.id)) {
+    if (collection.definition.editorsField && data.value?.editors?.includes(auth.value.user?.id)) {
       return true
     }
   }
@@ -307,7 +307,7 @@ const canDelete = computed(() => {
     if (!isManaged || canManage) {
       return true
     }
-    if (collection.definition.editorsField && (canManage || data.value.editors?.includes(auth.value.user?.id))) {
+    if (collection.definition.editorsField && (canManage || data.value?.editors?.includes(auth.value.user?.id))) {
       return true
     }
   }
@@ -408,10 +408,10 @@ async function readData() {
 }
 
 function resolveConditionalLogic(reset = true) {
-  conditionalLogicResolver.setInput(data.value)
+  conditionalLogicResolver.setInput(data.value ?? {})
   conditionalLogicDependencies = {}
   if (reset) {
-    conditionalLogicResolver.setConditionalLogic(parseConditionalLogic(collection.definition.fields, data.value))
+    conditionalLogicResolver.setConditionalLogic(parseConditionalLogic(collection.definition.fields, data.value ?? {}))
   }
   return conditionalLogicResolver.resolve()
 }
@@ -434,7 +434,7 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
     conditionalLogic.value = resolveConditionalLogic(true)
   } else {
     if (queue.some((path) => isString(path) && !isDefined(conditionalLogicDependencies[path]))) {
-      const parsedConditionalLogic = parseConditionalLogic(collection.definition.fields, data.value)
+      const parsedConditionalLogic = parseConditionalLogic(collection.definition.fields, data.value ?? {})
       for (const from of Object.keys(parsedConditionalLogic)) {
         conditionalLogicDependencies[from] ??= false
         const referencedFieldPaths = conditionalLogicResolver.getReferencedFieldPaths(from)
@@ -444,7 +444,7 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
       }
     }
     if (queue.some((path) => path === '$resolve' || conditionalLogicDependencies[path])) {
-      conditionalLogic.value = conditionalLogicResolver.setInput(data.value).resolve()
+      conditionalLogic.value = conditionalLogicResolver.setInput(data.value ?? {}).resolve()
     }
   }
 }, 50)

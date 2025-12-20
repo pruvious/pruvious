@@ -2,6 +2,8 @@ import type { LanguageCode } from '#pruvious/server'
 import {
   generateSecureRandomString,
   isString,
+  omit,
+  remap,
   withLeadingSlash,
   withoutTrailingSlash,
   withTrailingSlash,
@@ -33,6 +35,7 @@ import { resetSingletonsResolver } from './pruvious/singletons/resolver'
 import { resetTemplatesResolver } from './pruvious/templates/resolver'
 import { resetTranslationsResolver } from './pruvious/translations/resolver'
 import { resolveTranslationsConfig } from './pruvious/translations/utils.server'
+import { normalizeImageTransformOptions } from './pruvious/uploads/images'
 
 export default defineNuxtModule<PruviousModuleOptions>({
   meta: {
@@ -55,6 +58,11 @@ export default defineNuxtModule<PruviousModuleOptions>({
     uploads: {
       driver: 'fs://.uploads',
       basePath: '/uploads/',
+    },
+    images: {
+      variants: {
+        thumbnail: { format: 'webp', width: 320, height: 320, fit: 'contain' },
+      },
     },
     cache: {
       driver: 'mainDatabase',
@@ -142,6 +150,24 @@ export default defineNuxtModule<PruviousModuleOptions>({
         driver: resolvedOptions.uploads.driver as any,
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.uploads.basePath!)),
       },
+      images: {
+        variants: {
+          thumbnail: omit(
+            normalizeImageTransformOptions({
+              format: 'webp',
+              originalExtension: '',
+              width: 320,
+              height: 320,
+              fit: 'contain',
+            }),
+            ['originalExtension'],
+          ),
+          ...remap(resolvedOptions.images.variants!, (key, options) => [
+            key,
+            omit(normalizeImageTransformOptions({ ...options, originalExtension: '' }), ['originalExtension']),
+          ]),
+        },
+      },
       cache: {
         driver: resolvedOptions.cache.driver!,
         prefix: resolvedOptions.cache.prefix!.replace(/:$/, ''),
@@ -207,6 +233,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       routing: nuxt.options.runtimeConfig.pruvious.routing,
       tokenStorage: nuxt.options.runtimeConfig.pruvious.auth.tokenStorage,
       translatableStringsPreloadRules: nuxt.options.runtimeConfig.pruvious.i18n.preloadTranslatableStrings,
+      uploadsBasePath: nuxt.options.runtimeConfig.pruvious.uploads.basePath,
     }
 
     // Set `#pruvious/*` aliases

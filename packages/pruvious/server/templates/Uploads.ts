@@ -60,9 +60,8 @@ export default defineTemplate(() => ({
             if (normalizedPath === value) {
               return
             }
-            console.log(normalizedPath, value)
           } catch {}
-            throw new Error(context.__('pruvious-api', 'Invalid path'))
+          throw new Error(context.__('pruvious-api', 'Invalid path'))
         },
         uniqueValidator({ errorMessage: ({ __ }) => __('pruvious-api', 'The path must be unique') }),
       ],
@@ -129,13 +128,13 @@ export default defineTemplate(() => ({
     category: selectField({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'Category') },
       choices: [
-        { value: 'documents', label: ({ __ }) => __('pruvious-dashboard', 'cat:documents') },
-        { value: 'images', label: ({ __ }) => __('pruvious-dashboard', 'cat:images') },
+        { value: 'document', label: ({ __ }) => __('pruvious-dashboard', 'cat:document') },
+        { value: 'image', label: ({ __ }) => __('pruvious-dashboard', 'cat:image') },
         { value: 'audio', label: ({ __ }) => __('pruvious-dashboard', 'cat:audio') },
         { value: 'video', label: ({ __ }) => __('pruvious-dashboard', 'cat:video') },
-        { value: 'archives', label: ({ __ }) => __('pruvious-dashboard', 'cat:archives') },
+        { value: 'archive', label: ({ __ }) => __('pruvious-dashboard', 'cat:archive') },
         { value: 'code', label: ({ __ }) => __('pruvious-dashboard', 'cat:code') },
-        { value: 'fonts', label: ({ __ }) => __('pruvious-dashboard', 'cat:fonts') },
+        { value: 'font', label: ({ __ }) => __('pruvious-dashboard', 'cat:font') },
         { value: '3d', label: ({ __ }) => __('pruvious-dashboard', 'cat:3d') },
         { value: 'data', label: ({ __ }) => __('pruvious-dashboard', 'cat:data') },
         { value: 'system', label: ({ __ }) => __('pruvious-dashboard', 'cat:system') },
@@ -197,6 +196,14 @@ export default defineTemplate(() => ({
     images: chipsField({
       ui: { dataTable: false },
       enforceUniqueItems: true,
+    }),
+    imageWidth: numberField({
+      ui: { label: ({ __ }) => __('pruvious-dashboard', 'Image width'), suffix: 'px' },
+      min: 0,
+    }),
+    imageHeight: numberField({
+      ui: { label: ({ __ }) => __('pruvious-dashboard', 'Image height'), suffix: 'px' },
+      min: 0,
     }),
     multipart: multipartField(),
     isLocked: switchField({

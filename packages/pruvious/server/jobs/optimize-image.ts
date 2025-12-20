@@ -1,47 +1,41 @@
-import {
-  defineJob,
-  deregisterOptimizedImage,
-  generateOptimizedImagePath,
-  optimizeImage,
-  putFile,
-  registerOptimizedImage,
-  stringifyImageTransformOptions,
-  type ImageTransformOptions,
-} from '#pruvious/server'
+import { createOptimizedImage, defineJob, selectFrom, type ImageTransformOptions } from '#pruvious/server'
+import { isString } from '@pruvious/utils'
 
 export default defineJob({
   retry: { count: 5, delay: 1000 },
   handler: async ({
-    uploadId,
+    uploadIdOrPath,
     options,
     baseURL,
   }: {
-    uploadId: number
+    uploadIdOrPath: number | string
     options: ImageTransformOptions
     baseURL?: string
   }) => {
-    const urlSuffix = stringifyImageTransformOptions(options)
-    const registration = await registerOptimizedImage(uploadId, urlSuffix)
+    const checkQuery = selectFrom('Uploads').select('category').withCustomContextData({ _allowUploadsQueries: true })
 
-    if (!registration.success) {
-      throw new Error(registration.error)
+    if (isString(uploadIdOrPath)) {
+      checkQuery.where('path', '=', uploadIdOrPath)
+    } else {
+      checkQuery.where('id', '=', uploadIdOrPath)
     }
 
-    const optimizeResult = await optimizeImage((baseURL ?? '') + registration.upload.path, options)
+    const checkResult = await checkQuery.first()
 
-    if (!optimizeResult.success) {
-      await deregisterOptimizedImage(uploadId, urlSuffix)
-      throw new Error(optimizeResult.error)
+    if (!checkResult.success) {
+      throw new Error(checkResult.runtimeError || 'Database query failed')
+    } else if (!checkResult.data) {
+      throw new Error('Upload not found')
+    } else if (checkResult.data.category !== 'image') {
+      throw new Error('Upload is not an image')
     }
 
-    const imagePath = generateOptimizedImagePath(registration.upload.path, urlSuffix)
-    const putResult = await putFile(optimizeResult.image, imagePath)
+    const result = await createOptimizedImage(uploadIdOrPath, options, baseURL)
 
-    if (!putResult.success) {
-      await deregisterOptimizedImage(uploadId, urlSuffix)
-      throw new Error(putResult.error)
+    if (!result.success) {
+      throw new Error(result.error)
     }
 
-    return putResult
+    return result
   },
 })

@@ -8,6 +8,7 @@ export default defineTranslation({
   'Directory': 'Ordner',
 
   'Failed to abort multipart upload': 'Das Abbrechen des mehrteiligen Uploads ist fehlgeschlagen',
+  'Failed to create image variant': 'Das Erstellen der Bildvariante ist fehlgeschlagen',
   'Failed to create multipart upload': 'Das Erstellen des mehrteiligen Uploads ist fehlgeschlagen',
   'Failed to fetch image': 'Das Abrufen des Bildes ist fehlgeschlagen',
   'Failed to resume multipart upload': 'Das Wiederaufnehmen des mehrteiligen Uploads ist fehlgeschlagen',
@@ -19,11 +20,7 @@ export default defineTranslation({
   'File': 'Datei',
   'File not found': 'Die Datei wurde nicht gefunden',
 
-  'Missing file parts: $parts': createPattern('Fehlende Dateiteile: $parts', { parts: 'string' }),
-  'Missing property for language code `$code`': createPattern('Fehlende Eigenschaft für den Sprachcode `$code`', {
-    code: 'string',
-  }),
-
+  'Image variant not found': 'Bildvariante nicht gefunden',
   'Incorrect credentials': 'Falsche Anmeldedaten',
   'Invalid `$param` value. Must be one of: $values': createPattern(
     'Ungültiger Wert für `$param`. Muss einer der folgenden sein: $values',
@@ -33,6 +30,12 @@ export default defineTranslation({
   'Invalid language code': 'Ungültiger Sprachcode',
   'Invalid path': 'Ungültiger Pfad',
   'Invalid RegExp pattern': 'Ungültiges RegExp-Muster',
+
+  'Missing file parts: $parts': createPattern('Fehlende Dateiteile: $parts', { parts: 'string' }),
+  'Missing image optimization parameters': 'Fehlende Bildoptimierungsparameter',
+  'Missing property for language code `$code`': createPattern('Fehlende Eigenschaft für den Sprachcode `$code`', {
+    code: 'string',
+  }),
 
   'No': 'Nein',
   'No file parts uploaded': 'Keine Dateiteile wurden hochgeladen',
@@ -108,8 +111,8 @@ export default defineTranslation({
   'The new path cannot be the root directory': 'Der neue Pfad darf nicht das Stammverzeichnis sein',
   'The new path must be different from the current path': 'Der neue Pfad muss sich vom aktuellen Pfad unterscheiden',
   'The file part has already been uploaded': 'Der Dateiteil wurde bereits hochgeladen',
-  'The image has already been registered': 'Das Bild wurde bereits registriert',
-  'The image has not been registered': 'Das Bild wurde nicht registriert',
+  'The image variant has already been registered': 'Die Bildvariante wurde bereits registriert',
+  'The image variant has not been registered': 'Die Bildvariante wurde nicht registriert',
   'The path must be unique': 'Der Pfad muss eindeutig sein',
   'The singleton `$singleton` does not exist': createPattern('Der Singleton `$singleton` existiert nicht', {
     singleton: 'string',

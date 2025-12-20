@@ -100,7 +100,7 @@ export function getTopLevelFieldDependencies(
     }
   }
 
-  if (fieldOptions.dependencies.length) {
+  if (fieldOptions.dependencies?.length) {
     dependencies.push(...fieldOptions.dependencies.map((d) => resolveRelativeDotNotation(fieldPath, d)))
   }
 

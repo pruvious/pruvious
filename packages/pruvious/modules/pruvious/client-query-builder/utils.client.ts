@@ -550,7 +550,7 @@ export function useSelectQueryBuilderParams(options: {
     if (syncRoute === 'navigateTo') {
       nextTick(() => {
         if (!deepCompare(query, route.query)) {
-          navigateTo({ query, replace })
+          navigateTo({ path: route.path ?? useRoute().path, query, replace })
         }
       })
     } else if (syncRoute === 'mutate') {

@@ -36,6 +36,7 @@ import {
   remove,
   toArray,
 } from '@pruvious/utils'
+import { join } from 'pathe'
 import {
   usePruviousDashboardUploadNotifications,
   type DashboardUploadNotification,
@@ -43,11 +44,10 @@ import {
 import { $pfetchDashboard } from '../api/dashboard-utils.client'
 import { selectFrom } from '../client-query-builder/utils.client'
 
-export interface PruviousFile
-  extends Omit<
-    InsertInput<Collections['Uploads']>,
-    'path' | 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'
-  > {
+export interface PruviousFile extends Omit<
+  InsertInput<Collections['Uploads']>,
+  'path' | 'type' | 'etag' | 'images' | 'imageWidth' | 'imageHeight' | 'isLocked' | 'multipart' | 'size'
+> {
   /**
    * The file to be uploaded.
    */
@@ -751,8 +751,8 @@ export async function updateUpload<
 ): Promise<
   QueryBuilderResult<
     TPopulateFields extends true
-      ? Pick<ExtractPopulatedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>
-      : Pick<ExtractCastedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>,
+      ? Pick<ExtractPopulatedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>[]
+      : Pick<ExtractCastedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>[],
     Record<string, string>
   >
 > {
@@ -866,4 +866,18 @@ export function splitFileIntoChunks(file: File, multipartThresholdBytes: number)
   }
 
   return chunks
+}
+
+/**
+ * Resolves the full URL path of an upload based on its relative path in the media library.
+ *
+ * @example
+ * ```ts
+ * const url = resolveUploadPath('/images/photo.jpg')
+ * // /uploads/images/photo.jpg
+ * ```
+ */
+export function resolveUploadPath(path: string): string {
+  const runtimeConfig = useRuntimeConfig()
+  return join(runtimeConfig.app.baseURL, runtimeConfig.public.pruvious.uploadsBasePath, path)
 }

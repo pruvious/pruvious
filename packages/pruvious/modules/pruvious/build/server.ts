@@ -735,6 +735,13 @@ function getServerFileContent() {
       .join(' | ')}`,
     ``,
     `/**`,
+    ` * Type representing all defined variants for image processing.`,
+    ` */`,
+    `export type ImageVariant = ${Object.keys(pruviousOptions.images.variants)
+      .map((key) => `'${key}'`)
+      .join(' | ')}`,
+    ``,
+    `/**`,
     ` * Type representing a generic database with the currect I18n instance.`,
     ` */`,
     `export type GenericDatabase = Database<Record<string, GenericCollection>, typeof i18n>`,
@@ -2088,15 +2095,13 @@ function getServerTypeFileContent() {
 
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/index.d.ts>`)
 
-  const fieldDefinitionFiles = resolveFieldDefinitionFiles()
-  const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
-
   return [
     `export type PruviousContext = any`,
     `export type Permission = any`,
     `export type LanguageCode = any`,
     `export type PrimaryLanguageCode = any`,
     `export type DashboardLanguageCode = any`,
+    `export type ImageVariant = any`,
     `export type GenericDatabase = any`,
     `export type MainDatabase = any`,
     `export type CacheDatabase = any`,
@@ -2182,8 +2187,8 @@ function getReExports() {
     `export { defineTranslation } from '${resolve('../translations/define')}'`,
     `export { type TranslatableStringCallbackContext, type TranslatableStringCallback, createPattern, resolveContextLanguage, isValidLanguageCode } from '${resolve('../translations/utils.server')}'`,
     `export { serializeTranslatableStringCallbacks } from '${resolve('../translations/utils.shared')}'`,
-    `export { type ImageTransformOptions, stringifyImageTransformOptions, parseImageTransformOptions, normalizeImageTransformOptions, validateImageTransformOptions, optimizeImage, generateOptimizedImagePath } from '${resolve('../uploads/images')}'`,
-    `export { type MediaCategory, type PutUploadOptions, type MoveUploadOptions, type UpdateUploadOptions, type DeleteUploadOptions, type CreateMultipartUploadOptions, type ResumeMultipartUploadOptions, type GetMultipartUploadOptions, type CompleteMultipartUploadOptions, type AbortMultipartUploadOptions, type PutUploadResult, type MoveUploadResult, type DeleteUploadResult, type CreateMultipartUploadResult, type ResumeMultipartUploadResult, type GetMultipartUploadResult, type CompleteMultipartUploadResult, type AbortMultipartUploadResult, mediaCategories, prepareUploadsInput, resolveMediaCategory, putUpload, moveUpload, updateUpload, deleteUpload, createMultipartUpload, getMultipartUpload, resumeMultipartUpload, completeMultipartUpload, abortMultipartUpload, registerOptimizedImage, deregisterOptimizedImage, queueImageOptimization } from '${resolve('../uploads/utils.server')}'`,
+    `export { type ImageTransformOptions, stringifyImageTransformOptions, parseImageTransformOptions, normalizeImageTransformOptions, validateImageTransformOptions, optimizeImage, generateOptimizedImagePath, normalizeOptimizedImagePath } from '${resolve('../uploads/images')}'`,
+    `export { type MediaCategory, type PutUploadOptions, type MoveUploadOptions, type UpdateUploadOptions, type DeleteUploadOptions, type CreateMultipartUploadOptions, type ResumeMultipartUploadOptions, type GetMultipartUploadOptions, type CompleteMultipartUploadOptions, type AbortMultipartUploadOptions, type PutUploadResult, type MoveUploadResult, type DeleteUploadResult, type CreateMultipartUploadResult, type ResumeMultipartUploadResult, type GetMultipartUploadResult, type CompleteMultipartUploadResult, type AbortMultipartUploadResult, mediaCategories, prepareUploadsInput, resolveMediaCategory, putUpload, moveUpload, updateUpload, deleteUpload, createMultipartUpload, getMultipartUpload, resumeMultipartUpload, completeMultipartUpload, abortMultipartUpload, registerOptimizedImage, deregisterOptimizedImage, createOptimizedImage, queueImageOptimization, getImageDimensions, streamToBuffer, uploadEventHandler } from '${resolve('../uploads/utils.server')}'`,
     `export { type InputValidator, httpStatusCodeMessages, crudToDatabaseOperation, databaseOperationToCrud, pruviousError, parseBody, assertInput, assertParams, assertQuery, assertUser, assertUserPermissions, parseRangeHeader } from '${resolve('../api/utils.server')}'`,
     `export { signToken, verifyToken, invalidateToken, isInvalidatedToken, setTokenCookies, removeTokenCookies, getToken, getTokenFromCookies, getTokenFromAuthorizationHeader, hashPassword, verifyPassword, resolveCurrentUser, isLoggedIn, getUser, hasPermission, hasCollectionPermission, hasSingletonPermission } from '${resolve('../auth/utils.server')}'`,
     `export { setCache, appendCache, getCache, getCacheKeys, hasCache, deleteCache, clearCache, removeExpiredCacheEntries } from '${resolve('../cache/utils.server')}'`,

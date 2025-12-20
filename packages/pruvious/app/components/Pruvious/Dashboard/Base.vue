@@ -10,6 +10,7 @@
     <PruviousDashboardUnsavedChanges />
     <PruviousDashboardLoginPopup />
     <PruviousDashboardDropUploader />
+    <PruviousDashboardDragImage />
   </PUIBase>
 </template>
 

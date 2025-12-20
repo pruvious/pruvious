@@ -1,57 +1,15 @@
 <template>
-  <div class="pui-row">
-    <span
-      v-if="!breadcrumbs.length"
-      :to="dashboardBasePath + 'media' + queryString"
-      @dragenter.prevent="highlighted = '/'"
-      @dragleave="highlighted = null"
-      @dragover.prevent
-      @drop.prevent="onMoveDrop('/')"
-      class="p-media-breadcrumb p-media-breadcrumb-active pui-shrink-0"
-      :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === '/' }"
-    >
-      {{ __('pruvious-dashboard', 'Media') }}
-    </span>
+  <div class="p-media-directory-item" :class="{ 'p-media-directory-item-highlighted': isMoving && highlighted }">
     <NuxtLink
-      v-else="!breadcrumbs.length"
-      :to="dashboardBasePath + 'media' + queryString"
-      @dragenter.prevent="highlighted = '/'"
-      @dragleave="highlighted = null"
+      :to="dashboardBasePath + 'media' + upload.path"
+      @dragenter.prevent="highlighted = true"
+      @dragleave="highlighted = false"
       @dragover.prevent
-      @drop.prevent="onMoveDrop('/')"
-      class="p-media-breadcrumb pui-shrink-0"
-      :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === '/' }"
+      @drop.prevent="onMoveDrop()"
+      class="p-media-directory-item-button pui-raw"
     >
-      {{ __('pruvious-dashboard', 'Media') }}
+      <Icon mode="svg" name="tabler:folder-open" class="p-media-directory-item-icon" />
     </NuxtLink>
-    <template v-for="(breadcrumb, index) in breadcrumbs" :key="index">
-      <span class="p-media-breadcrumb-separator pui-shrink-0">/</span>
-      <span
-        v-if="index === breadcrumbs.length - 1"
-        :title="breadcrumb"
-        @dragenter.prevent="highlighted = breadcrumb"
-        @dragleave="highlighted = null"
-        @dragover.prevent
-        @drop.prevent="onMoveDrop(breadcrumb)"
-        class="p-media-breadcrumb p-media-breadcrumb-active pui-shrink-0"
-        :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === breadcrumb }"
-      >
-        {{ breadcrumb }}
-      </span>
-      <NuxtLink
-        v-else
-        :title="breadcrumb"
-        :to="dashboardBasePath + 'media/' + breadcrumbs.slice(0, index + 1).join('/') + queryString"
-        @dragenter.prevent="highlighted = breadcrumb"
-        @dragleave="highlighted = null"
-        @dragover.prevent
-        @drop.prevent="onMoveDrop(breadcrumb)"
-        class="p-media-breadcrumb"
-        :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === breadcrumb }"
-      >
-        <span class="pui-truncate">{{ breadcrumb }}</span>
-      </NuxtLink>
-    </template>
   </div>
 </template>
 
@@ -63,50 +21,45 @@ import {
   selectFrom,
   usePruviousDashboardIsMoving,
   type DashboardMediaLibraryState,
+  type ResolvedCollectionRecordPermissions,
+  type UploadItem,
 } from '#pruvious/client'
 import type { MoveUploadResult } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { puiToast } from '@pruvious/ui/pui/toast'
-import { isStringInteger } from '@pruvious/utils'
 import { basename, join } from 'pathe'
 
 const props = defineProps({
+  upload: {
+    type: Object as PropType<UploadItem>,
+    required: true,
+  },
   state: {
     type: Object as PropType<DashboardMediaLibraryState>,
     required: true,
   },
+  resolvedPermissions: {
+    type: Object as PropType<ResolvedCollectionRecordPermissions>,
+  },
 })
 
-const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const isMoving = usePruviousDashboardIsMoving()
-const highlighted = ref<string | null>(null)
-const breadcrumbs = computed(() =>
-  props.state.currentDirectory === '/' ? [] : props.state.currentDirectory.split('/').filter(Boolean),
-)
-const queryString = computed(() => {
-  const params = { ...route.query }
-  const page = isStringInteger(params.page) ? +params.page : 1
-  if (page > 1) {
-    delete params.page
-  }
-  const qs = new URLSearchParams(params as Record<string, string>).toString()
-  return qs ? `?${qs}` : ''
-})
+const highlighted = ref(false)
 
-async function onMoveDrop(targetDirectory: string) {
-  highlighted.value = null
+async function onMoveDrop() {
+  highlighted.value = false
 
   if (!isMoving.value) {
     return
   }
 
-  if (!props.state.selectedUploads.some(({ path }) => path === targetDirectory)) {
+  if (!props.state.selectedUploads.some(({ id }) => id === props.upload.id)) {
     for (let i = 0; i < props.state.selectedUploads.length; i += 50) {
       const pathsToCheck = props.state.selectedUploads
         .slice(i, i + 50)
         .map(({ path }) => {
-          const newPath = join(targetDirectory, basename(path))
+          const newPath = join(props.upload.path, basename(path))
           return newPath === path ? '' : newPath
         })
         .filter(Boolean)
@@ -151,7 +104,7 @@ async function onMoveDrop(targetDirectory: string) {
           $pfetchDashboard(runtimeConfig.public.pruvious.apiBasePath + 'uploads/move/path' + path, {
             method: 'patch',
             body: {
-              path: join(targetDirectory, basename(path)),
+              path: join(props.upload.path, basename(path)),
             },
             query: { overwrite: true },
           })
@@ -194,49 +147,47 @@ async function onMoveDrop(targetDirectory: string) {
 </script>
 
 <style scoped>
-.p-media-breadcrumb {
-  position: relative;
-  display: flex;
-  width: auto;
-  text-decoration: none;
+.p-media-directory-item {
+  aspect-ratio: 1;
 }
 
-.p-media-breadcrumb:not(.p-media-breadcrumb-active),
-.p-media-breadcrumb-separator {
-  color: hsl(var(--pui-muted-foreground));
-}
-
-.p-media-breadcrumb:not(.p-media-breadcrumb-active):hover,
-.p-media-breadcrumb:not(.p-media-breadcrumb-active):focus {
-  color: hsl(var(--pui-foreground));
-}
-
-.p-media-breadcrumb::before {
-  content: '';
+.p-media-directory-item-button {
   position: absolute;
-  z-index: -1;
-  top: -0.125rem;
-  right: -0.375rem;
-  bottom: -0.125rem;
-  left: -0.375rem;
-  background-color: hsl(var(--pui-accent));
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: hsl(var(--pui-background));
+  border: 1px solid hsl(var(--pui-border));
   border-radius: var(--pui-radius);
-  opacity: 0;
-  visibility: hidden;
+  color: hsl(var(--pui-foreground));
   transition: var(--pui-transition);
-  transition-property: opacity, visibility;
+  transition-property: background-color, border-color, color;
 }
 
-.p-media-breadcrumb * {
+.p-media-directory-item-icon {
   pointer-events: none;
+  font-size: 1.75rem;
 }
 
-.p-media-breadcrumb-highlighted {
-  color: hsl(var(--pui-accent-foreground)) !important;
+.p-media-directory-item-icon :deep([stroke]) {
+  stroke-width: 1;
+}
+</style>
+
+<style>
+.p-media-item-selected .p-media-directory-item-button,
+.p-media-item-box:hover .p-media-directory-item-button,
+.p-media-item-box:focus-within .p-media-directory-item-button,
+.p-media-directory-item-highlighted .p-media-directory-item-button {
+  background-color: hsl(var(--pui-card));
+  color: hsl(var(--pui-card-foreground));
 }
 
-.p-media-breadcrumb-highlighted::before {
-  opacity: 1;
-  visibility: visible;
+.p-media-item-selected .p-media-directory-item-button {
+  border-color: hsl(var(--pui-accent));
 }
 </style>

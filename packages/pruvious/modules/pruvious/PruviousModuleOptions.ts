@@ -1,4 +1,4 @@
-import type { LanguageCode } from '#pruvious/server'
+import type { ImageTransformOptions, LanguageCode } from '#pruvious/server'
 import type { DeepRequired } from '@pruvious/utils'
 
 export interface PruviousModuleOptions {
@@ -186,6 +186,41 @@ export interface PruviousModuleOptions {
      * @default '/uploads/'
      */
     basePath?: string
+  }
+
+  /**
+   * Configuration options for image processing.
+   *
+   * @default
+   * {
+   *   variants: {
+   *     thumbnail: { format: 'webp', width: 320, height: 320, fit: 'contain' },
+   *   }
+   * }
+   */
+  images: {
+    /**
+     * Predefined image transformation variants.
+     * These variants can be applied in image fields when defining sources.
+     *
+     * By default, a `thumbnail` variant is provided.
+     * Any additional variants defined here will be merged with the default variant.
+     * You can override default variant settings by redefining them here.
+     *
+     * @default
+     * { thumbnail: { format: 'webp', width: 320, height: 320, fit: 'contain' } }
+     *
+     * @example
+     * ```ts
+     * {
+     *   thumbnail: { format: 'webp', width: 320, height: 320, fit: 'contain' },
+     *   webpLarge: { format: 'webp', width: 1920 },
+     *   jpegLarge: { format: 'jpeg', width: 1920, quality: 90 },
+     *   // ...
+     * }
+     * ```
+     */
+    variants?: Record<string, Omit<ImageTransformOptions, 'originalExtension'>>
   }
 
   /**
@@ -1345,6 +1380,9 @@ declare module 'nuxt/schema' {
       }
       i18n: ResolvedI18nConfig
       debug: ResolvedDebugConfig
+      images: {
+        variants: Record<string, Required<Omit<ImageTransformOptions, 'originalExtension'>>>
+      }
     }
   }
 
@@ -1409,9 +1447,12 @@ declare module 'nuxt/schema' {
       translatableStringsPreloadRules: Record<string, { include: string[]; exclude: string[] }>
 
       /**
-       * Controls how routes are handled in the `pruvious` or `pruvious-route` client middleware.
+       * The base URL path prefix for all Pruvious uploads.
+       * By default, uploads are placed directly under `/uploads/`.
+       *
+       * This setting is derived from the Nuxt config `pruvious.uploads.basePath`.
        */
-      routing: Required<PruviousModuleOptions['routing']>
+      uploadsBasePath: string
     }
   }
 }

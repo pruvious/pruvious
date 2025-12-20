@@ -8,6 +8,7 @@ import {
   isRealNumber,
   isString,
   isUndefined,
+  nanoid,
 } from '@pruvious/utils'
 import { basename, extname } from 'pathe'
 import { isWorkerd } from 'std-env'
@@ -23,6 +24,13 @@ export interface ImageTransformOptions {
    * - `gif` - Animated image format with basic color palette.
    */
   format: 'webp' | 'jpeg' | 'png' | 'avif' | 'gif'
+
+  /**
+   * The file extension of the original image, including the dot (e.g., `.jpg`).
+   * Used to properly reference the source image during transformation.
+   * This is an empty string if the original file has no extension.
+   */
+  originalExtension: string
 
   /**
    * Specifies the width of the image in pixels.
@@ -128,6 +136,10 @@ export interface ImageTransformOptions {
 export function stringifyImageTransformOptions(options: ImageTransformOptions): string {
   const parts: string[] = []
 
+  if (options.originalExtension !== '') {
+    parts.push(`oext${options.originalExtension.slice(1)}`)
+  }
+
   if (isRealNumber(options.width)) {
     parts.push(`w${options.width}`)
   }
@@ -178,9 +190,10 @@ export function stringifyImageTransformOptions(options: ImageTransformOptions): 
  *
  * @example
  * ```ts
- * parseImageTransformOptions('_w320_h320_contain.webp')
+ * parseImageTransformOptions('_oextjpg_w320_h320_contain.webp')
  * // {
  * //   format: 'webp',
+ * //   originalExtension: '.jpg',
  * //   width: 320,
  * //   height: 320,
  * //   fit: 'contain',
@@ -198,7 +211,10 @@ export function parseImageTransformOptions(urlSuffix: string): Required<ImageTra
   const ext = extname(urlSuffix)
   const base = basename(urlSuffix, ext)
   const parts = base.split('_').filter(Boolean)
-  const options: Record<string, any> = normalizeImageTransformOptions({ format: ext.slice(1) as any })
+  const options: Record<string, any> = normalizeImageTransformOptions({
+    format: ext.slice(1) as any,
+    originalExtension: '',
+  })
 
   for (const part of parts) {
     if (['cover', 'contain'].includes(part)) {
@@ -207,6 +223,8 @@ export function parseImageTransformOptions(urlSuffix: string): Required<ImageTra
       ['center', 'top', 'topRight', 'right', 'bottomRight', 'bottom', 'bottomLeft', 'left', 'topLeft'].includes(part)
     ) {
       options.position = part
+    } else if (part.startsWith('oext') && part.length > 4) {
+      options.originalExtension = '.' + part.slice(4)
     } else if (part.startsWith('bl')) {
       options.blur = castToNumber(part.slice(2))
     } else if (part.startsWith('br')) {
@@ -393,10 +411,11 @@ export async function validateImageTransformOptions(
  */
 export async function optimizeImage(
   imageURL: string,
-  options: ImageTransformOptions,
+  options: Omit<ImageTransformOptions, 'originalExtension'>,
 ): Promise<{ success: true; image: Buffer } | { success: false; error: string }> {
-  const validate = await validateImageTransformOptions(options)
-  const normalizedOptions = normalizeImageTransformOptions(options)
+  const originalExtension = extname(imageURL)
+  const validate = await validateImageTransformOptions({ ...options, originalExtension })
+  const normalizedOptions = normalizeImageTransformOptions({ ...options, originalExtension })
 
   if (!validate.success) {
     return validate
@@ -415,7 +434,7 @@ export async function optimizeImage(
         }
       }
 
-      imageURL += (imageURL.includes('?') ? '&' : '?') + `_nocache=${Date.now()}`
+      imageURL += (imageURL.includes('?') ? '&' : '?') + `_nocache=${nanoid()}`
 
       const cf = {
         image: {
@@ -520,10 +539,24 @@ export async function optimizeImage(
 }
 
 /**
- * Retrieves the optimized image path by appending the provided `urlSuffix` to the `uploadPath`.
+ * Generates an optimized image path by appending the provided `urlSuffix` to the `uploadPath`.
  */
 export function generateOptimizedImagePath(uploadPath: string, urlSuffix: string): string {
   const ext = extname(uploadPath)
   const basePath = ext ? uploadPath.slice(0, -ext.length) : uploadPath
   return basePath + urlSuffix
+}
+
+/**
+ * Normalizes the path suffix for optimized images by sorting and removing duplicates from the transformations in the path.
+ *
+ * @example
+ * ```ts
+ * normalizeOptimizedImagePath('/images/photo_h300_w200_contain_q80_oextjpg.webp')
+ * // '/images/photo_oextjpg_w200_h300_contain_q80.webp'
+ * ```
+ */
+export function normalizeOptimizedImagePath(uploadPath: string): string {
+  const urlSuffix = uploadPath.includes('_') ? '_' + uploadPath.split('_').slice(1).join('_') : ''
+  return urlSuffix ? stringifyImageTransformOptions(parseImageTransformOptions(urlSuffix)) : uploadPath
 }

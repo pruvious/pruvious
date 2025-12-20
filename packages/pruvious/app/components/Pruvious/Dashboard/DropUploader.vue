@@ -28,9 +28,11 @@
 </template>
 
 <script lang="ts" setup>
-import { __, useUpload } from '#pruvious/client'
+import { __, dashboardBasePath, usePruviousDashboardMediaLibraryPopup, useUpload } from '#pruvious/client'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
+import { isArray, withLeadingSlash, withoutTrailingSlash } from '@pruvious/utils'
 import { useEventListener } from '@vueuse/core'
+import { join } from 'pathe'
 import { onMounted, ref } from 'vue'
 
 interface FileWithRelativePath extends File {
@@ -42,6 +44,8 @@ interface UploadPayload {
   directory: string
 }
 
+const route = useRoute()
+const mediaLibraryPopup = usePruviousDashboardMediaLibraryPopup()
 const input = useTemplateRef('input')
 const isDragging = ref(false)
 const isReady = ref(false)
@@ -90,6 +94,7 @@ async function handleDrop(event: DragEvent) {
 
   const uploadPayloads: UploadPayload[] = []
   const queue: FileSystemEntry[] = []
+  const currentDirectory = getCurrentDirectory()
 
   for (const item of items) {
     const entry = item.webkitGetAsEntry()
@@ -104,10 +109,10 @@ async function handleDrop(event: DragEvent) {
       const file = (await getFile(entry as FileSystemFileEntry)) as FileWithRelativePath
       const fullPath = entry.fullPath
       const lastSlashIndex = fullPath.lastIndexOf('/')
-      let directory = ''
+      let directory = currentDirectory
 
       if (lastSlashIndex > 0) {
-        directory = fullPath.substring(1, lastSlashIndex)
+        directory = join(directory, fullPath.substring(1, lastSlashIndex))
       }
 
       uploadPayloads.push({ file, directory })
@@ -152,7 +157,19 @@ function readEntriesPromise(directoryReader: FileSystemDirectoryReader): Promise
 
 async function uploadFromInput() {
   if (input.value?.files) {
-    return useUpload([...input.value.files])
+    const directory = getCurrentDirectory()
+    return useUpload([...input.value.files].map((file) => ({ file, directory })))
+  }
+}
+
+function getCurrentDirectory() {
+  if (mediaLibraryPopup.value.isOpen) {
+    return mediaLibraryPopup.value.currentDirectory
+  } else if (route.path === `${dashboardBasePath}media` || route.path.startsWith(`${dashboardBasePath}media/`)) {
+    const subpath = isArray(route.params.catchAll) ? route.params.catchAll.join('/') : route.params.catchAll || '/'
+    return withLeadingSlash(withoutTrailingSlash(subpath))
+  } else {
+    return '/'
   }
 }
 </script>

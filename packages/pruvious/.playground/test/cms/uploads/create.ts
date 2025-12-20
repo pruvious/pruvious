@@ -6,7 +6,6 @@ describe('create uploads', () => {
   const txtFile = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.txt')], 'test.txt')
 
   test('uploads txt file', async () => {
-    // @todo include descriptions field
     expect(await $postFormData('/api/uploads', { '': txtFile, 'path': 'foo.txt' })).toEqual([
       {
         success: true,
@@ -21,6 +20,8 @@ describe('create uploads', () => {
           description: { en: '', de: '', bs: '' },
           etag: expect.any(String),
           images: [],
+          imageWidth: 0,
+          imageHeight: 0,
           multipart: {},
           isLocked: false,
           createdAt: expect.any(Number),

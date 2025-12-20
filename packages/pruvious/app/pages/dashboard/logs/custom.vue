@@ -84,7 +84,10 @@
               <PUIFieldLabel>
                 <span class="pui-label">{{ __('pruvious-dashboard', 'User') }}</span>
               </PUIFieldLabel>
-              <div>{{ details.request.user }}</div>
+              <div>
+                {{ details.request.user }}
+                <span class="pui-muted">({{ __('pruvious-dashboard', 'user ID') }})</span>
+              </div>
             </div>
             <div class="p-details-field">
               <PUIFieldLabel>

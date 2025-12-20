@@ -9,6 +9,7 @@
     <PruviousDashboardMediaLibrary
       v-model:state="state"
       :queryString="queryString"
+      :showPathTooltips="isDirty"
       @update:state="updateRouteFromState($event)"
     />
 
@@ -35,7 +36,7 @@ import {
 } from '#pruvious/client'
 import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
-import { deepClone, isArray } from '@pruvious/utils'
+import { deepClone, isArray, withLeadingSlash, withoutTrailingSlash } from '@pruvious/utils'
 
 defineDashboardPage({
   path: 'media',
@@ -79,12 +80,12 @@ const defaultOrderBy = deepClone(state.value.orderBy)
 const defaultParams: Pick<DashboardMediaLibraryState, 'orderBy' | 'page' | 'perPage'> = {
   orderBy: defaultOrderBy,
   page: 1,
-  perPage: 5, // @todo make dynamic based on screen size (update from resize watcher but init here also)
+  perPage: 1000,
 }
 const queryString = ref('')
 const { params, push, isDirty } = useSelectQueryBuilderParams({
   callback: async ({ queryString: _queryString, params }) => {
-    state.value.where = (params.where as any) ?? []
+    state.value.where = params.where as any
     state.value.orderBy = (params.orderBy as any) ?? defaultOrderBy
     const { page, perPage } = getPagedFromParams(params)
     state.value.page = page
@@ -104,7 +105,8 @@ watch(
 )
 
 function getDirectoryFromRoute() {
-  return isArray(route.params.catchAll) ? route.params.catchAll.join('/') : route.params.catchAll || '/'
+  const subpath = isArray(route.params.catchAll) ? route.params.catchAll.join('/') : route.params.catchAll || '/'
+  return withLeadingSlash(withoutTrailingSlash(subpath))
 }
 
 function getPagedFromParams(params: Record<string, any>) {
@@ -130,6 +132,15 @@ async function updateRouteFromState(newState: DashboardMediaLibraryState) {
 </script>
 
 <style scoped>
+:deep(.p-page-wrapper > .pui-container > .pui-container-content) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.p-page-main) {
+  flex: 1;
+}
+
 :deep(.p-page-footer) {
   container-type: inline-size;
 }

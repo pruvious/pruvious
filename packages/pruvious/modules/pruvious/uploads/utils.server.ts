@@ -8,12 +8,15 @@ import type {
 } from '@pruvious/orm'
 import { tryNormalizePath, type UploadedPart } from '@pruvious/storage'
 import {
+  deepCompare,
   isArray,
   isDefined,
   isEmpty,
   isNumber,
+  isPositiveInteger,
   isString,
   isUndefined,
+  LimitedSizeObject,
   omit,
   pick,
   randomString,
@@ -22,6 +25,12 @@ import {
   withoutTrailingSlash,
   type NonEmptyArray,
 } from '@pruvious/utils'
+import type { H3Event } from 'h3'
+import mime from 'mime'
+// @ts-expect-error
+import exifr from 'exifr/dist/full.esm.mjs'
+import { imageSize } from 'image-size'
+import { type ReadStream } from 'node:fs'
 import { extname } from 'pathe'
 import { isWorkerd } from 'std-env'
 import { assertUserPermissions, httpStatusCodeMessages } from '../api/utils.server'
@@ -31,13 +40,13 @@ import { stringifyImageTransformOptions, type ImageTransformOptions } from './im
  * Type representing the media categories for the `Uploads` collection.
  */
 export type MediaCategory =
-  | 'documents'
-  | 'images'
+  | 'document'
+  | 'image'
   | 'audio'
   | 'video'
-  | 'archives'
+  | 'archive'
   | 'code'
-  | 'fonts'
+  | 'font'
   | '3d'
   | 'data'
   | 'system'
@@ -355,7 +364,7 @@ export type AbortMultipartUploadResult =
  * The keys are the category names and the values are the MIME types that belong to that category.
  */
 export const mediaCategories: Record<MediaCategory, string[]> = {
-  'documents': [
+  'document': [
     // PDF
     'application/pdf',
     'application/x-pdf',
@@ -387,7 +396,7 @@ export const mediaCategories: Record<MediaCategory, string[]> = {
     'text/richtext',
   ],
 
-  'images': [
+  'image': [
     // Common web formats
     'image/jpeg',
     'image/pjpeg',
@@ -529,7 +538,7 @@ export const mediaCategories: Record<MediaCategory, string[]> = {
     'application/vnd.rn-realmedia-vbr',
   ],
 
-  'archives': [
+  'archive': [
     // Common formats
     'application/zip',
     'application/x-zip-compressed',
@@ -586,7 +595,7 @@ export const mediaCategories: Record<MediaCategory, string[]> = {
     'text/x-swift',
   ],
 
-  'fonts': [
+  'font': [
     // Modern web fonts
     'font/woff',
     'font/woff2',
@@ -688,6 +697,8 @@ export const mediaCategories: Record<MediaCategory, string[]> = {
 
   'other': [],
 }
+
+const imageOptimizationCache = new LimitedSizeObject<{ date: number; promise: Promise<any> | false }>(1000)
 
 /**
  * Prepare the input for the `Uploads` collection from the request body `input` and `files`.
@@ -820,7 +831,10 @@ export async function putUpload<
   const TPopulateFields extends boolean = false,
 >(
   file: Buffer,
-  input: Omit<InsertInput<Collections['Uploads']>, 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'>,
+  input: Omit<
+    InsertInput<Collections['Uploads']>,
+    'type' | 'etag' | 'images' | 'imageWidth' | 'imageHeight' | 'isLocked' | 'multipart' | 'size'
+  >,
   options?: PutUploadOptions<TReturningFields, TPopulateFields>,
 ): Promise<PutUploadResult<TReturningFields, TPopulateFields>> {
   const event = useEvent()
@@ -830,9 +844,8 @@ export async function putUpload<
     assertUserPermissions(event, ['collection:uploads:create'])
   }
 
-  const { __, collections, deleteFile, deleteFrom, guardedInsertInto, insertInto, putFile, update } = await import(
-    '#pruvious/server'
-  )
+  const { __, collections, deleteFile, deleteFrom, guardedInsertInto, insertInto, putFile, update } =
+    await import('#pruvious/server')
   const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString(), 'file') : undefined
   const returning =
     isUndefined(options?.returning) || toArray(options?.returning).includes('*' as any)
@@ -842,12 +855,12 @@ export async function putUpload<
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
     .values({
-      ...omit(input, ['type', 'etag', 'images', 'isLocked', 'multipart', 'size'] as any),
+      ...omit(input, ['type', 'etag', 'images', 'imageWidth', 'imageHeight', 'isLocked', 'multipart', 'size'] as any),
       path: normalizedPath as any,
       type: 'file',
       isLocked: true,
     })
-    .returning(['id', 'path'])
+    .returning(['id', 'path', 'category'])
     .withCustomContextData({ _allowUploadsQueries: true, _overwrite: overwrite })
     .run()
 
@@ -861,7 +874,7 @@ export async function putUpload<
     } as PutUploadResult<TReturningFields, TPopulateFields>
   }
 
-  const { id, path } = insertQuery.data[0]!
+  const { id, path, category } = insertQuery.data[0]!
   const putResult = await putFile(file, path)
 
   if (!putResult.success) {
@@ -878,7 +891,12 @@ export async function putUpload<
 
   const updateQueryBuilder = update('Uploads')
     .where('id', '=', id)
-    .set({ size: putResult.data.size, etag: putResult.data.etag, isLocked: false })
+    .set({
+      size: putResult.data.size,
+      etag: putResult.data.etag,
+      isLocked: false,
+      ...(category === 'image' ? await getImageDimensions(file) : {}),
+    })
     .returning(returning)
 
   if (options?.populate) {
@@ -1267,8 +1285,8 @@ export async function updateUpload<
 ): Promise<
   QueryBuilderResult<
     TPopulateFields extends true
-      ? Pick<ExtractPopulatedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>
-      : Pick<ExtractCastedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>,
+      ? Pick<ExtractPopulatedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>[]
+      : Pick<ExtractCastedTypes<Collections['Uploads']['fields']> & { id: number }, TReturningFields>[],
     Record<string, string>
   >
 > {
@@ -1603,7 +1621,10 @@ export async function deleteUpload<
  * ```
  */
 export async function createMultipartUpload(
-  input: Omit<InsertInput<Collections['Uploads']>, 'type' | 'etag' | 'images' | 'isLocked' | 'multipart' | 'size'>,
+  input: Omit<
+    InsertInput<Collections['Uploads']>,
+    'type' | 'etag' | 'images' | 'imageWidth' | 'imageHeight' | 'isLocked' | 'multipart' | 'size'
+  >,
   options?: CreateMultipartUploadOptions,
 ): Promise<CreateMultipartUploadResult> {
   const event = useEvent()
@@ -1619,7 +1640,7 @@ export async function createMultipartUpload(
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
     .values({
-      ...omit(input, ['type', 'etag', 'images', 'isLocked', 'multipart', 'size'] as any),
+      ...omit(input, ['type', 'etag', 'images', 'imageWidth', 'imageHeight', 'isLocked', 'multipart', 'size'] as any),
       path: normalizedPath as any,
       type: 'file',
       isLocked: true,
@@ -1753,7 +1774,7 @@ export async function getMultipartUpload(
     .select(['path', 'multipart'])
     .where('type', '=', 'file')
     .where('isLocked', '=', true)
-    .where('multipart', 'like', `{"key":"${key}",%}`)
+    .where('multipart', 'like', `{"key":"${key.slice(0, 16)}%}`)
 
   if (guarded && !user.canManage) {
     selectQueryBuilder.orGroup([
@@ -1762,9 +1783,10 @@ export async function getMultipartUpload(
     ])
   }
 
-  const selectQuery = await selectQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).first()
+  const selectQuery = await selectQueryBuilder.withCustomContextData({ _allowUploadsQueries: true }).all()
+  const mpu = selectQuery.data?.find((upload) => upload.multipart!.key === key)
 
-  if (!selectQuery.success || isEmpty(selectQuery.data)) {
+  if (!mpu) {
     setResponseStatus(event, 404, httpStatusCodeMessages[404])
     return {
       success: false,
@@ -1775,8 +1797,8 @@ export async function getMultipartUpload(
   return {
     success: true,
     key,
-    path: selectQuery.data.path,
-    parts: selectQuery.data.multipart!.parts,
+    path: mpu.path,
+    parts: mpu.multipart!.parts,
   }
 }
 
@@ -1878,6 +1900,7 @@ export async function resumeMultipartUpload(
   const updateQuery = await update('Uploads')
     .where('path', '=', mpu.path)
     .set({ multipart: { key, parts: [...mpu.parts, { partNumber, etag: storageResult.data.etag }] } })
+    .returning('category')
     .withCustomContextData({ _allowUploadsQueries: true })
     .run()
 
@@ -1887,6 +1910,17 @@ export async function resumeMultipartUpload(
     return {
       success: false,
       error: updateQuery.runtimeError ?? __('pruvious-api', 'Failed to resume multipart upload'),
+    }
+  }
+
+  if (partNumber === 1 && updateQuery.data[0]?.category === 'image') {
+    const { imageWidth, imageHeight } = await getImageDimensions(part)
+    if (imageWidth || imageHeight) {
+      await update('Uploads')
+        .where('path', '=', mpu.path)
+        .set({ imageWidth, imageHeight })
+        .withCustomContextData({ _allowUploadsQueries: true })
+        .run()
     }
   }
 
@@ -2023,7 +2057,12 @@ export async function completeMultipartUpload<
       : options.returning
   const updateQueryBuilder = update('Uploads')
     .where('path', '=', mpu.path)
-    .set({ size: storageResult.data.size, etag: storageResult.data.etag, multipart: null, isLocked: false })
+    .set({
+      size: storageResult.data.size,
+      etag: storageResult.data.etag,
+      multipart: null,
+      isLocked: false,
+    })
     .returning(returning)
 
   if (options?.populate) {
@@ -2151,16 +2190,16 @@ export async function abortMultipartUpload(
  * Adds a `urlSuffix` to an existing image upload record.
  */
 export async function registerOptimizedImage(
-  uploadId: number,
+  uploadIdOrPath: number | string,
   urlSuffix: string,
 ): Promise<
   { success: true; upload: { id: number } & Collections['Uploads']['TCastedTypes'] } | { success: false; error: string }
 > {
   const { __ } = await import('#pruvious/server')
 
-  return _updateUploadImages(uploadId, (images) => {
+  return _updateUploadImages(uploadIdOrPath, (images) => {
     if (images.includes(urlSuffix)) {
-      return { success: false, error: __('pruvious-api', 'The image has already been registered') }
+      return { success: false, error: __('pruvious-api', 'The image variant has already been registered') }
     }
 
     return { success: true, images: [...images, urlSuffix] }
@@ -2171,16 +2210,16 @@ export async function registerOptimizedImage(
  * Removes a `urlSuffix` from an existing image upload record.
  */
 export async function deregisterOptimizedImage(
-  uploadId: number,
+  uploadIdOrPath: number | string,
   urlSuffix: string,
 ): Promise<
   { success: true; upload: { id: number } & Collections['Uploads']['TCastedTypes'] } | { success: false; error: string }
 > {
   const { __ } = await import('#pruvious/server')
 
-  return _updateUploadImages(uploadId, (images) => {
+  return _updateUploadImages(uploadIdOrPath, (images) => {
     if (!images.includes(urlSuffix)) {
-      return { success: false, error: __('pruvious-api', 'The image has not been registered') }
+      return { success: false, error: __('pruvious-api', 'The image variant has not been registered') }
     }
 
     return { success: true, images: images.filter((image) => image !== urlSuffix) }
@@ -2188,40 +2227,67 @@ export async function deregisterOptimizedImage(
 }
 
 async function _updateUploadImages(
-  uploadId: number,
+  uploadIdOrPath: number | string,
   callback: (images: string[]) => { success: true; images: string[] } | { success: false; error: string },
 ): Promise<
   { success: true; upload: { id: number } & Collections['Uploads']['TCastedTypes'] } | { success: false; error: string }
 > {
-  const { __, update } = await import('#pruvious/server')
-  const unlock = () =>
-    update('Uploads')
-      .set({ isLocked: false })
-      .where('id', '=', uploadId)
-      .withCustomContextData({ _allowUploadsQueries: true })
-      .run()
+  const { __, selectFrom, update } = await import('#pruvious/server')
+  const unlock = () => {
+    const query = update('Uploads').set({ isLocked: false }).withCustomContextData({ _allowUploadsQueries: true })
+
+    if (isString(uploadIdOrPath)) {
+      query.where('path', '=', uploadIdOrPath)
+    } else {
+      query.where('id', '=', uploadIdOrPath)
+    }
+
+    return query.run()
+  }
 
   let upload: { id: number } & Collections['Uploads']['TCastedTypes']
-  let i = 0
+  let retry = 0
 
   while (true) {
-    const query = await update('Uploads')
-      .set({ isLocked: true })
-      .where('id', '=', uploadId)
-      .withCustomContextData({ _allowUploadsQueries: true })
-      .returningAll()
-      .run()
+    const [existsQuery, lockQuery] = [
+      selectFrom('Uploads')
+        .select('id')
+        .where('category', '=', 'image')
+        .withCustomContextData({ _allowUploadsQueries: true }),
+      update('Uploads')
+        .set({ isLocked: true })
+        .where('category', '=', 'image')
+        .where('isLocked', '=', false)
+        .withCustomContextData({ _allowUploadsQueries: true })
+        .returningAll(),
+    ]
 
-    if (query.success && !isEmpty(query.data)) {
-      upload = query.data[0]!
+    if (isString(uploadIdOrPath)) {
+      existsQuery.where('path', '=', uploadIdOrPath)
+      lockQuery.where('path', '=', uploadIdOrPath)
+    } else {
+      existsQuery.where('id', '=', uploadIdOrPath)
+      lockQuery.where('id', '=', uploadIdOrPath)
+    }
+
+    const [existsResult, lockResult] = await Promise.all([existsQuery.first(), lockQuery.run()])
+
+    if (!existsResult.success || !existsResult.data) {
+      await unlock()
+      return { success: false, error: __('pruvious-api', 'Resource not found') }
+    } else if (lockResult.success && !isEmpty(lockResult.data)) {
+      upload = lockResult.data[0]!
       break
     } else {
-      if (++i >= 5) return { success: false, error: __('pruvious-api', 'Resource not found') }
+      if (++retry >= 5) {
+        await unlock()
+        return { success: false, error: __('pruvious-api', 'Resource not found') }
+      }
       await sleep(300)
     }
   }
 
-  if (upload.category !== 'images') {
+  if (upload.category !== 'image') {
     await unlock()
     return {
       success: false,
@@ -2232,21 +2298,28 @@ async function _updateUploadImages(
   const result = callback(upload.images)
 
   if (!result.success) {
+    await unlock()
     return { success: false, error: result.error }
   }
 
-  const updateQuery = await update('Uploads')
+  const updateQuery = update('Uploads')
     .set({ images: result.images, isLocked: false })
-    .where('id', '=', uploadId)
     .withCustomContextData({ _allowUploadsQueries: true })
-    .run()
 
-  if (!updateQuery.success) {
+  if (isString(uploadIdOrPath)) {
+    updateQuery.where('path', '=', uploadIdOrPath)
+  } else {
+    updateQuery.where('id', '=', uploadIdOrPath)
+  }
+
+  const updateResult = await updateQuery.run()
+
+  if (!updateResult.success) {
     await unlock()
     return {
       success: false,
       error:
-        updateQuery.runtimeError ?? updateQuery.inputErrors.images ?? __('pruvious-orm', 'An unknown error occurred'),
+        updateResult.runtimeError ?? updateResult.inputErrors.images ?? __('pruvious-orm', 'An unknown error occurred'),
     }
   }
 
@@ -2254,9 +2327,65 @@ async function _updateUploadImages(
 }
 
 /**
+ * Creates an optimized version of an existing image upload.
+ *
+ * - The `uploadIdOrPath` parameter is the ID or full path of the image upload record.
+ * - The `options` parameter is an object containing the image optimization settings.
+ * - The optional `baseURL` parameter is the base URL to prepend to the original image path during optimization.
+ *   This is required when running in environments like Cloudflare Workers where direct file access is not available.
+ *
+ * @returns a `PutResult` with the created optimized `image` Buffer or error information.
+ *
+ * @example
+ * ```ts
+ * await createOptimizedImage('/image.jpg', { format: 'webp', width: 1920 }, 'https://cdn.example.com/uploads/')
+ * // {
+ * //   success: true,
+ * //   data: {
+ * //     path: '/image_oextjpg_w1920.webp',
+ * //     dir: '/',
+ * //     name: 'image_oextjpg_w1920.webp',
+ * //     ext: 'webp',
+ * //     size: 1000000,
+ * //     etag: '...',
+ * //   },
+ * // }
+ * ```
+ */
+export async function createOptimizedImage(
+  uploadIdOrPath: number | string,
+  options: ImageTransformOptions,
+  baseURL?: string,
+) {
+  const urlSuffix = stringifyImageTransformOptions(options)
+  const registration = await registerOptimizedImage(uploadIdOrPath, urlSuffix)
+
+  if (!registration.success) {
+    throw new Error(registration.error)
+  }
+
+  const { optimizeImage, generateOptimizedImagePath, putFile } = await import('#pruvious/server')
+  const optimizeResult = await optimizeImage((baseURL ?? '') + registration.upload.path, options)
+
+  if (!optimizeResult.success) {
+    await deregisterOptimizedImage(uploadIdOrPath, urlSuffix)
+    throw new Error(optimizeResult.error)
+  }
+
+  const imagePath = generateOptimizedImagePath(registration.upload.path, urlSuffix)
+  const putResult = await putFile(optimizeResult.image, imagePath)
+
+  if (!putResult.success) {
+    await deregisterOptimizedImage(uploadIdOrPath, urlSuffix)
+  }
+
+  return putResult.success ? { ...putResult, data: { ...putResult.data, image: optimizeResult.image } } : putResult
+}
+
+/**
  * Creates a unique image optimization job and adds it to the queue.
  *
- * - The `uploadId` parameter is the ID of the image upload record.
+ * - The `uploadIdOrPath` parameter is the ID or full path of the image upload record.
  * - The `options` parameter is an object containing the image optimization settings.
  *
  * @returns a `QueryBuilderResult` with the created job record or error information.
@@ -2276,16 +2405,16 @@ async function _updateUploadImages(
  * //       },
  * //     },
  * //     priority: 10,
- * //     key: 'optimize-image:1337_w200_h200.webp',
+ * //     key: 'optimize-image:1337_oextjpg_w200_h200.webp',
  * //     scheduledAt: null,
  * //     createdAt: 1735419553293,
  * //   },
  * // }
  * ```
  */
-export async function queueImageOptimization(uploadId: number, options: ImageTransformOptions) {
+export async function queueImageOptimization(uploadIdOrPath: number | string, options: ImageTransformOptions) {
   const { queueUniqueJob } = await import('#pruvious/server')
-  const payload: Jobs['optimize-image']['TPayload'] = { uploadId, options }
+  const payload: Jobs['optimize-image']['TPayload'] = { uploadIdOrPath, options }
   const urlSuffix = stringifyImageTransformOptions(options)
 
   if (isWorkerd) {
@@ -2295,5 +2424,187 @@ export async function queueImageOptimization(uploadId: number, options: ImageTra
     payload.baseURL = url.origin + withoutTrailingSlash(runtimeConfig.pruvious.uploads.basePath)
   }
 
-  return queueUniqueJob('optimize-image', `optimize-image:${uploadId}${urlSuffix}`, payload)
+  return queueUniqueJob('optimize-image', `optimize-image:${uploadIdOrPath}${urlSuffix}`, payload)
+}
+
+/**
+ * Retrieves the dimensions of an image from a `Buffer` or file path.
+ */
+export async function getImageDimensions(input: Buffer | string): Promise<{ imageWidth: number; imageHeight: number }> {
+  let buffer: Buffer | null = Buffer.isBuffer(input) ? input : null
+
+  if (isString(input)) {
+    const { streamFile } = await import('#pruvious/server')
+    const result = await streamFile(input, 0, 64 * 1024)
+    if (result.success) {
+      buffer = await streamToBuffer(result.data.stream)
+    }
+  }
+
+  if (buffer?.subarray(0, 1024).toString('utf-8').includes('<svg')) {
+    const svgString = buffer.toString('utf-8')
+    const widthMatch = svgString.match(/<svg[^>]*\swidth=["']?([\d.]+)(px)?["']?[^>]*>/i)
+    const heightMatch = svgString.match(/<svg[^>]*\sheight=["']?([\d.]+)(px)?["']?[^>]*>/i)
+    const width = widthMatch ? parseInt(widthMatch[1]!, 10) : 0
+    const height = heightMatch ? parseInt(heightMatch[1]!, 10) : 0
+    return { imageWidth: width, imageHeight: height }
+  } else if (buffer) {
+    try {
+      const orientation = await exifr.orientation(buffer)
+      const { width, height } = imageSize(buffer)
+      return isPositiveInteger(orientation) && orientation >= 5
+        ? { imageWidth: height, imageHeight: width }
+        : { imageWidth: width, imageHeight: height }
+    } catch (error: any) {
+      const { logError } = await import('#pruvious/server')
+      useEvent().waitUntil(
+        logError(error.toString(), { category: 'image-dimensions', payload: { functionName: 'getImageDimensions' } }),
+      )
+    }
+  }
+
+  return { imageWidth: 0, imageHeight: 0 }
+}
+
+/**
+ * Converts a `ReadStream` or `ReadableStream` into a `Buffer`.
+ */
+export async function streamToBuffer(stream: ReadStream | ReadableStream<any>): Promise<Buffer> {
+  if ('read' in stream) {
+    const chunks: Buffer[] = []
+    for await (const chunk of stream as ReadStream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    }
+    return Buffer.concat(chunks)
+  }
+
+  const reader = (stream as ReadableStream<any>).getReader()
+  const chunks: Uint8Array[] = []
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+  }
+
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
+}
+
+/**
+ * Default handler for upload requests.
+ *
+ * Used in the `/uploads/*` route to process file uploads by streaming files and handling image transformations.
+ *
+ * @example
+ * ```ts
+ * import { uploadEventHandler } from '#pruvious/server'
+ *
+ * export default defineEventHandler(uploadEventHandler)
+ * ```
+ */
+export async function uploadEventHandler(event: H3Event) {
+  const {
+    __,
+    createOptimizedImage,
+    httpStatusCodeMessages,
+    logError,
+    parseImageTransformOptions,
+    parseRangeHeader,
+    pruviousError,
+    resolveContextLanguage,
+    streamFile,
+    stringifyImageTransformOptions,
+  } = await import('#pruvious/server')
+  const runtimeConfig = useRuntimeConfig()
+  const path = '/' + getRouterParams(event)._
+  const ext = extname(path)
+  const urlSuffix = path.includes('_') ? '_' + path.split('_').slice(1).join('_') : ''
+  const imageOptions = urlSuffix ? parseImageTransformOptions(urlSuffix) : null
+  const normalizedPath = imageOptions
+    ? path.slice(0, -urlSuffix.length) + stringifyImageTransformOptions(imageOptions)
+    : path
+
+  if (path !== normalizedPath) {
+    return sendRedirect(event, runtimeConfig.pruvious.uploads.basePath + normalizedPath.slice(1), 301)
+  }
+
+  await resolveContextLanguage()
+
+  const range = parseRangeHeader(event)
+  let streamResult = range ? await streamFile(normalizedPath, range[0], range[1]) : await streamFile(normalizedPath)
+
+  if (!streamResult.success && imageOptions) {
+    const cache = imageOptimizationCache.get(normalizedPath)
+    const imagePath = path.slice(0, -urlSuffix.length) + imageOptions.originalExtension
+    let baseURL: string | undefined
+
+    if (cache?.promise === false && cache.date + 30 * 60 * 1000 < Date.now()) {
+      imageOptimizationCache.delete(normalizedPath)
+    }
+
+    if (
+      Object.values(runtimeConfig.pruvious.images.variants).some((variant) =>
+        deepCompare(omit(imageOptions, ['originalExtension']), variant),
+      )
+    ) {
+      if (isWorkerd) {
+        const url = new URL(event.context.cloudflare.request.url)
+        baseURL = url.origin + withoutTrailingSlash(runtimeConfig.pruvious.uploads.basePath)
+      }
+
+      try {
+        const promise =
+          imageOptimizationCache.get(normalizedPath)?.promise ?? createOptimizedImage(imagePath, imageOptions, baseURL)
+        imageOptimizationCache.set(normalizedPath, { date: Date.now(), promise })
+        const optimizedImage = await promise
+
+        if (optimizedImage.success) {
+          streamResult = range
+            ? await streamFile(optimizedImage.data.path, range[0], range[1])
+            : await streamFile(optimizedImage.data.path)
+        } else {
+          imageOptimizationCache.set(normalizedPath, { date: Date.now(), promise: false })
+          event.waitUntil(
+            logError(optimizedImage.error, {
+              category: 'image-optimization',
+              payload: { functionName: 'uploadEventHandler', imagePath, imageOptions, baseURL },
+            }),
+          )
+        }
+      } catch (error: any) {
+        imageOptimizationCache.set(normalizedPath, { date: Date.now(), promise: false })
+        event.waitUntil(
+          logError(error.toString(), {
+            category: 'image-optimization',
+            payload: { functionName: 'uploadEventHandler', imagePath, imageOptions, baseURL },
+          }),
+        )
+      }
+    }
+  }
+
+  if (!streamResult.success) {
+    throw pruviousError(event, {
+      statusCode: 404,
+      message: __('pruvious-api', 'File not found'),
+    })
+  }
+
+  setHeader(event, 'Content-Type', mime.getType(ext) || 'application/octet-stream')
+  setHeader(event, 'ETag', streamResult.data.etag)
+
+  if (isDefined(streamResult.data.start) && isDefined(streamResult.data.end)) {
+    setHeader(event, 'Accept-Ranges', 'bytes')
+    setHeader(event, 'Content-Length', streamResult.data.end - streamResult.data.start + 1)
+    setHeader(
+      event,
+      'Content-Range',
+      `bytes ${streamResult.data.start}-${streamResult.data.end}/${streamResult.data.size}`,
+    )
+    setResponseStatus(event, 206, httpStatusCodeMessages[206])
+  } else {
+    setHeader(event, 'Content-Length', streamResult.data.size)
+  }
+
+  return streamResult.data.stream
 }

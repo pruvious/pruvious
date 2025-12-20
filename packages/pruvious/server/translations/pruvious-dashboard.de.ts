@@ -7,6 +7,10 @@ export default defineTranslation({
     { count: 'number' },
     { subject: [{ conditions: [{ count: 1 }], output: 'Block konnte' }, 'Blöcke konnten'] },
   ),
+  '$upload `$oldName` has been renamed to `$newName`': createPattern(
+    '$upload `$oldName` wurde in `$newName` umbenannt',
+    { upload: 'string', oldName: 'string', newName: 'string' },
+  ),
 
   '/example/path': '/beispiel/pfad',
 
@@ -41,12 +45,33 @@ export default defineTranslation({
   'An error occurred during duplication': 'Beim Duplizieren ist ein Fehler aufgetreten',
   'An error occurred while copying the translation': 'Beim Kopieren der Übersetzung ist ein Fehler aufgetreten',
   'An error occurred while creating the folder': 'Beim Erstellen des Ordners ist ein Fehler aufgetreten',
+  'An error occurred while renaming the upload': 'Beim Umbenennen des Uploads ist ein Fehler aufgetreten',
+  'An unknown error occurred': 'Es ist ein unbekannter Fehler aufgetreten',
   'and': 'und',
   'Apply': 'Anwenden',
   'Are you sure you want to delete $count $entries?': createPattern(
     'Sind Sie sicher, dass Sie $count $entries löschen möchten?',
     { count: 'number' },
     { entries: [{ conditions: [{ count: 1 }], output: 'Eintrag' }, 'Einträge'] },
+  ),
+  'Are you sure you want to delete $count $uploads?': createPattern(
+    'Sind Sie sicher, dass Sie $count $uploads löschen möchten?',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
+  'Are you sure you want to delete this $uploadType?': createPattern(
+    'Sind Sie sicher, dass Sie $upload löschen möchten?',
+    { uploadType: 'string' },
+    { upload: [{ conditions: [{ uploadType: 'file' }], output: 'diese Datei' }, 'diesen Ordner'] },
   ),
   'Are you sure you want to delete this entry?': 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?',
   'Are you sure you want to Sign out from all other devices? Your current session will remain active.':
@@ -74,17 +99,17 @@ export default defineTranslation({
   'Calendar (seconds precision)': 'Kalender (Sekunden-Präzision)',
   'Cancel': 'Abbrechen',
   'cat:3d': '3D',
-  'cat:archives': 'Archiv',
+  'cat:archive': 'Archiv',
   'cat:audio': 'Audio',
   'cat:code': 'Code',
   'cat:data': 'Daten',
-  'cat:documents': 'Dokumente',
-  'cat:fonts': 'Schriften',
-  'cat:images': 'Bilder',
+  'cat:document': 'Dokumente',
+  'cat:font': 'Schriften',
+  'cat:image': 'Bilder',
   'cat:other': 'Andere',
   'cat:system': 'System',
-  'cat:text': 'Text',
-  'cat:video': 'Video',
+  'cat:text': 'Texte',
+  'cat:video': 'Videos',
   'Category': 'Kategorie',
   'Change password': 'Passwort ändern',
   'Changes made to this field will automatically sync across all translations.':
@@ -96,7 +121,7 @@ export default defineTranslation({
   'Choose `301` for permanent redirects or `302` for temporary redirects.':
     'Wählen Sie `301` für permanente Weiterleitungen oder `302` für temporäre Weiterleitungen.',
   'Clear': 'Löschen',
-  'Clear selection': 'Auswahl löschen',
+  'Clear selection': 'Auswahl aufheben',
   'Close': 'Schließen',
   'Collapse': 'Einklappen',
   'Collapse all': 'Alle einklappen',
@@ -178,16 +203,50 @@ export default defineTranslation({
     { count: 'number' },
     { entries: [{ conditions: [{ count: 1 }], output: 'Eintrag' }, 'Einträge'] },
   ),
+  'Delete $count $uploads': createPattern(
+    '$count $uploads löschen',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
+  'Delete file': 'Datei löschen',
+  'Delete folder': 'Ordner löschen',
   'Deleted': 'Gelöscht',
   'Deleted $count $entries': createPattern(
     '$count $entries gelöscht',
     { count: 'number' },
     { entries: [{ conditions: [{ count: 1 }], output: 'Eintrag' }, 'Einträge'] },
   ),
+  'Deleted $count $uploads': createPattern(
+    '$count $uploads gelöscht',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
   'Deleted record': 'Gelöschter Eintrag',
+  'Deleting a folder will also delete all of its contents.':
+    'Das Löschen eines Ordners löscht auch alle darin enthaltenen Inhalte.',
   'Dependencies': 'Abhängigkeiten',
   'Description': 'Beschreibung',
   'Deselect': 'Abwählen',
+  'Details': 'Details',
+  'Dimensions': 'Abmessungen',
   'Disable': 'Deaktivieren',
   'Disable to use the exact route path.': 'Deaktivieren Sie dies, um den genauen Routenpfad zu verwenden.',
   'Disabled': 'Deaktiviert',
@@ -210,6 +269,7 @@ export default defineTranslation({
   'e.g. .+-legacy$': 'z.B. .+-legacy$',
   'e.g. archive/reports/2024/$1': 'z.B. archiv/berichte/2024/$1',
   'e.g. https://pruvious.com': 'z.B. https://pruvious.com',
+  'e.g. my-file': 'z.B. meine-datei',
   'e.g. my-folder': 'z.B. mein-ordner',
   'e.g. Recently updated': 'z.B. Zuletzt aktualisiert',
   'e.g. report-(.+)-2024$': 'z.B. report-(.+)-2024$',
@@ -235,11 +295,21 @@ export default defineTranslation({
   'Failed': 'Fehlgeschlagen',
   'False': 'Falsch',
   'Fields': 'Felder',
+  'File': 'Datei',
+  'File deleted': 'Datei gelöscht',
+  'File name': 'Dateiname',
+  'File size': 'Dateigröße',
+  'File type': 'Dateityp',
+  'File URL': 'Datei-URL',
+  'Files': 'Dateien',
   'Filters': 'Filter',
   'First name': 'Vorname',
   'Fixed width': 'Feste Breite',
+  'Folder': 'Ordner',
   'Folder `$name` has been created': createPattern('Ordner `$name` wurde erstellt', { name: 'string' }),
+  'Folder is empty': 'Der Ordner ist leer',
   'Folder name': 'Ordnername',
+  'Folders': 'Ordner',
   'Forgot password?': 'Passwort vergessen?',
   'Forward query parameters': 'Query-Parameter weiterleiten',
   'Found $count $errors': createPattern(
@@ -265,6 +335,9 @@ export default defineTranslation({
   'HTTP Method': 'HTTP Methode',
 
   'ID': 'ID',
+  'Image height': 'Bildhöhe',
+  'Image variant recreated successfully': 'Bildvariante erfolgreich neu erstellt',
+  'Image width': 'Bildbreite',
   'Inactive': 'Inaktiv',
   'Includes all': 'Enthält alle',
   'Includes any': 'Enthält mindestens eines',
@@ -308,7 +381,50 @@ export default defineTranslation({
   'MIME type': 'MIME-Typ',
   'More actions': 'Weitere Aktionen',
   'Move down': 'Nach unten verschieben',
+  'Move $count $uploads': createPattern(
+    '$count $uploads verschieben',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
+  'Move into `$directory`': createPattern('In `$directory` verschieben', { directory: 'string' }),
   'Move up': 'Nach oben verschieben',
+  'Moved $count $uploads': createPattern(
+    '$count $uploads verschoben',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
+  'Moving $count $uploads': createPattern(
+    '$count $uploads verschieben',
+    { count: 'number', type: 'string' },
+    {
+      uploads: [
+        { conditions: [{ count: 1, type: 'files' }], output: 'Datei' },
+        { conditions: [{ count: 1, type: 'directories' }], output: 'Ordner' },
+        { conditions: [{ count: 1 }], output: 'Upload' },
+        { conditions: [{ type: 'files' }], output: 'Dateien' },
+        { conditions: [{ type: 'directories' }], output: 'Ordner' },
+        'Uploads',
+      ],
+    },
+  ),
   'My account': 'Mein Konto',
   'My bookmarks': 'Meine Merklisten',
 
@@ -320,6 +436,7 @@ export default defineTranslation({
   'New folder': 'Neuer Ordner',
   'New name': 'Neuer Name',
   'New password': 'Neues Passwort',
+  'New subfolder': 'Neuer Unterordner',
   'New translation': 'Neue Übersetzung',
   'New translation of': 'Neue Übersetzung von',
   'Next entry': 'Nächster Eintrag',
@@ -336,6 +453,9 @@ export default defineTranslation({
   'No fields to display': 'Keine Felder zum Anzeigen',
   'No results found': 'Keine Ergebnisse gefunden',
   'No sorting applied': 'Keine Sortierung angewendet',
+  'No uploads found': 'Keine Uploads gefunden',
+  'No uploads were deleted': 'Es wurden keine Uploads gelöscht',
+  'No uploads were moved': 'Es wurden keine Uploads verschoben',
   'None': 'Keine',
   'Numeric': 'Numerisch',
   'Numeric (milliseconds precision)': 'Numerisch (Millisekunden-Präzision)',
@@ -366,6 +486,7 @@ export default defineTranslation({
   'Path': 'Pfad',
   'Payload': 'Payload',
   'Pending': 'Ausstehend',
+  'pixels': 'Pixel',
   'Predefined': 'Vordefiniert',
   'Preformatted text': 'Vorformatierter Text',
   'Preview': 'Vorschau',
@@ -387,6 +508,7 @@ export default defineTranslation({
 
   'Raw result': 'Rohergebnis',
   'Record not found': 'Eintrag nicht gefunden',
+  'Recreate': 'Neu erstellen',
   'Redirect': 'Weiterleitung',
   'Redirect URL': 'Weiterleitungs-URL',
   'Redirected': 'Weitergeleitet',
@@ -400,6 +522,8 @@ export default defineTranslation({
   'Remove': 'Entfernen',
   'Rename': 'Umbenennen',
   'Rename bookmark': 'Merkliste umbenennen',
+  'Rename file': 'Datei umbenennen',
+  'Rename folder': 'Ordner umbenennen',
   'Replace with current': 'Mit aktuellem ersetzen',
   'Request': 'Request',
   'Request debug ID': 'Request-Debug-ID',
@@ -410,6 +534,7 @@ export default defineTranslation({
   'Result': 'Ergebnis',
   'Rich text': 'Formatierter Text',
   'Roles': 'Rollen',
+  'Root folder': 'Root-Ordner',
   'Route': 'Route',
   'Routes': 'Routen',
 
@@ -471,6 +596,8 @@ export default defineTranslation({
   'Smart clipboard': 'Intelligente Zwischenablage',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
     'Einige Systemeinstellungen wurden aktualisiert. Bitte laden Sie die Seite neu, damit die Änderungen wirksam werden.',
+  'Some uploads already exist in the target directory. Do you want to overwrite them?':
+    'Einige Uploads existieren bereits im Zielverzeichnis. Möchten Sie diese überschreiben?',
   'Sort in ascending order': 'Aufsteigend sortieren',
   'Sort in descending order': 'Absteigend sortieren',
   'Sort NULL values first': 'Sortiere NULL-Werte zuerst',
@@ -511,6 +638,8 @@ export default defineTranslation({
   'The date and time when the record was created.': 'Das Datum und die Uhrzeit, wann der Eintrag erstellt wurde.',
   'The date and time when the record was last updated.':
     'Das Datum und die Uhrzeit, wann der Eintrag zuletzt aktualisiert wurde.',
+  'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).':
+    'Der Dateiname wird in ein URL-freundliches Format konvertiert (z. B. wird aus `Meine Datei` -> `meine-datei`).',
   'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
     'Der Ordnername wird in ein URL-freundliches Format konvertiert (z. B. wird aus `Mein Ordner` -> `mein-ordner`).',
   'The HTML tag name to use for this element.': 'Der zu verwendende HTML-Tag-Name für dieses Element.',
@@ -527,6 +656,8 @@ export default defineTranslation({
     'Die URL oder der Pfad, auf den die Benutzer weitergeleitet werden.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
+  'There are no folders available to move the selected uploads to.':
+    'Es sind keine Ordner verfügbar, um die ausgewählten Uploads zu verschieben.',
   'This block is not allowed here': 'Dieser Block ist hier nicht erlaubt',
   'This field must contain at least $min blocks': createPattern(
     'Dieses Feld muss mindestens $min $blocks enthalten',
@@ -546,6 +677,8 @@ export default defineTranslation({
   ),
   'This field stores time with milliseconds precision. When using the calendar selector (which only offers seconds precision), use the `<=` and `>=` operators to ensure you capture all relevant entries. For exact millisecond-level comparisons, use the numeric input field instead.':
     'Dieses Feld speichert Zeit mit Millisekunden-Präzision. Wenn Sie den Kalender-Selektor verwenden (der nur Sekunden-Präzision bietet), nutzen Sie die Operatoren `⁠<=` und ⁠`>=`, um sicherzustellen, dass Sie alle relevanten Einträge erfassen. Für exakte Vergleiche auf Millisekunden-Ebene verwenden Sie stattdessen das numerische Eingabefeld.',
+  'This file is temporarily locked and cannot be deleted or modified because an upload is in progress or a system operation is running.':
+    'Diese Datei ist vorübergehend gesperrt und kann nicht gelöscht oder geändert werden, da ein Upload im Gange ist oder eine Systemoperation ausgeführt wird.',
   'This path is already in use.': 'Dieser Pfad ist bereits in Verwendung.',
   'This subpath is already in use.': 'Dieser Unterpfad ist bereits in Verwendung.',
   'They are resolved in the order they are provided.':
@@ -591,6 +724,7 @@ export default defineTranslation({
     path: 'string',
   }),
   'Undo': 'Rückgängig',
+  'Uncategorized': 'Unkategorisiert',
   'unique-subpath': 'eindeutiger-unterpfad',
   'Unordered list': 'Ungeordnete Liste',
   'Untitled': 'Unbenannt',
@@ -602,6 +736,8 @@ export default defineTranslation({
   'Upload failed': 'Upload fehlgeschlagen',
   'Upload history': 'Uploadverlauf',
   'Upload speed': 'Uploadgeschwindigkeit',
+  'Uploaded by': 'Hochgeladen von',
+  'Uploaded on': 'Hochgeladen am',
   'Uploading': 'Hochladen',
   'Uploads': 'Uploads',
   'Upload aborted': 'Upload abgebrochen',
@@ -612,9 +748,11 @@ export default defineTranslation({
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Verwenden Sie Capture-Gruppen (z.B. `(.+)`), um Teile des gematchten Pfads für die Weiterleitungs-URL zu extrahieren.',
   'User': 'Benutzer',
+  'user ID': 'Benutzer-ID',
   'Users': 'Benutzer',
   'Utilities': 'Werkzeuge',
 
+  'Variants': 'Varianten',
   'View': 'Anzeigen',
   'View configuration': 'Ansichtskonfiguration',
   'View field value': 'Feldwert anzeigen',

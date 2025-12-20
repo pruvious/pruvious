@@ -102,7 +102,7 @@
 
         <template #actions="{ row }">
           <PUIDropdownItem
-            v-if="selected[row.id]"
+            v-if="multiSelect && selected[row.id]"
             :title="__('pruvious-dashboard', 'Deselect')"
             @click="deselect(row.id)"
           >
@@ -111,7 +111,7 @@
           </PUIDropdownItem>
 
           <PUIDropdownItem
-            v-if="!selected[row.id]"
+            v-if="!multiSelect || !selected[row.id]"
             :title="__('pruvious-dashboard', 'Select')"
             @click="
               () => {
