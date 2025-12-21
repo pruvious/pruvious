@@ -17,13 +17,17 @@ import {
   isDefined,
   isNull,
   isUndefined,
+  LimitedSizeObject,
   toArray,
   uniqueArray,
   type NonEmptyArray,
   type StringKeys,
 } from '@pruvious/utils'
+import { hash } from 'ohash'
 import { ConditionalQueryBuilder } from './ConditionalQueryBuilder'
 import type { QueryBuilderOptions } from './QueryBuilder'
+
+const cache = new LimitedSizeObject<{ date: number; promise: Promise<any> }>(1000)
 
 /**
  * A utility class for constructing and querying collection records through the GET collections API in a type-safe manner.
@@ -121,6 +125,7 @@ export class SelectQueryBuilder<
   protected limitValue: number | null = null
   protected offsetValue: number | null = null
   protected populateFields: boolean = false
+  protected cacheDuration: number = 0
 
   constructor(
     collectionName: TCollectionName,
@@ -292,6 +297,24 @@ export class SelectQueryBuilder<
   }
 
   /**
+   * Computes a unique hash for the query builder's current state.
+   */
+  hash(): string {
+    return hash({
+      collection: this.collectionName,
+      selectedFields: this.selectedFields,
+      searchCondition: this.searchCondition,
+      orderByRelevance: this.orderByRelevanceValue,
+      whereCondition: this.whereCondition,
+      groupByFields: this.groupByFields,
+      orderByClauses: this.orderByClauses,
+      limitValue: this.limitValue,
+      offsetValue: this.offsetValue,
+      populateFields: this.populateFields,
+    })
+  }
+
+  /**
    * Clones the current query builder instance.
    */
   clone(): this {
@@ -307,6 +330,7 @@ export class SelectQueryBuilder<
     clone.limitValue = this.limitValue
     clone.offsetValue = this.offsetValue
     clone.populateFields = this.populateFields
+    clone.cacheDuration = this.cacheDuration
 
     return clone as any
   }
@@ -860,6 +884,23 @@ export class SelectQueryBuilder<
   }
 
   /**
+   * Enables automatic caching of query results for the specified `duration` (in milliseconds).
+   * Results are cached globally for all query builder instances.
+   */
+  cache(duration: number): this {
+    this.cacheDuration = duration
+    return this
+  }
+
+  /**
+   * Disables caching in this query builder instance.
+   */
+  noCache(): this {
+    this.cacheDuration = 0
+    return this
+  }
+
+  /**
    * Retrieves all matching collection records.
    *
    * @example
@@ -917,11 +958,19 @@ export class SelectQueryBuilder<
       undefined
     >
   > {
-    const response = await this.options
+    const cachedResponse = this.getCachedResponse()
+
+    if (cachedResponse) {
+      return cachedResponse
+    }
+
+    const promise = this.options
       .fetcher(this.options.apiRouteResolver.read(this.collectionName), {
         body: { query: this.toQueryString({ limit: false, offset: false }) },
       })
       .then((r) => (r.success ? { ...r, data: r.data.records } : r))
+    this.cacheResponse(promise)
+    const response = await promise
 
     if (response.success) {
       return {
@@ -1000,9 +1049,17 @@ export class SelectQueryBuilder<
       undefined
     >
   > {
-    const response = await this.options.fetcher(this.options.apiRouteResolver.read(this.collectionName), {
+    const cachedResponse = this.getCachedResponse()
+
+    if (cachedResponse) {
+      return cachedResponse
+    }
+
+    const promise = this.options.fetcher(this.options.apiRouteResolver.read(this.collectionName), {
       body: { query: this.toQueryString() },
     })
+    this.cacheResponse(promise)
+    const response = await promise
 
     if (response.success) {
       return {
@@ -1069,9 +1126,17 @@ export class SelectQueryBuilder<
       this.limit(prevLimit)
     }
 
-    const response = await this.options
+    const cachedResponse = this.getCachedResponse()
+
+    if (cachedResponse) {
+      return cachedResponse
+    }
+
+    const promise = this.options
       .fetcher(this.options.apiRouteResolver.read(this.collectionName), { body: { query } })
       .then((r) => (r.success ? { ...r, data: r.data.records[0] ?? null } : r))
+    this.cacheResponse(promise)
+    const response = await promise
 
     if (response.success) {
       return {
@@ -1087,6 +1152,40 @@ export class SelectQueryBuilder<
         runtimeError: response.error.message,
         inputErrors: undefined,
       }
+    }
+  }
+
+  /**
+   * Retrieves a cached response for the current query if caching is enabled and a valid cache exists.
+   */
+  private getCachedResponse(): Promise<any> | null {
+    const cacheKey = this.cacheDuration > 0 ? this.hash() : null
+
+    if (cacheKey && cache.has(cacheKey)) {
+      const response = cache.get(cacheKey)
+
+      if (response) {
+        const now = Date.now()
+        const minDate = now - this.cacheDuration
+        const maxDate = now + this.cacheDuration
+
+        if (response.date >= minDate && response.date <= maxDate) {
+          return response.promise
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Caches the response promise for the current query if caching is enabled.
+   */
+  private cacheResponse(promise: Promise<any>): void {
+    const cacheKey = this.cacheDuration > 0 ? this.hash() : null
+
+    if (cacheKey) {
+      cache.set(cacheKey, { date: Date.now(), promise })
     }
   }
 }
