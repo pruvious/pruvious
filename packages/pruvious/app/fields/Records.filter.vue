@@ -132,6 +132,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const query = await selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
+    .cache(3000)
     .paged(page, 50)
     .paginate()
 
@@ -183,6 +184,7 @@ async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> 
       ? await selectFrom(collection.name)
           .select(['id', ...select] as any)
           .where('id', 'in', missingIds)
+          .cache(3000)
           .all()
       : { success: true, data: [] }
 

@@ -202,6 +202,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const query = await selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
+    .cache(3000)
     .paged(page, 50)
     .paginate()
 
@@ -243,6 +244,7 @@ async function selectedChoiceResolver(): Promise<PUIDynamicSelectChoiceModel | n
     const query = await selectFrom(collection.name)
       .select(['id', ...select] as any)
       .where('id', '=', props.modelValue)
+      .cache(3000)
       .first()
 
     if (query.success) {

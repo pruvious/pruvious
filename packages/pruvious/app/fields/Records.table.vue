@@ -141,6 +141,7 @@ async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> 
     const query = await selectFrom(relatedCollection.name)
       .select(['id', ...select] as any)
       .where('id', 'in', ids)
+      .cache(3000)
       .all()
 
     if (query.success && query.data) {

@@ -134,6 +134,7 @@ async function selectedChoiceResolver(): Promise<PUIDynamicSelectChoiceModel | n
     const query = await selectFrom(relatedCollection.name)
       .select(['id', ...select] as any)
       .where('id', '=', +props.modelValue)
+      .cache(3000)
       .first()
 
     if (query.success) {
