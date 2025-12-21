@@ -58,6 +58,47 @@ export interface DefineJobOptions<TPayload, TResultData> {
   defaultPriority?: number
 
   /**
+   * Schedule automatic job execution at regular intervals or specific times.
+   * When defined, the job will be re-queued automatically based on the provided schedule after each execution.
+   *
+   * By default, jobs are only executed when they are explicitly queued using `queueJob()` or `queueUniqueJob()`.
+   *
+   * @default false
+   */
+  schedule?:
+    | false
+    | ({
+        /**
+         * Execute job at regular intervals.
+         * You can provide a number (in seconds) or a human-readable string (e.g. '5 minutes', '1 hour', '2 days').
+         * Set to `false` or `0` to disable recurring execution.
+         *
+         * @example
+         * ```ts
+         * '1h'         // Every hour
+         * '30 minutes' // Every 30 minutes
+         * 86400        // Every 24 hours (in seconds)
+         * 0            // Disable recurring execution
+         * ```
+         */
+        interval: number | string | false
+
+        /**
+         * Run immediately on server startup.
+         *
+         * @default true
+         */
+        immediate?: boolean
+      } & ([TPayload] extends [never]
+        ? {}
+        : {
+            /**
+             * A function that returns the payload for each scheduled execution.
+             */
+            payload: () => TPayload | Promise<TPayload>
+          }))
+
+  /**
    * Controls the retry behavior for failed jobs.
    * When a retry occurs, the failed job is added back to the queue as a new job.
    *
@@ -176,6 +217,7 @@ export function defineJob<TPayload extends Record<string, any> = never, TResultD
   return {
     handler: options.handler,
     defaultPriority: options.defaultPriority ?? 10,
+    schedule: options.schedule ?? false,
     retry: options.retry ?? false,
     logs: options.logs ?? true,
     TPayload: undefined as any,
@@ -236,6 +278,7 @@ export function defineJobHandler<TPayload extends Record<string, any> = never, T
   return {
     handler: handler as any,
     defaultPriority: 10,
+    schedule: false,
     retry: false,
     logs: true,
     TPayload: undefined as any,

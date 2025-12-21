@@ -12,6 +12,7 @@ import {
   randomIdentifier,
   toArray,
   toDate,
+  toSeconds,
 } from '@pruvious/utils'
 import { colorize } from 'consola/utils'
 import safeStringify from 'safe-stringify'
@@ -416,15 +417,15 @@ async function _processJob<TName extends keyof Jobs>(
   const { jobs, getLogsDatabase, resolveContextLanguage, resolveCurrentUser } = await import('#pruvious/server')
   const runtimeConfig = useRuntimeConfig()
   const logsDatabase = getLogsDatabase()
-  const definition = jobs[job.name as TName]
-  const handler = definition.handler as any
-  const retryCount = isNumber(definition.retry)
+  const definition = jobs[job.name as TName] as Jobs[TName] | undefined
+  const handler = definition?.handler as any
+  const retryCount = isNumber(definition?.retry)
     ? definition.retry
-    : isObject(definition.retry)
+    : isObject(definition?.retry)
       ? definition.retry.count
       : 0
   const retryDelay =
-    isObject(definition.retry) && isPositiveInteger(definition.retry.delay) ? definition.retry.delay : 5000
+    isObject(definition?.retry) && isPositiveInteger(definition.retry.delay) ? definition.retry.delay : 5000
   const details = pick(job, ['name', 'payload', 'priority', 'key', 'scheduledAt', 'createdAt']) as QueuedJob<TName>
   let result: JobResult<TName>
 
@@ -442,6 +443,15 @@ async function _processJob<TName extends keyof Jobs>(
         error: error.message,
       }
     }
+
+    if (definition.schedule && definition.schedule.interval && job.key === `_schedule:${job.name}`) {
+      const intervalSeconds = toSeconds(definition.schedule.interval)
+      const payload = (definition.schedule as any).payload
+      await queueUniqueJob(job.name as TName, `_schedule:${job.name}`, {
+        ...(payload ? await payload() : {}),
+        scheduledAt: Date.now() + intervalSeconds * 1000,
+      } as any)
+    }
   } else {
     result = {
       details,
@@ -450,7 +460,7 @@ async function _processJob<TName extends keyof Jobs>(
     }
   }
 
-  if (runtimeConfig.pruvious.debug.logs.queue && definition.logs && logsDatabase) {
+  if (runtimeConfig.pruvious.debug.logs.queue && definition?.logs && logsDatabase) {
     await logsDatabase
       .queryBuilder()
       .update('Queue')
