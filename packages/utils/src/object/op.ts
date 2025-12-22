@@ -273,24 +273,112 @@ export function omit<T, K extends keyof T>(object: T, keys: K[]): Omit<T, K> {
  * anonymizeObject('foo')                  // 'foo'
  * ```
  */
-export function anonymizeObject(object: any): any {
-  if (isObject(object)) {
-    const result: Record<string, any> = {}
+export function anonymizeObject(
+  object: any,
+  options: {
+    /**
+     * The maximum depth to which the object should be anonymized.
+     * If not provided, the function will anonymize the entire object.
+     */
+    deep?: number
+  } = {},
+): any {
+  const { deep = Infinity } = options
 
-    for (const key in object) {
-      if (isObject(object[key]) || isArray(object[key])) {
-        result[key] = anonymizeObject(object[key])
-      } else {
-        result[key] = typeof object[key]
+  function anonymize(obj: any, currentDepth: number): any {
+    if (currentDepth >= deep) {
+      if (isObject(obj)) {
+        return 'object'
+      } else if (isArray(obj)) {
+        return 'array'
       }
+      return obj
     }
 
-    return result
-  } else if (isArray(object)) {
-    return object.map((v) => (isObject(v) || isArray(v) ? anonymizeObject(v) : typeof v))
+    if (isObject(obj)) {
+      const result: Record<string, any> = {}
+
+      for (const key in obj) {
+        if (isObject(obj[key]) || isArray(obj[key])) {
+          result[key] = anonymize(obj[key], currentDepth + 1)
+        } else {
+          result[key] = typeof obj[key]
+        }
+      }
+
+      return result
+    } else if (isArray(obj)) {
+      return obj.map((v) => (isObject(v) || isArray(v) ? anonymize(v, currentDepth + 1) : typeof v))
+    }
+
+    return obj
   }
 
-  return object
+  return anonymize(object, 0)
+}
+
+/**
+ * Truncates an object's depth by preserving values up to a specified level, then replacing deeper nested structures with their type names.
+ * It does not modify the original `object`.
+ *
+ * @example
+ * ```ts
+ * truncateObject({ foo: 'bar', baz: 1 }, 1)
+ * // { foo: 'bar', baz: 1 }
+ *
+ * truncateObject({ a: { b: { c: 'deep' } } }, 1)
+ * // { a: 'object' }
+ *
+ * truncateObject({ a: { b: { c: 'deep' } } }, 2)
+ * // { a: { b: 'object' } }
+ *
+ * truncateObject({ a: { b: { c: 'deep' } } }, 3)
+ * // { a: { b: { c: 'deep' } } }
+ *
+ * truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 1)
+ * // { items: 'array' }
+ *
+ * truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 2)
+ * // { items: ['object', 'object'] }
+ *
+ * truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 3)
+ * // { items: [{ id: 1 }, { id: 2 }] }
+ *
+ * truncateObject({ items: [{ nested: { deep: true } }] }, 2)
+ * // { items: ['object'] }
+ *
+ * truncateObject({ items: [{ nested: { deep: true } }] }, 3)
+ * // { items: [{ nested: 'object' }] }
+ * ```
+ */
+export function truncateObject(object: any, maxDepth: number): any {
+  function truncate(obj: any, currentDepth: number): any {
+    if (currentDepth > maxDepth) {
+      if (isObject(obj)) return 'object'
+      if (isArray(obj)) return 'array'
+      return obj
+    }
+
+    if (isObject(obj)) {
+      const result: Record<string, any> = {}
+
+      for (const key in obj) {
+        if (isObject(obj[key]) || isArray(obj[key])) {
+          result[key] = truncate(obj[key], currentDepth + 1)
+        } else {
+          result[key] = obj[key]
+        }
+      }
+
+      return result
+    } else if (isArray(obj)) {
+      return obj.map((v) => (isObject(v) || isArray(v) ? truncate(v, currentDepth + 1) : v))
+    }
+
+    return obj
+  }
+
+  return truncate(object, 1)
 }
 
 /**

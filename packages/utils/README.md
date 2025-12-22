@@ -98,6 +98,7 @@ npm install @pruvious/utils
   - [pick](#pick)
   - [remap](#remap)
   - [setProperty](#setproperty)
+  - [truncateObject](#truncateobject)
   - [walkObjects](#walkobjects)
 - [String](#string)
   - [camelCase](#camelcase)
@@ -936,7 +937,7 @@ parseId(1.5) // null
 
 ## <a id="object">Object</a>
 
-### <a id="anonymizeobject">`anonymizeObject(object)`</a>
+### <a id="anonymizeobject">`anonymizeObject(object, options)`</a>
 
 Anonymizes an `object` by replacing its primitive values with their corresponding types.
 It does not modify the original `object`.
@@ -1198,6 +1199,42 @@ Sets a property on an `object` to a specified `value` using a `path` in dot nota
 ```ts
 setProperty({ foo: {}}, 'foo.bar', { bar: 'baz' }) // { foo: { bar: 'baz' } }
 setProperty({ foo: ['bar']}, 'foo.1', 'baz)        // { foo: ['bar', 'baz'] }
+```
+
+### <a id="truncateobject">`truncateObject(object, maxDepth)`</a>
+
+Truncates an object's depth by preserving values up to a specified level, then replacing deeper nested structures with their type names.
+It does not modify the original `object`.
+
+**Example:**
+
+```ts
+truncateObject({ foo: 'bar', baz: 1 }, 1)
+// { foo: 'bar', baz: 1 }
+
+truncateObject({ a: { b: { c: 'deep' } } }, 1)
+// { a: 'object' }
+
+truncateObject({ a: { b: { c: 'deep' } } }, 2)
+// { a: { b: 'object' } }
+
+truncateObject({ a: { b: { c: 'deep' } } }, 3)
+// { a: { b: { c: 'deep' } } }
+
+truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 1)
+// { items: 'array' }
+
+truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 2)
+// { items: ['object', 'object'] }
+
+truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 3)
+// { items: [{ id: 1 }, { id: 2 }] }
+
+truncateObject({ items: [{ nested: { deep: true } }] }, 2)
+// { items: ['object'] }
+
+truncateObject({ items: [{ nested: { deep: true } }] }, 3)
+// { items: [{ nested: 'object' }] }
 ```
 
 ### <a id="walkobjects">`walkObjects(value)`</a>

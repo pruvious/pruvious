@@ -13,6 +13,7 @@ import {
   omit,
   pick,
   remap,
+  truncateObject,
   walkObjects,
 } from '../../src'
 
@@ -103,6 +104,26 @@ test('anonymize object', () => {
   expect(anonymizeObject({ foo: [{ bar: 'baz' }] })).toEqual({ foo: [{ bar: 'string' }] })
   expect(anonymizeObject(1)).toBe(1)
   expect(anonymizeObject('foo')).toBe('foo')
+
+  expect(anonymizeObject({ foo: { bar: { baz: 'qux' } } })).toEqual({ foo: { bar: { baz: 'string' } } })
+  expect(anonymizeObject({ foo: { bar: { baz: 'qux' } } }, { deep: 3 })).toEqual({ foo: { bar: { baz: 'string' } } })
+  expect(anonymizeObject({ foo: { bar: { baz: 'qux' } } }, { deep: 2 })).toEqual({ foo: { bar: 'object' } })
+  expect(anonymizeObject({ foo: { bar: { baz: 'qux' } } }, { deep: 1 })).toEqual({ foo: 'object' })
+  expect(anonymizeObject({ foo: { bar: { baz: 'qux' } } }, { deep: 0 })).toEqual('object')
+})
+
+test('truncate object', () => {
+  expect(truncateObject({ foo: 'bar', baz: 1 }, 1)).toEqual({ foo: 'bar', baz: 1 })
+  expect(truncateObject({ a: { b: { c: 'deep' } } }, 1)).toEqual({ a: 'object' })
+  expect(truncateObject({ a: { b: { c: 'deep' } } }, 2)).toEqual({ a: { b: 'object' } })
+  expect(truncateObject({ a: { b: { c: 'deep' } } }, 3)).toEqual({ a: { b: { c: 'deep' } } })
+  expect(truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 1)).toEqual({ items: 'array' })
+  expect(truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 2)).toEqual({ items: ['object', 'object'] })
+  expect(truncateObject({ items: [{ id: 1 }, { id: 2 }] }, 3)).toEqual({ items: [{ id: 1 }, { id: 2 }] })
+  expect(truncateObject({ items: [{ nested: { deep: true } }] }, 2)).toEqual({ items: ['object'] })
+  expect(truncateObject({ items: [{ nested: { deep: true } }] }, 3)).toEqual({ items: [{ nested: 'object' }] })
+  expect(truncateObject(1)).toBe(1)
+  expect(truncateObject('foo')).toBe('foo')
 })
 
 test('clean merge', () => {
