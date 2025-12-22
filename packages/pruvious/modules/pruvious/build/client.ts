@@ -463,6 +463,7 @@ function getClientFileContent() {
 
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/client/index.ts>`)
 
+  const { resolve } = createResolver(import.meta.url)
   const fieldComponentFiles = resolveFieldComponentFiles()
   const fieldComponentEntries = Object.entries(fieldComponentFiles)
 
@@ -470,6 +471,8 @@ function getClientFileContent() {
 
   return [
     `import { type Component, defineAsyncComponent } from 'vue'`,
+    `import type { ImageVariant } from '../server'`,
+    `import type { ImageVariantOptions } from '${resolve('../uploads/images')}'`,
     ``,
     `/**`,
     ` * Key-value object mapping field names to their corresponding Vue components.`,
@@ -550,7 +553,7 @@ function getClientFileContent() {
     `/**`,
     ` * Key-value object defining image variants for uploaded images in the CMS.`,
     ` */`,
-    `export const imageVariants = ${JSON.stringify(remap(nuxt.options.runtimeConfig.pruvious.images.variants, (key, options) => [key, { ...options, suffix: stringifyImageTransformOptions({ ...options, originalExtension: '' }) }]))}`,
+    `export const imageVariants: Record<ImageVariant, Required<ImageVariantOptions> & { suffix: string }> = ${JSON.stringify(remap(nuxt.options.runtimeConfig.pruvious.images.variants, (key, options) => [key, { ...options, suffix: stringifyImageTransformOptions({ ...options, originalExtension: '' }) }]))}`,
     ``,
     getReExports(),
   ].join('\n')

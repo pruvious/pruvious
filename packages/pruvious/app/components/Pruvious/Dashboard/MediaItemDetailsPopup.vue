@@ -162,6 +162,10 @@
                   <div>
                     <strong>{{ options.label }}</strong>
                   </div>
+                  <div>
+                    {{ options.options.format }}
+                    <span class="pui-muted">({{ __('pruvious-dashboard', options.options.fit) }})</span>
+                  </div>
                   <div v-if="options.size">
                     {{ formatBytes(options.size) }}
                     <span class="pui-muted">({{ options.size }} bytes)</span>
@@ -228,12 +232,22 @@ import {
   type UploadItem,
 } from '#pruvious/client'
 import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
-import type { DeleteUploadResult } from '#pruvious/server'
+import type { DeleteUploadResult, ImageVariantOptions } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiQueueToast, puiToast } from '@pruvious/ui/pui/toast'
 import { blurActiveElement, formatBytes, lockAndLoad } from '@pruvious/utils'
 import { basename, extname } from 'pathe'
+
+interface Variant {
+  label: string
+  path: string
+  resolvedPath: string
+  size: number
+  width: number
+  height: number
+  options: Required<ImageVariantOptions>
+}
 
 const props = defineProps({
   upload: {
@@ -321,9 +335,7 @@ const hasPreview = computed(
     (props.upload.category === 'image' && displayableImageTypes[props.upload.mime]) ||
     (props.upload.category === 'video' && playableVideoTypes[props.upload.mime]),
 )
-const variants = ref<
-  { label: string; path: string; resolvedPath: string; size: number; width: number; height: number }[]
->([])
+const variants = ref<Variant[]>([])
 
 onMounted(async () => {
   setTimeout(() => {
@@ -394,9 +406,7 @@ async function close(force = false) {
 }
 
 async function loadVariants() {
-  const promises: Array<
-    Promise<{ label: string; path: string; resolvedPath: string; size: number; width: number; height: number }>
-  > = []
+  const promises: Array<Promise<Variant>> = []
 
   if (props.upload.category === 'image' && optimizableImageTypes[props.upload.mime]) {
     for (const [key, options] of Object.entries(imageVariants)) {
@@ -411,6 +421,7 @@ async function loadVariants() {
             path,
             resolvedPath,
             size: blob.size,
+            options,
             ...(await getImageDimensions(blob)),
           }))
           .catch(() => ({
@@ -420,6 +431,7 @@ async function loadVariants() {
             size: 0,
             width: 0,
             height: 0,
+            options,
           })),
       )
     }

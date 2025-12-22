@@ -26,7 +26,7 @@
       <Icon mode="svg" name="tabler:lock" />
     </PUIButton>
 
-    <PruviousDashboardMediaItemDetails
+    <PruviousDashboardMediaItemDetailsPopup
       v-if="isDetailsPopupVisible"
       :resolvedPermissions="resolvedPermissions"
       :state="state"

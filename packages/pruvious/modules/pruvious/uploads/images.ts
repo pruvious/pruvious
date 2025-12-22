@@ -13,7 +13,7 @@ import {
 import { basename, extname } from 'pathe'
 import { isWorkerd } from 'std-env'
 
-export interface ImageTransformOptions {
+export interface ImageVariantOptions {
   /**
    * The output format for the transformed image.
    *
@@ -24,13 +24,6 @@ export interface ImageTransformOptions {
    * - `gif` - Animated image format with basic color palette.
    */
   format: 'webp' | 'jpeg' | 'png' | 'avif' | 'gif'
-
-  /**
-   * The file extension of the original image, including the dot (e.g., `.jpg`).
-   * Used to properly reference the source image during transformation.
-   * This is an empty string if the original file has no extension.
-   */
-  originalExtension: string
 
   /**
    * Specifies the width of the image in pixels.
@@ -120,6 +113,15 @@ export interface ImageTransformOptions {
    * @default false
    */
   preserveAnimation?: boolean
+}
+
+export interface ImageTransformOptions extends ImageVariantOptions {
+  /**
+   * The file extension of the original image, including the dot (e.g., `.jpg`).
+   * Used to properly reference the source image during transformation.
+   * This is an empty string if the original file has no extension.
+   */
+  originalExtension: string
 }
 
 /**
@@ -411,7 +413,7 @@ export async function validateImageTransformOptions(
  */
 export async function optimizeImage(
   imageURL: string,
-  options: Omit<ImageTransformOptions, 'originalExtension'>,
+  options: ImageVariantOptions,
 ): Promise<{ success: true; image: Buffer } | { success: false; error: string }> {
   const originalExtension = extname(imageURL)
   const validate = await validateImageTransformOptions({ ...options, originalExtension })

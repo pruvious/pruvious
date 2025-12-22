@@ -6,7 +6,7 @@
       <span class="p-media-image-size">{{ formattedSize }}</span>
     </NuxtLink>
 
-    <PruviousDashboardMediaItemDetails
+    <PruviousDashboardMediaItemDetailsPopup
       v-if="isDetailsPopupVisible"
       :resolvedPermissions="resolvedPermissions"
       :state="state"

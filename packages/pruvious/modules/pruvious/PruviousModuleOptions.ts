@@ -1,4 +1,4 @@
-import type { ImageTransformOptions, LanguageCode } from '#pruvious/server'
+import type { ImageVariantOptions, LanguageCode } from '#pruvious/server'
 import type { DeepRequired } from '@pruvious/utils'
 
 export interface PruviousModuleOptions {
@@ -214,13 +214,13 @@ export interface PruviousModuleOptions {
      * ```ts
      * {
      *   thumbnail: { format: 'webp', width: 320, height: 320, fit: 'contain' },
-     *   webpLarge: { format: 'webp', width: 1920 },
-     *   jpegLarge: { format: 'jpeg', width: 1920, quality: 90 },
+     *   medium: { format: 'webp', width: 1024 },
+     *   large: { format: 'webp', width: 1920 },
      *   // ...
      * }
      * ```
      */
-    variants?: Record<string, Omit<ImageTransformOptions, 'originalExtension'>>
+    variants?: Record<string, ImageVariantOptions>
   }
 
   /**
@@ -1381,7 +1381,7 @@ declare module 'nuxt/schema' {
       i18n: ResolvedI18nConfig
       debug: ResolvedDebugConfig
       images: {
-        variants: Record<string, Required<Omit<ImageTransformOptions, 'originalExtension'>>>
+        variants: Record<string, Required<ImageVariantOptions>>
       }
     }
   }
