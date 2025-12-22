@@ -9,11 +9,11 @@ import {
   type ResolveFieldUIOptions,
 } from '#pruvious/server'
 import {
-  numberFieldModel,
+  bigIntFieldModel,
+  type BigIntFieldModelOptions,
   type ConditionalLogic,
   type Field,
   type FieldModel,
-  type NumberFieldModelOptions,
 } from '@pruvious/orm'
 import { isNull, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
 import type { PropType } from 'vue'
@@ -135,15 +135,15 @@ export default {
     options: Omit<
       CombinedFieldOptions<
         FieldModel<
-          NumberFieldModelOptions<number, TPopulatedType>,
-          'text',
+          BigIntFieldModelOptions<number, TPopulatedType>,
+          'bigint',
           number,
           TPopulatedType,
           number | string,
           undefined,
           undefined
         >,
-        NumberFieldModelOptions<number, TPopulatedType> &
+        BigIntFieldModelOptions<number, TPopulatedType> &
           CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         true,
@@ -153,19 +153,19 @@ export default {
         TConditionalLogic,
         GenericDatabase
       >,
-      'decimalPlaces' | 'min' | 'max'
+      'min' | 'max'
     >,
   ): Field<
     FieldModel<
-      NumberFieldModelOptions<number, TPopulatedType>,
-      'text',
+      BigIntFieldModelOptions<number, TPopulatedType>,
+      'bigint',
       number,
       TPopulatedType,
       number | string,
       undefined,
       undefined
     >,
-    NumberFieldModelOptions<number, TPopulatedType> &
+    BigIntFieldModelOptions<number, TPopulatedType> &
       CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     true,
@@ -176,7 +176,7 @@ export default {
     GenericDatabase
   > {
     const bound = defineField({
-      model: numberFieldModel<number, TPopulatedType>(),
+      model: bigIntFieldModel<number, TPopulatedType>(),
       nullable: true,
       default: null,
       customOptions: { ...customOptions, min: 1 },
@@ -231,7 +231,7 @@ export default {
 
         return (query.success ? query.data : null) as any
       },
-      omitOptions: ['decimalPlaces', 'min', 'max'],
+      omitOptions: ['min', 'max'],
       populatedTypeFn: ({ field }) =>
         `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}> | null`,
     }).serverFn.bind(this)
@@ -260,15 +260,15 @@ export default {
     options: Omit<
       CombinedFieldOptions<
         FieldModel<
-          NumberFieldModelOptions<number, TPopulatedType>,
-          'text',
+          BigIntFieldModelOptions<number, TPopulatedType>,
+          'bigint',
           number,
           TPopulatedType,
           number | string,
           undefined,
           undefined
         >,
-        NumberFieldModelOptions<number, TPopulatedType> &
+        BigIntFieldModelOptions<number, TPopulatedType> &
           CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
           ResolveFieldUIOptions<{ placeholder: true }>,
         true,
@@ -278,20 +278,20 @@ export default {
         TConditionalLogic,
         GenericDatabase
       >,
-      'decimalPlaces' | 'min' | 'max'
+      'min' | 'max'
     >,
   ): { type: PropType<TPopulatedType>; required: true } & {
     field: Field<
       FieldModel<
-        NumberFieldModelOptions<number, TPopulatedType>,
-        'text',
+        BigIntFieldModelOptions<number, TPopulatedType>,
+        'bigint',
         number,
         TPopulatedType,
         number | string,
         undefined,
         undefined
       >,
-      NumberFieldModelOptions<number, TPopulatedType> &
+      BigIntFieldModelOptions<number, TPopulatedType> &
         CustomRecordFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       true,
@@ -313,15 +313,15 @@ export default {
   TOptions: undefined as unknown as Omit<
     CombinedFieldOptions<
       FieldModel<
-        NumberFieldModelOptions<number, Record<string, any>>,
-        'text',
+        BigIntFieldModelOptions<number, Record<string, any>>,
+        'bigint',
         number,
         Record<string, any>,
         number | string,
         undefined,
         undefined
       >,
-      NumberFieldModelOptions<number, Record<string, any>> &
+      BigIntFieldModelOptions<number, Record<string, any>> &
         CustomRecordFieldOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       true,
@@ -331,6 +331,6 @@ export default {
       ConditionalLogic | undefined,
       GenericDatabase
     >,
-    'decimalPlaces' | 'min' | 'max'
+    'min' | 'max'
   >,
 }
