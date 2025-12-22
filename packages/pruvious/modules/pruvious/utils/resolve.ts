@@ -250,6 +250,38 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
 }
 
 /**
+ * Resolves a single file from the given `filePath`.
+ */
+export function resolveFile(filePath: string): ResolveResult | null {
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const workspaceDir = useNuxt().options.workspaceDir
+    const relativeFilePath = relative(workspaceDir, filePath)
+    const _ext = extname(filePath)
+    const ext = _ext ? _ext.slice(1) : ''
+    const absoluteDirPath = dirname(filePath)
+    const relativeDirPath = relative(workspaceDir, absoluteDirPath)
+
+    return {
+      file: {
+        absolute: filePath,
+        relative: relativeFilePath,
+        import: _ext ? filePath.slice(0, -_ext.length) : filePath,
+      },
+      dir: {
+        absolute: absoluteDirPath,
+        relative: relativeDirPath,
+        import: absoluteDirPath,
+      },
+      name: basename(filePath),
+      base: basename(filePath, _ext),
+      ext,
+    }
+  }
+
+  return null
+}
+
+/**
  * Processes an array of path `segments` to eliminate redundancy while preserving meaning.
  *
  * - Normalizes all arguments into a PascalCase string before processing.

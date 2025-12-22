@@ -1030,6 +1030,53 @@ export interface PruviousModuleOptions {
            * ```
            */
           custom?: boolean
+
+          /**
+           * Configuration options for automatic log cleanup.
+           * Helps manage database size by removing old logs based on defined criteria.
+           *
+           * Use `true` or `false` to enable/disable automatic cleanup with default settings.
+           * For advanced configuration, provide an object with these options:
+           *
+           * - `maxAge` - The maximum age of logs to retain (default: `30d`).
+           * - `interval` - The interval at which cleanup runs (default: `1h`).
+           *
+           * @default true
+           */
+          cleanup?:
+            | boolean
+            | {
+                /**
+                 * The maximum age of logs to retain in the database.
+                 * Logs older than this duration will be automatically deleted.
+                 *
+                 * Accepts duration string or number of seconds.
+                 *
+                 * @default '30d'
+                 *
+                 * @example
+                 * ```ts
+                 * '60d'  // 60 days
+                 * 2592000 // 30 days in seconds
+                 * ```
+                 */
+                maxAge?: string | number
+
+                /**
+                 * The interval at which the cleanup process runs.
+                 *
+                 * Accepts duration string or number of seconds.
+                 *
+                 * @default '1h'
+                 *
+                 * @example
+                 * ```ts
+                 * '30m'  // 30 minutes
+                 * 3600   // 1 hour in seconds
+                 * ```
+                 */
+                interval?: string | number
+              }
         }
   }
 
@@ -1354,6 +1401,11 @@ export interface ResolvedDebugConfig {
     queue: boolean
     errors: boolean
     custom: boolean
+    cleanup: {
+      enabled: boolean
+      maxAge: string | number
+      interval: string | number
+    }
   }
 }
 

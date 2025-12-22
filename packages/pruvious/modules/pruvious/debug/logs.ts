@@ -497,6 +497,11 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     queue: false,
     errors: false,
     custom: false,
+    cleanup: {
+      enabled: false,
+      maxAge: '30d',
+      interval: '1h',
+    },
   }
 
   if (isBoolean(logs)) {
@@ -506,6 +511,7 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     config.queue = config.enabled
     config.errors = config.enabled
     config.custom = config.enabled
+    config.cleanup.enabled = config.enabled
   } else if (isObject(logs)) {
     config.enabled = true
     config.driver = logs.driver ?? config.driver
@@ -514,6 +520,7 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     config.queue = logs.queue !== false
     config.errors = logs.errors !== false
     config.custom = logs.custom !== false
+    config.cleanup.enabled = logs.cleanup !== false
 
     if (isObject(logs.api)) {
       config.api.include = logs.api.include ?? config.api.include
@@ -525,6 +532,11 @@ export function resolveDebugLogsConfig(logs: PruviousModuleOptions['debug']['log
     if (isObject(logs.queries)) {
       config.queries.include = logs.queries.include ?? config.queries.include
       config.queries.exclude = logs.queries.exclude ?? config.queries.exclude
+    }
+
+    if (isObject(logs.cleanup)) {
+      config.cleanup.maxAge = logs.cleanup.maxAge ?? config.cleanup.maxAge
+      config.cleanup.interval = logs.cleanup.interval ?? config.cleanup.interval
     }
   }
 

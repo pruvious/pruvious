@@ -93,7 +93,10 @@ export interface DefineJobOptions<TPayload, TResultData> {
         ? {}
         : {
             /**
-             * A function that returns the payload for each scheduled execution.
+             * Function that provides the payload for each scheduled job run.
+             *
+             * This runs when the job is added to the queue.
+             * For code that should execute during job processing, use the `handler` function instead.
              */
             payload: () => TPayload | Promise<TPayload>
           }))

@@ -1,10 +1,10 @@
 import { isDefined, kebabCase } from '@pruvious/utils'
 import { colorize } from 'consola/utils'
-import { useNuxt } from 'nuxt/kit'
+import { createResolver, useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { relative } from 'pathe'
 import { debug, warnWithContext } from '../debug/console'
-import { reduceFileNameSegments, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
+import { reduceFileNameSegments, resolveFile, resolveFromLayers, type ResolveFromLayersResult } from '../utils/resolve'
 
 /**
  * Key-value object containing job names and their definition file locations.
@@ -21,6 +21,18 @@ export function resolveJobFiles(): Record<string, ResolveFromLayersResult> {
 
     const nuxt = useNuxt()
     const duplicates: Record<string, { layer: NuxtConfigLayer; relativePath: string }> = {}
+
+    if (nuxt.options.runtimeConfig.pruvious.debug.logs.cleanup.enabled) {
+      const { resolve } = createResolver(import.meta.url)
+      const definitionPath = resolve('../debug/cleanup.job.ts')
+      const location = resolveFile(definitionPath)!
+      jobs['pruvious-cleanup-logs'] = {
+        ...location,
+        layer: nuxt.options._layers[0]!,
+        layers: nuxt.options._layers as any,
+        pruviousDirNames: [],
+      }
+    }
 
     for (const location of resolveFromLayers({
       nuxtDir: 'serverDir',
