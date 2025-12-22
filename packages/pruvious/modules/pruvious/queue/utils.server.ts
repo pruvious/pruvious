@@ -103,9 +103,9 @@ export async function queueJob<
  *
  * @example
  * ```ts
- * await queueUniqueJob('optimize-image', 'thumbnail:1337', {
- *   uploadId: 1337,
- *   options: { format: 'webp', width: 320, height: 320 },
+ * await queueUniqueJob('pruvious-optimize-image', 'thumbnail:1337', {
+ *   uploadIdOrPath: 1337,
+ *   options: { format: 'webp', originalExtension: 'jpeg', width: 320, height: 320 },
  * })
  * ```
  */

@@ -2392,15 +2392,16 @@ export async function createOptimizedImage(
  *
  * @example
  * ```ts
- * await queueImageOptimization(1337, { format: 'webp', width: 1920 })
+ * await queueImageOptimization(1337, { format: 'webp', originalExtension: 'jpeg', width: 1920 })
  * // {
  * //   success: true,
  * //   data: {
- * //     name: 'optimize-image',
+ * //     name: 'pruvious-optimize-image',
  * //     payload: {
- * //       uploadId: 1337,
+ * //       uploadIdOrPath: 1337,
  * //       options: {
  * //         format: 'webp',
+ * //         originalExtension: 'jpeg',
  * //         width: 1920,
  * //       },
  * //     },
@@ -2414,7 +2415,7 @@ export async function createOptimizedImage(
  */
 export async function queueImageOptimization(uploadIdOrPath: number | string, options: ImageTransformOptions) {
   const { queueUniqueJob } = await import('#pruvious/server')
-  const payload: Jobs['optimize-image']['TPayload'] = { uploadIdOrPath, options }
+  const payload: Jobs['pruvious-optimize-image']['TPayload'] = { uploadIdOrPath, options }
   const urlSuffix = stringifyImageTransformOptions(options)
 
   if (isWorkerd) {
@@ -2424,7 +2425,7 @@ export async function queueImageOptimization(uploadIdOrPath: number | string, op
     payload.baseURL = url.origin + withoutTrailingSlash(runtimeConfig.pruvious.uploads.basePath)
   }
 
-  return queueUniqueJob('optimize-image', `optimize-image:${uploadIdOrPath}${urlSuffix}`, payload)
+  return queueUniqueJob('pruvious-optimize-image', `optimize-image:${uploadIdOrPath}${urlSuffix}`, payload)
 }
 
 /**
