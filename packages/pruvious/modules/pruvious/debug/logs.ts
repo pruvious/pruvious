@@ -9,7 +9,7 @@ import {
   type DatabaseOperation,
   type QueryBuilderResult,
 } from '@pruvious/orm'
-import { anonymizeObject, isArray, isBoolean, isNumber, isObject, isString } from '@pruvious/utils'
+import { anonymizeObject, isArray, isBoolean, isNumber, isObject, isString, truncateObject } from '@pruvious/utils'
 import { PathMatcher } from '@pruvious/utils/path-matcher'
 import type { H3Event } from 'h3'
 import safeStringify from 'safe-stringify'
@@ -591,8 +591,8 @@ export async function logRequest() {
             body: ['patch', 'post', 'put'].includes(event.method.toLowerCase())
               ? safeStringify({
                   input: api.exposeRequestData
-                    ? event.context.pruvious.input
-                    : anonymizeObject(event.context.pruvious.input),
+                    ? truncateObject(event.context.pruvious.input, 10)
+                    : anonymizeObject(event.context.pruvious.input, { deep: 10 }),
                   files: Object.fromEntries(
                     Object.entries(event.context.pruvious.files).map(([key, value]) => {
                       return [key, value.byteLength]
@@ -700,17 +700,19 @@ function anonymizeCookie(cookie: string) {
  * Anonymizes the response body by removing sensitive data.
  */
 function anonymizeBody(body: any, exposeResponseData: boolean) {
-  if (isObject(body) || isArray(body)) {
+  const truncatedBody = truncateObject(body, 10)
+
+  if (isObject(truncatedBody) || isArray(truncatedBody)) {
     if (exposeResponseData) {
-      return safeStringify(body)
+      return safeStringify(truncatedBody)
     } else {
-      return safeStringify(anonymizeObject(body))
+      return safeStringify(anonymizeObject(truncatedBody))
     }
-  } else if (isString(body)) {
+  } else if (isString(truncatedBody)) {
     if (exposeResponseData) {
-      return body
+      return truncatedBody
     } else {
-      if (body) {
+      if (truncatedBody) {
         return 'string'
       } else {
         return ''

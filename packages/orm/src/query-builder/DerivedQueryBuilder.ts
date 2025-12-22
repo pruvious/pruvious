@@ -4,7 +4,7 @@ import type {
   I18n,
   TranslatableStringsDefinition,
 } from '@pruvious/i18n'
-import { anonymizeObject, deepClone, isArray, isEmpty, isUndefined } from '@pruvious/utils'
+import { anonymizeObject, deepClone, isArray, isEmpty, isUndefined, truncateObject } from '@pruvious/utils'
 import type { GenericCollection, GenericDatabase, QueryDetails } from '../core'
 import { BaseQueryBuilder } from './BaseQueryBuilder'
 import type { i18n, translatableStrings } from './i18n'
@@ -302,7 +302,8 @@ export class DerivedQueryBuilder<
 
     if (result.success) {
       this.logger(`Output`, this.verboseMode === 'anonymized' ? '(anonymized)' : '')
-      const output = this.verboseMode === 'anonymized' ? anonymizeObject(result.data) : result.data
+      const output =
+        this.verboseMode === 'anonymized' ? anonymizeObject(result.data, { deep: 10 }) : truncateObject(result.data, 10)
       JSON.stringify(output, null, 2)
         .split('\n')
         .forEach((line) => this.logger(`> ${line}`))
