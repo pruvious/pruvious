@@ -300,8 +300,18 @@ export default defineTranslation({
   'File': 'Datei',
   'File deleted': 'Datei gelöscht',
   'File name': 'Dateiname',
+  'File not found': 'Datei nicht gefunden',
   'File size': 'Dateigröße',
+  'File too large.<br>Maximum size: `$maxSize`<br>Current: `$currentSize`': createPattern(
+    'Datei zu groß.<br>Maximale Größe: `$maxSize`<br>Aktuell: `$currentSize`',
+    { maxSize: 'string', currentSize: 'string' },
+  ),
+  'File too small.<br>Minimum size: `$minSize`<br>Current: `$currentSize`': createPattern(
+    'Datei zu klein.<br>Minimale Größe: `$minSize`<br>Aktuell: `$currentSize`',
+    { minSize: 'string', currentSize: 'string' },
+  ),
   'File type': 'Dateityp',
+  'File type not allowed': 'Dateityp nicht erlaubt',
   'File URL': 'Datei-URL',
   'Files': 'Dateien',
   'Filters': 'Filter',
@@ -338,8 +348,24 @@ export default defineTranslation({
 
   'ID': 'ID',
   'Image height': 'Bildhöhe',
+  'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px': createPattern(
+    'Bildhöhe zu groß.<br>Maximum: `$maxHeight` px<br>Aktuell: `$height` px',
+    { maxHeight: 'number', height: 'number' },
+  ),
+  'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px': createPattern(
+    'Bildhöhe zu klein.<br>Minimum: `$minHeight` px<br>Aktuell: `$height` px',
+    { minHeight: 'number', height: 'number' },
+  ),
   'Image variant recreated successfully': 'Bildvariante erfolgreich neu erstellt',
   'Image width': 'Bildbreite',
+  'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px': createPattern(
+    'Bildbreite zu groß.<br>Maximum: `$maxWidth` px<br>Aktuell: `$width` px',
+    { maxWidth: 'number', width: 'number' },
+  ),
+  'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px': createPattern(
+    'Bildbreite zu klein.<br>Minimum: `$minWidth` px<br>Aktuell: `$width` px',
+    { minWidth: 'number', width: 'number' },
+  ),
   'Inactive': 'Inaktiv',
   'Includes all': 'Enthält alle',
   'Includes any': 'Enthält mindestens eines',
@@ -357,6 +383,7 @@ export default defineTranslation({
   'Job name': 'Auftragsname',
 
   'Key': 'Schlüssel',
+  'Keyword': 'Schlüsselwort',
 
   'Language': 'Sprache',
   'Language of the dashboard interface.': 'Sprache der Dashboard-Benutzeroberfläche.',
@@ -526,6 +553,7 @@ export default defineTranslation({
   'Rename bookmark': 'Merkliste umbenennen',
   'Rename file': 'Datei umbenennen',
   'Rename folder': 'Ordner umbenennen',
+  'Replace': 'Ersetzen',
   'Replace with current': 'Mit aktuellem ersetzen',
   'Request': 'Request',
   'Request debug ID': 'Request-Debug-ID',
@@ -543,8 +571,11 @@ export default defineTranslation({
   'Save': 'Speichern',
   'Saved': 'Gespeichert',
   'Scheduled at': 'Geplant am',
+  'Search': 'Suchen',
   'Search engine visibility': 'Sichtbarkeit für Suchmaschinen',
   'Search...': 'Suchen...',
+  'Search by filename...': 'Nach Dateinamen suchen...',
+  'Search files': 'Dateien suchen',
   'Select': 'Auswählen',
   'Select a routable collection to create child routes from its records.':
     'Wählen Sie eine routingfähige Collection aus, um aus deren Datensätzen untergeordnete Routen zu erstellen.',
@@ -552,6 +583,7 @@ export default defineTranslation({
     'Wählen Sie einen routingfähigen Singleton aus, um dessen Daten für diese spezifische Route zu verwenden.',
   'Select block': 'Block auswählen',
   'Select date': 'Datum auswählen',
+  'Select file': 'Datei auswählen',
   'selected': 'ausgewählt',
   'Selected $count $entries': createPattern(
     '$count $entries ausgewählt',
@@ -774,6 +806,8 @@ export default defineTranslation({
   'Yes': 'Ja',
   'You cannot translate a record into its source language':
     'Sie können einen Eintrag nicht in seine Quellsprache übersetzen',
+  'You do not have permission to access the media library.':
+    'Sie haben keine Berechtigung, auf die Medienbibliothek zuzugreifen.',
   'You do not have permission to access the page `$page`': createPattern(
     'Sie haben keine Berechtigung, auf die Seite `$page` zuzugreifen.',
     { page: 'string' },

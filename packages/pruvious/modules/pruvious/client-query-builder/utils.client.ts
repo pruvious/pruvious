@@ -175,6 +175,40 @@ export function selectFrom<
 }
 
 /**
+ * Executes SQL queries with large `IN` clauses by splitting `values` into smaller batches.
+ *
+ * This function helps avoid parameter limits in databases like Cloudflare D1 when you need to query with many values in an `IN` clause.
+ * It divides your `values` into smaller batches, runs the query for each batch, and returns an array of results.
+ *
+ * @example
+ * ```ts
+ * import { batchSelectIn, selectFrom } from '#pruvious/client'
+ *
+ * const studentIds = [1, 2, 3, ..., 1000]
+ * const students = await batchSelectIn(studentIds, (batch) => {
+ *   return selectFrom('Students')
+ *     .selectAll()
+ *     .where('id', 'in', batch)
+ *     .all()
+ *     .then(response => response.data)
+ * })
+ *
+ * console.log(students)
+ * // [
+ * //   { id: 1, firstName: 'Harry', lastName: 'Potter', ... },
+ * //   { id: 2, firstName: 'Hermione', lastName: 'Granger', ... },
+ * //   // ...
+ * // ]
+ * ```
+ */
+export async function batchSelectIn<TValue, TResult extends any[]>(
+  values: TValue[],
+  callback: (batch: TValue[]) => Promise<TResult>,
+): Promise<TResult> {
+  return new QueryBuilder().batchSelectIn(values, callback)
+}
+
+/**
  * Creates a client-side `UpdateQueryBuilder` for a specific `collection`.
  * Enables type-safe updating of collection records through HTTP requests.
  *

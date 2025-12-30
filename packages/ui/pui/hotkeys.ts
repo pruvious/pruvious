@@ -13,6 +13,7 @@ export type PUIHotkeyAction =
   | 'paste'
   | 'redo'
   | 'save'
+  | 'search'
   | 'selectAll'
   | 'undo'
 
@@ -185,6 +186,10 @@ export function usePUIHotkeys(options?: PUIHotkeysOptions): PUIHotkeys {
             ? null
             : listeners.get('undo')?.forEach((callback) => callback(event))
       }
+    } else if (letter === 'k') {
+      if (!event.shiftKey && !puiIsEditingText() && !disabled) {
+        return listeners.get('search')?.forEach((callback) => callback(event))
+      }
     } else if (letter === 'a') {
       if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get('selectAll')?.forEach((callback) => callback(event))
@@ -292,6 +297,7 @@ export function puiGetHotkeyLabels() {
     paste: `${metaKey} + V`,
     redo: mac ? `${metaKey} + Shift + Z` : `${metaKey} + Y`,
     save: `${metaKey} + S`,
+    search: `${metaKey} + K`,
     selectAll: `${metaKey} + A`,
     undo: `${metaKey} + Z`,
   }

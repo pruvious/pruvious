@@ -262,6 +262,44 @@ export class QueryBuilder<TCollections extends Record<string, Collection<any, Re
   }
 
   /**
+   * Executes SQL queries with large `IN` clauses by splitting `values` into smaller batches.
+   *
+   * This function helps avoid parameter limits in databases like Cloudflare D1 when you need to query with many values in an `IN` clause.
+   * It divides your `values` into smaller batches, runs the query for each batch, and returns an array of results.
+   *
+   * @example
+   * ```ts
+   * const studentIds = [1, 2, 3, ..., 1000]
+   * const students = await this.batchSelectIn(studentIds, (batch, qb) => {
+   *   return qb.selectFrom('Students')
+   *     .selectAll()
+   *     .where('id', 'in', batch)
+   *     .all()
+   *     .then(response => response.data)
+   * })
+   *
+   * console.log(students)
+   * // [
+   * //   { id: 1, firstName: 'Harry', lastName: 'Potter', ... },
+   * //   { id: 2, firstName: 'Hermione', lastName: 'Granger', ... },
+   * //   // ...
+   * // ]
+   * ```
+   */
+  async batchSelectIn<TValue, TResult extends any[]>(
+    values: TValue[],
+    callback: (batch: TValue[], qb: this) => Promise<TResult>,
+  ): Promise<TResult> {
+    const queries: Promise<any>[] = []
+
+    for (let i = 0; i < values.length; i += 50) {
+      queries.push(callback(values.slice(i, i + 50), this))
+    }
+
+    return (await Promise.all(queries)).flat() as TResult
+  }
+
+  /**
    * Creates a new client-side `UpdateQueryBuilder` for a specific `collection`.
    *
    * @example

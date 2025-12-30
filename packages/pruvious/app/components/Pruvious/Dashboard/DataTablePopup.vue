@@ -232,13 +232,12 @@
             </template>
           </PUIButton>
 
-          <PUIButton @click="$emit('close', popup!.close)" variant="outline">
-            <span v-if="multiSelect">{{ __('pruvious-dashboard', 'Cancel') }}</span>
-            <span v-else>{{ __('pruvious-dashboard', 'Close') }}</span>
+          <PUIButton v-if="multiSelect" :variant="selectionChanged ? 'primary' : 'outline'" @click="applyMultiSelect()">
+            <span>{{ __('pruvious-dashboard', 'Apply') }} ({{ selectedCount }})</span>
           </PUIButton>
 
-          <PUIButton v-if="multiSelect" :variant="selectionChanged ? 'accent' : 'outline'" @click="applyMultiSelect()">
-            <span>{{ __('pruvious-dashboard', 'Apply') }}</span>
+          <PUIButton v-else @click="$emit('close', popup!.close)" variant="outline">
+            <span>{{ __('pruvious-dashboard', 'Close') }}</span>
           </PUIButton>
         </div>
       </div>
@@ -367,6 +366,7 @@ const overlayCounter = usePUIOverlayCounter()
 const tableWrapper = useTemplateRef('tableWrapper')
 const table = useTemplateRef('table')
 const selected = ref<Record<number | string, boolean>>(Object.fromEntries(props.modelValue.map((id) => [id, true])))
+const selectedCount = computed(() => Object.values(selected.value).filter(Boolean).length)
 const selectionChanged = computed(() => {
   return !deepCompare(
     Object.entries(selected.value)

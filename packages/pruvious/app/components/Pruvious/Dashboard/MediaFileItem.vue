@@ -1,14 +1,28 @@
 <template>
-  <div class="p-media-file-item">
-    <NuxtLink
-      :to="link"
-      @click.stop
+  <div class="p-media-file-item" :class="{ 'p-media-file-item-disabled': disabled.value && !upload.isLocked }">
+    <component
+      :href="link"
+      :is="linkHandler ? 'a' : NuxtLink"
+      :target="linkHandler ? '_blank' : undefined"
+      @click.stop="
+        (event: MouseEvent) => {
+          if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey) {
+            event.preventDefault()
+            if (!disabled.value) {
+              linkHandler?.(upload)
+              if (selectionMode === 'multiple') {
+                $emit(selected ? 'deselect' : ('select' as any), upload)
+              }
+            }
+          }
+        }
+      "
       class="p-media-file-item-button pui-raw"
-      :class="{ 'p-media-file-item-button-disabled': upload.isLocked }"
+      :class="{ 'p-media-file-item-button-disabled': upload.isLocked || disabled.value }"
     >
       <Icon :name="`tabler:${icon}`" mode="svg" class="p-media-file-item-icon" />
       <span class="p-media-file-size">{{ formattedSize }}</span>
-    </NuxtLink>
+    </component>
 
     <PUIButton
       v-if="upload.isLocked"
@@ -21,15 +35,25 @@
       :size="-3"
       is="span"
       variant="accent"
-      class="p-media-file-locked"
+      class="p-media-file-locked-indicator"
     >
       <Icon mode="svg" name="tabler:lock" />
+    </PUIButton>
+
+    <PUIButton
+      v-else-if="disabled.value"
+      v-pui-tooltip="disabled.reason"
+      :size="-3"
+      is="span"
+      variant="ghost"
+      class="p-media-file-item-disabled-indicator"
+    >
+      <Icon mode="svg" name="tabler:forbid" />
     </PUIButton>
 
     <PruviousDashboardMediaItemDetailsPopup
       v-if="isDetailsPopupVisible"
       :resolvedPermissions="resolvedPermissions"
-      :state="state"
       :upload="upload"
       @close="$event().then(closeDetailsPopup)"
       @deselect="$emit('deselect', $event)"
@@ -39,8 +63,10 @@
 </template>
 
 <script lang="ts" setup>
+import { NuxtLink } from '#components'
 import {
   __,
+  dashboardBasePath,
   type DashboardMediaLibraryState,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
@@ -53,6 +79,14 @@ const props = defineProps({
     type: Object as PropType<UploadItem>,
     required: true,
   },
+  selected: {
+    type: Boolean,
+    required: true,
+  },
+  disabled: {
+    type: Object as PropType<{ value: false } | { value: true; reason: string }>,
+    default: () => ({ value: false }),
+  },
   state: {
     type: Object as PropType<DashboardMediaLibraryState>,
     required: true,
@@ -60,9 +94,20 @@ const props = defineProps({
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
   },
+  selectionMode: {
+    type: String as PropType<'single' | 'multiple' | 'none'>,
+    default: 'none',
+  },
+  linkHandler: {
+    type: Function as PropType<(upload: UploadItem) => any>,
+  },
+  disabledResolver: {
+    type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
+  },
 })
 
 const emit = defineEmits<{
+  select: [upload: UploadItem]
   deselect: [upload: UploadItem]
 }>()
 
@@ -70,7 +115,10 @@ const route = useRoute()
 const detailsPopup = useTemplateRef('detailsPopup')
 const formattedSize = computed(() => formatBytes(props.upload.size))
 const isDetailsPopupVisible = ref(false)
-const link = computed(() => `${route.path}?${stringifyQuery({ ...route.query, details: props.upload.id })}`)
+const link = computed(
+  () =>
+    `${dashboardBasePath}media${props.state.currentDirectory === '/' ? '' : props.state.currentDirectory}?${stringifyQuery({ ...route.query, details: props.upload.id })}`,
+)
 
 const icon = computed(() => {
   if (props.upload.category === 'image') {
@@ -178,6 +226,11 @@ async function closeDetailsPopup() {
   pointer-events: none;
 }
 
+.p-media-file-item-disabled .p-media-file-item-button {
+  filter: blur(2px);
+  opacity: 0.5;
+}
+
 .p-media-file-item-icon {
   pointer-events: none;
   font-size: 1.75rem;
@@ -185,6 +238,14 @@ async function closeDetailsPopup() {
 
 .p-media-file-item-icon :deep([stroke]) {
   stroke-width: 1;
+}
+
+.p-media-file-item-disabled .p-media-file-item-icon {
+  opacity: 0.5;
+}
+
+.p-media-file-item-disabled .p-media-file-item-icon :deep([stroke]) {
+  stroke-width: 0.75;
 }
 
 .p-media-file-size {
@@ -197,10 +258,17 @@ async function closeDetailsPopup() {
   color: hsl(var(--pui-muted-foreground));
 }
 
-.p-media-file-locked {
+.p-media-file-locked-indicator {
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
+  cursor: help;
+}
+
+.p-media-file-item-disabled-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
   cursor: help;
 }
 </style>

@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/client'
+import { __, batchSelectIn, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUIDynamicChipsChoiceModel } from '@pruvious/ui/components/PUIDynamicChips.vue'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
@@ -138,36 +138,37 @@ async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> 
     const select = displayFields.flatMap((x) =>
       isArray(x) ? x.filter((y) => relatedCollection.definition.fields[y]) : x,
     )
-    const query = await selectFrom(relatedCollection.name)
-      .select(['id', ...select] as any)
-      .where('id', 'in', ids)
-      .cache(3000)
-      .all()
+    const records = await batchSelectIn(ids, (batch) =>
+      selectFrom(relatedCollection.name)
+        .select(['id', ...select] as any)
+        .where('id', 'in', batch)
+        .cache(3000)
+        .all()
+        .then(({ data }) => data ?? []),
+    )
 
-    if (query.success && query.data) {
-      const choices = query.data.map((record) => ({
-        value: record.id,
-        label: toArray(displayFields[0])!
-          .flatMap((x) => (isArray(x) ? x.map((y: any) => record[y] ?? y) : (record[x] ?? x)))
-          .join('')
-          .trim(),
-        detail: isDefined(displayFields[1])
-          ? toArray(displayFields[1])!
-              .flatMap((x) => (isArray(x) ? x.map((y: any) => record[y] ?? y) : (record[x] ?? x)))
-              .join('')
-              .trim()
-          : undefined,
-      }))
+    const choices = records.map((record) => ({
+      value: record.id,
+      label: toArray(displayFields[0])!
+        .flatMap((x) => (isArray(x) ? x.map((y: any) => record[y] ?? y) : (record[x] ?? x)))
+        .join('')
+        .trim(),
+      detail: isDefined(displayFields[1])
+        ? toArray(displayFields[1])!
+            .flatMap((x) => (isArray(x) ? x.map((y: any) => record[y] ?? y) : (record[x] ?? x)))
+            .join('')
+            .trim()
+        : undefined,
+    }))
 
-      return ids.map(
-        (id) =>
-          choices.find((choice) => choice.value === id) ?? {
-            value: id,
-            label: __('pruvious-dashboard', 'Deleted record') + ` (#${id})`,
-            detail: isDefined(displayFields[1]) ? '' : undefined,
-          },
-      ) as PUIDynamicChipsChoiceModel[]
-    }
+    return ids.map(
+      (id) =>
+        choices.find((choice) => choice.value === id) ?? {
+          value: id,
+          label: __('pruvious-dashboard', 'Record not found') + ` (#${id})`,
+          detail: isDefined(displayFields[1]) ? '' : undefined,
+        },
+    ) as PUIDynamicChipsChoiceModel[]
   }
 
   return []

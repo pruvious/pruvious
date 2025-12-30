@@ -1,15 +1,44 @@
 <template>
-  <div class="p-media-image-item">
-    <NuxtLink :to="link" class="p-media-image-item-button pui-raw">
+  <div class="p-media-image-item" :class="{ 'p-media-image-item-disabled': disabled.value && !upload.isLocked }">
+    <component
+      :href="link"
+      :is="linkHandler ? 'a' : NuxtLink"
+      :target="linkHandler ? '_blank' : undefined"
+      @click="
+        (event: MouseEvent) => {
+          if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey) {
+            event.preventDefault()
+            if (!disabled.value) {
+              linkHandler?.(upload)
+              if (selectionMode === 'multiple') {
+                $emit(selected ? 'deselect' : ('select' as any), upload)
+              }
+            }
+          }
+        }
+      "
+      class="p-media-image-item-button pui-raw"
+      :class="{ 'p-media-image-item-button-disabled': disabled.value }"
+    >
       <img :alt="upload.description[language]" :src="thumbnailURL" class="p-media-image-thumbnail" />
       <span class="p-media-image-dimensions">{{ upload.imageWidth }} x {{ upload.imageHeight }}</span>
       <span class="p-media-image-size">{{ formattedSize }}</span>
-    </NuxtLink>
+    </component>
+
+    <PUIButton
+      v-if="disabled.value"
+      v-pui-tooltip="disabled.reason"
+      :size="-3"
+      is="span"
+      variant="ghost"
+      class="p-media-image-disabled-indicator"
+    >
+      <Icon mode="svg" name="tabler:forbid" />
+    </PUIButton>
 
     <PruviousDashboardMediaItemDetailsPopup
       v-if="isDetailsPopupVisible"
       :resolvedPermissions="resolvedPermissions"
-      :state="state"
       :upload="upload"
       @close="$event().then(closeDetailsPopup)"
       @deselect="$emit('deselect', $event)"
@@ -19,7 +48,9 @@
 </template>
 
 <script lang="ts" setup>
+import { NuxtLink } from '#components'
 import {
+  dashboardBasePath,
   resolveUploadPath,
   useLanguage,
   type DashboardMediaLibraryState,
@@ -35,16 +66,35 @@ const props = defineProps({
     type: Object as PropType<UploadItem>,
     required: true,
   },
+  selected: {
+    type: Boolean,
+    required: true,
+  },
   state: {
     type: Object as PropType<DashboardMediaLibraryState>,
     required: true,
   },
+  disabled: {
+    type: Object as PropType<{ value: false } | { value: true; reason: string }>,
+    default: () => ({ value: false }),
+  },
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
+  },
+  selectionMode: {
+    type: String as PropType<'single' | 'multiple' | 'none'>,
+    default: 'none',
+  },
+  linkHandler: {
+    type: Function as PropType<(upload: UploadItem) => any>,
+  },
+  disabledResolver: {
+    type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
   },
 })
 
 const emit = defineEmits<{
+  select: [upload: UploadItem]
   deselect: [upload: UploadItem]
 }>()
 
@@ -61,7 +111,10 @@ const thumbnailURL = computed(() => {
   return resolveUploadPath(props.upload.path.slice(0, -ext.length) + oext + '_w320_h320_contain.webp')
 })
 const isDetailsPopupVisible = ref(false)
-const link = computed(() => `${route.path}?${stringifyQuery({ ...route.query, details: props.upload.id })}`)
+const link = computed(
+  () =>
+    `${dashboardBasePath}media${props.state.currentDirectory === '/' ? '' : props.state.currentDirectory}?${stringifyQuery({ ...route.query, details: props.upload.id })}`,
+)
 
 watch(
   () => route.query,
@@ -109,6 +162,12 @@ async function closeDetailsPopup() {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAA/SURBVHgB7dOhEQAgDAPAwGFrmAEGYP+dMB0AVoio6PUSnXuTS1v7PBBxv0wNHcERKDADONgHmE2qp1EElgQ/ufgHd9nZw0oAAAAASUVORK5CYII=');
 }
 
+.p-media-image-item-disabled .p-media-image-item-button {
+  background-image: none;
+  filter: blur(2px);
+  opacity: 0.5;
+}
+
 .p-media-image-item-button::before {
   content: '';
   position: absolute;
@@ -121,6 +180,10 @@ async function closeDetailsPopup() {
   opacity: 0;
   transition: var(--pui-transition);
   transition-property: opacity;
+}
+
+.p-media-image-item-button-disabled {
+  pointer-events: none;
 }
 
 .p-media-image-item-icon {
@@ -145,6 +208,12 @@ async function closeDetailsPopup() {
   transition-property: max-height;
 }
 
+.p-media-image-item-disabled .p-media-image-thumbnail {
+  max-height: 50%;
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
 .p-media-image-dimensions,
 .p-media-image-size {
   position: absolute;
@@ -166,13 +235,20 @@ async function closeDetailsPopup() {
   bottom: 0.5rem;
   right: 0.5rem;
 }
+
+.p-media-image-disabled-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: help;
+}
 </style>
 
 <style>
-.p-media-item-selected .p-media-image-item-button,
-.p-media-item-box:hover .p-media-image-item-button,
-.p-media-item-box:focus-within .p-media-image-item-button,
-.p-media-image-item-highlighted .p-media-image-item-button {
+.p-media-item-selected .p-media-image-item-button:not(.p-media-image-item-button-disabled),
+.p-media-item-box:hover .p-media-image-item-button:not(.p-media-image-item-button-disabled),
+.p-media-item-box:focus-within .p-media-image-item-button:not(.p-media-image-item-button-disabled),
+.p-media-image-item-highlighted .p-media-image-item-button:not(.p-media-image-item-button-disabled) {
   background-color: hsl(var(--pui-card));
   color: hsl(var(--pui-card-foreground));
 }
@@ -181,10 +257,10 @@ async function closeDetailsPopup() {
   border-color: hsl(var(--pui-accent));
 }
 
-.p-media-item-selected .p-media-image-item-button::before,
-.p-media-item-box:hover .p-media-image-item-button::before,
-.p-media-item-box:focus-within .p-media-image-item-button::before,
-.p-media-image-item-highlighted .p-media-image-item-button::before {
+.p-media-item-selected .p-media-image-item-button:not(.p-media-image-item-button-disabled)::before,
+.p-media-item-box:hover .p-media-image-item-button:not(.p-media-image-item-button-disabled)::before,
+.p-media-item-box:focus-within .p-media-image-item-button:not(.p-media-image-item-button-disabled)::before,
+.p-media-image-item-highlighted .p-media-image-item-button:not(.p-media-image-item-button-disabled)::before {
   opacity: 1;
 }
 

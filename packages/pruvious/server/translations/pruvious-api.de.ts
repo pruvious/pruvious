@@ -133,6 +133,15 @@ export default defineTranslation({
   }),
   'The values must be rounded to seconds': 'Die Werte müssen auf Sekunden gerundet werden',
   'The values must be rounded to the nearest UTC day': 'Die Werte müssen auf den nächsten UTC-Tag gerundet werden',
+  'The file exceeds the maximum allowed size of $size': createPattern(
+    'Die Datei überschreitet die maximal zulässige Größe von $size',
+    { size: 'string' },
+  ),
+  'The file is smaller than the minimum allowed size of $size': createPattern(
+    'Die Datei ist kleiner als die minimal zulässige Größe von $size',
+    { size: 'string' },
+  ),
+  'This file type is not allowed': 'Dieser Dateityp ist nicht erlaubt',
   'This directory contains nested files or directories that cannot be deleted':
     'Dieser Ordner enthält verschachtelte Dateien oder Ordner, die nicht gelöscht werden können',
   'This directory contains nested files or directories that cannot be moved':

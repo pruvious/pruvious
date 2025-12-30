@@ -45,6 +45,7 @@ async function uploadFiles() {
       [...fileInput.value.files].map((file) => ({ file, directory: props.state.currentDirectory })),
       { returning: ['id', 'path'] },
     )
+    fileInput.value.value = ''
   }
 }
 </script>

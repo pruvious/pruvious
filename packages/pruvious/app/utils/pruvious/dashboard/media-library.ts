@@ -59,7 +59,7 @@ export interface DashboardMediaLibraryState<
   canDeleteSelection: boolean
 }
 
-export interface DashboardMediaLibraryPopupState extends DashboardMediaLibraryState {
+export interface DashboardMediaLibraryPopupState extends Pick<DashboardMediaLibraryState, 'currentDirectory'> {
   /**
    * Whether the media library popup is opened.
    */
@@ -71,8 +71,8 @@ export interface DashboardMediaLibraryPopupState extends DashboardMediaLibrarySt
  */
 export const usePruviousDashboardMediaLibraryPopup = () =>
   useState<DashboardMediaLibraryPopupState>('pruvious-dashboard-media-library-popup', () => ({
-    ...getDefaultDashboardMediaLibraryState(),
     isOpen: false,
+    currentDirectory: '/',
   }))
 
 /**

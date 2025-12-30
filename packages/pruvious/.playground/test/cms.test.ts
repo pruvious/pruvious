@@ -24,6 +24,13 @@ describe('cms', async () => {
   await import('./cms/collections/public')
   await import('./cms/collections/uploads')
 
+  // Uploads
+  await import('./cms/uploads/create')
+  await import('./cms/uploads/update')
+  await import('./cms/uploads/move')
+  await import('./cms/uploads/delete')
+  await import('./cms/uploads/multipart')
+
   // Fields
   await import('./cms/fields/blocks')
   await import('./cms/fields/buttonGroup')
@@ -33,6 +40,7 @@ describe('cms', async () => {
   await import('./cms/fields/dateRange')
   await import('./cms/fields/dateTime')
   await import('./cms/fields/dateTimeRange')
+  await import('./cms/fields/file')
   await import('./cms/fields/language-translations')
   await import('./cms/fields/nullableObject')
   await import('./cms/fields/nullableSelect')
@@ -53,11 +61,4 @@ describe('cms', async () => {
   await import('./cms/fields/timestamp')
   await import('./cms/fields/translatableText')
   await import('./cms/fields/trueFalse')
-
-  // Uploads
-  await import('./cms/uploads/create')
-  await import('./cms/uploads/update')
-  await import('./cms/uploads/move')
-  await import('./cms/uploads/delete')
-  await import('./cms/uploads/multipart')
 })

@@ -1,5 +1,8 @@
 <template>
-  <div class="pui-justify-between">
+  <div
+    class="pui-justify-between"
+    :class="{ 'p-media-footer-has-selection': selectionMode === 'none' && state.selectedUploads.length }"
+  >
     <PUIPagination
       :currentPage="state.page"
       :goToPageTitle="__('pruvious-dashboard', 'Go to page')"
@@ -30,7 +33,7 @@
 
     <div class="pui-row pui-ml-auto">
       <PUIButton
-        v-if="state.selectedUploads.length && state.canDeleteSelection"
+        v-if="selectionMode === 'none' && state.selectedUploads.length && state.canDeleteSelection"
         v-pui-tooltip="
           __('pruvious-dashboard', 'Delete $count $uploads', {
             count: state.selectedUploads.length,
@@ -44,7 +47,7 @@
       </PUIButton>
 
       <PUIButton
-        v-if="state.selectedUploads.length"
+        v-if="selectionMode === 'none' && state.selectedUploads.length"
         v-pui-tooltip="__('pruvious-dashboard', 'Clear selection')"
         @click="$emit('update:state', { ...state, selectedUploads: [] })"
         variant="accent"
@@ -53,7 +56,7 @@
       </PUIButton>
 
       <PUIButton
-        v-if="state.selectedUploads.length && state.canUpdateSelection"
+        v-if="selectionMode === 'none' && state.selectedUploads.length && state.canUpdateSelection"
         v-pui-tooltip="
           __('pruvious-dashboard', 'Move $count $uploads', { count: state.selectedUploads.length, type: selectionType })
         "
@@ -61,6 +64,18 @@
         variant="outline"
       >
         <Icon mode="svg" name="tabler:file-arrow-right" />
+      </PUIButton>
+
+      <PUIButton
+        v-if="selectionMode !== 'none'"
+        v-pui-tooltip="__('pruvious-dashboard', 'Search files')"
+        :variant="searchKeyword ? 'accent' : 'outline'"
+        @click="openSearchPopup()"
+      >
+        <Icon mode="svg" name="tabler:search" />
+        <template v-if="searchKeyword" #bubble>
+          <PUIBubble></PUIBubble>
+        </template>
       </PUIButton>
 
       <PUIButton
@@ -74,7 +89,11 @@
         </template>
       </PUIButton>
 
-      <PruviousDashboardCreateUploadActions :state="state" />
+      <PruviousDashboardCreateUploadActions v-if="selectionMode === 'none'" :state="state" />
+
+      <PUIButton v-if="selectionMode === 'multiple'" @click="$emit('applySelection')" variant="primary">
+        <span>{{ __('pruvious-dashboard', 'Apply') }} ({{ state.selectedUploads.length }})</span>
+      </PUIButton>
     </div>
 
     <PruviousDashboardTableSettingsPopup
@@ -141,6 +160,60 @@
         </div>
       </template>
     </PUIPopup>
+
+    <PUIPopup
+      v-if="isSearchPopupVisible"
+      :size="-1"
+      @close="$event().then(() => (isSearchPopupVisible = false))"
+      fullHeight="auto"
+      ref="searchPopup"
+      width="26rem"
+    >
+      <template #header>
+        <div class="pui-row">
+          <span class="pui-medium">
+            {{ __('pruvious-dashboard', 'Search files') }}
+          </span>
+
+          <PUIButton
+            :size="-2"
+            :title="__('pruvious-dashboard', 'Close')"
+            @click="closeSearchPopup()"
+            variant="ghost"
+            class="pui-ml-auto"
+          >
+            <Icon mode="svg" name="tabler:x" />
+          </PUIButton>
+        </div>
+      </template>
+
+      <PUIField>
+        <PUIFieldLabel>
+          <label for="keyword">
+            {{ __('pruvious-dashboard', 'Keyword') }}
+          </label>
+        </PUIFieldLabel>
+
+        <PUIInput
+          v-model="searchKeywordInput"
+          :placeholder="__('pruvious-dashboard', 'Search by filename...')"
+          @keydown.enter="search()"
+          autofocus
+          id="keyword"
+          name="keyword"
+        />
+      </PUIField>
+
+      <div class="p-media-footer-search-popup-buttons pui-row">
+        <PUIButton @click="closeSearchPopup()" variant="outline">
+          {{ __('pruvious-dashboard', 'Cancel') }}
+        </PUIButton>
+
+        <PUIButton @click="search()">
+          {{ __('pruvious-dashboard', 'Search') }}
+        </PUIButton>
+      </div>
+    </PUIPopup>
   </div>
 </template>
 
@@ -155,11 +228,11 @@ import {
 } from '#pruvious/client'
 import type { DeleteUploadResult, MoveUploadResult } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
-import { puiHasModifierKey, puiIsEditingText } from '@pruvious/ui/pui/hotkeys'
+import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { puiColumn, type PUIColumns } from '@pruvious/ui/pui/table'
 import { puiToast } from '@pruvious/ui/pui/toast'
-import { isDefined, isObject, remap, titleCase } from '@pruvious/utils'
+import { deepCompare, isDefined, isObject, remap, titleCase } from '@pruvious/utils'
 import { onKeyStroke, useEventListener } from '@vueuse/core'
 import { basename, join } from 'pathe'
 
@@ -183,10 +256,15 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  selectionMode: {
+    type: String as PropType<'single' | 'multiple' | 'none'>,
+    default: 'none',
+  },
 })
 
 const emit = defineEmits<{
-  'update:state': [DashboardMediaLibraryState]
+  'update:state': [state: DashboardMediaLibraryState]
+  'applySelection': []
 }>()
 
 const dashboard = usePruviousDashboard()
@@ -196,10 +274,19 @@ const collection = {
   definition: dashboard.value!.collections.Uploads!,
 }
 const overlayCounter = usePUIOverlayCounter()
-const currentOverlayCounter = overlayCounter.value
+const popupRoot = inject<Ref<HTMLElement | undefined> | null>('popup', null)
+const { listen, isListening } = usePUIHotkeys({
+  allowInOverlays: true,
+  target: () => popupRoot?.value,
+  listen: false,
+})
 const isTableSettingsPopupVisible = ref(false)
 const movePopup = useTemplateRef('movePopup')
+const searchPopup = useTemplateRef('searchPopup')
 const isMovePopupVisible = ref(false)
+const isSearchPopupVisible = ref(false)
+const searchKeyword = ref('')
+const searchKeywordInput = ref('')
 const targetDirectories = ref<TargetDirectory[]>([])
 const hasValidTargetDirectories = ref(false)
 const columns = resolveColumns()
@@ -215,6 +302,19 @@ const selectionType = computed(() => {
   } else {
     return 'none'
   }
+})
+
+let currentOverlayCounter = overlayCounter.value
+
+onMounted(() => {
+  setTimeout(() => {
+    if (popupRoot?.value) {
+      isListening.value = true
+    }
+    setTimeout(() => {
+      currentOverlayCounter = overlayCounter.value
+    })
+  })
 })
 
 useEventListener('pruvious:create-upload-directory-complete' as any, () => {
@@ -246,6 +346,31 @@ onKeyStroke('ArrowRight', (e) => {
     emit('update:state', { ...props.state, page: props.state.page + 1 })
   }
 })
+
+listen('search', (event) => {
+  if (props.selectionMode !== 'none' && overlayCounter.value === currentOverlayCounter) {
+    event.preventDefault()
+    openSearchPopup()
+  }
+})
+
+watch(
+  () => props.state.where,
+  (where) => {
+    if (
+      where?.length === 2 &&
+      deepCompare(where[0], { field: 'type', operator: '=', value: 'file' }) &&
+      !('or' in where[1]!) &&
+      where[1]!.field === 'path' &&
+      where[1]!.operator === 'ilike'
+    ) {
+      searchKeyword.value = String(where[1]!.value).replaceAll('%', ' ').trim()
+    } else {
+      searchKeyword.value = ''
+    }
+  },
+  { deep: true, immediate: true },
+)
 
 function resolveColumns(): PUIColumns {
   return remap(collection.definition.fields, (fieldName, options) => [
@@ -363,6 +488,36 @@ async function openMovePopup() {
 
 function closeMovePopup() {
   movePopup.value?.close().then(() => (isMovePopupVisible.value = false))
+}
+
+function openSearchPopup() {
+  isSearchPopupVisible.value = true
+  searchKeywordInput.value = searchKeyword.value
+}
+
+function search() {
+  const keyword = searchKeywordInput.value.trim()
+
+  if (keyword !== searchKeyword.value) {
+    if (keyword) {
+      emit('update:state', {
+        ...props.state,
+        page: 1,
+        where: [
+          { field: 'type', operator: '=', value: 'file' },
+          { field: 'path', operator: 'ilike', value: `%${keyword.replace(/ +/g, '%')}%` },
+        ],
+      })
+    } else {
+      emit('update:state', { ...props.state, page: 1, where: [] })
+    }
+  }
+
+  closeSearchPopup()
+}
+
+function closeSearchPopup() {
+  searchPopup.value?.close().then(() => (isSearchPopupVisible.value = false))
 }
 
 function sortTargetDirectories(directories: { path: string }[]): TargetDirectory[] {
@@ -516,8 +671,19 @@ async function moveUploads(target: TargetDirectory) {
 </script>
 
 <style scoped>
+.p-media-footer-search-popup-buttons {
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
 :deep(.pui-pagination-buttons) {
   margin: -0.75rem -0.25rem;
   padding: 0.75rem 0.25rem;
+}
+
+@container (max-width: 767px) {
+  .p-media-footer-has-selection .pui-pagination {
+    display: none;
+  }
 }
 </style>

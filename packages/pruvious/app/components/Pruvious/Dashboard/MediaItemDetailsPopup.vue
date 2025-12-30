@@ -227,7 +227,6 @@ import {
   updateUpload,
   useLanguage,
   usePruviousDashboard,
-  type DashboardMediaLibraryState,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
 } from '#pruvious/client'
@@ -254,10 +253,6 @@ const props = defineProps({
     type: Object as PropType<UploadItem>,
     required: true,
   },
-  state: {
-    type: Object as PropType<DashboardMediaLibraryState>,
-    required: true,
-  },
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
   },
@@ -276,7 +271,7 @@ const dashboard = usePruviousDashboard()
 const popup = useTemplateRef('popup')
 const locationOrigin = import.meta.client ? window.location.origin : ''
 const filename = computed(() => basename(props.upload.path))
-const extension = computed(() => (props.upload.type === 'file' ? extname(filename.value) : ''))
+const extension = computed(() => extname(filename.value))
 const filenameWithoutExtension = computed(() =>
   extension.value ? filename.value.slice(0, -extension.value.length) : filename.value,
 )

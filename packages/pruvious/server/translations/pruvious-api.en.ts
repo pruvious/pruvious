@@ -128,6 +128,15 @@ export default defineTranslation({
   }),
   'The values must be rounded to seconds': 'The values must be rounded to seconds',
   'The values must be rounded to the nearest UTC day': 'The values must be rounded to the nearest UTC day',
+  'The file exceeds the maximum allowed size of $size': createPattern(
+    'The file exceeds the maximum allowed size of $size',
+    { size: 'string' },
+  ),
+  'The file is smaller than the minimum allowed size of $size': createPattern(
+    'The file is smaller than the minimum allowed size of $size',
+    { size: 'string' },
+  ),
+  'This file type is not allowed': 'This file type is not allowed',
   'This directory contains nested files or directories that cannot be deleted':
     'This directory contains nested files or directories that cannot be deleted',
   'This directory contains nested files or directories that cannot be moved':

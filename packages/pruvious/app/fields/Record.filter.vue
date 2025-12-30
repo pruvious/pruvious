@@ -219,7 +219,7 @@ async function selectedChoiceResolver(): Promise<PUIDynamicSelectChoiceModel | n
           }
         : {
             value: +props.modelValue.value,
-            label: __('pruvious-dashboard', 'Deleted record') + ` (#${props.modelValue.value})`,
+            label: __('pruvious-dashboard', 'Record not found') + ` (#${props.modelValue.value})`,
             detail: isDefined(displayFields[1]) ? '' : undefined,
           }
     }

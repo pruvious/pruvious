@@ -6,8 +6,11 @@
         <div class="p-media-group-items">
           <PruviousDashboardMediaItem
             v-for="upload of uploads"
+            :disabledResolver="disabledResolver"
             :key="upload.id"
+            :linkHandler="linkHandler"
             :permissionsResolver="recordsPermissions.resolver"
+            :selectionMode="selectionMode"
             :showPathTooltip="showPathTooltips"
             :state="state"
             :upload="upload"
@@ -35,8 +38,8 @@ import {
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
 } from '#pruvious/client'
-import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
-import { deepCompare } from '@pruvious/utils'
+import type { MediaCategory } from '#pruvious/server'
+import { deepCompare, uniqueArrayByProp } from '@pruvious/utils'
 import { useDebounceFn, useEventListener, useKeyModifier } from '@vueuse/core'
 
 const props = defineProps({
@@ -52,17 +55,34 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  selectionMode: {
+    type: String as PropType<'single' | 'multiple' | 'none'>,
+    default: 'none',
+  },
+  linkHandler: {
+    type: Function as PropType<(upload: UploadItem) => any>,
+  },
+  disabledResolver: {
+    type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
+  },
+  filterUnlocked: {
+    type: Boolean,
+    default: false,
+  },
+  filterCategory: {
+    type: String as PropType<MediaCategory>,
+  },
 })
 
 const emit = defineEmits<{
-  'update:state': [DashboardMediaLibraryState]
+  'update:state': [state: DashboardMediaLibraryState]
+  'update:customSelection': [selection: number[]]
 }>()
 
 const dashboard = usePruviousDashboard()
 const collection = { name: 'Uploads' as const, definition: dashboard.value!.collections.Uploads! }
 const ready = ref(false)
 const recordsPermissions = useCollectionRecordPermissions(collection)
-const overlayCounter = usePUIOverlayCounter()
 const isMoving = usePruviousDashboardIsMoving()
 const uploads = ref<UploadItem[]>([])
 const groupedUploads = computed<{ group: string; label?: string; uploads: UploadItem[] }[]>(() => {
@@ -129,6 +149,14 @@ async function refresh() {
 
   if (level > 0) {
     query.where('path', 'like', `${currentDirectory}/%`)
+  }
+
+  if (props.filterUnlocked) {
+    query.where('isLocked', '=', false)
+  }
+
+  if (props.filterCategory) {
+    query.where('category', '=', props.filterCategory)
   }
 
   query.where('level', where?.length ? '>=' : '=', level)
@@ -222,9 +250,15 @@ async function onSelect(upload: UploadItem) {
       newSelection.reverse()
     }
 
-    emit('update:state', { ...props.state, selectedUploads: newSelection, canUpdateSelection, canDeleteSelection })
+    emit('update:state', {
+      ...props.state,
+      selectedUploads: uniqueArrayByProp([...props.state.selectedUploads, ...newSelection], 'id'),
+      canUpdateSelection,
+      canDeleteSelection,
+    })
   } else {
     if (!props.state.selectedUploads.some(({ id }) => id === upload.id)) {
+      selectionOrigin.value = upload
       const { canUpdate, canDelete } = await resolveUploadPermissions(upload)
       emit('update:state', {
         ...props.state,
@@ -258,6 +292,8 @@ async function onDeselect(upload: UploadItem) {
       }
     }
 
+    selectionOrigin.value = null
+
     emit('update:state', {
       ...props.state,
       selectedUploads: newSelection,
@@ -268,28 +304,39 @@ async function onDeselect(upload: UploadItem) {
 }
 
 function updateSelectionOrigin() {
-  if (!props.state.selectedUploads.length) {
-    selectionOrigin.value = null
-  } else if (
-    !selectionOrigin.value ||
-    !props.state.selectedUploads.some(({ id }) => id === selectionOrigin.value?.id)
+  if (
+    !props.state.selectedUploads.length ||
+    (selectionOrigin.value &&
+      (!props.state.selectedUploads.some(({ id }) => id === selectionOrigin.value?.id) ||
+        !uploads.value.some(({ id }) => id === selectionOrigin.value?.id)))
   ) {
-    selectionOrigin.value = props.state.selectedUploads[0] ?? null
+    selectionOrigin.value = null
   }
 }
 
 function emitClearSelection() {
   if (props.state.selectedUploads.length) {
-    emit('update:state', { ...props.state, selectedUploads: [], canUpdateSelection: false, canDeleteSelection: false })
+    if (props.selectionMode === 'none') {
+      emit('update:state', {
+        ...props.state,
+        selectedUploads: [],
+        canUpdateSelection: false,
+        canDeleteSelection: false,
+      })
+    } else {
+      selectionOrigin.value = null
+    }
   }
 }
 
 const emitClearSelectionDebounced = useDebounceFn(emitClearSelection, 100)
 
 function flattenGroupedUploads(): UploadItem[] {
-  return groupedUploads.value.reduce<UploadItem[]>((acc, group) => {
-    return acc.concat(group.uploads)
-  }, [])
+  return groupedUploads.value
+    .reduce<UploadItem[]>((acc, group) => {
+      return acc.concat(group.uploads)
+    }, [])
+    .filter(({ isLocked }) => !isLocked)
 }
 
 async function resolveUploadPermissions(upload: UploadItem): Promise<ResolvedCollectionRecordPermissions> {
@@ -308,14 +355,13 @@ async function resolveUploadPermissions(upload: UploadItem): Promise<ResolvedCol
 }
 
 .p-media-group:not(:first-child) {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .p-media-group-items {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
-  gap: 1.5rem;
-  padding: 0.75rem;
+  gap: 0.75rem;
 }
 
 .p-media-group-label {
@@ -323,13 +369,18 @@ async function resolveUploadPermissions(upload: UploadItem): Promise<ResolvedCol
   top: 0;
   z-index: 3;
   display: block;
-  padding: 0.25rem 0.75rem;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0;
   background-color: hsl(var(--pui-background));
   color: hsl(var(--pui-muted-foreground));
   font-size: 0.75rem;
   font-weight: 600;
   line-height: calc(1em + 0.5rem);
   text-transform: uppercase;
+}
+
+.p-media-group:first-child .p-media-group-label {
+  margin-top: -0.25rem;
 }
 
 .p-media-empty {
@@ -344,13 +395,6 @@ async function resolveUploadPermissions(upload: UploadItem): Promise<ResolvedCol
 @media (max-width: 767px) {
   .p-media-group-items {
     grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
-    gap: 0.75rem;
-    padding: 0;
-  }
-
-  .p-media-group-label {
-    padding-right: 0;
-    padding-left: 0;
   }
 }
 </style>

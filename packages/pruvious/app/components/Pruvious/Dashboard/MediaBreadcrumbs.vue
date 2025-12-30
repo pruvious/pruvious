@@ -1,8 +1,8 @@
 <template>
-  <div class="pui-row">
+  <div class="pui-row pui-medium">
     <span
       v-if="!breadcrumbs.length"
-      :to="dashboardBasePath + 'media' + queryString"
+      :href="dashboardBasePath + 'media' + queryString"
       @dragenter.prevent="highlighted = '/'"
       @dragleave="highlighted = null"
       @dragover.prevent
@@ -12,9 +12,19 @@
     >
       {{ __('pruvious-dashboard', 'Media') }}
     </span>
-    <NuxtLink
+    <component
       v-else="!breadcrumbs.length"
-      :to="dashboardBasePath + 'media' + queryString"
+      :href="dashboardBasePath + 'media' + queryString"
+      :is="linkHandler ? 'a' : NuxtLink"
+      :target="linkHandler ? '_blank' : undefined"
+      @click="
+        (event: MouseEvent) => {
+          if (linkHandler && !event.metaKey && !event.ctrlKey) {
+            event.preventDefault()
+            linkHandler('/')
+          }
+        }
+      "
       @dragenter.prevent="highlighted = '/'"
       @dragleave="highlighted = null"
       @dragover.prevent
@@ -23,7 +33,7 @@
       :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === '/' }"
     >
       {{ __('pruvious-dashboard', 'Media') }}
-    </NuxtLink>
+    </component>
     <template v-for="(breadcrumb, index) in breadcrumbs" :key="index">
       <span class="p-media-breadcrumb-separator pui-shrink-0">/</span>
       <span
@@ -38,10 +48,20 @@
       >
         {{ breadcrumb }}
       </span>
-      <NuxtLink
+      <component
         v-else
+        :href="dashboardBasePath + 'media/' + breadcrumbs.slice(0, index + 1).join('/') + queryString"
+        :is="linkHandler ? 'a' : NuxtLink"
+        :target="linkHandler ? '_blank' : undefined"
         :title="breadcrumb"
-        :to="dashboardBasePath + 'media/' + breadcrumbs.slice(0, index + 1).join('/') + queryString"
+        @click="
+          (event: MouseEvent) => {
+            if (linkHandler && !event.metaKey && !event.ctrlKey) {
+              event.preventDefault()
+              linkHandler('/' + breadcrumbs.slice(0, index + 1).join('/'))
+            }
+          }
+        "
         @dragenter.prevent="highlighted = breadcrumb"
         @dragleave="highlighted = null"
         @dragover.prevent
@@ -50,12 +70,13 @@
         :class="{ 'p-media-breadcrumb-highlighted': isMoving && highlighted === breadcrumb }"
       >
         <span class="pui-truncate">{{ breadcrumb }}</span>
-      </NuxtLink>
+      </component>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { NuxtLink } from '#components'
 import {
   $pfetchDashboard,
   __,
@@ -74,6 +95,9 @@ const props = defineProps({
   state: {
     type: Object as PropType<DashboardMediaLibraryState>,
     required: true,
+  },
+  linkHandler: {
+    type: Function as PropType<(path: string) => any>,
   },
 })
 

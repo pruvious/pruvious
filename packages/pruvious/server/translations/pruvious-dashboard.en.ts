@@ -242,7 +242,6 @@ export default defineTranslation({
       ],
     },
   ),
-  'Deleted record': 'Deleted record',
   'Deleting a folder will also delete all of its contents.': 'Deleting a folder will also delete all of its contents.',
   'Dependencies': 'Dependencies',
   'Description': 'Description',
@@ -300,8 +299,18 @@ export default defineTranslation({
   'File': 'File',
   'File deleted': 'File deleted',
   'File name': 'File name',
+  'File not found': 'File not found',
   'File size': 'File size',
+  'File too large.<br>Maximum size: `$maxSize`<br>Current: `$currentSize`': createPattern(
+    'File too large.<br>Maximum size: `$maxSize`<br>Current: `$currentSize`',
+    { maxSize: 'string', currentSize: 'string' },
+  ),
+  'File too small.<br>Minimum size: `$minSize`<br>Current: `$currentSize`': createPattern(
+    'File too small.<br>Minimum size: `$minSize`<br>Current: `$currentSize`',
+    { minSize: 'string', currentSize: 'string' },
+  ),
   'File type': 'File type',
+  'File type not allowed': 'File type not allowed',
   'File URL': 'File URL',
   'Files': 'Files',
   'Filters': 'Filters',
@@ -338,8 +347,24 @@ export default defineTranslation({
 
   'ID': 'ID',
   'Image height': 'Image height',
+  'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px': createPattern(
+    'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px',
+    { minHeight: 'number', height: 'number' },
+  ),
+  'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px': createPattern(
+    'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px',
+    { maxHeight: 'number', height: 'number' },
+  ),
   'Image variant recreated successfully': 'Image variant recreated successfully',
   'Image width': 'Image width',
+  'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px': createPattern(
+    'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px',
+    { minWidth: 'number', width: 'number' },
+  ),
+  'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px': createPattern(
+    'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px',
+    { maxWidth: 'number', width: 'number' },
+  ),
   'Inactive': 'Inactive',
   'Includes all': 'Includes all',
   'Includes any': 'Includes any',
@@ -357,6 +382,7 @@ export default defineTranslation({
   'Job name': 'Job name',
 
   'Key': 'Key',
+  'Keyword': 'Keyword',
 
   'Language': 'Language',
   'Language of the dashboard interface.': 'Language of the dashboard interface.',
@@ -526,6 +552,7 @@ export default defineTranslation({
   'Rename bookmark': 'Rename bookmark',
   'Rename file': 'Rename file',
   'Rename folder': 'Rename folder',
+  'Replace': 'Replace',
   'Replace with current': 'Replace with current',
   'Request': 'Request',
   'Request debug ID': 'Request debug ID',
@@ -543,8 +570,11 @@ export default defineTranslation({
   'Save': 'Save',
   'Saved': 'Saved',
   'Scheduled at': 'Scheduled at',
+  'Search': 'Search',
   'Search engine visibility': 'Search engine visibility',
   'Search...': 'Search...',
+  'Search by filename...': 'Search by filename...',
+  'Search files': 'Search files',
   'Select': 'Select',
   'Select a routable collection to create child routes from its records.':
     'Select a routable collection to create child routes from its records.',
@@ -552,6 +582,7 @@ export default defineTranslation({
     'Select a routable singleton to use its data for this specific route.',
   'Select block': 'Select block',
   'Select date': 'Select date',
+  'Select file': 'Select file',
   'selected': 'selected',
   'Selected $count $entries': createPattern(
     'Selected $count $entries',
@@ -765,6 +796,7 @@ export default defineTranslation({
 
   'Yes': 'Yes',
   'You cannot translate a record into its source language': 'You cannot translate a record into its source language',
+  'You do not have permission to access the media library.': 'You do not have permission to access the media library.',
   'You do not have permission to access the page `$page`': createPattern(
     'You do not have permission to access the page `$page`',
     { page: 'string' },

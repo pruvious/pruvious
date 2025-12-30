@@ -8,6 +8,7 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  fileField,
   nullableObjectField,
   nullableSelectField,
   nullableTextField,
@@ -169,6 +170,32 @@ export default defineCollection({
       minRange: { days: 1 },
       maxRange: '10 days',
       ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, bounded)' },
+    }),
+
+    // fileField
+    file: fileField({
+      ui: { label: 'File' },
+    }),
+    fileCasted: fileField({
+      fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+      populate: false,
+      ui: { label: 'File (casted)' },
+    }),
+    fileAllowedTypesMime: fileField({
+      allowedTypes: ['text/plain'],
+      ui: { label: 'File (allowed types - MIME)', selectLabel: 'Select a text file' },
+    }),
+    fileAllowedTypesCategory: fileField({
+      allowedTypes: 'image',
+      ui: { label: 'File (allowed types - category)', selectLabel: 'Select an image' },
+    }),
+    fileMinSize: fileField({
+      minSize: '1 KB',
+      ui: { label: 'File (min size)', description: 'Minimum size: 1 KB' },
+    }),
+    fileMaxSize: fileField({
+      maxSize: '1 KB',
+      ui: { label: 'File (max size)', description: 'Maximum size: 1 KB' },
     }),
 
     // nullableObject
@@ -708,6 +735,17 @@ export default defineCollection({
               ],
             },
             {
+              label: 'File',
+              fields: [
+                'file',
+                'fileCasted',
+                'fileAllowedTypesMime',
+                'fileAllowedTypesCategory',
+                'fileMinSize',
+                'fileMaxSize',
+              ],
+            },
+            {
               label: 'Nullable object',
               fields: ['nullableObject', 'nullableObjectNested'],
             },
@@ -728,16 +766,16 @@ export default defineCollection({
               fields: ['object', 'objectNested'],
             },
             {
-              label: 'Repeater',
-              fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
-            },
-            {
               label: 'Record',
               fields: ['record', 'recordPopulate'],
             },
             {
               label: 'Records',
               fields: ['records', 'recordsMinMax', 'recordsAllowDuplicates', 'recordsDeduplicate', 'recordsPopulate'],
+            },
+            {
+              label: 'Repeater',
+              fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
             },
             {
               label: 'Select',

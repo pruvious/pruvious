@@ -1,7 +1,17 @@
 <template>
   <div class="p-media-directory-item" :class="{ 'p-media-directory-item-highlighted': isMoving && highlighted }">
-    <NuxtLink
-      :to="dashboardBasePath + 'media' + upload.path"
+    <component
+      :href="dashboardBasePath + 'media' + upload.path"
+      :is="linkHandler ? 'a' : NuxtLink"
+      :target="linkHandler ? '_blank' : undefined"
+      @click="
+        (event: MouseEvent) => {
+          if (linkHandler && !event.metaKey && !event.ctrlKey) {
+            event.preventDefault()
+            linkHandler(upload)
+          }
+        }
+      "
       @dragenter.prevent="highlighted = true"
       @dragleave="highlighted = false"
       @dragover.prevent
@@ -9,11 +19,12 @@
       class="p-media-directory-item-button pui-raw"
     >
       <Icon mode="svg" name="tabler:folder-open" class="p-media-directory-item-icon" />
-    </NuxtLink>
+    </component>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { NuxtLink } from '#components'
 import {
   $pfetchDashboard,
   __,
@@ -41,6 +52,13 @@ const props = defineProps({
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
   },
+  linkHandler: {
+    type: Function as PropType<(upload: UploadItem) => any>,
+  },
+  allowDrop: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const runtimeConfig = useRuntimeConfig()
@@ -50,7 +68,7 @@ const highlighted = ref(false)
 async function onMoveDrop() {
   highlighted.value = false
 
-  if (!isMoving.value) {
+  if (!isMoving.value || !props.allowDrop) {
     return
   }
 

@@ -12,28 +12,52 @@
     >
       <PruviousDashboardMediaDirectoryItem
         v-if="upload.type === 'directory'"
+        :allowDrop="selectionMode !== 'multiple'"
+        :linkHandler="linkHandler"
         :resolvedPermissions="resolvedPermissions"
         :state="state"
         :upload="upload"
       />
       <PruviousDashboardMediaImageItem
         v-else-if="upload.category === 'image' && displayableImageTypes[upload.mime] && !upload.isLocked"
+        :disabled="disabled"
+        :linkHandler="linkHandler"
         :resolvedPermissions="resolvedPermissions"
+        :selected="selected"
+        :selectionMode="selectionMode"
         :state="state"
         :upload="upload"
         @deselect="$emit('deselect', $event)"
+        @select="$emit('select', $event)"
       />
       <PruviousDashboardMediaFileItem
         v-else
+        :disabled="disabled"
+        :linkHandler="linkHandler"
         :resolvedPermissions="resolvedPermissions"
+        :selected="selected"
+        :selectionMode="selectionMode"
         :state="state"
         :upload="upload"
         @deselect="$emit('deselect', $event)"
+        @select="$emit('select', $event)"
       />
 
       <PUICheckbox
-        v-if="(resolvedPermissions?.canUpdate || resolvedPermissions?.canDelete) && !upload.isLocked"
-        v-pui-tooltip="selected ? __('pruvious-dashboard', 'Deselect') : __('pruvious-dashboard', 'Select')"
+        v-if="
+          selectionMode !== 'single' &&
+          (selectionMode !== 'multiple' || upload.type === 'file') &&
+          (resolvedPermissions?.canUpdate || resolvedPermissions?.canDelete) &&
+          !upload.isLocked &&
+          !disabled?.value
+        "
+        v-pui-tooltip="
+          selectionMode === 'multiple'
+            ? undefined
+            : selected
+              ? __('pruvious-dashboard', 'Deselect')
+              : __('pruvious-dashboard', 'Select')
+        "
         :modelValue="selected"
         @update:modelValue="() => (selected ? $emit('deselect', upload) : $emit('select', upload))"
         strict
@@ -41,7 +65,13 @@
       />
 
       <PUIButton
-        v-if="resolvedPermissions?.canDelete && !upload.isLocked && !state.selectedUploads.length"
+        v-if="
+          selectionMode === 'none' &&
+          resolvedPermissions?.canDelete &&
+          !upload.isLocked &&
+          !state.selectedUploads.length &&
+          !disabled?.value
+        "
         v-pui-tooltip="
           upload.type === 'file' ? __('pruvious-dashboard', 'Delete file') : __('pruvious-dashboard', 'Delete folder')
         "
@@ -55,15 +85,28 @@
     </div>
 
     <div class="p-media-item-name">
-      <span :title="currentName" class="pui-flex">
+      <component
+        :is="selectionMode === 'none' ? 'span' : NuxtLink"
+        :target="selectionMode === 'none' ? undefined : '_blank'"
+        :title="currentName"
+        :to="
+          selectionMode === 'none'
+            ? undefined
+            : dashboardBasePath +
+              'media' +
+              (currentDirectory === '/' ? '' : currentDirectory) +
+              (upload.type === 'file' ? `?details=${upload.id}` : '')
+        "
+        class="p-media-item-name-text pui-flex"
+      >
         <span class="pui-truncate">
           <span>{{ currentNameWithoutExtension }}</span>
           <span v-if="currentExtensionWithoutDot" class="pui-muted">.</span>
         </span>
         <span v-if="currentExtensionWithoutDot" class="pui-shrink-0 pui-muted">{{ currentExtensionWithoutDot }}</span>
-      </span>
+      </component>
       <PUIButton
-        v-if="resolvedPermissions?.canUpdate && !upload.isLocked"
+        v-if="selectionMode === 'none' && resolvedPermissions?.canUpdate && !upload.isLocked"
         v-pui-tooltip="
           upload.type === 'file' ? __('pruvious-dashboard', 'Rename file') : __('pruvious-dashboard', 'Rename folder')
         "
@@ -145,7 +188,7 @@
         />
       </PUIField>
 
-      <div class="p-rename-upload-popup-buttons pui-row">
+      <div class="p-media-item-rename-upload-popup-buttons pui-row">
         <PUIButton @click="renameUploadPopup?.close().then(() => (renameUploadPopupVisible = false))" variant="outline">
           {{ __('pruvious-dashboard', 'Cancel') }}
         </PUIButton>
@@ -159,10 +202,11 @@
 </template>
 
 <script lang="ts" setup>
-import { PruviousDashboardMediaDirectoryItem } from '#components'
+import { NuxtLink, PruviousDashboardMediaDirectoryItem } from '#components'
 import {
   $pfetchDashboard,
   __,
+  dashboardBasePath,
   moveUpload,
   startMoving,
   stopMoving,
@@ -177,7 +221,7 @@ import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, slugify } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { extname } from 'pathe'
+import { dirname, extname } from 'pathe'
 
 const props = defineProps({
   upload: {
@@ -196,6 +240,16 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  selectionMode: {
+    type: String as PropType<'single' | 'multiple' | 'none'>,
+    default: 'none',
+  },
+  linkHandler: {
+    type: Function as PropType<(upload: UploadItem) => any>,
+  },
+  disabledResolver: {
+    type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
+  },
 })
 
 const emit = defineEmits<{
@@ -213,8 +267,12 @@ const resolvedPermissions = computedAsync(() =>
   }),
 )
 const selected = computed(() => props.state.selectedUploads.some(({ id }) => id === props.upload.id))
+const disabled = computed(() => props.disabledResolver?.(props.upload))
 const renameUploadPopup = useTemplateRef('renameUploadPopup')
 const renameUploadPopupVisible = ref(false)
+const currentDirectory = computed(() =>
+  props.upload.type === 'directory' ? props.upload.path : dirname(props.upload.path),
+)
 const currentName = computed(() => props.upload.path.split('/').pop()!)
 const currentExtension = computed(() => (props.upload.type === 'file' ? extname(currentName.value) : ''))
 const currentNameWithoutExtension = computed(() =>
@@ -314,7 +372,7 @@ function closeRenameUploadPopup() {
 }
 
 function onMoveStart(event: DragEvent) {
-  if (!resolvedPermissions.value?.canUpdate) {
+  if (!resolvedPermissions.value?.canUpdate || props.selectionMode !== 'none') {
     event.preventDefault()
     return
   }
@@ -460,6 +518,10 @@ async function onDelete() {
   font-size: 0.875rem;
 }
 
+.p-media-item-name-text {
+  text-decoration: none;
+}
+
 .p-media-item-rename-button {
   display: none;
 }
@@ -468,7 +530,7 @@ async function onDelete() {
   display: inline-flex;
 }
 
-.p-rename-upload-popup-buttons {
+.p-media-item-rename-upload-popup-buttons {
   justify-content: flex-end;
   margin-top: 0.75rem;
 }
