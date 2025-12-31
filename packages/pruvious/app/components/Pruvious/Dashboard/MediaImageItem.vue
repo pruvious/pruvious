@@ -6,7 +6,7 @@
       :target="linkHandler ? '_blank' : undefined"
       @click="
         (event: MouseEvent) => {
-          if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey) {
+          if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
             event.preventDefault()
             if (!disabled.value) {
               linkHandler?.(upload)

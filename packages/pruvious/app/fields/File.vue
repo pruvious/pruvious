@@ -7,7 +7,15 @@
         <PUIButton
           v-if="file"
           v-pui-tooltip="file.path"
-          @click="isDetailsPopupVisible = true"
+          :to="`${dashboardBasePath}media${dir === '/' ? '' : dir}?details=${file.id}`"
+          @click="
+            (event: MouseEvent) => {
+              if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                event.preventDefault()
+                isDetailsPopupVisible = true
+              }
+            }
+          "
           variant="outline"
           class="pui-shrink"
         >
@@ -119,6 +127,7 @@
 <script lang="ts" setup>
 import {
   __,
+  dashboardBasePath,
   hasPermission,
   maybeTranslate,
   mediaCategories,
@@ -132,7 +141,7 @@ import type { MediaCategory, SerializableFieldOptions } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isDefined, parseBytes, toArray } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { basename, extname } from 'pathe'
+import { basename, dirname, extname } from 'pathe'
 import { validateUpload, type UploadFieldValidation } from '../utils/pruvious/dashboard/upload-fields'
 
 const props = defineProps({
@@ -248,6 +257,7 @@ const filenameWithoutExtension = computed(() =>
 const extensionWithoutDot = computed(() =>
   extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
 )
+const dir = computed(() => dirname(file.value?.path ?? ''))
 const allowedTypes = computed(() => {
   const mimes = toArray(props.options.allowedTypes)
     .map((v) =>

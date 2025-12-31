@@ -19,7 +19,7 @@
       :target="linkHandler ? '_blank' : undefined"
       @click="
         (event: MouseEvent) => {
-          if (linkHandler && !event.metaKey && !event.ctrlKey) {
+          if (linkHandler && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
             event.preventDefault()
             linkHandler('/')
           }
