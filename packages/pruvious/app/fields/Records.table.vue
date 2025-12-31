@@ -1,15 +1,17 @@
 <template>
   <div>
-    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name" editButtonPosition="auto">
+    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name" editButtonPosition="auto" wrap>
       <template v-if="choices?.length">
-        <PUIBadge
+        <PUIButton
           v-for="{ label, value } of choices"
-          :title="label ? `${label} (${value})` : String(value)"
-          @dblclick.stop="open(+value!)"
-          color="secondary"
+          :size="-2"
+          :title="label ? `${label} (#${value})` : String(value)"
+          :to="`${dashboardBasePath}collections/${relatedCollection.slug}/${value}`"
+          variant="secondary"
+          class="p-item"
         >
           {{ label || value }}
-        </PUIBadge>
+        </PUIButton>
       </template>
       <span v-else>-</span>
     </PruviousDashboardEditableFieldCell>
@@ -173,17 +175,16 @@ async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> 
 
   return []
 }
-
-function open(id: number) {
-  window.open(`${dashboardBasePath}collections/${relatedCollection.slug}/${id}`, '_blank')
-}
 </script>
 
 <style scoped>
-.pui-badge {
-  align-items: center;
+.p-item {
   height: 1.5rem;
-  cursor: default;
   font-size: 0.75rem;
+}
+
+.p-item :deep(.pui-button-inner) {
+  display: block;
+  padding: 0 0.5rem;
 }
 </style>

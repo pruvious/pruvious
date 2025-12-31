@@ -1,12 +1,14 @@
 <template>
   <div>
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <span
-        :title="choice?.label ? `${choice.label} (${choice.value})` : String(choice?.value ?? '')"
-        class="pui-truncate"
+      <component
+        :is="choice?.value ? NuxtLink : 'span'"
+        :title="choice?.label ? `${choice.label} (#${choice.value})` : String(choice?.value ?? '')"
+        :to="choice?.value ? `${dashboardBasePath}collections/${relatedCollection.slug}/${choice.value}` : undefined"
+        class="p-item pui-truncate"
       >
         {{ choice?.label || choice?.value || '-' }}
-      </span>
+      </component>
     </PruviousDashboardEditableFieldCell>
 
     <PruviousDashboardEditTableFieldPopup
@@ -31,7 +33,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, selectFrom, usePruviousDashboard } from '#pruvious/client'
+import { NuxtLink } from '#components'
+import { __, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUIDynamicSelectChoiceModel } from '@pruvious/ui/components/PUIDynamicSelect.vue'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
@@ -163,3 +166,15 @@ async function selectedChoiceResolver(): Promise<PUIDynamicSelectChoiceModel | n
   return null
 }
 </script>
+
+<style scoped>
+a.p-item {
+  color: hsl(var(--pui-muted-foreground));
+  text-decoration: none;
+}
+
+a.p-item:hover,
+a.p-item:focus {
+  color: hsl(var(--pui-foreground));
+}
+</style>
