@@ -38,11 +38,14 @@
         :selectAllState="selectAllState"
         :showEmptyState="initialized"
         @doubleClick="
-          navigateTo(
-            dashboardBasePath +
-              `collections/routes/${$event.id}` +
-              (languages.length > 1 ? `?language=${contentLanguage}` : ''),
-          )
+          ({ id }, event) => {
+            navigateTo(
+              dashboardBasePath +
+                `collections/routes/${id}` +
+                (languages.length > 1 ? `?language=${contentLanguage}` : ''),
+              { open: event.ctrlKey || event.metaKey || event.shiftKey ? { target: '_blank' } : undefined },
+            )
+          }
         "
         @selectAll="onSelectAll()"
         @update:selected="refreshSelectable()"

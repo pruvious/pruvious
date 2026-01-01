@@ -94,7 +94,7 @@
     </thead>
 
     <tbody v-if="data.length">
-      <tr v-for="(row, rowIndex) of data" :key="row.id" @dblclick="onDoubleClick(row)">
+      <tr v-for="(row, rowIndex) of data" :key="row.id" @dblclick="onDoubleClick(row, $event)">
         <td v-if="selectable">
           <PUICheckbox
             :disabled="shift && selectOrigin === row.id"
@@ -282,7 +282,7 @@ const emit = defineEmits<{
   'update:sort': [value: PUITableSort<TColumns>]
   'update:selected': [value: Record<number | string, boolean>]
   'selectAll': [value: boolean]
-  'doubleClick': [row: PUIRow<TColumns>]
+  'doubleClick': [row: PUIRow<TColumns>, event: MouseEvent]
 }>()
 
 const buttonSize = computed(() => (isDefined(props.size) ? props.size - 2 : -3))
@@ -311,9 +311,9 @@ function toggleSort(columnKey: keyof TColumns) {
   }
 }
 
-function onDoubleClick(row: PUIRow<TColumns>) {
+function onDoubleClick(row: PUIRow<TColumns>, event: MouseEvent) {
   deselectAll()
-  emit('doubleClick', row)
+  emit('doubleClick', row, event)
 }
 
 function onSelect(id: number | string, value: boolean) {

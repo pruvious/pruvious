@@ -37,7 +37,13 @@
         :selectable="selectable"
         :selectAllState="selectAllState"
         :showEmptyState="initialized"
-        @doubleClick="navigateTo(dashboardBasePath + `collections/${route.params.collection}/${$event.id}`)"
+        @doubleClick="
+          ({ id }, event) => {
+            navigateTo(dashboardBasePath + `collections/${route.params.collection}/${id}`, {
+              open: event.ctrlKey || event.metaKey || event.shiftKey ? { target: '_blank' } : undefined,
+            })
+          }
+        "
         @selectAll="onSelectAll()"
         @update:selected="refreshSelectable()"
         @update:sort="
