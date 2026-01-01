@@ -158,6 +158,15 @@ async function closeDetailsPopup() {
   transition-property: background-color, border-color, color;
 }
 
+.p-media-image-item-button:focus-visible {
+  box-shadow:
+    0 0 0 0.125rem hsl(var(--pui-background)),
+    0 0 0 0.25rem hsl(var(--pui-ring)),
+    0 0 #0000;
+  outline: 0.125rem solid transparent;
+  outline-offset: 0.125rem;
+}
+
 .dark .p-media-image-item-button {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAA/SURBVHgB7dOhEQAgDAPAwGFrmAEGYP+dMB0AVoio6PUSnXuTS1v7PBBxv0wNHcERKDADONgHmE2qp1EElgQ/ufgHd9nZw0oAAAAASUVORK5CYII=');
 }

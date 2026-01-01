@@ -222,6 +222,15 @@ async function closeDetailsPopup() {
   transition-property: background-color, border-color, color;
 }
 
+.p-media-file-item-button:focus-visible {
+  box-shadow:
+    0 0 0 0.125rem hsl(var(--pui-background)),
+    0 0 0 0.25rem hsl(var(--pui-ring)),
+    0 0 #0000;
+  outline: 0.125rem solid transparent;
+  outline-offset: 0.125rem;
+}
+
 .p-media-file-item-button-disabled {
   pointer-events: none;
 }

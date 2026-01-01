@@ -186,6 +186,15 @@ async function onMoveDrop() {
   transition-property: background-color, border-color, color;
 }
 
+.p-media-directory-item-button:focus-visible {
+  box-shadow:
+    0 0 0 0.125rem hsl(var(--pui-background)),
+    0 0 0 0.25rem hsl(var(--pui-ring)),
+    0 0 #0000;
+  outline: 0.125rem solid transparent;
+  outline-offset: 0.125rem;
+}
+
 .p-media-directory-item-icon {
   pointer-events: none;
   font-size: 1.75rem;
