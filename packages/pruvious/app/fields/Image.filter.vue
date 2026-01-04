@@ -33,7 +33,9 @@
         </PUIButton>
 
         <PUIButton v-else-if="!loadingFile" disabled variant="outline" class="pui-shrink">
-          <span class="pui-truncate">{{ __('pruvious-dashboard', 'File not found') + ` (#${modelValue.value})` }}</span>
+          <span class="pui-truncate">
+            {{ __('pruvious-dashboard', 'Image not found') + ` (#${modelValue.value})` }}
+          </span>
         </PUIButton>
 
         <PUIButton
@@ -88,6 +90,7 @@
           $emit('update:modelValue', { ...modelValue, value })
         }
       "
+      filterCategory="image"
       selectionMode="single"
     />
 
@@ -146,7 +149,7 @@ const props = defineProps({
    * The combined field options defined in a collection.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'file'>>,
+    type: Object as PropType<SerializableFieldOptions<'image'>>,
     required: true,
   },
 })
@@ -160,7 +163,7 @@ const id = useId()
 const label = resolveFieldLabel(props.options.ui.label, props.name)
 const selectLabel = isDefined(props.options.ui.selectLabel)
   ? maybeTranslate(props.options.ui.selectLabel)
-  : __('pruvious-dashboard', 'Select file')
+  : __('pruvious-dashboard', 'Select image')
 const dashboard = usePruviousDashboard()
 const uploadCollection = { name: 'Uploads' as const, definition: dashboard.value!.collections.Uploads! }
 const isMediaLibraryPopupVisible = ref(false)

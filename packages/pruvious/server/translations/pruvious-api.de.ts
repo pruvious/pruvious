@@ -111,8 +111,22 @@ export default defineTranslation({
   'The new path cannot be the root directory': 'Der neue Pfad darf nicht das Stammverzeichnis sein',
   'The new path must be different from the current path': 'Der neue Pfad muss sich vom aktuellen Pfad unterscheiden',
   'The file part has already been uploaded': 'Der Dateiteil wurde bereits hochgeladen',
+  'The image height must not be less than $minHeight': createPattern(
+    'Die Bildhöhe darf $minHeight nicht unterschreiten',
+    { minHeight: 'string' },
+  ),
+  'The image height must not exceed $maxHeight': createPattern('Die Bildhöhe darf $maxHeight nicht überschreiten', {
+    maxHeight: 'string',
+  }),
   'The image variant has already been registered': 'Die Bildvariante wurde bereits registriert',
   'The image variant has not been registered': 'Die Bildvariante wurde nicht registriert',
+  'The image width must not be less than $minWidth': createPattern(
+    'Die Bildbreite darf $minWidth nicht unterschreiten',
+    { minWidth: 'string' },
+  ),
+  'The image width must not exceed $maxWidth': createPattern('Die Bildbreite darf $maxWidth nicht überschreiten', {
+    maxWidth: 'string',
+  }),
   'The path must be unique': 'Der Pfad muss eindeutig sein',
   'The singleton `$singleton` does not exist': createPattern('Der Singleton `$singleton` existiert nicht', {
     singleton: 'string',

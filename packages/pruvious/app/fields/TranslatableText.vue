@@ -113,7 +113,7 @@ const props = defineProps({
   },
 })
 
-defineEmits<{
+const emit = defineEmits<{
   'commit': [value: Record<LanguageCode, string>]
   'update:modelValue': [value: Record<LanguageCode, string>]
 }>()
@@ -124,6 +124,18 @@ const placeholder = maybeTranslate(props.options.ui.placeholder)
 const objectErrors = computed(() => (isObject(props.error) ? props.error[props.name] : props.error))
 const subfieldErrors = computed<Record<string, string | string[] | undefined> | undefined>(() =>
   isObject(props.error) ? omit(props.error, [props.name] as any) : undefined,
+)
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    for (const language of languages) {
+      if (!(language.code in newValue)) {
+        emit('update:modelValue', { ...newValue, [language.code]: '' })
+      }
+    }
+  },
+  { immediate: true },
 )
 </script>
 

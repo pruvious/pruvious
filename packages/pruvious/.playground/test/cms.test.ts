@@ -41,6 +41,7 @@ describe('cms', async () => {
   await import('./cms/fields/dateTime')
   await import('./cms/fields/dateTimeRange')
   await import('./cms/fields/file')
+  await import('./cms/fields/image')
   await import('./cms/fields/language-translations')
   await import('./cms/fields/nullableObject')
   await import('./cms/fields/nullableSelect')

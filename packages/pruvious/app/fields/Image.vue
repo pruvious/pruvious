@@ -4,57 +4,85 @@
 
     <div v-if="canRead" class="pui-row">
       <template v-if="modelValue">
-        <PUIButton
-          v-if="file"
-          v-pui-tooltip="file.path"
-          :to="`${dashboardBasePath}media${dir === '/' ? '' : dir}?details=${file.id}`"
-          @click="
-            (event: MouseEvent) => {
-              if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
-                event.preventDefault()
-                isDetailsPopupVisible = true
-              }
-            }
-          "
-          variant="outline"
-          class="pui-shrink"
-        >
-          <span :title="filename" class="pui-flex">
-            <span class="pui-truncate">
-              <span>{{ filenameWithoutExtension }}</span>
-              <span v-if="extensionWithoutDot" class="pui-muted">.</span>
+        <div class="p-image-preview p-media-item-box">
+          <PruviousDashboardMediaImageItem
+            v-if="file && file.category === 'image' && displayableImageTypes[file.mime]"
+            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :upload="file"
+            compact
+          />
+          <PruviousDashboardMediaFileItem
+            v-else-if="file && !loadingFile"
+            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :upload="file"
+            compact
+          />
+          <div v-else-if="!loadingFile" class="p-image-preview-error">
+            <Icon mode="svg" name="tabler:photo-off" />
+          </div>
+        </div>
+
+        <div class="p-image-details">
+          <div v-if="file">
+            <span v-pui-tooltip="{ content: file.path, offset: [0, 6] }" class="p-image-title">
+              <span :title="filename" class="pui-flex">
+                <span class="pui-truncate">
+                  <span>{{ filenameWithoutExtension }}</span>
+                  <span v-if="extensionWithoutDot" class="pui-muted">.</span>
+                </span>
+                <span v-if="extensionWithoutDot" class="pui-shrink-0 pui-muted">{{ extensionWithoutDot }}</span>
+              </span>
             </span>
-            <span v-if="extensionWithoutDot" class="pui-shrink-0 pui-muted">{{ extensionWithoutDot }}</span>
-          </span>
-        </PUIButton>
+          </div>
 
-        <PUIButton v-else-if="!loadingFile" disabled variant="outline" class="pui-shrink">
-          <span class="pui-truncate">{{ __('pruvious-dashboard', 'File not found') + ` (#${modelValue})` }}</span>
-        </PUIButton>
+          <div v-else-if="!loadingFile" class="pui-muted">
+            <span class="pui-truncate">{{ __('pruvious-dashboard', 'Image not found') + ` (#${modelValue})` }}</span>
+          </div>
 
-        <PUIButton
-          v-pui-tooltip="__('pruvious-dashboard', 'Replace')"
-          :disabled="disabled"
-          @click="isMediaLibraryPopupVisible = true"
-          variant="outline"
-        >
-          <Icon mode="svg" name="tabler:replace" />
-        </PUIButton>
+          <component
+            :is="resolvedPermissions?.canUpdate ? 'button' : 'div'"
+            @click="
+              () => {
+                if (resolvedPermissions?.canUpdate) {
+                  defaultDetailsTab = 'description'
+                  isDetailsPopupVisible = true
+                }
+              }
+            "
+            class="p-image-description pui-truncate"
+          >
+            <span :title="file?.description[language]" class="pui-truncate">
+              {{ file?.description[language] || __('pruvious-dashboard', 'No description') }}
+            </span>
+            <Icon v-if="resolvedPermissions?.canUpdate" mode="svg" name="tabler:pencil" />
+          </component>
 
-        <PUIButton
-          v-pui-tooltip="__('pruvious-dashboard', 'Clear selection')"
-          :disabled="disabled"
-          @click="
-            () => {
-              isMediaLibraryPopupVisible = false
-              $emit('update:modelValue', null)
-              $emit('commit', null)
-            }
-          "
-          variant="outline"
-        >
-          <Icon mode="svg" name="tabler:x" />
-        </PUIButton>
+          <div class="pui-row">
+            <PUIButton
+              v-pui-tooltip="__('pruvious-dashboard', 'Replace')"
+              :disabled="disabled"
+              @click="isMediaLibraryPopupVisible = true"
+              variant="outline"
+            >
+              <Icon mode="svg" name="tabler:replace" />
+            </PUIButton>
+
+            <PUIButton
+              v-pui-tooltip="__('pruvious-dashboard', 'Clear selection')"
+              :disabled="disabled"
+              @click="
+                () => {
+                  isMediaLibraryPopupVisible = false
+                  $emit('update:modelValue', null)
+                  $emit('commit', null)
+                }
+              "
+              variant="outline"
+            >
+              <Icon mode="svg" name="tabler:x" />
+            </PUIButton>
+          </div>
+        </div>
       </template>
 
       <template v-else>
@@ -100,14 +128,21 @@
           $emit('commit', value as number | null)
         }
       "
+      filterCategory="image"
       selectionMode="single"
     />
 
     <PruviousDashboardMediaItemDetailsPopup
       v-if="isDetailsPopupVisible && file"
+      :defaultTab="defaultDetailsTab"
       :resolvedPermissions="resolvedPermissions"
       :upload="file"
-      @close="$event().then(() => (isDetailsPopupVisible = false))"
+      @close="
+        $event().then(() => {
+          isDetailsPopupVisible = false
+          defaultDetailsTab = 'details'
+        })
+      "
       @data="file = $event"
       @deselect="
         () => {
@@ -124,14 +159,16 @@
 <script lang="ts" setup>
 import {
   __,
-  dashboardBasePath,
+  displayableImageTypes,
   hasPermission,
   maybeTranslate,
   mediaCategories,
+  primaryLanguage,
   resolveFieldLabel,
   selectFrom,
   upload,
   useCollectionRecordPermissions,
+  useDashboardContentLanguage,
   usePruviousDashboard,
   type UploadItem,
 } from '#pruvious/client'
@@ -139,7 +176,7 @@ import type { MediaCategory, SerializableFieldOptions } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isDefined, parseBytes, toArray } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { basename, dirname, extname } from 'pathe'
+import { basename, extname } from 'pathe'
 import { validateUpload, type UploadFieldValidation } from '../utils/pruvious/dashboard/upload-fields'
 
 const props = defineProps({
@@ -163,7 +200,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'file'>>,
+    type: Object as PropType<SerializableFieldOptions<'image'>>,
     required: true,
   },
 
@@ -224,12 +261,15 @@ const id = useId()
 const label = resolveFieldLabel(props.options.ui.label, props.name)
 const selectLabel = isDefined(props.options.ui.selectLabel)
   ? maybeTranslate(props.options.ui.selectLabel)
-  : __('pruvious-dashboard', 'Select file')
+  : __('pruvious-dashboard', 'Select image')
 const fileInput = useTemplateRef('fileInput')
 const dashboard = usePruviousDashboard()
 const uploadsCollection = { name: 'Uploads' as const, definition: dashboard.value!.collections.Uploads! }
+const contentLanguage = useDashboardContentLanguage()
+const language = computed(() => (props.translatable ? contentLanguage.value : primaryLanguage))
 const isMediaLibraryPopupVisible = ref(false)
 const isDetailsPopupVisible = ref(false)
+const defaultDetailsTab = ref<'details' | 'description' | 'variants'>('details')
 const canRead = hasPermission('collection:uploads:read')
 const canCreate = hasPermission('collection:uploads:create')
 const loadingFile = ref(false)
@@ -242,7 +282,6 @@ const filenameWithoutExtension = computed(() =>
 const extensionWithoutDot = computed(() =>
   extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
 )
-const dir = computed(() => dirname(file.value?.path ?? ''))
 const allowedTypes = computed(() => {
   const mimes = toArray(props.options.allowedTypes)
     .map((v) =>
@@ -255,6 +294,10 @@ const validation = computed<UploadFieldValidation>(() => ({
   allowedMimes: allowedTypes.value,
   minBytes: parseBytes(props.options.minSize),
   maxBytes: parseBytes(props.options.maxSize),
+  minImageWIdth: props.options.minWidth,
+  maxImageWidth: props.options.maxWidth,
+  minImageHeight: props.options.minHeight,
+  maxImageHeight: props.options.maxHeight,
 }))
 const { resolver: permissionsResolver } = useCollectionRecordPermissions(uploadsCollection)
 const resolvedPermissions = computedAsync(() =>
@@ -310,3 +353,70 @@ async function uploadFile() {
   }
 }
 </script>
+
+<style scoped>
+.p-image-preview {
+  flex-shrink: 0;
+  position: relative;
+  width: 6.5rem;
+  aspect-ratio: 1;
+}
+
+.p-image-preview-error {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: hsl(var(--pui-background));
+  border: 1px solid hsla(var(--pui-border));
+  border-radius: calc(var(--pui-radius) - 0.125rem);
+  font-size: 1.25rem;
+  color: hsla(var(--pui-muted-foreground));
+}
+
+.p-image-preview-error > * {
+  margin: auto;
+}
+
+.p-image-details {
+  margin-top: auto;
+}
+
+.p-image-details > * + * {
+  margin-top: 0.5rem;
+}
+
+.p-image-title {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.p-image-description {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 100%;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  color: hsla(var(--pui-muted-foreground));
+  text-decoration: none;
+  transition: var(--pui-transition);
+  transition-property: box-shadow, color;
+}
+
+.p-image-description svg,
+.p-image-description svg {
+  flex-shrink: 0;
+  display: none;
+  font-size: 0.875rem;
+}
+
+button.p-image-description:hover,
+button.p-image-description:focus {
+  color: hsla(var(--pui-foreground));
+}
+
+button.p-image-description:hover svg,
+button.p-image-description:focus svg {
+  display: inline-block;
+}
+</style>

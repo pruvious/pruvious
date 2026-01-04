@@ -1,5 +1,13 @@
 import type { MediaCategory } from './utils.server'
 
+export type OptimizableImageType =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/gif'
+  | 'image/webp'
+  | 'image/svg+xml'
+  | 'image/avif'
+
 /**
  * Media categories for the `Uploads` collection.
  * The keys are the category names and the values are the MIME types that belong to that category.
@@ -338,3 +346,33 @@ export const mediaCategories = {
 
   'other': [] as const,
 } satisfies Record<MediaCategory, readonly string[]>
+
+export const displayableImageTypes: Record<string, true> = {
+  'image/jpeg': true,
+  'image/pjpeg': true,
+  'image/png': true,
+  'image/gif': true,
+  'image/webp': true,
+  'image/svg+xml': true,
+  'image/avif': true,
+  'image/vnd.mozilla.apng': true,
+  'image/x-icon': true,
+  'image/vnd.microsoft.icon': true,
+  'image/bmp': true,
+  'image/x-windows-bmp': true,
+}
+
+export const optimizableImageTypes: Record<string, true> = {
+  'image/jpeg': true,
+  'image/png': true,
+  'image/gif': true,
+  'image/webp': true,
+  'image/svg+xml': true,
+  'image/avif': true,
+}
+
+export const playableVideoTypes: Record<string, true> = {
+  'video/mp4': true,
+  'video/webm': true,
+  'video/ogg': true,
+}

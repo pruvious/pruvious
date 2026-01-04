@@ -30,12 +30,13 @@
     <PruviousDashboardMediaLibrary
       v-model:state="state"
       :disabledResolver="disabledResolver"
+      :filterCategory="filterCategory"
+      :filterUnlocked="filterUnlocked"
       :linkHandler="linkHandler"
       :queryString="queryString"
       :selectionMode="selectionMode"
       :showPathTooltips="isDirty"
       @update:state="updateRouteFromState($event)"
-      filterUnlocked
     />
 
     <template #footer>
@@ -70,6 +71,7 @@ import {
   type DashboardMediaLibraryState,
   type UploadItem,
 } from '#pruvious/client'
+import type { MediaCategory } from '#pruvious/server'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { clearArray, deepClone, toArray } from '@pruvious/utils'
 import { dirname } from 'pathe'
@@ -101,6 +103,13 @@ const props = defineProps({
   },
   initialFilePath: {
     type: String,
+  },
+  filterUnlocked: {
+    type: Boolean,
+    default: true,
+  },
+  filterCategory: {
+    type: String as PropType<MediaCategory>,
   },
 })
 

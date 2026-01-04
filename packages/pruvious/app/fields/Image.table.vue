@@ -4,6 +4,26 @@
       <template v-if="modelValue">
         <span v-if="!canRead">{{ modelValue }}</span>
 
+        <div
+          v-else-if="file && showThumbnail"
+          v-pui-tooltip="file.path"
+          @click="isDetailsPopupVisible = true"
+          class="p-item p-image-preview p-media-item-box"
+        >
+          <PruviousDashboardMediaImageItem
+            v-if="file.category === 'image' && displayableImageTypes[file.mime]"
+            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :upload="file"
+            compact
+          />
+          <PruviousDashboardMediaFileItem
+            v-else-if="!loadingFile"
+            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :upload="file"
+            compact
+          />
+        </div>
+
         <button v-else-if="file" v-pui-tooltip="file.path" @click="isDetailsPopupVisible = true" class="p-item">
           <span :title="__('pruvious-dashboard', 'Show details')" class="pui-flex">
             <span class="pui-truncate">
@@ -16,10 +36,10 @@
 
         <span
           v-else-if="!loadingFile"
-          :title="__('pruvious-dashboard', 'File not found') + ` (#${modelValue})`"
+          :title="__('pruvious-dashboard', 'Image not found') + ` (#${modelValue})`"
           class="pui-truncate"
         >
-          {{ __('pruvious-dashboard', 'File not found') + ` (#${modelValue})` }}
+          {{ __('pruvious-dashboard', 'Image not found') + ` (#${modelValue})` }}
         </span>
       </template>
 
@@ -64,6 +84,7 @@
 <script lang="ts" setup>
 import {
   __,
+  displayableImageTypes,
   hasPermission,
   selectFrom,
   useCollectionRecordPermissions,
@@ -72,7 +93,7 @@ import {
 } from '#pruvious/client'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isString } from '@pruvious/utils'
+import { castToNumber, isObject, isString, isUndefined } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
 import { basename, extname } from 'pathe'
 
@@ -104,7 +125,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'file'>>,
+    type: Object as PropType<SerializableFieldOptions<'image'>>,
     required: true,
   },
 
@@ -146,6 +167,12 @@ const uploadsCollection = { name: 'Uploads' as const, definition: dashboard.valu
 const isDetailsPopupVisible = ref(false)
 const isEditPopupVisible = ref(false)
 const canRead = hasPermission('collection:uploads:read')
+const showThumbnail = computed(
+  () =>
+    isUndefined(props.options.ui.dataTable) ||
+    props.options.ui.dataTable === true ||
+    (isObject(props.options.ui.dataTable) && props.options.ui.dataTable.showThumbnail),
+)
 const loadingFile = ref(false)
 const file = ref<UploadItem | null>(await fetchFileData())
 const filename = computed(() => basename(file.value?.path ?? ''))
@@ -214,5 +241,11 @@ button.p-item {
 button.p-item:hover,
 button.p-item:focus {
   color: hsl(var(--pui-foreground));
+}
+
+.p-image-preview {
+  position: relative;
+  width: 6.5rem;
+  aspect-ratio: 1;
 }
 </style>

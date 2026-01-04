@@ -42,6 +42,7 @@
 
       <div class="p-media-item-details-fields">
         <PUITabs
+          :active="defaultTab"
           :list="[
             { name: 'details', label: __('pruvious-dashboard', 'Details') },
             {
@@ -59,7 +60,6 @@
               ? [{ name: 'variants', label: __('pruvious-dashboard', 'Variants') }]
               : []),
           ]"
-          active="details"
         >
           <PUITab name="details">
             <div class="p-media-item-details-field">
@@ -217,10 +217,13 @@ import {
   $pfetchDashboard,
   __,
   dashboardBasePath,
+  displayableImageTypes,
   fieldComponents,
   hasPermission,
   History,
   imageVariants,
+  optimizableImageTypes,
+  playableVideoTypes,
   resolveUploadPath,
   selectFrom,
   unsavedChanges,
@@ -256,11 +259,16 @@ const props = defineProps({
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
   },
+  defaultTab: {
+    type: String as PropType<'details' | 'description' | 'variants'>,
+    default: 'details',
+  },
 })
 
 const emit = defineEmits<{
   close: [close: () => Promise<void>]
   deselect: [upload: UploadItem]
+  data: [upload: UploadItem]
 }>()
 
 defineExpose({ close })
@@ -298,33 +306,6 @@ const author = ref<{ firstName: string; lastName: string; email: string } | fals
         .then(({ data }) => data ?? false)
     : false,
 )
-const displayableImageTypes: Record<string, true> = {
-  'image/jpeg': true,
-  'image/pjpeg': true,
-  'image/png': true,
-  'image/gif': true,
-  'image/webp': true,
-  'image/svg+xml': true,
-  'image/avif': true,
-  'image/vnd.mozilla.apng': true,
-  'image/x-icon': true,
-  'image/vnd.microsoft.icon': true,
-  'image/bmp': true,
-  'image/x-windows-bmp': true,
-}
-const optimizableImageTypes: Record<string, true> = {
-  'image/jpeg': true,
-  'image/png': true,
-  'image/gif': true,
-  'image/webp': true,
-  'image/svg+xml': true,
-  'image/avif': true,
-}
-const playableVideoTypes: Record<string, true> = {
-  'video/mp4': true,
-  'video/webm': true,
-  'video/ogg': true,
-}
 const hasPreview = computed(
   () =>
     (props.upload.category === 'image' && displayableImageTypes[props.upload.mime]) ||
@@ -353,6 +334,7 @@ const saveData = lockAndLoad(isSubmitting, async () => {
   if (result.success) {
     if (result.data.length) {
       error.value = ''
+      emit('data', result.data[0]!)
       puiQueueToast(__('pruvious-dashboard', 'Saved'), { type: 'success' })
     } else {
       puiQueueToast(__('pruvious-dashboard', 'Record not found'), { type: 'error' })
@@ -492,6 +474,8 @@ const recreateVariant = lockAndLoad(isSubmitting, async (path: string) =>
 .p-media-item-details-preview-image-link {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAA5SURBVHgB7dGxEQAgDELRxDHYfzVYIzoChYXnQf3vNTTJKWMAnKxWXV7AgC+APWdOKMnJckrAP8ENTFgK0Z64q28AAAAASUVORK5CYII=');
   background-color: hsl(var(--pui-background));
+  transition: var(--pui-transition);
+  transition-property: box-shadow;
 }
 
 .dark .p-media-item-details-preview-image-link {
@@ -550,6 +534,8 @@ const recreateVariant = lockAndLoad(isSubmitting, async (path: string) =>
   border-radius: calc(var(--pui-radius) - 0.125rem);
   font-size: 1.25rem;
   color: hsla(var(--pui-muted-foreground));
+  transition: var(--pui-transition);
+  transition-property: box-shadow;
 }
 
 .dark .p-media-item-details-variant-preview {

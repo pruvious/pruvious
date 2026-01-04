@@ -42,9 +42,9 @@ export function validateUpload(
   if (validation?.minImageWidth && upload.imageWidth < validation.minImageWidth) {
     return {
       value: true,
-      reason: __('pruvious-dashboard', 'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px', {
-        minWidth: validation.minImageWidth,
-        width: upload.imageWidth,
+      reason: __('pruvious-dashboard', 'Image width too small.<br>Minimum: `$minWidth`<br>Current: `$width`', {
+        minWidth: `${validation.minImageWidth}px`,
+        width: `${upload.imageWidth}px`,
       }),
     }
   }
@@ -52,9 +52,9 @@ export function validateUpload(
   if (validation?.maxImageWidth && upload.imageWidth > validation.maxImageWidth) {
     return {
       value: true,
-      reason: __('pruvious-dashboard', 'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px', {
-        maxWidth: validation.maxImageWidth,
-        width: upload.imageWidth,
+      reason: __('pruvious-dashboard', 'Image width too large.<br>Maximum: `$maxWidth`<br>Current: `$width`', {
+        maxWidth: `${validation.maxImageWidth}px`,
+        width: `${upload.imageWidth}px`,
       }),
     }
   }
@@ -62,9 +62,9 @@ export function validateUpload(
   if (validation?.minImageHeight && upload.imageHeight < validation.minImageHeight) {
     return {
       value: true,
-      reason: __('pruvious-dashboard', 'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px', {
-        minHeight: validation.minImageHeight,
-        height: upload.imageHeight,
+      reason: __('pruvious-dashboard', 'Image height too small.<br>Minimum: `$minHeight`<br>Current: `$height`', {
+        minHeight: `${validation.minImageHeight}px`,
+        height: `${upload.imageHeight}px`,
       }),
     }
   }
@@ -72,9 +72,9 @@ export function validateUpload(
   if (validation?.maxImageHeight && upload.imageHeight > validation.maxImageHeight) {
     return {
       value: true,
-      reason: __('pruvious-dashboard', 'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px', {
-        maxHeight: validation.maxImageHeight,
-        height: upload.imageHeight,
+      reason: __('pruvious-dashboard', 'Image height too large.<br>Maximum: `$maxHeight`<br>Current: `$height`', {
+        maxHeight: `${validation.maxImageHeight}px`,
+        height: `${upload.imageHeight}px`,
       }),
     }
   }

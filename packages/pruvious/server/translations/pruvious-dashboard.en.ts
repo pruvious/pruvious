@@ -347,23 +347,24 @@ export default defineTranslation({
 
   'ID': 'ID',
   'Image height': 'Image height',
-  'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px': createPattern(
-    'Image height too small.<br>Minimum: `$minHeight` px<br>Current: `$height` px',
-    { minHeight: 'number', height: 'number' },
+  'Image height too small.<br>Minimum: `$minHeight`<br>Current: `$height`': createPattern(
+    'Image height too small.<br>Minimum: `$minHeight`<br>Current: `$height`',
+    { minHeight: 'string', height: 'string' },
   ),
-  'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px': createPattern(
-    'Image height too large.<br>Maximum: `$maxHeight` px<br>Current: `$height` px',
-    { maxHeight: 'number', height: 'number' },
+  'Image height too large.<br>Maximum: `$maxHeight`<br>Current: `$height`': createPattern(
+    'Image height too large.<br>Maximum: `$maxHeight`<br>Current: `$height`',
+    { maxHeight: 'string', height: 'string' },
   ),
+  'Image not found': 'Image not found',
   'Image variant recreated successfully': 'Image variant recreated successfully',
   'Image width': 'Image width',
-  'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px': createPattern(
-    'Image width too small.<br>Minimum: `$minWidth` px<br>Current: `$width` px',
-    { minWidth: 'number', width: 'number' },
+  'Image width too small.<br>Minimum: `$minWidth`<br>Current: `$width`': createPattern(
+    'Image width too small.<br>Minimum: `$minWidth`<br>Current: `$width`',
+    { minWidth: 'string', width: 'string' },
   ),
-  'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px': createPattern(
-    'Image width too large.<br>Maximum: `$maxWidth` px<br>Current: `$width` px',
-    { maxWidth: 'number', width: 'number' },
+  'Image width too large.<br>Maximum: `$maxWidth`<br>Current: `$width`': createPattern(
+    'Image width too large.<br>Maximum: `$maxWidth`<br>Current: `$width`',
+    { maxWidth: 'string', width: 'string' },
   ),
   'Inactive': 'Inactive',
   'Includes all': 'Includes all',
@@ -583,6 +584,7 @@ export default defineTranslation({
   'Select block': 'Select block',
   'Select date': 'Select date',
   'Select file': 'Select file',
+  'Select image': 'Select image',
   'selected': 'selected',
   'Selected $count $entries': createPattern(
     'Selected $count $entries',

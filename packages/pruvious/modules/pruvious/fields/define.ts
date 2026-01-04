@@ -666,7 +666,7 @@ export interface FieldUIOptions<
    * {
    *   visible: true,
    *   sortable: true,
-   *   filterable: true
+   *   filterable: true,
    * }
    */
   dataTable?: DefaultTrue<TDataTable> extends true

@@ -183,7 +183,7 @@ async function onMoveDrop() {
   border-radius: var(--pui-radius);
   color: hsl(var(--pui-foreground));
   transition: var(--pui-transition);
-  transition-property: background-color, border-color, color;
+  transition-property: background-color, border-color, box-shadow, color;
 }
 
 .p-media-directory-item-button:focus-visible {

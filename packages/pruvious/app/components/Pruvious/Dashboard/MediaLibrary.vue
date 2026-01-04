@@ -156,7 +156,10 @@ async function refresh() {
   }
 
   if (props.filterCategory) {
-    query.where('category', '=', props.filterCategory)
+    query.orGroup([
+      (eb) => eb.where('category', '=', props.filterCategory!),
+      (eb) => eb.where('type', '=', 'directory'),
+    ])
   }
 
   query.where('level', where?.length ? '>=' : '=', level)

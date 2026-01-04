@@ -64,14 +64,9 @@
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
-import {
-  __,
-  dashboardBasePath,
-  type DashboardMediaLibraryState,
-  type ResolvedCollectionRecordPermissions,
-  type UploadItem,
-} from '#pruvious/client'
+import { __, dashboardBasePath, type ResolvedCollectionRecordPermissions, type UploadItem } from '#pruvious/client'
 import { formatBytes, omit } from '@pruvious/utils'
+import { dirname } from 'pathe'
 import { stringifyQuery } from 'ufo'
 
 const props = defineProps({
@@ -81,15 +76,10 @@ const props = defineProps({
   },
   selected: {
     type: Boolean,
-    required: true,
   },
   disabled: {
     type: Object as PropType<{ value: false } | { value: true; reason: string }>,
     default: () => ({ value: false }),
-  },
-  state: {
-    type: Object as PropType<DashboardMediaLibraryState>,
-    required: true,
   },
   resolvedPermissions: {
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
@@ -115,10 +105,11 @@ const route = useRoute()
 const detailsPopup = useTemplateRef('detailsPopup')
 const formattedSize = computed(() => formatBytes(props.upload.size))
 const isDetailsPopupVisible = ref(false)
-const link = computed(
-  () =>
-    `${dashboardBasePath}media${props.state.currentDirectory === '/' ? '' : props.state.currentDirectory}?${stringifyQuery({ ...route.query, details: props.upload.id })}`,
-)
+const link = computed(() => {
+  const dir = dirname(props.upload.path)
+  const qs = props.linkHandler ? { details: props.upload.id } : { ...route.query, details: props.upload.id }
+  return `${dashboardBasePath}media${dir === '/' ? '' : dir}?${stringifyQuery(qs)}`
+})
 
 const icon = computed(() => {
   if (props.upload.category === 'image') {
@@ -219,7 +210,7 @@ async function closeDetailsPopup() {
   border-radius: var(--pui-radius);
   color: hsl(var(--pui-foreground));
   transition: var(--pui-transition);
-  transition-property: background-color, border-color, color;
+  transition-property: background-color, border-color, box-shadow, color;
 }
 
 .p-media-file-item-button:focus-visible {
@@ -279,6 +270,23 @@ async function closeDetailsPopup() {
   top: 0.5rem;
   right: 0.5rem;
   cursor: help;
+}
+
+@media (max-width: 767px) {
+  .p-media-file-size {
+    bottom: 0.375rem;
+    right: 0.375rem;
+  }
+
+  .p-media-file-locked-indicator {
+    top: 0.375rem;
+    left: 0.375rem;
+  }
+
+  .p-media-file-item-disabled-indicator {
+    top: 0.375rem;
+    right: 0.375rem;
+  }
 }
 </style>
 

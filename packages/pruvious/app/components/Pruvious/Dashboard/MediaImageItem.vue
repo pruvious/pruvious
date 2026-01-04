@@ -1,5 +1,11 @@
 <template>
-  <div class="p-media-image-item" :class="{ 'p-media-image-item-disabled': disabled.value && !upload.isLocked }">
+  <div
+    class="p-media-image-item"
+    :class="{
+      'p-media-image-item-disabled': disabled.value && !upload.isLocked,
+      'p-media-image-compact': compact,
+    }"
+  >
     <component
       :href="link"
       :is="linkHandler ? 'a' : NuxtLink"
@@ -53,12 +59,11 @@ import {
   dashboardBasePath,
   resolveUploadPath,
   useLanguage,
-  type DashboardMediaLibraryState,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
 } from '#pruvious/client'
 import { formatBytes, omit } from '@pruvious/utils'
-import { extname } from 'pathe'
+import { dirname, extname } from 'pathe'
 import { stringifyQuery } from 'ufo'
 
 const props = defineProps({
@@ -68,11 +73,6 @@ const props = defineProps({
   },
   selected: {
     type: Boolean,
-    required: true,
-  },
-  state: {
-    type: Object as PropType<DashboardMediaLibraryState>,
-    required: true,
   },
   disabled: {
     type: Object as PropType<{ value: false } | { value: true; reason: string }>,
@@ -90,6 +90,10 @@ const props = defineProps({
   },
   disabledResolver: {
     type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
+  },
+  compact: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -111,10 +115,11 @@ const thumbnailURL = computed(() => {
   return resolveUploadPath(props.upload.path.slice(0, -ext.length) + oext + '_w320_h320_contain.webp')
 })
 const isDetailsPopupVisible = ref(false)
-const link = computed(
-  () =>
-    `${dashboardBasePath}media${props.state.currentDirectory === '/' ? '' : props.state.currentDirectory}?${stringifyQuery({ ...route.query, details: props.upload.id })}`,
-)
+const link = computed(() => {
+  const dir = dirname(props.upload.path)
+  const qs = props.linkHandler ? { details: props.upload.id } : { ...route.query, details: props.upload.id }
+  return `${dashboardBasePath}media${dir === '/' ? '' : dir}?${stringifyQuery(qs)}`
+})
 
 watch(
   () => route.query,
@@ -155,7 +160,7 @@ async function closeDetailsPopup() {
   border-radius: var(--pui-radius);
   color: hsl(var(--pui-foreground));
   transition: var(--pui-transition);
-  transition-property: background-color, border-color, color;
+  transition-property: background-color, border-color, box-shadow, color;
 }
 
 .p-media-image-item-button:focus-visible {
@@ -240,9 +245,19 @@ async function closeDetailsPopup() {
   left: 0.5rem;
 }
 
+.p-media-image-compact .p-media-image-dimensions {
+  top: 0.375rem;
+  left: 0.375rem;
+}
+
 .p-media-image-size {
   bottom: 0.5rem;
   right: 0.5rem;
+}
+
+.p-media-image-compact .p-media-image-size {
+  bottom: 0.375rem;
+  right: 0.375rem;
 }
 
 .p-media-image-disabled-indicator {
@@ -250,6 +265,23 @@ async function closeDetailsPopup() {
   top: 0.5rem;
   right: 0.5rem;
   cursor: help;
+}
+
+@media (max-width: 767px) {
+  .p-media-image-dimensions {
+    top: 0.375rem;
+    left: 0.375rem;
+  }
+
+  .p-media-image-size {
+    bottom: 0.375rem;
+    right: 0.375rem;
+  }
+
+  .p-media-image-disabled-indicator {
+    top: 0.375rem;
+    right: 0.375rem;
+  }
 }
 </style>
 

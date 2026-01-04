@@ -9,6 +9,7 @@ import {
   dateTimeRangeField,
   defineCollection,
   fileField,
+  imageField,
   nullableObjectField,
   nullableSelectField,
   nullableTextField,
@@ -196,6 +197,44 @@ export default defineCollection({
     fileMaxSize: fileField({
       maxSize: '1 KB',
       ui: { label: 'File (max size)', description: 'Maximum size: 1 KB' },
+    }),
+
+    // fileField
+    image: imageField({
+      ui: { label: 'Image', dataTable: { showThumbnail: false } },
+    }),
+    imageCasted: imageField({
+      fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+      populate: false,
+      ui: { label: 'Image (casted)' },
+    }),
+    imageAllowedTypesMime: imageField({
+      allowedTypes: ['image/png'],
+      ui: { label: 'Image (allowed types - MIME)', selectLabel: 'Select a PNG image' },
+    }),
+    imageMinSize: imageField({
+      minSize: '5 KB',
+      ui: { label: 'Image (min size)', description: 'Minimum size: 5 KB' },
+    }),
+    imageMaxSize: imageField({
+      maxSize: '5 KB',
+      ui: { label: 'Image (max size)', description: 'Maximum size: 5 KB' },
+    }),
+    imageMinWidth: imageField({
+      minWidth: 100,
+      ui: { label: 'Image (min width)', description: 'Minimum width: 100px' },
+    }),
+    imageMaxWidth: imageField({
+      maxWidth: 100,
+      ui: { label: 'Image (max width)', description: 'Maximum width: 100px' },
+    }),
+    imageMinHeight: imageField({
+      minHeight: 100,
+      ui: { label: 'Image (min height)', description: 'Minimum height: 100px' },
+    }),
+    imageMaxHeight: imageField({
+      maxHeight: 100,
+      ui: { label: 'Image (max height)', description: 'Maximum height: 100px' },
     }),
 
     // nullableObject
@@ -743,6 +782,20 @@ export default defineCollection({
                 'fileAllowedTypesCategory',
                 'fileMinSize',
                 'fileMaxSize',
+              ],
+            },
+            {
+              label: 'Image',
+              fields: [
+                'image',
+                'imageCasted',
+                'imageAllowedTypesMime',
+                'imageMinSize',
+                'imageMaxSize',
+                'imageMinWidth',
+                'imageMaxWidth',
+                'imageMinHeight',
+                'imageMaxHeight',
               ],
             },
             {

@@ -207,6 +207,7 @@ import {
   $pfetchDashboard,
   __,
   dashboardBasePath,
+  displayableImageTypes,
   moveUpload,
   startMoving,
   stopMoving,
@@ -306,20 +307,6 @@ const renameFieldOptions = {
 const renameDisabled = computed(
   () => !newNameNormalized.value || newNameNormalized.value === currentNameWithoutExtension.value,
 )
-const displayableImageTypes: Record<string, true> = {
-  'image/jpeg': true,
-  'image/pjpeg': true,
-  'image/png': true,
-  'image/gif': true,
-  'image/webp': true,
-  'image/svg+xml': true,
-  'image/avif': true,
-  'image/vnd.mozilla.apng': true,
-  'image/x-icon': true,
-  'image/vnd.microsoft.icon': true,
-  'image/bmp': true,
-  'image/x-windows-bmp': true,
-}
 
 async function rename() {
   if (renameDisabled.value) {
@@ -533,5 +520,17 @@ async function onDelete() {
 .p-media-item-rename-upload-popup-buttons {
   justify-content: flex-end;
   margin-top: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .p-media-item-checkbox {
+    bottom: 0.375rem;
+    left: 0.375rem;
+  }
+
+  .p-media-item-delete-button {
+    top: 0.375rem;
+    right: 0.375rem;
+  }
 }
 </style>
