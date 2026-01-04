@@ -14,6 +14,8 @@ import {
   type ConditionalLogic,
   type Field,
   type FieldModel,
+  type ForeignKey,
+  type GenericField,
 } from '@pruvious/orm'
 import { formatBytes, isNull, parseBytes, toArray, type DefaultFalse, type NonEmptyArray } from '@pruvious/utils'
 import type { PropType } from 'vue'
@@ -199,6 +201,16 @@ interface CustomOptions<
       | boolean
       | undefined
   }
+
+  /**
+   * Controls whether a foreign key constraint is automatically created when this field is used at the top level of a collection.
+   * The constraint references the `id` field in the `Uploads` collection.
+   *
+   * When set to `false`, you can define foreign key constraints manually using the `foreignKeys` option at the collection level.
+   *
+   * @default true
+   */
+  foreignKey?: boolean
 }
 
 const customOptions: CustomOptions<keyof DynamicCollectionFieldTypes['Casted' | 'Populated']['Uploads'], boolean> = {
@@ -214,6 +226,7 @@ const customOptions: CustomOptions<keyof DynamicCollectionFieldTypes['Casted' | 
   ui: {
     selectLabel: ({ __ }) => __('pruvious-dashboard', 'Select image'),
   },
+  foreignKey: true,
 }
 
 export default {
@@ -438,7 +451,17 @@ export default {
       populatedTypeFn: ({ field }) =>
         `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['Uploads'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}> | null`,
     }).serverFn.bind(this)
-    return bound(options as any) as any
+    return bound({
+      ...(options as any),
+      _foreignKey:
+        options.foreignKey !== false
+          ? ({
+              referencedCollection: 'Uploads',
+              referencedField: 'id',
+              action: ['ON UPDATE RESTRICT', 'ON DELETE SET NULL'],
+            } satisfies Omit<ForeignKey<Record<string, GenericField>>, 'field'>)
+          : undefined,
+    }) as any
   },
 
   /**

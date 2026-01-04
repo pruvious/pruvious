@@ -112,7 +112,7 @@ describe('file field', () => {
     expect(await $deleteAsAdmin(`/api/uploads/${txtFileId}`)).toEqual([
       { success: true, data: expect.any(Object), details: expect.any(Object) },
     ])
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=file`)).toEqual({ file: txtFileId })
+    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=file`)).toEqual({ file: null })
     expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=file&populate=1`)).toEqual({ file: null })
   })
 })

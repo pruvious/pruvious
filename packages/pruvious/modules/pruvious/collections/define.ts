@@ -2009,6 +2009,17 @@ export function defineCollection<
       }
     }
 
+    for (const [fieldName, field] of Object.entries(fields)) {
+      if (isObject(field.options._foreignKey)) {
+        foreignKeys.push({
+          field: fieldName,
+          referencedCollection: field.options._foreignKey.referencedCollection,
+          referencedField: field.options._foreignKey.referencedField,
+          action: field.options._foreignKey.action,
+        })
+      }
+    }
+
     if (createdAt.enabled) {
       fields.createdAt = createdAtFieldPreset(omit(createdAt, ['enabled', 'index']))
       if (createdAt.index) {

@@ -164,7 +164,7 @@ describe('image field', () => {
     expect(await $deleteAsAdmin(`/api/uploads/${pngId}`)).toEqual([
       { success: true, data: expect.any(Object), details: expect.any(Object) },
     ])
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=image`)).toEqual({ image: pngId })
+    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=image`)).toEqual({ image: null })
     expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=image&populate=1`)).toEqual({
       image: null,
     })

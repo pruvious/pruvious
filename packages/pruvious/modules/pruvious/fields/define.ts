@@ -1143,7 +1143,10 @@ export function defineField<
         }
       }
 
-      const customOptionKeys = Object.keys(defaultCustomOptions)
+      const customOptionKeys = [
+        ...Object.keys(defaultCustomOptions),
+        ...Object.keys(defaultCustomOptions).map((key) => `_${key}`),
+      ]
       const omitOptions = (fieldTypeOptions.omitOptions ?? []).filter(
         (option: any) => !customOptionKeys.includes(option),
       )
