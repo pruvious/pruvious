@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { maybeTranslate, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
 

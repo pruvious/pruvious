@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { languages, maybeTranslate, resolveFieldLabel } from '#pruvious/client'
+import { languages } from '#pruvious/app'
+import { maybeTranslate, resolveFieldLabel } from '#pruvious/dashboard'
 import type { LanguageCode, SerializableFieldOptions } from '#pruvious/server'
 import { isObject, omit } from '@pruvious/utils'
 

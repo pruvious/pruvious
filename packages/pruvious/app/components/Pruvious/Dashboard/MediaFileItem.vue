@@ -64,7 +64,8 @@
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
-import { __, dashboardBasePath, type ResolvedCollectionRecordPermissions, type UploadItem } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, type ResolvedCollectionRecordPermissions, type UploadItem } from '#pruvious/dashboard'
 import { formatBytes, omit } from '@pruvious/utils'
 import { dirname } from 'pathe'
 import { stringifyQuery } from 'ufo'

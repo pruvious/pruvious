@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { maybeTranslate } from '#pruvious/client'
+import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUIButtonGroupChoiceModel } from '@pruvious/ui/components/PUIButtonGroup.vue'
 

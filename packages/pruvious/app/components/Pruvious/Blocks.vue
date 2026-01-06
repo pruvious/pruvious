@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePruviousRoute } from '#pruvious/client'
+import { usePruviousRoute } from '#pruvious/app'
 import type { BlockName, DynamicBlockFieldTypes } from '#pruvious/server'
 import { getProperty } from '@pruvious/utils'
 

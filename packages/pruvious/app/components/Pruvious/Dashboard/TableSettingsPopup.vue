@@ -131,7 +131,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, hasPermission, History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/client'
+import { __, hasPermission } from '#pruvious/app'
+import { History, maybeTranslate, resolveFieldLabel, unsavedChanges } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField, Paginated, SelectQueryBuilderParams } from '@pruvious/orm'
 import type { PUITabListItem } from '@pruvious/ui/components/PUITabs.vue'

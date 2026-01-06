@@ -1,4 +1,4 @@
-import { addFilter, getUser } from '#pruvious/client'
+import { addFilter, getUser } from '#pruvious/app'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
 import { isEmpty } from '@pruvious/utils'
 

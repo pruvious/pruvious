@@ -770,7 +770,7 @@ export interface CollectionMetaOptions<
    * </template>
    *
    * <script lang="ts" setup>
-   * import { usePruviousRoute } from '#pruvious/client'
+   * import { usePruviousRoute } from '#pruvious/app'
    *
    * const proute = usePruviousRoute()
    * </script>
@@ -1647,7 +1647,7 @@ export type CollectionRoutingOptions<
    * </template>
    *
    * <script setup>
-   * import { usePruviousRoute } from '#pruvious/client'
+   * import { usePruviousRoute } from '#pruvious/app'
    *
    * definePageMeta({
    *   middleware: ['pruvious'],

@@ -55,7 +55,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, createUploadDirectory } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { createUploadDirectory } from '#pruvious/dashboard'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, slugify } from '@pruvious/utils'

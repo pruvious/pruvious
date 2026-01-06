@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/client'
+import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/dashboard'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
 import { deepClone, isArray, isBoolean, isDefined, isNull, isNumber, isString } from '@pruvious/utils'
 

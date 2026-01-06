@@ -28,7 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, usePruviousDashboardMediaLibraryPopup, useUpload } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, usePruviousDashboardMediaLibraryPopup, useUpload } from '#pruvious/dashboard'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { isArray, withLeadingSlash, withoutTrailingSlash } from '@pruvious/utils'
 import { useEventListener } from '@vueuse/core'

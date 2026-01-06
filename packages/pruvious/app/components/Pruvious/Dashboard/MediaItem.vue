@@ -203,9 +203,9 @@
 
 <script lang="ts" setup>
 import { NuxtLink, PruviousDashboardMediaDirectoryItem } from '#components'
+import { __ } from '#pruvious/app'
 import {
   $pfetchDashboard,
-  __,
   dashboardBasePath,
   displayableImageTypes,
   moveUpload,
@@ -215,7 +215,7 @@ import {
   type CollectionRecordPermissionsResolver,
   type DashboardMediaLibraryState,
   type UploadItem,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { DeleteUploadResult } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

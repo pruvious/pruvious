@@ -28,16 +28,16 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   selectFrom,
   useCollectionRecordPermissions,
+  useIsMoving,
   usePruviousDashboard,
-  usePruviousDashboardIsMoving,
   type DashboardMediaLibraryState,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { MediaCategory } from '#pruvious/server'
 import { deepCompare, uniqueArrayByProp } from '@pruvious/utils'
 import { useDebounceFn, useEventListener, useKeyModifier } from '@vueuse/core'
@@ -83,7 +83,7 @@ const dashboard = usePruviousDashboard()
 const collection = { name: 'Uploads' as const, definition: dashboard.value!.collections.Uploads! }
 const ready = ref(false)
 const recordsPermissions = useCollectionRecordPermissions(collection)
-const isMoving = usePruviousDashboardIsMoving()
+const isMoving = useIsMoving()
 const uploads = ref<UploadItem[]>([])
 const groupedUploads = computed<{ group: string; label?: string; uploads: UploadItem[] }[]>(() => {
   const groupBy = props.state.orderBy[0]?.field

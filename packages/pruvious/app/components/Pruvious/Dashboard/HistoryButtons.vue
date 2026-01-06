@@ -24,7 +24,7 @@
 </template>
 
 <script generic="T extends Record<string, any>" lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import type { History } from '../../../utils/pruvious/dashboard/history'
 

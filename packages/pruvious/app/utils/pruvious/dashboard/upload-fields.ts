@@ -1,4 +1,5 @@
-import { __, type UploadItem } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import type { UploadItem } from '#pruvious/dashboard'
 import { formatBytes } from '@pruvious/utils'
 
 export interface UploadFieldValidation {

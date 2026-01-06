@@ -51,7 +51,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, usePruviousDashboard } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { maybeTranslate, usePruviousDashboard } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isDefined, isString, sortNaturallyByProp, titleCase } from '@pruvious/utils'

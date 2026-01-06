@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dayjsConfig, dayjsUTC } from '#pruvious/client/dayjs'
+import { dayjsConfig, dayjsUTC } from '#pruvious/dashboard/dayjs'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isString } from '@pruvious/utils'

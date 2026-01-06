@@ -113,12 +113,12 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   usePruviousDashboardUploadNotifications,
   usePruviousDashboardUploadNotificationsWidget,
   useUploadSpeed,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import { formatBytes } from '@pruvious/utils'
 
 const button = useTemplateRef('button')

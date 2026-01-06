@@ -74,14 +74,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  hasPermission,
-  languages,
-  pruviousDashboardGet,
-  SingletonUpdateQueryBuilder,
-  useDashboardContentLanguage,
-} from '#pruvious/client'
+import { __, hasPermission, languages } from '#pruvious/app'
+import { pruviousDashboardGet, SingletonUpdateQueryBuilder, useDashboardContentLanguage } from '#pruvious/dashboard'
 import type { LanguageCode, Permission, SerializableSingleton, Singletons } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'

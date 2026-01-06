@@ -106,17 +106,16 @@
 </template>
 
 <script lang="ts" setup>
+import { __, languages } from '#pruvious/app'
 import {
-  __,
   dashboardBasePath,
-  languages,
   pruviousDashboardGet,
   pruviousDashboardPost,
   QueryBuilder,
   resolveTranslatableCollectionRecordPermissions,
   useDashboardContentLanguage,
   type ResolvedTranslatableCollectionRecordPermissions,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Collections, LanguageCode, SerializableCollection } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'

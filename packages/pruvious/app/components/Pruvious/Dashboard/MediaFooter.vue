@@ -218,14 +218,14 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
   $pfetchDashboard,
-  __,
   maybeTranslate,
   selectFrom,
   usePruviousDashboard,
   type DashboardMediaLibraryState,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { DeleteUploadResult, MoveUploadResult } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

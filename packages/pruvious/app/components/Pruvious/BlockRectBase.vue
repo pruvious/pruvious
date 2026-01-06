@@ -21,11 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  usePruviousPreviewFocusedBlocks,
-  usePruviousPreviewHighlightedBlocks,
-  usePruviousRoute,
-} from '#pruvious/client'
+import { usePruviousRoute } from '#pruvious/app'
+import { usePreviewFocusedBlocks, usePreviewHighlightedBlocks } from '#pruvious/dashboard'
 import { useElementBounding } from '@vueuse/core'
 
 const props = defineProps({
@@ -87,8 +84,8 @@ const props = defineProps({
 
 const proute = usePruviousRoute()
 const { top, left, width, height, update } = useElementBounding(() => props.el)
-const focused = usePruviousPreviewFocusedBlocks()
-const highlighted = usePruviousPreviewHighlightedBlocks()
+const focused = usePreviewFocusedBlocks()
+const highlighted = usePreviewHighlightedBlocks()
 const hasHighlightedDescendant = computed(
   () => props.focused && highlighted.value.some((h) => h.path.startsWith(`${props.path}.`)),
 )

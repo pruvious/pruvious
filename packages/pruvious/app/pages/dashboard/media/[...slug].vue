@@ -25,15 +25,15 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   dashboardBasePath,
   dashboardMiddleware,
   defineDashboardPage,
   getDefaultDashboardMediaLibraryState,
   useSelectQueryBuilderParams,
   type DashboardMediaLibraryState,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import { deepClone, isArray, withLeadingSlash, withoutTrailingSlash } from '@pruvious/utils'

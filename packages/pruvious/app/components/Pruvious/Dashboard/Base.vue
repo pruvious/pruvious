@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { pruviousDashboardPost, useDashboardContentLanguage, usePruviousHMR } from '#pruvious/client'
+import { pruviousDashboardPost, useDashboardContentLanguage, usePruviousHMR } from '#pruvious/dashboard'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import '@pruvious/ui/styles'
 import { useEventListener } from '@vueuse/core'

@@ -153,17 +153,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __, applyFilters, hasPermission, isValidLanguageCode, loadFilters, useAuth } from '#pruvious/app'
 import {
-  __,
-  applyFilters,
   dashboardBasePath,
   dashboardMiddleware,
   getCollectionBySlug,
   getOverlayTransitionDuration,
-  hasPermission,
   History,
-  isValidLanguageCode,
-  loadFilters,
   maybeTranslate,
   parseConditionalLogic,
   prepareFieldData,
@@ -172,9 +168,8 @@ import {
   QueryBuilder,
   resolveTranslatableCollectionRecordPermissions,
   unsavedChanges,
-  useAuth,
   useDashboardContentLanguage,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Permission } from '#pruvious/server'
 import type { QueryBuilderResult } from '@pruvious/orm'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'

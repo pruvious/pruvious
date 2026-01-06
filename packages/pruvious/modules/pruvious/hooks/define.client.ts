@@ -15,17 +15,17 @@
  * @example
  * ```ts
  * // app/hooks/actions/foo/before.ts
- * import { defineAction } from '#pruvious/client'
+ * import { defineAction } from '#pruvious/app'
  *
  * export default defineAction<{ time: number }>()
  *
  * // app/hooks/actions/foo/after.ts
- * import { defineAction } from '#pruvious/client'
+ * import { defineAction } from '#pruvious/app'
  *
  * export default defineAction<{ time: number }>()
  *
  * // app/actions/foo.ts
- * import { addAction } from '#pruvious/client'
+ * import { addAction } from '#pruvious/app'
  *
  * addAction('foo:before', ({ time }) => {
  *   // Do something
@@ -36,7 +36,7 @@
  * })
  *
  * // app/utils/foo.ts
- * import { doActions, loadActions } from '#pruvious/client'
+ * import { doActions, loadActions } from '#pruvious/app'
  *
  * await loadActions('foo:before', 'foo:after')
  *
@@ -69,19 +69,19 @@ export function defineAction<Context extends Record<string, any> = {}>(): { TCon
  * @example
  * ```ts
  * // app/hooks/filters/foo/returnable.ts
- * import { defineFilter } from '#pruvious/client'
+ * import { defineFilter } from '#pruvious/app'
  *
  * export default defineFilter<string>()
  *
  * // app/filters/foo.ts
- * import { addFilter } from '#pruvious/client'
+ * import { addFilter } from '#pruvious/app'
  *
  * addFilter('foo:returnable', (value) => {
  *   return value + ', world!'
  * })
  *
  * // app/utils/foo.ts
- * import { applyFilters, loadFilters } from '#pruvious/client'
+ * import { applyFilters, loadFilters } from '#pruvious/app'
  *
  * await loadFilters('foo:returnable')
  *

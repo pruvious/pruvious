@@ -8,9 +8,9 @@ import {
   removeAuthToken,
   storeAuthToken,
   useAuth,
-  usePruviousLoginPopup,
   type PruviousFetchResponse,
-} from '#pruvious/client'
+} from '#pruvious/app'
+import { useLoginPopup } from '#pruvious/dashboard'
 import { isNumber, isString } from '@pruvious/utils'
 import { useEventListener, useTimeoutFn, type Stoppable } from '@vueuse/core'
 
@@ -47,7 +47,7 @@ const props = defineProps({
 })
 
 const auth = useAuth()
-const loginPopup = usePruviousLoginPopup()
+const loginPopup = useLoginPopup()
 
 let timeout: Stoppable<[]> | undefined
 

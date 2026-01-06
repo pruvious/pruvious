@@ -156,7 +156,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, filterOperatorsMap, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { filterOperatorsMap, type WhereField } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { WhereField as _WhereField } from '@pruvious/orm'
 import { deepClone, invertMap, isArray, isEmpty, isString, nanoid, omit, walkObjects } from '@pruvious/utils'

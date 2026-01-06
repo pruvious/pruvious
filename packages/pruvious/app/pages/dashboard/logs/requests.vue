@@ -227,8 +227,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, dashboardMiddleware, hasPermission, usePruviousDashboard } from '#pruvious/client'
-import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
+import { __, hasPermission } from '#pruvious/app'
+import { dashboardBasePath, dashboardMiddleware, usePruviousDashboard } from '#pruvious/dashboard'
+import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/dashboard/dayjs'
 import type { GenericSerializableFieldOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import { pick } from '@pruvious/utils'
 import { beautifyCode, beautifyQuery, beautifyQueryString } from '../../../utils/pruvious/dashboard/beautify'

@@ -55,13 +55,13 @@
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
+import { useLanguage } from '#pruvious/app'
 import {
   dashboardBasePath,
   resolveUploadPath,
-  useLanguage,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import { formatBytes, omit } from '@pruvious/utils'
 import { dirname, extname } from 'pathe'
 import { stringifyQuery } from 'ufo'

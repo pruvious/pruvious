@@ -82,15 +82,14 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission } from '#pruvious/app'
 import {
-  __,
   displayableImageTypes,
-  hasPermission,
   selectFrom,
   useCollectionRecordPermissions,
   usePruviousDashboard,
   type UploadItem,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isObject, isString, isUndefined } from '@pruvious/utils'

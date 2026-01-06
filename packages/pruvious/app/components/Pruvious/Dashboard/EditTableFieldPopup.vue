@@ -61,8 +61,8 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   getTopLevelFieldDependencies,
   History,
   maybeTranslate,
@@ -72,7 +72,7 @@ import {
   QueryBuilder,
   resolveFieldLabel,
   unsavedChanges,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type {
   Collections,
   FieldsLayout,

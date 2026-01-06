@@ -1,4 +1,4 @@
-import { dashboardBasePath, useAuth } from '#pruvious/client'
+import { dashboardBasePath, useAuth } from '#pruvious/app'
 import type { RouteLocationNormalized } from 'vue-router'
 /**
  * Pruvious client middleware that guards against non-logged-in users and users without the `access-dashboard` permission.

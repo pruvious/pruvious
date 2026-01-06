@@ -18,7 +18,7 @@ export interface ResolveCustomComponentsInFileOptions extends Omit<ResolveCustom
   srcDirs: string[]
 
   /**
-   * Whether to write to the `#pruvious/client/custom-components.ts` file.
+   * Whether to write to the `#pruvious/dashboard/custom-components.ts` file.
    *
    * @default true
    */
@@ -45,7 +45,7 @@ const nameMap: Record<string, string[]> = {}
  * - `<serverDir>/<pruvious.dir.templates>`
  * - `<sharedDir>`
  *
- * The `write` parameter can be used to disable writing to the `#pruvious/client/custom-components.ts` file.
+ * The `write` parameter can be used to disable writing to the `#pruvious/dashboard/custom-components.ts` file.
  * By default, it is set to `true`.
  */
 export function resolveCustomComponents(write = true): Record<string, string> {
@@ -145,7 +145,7 @@ export function resolveCustomComponents(write = true): Record<string, string> {
 
 /**
  * Finds all `resolvePruviousComponent()` calls in a `file` and adds them to the `components` array.
- * The `write` option can be used to disable writing to the `#pruvious/client/custom-components.ts` file (default: `true`).
+ * The `write` option can be used to disable writing to the `#pruvious/dashboard/custom-components.ts` file (default: `true`).
  */
 export function resolveCustomComponentsInFile(options: ResolveCustomComponentsInFileOptions) {
   const { file, srcDir, srcDirs } = options
@@ -343,7 +343,7 @@ export function resolveCustomComponentsInFile(options: ResolveCustomComponentsIn
 function writeToFile() {
   const nuxt = useNuxt()
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
-  const file = `${buildDir}/client/custom-components.ts`
+  const file = `${buildDir}/dashboard/custom-components.ts`
   const content = [
     `import { type Component, defineAsyncComponent } from 'vue'`,
     ``,

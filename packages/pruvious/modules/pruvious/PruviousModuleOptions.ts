@@ -1449,6 +1449,15 @@ declare module 'nuxt/schema' {
       apiBasePath: string
 
       /**
+       * The base path for the dashboard routes.
+       * This defines the URL prefix where the dashboard will be accessible.
+       * By default, the dashboard is accessible under `/dashboard/`.
+       *
+       * This setting is derived from the Nuxt config `pruvious.dashboard.basePath`.
+       */
+      dashboardBasePath: string
+
+      /**
        * List of supported languages in the CMS.
        * Each language is represented by its ISO code (e.g., 'en', 'de', 'fr').
        */

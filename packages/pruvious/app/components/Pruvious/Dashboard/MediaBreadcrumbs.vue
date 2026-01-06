@@ -77,14 +77,14 @@
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
+import { __ } from '#pruvious/app'
 import {
   $pfetchDashboard,
-  __,
   dashboardBasePath,
   selectFrom,
-  usePruviousDashboardIsMoving,
+  useIsMoving,
   type DashboardMediaLibraryState,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { MoveUploadResult } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { puiToast } from '@pruvious/ui/pui/toast'
@@ -103,7 +103,7 @@ const props = defineProps({
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
-const isMoving = usePruviousDashboardIsMoving()
+const isMoving = useIsMoving()
 const highlighted = ref<string | null>(null)
 const breadcrumbs = computed(() =>
   props.state.currentDirectory === '/' ? [] : props.state.currentDirectory.split('/').filter(Boolean),

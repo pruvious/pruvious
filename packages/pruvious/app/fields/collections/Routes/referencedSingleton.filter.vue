@@ -9,14 +9,14 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   filterFieldComponents,
   getRouteReferences,
   maybeTranslate,
   usePruviousDashboard,
   type WhereField,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
 import { isDefined, titleCase } from '@pruvious/utils'

@@ -270,22 +270,19 @@
 
 <script lang="ts" setup>
 import type { PruviousDashboardBlocksTree } from '#components'
+import { __, languages, primaryLanguage, useLanguage } from '#pruvious/app'
 import {
-  __,
   getRouteReferences,
   History,
-  languages,
   maybeTranslate,
   parseFields,
-  primaryLanguage,
   pruviousDashboardPost,
   resolveFieldLabel,
   serializeTranslatableStringCallbacks,
-  useLanguage,
+  useDashboardLayout,
   usePruviousClipboardData,
   usePruviousDashboard,
-  usePruviousDashboardLayout,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type {
   Collections,
   Fields,
@@ -437,7 +434,7 @@ provide('isLivePreview', true)
 const runtimeConfig = useRuntimeConfig()
 const dashboard = usePruviousDashboard()
 const dashboardSerialized = usePruviousDashboardSerialized()
-const dashboardLayout = usePruviousDashboardLayout()
+const dashboardLayout = useDashboardLayout()
 const layoutRef = useTemplateRef<any>('layoutRef')
 const iframe = useTemplateRef('iframe')
 const blocksTree = useTemplateRef<InstanceType<typeof PruviousDashboardBlocksTree>[]>('blocksTree')

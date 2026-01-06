@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage, usePruviousDashboard } from '#pruvious/client'
+import { primaryLanguage } from '#pruvious/app'
+import { usePruviousDashboard } from '#pruvious/dashboard'
 import type { Collections, SerializableFieldOptions, Singletons } from '#pruvious/server'
 
 const props = defineProps({

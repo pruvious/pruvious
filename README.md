@@ -85,8 +85,9 @@ export default defineSingleton({
 
 #### Import Paths
 
+- Use `#pruvious/app` imports for client-side code used in your application.
+- Use `#pruvious/dashboard` imports for client-side code used in the dashboard.
 - Use `#pruvious/server` imports for server-side code.
-- Use `#pruvious/client` imports for client-side code.
 
 You can find detailed documentation for each export in their code comments.
 

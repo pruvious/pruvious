@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { fieldComponents, languages } from '#pruvious/client'
+import { languages } from '#pruvious/app'
+import { fieldComponents } from '#pruvious/dashboard'
 import type { LanguageCode, SerializableFieldOptions } from '#pruvious/server'
 
 defineProps({

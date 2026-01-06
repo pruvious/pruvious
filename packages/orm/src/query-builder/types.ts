@@ -486,8 +486,9 @@ export interface InsertQueryBuilderParamsOptions<TColumnNames extends string = s
   populate?: boolean
 }
 
-export interface SelectQueryBuilderParams<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParams<TColumnNames> {
+export interface SelectQueryBuilderParams<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParams<TColumnNames> {
   /**
    * Fields to retrieve.
    */
@@ -577,8 +578,9 @@ export interface SelectQueryBuilderParams<TColumnNames extends string = string>
   populate?: boolean
 }
 
-export interface SelectQueryBuilderParamsOptions<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
+export interface SelectQueryBuilderParamsOptions<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
   /**
    * Controls how to handle the `select` parameter.
    *
@@ -669,8 +671,9 @@ export interface SelectQueryBuilderParamsOptions<TColumnNames extends string = s
   populate?: boolean
 }
 
-export interface UpdateQueryBuilderParams<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParams<TColumnNames> {
+export interface UpdateQueryBuilderParams<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParams<TColumnNames> {
   /**
    * Fields to return after the UPDATE operation.
    */
@@ -683,8 +686,9 @@ export interface UpdateQueryBuilderParams<TColumnNames extends string = string>
   populate?: boolean
 }
 
-export interface UpdateQueryBuilderParamsOptions<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
+export interface UpdateQueryBuilderParamsOptions<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
   /**
    * Controls how to handle the `returning` parameter.
    *
@@ -704,8 +708,9 @@ export interface UpdateQueryBuilderParamsOptions<TColumnNames extends string = s
   populate?: boolean
 }
 
-export interface DeleteQueryBuilderParams<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParams<TColumnNames> {
+export interface DeleteQueryBuilderParams<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParams<TColumnNames> {
   /**
    * Fields to return after the DELETE operation.
    */
@@ -718,8 +723,9 @@ export interface DeleteQueryBuilderParams<TColumnNames extends string = string>
   populate?: boolean
 }
 
-export interface DeleteQueryBuilderParamsOptions<TColumnNames extends string = string>
-  extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
+export interface DeleteQueryBuilderParamsOptions<
+  TColumnNames extends string = string,
+> extends ConditionalQueryBuilderParamsOptions<TColumnNames> {
   /**
    * Controls how to handle the `returning` parameter.
    *

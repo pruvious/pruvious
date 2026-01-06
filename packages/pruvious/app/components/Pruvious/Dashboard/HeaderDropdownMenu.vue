@@ -27,15 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  applyFilters,
-  dashboardBasePath,
-  hasPermission,
-  loadFilters,
-  prepareDashboardMenu,
-  type DashboardMenuItem,
-} from '#pruvious/client'
+import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
+import { dashboardBasePath, prepareDashboardMenu, type DashboardMenuItem } from '#pruvious/dashboard'
 import type { PUIColorMode } from '@pruvious/ui/components/PUIColorMode.vue'
 import { computedAsync } from '@vueuse/core'
 

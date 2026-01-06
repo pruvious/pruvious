@@ -1,4 +1,4 @@
-import { extractLanguageCode, preloadTranslatableStringsForPath, useLanguage } from '#pruvious/client'
+import { extractLanguageCode, preloadTranslatableStringsForPath, useLanguage } from '#pruvious/app'
 
 /**
  * Pruvious client middleware responsible for resolving the current language and preloading translations.

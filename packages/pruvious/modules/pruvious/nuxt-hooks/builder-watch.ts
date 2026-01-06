@@ -6,7 +6,8 @@ import type { NuxtConfigLayer, WatchEvent } from 'nuxt/schema'
 import { join, relative } from 'pathe'
 import { resetServerHandlersResolver } from '../api/resolver'
 import { resetBlocksResolver, resolveBlockDefinition, resolveBlockFiles } from '../blocks/resolver'
-import { generateClientFiles } from '../build/client'
+import { generateAppFiles } from '../build/app'
+import { generateDashboardFiles } from '../build/dashboard'
 import { generateServerFiles } from '../build/server'
 import { resetCollectionsResolver } from '../collections/resolver'
 import { resolveCustomComponentsInFile } from '../components/resolver'
@@ -136,7 +137,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetCollectionsResolver()
       resetBlocksResolver()
       resetSingletonsResolver()
-      generateClientFiles()
+      generateAppFiles()
       generateServerFiles()
       resolveBlockFiles()
       reloadOnNitroCompiled(event, path)
@@ -163,7 +164,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetCollectionsResolver()
       resetSingletonsResolver()
       resetBlocksResolver()
-      generateClientFiles()
+      generateDashboardFiles()
       generateServerFiles()
       resolveBlockFiles()
     }
@@ -180,7 +181,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetCollectionsResolver()
       resetSingletonsResolver()
       resetBlocksResolver()
-      generateClientFiles()
+      generateDashboardFiles()
       generateServerFiles()
       resolveBlockFiles()
       reloadOnNitroCompiled(event, path)
@@ -218,7 +219,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetTranslationsResolver()
-      generateClientFiles()
+      generateDashboardFiles()
       generateServerFiles()
     }
 
@@ -239,7 +240,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
 
   if (type === 'client-hook' || type === 'client-action' || type === 'client-filter') {
     clearCachedClientHooks()
-    generateClientFiles()
+    generateAppFiles()
     return
   }
 

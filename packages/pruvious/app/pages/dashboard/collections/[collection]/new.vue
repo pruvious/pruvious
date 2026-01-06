@@ -97,16 +97,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __, applyFilters, getUser, loadFilters } from '#pruvious/app'
 import {
-  __,
-  applyFilters,
   dashboardBasePath,
   dashboardMiddleware,
   fillFieldData,
   getCollectionBySlug,
-  getUser,
   History,
-  loadFilters,
   maybeTranslate,
   parseConditionalLogic,
   prepareFieldData,
@@ -114,7 +111,7 @@ import {
   QueryBuilder,
   selectFrom,
   useDashboardContentLanguage,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { LanguageCode, Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

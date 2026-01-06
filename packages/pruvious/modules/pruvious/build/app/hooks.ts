@@ -1,0 +1,168 @@
+import { camelCase } from '@pruvious/utils'
+import { useNuxt } from 'nuxt/kit'
+import { relative } from 'pathe'
+import { debug } from '../../debug/console'
+import {
+  resolveActionCallbackFiles,
+  resolveActionDefinitionFiles,
+  resolveFilterCallbackFiles,
+  resolveFilterDefinitionFiles,
+} from '../../hooks/resolver'
+
+/**
+ * Generates the `#pruvious/app/hooks.ts` file content.
+ */
+export function getAppHooksFileContent() {
+  const nuxt = useNuxt()
+  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
+
+  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/hooks.ts>`)
+
+  const actionDefinitionFiles = resolveActionDefinitionFiles()
+  const clientActionDefinitionEntries = Object.entries(actionDefinitionFiles.client)
+  const actionCallbackFiles = resolveActionCallbackFiles()
+  const clientActionCallbackEntries = Object.entries(actionCallbackFiles.client)
+  const filterDefinitionFiles = resolveFilterDefinitionFiles()
+  const clientFilterDefinitionEntries = Object.entries(filterDefinitionFiles.client)
+  const filterCallbackFiles = resolveFilterCallbackFiles()
+  const clientFilterCallbackEntries = Object.entries(filterCallbackFiles.client)
+
+  return [
+    ...clientActionDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
+    ),
+    ...clientFilterDefinitionEntries.map(
+      ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Filter from '${file.import}'`,
+    ),
+    ``,
+    `/**`,
+    ` * Type representing all defined client-side action hooks.`,
+    ` * The keys are the action names, and the values are the \`Action\` definition objects.`,
+    ` */`,
+    `export type Actions = {`,
+    ...clientActionDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Action,`,
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Type representing all defined client-side filter hooks.`,
+    ` * The keys are the filter names, and the values are the \`Filter\` definition objects.`,
+    ` */`,
+    `export type Filters = {`,
+    ...clientFilterDefinitionEntries.map(
+      ([name]) => `  '${name}': typeof _${name.split(':').map(camelCase).join('_')}Filter,`,
+    ),
+    `}`,
+    ``,
+    `/**`,
+    ` * Stores all loaded client-side actions in a key-value structure.`,
+    ` * The keys represent action names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The action function to be executed.`,
+    ` * - \`priority\` - The priority of the action.`,
+    ` */`,
+    `export const actions: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Stores all loaded client-side filters in a key-value structure.`,
+    ` * The keys represent filter names, and their values are arrays of objects containing the following properties:`,
+    ` *`,
+    ` * - \`callback\` - The filter function to be executed.`,
+    ` * - \`priority\` - The priority of the filter.`,
+    ` */`,
+    `export const filters: Record<string, { callback: Function, priority: number }[]> = {}`,
+    ``,
+    `/**`,
+    ` * Loads specific client-side actions by their action \`name\`.`,
+    ` *`,
+    ` * Actions are functions that allow you to hook into specific points in the application flow.`,
+    ` * They provide a way to execute custom code without changing the original implementation.`,
+    ` *`,
+    ` * @example`,
+    ` * \`\`\`ts`,
+    ` * // app/hooks/actions/foo/before.ts`,
+    ` * import { defineAction } from '#pruvious/app'`,
+    ` *`,
+    ` * export default defineAction<{ time: number }>()`,
+    ` *`,
+    ` * // app/hooks/actions/foo/after.ts`,
+    ` * import { defineAction } from '#pruvious/app'`,
+    ` *`,
+    ` * export default defineAction<{ time: number }>()`,
+    ` *`,
+    ` * // app/actions/foo.ts`,
+    ` * import { addAction } from '#pruvious/app'`,
+    ` *`,
+    ` * addAction('foo:before', ({ time }) => {`,
+    ` *   // Do something`,
+    ` * })`,
+    ` *`,
+    ` * addAction('foo:after', ({ time }) => {`,
+    ` *   // Do something`,
+    ` * })`,
+    ` *`,
+    ` * // app/utils/foo.ts`,
+    ` * import { doActions, loadActions } from '#pruvious/app'`,
+    ` *`,
+    ` * await loadActions('foo:before', 'foo:after')`,
+    ` *`,
+    ` * export async function foo() {`,
+    ` *   await doActions('foo:before', { time: performance.now() })`,
+    ` *   // Do something`,
+    ` *   await doActions('foo:after', { time: performance.now() })`,
+    ` * }`,
+    ` * \`\`\``,
+    ` */`,
+    `export async function loadActions<TName extends keyof Actions>(name: TName, ...additional: TName[]) {`,
+    `  for (const action of [name, ...additional]) {`,
+    ...clientActionCallbackEntries.flatMap(([name, locations]) => [
+      `    if (action === '${name}' && !actions[action]) {`,
+      ...locations.map(({ file }) => `      await import('${file.import}')`),
+      `    }`,
+    ]),
+    `  }`,
+    `}`,
+    ``,
+    `/**`,
+    ` * Loads specific client-side filters by their filter \`name\`.`,
+    ` *`,
+    ` * Filters are functions that allow modification of data at specific points in the application flow.`,
+    ` * They provide a way to transform data without changing the original implementation.`,
+    ` *`,
+    ` * @example`,
+    ` * // app/hooks/filters/foo/returnable.ts`,
+    ` * import { defineFilter } from '#pruvious/app'`,
+    ` *`,
+    ` * export default defineFilter<string>()`,
+    ` *`,
+    ` * // app/filters/foo.ts`,
+    ` * import { addFilter } from '#pruvious/app'`,
+    ` *`,
+    ` * addFilter('foo:returnable', (value) => {`,
+    ` *   return value + ', world!'`,
+    ` * })`,
+    ` *`,
+    ` * // app/utils/foo.ts`,
+    ` * import { applyFilters, loadFilters } from '#pruvious/app'`,
+    ` *`,
+    ` * await loadFilters('foo:returnable')`,
+    ` *`,
+    ` * export async function foo() {`,
+    ` *   const returnable = 'Hello'`,
+    ` *   return applyFilters('foo:returnable', returnable, {})`,
+    ` * }`,
+    ` * \`\`\``,
+    ` */`,
+    `export async function loadFilters<TName extends keyof Filters>(name: TName, ...additional: TName[]) {`,
+    `  for (const filter of [name, ...additional]) {`,
+    ...clientFilterCallbackEntries.flatMap(([name, locations]) => [
+      `    if (filter === '${name}' && !filters[filter]) {`,
+      ...locations.map(({ file }) => `      await import('${file.import}')`),
+      `    }`,
+    ]),
+    `  }`,
+    `}`,
+    ``,
+  ].join('\n')
+}

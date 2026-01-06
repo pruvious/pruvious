@@ -151,7 +151,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { PUIColumns } from '@pruvious/ui/pui/table'
 import { isNull, isNumber, isUndefined } from '@pruvious/utils'

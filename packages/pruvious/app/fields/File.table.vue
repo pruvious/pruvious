@@ -62,14 +62,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  hasPermission,
-  selectFrom,
-  useCollectionRecordPermissions,
-  usePruviousDashboard,
-  type UploadItem,
-} from '#pruvious/client'
+import { __, hasPermission } from '#pruvious/app'
+import { selectFrom, useCollectionRecordPermissions, usePruviousDashboard, type UploadItem } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isString } from '@pruvious/utils'

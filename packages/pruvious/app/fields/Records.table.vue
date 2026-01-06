@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, batchSelectIn, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { batchSelectIn, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUIDynamicChipsChoiceModel } from '@pruvious/ui/components/PUIDynamicChips.vue'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'

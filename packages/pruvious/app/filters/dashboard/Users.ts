@@ -1,4 +1,4 @@
-import { addFilter } from '#pruvious/client'
+import { addFilter } from '#pruvious/app'
 
 /**
  * Adds a button in the edit collection page that triggers a logout action across all active user sessions.

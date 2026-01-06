@@ -1,12 +1,5 @@
-import type {
-  __,
-  getCollectionBySlug,
-  getSingletonBySlug,
-  hasPermission,
-  isValidLanguageCode,
-  usePruvious,
-  usePruviousDashboard,
-} from '#pruvious/client'
+import type { __, hasPermission, isValidLanguageCode } from '#pruvious/app'
+import { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } from '#pruvious/dashboard'
 import type { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isString, type slugify } from '@pruvious/utils'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
@@ -34,7 +27,7 @@ export interface DashboardMiddlewareContext {
    * </template>
    *
    * <script lang="ts" setup>
-   * import { __, preloadTranslatableStrings } from '#pruvious/client'
+   * import { __, preloadTranslatableStrings } from '#pruvious/app'
    *
    * // You can also preload custom translatable string domains in your Nuxt config:
    * // `pruvious.i18n.preloadTranslatableStrings`
@@ -129,7 +122,7 @@ export interface DashboardMiddlewareContext {
  *
  * @example
  * ```ts
- * import { dashboardBasePath, dashboardMiddleware } from '#pruvious/client'
+ * import { dashboardBasePath, dashboardMiddleware } from '#pruvious/dashboard'
  *
  * definePageMeta({
  *   path: dashboardBasePath + 'custom-dashboard-page',
@@ -147,27 +140,21 @@ export async function dashboardMiddleware(
 ): Promise<any> {
   if (isString(middleware)) {
     if (middleware === 'default') {
-      const { dashboardDefaultMiddleware } = await import('#pruvious/client')
+      const { dashboardDefaultMiddleware } = await import('#pruvious/dashboard')
       return dashboardDefaultMiddleware()
     } else if (middleware === 'auth-guard') {
-      const { dashboardAuthGuard } = await import('#pruvious/client')
+      const { dashboardAuthGuard } = await import('#pruvious/dashboard')
       return dashboardAuthGuard(to)
     } else if (middleware === 'guest-guard') {
-      const { dashboardGuestGuard } = await import('#pruvious/client')
+      const { dashboardGuestGuard } = await import('#pruvious/dashboard')
       return dashboardGuestGuard()
     } else {
       throw new Error(`Invalid dashboard middleware option: ${middleware}`)
     }
   } else {
-    const {
-      __,
-      getCollectionBySlug,
-      getSingletonBySlug,
-      isValidLanguageCode,
-      hasPermission,
-      usePruvious,
-      usePruviousDashboard,
-    } = await import('#pruvious/client')
+    const { __, hasPermission, isValidLanguageCode } = await import('#pruvious/app')
+    const { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } =
+      await import('#pruvious/dashboard')
     const { puiQueueToast } = await import('@pruvious/ui/pui/toast')
     const { slugify } = await import('@pruvious/utils')
 

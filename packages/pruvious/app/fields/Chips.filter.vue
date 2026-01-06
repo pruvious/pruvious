@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { maybeTranslate, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUIChipsChoiceModel } from '@pruvious/ui/components/PUIChips.vue'
 import { isArray, isString } from '@pruvious/utils'

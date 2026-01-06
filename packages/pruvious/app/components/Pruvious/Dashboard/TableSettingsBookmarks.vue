@@ -327,15 +327,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  hasPermission,
-  pruviousDashboardPatch,
-  pruviousDashboardPost,
-  QueryBuilder,
-  refreshAuthState,
-  useAuth,
-} from '#pruvious/client'
+import { __, hasPermission, refreshAuthState, useAuth } from '#pruvious/app'
+import { pruviousDashboardPatch, pruviousDashboardPost, QueryBuilder } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { sortNaturallyByProp } from '@pruvious/utils'

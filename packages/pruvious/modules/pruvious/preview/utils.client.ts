@@ -8,69 +8,66 @@ import { puiIsEditingText, puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { isDefined, last } from '@pruvious/utils'
 import { useEventListener } from '@vueuse/core'
 import { usePruviousRoute } from '../routes/composable'
-import { usePruviousPreviewKey } from './composable'
+import { usePreviewKey } from './composable'
 
 /**
  * Composable that stores the field paths of the current route data with their corresponding field options.
  */
-export const usePruviousPreviewParsedFields = () =>
+export const usePreviewParsedFields = () =>
   useState<Record<string, GenericSerializableFieldOptions>>('pruvious-preview-parsed-fields', () => ({}))
 
 /**
  * Composable that stores the field paths of the currently highlighted blocks in the preview iframe.
  * The array is ordered from parent to child (ancestors first, descendants later).
  */
-export const usePruviousPreviewHighlightedBlocks = () =>
+export const usePreviewHighlightedBlocks = () =>
   useState<{ path: string; block: BlockName; el: HTMLElement }[]>('pruvious-preview-highlighted-blocks', () => [])
 
 /**
  * Composable that stores the field paths of the currently focused blocks in the preview iframe.
  * The array is ordered from parent to child (ancestors first, descendants later).
  */
-export const usePruviousPreviewFocusedBlocks = () =>
+export const usePreviewFocusedBlocks = () =>
   useState<{ path: string; block: BlockName; el: HTMLElement }[]>('pruvious-preview-focused-blocks', () => [])
 
 /**
  * Composable that stores serialized field definitions of the current collection or singleton.
  */
-export const usePruviousPreviewFields = () =>
+export const usePreviewFields = () =>
   useState<Record<string, GenericSerializableFieldOptions>>('pruvious-preview-fields', () => ({}))
 
 /**
  * Composable that stores serialized block definitions.
  */
-export const usePruviousPreviewBlocks = () =>
-  useState<Record<string, SerializableBlock>>('pruvious-preview-blocks', () => ({}))
+export const usePreviewBlocks = () => useState<Record<string, SerializableBlock>>('pruvious-preview-blocks', () => ({}))
 
 /**
  * Composable that stores labels for blocks in the preview.
  * The keys are block names, and the values are the labels.
  */
-export const usePruviousPreviewBlockLabels = () =>
-  useState<Record<string, string>>('pruvious-preview-block-labels', () => ({}))
+export const usePreviewBlockLabels = () => useState<Record<string, string>>('pruvious-preview-block-labels', () => ({}))
 
 /**
  * Composable that stores route references.
  */
-export const usePruviousPreviewRouteReferences = () =>
+export const usePreviewRouteReferences = () =>
   useState<Record<string, Omit<GenericRouteReference, 'publicFields'>>>('pruvious-preview-route-references', () => ({}))
 
 /**
  * Composable that stores the editable state of the current collection or singleton fields.
  */
-export const usePruviousPreviewIsEditable = () => useState<boolean>('pruvious-preview-editable', () => false)
+export const usePreviewIsEditable = () => useState<boolean>('pruvious-preview-editable', () => false)
 
 /**
  * Composable that stores the field path of the editable field that should be focused next within the next 500 milliseconds.
  */
-export const usePruviousPreviewFocusNext = () =>
+export const usePreviewFocusNext = () =>
   useState<{ path: string; timestamp: number } | null>('pruvious-preview-focus-next', () => null)
 
 /**
  * Composable that stores the current dashboard language code.
  */
-export const usePruviousPreviewDashboardLanguage = () =>
-  useState<string>('pruvious-preview-dashboard-language', () => 'en')
+export const usePreviewDashboardLanguage = () => useState<string>('pruvious-preview-dashboard-language', () => 'en')
 
 /**
  * Sets up the Pruvious preview environment to enable communication between the preview iframe (current window) and the dashboard (parent window).
@@ -94,29 +91,29 @@ export function initializePreview() {
 function onMessage(event: MessageEvent) {
   if (event.origin === window.location.origin) {
     if (event.data.name === 'dashboard:route') {
-      const previewKey = usePruviousPreviewKey()
+      const previewKey = usePreviewKey()
       if (isDefined(previewKey) && previewKey.value === event.data.key) {
-        usePruviousPreviewParsedFields().value = event.data.parsedFields
+        usePreviewParsedFields().value = event.data.parsedFields
         usePruviousRoute().value = event.data.route
       }
     } else if (event.data.name === 'dashboard:setup') {
-      usePruviousPreviewFields().value = event.data.fields
-      usePruviousPreviewBlocks().value = event.data.blocks
-      usePruviousPreviewBlockLabels().value = event.data.blockLabels
-      usePruviousPreviewRouteReferences().value = event.data.routeReferences
-      usePruviousPreviewIsEditable().value = event.data.editable
-      usePruviousPreviewDashboardLanguage().value = event.data.dashboardLanguage
+      usePreviewFields().value = event.data.fields
+      usePreviewBlocks().value = event.data.blocks
+      usePreviewBlockLabels().value = event.data.blockLabels
+      usePreviewRouteReferences().value = event.data.routeReferences
+      usePreviewIsEditable().value = event.data.editable
+      usePreviewDashboardLanguage().value = event.data.dashboardLanguage
     } else if (event.data.name === 'dashboard:reload') {
       window.location.reload()
     } else if (event.data.name === 'dashboard:highlightBlock') {
       const el = document.querySelector(`[data-field="${event.data.block}"]`)
       if (el instanceof HTMLElement && el.dataset.block) {
-        usePruviousPreviewHighlightedBlocks().value = getBlocksHierarchy({ target: el } as any)
+        usePreviewHighlightedBlocks().value = getBlocksHierarchy({ target: el } as any)
       }
     } else if (event.data.name === 'dashboard:unhighlightBlock') {
-      usePruviousPreviewHighlightedBlocks().value = []
+      usePreviewHighlightedBlocks().value = []
     } else if (event.data.name === 'dashboard:focusBlocks') {
-      usePruviousPreviewFocusedBlocks().value = event.data.blocks.flatMap((path: string, i: number) => {
+      usePreviewFocusedBlocks().value = event.data.blocks.flatMap((path: string, i: number) => {
         const el = document.querySelector(`[data-field="${path}"]`)
         if (el instanceof HTMLElement && el.dataset.block) {
           if (i === 0) {
@@ -127,7 +124,7 @@ function onMessage(event: MessageEvent) {
         return []
       })
     } else if (event.data.name === 'dashboard:unfocusBlocks') {
-      usePruviousPreviewFocusedBlocks().value = []
+      usePreviewFocusedBlocks().value = []
     }
   }
 }
@@ -139,7 +136,7 @@ function onKeyDown(event: KeyboardEvent) {
 
   const letter = event.key?.toLowerCase() ?? ''
   const mac = puiIsMac()
-  const nearestBlock = last(usePruviousPreviewFocusedBlocks().value)
+  const nearestBlock = last(usePreviewFocusedBlocks().value)
 
   if (
     ((event.key === 'Delete' || event.key === 'Backspace') &&
@@ -231,13 +228,13 @@ function onFocusIn(event: FocusEvent) {
 }
 
 function onBlur() {
-  usePruviousPreviewHighlightedBlocks().value = []
+  usePreviewHighlightedBlocks().value = []
 }
 
 function updateFocusedPreviewFields(event: Event) {
   if (event.target instanceof HTMLElement && !event.target.closest('.p-preview-rect')) {
     const blocks = getBlocksHierarchy(event)
-    usePruviousPreviewFocusedBlocks().value = blocks
+    usePreviewFocusedBlocks().value = blocks
     if (blocks.length) {
       window.parent.postMessage({ name: 'iframe:selectBlock', path: last(blocks)!.path }, window.location.origin)
     } else {
@@ -248,7 +245,7 @@ function updateFocusedPreviewFields(event: Event) {
 
 function updateHighlightedBlocks(event: MouseEvent) {
   if (event.target instanceof HTMLElement && !event.target.closest('.p-preview-rect')) {
-    usePruviousPreviewHighlightedBlocks().value = getBlocksHierarchy(event)
+    usePreviewHighlightedBlocks().value = getBlocksHierarchy(event)
   }
 }
 

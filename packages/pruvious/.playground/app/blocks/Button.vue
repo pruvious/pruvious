@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineBlock, textField } from '#pruvious/client'
+import { defineBlock, textField } from '#pruvious/app'
 
 defineBlock({
   ui: {

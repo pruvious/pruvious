@@ -453,14 +453,14 @@
 
 <script lang="ts" setup>
 import { PruviousDashboardBlockPickerPopup } from '#components'
+import { __ } from '#pruvious/app'
 import {
-  __,
   maybeTranslate,
   parseConditionalLogic,
   usePruviousClipboard,
   usePruviousClipboardData,
   usePruviousDashboard,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type {
   BlockGroupName,
   BlockName,

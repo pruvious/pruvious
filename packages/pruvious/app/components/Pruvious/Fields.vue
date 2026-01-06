@@ -169,7 +169,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, customComponents, maybeTranslate } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { customComponents, maybeTranslate } from '#pruvious/dashboard'
 import type {
   Collections,
   FieldsLayout,

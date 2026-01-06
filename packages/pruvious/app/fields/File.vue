@@ -122,10 +122,9 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission } from '#pruvious/app'
 import {
-  __,
   dashboardBasePath,
-  hasPermission,
   maybeTranslate,
   mediaCategories,
   resolveFieldLabel,
@@ -134,7 +133,7 @@ import {
   useCollectionRecordPermissions,
   usePruviousDashboard,
   type UploadItem,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { MediaCategory, SerializableFieldOptions } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isDefined, parseBytes, toArray } from '@pruvious/utils'

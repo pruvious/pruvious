@@ -246,8 +246,8 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   customComponents,
   dashboardBasePath,
   maybeTranslate,
@@ -259,7 +259,7 @@ import {
   usePruviousDashboard,
   useSelectQueryBuilderParams,
   type ResolvedTranslatableCollectionRecordPermissions,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Collections, CollectionUIOptions } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
 import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

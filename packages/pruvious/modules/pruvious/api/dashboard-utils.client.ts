@@ -2,7 +2,7 @@ import type { StandardRoutes } from '#pruvious/server'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isFunction } from '@pruvious/utils'
 import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
-import { usePruviousLoginPopup } from '../../../app/utils/pruvious/dashboard/login'
+import { useLoginPopup } from '../../../app/utils/pruvious/dashboard/login'
 import {
   $pfetch,
   pruviousDelete,
@@ -42,7 +42,7 @@ import {
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousDashboardPost } from '#pruvious/client'
+ * import { pruviousDashboardPost } from '#pruvious/dashboard'
  *
  * const body = ref({ email: '', password: '', remember: false })
  * const isFormDisabled = ref(false)
@@ -84,7 +84,7 @@ export function pruviousDashboardPost<TRoute extends PruviousPostRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousDashboardGet } from '#pruvious/client'
+ * import { pruviousDashboardGet } from '#pruvious/dashboard'
  *
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
@@ -125,7 +125,7 @@ export function pruviousDashboardGet<TRoute extends PruviousGetRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousDashboardPatch } from '#pruvious/client'
+ * import { pruviousDashboardPatch } from '#pruvious/dashboard'
  *
  * const body = ref('@todo')
  * const isFormDisabled = ref(false)
@@ -168,7 +168,7 @@ export function pruviousDashboardPatch<TRoute extends PruviousPatchRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousDashboardDelete } from '#pruvious/client'
+ * import { pruviousDashboardDelete } from '#pruvious/dashboard'
  *
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
@@ -220,7 +220,7 @@ function _pruviousDashboardFetch(
           if (route === 'auth/login') {
             puiQueueToast(data.message, { type: 'error' })
           } else if (route !== 'auth/logout') {
-            usePruviousLoginPopup().value = true
+            useLoginPopup().value = true
           }
         } else if (payload.response.status !== 422) {
           puiQueueToast(data.message, { type: 'error' })
@@ -266,7 +266,7 @@ export async function $pfetchDashboard<
           if (route === 'auth/login') {
             puiQueueToast(data.message, { type: 'error' })
           } else if (route !== 'auth/logout') {
-            usePruviousLoginPopup().value = true
+            useLoginPopup().value = true
           }
         } else if (payload.response.status !== 422) {
           puiQueueToast(data.message, { type: 'error' })

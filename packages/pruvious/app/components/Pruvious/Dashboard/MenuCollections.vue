@@ -9,19 +9,9 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  applyFilters,
-  hasPermission,
-  loadFilters,
-  maybeTranslate,
-  preloadTranslatableStrings,
-  prepareDashboardMenu,
-  useLanguage,
-  usePruviousDashboard,
-  type DashboardMenuItem,
-} from '#pruvious/client'
-import { dashboardPages } from '#pruvious/client/dashboard-pages'
+import { __, applyFilters, hasPermission, loadFilters, preloadTranslatableStrings, useLanguage } from '#pruvious/app'
+import { maybeTranslate, prepareDashboardMenu, usePruviousDashboard, type DashboardMenuItem } from '#pruvious/dashboard'
+import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { collator, isArray, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 

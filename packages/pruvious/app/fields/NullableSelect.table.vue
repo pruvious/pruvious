@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { maybeTranslate } from '#pruvious/client'
+import { maybeTranslate } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isDefined, isNull, isString } from '@pruvious/utils'

@@ -1,4 +1,4 @@
-import { languages } from '#pruvious/client/i18n'
+import { languages } from '#pruvious/app/i18n'
 import type { Collections, LanguageCode, Permission, SerializableCollection } from '#pruvious/server'
 import { clear, isNumber, isUndefined, kebabCase } from '@pruvious/utils'
 import { getUser, hasPermission } from '../../../../modules/pruvious/auth/utils.client'

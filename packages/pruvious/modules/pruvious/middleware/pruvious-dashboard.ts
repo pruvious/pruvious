@@ -1,17 +1,19 @@
 import {
-  dashboardBasePath,
-  filterStylesheets,
   hasPermission,
   isValidLanguageCode,
   preloadTranslatableStrings,
   primaryLanguage,
   refreshAuthState,
+  useAuth,
+  useLanguage,
+} from '#pruvious/app'
+import {
+  dashboardBasePath,
+  filterStylesheets,
   refreshPruviousDashboardState,
   refreshPruviousState,
-  useAuth,
   useDashboardContentLanguage,
-  useLanguage,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { LanguageCode } from '#pruvious/server'
 import { getCleanupDashboardStylesheetsScript } from '../dashboard/stylesheets'
 

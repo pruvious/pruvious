@@ -122,8 +122,9 @@ export interface InsertContextOptions<TDatabase extends GenericDatabase> extends
   getRawInputValue: <T = any>(fieldPath: string, ...appendPaths: string[]) => T
 }
 
-export interface SanitizedInsertContextOptions<TDatabase extends GenericDatabase>
-  extends InsertContextOptions<TDatabase> {
+export interface SanitizedInsertContextOptions<
+  TDatabase extends GenericDatabase,
+> extends InsertContextOptions<TDatabase> {
   /**
    * An array of objects containing the sanitized input data for the new records.
    */
@@ -212,8 +213,9 @@ export interface UpdateContextOptions<TDatabase extends GenericDatabase> extends
   whereCondition: WhereCondition[]
 }
 
-export interface SanitizedUpdateContextOptions<TDatabase extends GenericDatabase>
-  extends UpdateContextOptions<TDatabase> {
+export interface SanitizedUpdateContextOptions<
+  TDatabase extends GenericDatabase,
+> extends UpdateContextOptions<TDatabase> {
   /**
    * An object containing the sanitized input data for updating existing records.
    */

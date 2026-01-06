@@ -32,13 +32,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   dashboardBasePath,
   resolveTranslatableCollectionRecordPermissions,
   useDashboardContentLanguage,
   type ResolvedTranslatableCollectionRecordPermissions,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { filterObject, slugify } from '@pruvious/utils'

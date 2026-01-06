@@ -20,10 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import { __, usePruviousDashboardLayout } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { useDashboardLayout } from '#pruvious/dashboard'
 import type { ShallowRef } from 'vue'
 
-const dashboardLayout = usePruviousDashboardLayout()
+const dashboardLayout = useDashboardLayout()
 const sidebar = inject<{ el: Readonly<ShallowRef<HTMLDivElement | null>>; toggle: () => void }>('sidebar')
 </script>
 

@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getOverlayTransitionDuration, usePruviousDashboardLayout } from '#pruvious/client'
+import { getOverlayTransitionDuration, useDashboardLayout } from '#pruvious/dashboard'
 import { puiIsEditingText } from '@pruvious/ui/pui/hotkeys'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { useElementSize } from '@vueuse/core'
@@ -61,7 +61,7 @@ defineProps({
   },
 })
 
-const dashboardLayout = usePruviousDashboardLayout()
+const dashboardLayout = useDashboardLayout()
 const header = useTemplateRef('header')
 const sidebar = useTemplateRef('sidebar')
 const sidebarContent = useTemplateRef('sidebarContent')

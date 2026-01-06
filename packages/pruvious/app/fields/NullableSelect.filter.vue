@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getValidFilterOperators, maybeTranslate, type WhereField } from '#pruvious/client'
+import { getValidFilterOperators, maybeTranslate, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
 import { isNull } from '@pruvious/utils'

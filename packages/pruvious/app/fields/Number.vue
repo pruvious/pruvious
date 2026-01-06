@@ -30,7 +30,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({

@@ -125,16 +125,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
 import {
-  __,
-  applyFilters,
   dashboardBasePath,
   dashboardMiddleware,
   fillFieldData,
   getSingletonBySlug,
-  hasPermission,
   History,
-  loadFilters,
   maybeTranslate,
   parseConditionalLogic,
   prepareFieldData,
@@ -144,7 +141,7 @@ import {
   SingletonUpdateQueryBuilder,
   unsavedChanges,
   useDashboardContentLanguage,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

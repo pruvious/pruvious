@@ -15,12 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  usePruviousPreviewFocusNext,
-  usePruviousPreviewIsEditable,
-  usePruviousPreviewKey,
-  usePruviousRoute,
-} from '#pruvious/client'
+import { usePruviousRoute } from '#pruvious/app'
+import { usePreviewFocusNext, usePreviewIsEditable, usePreviewKey } from '#pruvious/dashboard'
 import { isStringInteger, nanoid } from '@pruvious/utils'
 
 const props = defineProps({
@@ -60,9 +56,9 @@ const props = defineProps({
 
 const root = useTemplateRef('root')
 const proute = usePruviousRoute()
-const key = usePruviousPreviewKey()
-const editable = usePruviousPreviewIsEditable() // @todo disable `PruviousRichText` if not editable
-const focusNext = usePruviousPreviewFocusNext()
+const key = usePreviewKey()
+const editable = usePreviewIsEditable() // @todo disable `PruviousRichText` if not editable
+const focusNext = usePreviewFocusNext()
 const fieldOptions = undefined // @todo resolve field options
 const placeholder = undefined // @todo resolve placeholder from field options
 const parentBlockPath = inject<string | undefined>('pruviousParentBlockPath')

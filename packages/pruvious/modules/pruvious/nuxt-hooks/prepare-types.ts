@@ -20,7 +20,8 @@ export async function optimizeTsConfig(options: { references: TSReference[]; tsC
   await resolvePruviousTSConfigPaths(tsConfig)
 
   tsConfig.include ||= []
-  tsConfig.include.push(`${nuxt.options.runtimeConfig.pruvious.dir.build}/client`)
+  tsConfig.include.push(`${nuxt.options.runtimeConfig.pruvious.dir.build}/app`)
+  tsConfig.include.push(`${nuxt.options.runtimeConfig.pruvious.dir.build}/dashboard`)
 
   tsConfig.exclude ||= []
   tsConfig.exclude.push(resolve('..'))

@@ -54,7 +54,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, getValidFilterOperators, languages, primaryLanguage, type WhereField } from '#pruvious/client'
+import { __, languages, primaryLanguage } from '#pruvious/app'
+import { getValidFilterOperators, type WhereField } from '#pruvious/dashboard'
 import type { LanguageCode, SerializableFieldOptions } from '#pruvious/server'
 import { isString } from '@pruvious/utils'
 

@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts" setup>
-import { usePruviousDashboardDragImageLabel } from '#pruvious/client'
+import { useDragImageLabel } from '#pruvious/dashboard'
 
-const dragImageLabel = usePruviousDashboardDragImageLabel()
+const dragImageLabel = useDragImageLabel()
 </script>
 
 <style scoped>

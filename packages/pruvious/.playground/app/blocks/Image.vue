@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineBlock } from '#pruvious/client'
+import { defineBlock } from '#pruvious/app'
 
 defineBlock({
   ui: { icon: 'photo' },

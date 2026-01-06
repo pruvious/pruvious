@@ -31,14 +31,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  hasPermission,
-  languages,
-  pruviousDashboardPatch,
-  useAuth,
-  useDashboardContentLanguage,
-} from '#pruvious/client'
+import { __, hasPermission, languages, useAuth } from '#pruvious/app'
+import { pruviousDashboardPatch, useDashboardContentLanguage } from '#pruvious/dashboard'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isUndefined } from '@pruvious/utils'
 

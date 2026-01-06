@@ -1,4 +1,4 @@
-import type { PruviousFetchResponse } from '#pruvious/client'
+import type { PruviousFetchResponse } from '#pruvious/app'
 import type { Collection } from '@pruvious/orm'
 import { defu, slugify } from '@pruvious/utils'
 import { pruviousPost } from '../api/utils.client'

@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, hasPermission, pruviousDashboardPost, QueryBuilder } from '#pruvious/client'
+import { __, hasPermission } from '#pruvious/app'
+import { pruviousDashboardPost, QueryBuilder } from '#pruvious/dashboard'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 
 const props = defineProps({

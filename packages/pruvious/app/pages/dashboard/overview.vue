@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, dashboardMiddleware, defineDashboardPage } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, dashboardMiddleware, defineDashboardPage } from '#pruvious/dashboard'
 
 defineDashboardPage({
   label: ({ __ }) => __('pruvious-dashboard', 'Overview'),

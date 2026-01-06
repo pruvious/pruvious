@@ -46,14 +46,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __, primaryLanguage } from '#pruvious/app'
 import {
-  __,
   getValidFilterOperators,
   maybeTranslate,
-  primaryLanguage,
   useDashboardContentLanguage,
   type WhereField,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isDefined, isNull, isString } from '@pruvious/utils'
 

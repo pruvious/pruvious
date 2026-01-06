@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { blocksField, defineBlock, numberField } from '#pruvious/client'
+import { blocksField, defineBlock, numberField } from '#pruvious/app'
 
 defineBlock({
   group: 'test',

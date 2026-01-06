@@ -52,13 +52,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  pruviousDashboardPost,
-  refreshPruviousDashboardState,
-  storeAuthToken,
-  usePruviousLoginPopup,
-} from '#pruvious/client'
+import { __, storeAuthToken } from '#pruvious/app'
+import { pruviousDashboardPost, refreshPruviousDashboardState, useLoginPopup } from '#pruvious/dashboard'
 import { lockAndLoad } from '@pruvious/utils'
 
 const props = defineProps({
@@ -71,7 +66,7 @@ const body = ref({ email: '', password: '', remember: false })
 const errors = ref<Record<string, string>>({})
 const isSubmitting = ref(false)
 const isPasswordVisible = ref(false)
-const loginPopup = usePruviousLoginPopup()
+const loginPopup = useLoginPopup()
 
 const onSubmit = lockAndLoad(isSubmitting, async () => {
   const { success, data } = await pruviousDashboardPost('auth/login', { body, inputErrors: errors })

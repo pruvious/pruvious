@@ -4,7 +4,7 @@ import {
   refreshAuthState,
   resolvePruviousRoute,
   useLanguage,
-} from '#pruvious/client'
+} from '#pruvious/app'
 
 /**
  * Pruvious client middleware that combines the following middleware in parallel:

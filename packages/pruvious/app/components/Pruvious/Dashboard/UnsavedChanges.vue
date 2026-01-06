@@ -17,7 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, getOverlayTransitionDuration, History, unsavedChanges } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { getOverlayTransitionDuration, History, unsavedChanges } from '#pruvious/dashboard'
 import { puiIsEditingText, puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { blurActiveElement, isDefined } from '@pruvious/utils'
 import { useEventListener, watchOnce } from '@vueuse/core'

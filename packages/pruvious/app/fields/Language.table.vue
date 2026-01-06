@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { PruviousTableFieldFallback } from '#components'
-import { languages } from '#pruvious/client'
+import { languages } from '#pruvious/app'
 import type { LanguageCode } from '#pruvious/server'
 
 const props = defineProps({

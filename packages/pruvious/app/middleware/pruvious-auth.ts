@@ -1,4 +1,4 @@
-import { refreshAuthState } from '#pruvious/client'
+import { refreshAuthState } from '#pruvious/app'
 
 /**
  * Pruvious client middleware responsible for authentication.

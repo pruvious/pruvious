@@ -17,23 +17,23 @@
 </template>
 
 <script lang="ts" setup>
+import { usePruviousRoute } from '#pruvious/app'
 import {
-  usePruviousPreviewBlocks,
-  usePruviousPreviewFocusedBlocks,
-  usePruviousPreviewHighlightedBlocks,
-  usePruviousPreviewIsEditable,
-  usePruviousPreviewRouteReferences,
-  usePruviousRoute,
-} from '#pruvious/client'
+  usePreviewBlocks,
+  usePreviewFocusedBlocks,
+  usePreviewHighlightedBlocks,
+  usePreviewIsEditable,
+  usePreviewRouteReferences,
+} from '#pruvious/dashboard'
 import type { BlockName } from '#pruvious/server'
 
 const route = usePruviousRoute()
-const routeReferences = usePruviousPreviewRouteReferences()
+const routeReferences = usePreviewRouteReferences()
 const routeReference = computed(() => (route.value ? routeReferences.value[route.value.ref] : null))
-const highlighted = usePruviousPreviewHighlightedBlocks()
-const focused = usePruviousPreviewFocusedBlocks()
-const blocks = usePruviousPreviewBlocks()
-const editable = usePruviousPreviewIsEditable()
+const highlighted = usePreviewHighlightedBlocks()
+const focused = usePreviewFocusedBlocks()
+const blocks = usePreviewBlocks()
+const editable = usePreviewIsEditable()
 const rects = computed(() => {
   const results: {
     path: string

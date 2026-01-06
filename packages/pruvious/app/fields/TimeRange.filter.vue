@@ -45,8 +45,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, type WhereField } from '#pruvious/client';
-import type { SerializableFieldOptions } from '#pruvious/server';
+import { __ } from '#pruvious/app'
+import { type WhereField } from '#pruvious/dashboard'
+import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({
   /**

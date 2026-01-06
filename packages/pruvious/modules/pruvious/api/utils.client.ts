@@ -3,11 +3,13 @@ import type {
   FieldsLayout,
   GenericSerializableFieldOptions,
   httpStatusCodeMessages,
+  Permission,
   PruviousDashboardState,
   PruviousState,
   RouteReferenceName,
   StandardRoutes,
 } from '#pruvious/server'
+import type { TranslatableStrings } from '@pruvious/i18n'
 import { clear, isFunction } from '@pruvious/utils'
 import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
 import type { AuthState } from '../auth/utils.client'
@@ -25,7 +27,7 @@ export interface PruviousFetchBaseOptions {
    * </template>
    *
    * <script lang="ts" setup>
-   * import { pruviousPost } from '#pruvious/client'
+   * import { pruviousPost } from '#pruvious/app'
    *
    * const body = ref({ email: '', password: '', remember: false })
    * const inputErrors = ref<Record<string, string>>({})
@@ -52,7 +54,7 @@ export interface PruviousFetchBaseOptions {
    * </template>
    *
    * <script lang="ts" setup>
-   * import { pruviousPost } from '#pruvious/client'
+   * import { pruviousPost } from '#pruvious/app'
    *
    * const body = ref({ email: '', password: '', remember: false })
    * const isFormDisabled = ref(false)
@@ -73,6 +75,7 @@ interface Body {
   'auth/logout/others': undefined
   'auth/renew-token': undefined
   'populate': { ref: RouteReferenceName; data: Record<string, any> }
+  'process-queue': undefined
   'pruvious/install': { firstName?: string; lastName?: string; email: string; password: string }
 }
 
@@ -82,15 +85,18 @@ interface PostResponse {
   'auth/logout/others': { token: string }
   'auth/renew-token': { token: string }
   'populate': { data: Record<string, any> }
+  'process-queue': { success: true }
   'pruvious/install': { token: string }
 }
 
 interface GetResponse {
+  'auth/permissions': Permission[]
   'auth/state': AuthState
   'me': Partial<Collections['Users']['TCastedTypes']>
   'me/structure': { fields: Record<string, GenericSerializableFieldOptions>; fieldsLayout?: FieldsLayout }
   'pruvious': PruviousState
   'pruvious/dashboard': PruviousDashboardState
+  'translations': TranslatableStrings
 }
 
 interface PatchResponse {
@@ -153,7 +159,7 @@ export type PruviousFetchError = (
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousPost } from '#pruvious/client'
+ * import { pruviousPost } from '#pruvious/app'
  *
  * const body = ref({ email: '', password: '', remember: false })
  * const isFormDisabled = ref(false)
@@ -194,7 +200,7 @@ export function pruviousPost<TRoute extends PruviousPostRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousGet } from '#pruvious/client'
+ * import { pruviousGet } from '#pruvious/app'
  *
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
@@ -233,7 +239,7 @@ export function pruviousGet<TRoute extends PruviousGetRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousPatch } from '#pruvious/client'
+ * import { pruviousPatch } from '#pruvious/app'
  *
  * const body = ref({ email: '', password: '', remember: false })
  * const isFormDisabled = ref(false)
@@ -274,7 +280,7 @@ export function pruviousPatch<TRoute extends PruviousPatchRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousDelete } from '#pruvious/client'
+ * import { pruviousDelete } from '#pruvious/app'
  *
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
@@ -312,7 +318,7 @@ export function pruviousDelete<TRoute extends PruviousDeleteRoute>(
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { pruviousFetchHeaders } from '#pruvious/client'
+ * import { pruviousFetchHeaders } from '#pruvious/app'
  *
  * await $fetch('my-endpoint', { headers: pruviousFetchHeaders() })
  * </script>

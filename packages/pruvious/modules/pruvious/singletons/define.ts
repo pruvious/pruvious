@@ -762,7 +762,7 @@ export interface DefineSingletonOptions<
    * </template>
    *
    * <script lang="ts" setup>
-   * import { resolveRoute } from '#pruvious/client'
+   * import { resolveRoute } from '#pruvious/app'
    *
    * const { data } = resolveRoute()
    * </script>
@@ -897,7 +897,7 @@ export type SingletonRoutingOptions<TFieldNames extends string = string> = {
    * </template>
    *
    * <script setup>
-   * import { usePruviousRoute } from '#pruvious/client'
+   * import { usePruviousRoute } from '#pruvious/app'
    *
    * definePageMeta({
    *   middleware: ['pruvious'],

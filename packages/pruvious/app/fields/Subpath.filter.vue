@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage, useDashboardContentLanguage, type WhereField } from '#pruvious/client'
+import { primaryLanguage } from '#pruvious/app'
+import { useDashboardContentLanguage, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 defineProps({

@@ -22,7 +22,7 @@ import type { UpdateQueryBuilder } from './UpdateQueryBuilder'
  *
  * @example
  * ```ts
- * import { insertInto } from '#pruvious/client'
+ * import { insertInto } from '#pruvious/dashboard'
  *
  * const newStudents = await insertInto('Students')
  *   .values([
@@ -93,7 +93,7 @@ export function insertInto<
  *
  * @example
  * ```ts
- * import { selectFrom } from '#pruvious/client'
+ * import { selectFrom } from '#pruvious/dashboard'
  *
  * const students = await selectFrom('Students')
  *   .select(['firstName', 'lastName'])
@@ -182,7 +182,7 @@ export function selectFrom<
  *
  * @example
  * ```ts
- * import { batchSelectIn, selectFrom } from '#pruvious/client'
+ * import { batchSelectIn, selectFrom } from '#pruvious/dashboard'
  *
  * const studentIds = [1, 2, 3, ..., 1000]
  * const students = await batchSelectIn(studentIds, (batch) => {
@@ -216,7 +216,7 @@ export async function batchSelectIn<TValue, TResult extends any[]>(
  *
  * @example
  * ```ts
- * import { update } from '#pruvious/client'
+ * import { update } from '#pruvious/dashboard'
  *
  * const updatedStudent = await update('Students')
  *   .set({ house: 2, prefect: true })
@@ -281,7 +281,7 @@ export function update<
  *
  * @example
  * ```ts
- * import { deleteFrom } from '#pruvious/client'
+ * import { deleteFrom } from '#pruvious/dashboard'
  *
  * const deletedStudent = await deleteFrom('Students')
  *   .where('firstName', '=', 'Draco')
@@ -335,7 +335,7 @@ export function deleteFrom<
  *
  * @example
  * ```ts
- * import { selectSingleton } from '#pruvious/client'
+ * import { selectSingleton } from '#pruvious/dashboard'
  *
  * const themeOptions = await selectSingleton('ThemeOptions')
  *   .select(['logo', 'copyrightText'])
@@ -379,7 +379,7 @@ export function selectSingleton<const TSingletonName extends SingletonAPI['any']
  *
  * @example
  * ```ts
- * import { updateSingleton } from '#pruvious/client'
+ * import { updateSingleton } from '#pruvious/dashboard'
  *
  * const updatedThemeOptions = await updateSingleton('ThemeOptions')
  *   .set({ logo: 456 })

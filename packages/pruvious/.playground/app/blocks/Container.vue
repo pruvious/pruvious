@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { blocksField, buttonGroupField } from '#pruvious/client'
+import { blocksField, buttonGroupField } from '#pruvious/app'
 
 defineProps({
   spacing: buttonGroupField({

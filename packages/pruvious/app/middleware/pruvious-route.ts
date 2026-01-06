@@ -1,4 +1,4 @@
-import { resolvePruviousRoute } from '#pruvious/client'
+import { resolvePruviousRoute } from '#pruvious/app'
 
 /**
  * Pruvious client middleware responsible for resolving routes and handling redirects.

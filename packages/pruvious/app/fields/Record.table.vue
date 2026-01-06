@@ -34,7 +34,8 @@
 
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
-import { __, dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, selectFrom, usePruviousDashboard } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUIDynamicSelectChoiceModel } from '@pruvious/ui/components/PUIDynamicSelect.vue'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'

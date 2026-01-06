@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import type { NuxtError } from '#app'
-import { _ } from '#pruvious/client'
+import { _ } from '#pruvious/app'
 
 defineProps({
   error: Object as PropType<NuxtError>,

@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts" setup>
-import { filterFieldComponents, languages, type WhereField } from '#pruvious/client'
+import { languages } from '#pruvious/app'
+import { filterFieldComponents, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 defineProps({

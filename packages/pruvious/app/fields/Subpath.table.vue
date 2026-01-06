@@ -12,7 +12,8 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage, useDashboardContentLanguage } from '#pruvious/client'
+import { primaryLanguage } from '#pruvious/app'
+import { useDashboardContentLanguage } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 

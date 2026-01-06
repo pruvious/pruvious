@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, fieldComponents, getRouteReferences, maybeTranslate, usePruviousDashboard } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { fieldComponents, getRouteReferences, maybeTranslate, usePruviousDashboard } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUISelectChoiceGroupModel, PUISelectChoiceModel } from '@pruvious/ui/components/PUISelect.vue'
 import { isDefined, titleCase } from '@pruvious/utils'

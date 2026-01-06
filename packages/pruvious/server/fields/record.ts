@@ -130,7 +130,7 @@ export default {
    * Creates a new `Field` instance.
    *
    * This function is intended for server-side use in collection definitions.
-   * For client-side usage, import the equivalent function from `#pruvious/client`.
+   * For client-side usage, import the equivalent function from `#pruvious/app`.
    */
   serverFn: function <
     const TRequired extends boolean | undefined,

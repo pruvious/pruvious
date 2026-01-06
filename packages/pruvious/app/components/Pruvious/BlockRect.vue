@@ -42,13 +42,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  i18n,
-  preloadTranslatableStrings,
-  usePruviousPreviewBlockLabels,
-  usePruviousPreviewDashboardLanguage,
-  usePruviousRoute,
-} from '#pruvious/client'
+import { i18n, preloadTranslatableStrings, usePruviousRoute } from '#pruvious/app'
+import { usePreviewBlockLabels, usePreviewDashboardLanguage } from '#pruvious/dashboard'
 import type { BlockName, SerializableBlock } from '#pruvious/server'
 import { castToNumber, getProperty } from '@pruvious/utils'
 
@@ -120,8 +115,8 @@ const props = defineProps({
 
 const t = i18n()
 const route = usePruviousRoute()
-const blockLabels = usePruviousPreviewBlockLabels()
-const dashboardLanguage = usePruviousPreviewDashboardLanguage()
+const blockLabels = usePreviewBlockLabels()
+const dashboardLanguage = usePreviewDashboardLanguage()
 const parent = computed<any[]>(() => getProperty(route.value?.data ?? {}, props.path.split('.').slice(0, -1).join('.')))
 const index = computed(() => Number(castToNumber(props.path.split('.').pop()) ?? -1))
 

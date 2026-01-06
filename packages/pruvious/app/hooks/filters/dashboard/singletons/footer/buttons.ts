@@ -1,4 +1,4 @@
-import { defineFilter } from '#pruvious/client'
+import { defineFilter } from '#pruvious/app'
 import type { LanguageCode, SerializableSingleton, Singletons } from '#pruvious/server'
 import type { ConditionalLogicResolver } from '@pruvious/orm'
 

@@ -1,4 +1,4 @@
-import { customComponents } from '#pruvious/client/custom-components'
+import { customComponents } from '#pruvious/dashboard/custom-components'
 import type { Collections, SerializableCollection, SerializableSingleton, Singletons } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
 import type { Component } from 'vue'
@@ -10,7 +10,7 @@ import type { Component } from 'vue'
  * - `sidebarScrollY` - Preserves the vertical scroll position of the `#sidebar` slot in the dashboard layout.
  * - `sidebarContentHeight` - Preserves the height of the content rendered in the `#sidebar` slot.
  */
-export const usePruviousDashboardLayout = () =>
+export const useDashboardLayout = () =>
   useState<{
     sidebarExpanded: boolean
     sidebarScrollY: number

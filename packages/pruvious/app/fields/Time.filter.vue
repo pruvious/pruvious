@@ -21,7 +21,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, getValidFilterOperators, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { getValidFilterOperators, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUITimeLabels } from '@pruvious/ui/components/PUITime.vue'
 

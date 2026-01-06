@@ -1,4 +1,4 @@
-import { primaryLanguage } from '#pruvious/client/i18n'
+import { primaryLanguage } from '#pruvious/app/i18n'
 import type { LanguageCode, SingletonAPI, Singletons } from '#pruvious/server'
 import type {
   DefaultQueryBuilderParamsOptions,

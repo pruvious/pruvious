@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { blockComponents, isPreview } from '#pruvious/client'
+import { blockComponents, isPreview } from '#pruvious/app'
 import type { BlockName, DynamicBlockFieldTypes } from '#pruvious/server'
 import { omit } from '@pruvious/utils'
 

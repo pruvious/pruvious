@@ -56,7 +56,7 @@ export function extractLanguageCode(path: string): LanguageCode {
  * @example
  * ```vue
  * <script lang="ts" setup>
- * import { __, preloadTranslatableStrings } from '#pruvious/client'
+ * import { __, preloadTranslatableStrings } from '#pruvious/app'
  *
  * await preloadTranslatableStrings('my-domain')
  *
@@ -68,7 +68,7 @@ export async function preloadTranslatableStrings<
   TDomain extends ExtractDomains<ExtractTranslatableStringsDefinitions<typeof _i18n>>,
   TLanguage extends ExtractLanguagesByDomain<TDomain, ExtractTranslatableStringsDefinitions<typeof _i18n>>,
 >(domain: TDomain, language: TLanguage): Promise<TranslatableStrings> {
-  const { i18n } = await import('#pruvious/client/i18n')
+  const { i18n } = await import('#pruvious/app/i18n')
   const nuxtApp = useNuxtApp()
 
   if (!i18n().hasDefinition(domain, language)) {

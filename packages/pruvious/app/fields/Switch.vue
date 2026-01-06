@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { resolveFieldLabel } from '#pruvious/client'
+import { resolveFieldLabel } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 
 const props = defineProps({

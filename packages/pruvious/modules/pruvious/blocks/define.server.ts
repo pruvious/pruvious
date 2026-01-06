@@ -334,7 +334,7 @@ export type DefineBlockOptions<TFields extends Record<string, GenericField>> = P
  * Defines a new Pruvious block.
  * This function is used internally by Pruvious to define blocks on the server-side.
  * You should not use this function directly in your code.
- * Use the `defineBlock` function in the `#pruvious/client` module instead or simply create a new Vue component in the `app/blocks/` directory.
+ * Use the `defineBlock` function in the `#pruvious/app` module instead or simply create a new Vue component in the `app/blocks/` directory.
  *
  * @see https://pruvious.com/docs/blocks
  */

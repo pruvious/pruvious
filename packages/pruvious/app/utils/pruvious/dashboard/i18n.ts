@@ -1,4 +1,4 @@
-import { _, __ } from '#pruvious/client/i18n'
+import { _, __ } from '#pruvious/app/i18n'
 import type { TranslatableStringCallbackContext } from '#pruvious/server'
 import { isFunction } from '@pruvious/utils'
 

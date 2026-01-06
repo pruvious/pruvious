@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { maybeTranslate, type WhereField } from '#pruvious/client'
+import { maybeTranslate, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUIButtonGroupChoiceModel } from '@pruvious/ui/components/PUIButtonGroup.vue'
 

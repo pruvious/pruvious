@@ -1,5 +1,5 @@
-import { dashboardBasePath } from '#pruvious/client/base'
-import { i18n } from '#pruvious/client/i18n'
+import { i18n } from '#pruvious/app/i18n'
+import { dashboardBasePath } from '#pruvious/dashboard/base'
 import { clear } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { isDevelopment } from 'std-env'

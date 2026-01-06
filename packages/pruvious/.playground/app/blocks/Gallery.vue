@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { blocksField, defineBlock } from '#pruvious/client'
+import { blocksField, defineBlock } from '#pruvious/app'
 
 defineBlock({
   tags: ['test'],

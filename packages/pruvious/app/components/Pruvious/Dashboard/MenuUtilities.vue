@@ -16,16 +16,18 @@ import {
   applyFilters,
   hasPermission,
   loadFilters,
-  maybeTranslate,
   preloadTranslatableStrings,
-  prepareDashboardMenu,
   useAuth,
   useLanguage,
+} from '#pruvious/app'
+import {
+  maybeTranslate,
+  prepareDashboardMenu,
+  useDashboardMenuExpanded,
   usePruviousDashboard,
-  usePruviousDashboardMenuExpanded,
   type DashboardMenuItem,
-} from '#pruvious/client'
-import { dashboardPages } from '#pruvious/client/dashboard-pages'
+} from '#pruvious/dashboard'
+import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
 import { collator, isArray, isDefined, isEmpty, omit, slugify, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
@@ -36,7 +38,7 @@ await loadFilters('dashboard:menu:utilities')
 const route = useRoute()
 const auth = useAuth()
 const dashboard = usePruviousDashboard()
-const expanded = usePruviousDashboardMenuExpanded()
+const expanded = useDashboardMenuExpanded()
 const orderedItems: (DashboardMenuItem & { order: number })[] = [
   ...Object.entries(dashboardPages)
     .filter(

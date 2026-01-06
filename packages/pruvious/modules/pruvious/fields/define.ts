@@ -1020,7 +1020,7 @@ const warned: string[] = []
  * Defined fields can be imported from:
  *
  * - `#pruvious/server` for server-side usage in collection definitions.
- * - `#pruvious/client` for client-side usage in Vue components when defining block fields.
+ * - `#pruvious/app` for client-side usage in Vue components when defining block fields.
  *
  * ---
  *
@@ -1079,7 +1079,7 @@ export function defineField<
      * Creates a new `Field` instance.
      *
      * This function is intended for server-side use in collection definitions.
-     * For client-side usage, import the equivalent function from `#pruvious/client`.
+     * For client-side usage, import the equivalent function from `#pruvious/app`.
      */
     serverFn: function <
       const TRequired extends boolean | undefined,

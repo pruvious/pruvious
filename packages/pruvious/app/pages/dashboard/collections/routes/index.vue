@@ -273,14 +273,12 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission, languages } from '#pruvious/app'
 import {
-  __,
   customComponents,
   dashboardBasePath,
   dashboardMiddleware,
   getCollectionBySlug,
-  hasPermission,
-  languages,
   maybeTranslate,
   pruviousDashboardGet,
   pruviousDashboardPost,
@@ -290,7 +288,7 @@ import {
   useDashboardContentLanguage,
   useSelectQueryBuilderParams,
   type ResolvedTranslatableCollectionRecordPermissions,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { CollectionUIOptions, Permission } from '#pruvious/server'
 import type { ExplicitWhereOrGroup, Paginated, SelectQueryBuilderParams, WhereField } from '@pruvious/orm'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'

@@ -1,7 +1,7 @@
 <template></template>
 
 <script lang="ts" setup>
-import { dashboardBasePath } from '#pruvious/client'
+import { dashboardBasePath } from '#pruvious/app'
 
 const route = useRoute()
 

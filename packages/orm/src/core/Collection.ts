@@ -117,8 +117,10 @@ interface ICollection {
   meta?: Record<string, any>
 }
 
-export interface CollectionDefinition<TFields extends Record<string, GenericField>, TMeta extends Record<string, any>>
-  extends ICollection {
+export interface CollectionDefinition<
+  TFields extends Record<string, GenericField>,
+  TMeta extends Record<string, any>,
+> extends ICollection {
   key?: string
   fields: TFields
   indexes?: Index<TFields>[]
@@ -274,9 +276,10 @@ export type GenericCollection = Collection<Record<string, GenericField>, Record<
  * })
  * ```
  */
-export class Collection<const TFields extends Record<string, GenericField>, const TMeta extends Record<string, any>>
-  implements ICollection
-{
+export class Collection<
+  const TFields extends Record<string, GenericField>,
+  const TMeta extends Record<string, any>,
+> implements ICollection {
   readonly key: string | undefined
   readonly fields: TFields
   readonly indexes: Index<Record<string, GenericField>>[]

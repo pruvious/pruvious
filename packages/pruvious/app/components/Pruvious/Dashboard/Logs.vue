@@ -381,8 +381,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/client'
-import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/dashboard'
+import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/dashboard/dayjs'
 import type { CollectionUIOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
 import { puiDialog } from '@pruvious/ui/pui/dialog'

@@ -45,8 +45,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath, usePruviousLoginPopup } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath, useLoginPopup } from '#pruvious/dashboard'
 
-const loginPopup = usePruviousLoginPopup()
+const loginPopup = useLoginPopup()
 const route = useRoute()
 </script>

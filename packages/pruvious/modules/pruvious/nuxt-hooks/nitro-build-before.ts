@@ -61,8 +61,10 @@ async function resolvePruviousTSConfigPaths(tsConfig: Partial<Pick<TSConfig, 'co
   tsConfig.compilerOptions ||= {}
   tsConfig.compilerOptions.paths ||= {}
 
-  delete tsConfig.compilerOptions.paths['#pruvious/client']
-  delete tsConfig.compilerOptions.paths['#pruvious/client/*']
+  delete tsConfig.compilerOptions.paths['#pruvious/app']
+  delete tsConfig.compilerOptions.paths['#pruvious/app/*']
+  delete tsConfig.compilerOptions.paths['#pruvious/dashboard']
+  delete tsConfig.compilerOptions.paths['#pruvious/dashboard/*']
   delete tsConfig.compilerOptions.paths['#pruvious/server']
   delete tsConfig.compilerOptions.paths['#pruvious/server/*']
 

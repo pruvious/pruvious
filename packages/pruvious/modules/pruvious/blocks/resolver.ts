@@ -145,7 +145,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
         }
       },
       ImportDeclaration(path) {
-        if (path.node.source.value === '#pruvious/client') {
+        if (path.node.source.value === '#pruvious/app' || path.node.source.value === '#pruvious/dashboard') {
           for (let i = path.node.specifiers.length - 1; i >= 0; i--) {
             const specifier = path.node.specifiers[i]!
             if (

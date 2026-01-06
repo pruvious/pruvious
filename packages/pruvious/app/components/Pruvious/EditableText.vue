@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import { PruviousHTML } from '#components'
-import { isPreview, usePruviousRoute } from '#pruvious/client'
+import { isPreview, usePruviousRoute } from '#pruvious/app'
 import { getProperty } from '@pruvious/utils'
 import { computed, onMounted, shallowRef, type Component } from 'vue'
 

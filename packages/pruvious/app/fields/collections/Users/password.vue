@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 
 const props = defineProps({
   /**

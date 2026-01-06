@@ -24,7 +24,7 @@ export interface SimpleRedirect {
  * </template>
  *
  * <script lang="ts" setup>
- * import { usePruviousRoute } from '#pruvious/client'
+ * import { usePruviousRoute } from '#pruvious/app'
  *
  * const proute = usePruviousRoute()
  * </script>

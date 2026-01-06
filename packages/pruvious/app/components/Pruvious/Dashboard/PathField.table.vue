@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage } from '#pruvious/client'
+import { primaryLanguage } from '#pruvious/app'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isDefined, isNull, isString } from '@pruvious/utils'

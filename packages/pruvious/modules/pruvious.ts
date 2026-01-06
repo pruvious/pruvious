@@ -15,7 +15,8 @@ import { join } from 'pathe'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
 import { resetBlocksResolver } from './pruvious/blocks/resolver'
-import { generateClientFiles } from './pruvious/build/client'
+import { generateAppFiles } from './pruvious/build/app'
+import { generateDashboardFiles } from './pruvious/build/dashboard'
 import { generateServerFiles } from './pruvious/build/server'
 import { resetCollectionsResolver } from './pruvious/collections/resolver'
 import { resolveCustomComponents } from './pruvious/components/resolver'
@@ -227,6 +228,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
+      dashboardBasePath: nuxt.options.runtimeConfig.pruvious.dashboard.basePath,
       languages: nuxt.options.runtimeConfig.pruvious.i18n.languages.map(({ code }) => code) as LanguageCode[],
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage as LanguageCode,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
@@ -237,13 +239,15 @@ export default defineNuxtModule<PruviousModuleOptions>({
     }
 
     // Set `#pruvious/*` aliases
-    nuxt.options.alias['#pruvious/client'] = `${buildDir}/client`
+    nuxt.options.alias['#pruvious/app'] = `${buildDir}/app`
+    nuxt.options.alias['#pruvious/dashboard'] = `${buildDir}/dashboard`
     nuxt.options.alias['#pruvious/server'] = `${buildDir}/server`
 
     // Clean up `#pruvious` build directory
     fs.rmSync(buildDir, { force: true, recursive: true })
     fs.mkdirSync(buildDir)
-    fs.mkdirSync(`${buildDir}/client`)
+    fs.mkdirSync(`${buildDir}/app`)
+    fs.mkdirSync(`${buildDir}/dashboard`)
     fs.mkdirSync(`${buildDir}/server`)
 
     // Reset resolvers
@@ -261,7 +265,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
     resolveCustomComponents()
 
     // Generate `#pruvious/*` files
-    generateClientFiles()
+    generateAppFiles()
+    generateDashboardFiles()
     generateServerFiles()
 
     // Optimize TypeScript configs for `#pruvious/*` imports

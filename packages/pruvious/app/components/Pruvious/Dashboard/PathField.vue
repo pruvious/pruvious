@@ -53,7 +53,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, maybeTranslate, primaryLanguage } from '#pruvious/client'
+import { __, primaryLanguage } from '#pruvious/app'
+import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isDefined, isString } from '@pruvious/utils'
 

@@ -5,7 +5,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, dashboardBasePath } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { dashboardBasePath } from '#pruvious/dashboard'
 import { withoutTrailingSlash } from '@pruvious/utils'
 
 const link = withoutTrailingSlash(dashboardBasePath)

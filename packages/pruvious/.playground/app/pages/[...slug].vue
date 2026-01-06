@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePruviousRoute } from '#pruvious/client'
+import { usePruviousRoute } from '#pruvious/app'
 
 definePageMeta({
   middleware: ['pruvious'],

@@ -274,13 +274,12 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission } from '#pruvious/app'
 import {
-  __,
   customComponents,
   dashboardBasePath,
   dashboardMiddleware,
   getCollectionBySlug,
-  hasPermission,
   maybeTranslate,
   pruviousDashboardGet,
   pruviousDashboardPost,
@@ -290,7 +289,7 @@ import {
   useDashboardContentLanguage,
   useSelectQueryBuilderParams,
   type ResolvedTranslatableCollectionRecordPermissions,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { CollectionUIOptions, Permission } from '#pruvious/server'
 import type { Paginated, QueryBuilderResult } from '@pruvious/orm'
 import { puiDialog } from '@pruvious/ui/pui/dialog'

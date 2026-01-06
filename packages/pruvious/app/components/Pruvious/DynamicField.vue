@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, fieldComponents } from '#pruvious/client'
+import { customComponents, fieldComponents } from '#pruvious/dashboard'
 import type {
   Collections,
   Fields,

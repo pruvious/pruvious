@@ -108,10 +108,9 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission } from '#pruvious/app'
 import {
-  __,
   dashboardBasePath,
-  hasPermission,
   maybeTranslate,
   resolveFieldLabel,
   selectFrom,
@@ -119,7 +118,7 @@ import {
   usePruviousDashboard,
   type UploadItem,
   type WhereField,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import { isDefined } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'

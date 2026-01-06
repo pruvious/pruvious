@@ -402,8 +402,8 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   maybeTranslate,
   parseConditionalLogic,
   resolveFieldLabel,
@@ -411,7 +411,7 @@ import {
   usePruviousClipboardData,
   usePruviousDashboard,
   type PruviousClipboardData,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type {
   BlockGroupName,
   BlockName,

@@ -161,7 +161,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { TableSettings } from './TableSettingsPopup.vue'
 

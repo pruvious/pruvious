@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { resolveFieldDescription } from '#pruvious/client'
+import { resolveFieldDescription } from '#pruvious/dashboard'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
 import { toArray } from '@pruvious/utils'
 

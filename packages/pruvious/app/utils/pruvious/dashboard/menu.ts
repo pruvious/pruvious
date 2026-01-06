@@ -1,5 +1,5 @@
-import { dashboardBasePath } from '#pruvious/client/base'
-import { __ } from '#pruvious/client/i18n'
+import { __ } from '#pruvious/app/i18n'
+import { dashboardBasePath } from '#pruvious/dashboard/base'
 import type { SerializableCollection, SerializableSingleton } from '#pruvious/server'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
 import type { PUIVerticalMenuItemModel } from '@pruvious/ui/components/PUIVerticalMenuItem.vue'
@@ -37,7 +37,7 @@ export type DashboardMenuItem = Pick<PUIVerticalMenuItemModel, 'action' | 'label
 /**
  * Composable containing the expanded states of the dashboard menu.
  */
-export const usePruviousDashboardMenuExpanded = () =>
+export const useDashboardMenuExpanded = () =>
   useState<Record<string, Record<string, boolean>>>('pruvious-dashboard-menu-expanded', () => ({}))
 
 /**

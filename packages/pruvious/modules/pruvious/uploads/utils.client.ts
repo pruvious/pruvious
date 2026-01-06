@@ -1,4 +1,4 @@
-import { __ } from '#pruvious/client/i18n'
+import { __ } from '#pruvious/app/i18n'
 import type {
   Collections,
   DeleteUploadOptions,
@@ -168,7 +168,7 @@ export const useUploadSpeed = () => useState<number | null>('pruvious-upload-spe
  * </template>
  *
  * <script lang="ts" setup>
- * import { upload } from '#pruvious/client'
+ * import { upload } from '#pruvious/dashboard'
  *
  * const input = useTemplateRef('input')
  *
@@ -610,7 +610,7 @@ export async function upload<
  * </template>
  *
  * <script lang="ts" setup>
- * import { useUpload, type UseUploadResult } from '#pruvious/client'
+ * import { useUpload, type UseUploadResult } from '#pruvious/dashboard'
  *
  * const uploads = ref<UseUploadResult[]>([])
  *

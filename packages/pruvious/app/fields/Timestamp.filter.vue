@@ -71,8 +71,9 @@
 </template>
 
 <script lang="ts" setup>
-import { __, getValidFilterOperators, useLanguage, type WhereField } from '#pruvious/client'
-import { dayjsConfig, dayjsLocales, dayjsResolveTimezone } from '#pruvious/client/dayjs'
+import { __, useLanguage } from '#pruvious/app'
+import { getValidFilterOperators, type WhereField } from '#pruvious/dashboard'
+import { dayjsConfig, dayjsLocales, dayjsResolveTimezone } from '#pruvious/dashboard/dayjs'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUICalendarLabels } from '@pruvious/ui/components/PUICalendar.vue'
 

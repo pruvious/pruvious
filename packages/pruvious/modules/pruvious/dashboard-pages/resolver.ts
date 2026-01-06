@@ -24,7 +24,7 @@ export interface ResolveDashboardPageDefinitionOptions {
   srcDir: string
 
   /**
-   * Whether to write to the `#pruvious/client/dashboard-pages.ts` file.
+   * Whether to write to the `#pruvious/dashboard/dashboard-pages.ts` file.
    *
    * @default true
    */
@@ -45,7 +45,7 @@ let dashboardPageDefinitions: Record<string, string | null> = {}
  * Retrieves a key-value object containing dashboard page paths and their component file locations.
  * It scans the `<srcDir>/<nuxt.options.dir.pages>` directories across all Nuxt layers.
  *
- * The `write` parameter can be used to disable writing to the `#pruvious/client/dashboard-pages.ts` file.
+ * The `write` parameter can be used to disable writing to the `#pruvious/dashboard/dashboard-pages.ts` file.
  * By default, it is set to `true`.
  */
 export function resolveDashboardPageFiles(write = true): Record<string, ResolveFromLayersResult> {
@@ -98,7 +98,7 @@ export function resolveDashboardPageFiles(write = true): Record<string, ResolveF
 
 /**
  * Resolves the dashboard page definition from a Vue page component file.
- * It generates the dashboard page definition code and writes it to the `#pruvious/client/dashboard-pages.ts` file (if `options.write` is `true`).
+ * It generates the dashboard page definition code and writes it to the `#pruvious/dashboard/dashboard-pages.ts` file (if `options.write` is `true`).
  *
  * @returns a Promise that resolves to `true` if any internal definition was successfully written, `false` otherwise.
  */
@@ -137,7 +137,7 @@ export async function resolveDashboardPageDefinition(options: ResolveDashboardPa
           ImportDeclaration(path) {
             if (path.node.source.value.startsWith('.')) {
               path.node.source.value = relative(
-                `${buildDir}/client/dashboard-pages`,
+                `${buildDir}/dashboard/dashboard-pages`,
                 resolve(dirname(options.vueFile), path.node.source.value),
               )
             }
@@ -183,20 +183,20 @@ export function writeDashboardPages(): boolean {
 
   let written = false
 
-  if (fs.existsSync(`${buildDir}/client/dashboard-pages`)) {
-    for (const file of fs.readdirSync(`${buildDir}/client/dashboard-pages`)) {
+  if (fs.existsSync(`${buildDir}/dashboard/dashboard-pages`)) {
+    for (const file of fs.readdirSync(`${buildDir}/dashboard/dashboard-pages`)) {
       if (!dashboardPageDefinitions[file.replace(/\.ts$/, '')]) {
-        fs.rmSync(`${buildDir}/client/dashboard-pages/${file}`)
+        fs.rmSync(`${buildDir}/dashboard/dashboard-pages/${file}`)
       }
     }
   } else {
-    fs.mkdirSync(`${buildDir}/client/dashboard-pages`)
+    fs.mkdirSync(`${buildDir}/dashboard/dashboard-pages`)
   }
 
   for (const [dashboardPagePath, definition] of Object.entries(dashboardPageDefinitions)) {
     if (isNotNull(definition)) {
       const identifier = dashboardPagePath.replaceAll('/', '_')
-      const path = `${buildDir}/client/dashboard-pages/${identifier}.ts`
+      const path = `${buildDir}/dashboard/dashboard-pages/${identifier}.ts`
 
       if (!fs.existsSync(path) || fs.readFileSync(path, 'utf-8') !== definition) {
         fs.writeFileSync(path, definition)
@@ -211,7 +211,7 @@ export function writeDashboardPages(): boolean {
     }
   }
 
-  const path = `${buildDir}/client/dashboard-pages.ts`
+  const path = `${buildDir}/dashboard/dashboard-pages.ts`
   const content = [
     ...dashboardPagesTS,
     `/**`,

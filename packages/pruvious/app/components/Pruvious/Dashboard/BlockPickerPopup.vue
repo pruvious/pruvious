@@ -90,7 +90,8 @@
 
 <script lang="ts" setup>
 import { Icon } from '#components'
-import { __, maybeTranslate, usePruviousDashboard } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { maybeTranslate, usePruviousDashboard } from '#pruvious/dashboard'
 import type { BlockName } from '#pruvious/server'
 import { isDefined, isObject, searchByKeywords, titleCase } from '@pruvious/utils'
 

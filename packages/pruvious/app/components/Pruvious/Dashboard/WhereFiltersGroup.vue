@@ -159,7 +159,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import type { WhereField } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import { deepClone, nanoid, walkObjects } from '@pruvious/utils'
 

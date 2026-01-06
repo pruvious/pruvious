@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, hasPermission, useUpload, type DashboardMediaLibraryState } from '#pruvious/client'
+import { __, hasPermission } from '#pruvious/app'
+import { useUpload, type DashboardMediaLibraryState } from '#pruvious/dashboard'
 
 const props = defineProps({
   state: {

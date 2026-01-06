@@ -1,4 +1,4 @@
-import { pruviousDashboardPost, QueryBuilder } from '#pruvious/client'
+import { pruviousDashboardPost, QueryBuilder } from '#pruvious/dashboard'
 import type { LogsDatabase } from '#pruvious/server'
 import { slugify } from '@pruvious/utils'
 

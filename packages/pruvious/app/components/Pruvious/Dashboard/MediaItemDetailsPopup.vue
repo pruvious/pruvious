@@ -213,13 +213,12 @@
 </template>
 
 <script lang="ts" setup>
+import { __, hasPermission, useLanguage } from '#pruvious/app'
 import {
   $pfetchDashboard,
-  __,
   dashboardBasePath,
   displayableImageTypes,
   fieldComponents,
-  hasPermission,
   History,
   imageVariants,
   optimizableImageTypes,
@@ -228,12 +227,11 @@ import {
   selectFrom,
   unsavedChanges,
   updateUpload,
-  useLanguage,
   usePruviousDashboard,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
-} from '#pruvious/client'
-import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/client/dayjs'
+} from '#pruvious/dashboard'
+import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/dashboard/dayjs'
 import type { DeleteUploadResult, ImageVariantOptions } from '#pruvious/server'
 import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'

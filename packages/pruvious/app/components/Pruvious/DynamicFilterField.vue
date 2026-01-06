@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, filterFieldComponents, type WhereField } from '#pruvious/client'
+import { customComponents, filterFieldComponents, type WhereField } from '#pruvious/dashboard'
 import type {
   Collections,
   Fields,

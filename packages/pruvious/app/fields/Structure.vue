@@ -458,13 +458,13 @@
 </template>
 
 <script lang="ts" setup>
+import { __ } from '#pruvious/app'
 import {
-  __,
   maybeTranslate,
   parseConditionalLogic,
   usePruviousClipboard,
   usePruviousClipboardData,
-} from '#pruvious/client'
+} from '#pruvious/dashboard'
 import type {
   Collections,
   GenericSerializableFieldOptions,

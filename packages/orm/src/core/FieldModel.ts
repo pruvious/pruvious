@@ -365,8 +365,7 @@ export class FieldModel<
   const TInputType,
   TSubfields extends Record<string, GenericField> | undefined,
   TStructure extends { [$key: string]: Record<string, GenericField> } | undefined,
-> implements IFieldModel
-{
+> implements IFieldModel {
   readonly dataType: TDataType
   readonly defaultValue: TCastedType | null
   readonly defaultOptions: Required<TOptions>

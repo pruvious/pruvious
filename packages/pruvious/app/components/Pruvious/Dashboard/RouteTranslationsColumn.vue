@@ -20,7 +20,8 @@
 </template>
 
 <script lang="ts" setup>
-import { languages, primaryLanguage, useDashboardContentLanguage } from '#pruvious/client'
+import { languages, primaryLanguage } from '#pruvious/app'
+import { useDashboardContentLanguage } from '#pruvious/dashboard'
 
 const props = defineProps({
   /**

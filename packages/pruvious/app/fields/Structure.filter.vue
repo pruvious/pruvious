@@ -34,7 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import { __, parseConditionalLogic, type WhereField } from '#pruvious/client'
+import { __ } from '#pruvious/app'
+import { parseConditionalLogic, type WhereField } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { isArray, isDefined, isObject, isString, isUndefined, remap, toArray } from '@pruvious/utils'

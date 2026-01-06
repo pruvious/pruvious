@@ -1,5 +1,5 @@
-import { dashboardBasePath } from '#pruvious/client/base'
-import { __ } from '#pruvious/client/i18n'
+import { __ } from '#pruvious/app/i18n'
+import { dashboardBasePath } from '#pruvious/dashboard/base'
 import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { WhereField as _WhereField, Operator } from '@pruvious/orm'
 import { puiMarkdown } from '@pruvious/ui/pui/html'

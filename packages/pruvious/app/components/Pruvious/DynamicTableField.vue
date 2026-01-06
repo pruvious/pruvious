@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { customComponents, tableFieldComponents, type CollectionRecordPermissionsResolver } from '#pruvious/client'
+import { customComponents, tableFieldComponents, type CollectionRecordPermissionsResolver } from '#pruvious/dashboard'
 import type {
   Collections,
   Fields,

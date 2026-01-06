@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUITimeLabels } from '@pruvious/ui/components/PUITime.vue'
 

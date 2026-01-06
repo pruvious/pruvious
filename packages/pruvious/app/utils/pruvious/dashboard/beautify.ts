@@ -1,4 +1,4 @@
-import { __ } from '#pruvious/client'
+import { __ } from '#pruvious/app'
 import type { LogsDatabase } from '#pruvious/server'
 import { isEmpty } from '@pruvious/utils'
 

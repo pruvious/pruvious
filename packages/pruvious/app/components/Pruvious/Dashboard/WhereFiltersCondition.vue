@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { WhereField } from '#pruvious/client'
+import type { WhereField } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import { deepClone } from '@pruvious/utils'
 

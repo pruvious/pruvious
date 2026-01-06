@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isPreview } from '#pruvious/client'
+import { isPreview } from '#pruvious/app'
 
 const preview = isPreview()
 </script>
