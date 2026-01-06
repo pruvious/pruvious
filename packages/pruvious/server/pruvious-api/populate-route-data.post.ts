@@ -1,5 +1,6 @@
 import {
   __,
+  assertUserPermissions,
   collections,
   database,
   getRouteReferences,
@@ -16,6 +17,8 @@ import { SelectContext, type Populator } from '@pruvious/orm'
 import { dotNotationsToObject, isObject, isString, isUndefined } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
+  assertUserPermissions(event, ['access-dashboard'])
+
   const routeReferences = await getRouteReferences()
   const { ref, data } = await parseBody(event, 'object').then(({ input }) => input)
 

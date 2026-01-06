@@ -724,7 +724,7 @@ async function updatePreviewRoute() {
   }
 
   if (populate.length && populate.some(({ fieldPath }) => !fieldPath.split('.').pop()!.startsWith('$'))) {
-    const populateResponse = await pruviousDashboardPost('populate', {
+    const populateResponse = await pruviousDashboardPost('populate-route-data', {
       body: {
         ref: ref?.[0] as RouteReferenceName,
         data: Object.fromEntries(populate.map(({ fieldPath, fieldValue }) => [fieldPath, fieldValue])),

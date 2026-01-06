@@ -74,7 +74,7 @@ interface Body {
   'auth/logout': undefined
   'auth/logout/others': undefined
   'auth/renew-token': undefined
-  'populate': { ref: RouteReferenceName; data: Record<string, any> }
+  'populate-route-data': { ref: RouteReferenceName; data: Record<string, any> }
   'process-queue': undefined
   'pruvious/install': { firstName?: string; lastName?: string; email: string; password: string }
 }
@@ -84,7 +84,7 @@ interface PostResponse {
   'auth/logout': { success: true }
   'auth/logout/others': { token: string }
   'auth/renew-token': { token: string }
-  'populate': { data: Record<string, any> }
+  'populate-route-data': { data: Record<string, any> }
   'process-queue': { success: true }
   'pruvious/install': { token: string }
 }
