@@ -1,9 +1,17 @@
-import { assertQuery, assertUser, getToken, pruviousError, setTokenCookies, signToken, update } from '#pruvious/server'
+import {
+  assertQuery,
+  assertUserPermissions,
+  getToken,
+  pruviousError,
+  setTokenCookies,
+  signToken,
+  update,
+} from '#pruvious/server'
 import { isEmpty, toSeconds } from '@pruvious/utils'
 import { decodeJwt } from 'jose'
 
 export default defineEventHandler(async (event) => {
-  assertUser(event)
+  assertUserPermissions(event, ['logout-other-users'])
 
   const runtimeConfig = useRuntimeConfig()
   const currentToken = getToken()!
