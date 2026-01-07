@@ -30,8 +30,8 @@
           <span>{{ label }}</span>
           <PUIBubble
             v-if="list[index]?.bubble"
-            v-pui-tooltip="list[index].bubble?.tooltip"
-            :variant="list[index].bubble?.variant"
+            v-pui-tooltip="list[index].bubble.tooltip"
+            :variant="list[index].bubble.variant"
           >
             {{ list[index].bubble.content }}
           </PUIBubble>

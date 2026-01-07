@@ -25,7 +25,7 @@
     :style="{ '--pui-size': size }"
   >
     <span
-      v-for="{ value, icon, title } of localChoices"
+      v-for="{ value, icon, title, bubble } of localChoices"
       v-pui-tooltip="showTooltips ? title : undefined"
       :title="!showTooltips ? title : undefined"
       @click="$emit('update:modelValue', value)"
@@ -34,6 +34,9 @@
     >
       <Icon v-if="typeof icon === 'string'" :name="`tabler:${icon}`" mode="svg" class="pui-icon-group-icon" />
       <component v-else-if="icon" :is="icon" class="pui-icon-group-icon" />
+      <PUIBubble v-if="bubble" v-pui-tooltip="bubble.tooltip" :variant="bubble.variant">
+        {{ bubble.content }}
+      </PUIBubble>
     </span>
 
     <input :id="id" :name="name" :value="modelValue" hidden />
@@ -72,6 +75,28 @@ export interface PUIIconGroupChoiceModel {
    * If `showTooltips` are enabled, this text appears as a tooltip on hover.
    */
   title?: string
+
+  /**
+   * An optional bubble to display on the top right corner of the icon.
+   */
+  bubble?: {
+    /**
+     * The content of the bubble.
+     */
+    content: string | Ref<string>
+
+    /**
+     * Defines the visual style variant of the bubble.
+     *
+     * @default 'primary'
+     */
+    variant?: 'primary' | 'secondary' | 'accent' | 'destructive'
+
+    /**
+     * A tooltip to display when hovering over the bubble.
+     */
+    tooltip?: string
+  }
 }
 
 const props = defineProps({
@@ -302,5 +327,11 @@ watch(
   width: 1em;
   height: 1em;
   font-size: calc(1em + 0.125rem);
+}
+
+.pui-icon-group .pui-bubble {
+  position: absolute;
+  border: none;
+  transform: translate(1.125em, -1.125em);
 }
 </style>

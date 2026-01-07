@@ -456,13 +456,13 @@ const blocksFieldsTabsList = ref<PUITabListItem<string>[]>(
   Object.entries(blocksFields).map(([name, options]) => ({ name, label: resolveFieldLabel(options.ui.label, name) })),
 )
 const activeBlocksFieldsTab = ref(blocksFieldsTabsList.value[0]?.name)
-const tabChoices: PUIIconGroupChoiceModel[] = [
+const tabChoices = ref<PUIIconGroupChoiceModel[]>([
   ...(blocksFieldsTabsList.value.length
     ? [{ value: 1, icon: 'cube', title: __('pruvious-dashboard', 'Blocks') } as const]
     : []),
   { value: 2, icon: 'device-desktop', title: __('pruvious-dashboard', 'Preview') },
   { value: 3, icon: 'forms', title: __('pruvious-dashboard', 'Fields') },
-]
+])
 const activeTab = ref<1 | 2 | 3>(
   state.value.activeTab
     ? state.value.activeTab === 1 && !blocksFieldsTabsList.value.length
@@ -800,6 +800,8 @@ function reloadIframe() {
 }
 
 function refreshErrors(): void {
+  let blockErrors = 0
+
   for (const item of blocksFieldsTabsList.value) {
     const count = Object.keys(props.errors).filter((key) => key === item.name || key.startsWith(`${item.name}.`)).length
     item.bubble = count
@@ -809,7 +811,37 @@ function refreshErrors(): void {
           variant: 'destructive',
         }
       : undefined
+    blockErrors += count
   }
+
+  tabChoices.value = tabChoices.value.map((choice) => {
+    if (choice.value === 1) {
+      return {
+        ...choice,
+        bubble: blockErrors
+          ? {
+              content: String(blockErrors),
+              tooltip: __('pruvious-dashboard', 'Found $count $errors', { count: blockErrors }),
+              variant: 'destructive',
+            }
+          : undefined,
+      }
+    } else if (choice.value === 3) {
+      const fieldErrors = Object.keys(props.errors).length - blockErrors
+      return {
+        ...choice,
+        bubble: fieldErrors
+          ? {
+              content: String(fieldErrors),
+              tooltip: __('pruvious-dashboard', 'Found $count $errors', { count: fieldErrors }),
+              variant: 'destructive',
+            }
+          : undefined,
+      }
+    }
+
+    return choice
+  })
 }
 
 function getBlockTreeItemByPath(path: string) {
