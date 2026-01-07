@@ -9,13 +9,21 @@ test('sync users and roles', async () => {
         email: new Field({ model: textFieldModel(), options: {} }),
         role: new Field({ model: textFieldModel(), options: {} }),
       },
-      indexes: [{ fields: ['email'], unique: true }],
+      indexes: [
+        { fields: ['email'], unique: true },
+        { fields: ['email'], unique: true },
+      ],
       foreignKeys: [
         {
           field: 'role',
           referencedCollection: 'Roles',
           referencedField: 'name',
           action: ['ON UPDATE RESTRICT', 'ON DELETE SET NULL'],
+        },
+        {
+          field: 'role',
+          referencedCollection: 'Roles',
+          referencedField: 'name',
         },
       ],
     }),

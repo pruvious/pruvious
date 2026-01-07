@@ -458,7 +458,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     for (const [collectionName, collectionDefinition] of Object.entries(this._collections)) {
       const collectionKey = collectionDefinition.key ?? collectionName
 
-      // Resolve indexe identifiers
+      // Resolve index identifiers
       for (const { fields, unique } of collectionDefinition.indexes) {
         // Check if the index `fields` are valid field names
         for (const field of fields) {
@@ -468,7 +468,11 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         }
 
         // Map indexes
-        this.schemaMap[collectionKey].indexes.push(toIndex(collectionName, fields, unique))
+        const indexName = toIndex(collectionName, fields, unique)
+
+        if (!this.schemaMap[collectionKey].indexes.includes(indexName)) {
+          this.schemaMap[collectionKey].indexes.push(indexName)
+        }
       }
 
       // Resolve foreign key identifiers
@@ -493,14 +497,18 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         }
 
         // Map foreign key identifier
-        this.schemaMap[collectionKey].foreignKeys.push(toForeignKey(collectionName, field))
+        const foreignKeyName = toForeignKey(collectionName, field)
 
-        // Ensure that the referenced collection is registered before the current collection
-        this._collections = Object.fromEntries(
-          Object.entries(this._collections).sort(([a], [b]) =>
-            a === referencedCollection ? -1 : b === referencedCollection ? 1 : 0,
-          ),
-        )
+        if (!this.schemaMap[collectionKey].foreignKeys.includes(foreignKeyName)) {
+          this.schemaMap[collectionKey].foreignKeys.push(foreignKeyName)
+
+          // Ensure that the referenced collection is registered before the current collection
+          this._collections = Object.fromEntries(
+            Object.entries(this._collections).sort(([a], [b]) =>
+              a === referencedCollection ? -1 : b === referencedCollection ? 1 : 0,
+            ),
+          )
+        }
       }
     }
   }
@@ -898,17 +906,27 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
 
         // Create indexes
         for (const [table, { indexes }] of Object.entries(this._collections)) {
+          const createdIndexes: string[] = []
           for (const { fields, unique } of indexes) {
-            this.log(`Creating index "${toIndex(table, fields, unique)}"`, 'sync')
-            await this.createIndex(table, fields, unique)
+            const indexName = toIndex(table, fields, unique)
+            if (!createdIndexes.includes(indexName)) {
+              this.log(`Creating index "${indexName}"`, 'sync')
+              await this.createIndex(table, fields, unique)
+              createdIndexes.push(indexName)
+            }
           }
         }
 
         // Create foreign keys
         for (const [table, { foreignKeys }] of Object.entries(this._collections)) {
+          const createdForeignKeys: string[] = []
           for (const { field, referencedCollection, referencedField, action } of foreignKeys) {
-            this.log(`Creating foreign key "${toForeignKey(table, field)}"`, 'sync')
-            await this.createForeignKey(table, field, referencedCollection, referencedField ?? 'id', action, false)
+            const foreignKeyName = toForeignKey(table, field)
+            if (!createdForeignKeys.includes(foreignKeyName)) {
+              this.log(`Creating foreign key "${foreignKeyName}"`, 'sync')
+              await this.createForeignKey(table, field, referencedCollection, referencedField ?? 'id', action, false)
+              createdForeignKeys.push(foreignKeyName)
+            }
           }
         }
       })
