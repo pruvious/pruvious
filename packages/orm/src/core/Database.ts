@@ -468,11 +468,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         }
 
         // Map indexes
-        const indexName = toIndex(collectionName, fields, unique)
-
-        if (!this.schemaMap[collectionKey].indexes.includes(indexName)) {
-          this.schemaMap[collectionKey].indexes.push(indexName)
-        }
+        this.schemaMap[collectionKey].indexes.push(toIndex(collectionName, fields, unique))
       }
 
       // Resolve foreign key identifiers
@@ -497,18 +493,14 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         }
 
         // Map foreign key identifier
-        const foreignKeyName = toForeignKey(collectionName, field)
+        this.schemaMap[collectionKey].foreignKeys.push(toForeignKey(collectionName, field))
 
-        if (!this.schemaMap[collectionKey].foreignKeys.includes(foreignKeyName)) {
-          this.schemaMap[collectionKey].foreignKeys.push(foreignKeyName)
-
-          // Ensure that the referenced collection is registered before the current collection
-          this._collections = Object.fromEntries(
-            Object.entries(this._collections).sort(([a], [b]) =>
-              a === referencedCollection ? -1 : b === referencedCollection ? 1 : 0,
-            ),
-          )
-        }
+        // Ensure that the referenced collection is registered before the current collection
+        this._collections = Object.fromEntries(
+          Object.entries(this._collections).sort(([a], [b]) =>
+            a === referencedCollection ? -1 : b === referencedCollection ? 1 : 0,
+          ),
+        )
       }
     }
   }
