@@ -28,6 +28,7 @@ export default defineTemplate(() => ({
     user: recordField({
       collection: 'Users',
       immutable: true,
+      foreignKey: 'cascade',
       inputFilters: {
         beforeInputSanitization: (value, { context }) => {
           if (context.operation === 'insert' && isUndefined(value)) {
@@ -41,8 +42,7 @@ export default defineTemplate(() => ({
     }),
     shared: switchField({}),
   },
-  indexes: [{ fields: ['collection'] }, { fields: ['user'] }, { fields: ['shared'] }],
-  foreignKeys: [{ field: 'user', referencedCollection: 'Users', action: ['ON UPDATE RESTRICT', 'ON DELETE CASCADE'] }],
+  indexes: [{ fields: ['collection'] }, { fields: ['shared'] }],
   translatable: false,
   hooks: {
     beforeQueryPreparation: [

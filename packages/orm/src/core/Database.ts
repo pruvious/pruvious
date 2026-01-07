@@ -472,7 +472,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       }
 
       // Resolve foreign key identifiers
-      for (const { field, referencedCollection, referencedField } of collectionDefinition.foreignKeys) {
+      for (const { field, referencedCollection, referencedField, action } of collectionDefinition.foreignKeys) {
         // Check if the field is a valid field identifier
         if (!Object.values(this.schemaMap[collectionKey].fields).some(({ column }) => column === field)) {
           throw new Error(`Invalid field for foreign key in collection '${collectionName}': ${field}`)
@@ -493,7 +493,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         }
 
         // Map foreign key identifier
-        this.schemaMap[collectionKey].foreignKeys.push(toForeignKey(collectionName, field))
+        this.schemaMap[collectionKey].foreignKeys.push(
+          `${toForeignKey(collectionName, field)} references "${referencedCollection}"("${referencedField ?? 'id'}") ${action?.join(' ') ?? 'ON UPDATE RESTRICT ON DELETE RESTRICT'}`,
+        )
 
         // Ensure that the referenced collection is registered before the current collection
         this._collections = Object.fromEntries(

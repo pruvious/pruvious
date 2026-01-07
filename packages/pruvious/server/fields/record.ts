@@ -106,11 +106,16 @@ export interface CustomRecordFieldOptions<
    * Controls whether a foreign key constraint is automatically created when this field is used at the top level of a collection.
    * The constraint references the `id` field in the related `collection`.
    *
-   * When set to `false`, you can define foreign key constraints manually using the `foreignKeys` option at the collection level.
+   * Available options:
    *
-   * @default true
+   * - `'cascade'` - Create a foreign key constraint with `ON UPDATE RESTRICT` and `ON DELETE CASCADE` actions.
+   * - `'restrict'` - Create a foreign key constraint with `ON UPDATE RESTRICT` and `ON DELETE RESTRICT` actions.
+   * - `'set null'` - Create a foreign key constraint with `ON UPDATE RESTRICT` and `ON DELETE SET NULL` actions (default).
+   * - `false` - Do not create any foreign key constraint (you can define it manually using the `foreignKeys` option at the collection level).
+   *
+   * @default 'set null'
    */
-  foreignKey?: boolean
+  foreignKey?: 'cascade' | 'restrict' | 'set null' | false
 }
 
 const customOptions: CustomRecordFieldOptions<any, string, boolean> = {
@@ -122,7 +127,7 @@ const customOptions: CustomRecordFieldOptions<any, string, boolean> = {
     displayFields: 'id',
     searchFields: 'id',
   },
-  foreignKey: true,
+  foreignKey: 'set null',
 }
 
 export default {
@@ -255,7 +260,12 @@ export default {
           ? ({
               referencedCollection: options.collection,
               referencedField: 'id',
-              action: ['ON UPDATE RESTRICT', 'ON DELETE SET NULL'],
+              action:
+                options.foreignKey === 'cascade'
+                  ? ['ON UPDATE RESTRICT', 'ON DELETE CASCADE']
+                  : options.foreignKey === 'restrict'
+                    ? ['ON UPDATE RESTRICT', 'ON DELETE RESTRICT']
+                    : ['ON UPDATE RESTRICT', 'ON DELETE SET NULL'],
             } satisfies Omit<ForeignKey<Record<string, GenericField>>, 'field'>)
           : undefined,
     }) as any

@@ -2017,6 +2017,7 @@ export function defineCollection<
           referencedField: field.options._foreignKey.referencedField,
           action: field.options._foreignKey.action,
         })
+        indexes.push({ fields: [fieldName] })
       }
     }
 
