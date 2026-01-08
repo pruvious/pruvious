@@ -19,7 +19,6 @@ import {
   textField,
   type TranslatableStringCallbackContext,
   trueFalseField,
-  uniqueValidator,
 } from '#pruvious/server'
 import type { WhereCondition } from '@pruvious/orm'
 import { type PUITimezone, puiTimezones } from '@pruvious/ui/pui/timezone'
@@ -30,13 +29,11 @@ export default defineTemplate(() => ({
     email: textField({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'Email') },
       required: true,
-      validators: [
-        emailValidator(),
-        uniqueValidator({
-          errorMessage: ({ __ }) => __('pruvious-api', 'The email address is already in use'),
-          caseSensitive: false,
-        }),
-      ],
+      unique: {
+        errorMessage: ({ __ }) => __('pruvious-api', 'The email address is already in use'),
+        caseSensitive: false,
+      },
+      validators: [emailValidator()],
     }),
     password: textField({
       required: true,
@@ -239,7 +236,7 @@ export default defineTemplate(() => ({
   logs: {
     exposeData: false,
   },
-  indexes: [{ fields: ['email'], unique: true }, { fields: ['tokenSubject'], unique: true }, { fields: ['isActive'] }],
+  indexes: [{ fields: ['tokenSubject'], unique: true }, { fields: ['isActive'] }],
   translatable: false,
   hooks: {
     beforeQueryPreparation: [

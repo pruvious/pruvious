@@ -4,6 +4,7 @@ export default defineTemplate(() => ({
   fields: {
     name: textField({
       required: true,
+      unique: true,
     }),
     permissions: chipsField({
       // @todo hide `collection:{slug}:manage` permissions from the UI for collections that have disabled the `author` and `editors` fields
@@ -11,7 +12,6 @@ export default defineTemplate(() => ({
       enforceUniqueItems: true,
     }),
   },
-  indexes: [{ fields: ['name'], unique: true }],
   translatable: false,
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'Roles'),

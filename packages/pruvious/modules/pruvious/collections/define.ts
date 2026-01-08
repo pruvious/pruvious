@@ -110,7 +110,8 @@ export type DefineCollectionOptions<
    * {
    *   email: textField({
    *     required: true,
-   *     validators: [emailValidator(), uniqueValidator()],
+   *     unique: true,
+   *     validators: [emailValidator()],
    *   }),
    *   roles: recordsField({
    *     collection: 'Roles',
@@ -2010,6 +2011,16 @@ export function defineCollection<
     }
 
     for (const [fieldName, field] of Object.entries(fields)) {
+      if (field.options.unique) {
+        indexes.push({
+          fields:
+            isObject(field.options.unique) && field.options.unique.perLanguage && translatable
+              ? [fieldName, 'language']
+              : [fieldName],
+          unique: true,
+        })
+      }
+
       if (isObject(field.options._foreignKey)) {
         foreignKeys.push({
           field: fieldName,

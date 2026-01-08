@@ -11,7 +11,6 @@ import {
   switchField,
   textField,
   translatableTextField,
-  uniqueValidator,
 } from '#pruvious/server'
 import { Field, objectFieldModel } from '@pruvious/orm'
 import { normalizePath } from '@pruvious/storage'
@@ -50,6 +49,7 @@ export default defineTemplate(() => ({
     path: textField({
       ui: { label: ({ __ }) => __('pruvious-dashboard', 'Path'), placeholder: 'e.g. /folder/file.jpg' },
       required: true,
+      unique: { errorMessage: ({ __ }) => __('pruvious-api', 'The path must be unique') },
       validators: [
         (value, { context }) => {
           try {
@@ -63,7 +63,6 @@ export default defineTemplate(() => ({
           } catch {}
           throw new Error(context.__('pruvious-api', 'Invalid path'))
         },
-        uniqueValidator({ errorMessage: ({ __ }) => __('pruvious-api', 'The path must be unique') }),
       ],
       inputFilters: {
         beforeInputValidation: async (value, { context }) => {
@@ -217,7 +216,7 @@ export default defineTemplate(() => ({
   },
   author: true,
   editors: true,
-  indexes: [{ fields: ['path'], unique: true }, { fields: ['type'] }, { fields: ['level'] }, { fields: ['category'] }],
+  indexes: [{ fields: ['type'] }, { fields: ['level'] }, { fields: ['category'] }],
   translatable: false,
   hooks: {
     beforeQueryExecution: [

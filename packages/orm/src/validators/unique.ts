@@ -183,7 +183,7 @@ export interface UniqueValidatorOptions<
    * The function receives an object with `_` and `__` properties to access the translation functions.
    *
    * @default
-   * __('pruvious-orm', 'The value must be unique')
+   * ({ __ }) => __('pruvious-orm', 'The value must be unique')
    */
   errorMessage?: CustomErrorMessage<TDatabase>
 

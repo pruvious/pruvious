@@ -54,6 +54,8 @@ export function getAppValidatorsFileContent() {
     ` * The imported function is a meta function that does not execute any actual validation logic.`,
     ` * The real validation is performed on the server side and \`uniqueValidator\` is removed from the Vue component during compilation.`,
     ` *`,
+    ` * Alternatively, you can use the \`unique\` option on the field itself, which will automatically add this validator.`,
+    ` *`,
     ` * @example`,
     ` * \`\`\`ts`,
     ` * <script lang="ts" setup>`,
