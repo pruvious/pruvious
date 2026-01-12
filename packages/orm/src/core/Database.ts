@@ -1396,8 +1396,6 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       const idType = this.dialect === 'postgres' ? 'bigserial' : 'integer'
       const sql = `create table "${junction.tableName}" ("${junction.columnA}" ${idType} not null, "${junction.columnB}" ${idType} not null, "${junction.columnOrderA}" integer, "${junction.columnOrderB}" integer, constraint "PK_${junction.tableName}" primary key ("${junction.columnA}", "${junction.columnB}"))`
       await this.exec(sql)
-      await this.createIndex(junction.tableName, [junction.columnOrderA])
-      await this.createIndex(junction.tableName, [junction.columnOrderB])
     }
     const createForeignKeysFn = async () => {
       await this.createForeignKey(
@@ -1431,6 +1429,8 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
 
       try {
         await createForeignKeysFn()
+        await this.createIndex(junction.tableName, [junction.columnOrderA])
+        await this.createIndex(junction.tableName, [junction.columnOrderB])
         return
       } catch {
         await this.dropTable(junction.tableName)
@@ -1439,6 +1439,8 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
 
     await createTableFn()
     await createForeignKeysFn()
+    await this.createIndex(junction.tableName, [junction.columnOrderA])
+    await this.createIndex(junction.tableName, [junction.columnOrderB])
   }
 
   /**
