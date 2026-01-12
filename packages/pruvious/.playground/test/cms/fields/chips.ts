@@ -79,6 +79,9 @@ describe('chips field', () => {
     expect(await $postAsAdmin(chipsAllowDuplicates, { chipsAllowDuplicates: ['foo', 'foo'] })).toEqual([
       { chipsAllowDuplicates: ['foo', 'foo'] },
     ])
+    expect(await $postAsAdmin(chips, { chips: ['foo', 'foo'] })).toEqual(
+      $422([{ 'chips': expect.any(String), 'chips.1': expect.any(String) }]),
+    )
 
     // allow duplicate items (with choices)
     expect(await $postAsAdmin(chipsChoicesAllowDuplicates, { chipsChoicesAllowDuplicates: [] })).toEqual([
@@ -87,6 +90,9 @@ describe('chips field', () => {
     expect(
       await $postAsAdmin(chipsChoicesAllowDuplicates, { chipsChoicesAllowDuplicates: ['option1', 'option1'] }),
     ).toEqual([{ chipsChoicesAllowDuplicates: ['option1', 'option1'] }])
+    expect(await $postAsAdmin(chipsChoices, { chipsChoices: ['foo', 'foo'] })).toEqual(
+      $422([{ 'chipsChoices': expect.any(String), 'chipsChoices.1': expect.any(String) }]),
+    )
     expect(await $postAsAdmin(chipsChoicesAllowDuplicates, { chipsChoicesAllowDuplicates: ['foo'] })).toEqual(
       $422([
         { 'chipsChoicesAllowDuplicates': expect.any(String), 'chipsChoicesAllowDuplicates.0': expect.any(String) },
