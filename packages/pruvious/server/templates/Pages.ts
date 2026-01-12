@@ -12,4 +12,6 @@ export default defineTemplate(() => ({
     seo: true,
     layout: 'page',
   },
+  author: true,
+  editors: true,
 }))
