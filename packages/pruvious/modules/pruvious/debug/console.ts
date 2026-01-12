@@ -35,7 +35,6 @@ export function warn(message: InputLogObject | any, ...args: any[]) {
  */
 export function warnWithContext(message: string, context: string[]) {
   if (context.length) {
-    message += '\n'
     message += context.map((line) => `\n - ${line}`).join('')
   }
   warn(message)

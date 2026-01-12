@@ -2269,11 +2269,11 @@ export function defineCollection<
       }
     }
 
-    return new Collection({
+    const collection = new Collection({
       key: options.key,
       fields: remap(fields, (fieldName, field) =>
         field.options._collectionFieldTransformFn
-          ? [fieldName, field.options._collectionFieldTransformFn() as any]
+          ? [fieldName, field.options._collectionFieldTransformFn() as GenericField]
           : [fieldName, field],
       ) as any,
       indexes,
@@ -2328,6 +2328,10 @@ export function defineCollection<
         } satisfies Required<CollectionUIOptions>),
       } satisfies CollectionMeta,
     }) as any
+
+    collection._resolveContext = resolveContext
+
+    return collection
   }
 }
 
