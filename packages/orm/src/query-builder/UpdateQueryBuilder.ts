@@ -1036,7 +1036,8 @@ export class UpdateQueryBuilder<
     )
 
     if (junctionFields.length && isArray<Record<string, any>>(rawResult)) {
-      const promises: (() => Promise<number>)[] = []
+      const promisesDelete: (() => Promise<number>)[] = []
+      const promisesInsert: (() => Promise<number>)[] = []
 
       for (const row of rawResult) {
         if (row.id) {
@@ -1049,12 +1050,12 @@ export class UpdateQueryBuilder<
               field.options.inverseField,
             )
 
-            promises.push(() =>
+            promisesDelete.push(() =>
               this.db.exec(`delete from "${junction.tableName}" where "${junction.columnA}" = $id`, { id: row.id }),
             )
 
             for (const [i, relatedId] of value.entries()) {
-              promises.push(() =>
+              promisesInsert.push(() =>
                 this.db.exec(
                   `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "order") values ($id, $relatedId, $order)`,
                   { id: row.id, relatedId, order: i + 1 },
@@ -1065,7 +1066,8 @@ export class UpdateQueryBuilder<
         }
       }
 
-      await promiseAllInBatches(promises, 50)
+      await promiseAllInBatches(promisesDelete, 50)
+      await promiseAllInBatches(promisesInsert, 50)
     }
   }
 
