@@ -10,9 +10,11 @@ import {
   isPrimitive,
   isUndefined,
   omit,
+  promiseAllInBatches,
   remap,
   resolveRelativeDotNotation,
   toArray,
+  toJunction,
   uniqueArray,
   type ExtractSQLParams,
   type NonEmptyArray,
@@ -665,10 +667,12 @@ export class InsertQueryBuilder<
 
     try {
       const { result: rawResult, duration: queryExecutionTime } = (await this.db.execWithDuration(sql, params)) as any
-      const deserializedResult = await this.deserialize(rawResult)
-      const populatedResult = this.populateFields
-        ? await this.populateFieldValues(deserializedResult)
-        : deserializedResult
+      await this.setRelationships(rawResult)
+      const deserializedResult = await this.deserialize(
+        this.returnType === 'count' && isArray(rawResult) ? rawResult.length : rawResult,
+      )
+      const preparedResult = await this.prepareResults(deserializedResult, this.returningFields)
+      const populatedResult = this.populateFields ? await this.populateFieldValues(preparedResult) : preparedResult
       const result = this.prepareOutput(populatedResult)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult, queryExecutionTime, result })
       return result
@@ -957,54 +961,47 @@ export class InsertQueryBuilder<
    * Executes all field validators using the `sanitizedInput` data and `conditionalLogicResolvers` results.
    */
   protected async validateInput() {
-    const promises: Promise<void>[] = []
+    const promises: (() => Promise<void>)[] = []
 
-    promises.push(
-      new Promise<void>(async (resolve) => {
-        for (const [i, item] of this.sanitizedInput.entries()) {
-          const errors: Record<string, string> = {}
-          const context = this.createSanitizedContext(i)
-          const promises2: Promise<void>[] = []
+    promises.push(async () => {
+      for (const [i, item] of this.sanitizedInput.entries()) {
+        const errors: Record<string, string> = {}
+        const context = this.createSanitizedContext(i)
+        const promises2: (() => Promise<void>)[] = []
 
-          for (const [fieldName, field] of Object.entries(this.c().fields)) {
-            const value = item[fieldName]
+        for (const [fieldName, field] of Object.entries(this.c().fields)) {
+          const value = item[fieldName]
 
-            promises2.push(
-              new Promise<void>(async (resolve2) => {
-                for (const validator of [...field.model.validators, ...field.validators]) {
-                  try {
-                    await validator(
-                      value,
-                      field.withSanitizedContext(context, {
-                        path: fieldName,
-                        conditionalLogicResolver: this.conditionalLogicResolvers[i],
-                      }),
-                      errors,
-                    )
-                  } catch (error: any) {
-                    if (error.message !== '_ignore') {
-                      errors[fieldName] = error.message || this._('Invalid input')
-                    }
-                    break
-                  }
+          promises2.push(async () => {
+            for (const validator of [...field.model.validators, ...field.validators]) {
+              try {
+                await validator(
+                  value,
+                  field.withSanitizedContext(context, {
+                    path: fieldName,
+                    conditionalLogicResolver: this.conditionalLogicResolvers[i],
+                  }),
+                  errors,
+                )
+              } catch (error: any) {
+                if (error.message !== '_ignore') {
+                  errors[fieldName] = error.message || this._('Invalid input')
                 }
-                resolve2()
-              }),
-            )
-          }
-
-          await Promise.all(promises2)
-
-          if (!isEmpty(errors)) {
-            this.inputErrors[i] = { ...errors, ...this.inputErrors[i] }
-          }
+                break
+              }
+            }
+          })
         }
 
-        resolve()
-      }),
-    )
+        await promiseAllInBatches(promises2, 50)
 
-    await Promise.all(promises)
+        if (!isEmpty(errors)) {
+          this.inputErrors[i] = { ...errors, ...this.inputErrors[i] }
+        }
+      }
+    })
+
+    await promiseAllInBatches(promises, 50)
   }
 
   /**
@@ -1037,13 +1034,51 @@ export class InsertQueryBuilder<
   }
 
   /**
+   * Updates junction field relationships using the raw result data.
+   * The result data contains IDs of inserted rows in the same order as input data.
+   */
+  protected async setRelationships(rawResult: any) {
+    if (isArray<Record<string, any>>(rawResult)) {
+      const promises: (() => Promise<number>)[] = []
+
+      for (const [i, item] of this.sanitizedInput.entries()) {
+        const id = rawResult[i]?.id
+
+        if (id) {
+          for (const [fieldName, field] of Object.entries(this.c().fields)) {
+            if (field.model.dataType === 'junction' && !isEmpty<number[]>(item[fieldName])) {
+              const junction = toJunction(
+                this.collectionName,
+                fieldName,
+                field.options.referencedCollection,
+                field.options.inverseField,
+              )
+
+              for (const [i, relatedId] of item[fieldName].entries()) {
+                promises.push(() =>
+                  this.db.exec(
+                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "order") values ($id, $relatedId, $order)`,
+                    { id, relatedId, order: i + 1 },
+                  ),
+                )
+              }
+            }
+          }
+        }
+      }
+
+      await promiseAllInBatches(promises, 50)
+    }
+  }
+
+  /**
    * Applies all available field populators to the provided `rows` and returns a new array with the populated values.
    */
   protected async populateFieldValues(rows: any) {
     if (isArray<Record<string, any>>(rows)) {
       const populatedRows: Record<string, any>[] = []
       const fields = this.c().fields
-      const promises: Promise<any>[] = []
+      const promises: (() => Promise<any>)[] = []
 
       for (const [i, row] of rows.entries()) {
         const populatedRow: Record<string, any> = {}
@@ -1053,18 +1088,15 @@ export class InsertQueryBuilder<
           const populator: Populator<any, any> | undefined = fields[column]?.model.populator
 
           if (populator) {
-            promises.push(
-              new Promise<void>(async (resolve) => {
-                populatedRow[column] = await populator(
-                  value,
-                  fields[column].withSanitizedContext(context, {
-                    path: column,
-                    conditionalLogicResolver: this.conditionalLogicResolvers[i],
-                  }),
-                )
-                resolve()
-              }),
-            )
+            promises.push(async () => {
+              populatedRow[column] = await populator(
+                value,
+                fields[column].withSanitizedContext(context, {
+                  path: column,
+                  conditionalLogicResolver: this.conditionalLogicResolvers[i],
+                }),
+              )
+            })
           } else {
             populatedRow[column] = value
           }
@@ -1073,7 +1105,7 @@ export class InsertQueryBuilder<
         populatedRows.push(populatedRow)
       }
 
-      await Promise.all(promises)
+      await promiseAllInBatches(promises, 50)
       return populatedRows
     }
 
@@ -1164,7 +1196,7 @@ export class InsertQueryBuilder<
    * Generates the SQL string and its corresponding parameters for the INSERT query.
    */
   protected async toSQL(): Promise<{ sql: string; params: Record<string, any> }> {
-    const columns = this.getColumnIdentifiers(Object.keys(this.c().fields))
+    const columns = this.getColumnIdentifiers(this.filterRealColumns(Object.keys(this.c().fields)))
     const values: string[][] = []
     const params: Record<string, any> = {
       ...this.rawInjections.afterInsertIntoClause?.params,
@@ -1177,7 +1209,7 @@ export class InsertQueryBuilder<
     for (const inputItem of this.sanitizedInput) {
       const valuesItem: string[] = []
 
-      for (const [fieldName, field] of Object.entries(this.c().fields)) {
+      for (const [fieldName, field] of this.filterRealColumns(Object.entries(this.c().fields))) {
         valuesItem.push(`$p${++i}`)
         try {
           params[`p${i}`] = await field.model.serializer(inputItem[fieldName] ?? null)
@@ -1197,7 +1229,9 @@ export class InsertQueryBuilder<
     sql += this.rawInjections.afterValuesClause ? ` ${this.rawInjections.afterValuesClause.raw}` : ''
 
     if (this.returnType === 'rows') {
-      sql += ` returning ${this.getColumnIdentifiers(this.returningFields)}`
+      sql += ` returning ${this.getColumnIdentifiers(uniqueArray(['id', ...this.filterRealColumns(this.returningFields)]))}`
+    } else if (this.hasJunctionFields()) {
+      sql += ` returning "id"`
     }
 
     sql += this.rawInjections.afterReturningClause ? ` ${this.rawInjections.afterReturningClause.raw}` : ''

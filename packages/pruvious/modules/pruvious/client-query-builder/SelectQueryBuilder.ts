@@ -2,6 +2,7 @@ import type {
   Collection,
   DefaultQueryBuilderParamsOptions,
   ExtractCastedTypes,
+  ExtractFieldNamesByType,
   ExtractPopulatedTypes,
   Paginated,
   QueryBuilderResult,
@@ -21,7 +22,6 @@ import {
   toArray,
   uniqueArray,
   type NonEmptyArray,
-  type StringKeys,
 } from '@pruvious/utils'
 import { hash } from 'ohash'
 import { ConditionalQueryBuilder } from './ConditionalQueryBuilder'
@@ -483,17 +483,17 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     fields: NonEmptyArray<TField>,
     orderByRelevance?: 'high' | 'low' | false,
   ): this
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     field: TField,
     orderByRelevance?: 'high' | 'low' | false,
   ): this
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     fields: NonEmptyArray<TField> | TField,
     orderByRelevance?: 'high' | 'low' | false,
@@ -509,7 +509,10 @@ export class SelectQueryBuilder<
     }
 
     if (finalKeywords.length) {
-      this.searchCondition.push({ fields: isArray(fields) ? uniqueArray(fields) : [fields], keywords: finalKeywords })
+      this.searchCondition.push({
+        fields: (isArray(fields) ? uniqueArray(fields) : [fields]) as any,
+        keywords: finalKeywords,
+      })
     }
 
     if (isDefined(orderByRelevance)) {
@@ -553,9 +556,15 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(fields: NonEmptyArray<TField>): this
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(field: TField): this
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(fields: NonEmptyArray<TField> | TField) {
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(fields: NonEmptyArray<TField>): this
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(field: TField): this
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(fields: NonEmptyArray<TField> | TField) {
     this.groupByFields = uniqueArray(toArray(fields as string[]))
     return this
   }
@@ -609,7 +618,9 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  orderBy<TField extends TCollection['TColumnNames'] | 'id'>(
+  orderBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(
     field: TField,
     direction: 'asc' | 'desc' = 'asc',
     nulls: 'nullsAuto' | 'nullsFirst' | 'nullsLast' = 'nullsAuto',

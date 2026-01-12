@@ -131,7 +131,14 @@ function serializeFields(fields: Record<string, any>): Record<string, GenericSer
         'dependencies',
       ]),
       ...serializeTranslatableStringCallbacks({
-        ...omit(field.options, ['unique', 'populator', 'structure', 'subfields', '_foreignKey']),
+        ...omit(field.options, [
+          'unique',
+          'populator',
+          'structure',
+          'subfields',
+          '_foreignKey',
+          '_collectionFieldTransformFn',
+        ]),
         structure: isObject(field.options.structure)
           ? remap(field.options.structure, ($key, subfields) => [$key, serializeFields(subfields)])
           : undefined,

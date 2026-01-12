@@ -119,12 +119,12 @@ export function matrixFieldModel<
    * Specifies the casted type for the array items.
    * Use a single type or an array to allow multiple types.
    *
-   * @default 'string'
+   * @default 'number'
    */
   type: TType | TType[] = 'number' as TType,
 ): FieldModel<
   MatrixFieldModelOptions<TCastedType, TPopulatedType>,
-  'text',
+  'matrix',
   TCastedType,
   TPopulatedType,
   TInputType,
@@ -132,7 +132,7 @@ export function matrixFieldModel<
   undefined
 > {
   return new FieldModel({
-    dataType: 'text',
+    dataType: 'matrix',
     defaultValue: [],
     defaultOptions: {
       allowEmptyArray: false,

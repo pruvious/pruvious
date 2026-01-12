@@ -606,7 +606,7 @@ function resolveColumns(
           'ui' in options && isDefined(options.ui?.label)
             ? maybeTranslate(options.ui.label)
             : __('pruvious-dashboard', titleCase(fieldName, false) as any),
-        sortable: options._dataType === 'text' ? 'text' : 'numeric',
+        sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
         minWidth: '16rem',
       })
     }
@@ -636,7 +636,7 @@ function resolveColumns(
                 'ui' in options && isDefined(options.ui?.label)
                   ? maybeTranslate(options.ui.label)
                   : __('pruvious-dashboard', titleCase(field, false) as any),
-              sortable: options._dataType === 'text' ? 'text' : 'numeric',
+              sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
               width,
               minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
             })
@@ -657,7 +657,7 @@ function resolveColumns(
               : 'ui' in options && isDefined(options.ui?.label)
                 ? maybeTranslate(options.ui.label)
                 : __('pruvious-dashboard', titleCase(column.field, false) as any),
-            sortable: options._dataType === 'text' ? 'text' : 'numeric',
+            sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
             width: column.width,
             minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),
           })

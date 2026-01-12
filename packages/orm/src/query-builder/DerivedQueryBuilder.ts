@@ -4,8 +4,18 @@ import type {
   I18n,
   TranslatableStringsDefinition,
 } from '@pruvious/i18n'
-import { anonymizeObject, deepClone, isArray, isEmpty, isUndefined, truncateObject } from '@pruvious/utils'
-import type { GenericCollection, GenericDatabase, QueryDetails } from '../core'
+import {
+  anonymizeObject,
+  deepClone,
+  isArray,
+  isEmpty,
+  isString,
+  isUndefined,
+  promiseAllInBatches,
+  toJunction,
+  truncateObject,
+} from '@pruvious/utils'
+import type { GenericCollection, GenericDatabase, GenericField, QueryDetails } from '../core'
 import { BaseQueryBuilder } from './BaseQueryBuilder'
 import type { i18n, translatableStrings } from './i18n'
 import type { QueryBuilderOutput, QueryBuilderPrepareCallback, QueryBuilderResult } from './types'
@@ -217,6 +227,76 @@ export class DerivedQueryBuilder<
    */
   protected escapeIdentifier(identifier: string) {
     return `"${identifier.replace(/"/g, '""')}"`
+  }
+
+  /**
+   * Checks if the current `collection` has any junction fields.
+   */
+  protected hasJunctionFields() {
+    return Object.values(this.c().fields).some((field) => field.model.dataType === 'junction')
+  }
+
+  /**
+   * Filters out junction fields from the provided `columns` array.
+   */
+  protected filterRealColumns<T extends string | [string, GenericField]>(columns: T[]): T[] {
+    return columns.filter((column) => {
+      const fieldName = isString(column) ? column : column[0]
+      return fieldName === 'id' || this.c().fields[fieldName]?.model.dataType !== 'junction'
+    })
+  }
+
+  /**
+   * Prepares the raw `rows` returned from the database before further processing.
+   *
+   * - Fetches values of junction fields from the `returnFields` list.
+   * - Removes the `id` field from the result if it's not included in the `returningFields`.
+   */
+  protected async prepareResults(rows: any, returnFields: string[]) {
+    if (isArray<Record<string, any>>(rows)) {
+      const preparedRows: Record<string, any>[] = []
+      const promises: (() => Promise<void>)[] = []
+
+      for (const row of rows) {
+        const preparedRow: Record<string, any> = { ...row }
+        const id = preparedRow['id']
+
+        if (!returnFields.includes('id')) {
+          delete preparedRow['id']
+        }
+
+        for (const fieldName of returnFields) {
+          const field = this.c().fields[fieldName]
+
+          if (field?.model.dataType === 'junction') {
+            const junction = toJunction(
+              this.collectionName,
+              fieldName,
+              field.options.referencedCollection,
+              field.options.inverseField,
+            )
+
+            promises.push(() =>
+              this.db
+                .exec(
+                  `select "${junction.columnB}" from "${junction.tableName}" where "${junction.columnA}" = $id order by "order" nulls last`,
+                  { id },
+                )
+                .then((junctionRows: any[]) => {
+                  preparedRow[fieldName] = junctionRows.map((r) => +r[junction.columnB])
+                }),
+            )
+          }
+        }
+
+        preparedRows.push(preparedRow)
+      }
+
+      await promiseAllInBatches(promises, 50)
+      return preparedRows
+    }
+
+    return rows
   }
 
   /**

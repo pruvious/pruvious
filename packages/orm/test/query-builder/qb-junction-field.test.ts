@@ -4,390 +4,174 @@ import {
   Database,
   emailValidator,
   Field,
-  matrixFieldModel,
+  junctionFieldModel,
   textFieldModel,
   uniqueValidator,
 } from '../../src'
 import { initAllDrivers, qbe, qbo } from '../utils'
 
-describe('matrix field', () => {
-  test('basic sanitization and validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_sanitization_validation')) {
+const collections = {
+  Events: new Collection({
+    fields: {
+      title: new Field({
+        model: textFieldModel(),
+        options: {},
+        required: true,
+      }),
+      categories: new Field({
+        model: junctionFieldModel('Categories'),
+        options: {},
+      }),
+      attendees: new Field({
+        model: junctionFieldModel('Users', 'events'),
+        options: {},
+      }),
+    },
+  }),
+  Categories: new Collection({
+    fields: {
+      name: new Field({
+        model: textFieldModel(),
+        options: {},
+        required: true,
+        validators: [uniqueValidator()],
+      }),
+    },
+    indexes: [{ fields: ['name'], unique: true }],
+  }),
+  Users: new Collection({
+    fields: {
+      email: new Field({
+        model: textFieldModel(),
+        options: {},
+        required: true,
+        validators: [emailValidator(), uniqueValidator()],
+      }),
+      events: new Field({
+        model: junctionFieldModel('Events', 'attendees'),
+        options: {},
+      }),
+    },
+    indexes: [{ fields: ['email'], unique: true }],
+  }),
+}
+
+describe('junction field', () => {
+  test('sanitization and validation', async () => {
+    for (const { driver, PGPool, close } of await initAllDrivers('qb_junction_field')) {
       const db = new Database({
         driver,
         PGPool,
         collections: {
-          Required: new Collection({
+          ...collections,
+          Events: {
+            ...collections.Events,
             fields: {
-              foo: new Field({
-                model: matrixFieldModel(),
+              ...collections.Events.fields,
+              categories: new Field({
+                model: junctionFieldModel('Categories'),
                 options: {},
                 required: true,
               }),
-            },
-          }),
-          NonNullable: new Collection({
-            fields: {
-              bar: new Field({
-                model: matrixFieldModel(),
-                options: {},
-                required: true,
-                nullable: false,
-              }),
-            },
-          }),
-          AllowEmptyArray: new Collection({
-            fields: {
-              baz: new Field({
-                model: matrixFieldModel(),
+              attendees: new Field({
+                model: junctionFieldModel('Users', 'events'),
                 options: {
-                  allowEmptyArray: true,
+                  minItems: 2,
+                  maxItems: 2,
                 },
               }),
             },
-          }),
+          },
         },
       })
+
       await db.connect()
       const qb = db.queryBuilder()
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({} as any)
+          .insertInto('Categories')
+          .values([{ name: 'Music' }, { name: 'Art' }, { name: 'Tech' }])
           .run(),
-      ).toEqual(qbe([{ foo: 'This field is required' }]))
-
-      expect(await qb.insertInto('Required').values({ foo: [] }).run()).toEqual(
-        qbe([{ foo: 'This field must contain at least one item' }]),
-      )
+      ).toEqual(qbo(3))
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({ foo: {} as any })
+          .insertInto('Users')
+          .values([{ email: 'user1@example.com' }, { email: 'user2@example.com' }, { email: 'user3@example.com' }])
           .run(),
-      ).toEqual(qbe([{ foo: 'The value must be an array or `null`' }]))
+      ).toEqual(qbo(3))
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({ foo: 'foo' as any })
+          .insertInto('Events')
+          .values([{ title: 'Concert', categories: ['1.0'], attendees: ['01', 2] }])
+          .returning(['categories', 'attendees'])
           .run(),
-      ).toEqual(qbe([{ foo: 'The value must be an array or `null`' }]))
+      ).toEqual(qbo([{ categories: [1], attendees: [1, 2] }]))
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({ foo: [1] })
-          .returning('foo')
+          .insertInto('Events')
+          .values([{ title: 'Event 1', attendees: [1, 2] } as any])
           .run(),
-      ).toEqual(qbo([{ foo: [1] }]))
-
-      expect(await qb.insertInto('Required').values({ foo: null }).returning('foo').run()).toEqual(qbo([{ foo: null }]))
+      ).toEqual(qbe([{ categories: 'This field is required' }]))
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({ foo: JSON.stringify([1]) as any })
-          .returning('foo')
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: [], attendees: [1, 2] }])
           .run(),
-      ).toEqual(qbo([{ foo: [1] }]))
+      ).toEqual(qbe([{ categories: 'This field must contain at least one item' }]))
 
       expect(
         await qb
-          .insertInto('Required')
-          .values({ foo: JSON.stringify(null) as any })
-          .returning('foo')
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: null, attendees: [1, 2] }])
           .run(),
-      ).toEqual(qbo([{ foo: null }]))
+      ).toEqual(qbe([{ categories: 'This field is not nullable' }]))
 
       expect(
         await qb
-          .insertInto('NonNullable')
-          .values({ bar: null as any })
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: {} as any, attendees: [1, 2] }])
           .run(),
-      ).toEqual(qbe([{ bar: 'This field is not nullable' }]))
+      ).toEqual(qbe([{ categories: 'The value must be an array' }]))
 
       expect(
         await qb
-          .insertInto('NonNullable')
-          .values({ bar: true as any })
-          .run(),
-      ).toEqual(qbe([{ bar: 'The value must be an array' }]))
-
-      expect(
-        await qb
-          .update('NonNullable')
-          .set({ bar: null as any })
-          .run(),
-      ).toEqual(qbe({ bar: 'This field is not nullable' }))
-
-      expect(await qb.insertInto('AllowEmptyArray').values({ baz: [] }).returning('baz').run()).toEqual(
-        qbo([{ baz: [] }]),
-      )
-
-      await db.close()
-      await close?.()
-    }
-  })
-
-  test('array items type casting', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_items_type_casting')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Foo: new Collection({
-            fields: {
-              strings: new Field({ model: matrixFieldModel('string'), options: {} }),
-              numbers: new Field({ model: matrixFieldModel('number'), options: {} }),
-              stringsAndNumbers: new Field({ model: matrixFieldModel(['string', 'number']), options: {} }),
-            },
-          }),
-        },
-      })
-      await db.connect()
-      const qb = db.queryBuilder()
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ strings: ['foo', 1] })
-          .returning('strings')
-          .run(),
-      ).toEqual(qbo([{ strings: ['foo', '1'] }]))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ numbers: ['1', 2] })
-          .returning('numbers')
-          .run(),
-      ).toEqual(qbo([{ numbers: [1, 2] }]))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ stringsAndNumbers: [1, 'foo', '2', ''] })
-          .returning('stringsAndNumbers')
-          .run(),
-      ).toEqual(qbo([{ stringsAndNumbers: [1, 'foo', '2', ''] }]))
-
-      await db.close()
-      await close?.()
-    }
-  })
-
-  test('array items type validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_items_type_validation')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Foo: new Collection({
-            fields: {
-              strings: new Field({ model: matrixFieldModel('string'), options: {} }),
-              numbers: new Field({ model: matrixFieldModel('number'), options: {} }),
-              stringsAndNumbers: new Field({ model: matrixFieldModel(['string', 'number']), options: {} }),
-            },
-          }),
-        },
-      })
-      await db.connect()
-      const qb = db.queryBuilder()
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ strings: [true, null] as any })
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: [0], attendees: [1, 2] }])
           .run(),
       ).toEqual(
         qbe([
           {
-            'strings': 'This field contains items of the wrong type',
-            'strings.0': 'The value must be a string',
-            'strings.1': 'The value must be a string',
+            'categories.0': 'The value must be a positive integer',
+            'categories': 'This field contains items of the wrong type',
           },
         ]),
       )
 
       expect(
         await qb
-          .insertInto('Foo')
-          .values({ numbers: ['foo', null, true] as any })
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: [1, 1], attendees: [1, 2] }])
           .run(),
       ).toEqual(
         qbe([
           {
-            'numbers': 'This field contains items of the wrong type',
-            'numbers.0': 'The value must be a number',
-            'numbers.1': 'The value must be a number',
-            'numbers.2': 'The value must be a number',
+            'categories.1': 'The value must be unique',
+            'categories': 'Each item in this field must be unique',
           },
         ]),
       )
 
       expect(
         await qb
-          .insertInto('Foo')
-          .values({ stringsAndNumbers: [true, null, false] as any })
+          .insertInto('Events')
+          .values([{ title: 'Event 1', categories: [1, 2], attendees: [1] }])
           .run(),
-      ).toEqual(
-        qbe([
-          {
-            'stringsAndNumbers': 'This field contains items of the wrong type',
-            'stringsAndNumbers.0': 'The value must be one of the specified types: string, number',
-            'stringsAndNumbers.1': 'The value must be one of the specified types: string, number',
-            'stringsAndNumbers.2': 'The value must be one of the specified types: string, number',
-          },
-        ]),
-      )
-
-      await db.close()
-      await close?.()
-    }
-  })
-
-  test('array items unique sanitization', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_unique_items_sanitization')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Foo: new Collection({
-            fields: {
-              foo: new Field({
-                model: matrixFieldModel(['number', 'string']),
-                options: { deduplicateItems: true },
-              }),
-            },
-          }),
-        },
-      })
-      await db.connect()
-      const qb = db.queryBuilder()
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: ['foo', 'foo'] })
-          .returning('foo')
-          .run(),
-      ).toEqual(qbo([{ foo: ['foo'] }]))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: ['1', 1] })
-          .returning('foo')
-          .run(),
-      ).toEqual(qbo([{ foo: ['1', 1] }]))
-
-      await db.close()
-      await close?.()
-    }
-  })
-
-  test('array items unique validation', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_unique_items_validation')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Foo: new Collection({
-            fields: {
-              foo: new Field({
-                model: matrixFieldModel(['number', 'string']),
-                options: { enforceUniqueItems: true },
-              }),
-            },
-          }),
-        },
-      })
-      await db.connect()
-      const qb = db.queryBuilder()
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: ['foo', 'foo'] })
-          .run(),
-      ).toEqual(qbe([{ 'foo': 'Each item in this field must be unique', 'foo.1': 'The value must be unique' }]))
-
-      await db.close()
-      await close?.()
-    }
-  })
-
-  test('array items min/max', async () => {
-    for (const { driver, PGPool, close } of await initAllDrivers('qb_matrix_field_min_max_validation')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Foo: new Collection({
-            fields: {
-              foo: new Field({
-                model: matrixFieldModel(),
-                options: { minItems: 2, maxItems: 4 },
-              }),
-            },
-          }),
-          Bar: new Collection({
-            fields: {
-              bar: new Field({
-                model: matrixFieldModel(),
-                options: { minItems: 1, maxItems: 1 },
-              }),
-            },
-          }),
-        },
-      })
-      await db.connect()
-      const qb = db.queryBuilder()
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: [1] })
-          .run(),
-      ).toEqual(qbe([{ foo: 'This field must contain at least 2 items' }]))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: [1, 1] })
-          .run(),
-      ).toEqual(qbo(1))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: [1, 1, 1, 1] })
-          .run(),
-      ).toEqual(qbo(1))
-
-      expect(
-        await qb
-          .insertInto('Foo')
-          .values({ foo: [1, 1, 1, 1, 1] })
-          .run(),
-      ).toEqual(qbe([{ foo: 'This field must contain at most 4 items' }]))
-
-      expect(
-        await qb
-          .insertInto('Bar')
-          .values({ bar: [1, 1] })
-          .run(),
-      ).toEqual(qbe([{ bar: 'This field must contain exactly 1 item' }]))
-
-      expect(
-        await qb
-          .insertInto('Bar')
-          .values({ bar: [1] })
-          .run(),
-      ).toEqual(qbo(1))
+      ).toEqual(qbe([{ attendees: 'This field must contain exactly 2 items' }]))
 
       await db.close()
       await close?.()
@@ -396,55 +180,7 @@ describe('matrix field', () => {
 
   test('query builder methods', async () => {
     for (const { driver, PGPool, close } of await initAllDrivers('qb_junction_field_2')) {
-      const db = new Database({
-        driver,
-        PGPool,
-        collections: {
-          Events: new Collection({
-            fields: {
-              title: new Field({
-                model: textFieldModel(),
-                options: {},
-                required: true,
-              }),
-              categories: new Field({
-                model: matrixFieldModel(),
-                options: {},
-              }),
-              attendees: new Field({
-                model: matrixFieldModel(),
-                options: {},
-              }),
-            },
-          }),
-          Categories: new Collection({
-            fields: {
-              name: new Field({
-                model: textFieldModel(),
-                options: {},
-                required: true,
-                validators: [uniqueValidator()],
-              }),
-            },
-            indexes: [{ fields: ['name'], unique: true }],
-          }),
-          Users: new Collection({
-            fields: {
-              email: new Field({
-                model: textFieldModel(),
-                options: {},
-                required: true,
-                validators: [emailValidator(), uniqueValidator()],
-              }),
-              events: new Field({
-                model: matrixFieldModel(),
-                options: {},
-              }),
-            },
-            indexes: [{ fields: ['email'], unique: true }],
-          }),
-        },
-      })
+      const db = new Database({ driver, PGPool, collections })
 
       await db.connect()
       const qb = db.queryBuilder()
@@ -749,7 +485,7 @@ describe('matrix field', () => {
       // Remove Concert 4
       expect(
         await qb.deleteFrom('Events').where('title', '=', 'Concert 4').returning(['title', 'attendees']).run(),
-      ).toEqual(qbo([{ title: 'Concert 4', attendees: [1, 2] }]))
+      ).toEqual(qbo([{ title: 'Concert 4', attendees: [] }]))
       expect(
         await qb.selectFrom('Events').select(['title', 'attendees']).where('title', '=', 'Concert 4').all(),
       ).toEqual(qbo([]))
@@ -768,6 +504,17 @@ describe('matrix field', () => {
           .where('title', '=', 'Concert 4')
           .all(),
       ).toEqual(qbo([{ title: 'Concert 4', categories: [1], attendees: [] }]))
+
+      // Check inverse relation from Users side
+      expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user1@example.com').all()).toEqual(
+        qbo([{ events: [1, 2, 3] }]),
+      )
+      expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user2@example.com').all()).toEqual(
+        qbo([{ events: [2, 3] }]),
+      )
+      expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user3@example.com').all()).toEqual(
+        qbo([{ events: [3] }]),
+      )
 
       await db.close()
       await close?.()

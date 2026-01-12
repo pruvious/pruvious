@@ -42,6 +42,7 @@ npm install @pruvious/utils
   - [isDatabaseIdentifier](#isdatabaseidentifier)
   - [toForeignKey](#toforeignkey)
   - [toIndex](#toindex)
+  - [toJunction](#tojunction)
 - [Date](#date)
   - [isDate](#isdate)
   - [toDate](#todate)
@@ -545,6 +546,36 @@ toIndex('Products', ['price']) // IX_Products__price
 toIndex('Products', ['price'], true) // UX_Products__price
 toIndex('Products', ['price', 'discount']) // CX_Products__price__discount
 toIndex('Products', ['price', 'discount'], true) // UC_Products__price__discount
+```
+
+### <a id="tojunction">`toJunction(tableA, fieldA, tableB, fieldB)`</a>
+
+Generates junction identifiers for a many-to-many relationship between two tables.
+
+Returns an object containing:
+
+- `tableName` - The junction table name.
+- If `fieldB` is provided, the junction `tableName` will include both fields.
+- If the generated name exceeds 63 characters, it will be shortened while remaining unique.
+- `columnA` - The junction column name for `tableA`.
+- `columnB` - The junction column name for `tableB`.
+
+**Example:**
+
+```ts
+toJunction('Products', 'categories', 'Categories')
+// {
+//   tableName: 'JN_Products__categories__Categories',
+//   columnA: 'productsId',
+//   columnB: 'categoriesId',
+// }
+
+toJunction('Products', 'categories', 'Categories', 'products')
+// {
+//   tableName: 'JN_Categories__products__Products__categories',
+//   columnA: 'productsId',
+//   columnB: 'categoriesId',
+// }
 ```
 
 ## <a id="date">Date</a>

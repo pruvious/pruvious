@@ -69,11 +69,13 @@ export type ConditionalOrGroup = {
 
 // Misc
 
-export type DataType = 'bigint' | 'boolean' | 'numeric' | 'text'
+export type DataType = 'bigint' | 'boolean' | 'junction' | 'matrix' | 'numeric' | 'text'
 
 export interface SerializedType extends Record<DataType, any> {
   bigint: number | string
   boolean: boolean | number
+  junction: string
+  matrix: string
   numeric: number | string
   text: string
 }

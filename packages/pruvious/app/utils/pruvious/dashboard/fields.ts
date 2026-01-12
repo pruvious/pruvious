@@ -153,13 +153,31 @@ export function getValidFilterOperators({
   ]
 
   if (_dataType === 'text') {
-    return choices.filter(
-      ({ value }) => !['lt', 'lte', 'gt', 'gte', 'includes', 'includesAny', 'excludes', 'excludesAny'].includes(value),
+    return choices.filter(({ value }) =>
+      [
+        'eq',
+        'eqi',
+        'ne',
+        'startsWith',
+        'startsWithI',
+        'endsWith',
+        'endsWithI',
+        'contains',
+        'containsI',
+        'notContains',
+        'notContainsI',
+      ].includes(value),
     )
   }
 
   if (_dataType === 'boolean') {
     return choices.filter(({ value }) => ['eq', 'ne'].includes(value))
+  }
+
+  if (_dataType === 'junction' || _dataType === 'matrix') {
+    return choices.filter(({ value }) =>
+      ['eq', 'ne', 'lt', 'lte', 'gt', 'gte', 'includes', 'includesAny', 'excludes', 'excludesAny'].includes(value),
+    )
   }
 
   return choices.filter(({ value }) => ['eq', 'ne', 'lt', 'lte', 'gt', 'gte'].includes(value))

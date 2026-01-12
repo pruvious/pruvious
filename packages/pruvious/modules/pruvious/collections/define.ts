@@ -31,6 +31,7 @@ import {
   isUndefined,
   kebabCase,
   omit,
+  remap,
   setProperty,
   type DeepRequired,
   type DefaultFalseWithOptions,
@@ -2270,7 +2271,11 @@ export function defineCollection<
 
     return new Collection({
       key: options.key,
-      fields: fields as any,
+      fields: remap(fields, (fieldName, field) =>
+        field.options._collectionFieldTransformFn
+          ? [fieldName, field.options._collectionFieldTransformFn() as any]
+          : [fieldName, field],
+      ) as any,
       indexes,
       foreignKeys,
       hooks,

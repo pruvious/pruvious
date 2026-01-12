@@ -316,16 +316,17 @@ const orderByFieldChoices = computed(() =>
   sortNaturallyByProp(
     Object.entries(props.collection.definition.fields)
       .filter(
-        ([_, definition]) =>
+        ([_, options]) =>
           !(
-            isObject(definition.ui) &&
-            (definition.ui.dataTable === false ||
-              (isObject(definition.ui.dataTable) && definition.ui.dataTable.sortable === false))
+            isObject(options.ui) &&
+            (options.ui.dataTable === false ||
+              (isObject(options.ui.dataTable) && options.ui.dataTable.sortable === false) ||
+              options._dataType === 'junction')
           ),
       )
-      .map(([fieldName, definition]) => ({
+      .map(([fieldName, options]) => ({
         value: fieldName,
-        label: resolveFieldLabel(definition.ui?.label, fieldName),
+        label: resolveFieldLabel(options.ui?.label, fieldName),
       })),
     'label',
   ),

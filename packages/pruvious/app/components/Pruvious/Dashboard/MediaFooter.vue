@@ -381,7 +381,9 @@ function resolveColumns(): PUIColumns {
           ? maybeTranslate(options.ui.label)
           : __('pruvious-dashboard', titleCase(fieldName, false) as any),
       sortable:
-        options.ui?.dataTable === false || (isObject(options.ui?.dataTable) && options.ui.dataTable.sortable === false)
+        options.ui?.dataTable === false ||
+        (isObject(options.ui?.dataTable) && options.ui.dataTable.sortable === false) ||
+        options._dataType === 'junction'
           ? false
           : options._dataType === 'text'
             ? 'text'

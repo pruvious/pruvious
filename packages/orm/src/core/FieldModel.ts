@@ -21,6 +21,8 @@ interface IFieldModel {
    *
    * - `bigint`
    * - `boolean`
+   * - `junction`
+   * - `matrix`
    * - `numeric`
    * - `text`
    */

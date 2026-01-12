@@ -18,6 +18,7 @@ import {
   sleep,
   toForeignKey,
   toIndex,
+  toJunction,
   toSQLDateTime,
   type ExtractSQLParams,
   type HasReturningClause,
@@ -191,6 +192,7 @@ export interface SchemaMap {
     fields: { [fieldKey: string]: { column: string; type: DataType; nullable: boolean } }
     indexes: string[]
     foreignKeys: string[]
+    junctions: { field: string; referencedCollection: string; inverseField: string | undefined }[]
   }
 }
 
@@ -423,7 +425,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       }
 
       // Map collection identifier
-      this.schemaMap[collectionKey] = { table: collectionName, fields: {}, indexes: [], foreignKeys: [] }
+      this.schemaMap[collectionKey] = { table: collectionName, fields: {}, indexes: [], foreignKeys: [], junctions: [] }
 
       // Resolve field identifiers
       for (const [fieldName, fieldDefinition] of Object.entries(collectionDefinition.fields)) {
@@ -480,7 +482,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
 
         // Check if the referenced collection is a valid collection identifier
         if (!this.schemaMap[referencedCollection]) {
-          throw new Error(`Invalid referenced collection in collection '${collectionName}': ${referencedCollection}`)
+          throw new Error(
+            `Invalid referenced collection for foreign key in collection '${collectionName}': ${referencedCollection}`,
+          )
         }
 
         // Check if the referenced field is a valid field identifier
@@ -489,7 +493,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
           referencedField !== 'id' &&
           !Object.values(this.schemaMap[referencedCollection].fields).some(({ column }) => column === referencedField)
         ) {
-          throw new Error(`Invalid referenced field in collection '${collectionName}': ${referencedField}`)
+          throw new Error(
+            `Invalid referenced field for foreign key in collection '${collectionName}': ${referencedField}`,
+          )
         }
 
         // Map foreign key identifier
@@ -503,6 +509,47 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
             a === referencedCollection ? -1 : b === referencedCollection ? 1 : 0,
           ),
         )
+      }
+
+      // Resolve junction identifiers
+      for (const { field, referencedCollection, inverseField } of collectionDefinition.junctions) {
+        // Check if the field is a valid field identifier
+        if (!Object.values(this.schemaMap[collectionKey].fields).some(({ column }) => column === field)) {
+          throw new Error(`Invalid field for junction in collection '${collectionName}': ${field}`)
+        } else if (collectionDefinition.fields[field].model.dataType !== 'junction') {
+          throw new Error(
+            `Field for junction in collection '${collectionName}' must use the junction field model: ${field}`,
+          )
+        }
+
+        // Check if the referenced collection is a valid collection identifier
+        if (!this.schemaMap[referencedCollection]) {
+          throw new Error(
+            `Invalid referenced collection for junction in collection '${collectionName}': ${referencedCollection}`,
+          )
+        }
+
+        // Check if the inversed field is a valid field identifier
+        if (isDefined(inverseField)) {
+          if (inverseField === field) {
+            throw new Error(
+              `Invalid inverse field for junction in collection '${collectionName}': ${inverseField} (cannot be the same as the corresponding junction field)`,
+            )
+          } else if (
+            !Object.values(this.schemaMap[referencedCollection].fields).some(({ column }) => column === inverseField)
+          ) {
+            throw new Error(
+              `Invalid inverse field for junction in collection '${collectionName}': ${inverseField} (referenced collection does not have such field)`,
+            )
+          } else if (this._collections[referencedCollection].fields[inverseField].model.dataType !== 'junction') {
+            throw new Error(
+              `Inverse field for junction in collection '${collectionName}' must use the junction field model: ${inverseField}`,
+            )
+          }
+        }
+
+        // Map junction identifier
+        this.schemaMap[collectionKey].junctions.push({ field, referencedCollection, inverseField })
       }
     }
   }
@@ -766,6 +813,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
           for (const table of await this.listTables()) {
             if (
               table !== 'Options' &&
+              !table.startsWith('JN_') &&
               !Object.keys(this._collections).some((collectionName) => collectionName === table)
             ) {
               this.log(`Dropping table "${table}"`, 'sync')
@@ -786,19 +834,23 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         // Resolve columns
         for (const [table, { key, fields }] of Object.entries(this._collections)) {
           const collectionKey = key ?? table
+          const filteredFieldEntries = Object.entries(fields).filter(([_, { model }]) => model.dataType !== 'junction')
 
           if (currentSchemaMap[collectionKey]) {
             const conflictingColumnNames: { tmpName: string; name: string }[] = []
+            const filteredExistingFieldEntries = Object.entries(currentSchemaMap[collectionKey].fields).filter(
+              ([_, { type }]) => type !== 'junction',
+            )
 
             // Rename columns with matching field keys
-            for (const [fieldKey, { column }] of Object.entries(currentSchemaMap[collectionKey].fields)) {
+            for (const [fieldKey, { column }] of filteredExistingFieldEntries) {
               if (
                 this.schemaMap[collectionKey].fields[fieldKey] &&
                 this.schemaMap[collectionKey].fields[fieldKey].column !== column
               ) {
                 if (
-                  Object.values(currentSchemaMap[collectionKey].fields).some(
-                    ({ column: existingColumn }) =>
+                  filteredExistingFieldEntries.some(
+                    ([_, { column: existingColumn }]) =>
                       existingColumn === this.schemaMap[collectionKey].fields[fieldKey].column,
                   )
                 ) {
@@ -829,14 +881,14 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
           // Remove existing columns that are not in the field models
           if (this.syncOptions.dropNonFieldColumns) {
             for (const column of await this.listColumns(table)) {
-              if (column !== 'id' && !Object.keys(fields).some((fieldName) => fieldName === column)) {
+              if (column !== 'id' && !filteredFieldEntries.some(([fieldName]) => fieldName === column)) {
                 this.log(`Dropping column "${table}.${column}"`, 'sync')
                 await this.dropColumn(table, column)
               }
             }
           }
 
-          for (const [column, { key, model, nullable }] of Object.entries(fields)) {
+          for (const [column, { key, model, nullable }] of filteredFieldEntries) {
             const fieldKey = key ?? column
             const existingColumns = await this.listColumns(table)
             const exists = existingColumns.includes(column)
@@ -920,6 +972,31 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
               this.log(`Creating foreign key "${foreignKeyName}"`, 'sync')
               await this.createForeignKey(table, field, referencedCollection, referencedField ?? 'id', action, false)
               createdForeignKeys.push(foreignKeyName)
+            }
+          }
+        }
+
+        // Create junction tables
+        const junctionTables: string[] = []
+        for (const [table, { junctions }] of Object.entries(this._collections)) {
+          const createdJunctions: string[] = []
+          for (const { field, referencedCollection, inverseField } of junctions) {
+            const junctionTableName = toJunction(table, field, referencedCollection, inverseField).tableName
+            junctionTables.push(junctionTableName)
+            if (!createdJunctions.includes(junctionTableName)) {
+              this.log(`Creating junction table "${junctionTableName}"`, 'sync')
+              await this.createJunctionTable(table, field, referencedCollection, inverseField)
+              createdJunctions.push(junctionTableName)
+            }
+          }
+        }
+
+        // Remove unused junction tables
+        if (this.syncOptions.dropNonCollectionTables) {
+          for (const table of await this.listTables()) {
+            if (table.startsWith('JN_') && !junctionTables.includes(table)) {
+              this.log(`Dropping table "${table}"`, 'sync')
+              await this.dropTable(table)
             }
           }
         }
@@ -1133,7 +1210,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       const rows = await this.exec(`select sql from sqlite_master where name = $tableName`, {
         tableName,
       })
-      return rows[0]?.sql.match(/constraint "(.+?)" foreign key/g)?.map((match: string) => match.slice(12, -13)) ?? []
+      return (
+        rows[0]?.sql.match(/constraint "([^"]+?)" foreign key/g)?.map((match: string) => match.slice(12, -13)) ?? []
+      )
     }
   }
 
@@ -1190,6 +1269,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
    * WARNING: The `tableName` and `columnName` parameters are not sanitized and should be validated before calling this method.
    */
   async createColumn(tableName: string, columnName: string, type: DataType, nullable = true) {
+    if (type === 'matrix') {
+      type = 'text'
+    }
+
     if (this.dialect === 'postgres') {
       await this.exec(`alter table "${tableName}" add column "${columnName}" ${type} ${nullable ? 'null' : 'not null'}`)
     } else {
@@ -1284,7 +1367,73 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     await exec(`insert into "${tmpTableName}" select * from "${tableName}"`)
     await exec(`drop table "${tableName}"`)
     await exec(`alter table "${tmpTableName}" rename to "${tableName}"`)
-    await Promise.all(indexes.map(async ({ sql }) => exec(sql)))
+    await Promise.all(indexes.map(async ({ sql }) => (sql ? exec(sql) : null)))
+  }
+
+  /**
+   * Creates a junction table for many-to-many relationships.
+   *
+   * If a junction table with the same name already exists, the method will attempt to reuse it without throwing an error.
+   * If that fails, the old junction table will be dropped and a new one will be created.
+   *
+   * - The `tableName` parameter is the name of the first table.
+   * - The `columnName` parameter is the name of the column in the first table that is defined using the `junctionFieldModel`.
+   * - The `referencedTable` parameter is the name of the second table.
+   * - The `inverseColumnName` (optional) parameter is the name of the column in the second table that is defined using the `junctionFieldModel`.
+   *
+   * WARNING: The table and column names are not sanitized and should be validated before calling this method.
+   */
+  async createJunctionTable(
+    tableName: string,
+    columnName: string,
+    referencedTable: string,
+    inverseColumnName?: string,
+  ) {
+    const junction = toJunction(tableName, columnName, referencedTable, inverseColumnName)
+    const createTableFn = async () => {
+      const idType = this.dialect === 'postgres' ? 'bigserial' : 'integer'
+      const sql = `create table "${junction.tableName}" ("${junction.columnA}" ${idType} not null, "${junction.columnB}" ${idType} not null, "order" integer, constraint "PK_${junction.tableName}" primary key ("${junction.columnA}", "${junction.columnB}"))`
+      await this.exec(sql)
+      await this.createIndex(junction.tableName, ['order'])
+    }
+    const createForeignKeysFn = async () => {
+      await this.createForeignKey(
+        junction.tableName,
+        junction.columnA,
+        tableName,
+        'id',
+        ['ON UPDATE CASCADE', 'ON DELETE CASCADE'],
+        false,
+      )
+      await this.createForeignKey(
+        junction.tableName,
+        junction.columnB,
+        referencedTable,
+        'id',
+        ['ON UPDATE CASCADE', 'ON DELETE CASCADE'],
+        false,
+      )
+    }
+
+    if (await this.tableExists(junction.tableName)) {
+      const foreignKeys = await this.listForeignKeys(junction.tableName)
+
+      if (
+        foreignKeys.length === 2 &&
+        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnA)) &&
+        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnB))
+      ) {
+        return
+      }
+
+      try {
+        await createForeignKeysFn()
+        return
+      } catch {}
+    }
+
+    await createTableFn()
+    await createForeignKeysFn()
   }
 
   /**
@@ -1313,6 +1462,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
    * @throws an error if the column type cannot be changed.
    */
   async changeColumnType(tableName: string, columnName: string, type: DataType, nullable: boolean) {
+    if (type === 'matrix') {
+      type = 'text'
+    }
+
     if (this.dialect === 'postgres') {
       await this.exec(
         `alter table "${tableName}" alter column "${columnName}" set data type ${type} using "${columnName}"::${type}, alter column "${columnName}" ${
@@ -1372,6 +1525,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
    * @throws an error if the column nullability cannot be changed.
    */
   async changeColumnNullable(tableName: string, columnName: string, type: DataType, nullable: boolean) {
+    if (type === 'matrix') {
+      type = 'text'
+    }
+
     if (!nullable) {
       await this.exec(
         `update "${tableName}" set "${columnName}" = ${type === 'text' ? "''" : type === 'boolean' ? false : 0} where "${columnName}" is null`,

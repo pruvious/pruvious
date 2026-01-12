@@ -1314,7 +1314,14 @@ export function defineField<
         validators,
       }) as any
 
-      const typeMap = { bigint: 'number', boolean: 'boolean', numeric: 'number', text: 'string' }
+      const typeMap = {
+        bigint: 'number',
+        boolean: 'boolean',
+        junction: 'number[]',
+        matrix: '(number | string)[]',
+        numeric: 'number',
+        text: 'string',
+      }
       const nullUnion = fieldTypeOptions.nullable ? ' | null' : ''
       field.castedTypeFn = fieldTypeOptions.castedTypeFn ?? (() => typeMap[model.dataType] + nullUnion)
       field.populatedTypeFn = fieldTypeOptions.populatedTypeFn ?? (() => typeMap[model.dataType] + nullUnion)

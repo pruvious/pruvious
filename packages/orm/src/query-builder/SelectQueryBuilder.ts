@@ -8,12 +8,12 @@ import {
   isInteger,
   isNull,
   isPositiveInteger,
+  promiseAllInBatches,
   remap,
   toArray,
   uniqueArray,
   type ExtractSQLParams,
   type NonEmptyArray,
-  type StringKeys,
 } from '@pruvious/utils'
 import { hash } from 'ohash'
 import {
@@ -823,17 +823,17 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     fields: NonEmptyArray<TField>,
     orderByRelevance?: 'high' | 'low' | false,
   ): this
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     field: TField,
     orderByRelevance?: 'high' | 'low' | false,
   ): this
-  search<TField extends StringKeys<TCollection['TDataTypes']> & string>(
+  search<TField extends ExtractFieldNamesByType<TCollection['fields'], 'text'>>(
     keywords: string | number | (string | number)[],
     fields: NonEmptyArray<TField> | TField,
     orderByRelevance?: 'high' | 'low' | false,
@@ -843,7 +843,10 @@ export class SelectQueryBuilder<
       .filter(Boolean)
 
     if (keywordsArray.length) {
-      this.searchCondition.push({ fields: isArray(fields) ? uniqueArray(fields) : [fields], keywords: keywordsArray })
+      this.searchCondition.push({
+        fields: (isArray(fields) ? uniqueArray(fields) : [fields]) as any,
+        keywords: keywordsArray,
+      })
     }
 
     if (isDefined(orderByRelevance)) {
@@ -887,9 +890,15 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(fields: NonEmptyArray<TField>): this
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(field: TField): this
-  groupBy<TField extends TCollection['TColumnNames'] | 'id'>(fields: NonEmptyArray<TField> | TField) {
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(fields: NonEmptyArray<TField>): this
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(field: TField): this
+  groupBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(fields: NonEmptyArray<TField> | TField) {
     this.groupByFields = uniqueArray(toArray(fields as string[]))
     return this
   }
@@ -943,7 +952,9 @@ export class SelectQueryBuilder<
    * // }
    * ```
    */
-  orderBy<TField extends TCollection['TColumnNames'] | 'id'>(
+  orderBy<
+    TField extends ExtractFieldNamesByType<TCollection['fields'], 'bigint' | 'boolean' | 'numeric' | 'text'> | 'id',
+  >(
     field: TField,
     direction: 'asc' | 'desc' = 'asc',
     nulls: 'nullsAuto' | 'nullsFirst' | 'nullsLast' = 'nullsAuto',
@@ -1442,7 +1453,8 @@ export class SelectQueryBuilder<
     try {
       const { result: rows, duration: queryExecutionTime } = (await this.db.execWithDuration(sql, params)) as any
       const deserializedRows = await this.deserialize(rows)
-      const populatedRows = this.populateFields ? await this.populateFieldValues(deserializedRows) : deserializedRows
+      const preparedResult = await this.prepareResults(deserializedRows, this.selectedFields)
+      const populatedRows = this.populateFields ? await this.populateFieldValues(preparedResult) : preparedResult
       const result = this.prepareOutput(populatedRows)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
       return this.cacheFilter('_all', result)
@@ -1571,7 +1583,8 @@ export class SelectQueryBuilder<
       const lastPage = perPage > 0 ? Math.ceil(total / perPage) : 0
 
       const deserializedRows = await this.deserialize(rows)
-      const populatedRows = this.populateFields ? await this.populateFieldValues(deserializedRows) : deserializedRows
+      const preparedResult = await this.prepareResults(deserializedRows, this.selectedFields)
+      const populatedRows = this.populateFields ? await this.populateFieldValues(preparedResult) : preparedResult
       const result = this.prepareOutput({
         records: populatedRows,
         currentPage,
@@ -1677,7 +1690,8 @@ export class SelectQueryBuilder<
     try {
       const { result: rows, duration: queryExecutionTime } = (await this.db.execWithDuration(sql, params)) as any
       const deserializedRows = await this.deserialize(rows)
-      const populatedRows = this.populateFields ? await this.populateFieldValues(deserializedRows) : deserializedRows
+      const preparedResult = await this.prepareResults(deserializedRows, this.selectedFields)
+      const populatedRows = this.populateFields ? await this.populateFieldValues(preparedResult) : preparedResult
       const result = this.prepareOutput(populatedRows[0] ?? null)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult: rows, queryExecutionTime, result })
       return this.cacheFilter('_first', result)
@@ -1728,6 +1742,16 @@ export class SelectQueryBuilder<
       this.setRuntimeError(this._('At least one field must be selected'))
     }
 
+    for (const { fields } of this.searchCondition) {
+      this.validateColumnNames(fields)
+
+      for (const field of fields) {
+        if (this.c().fields[field]?.model.dataType !== 'text') {
+          this.setRuntimeError(this._('The search field `$field` must be of type `text`', { field }))
+        }
+      }
+    }
+
     if (this.groupByFields.length) {
       this.validateColumnNames(this.groupByFields)
     }
@@ -1771,7 +1795,7 @@ export class SelectQueryBuilder<
       const populatedRows: Record<string, any>[] = []
       const fields = this.c().fields
       const context = this.createContext()
-      const promises: Promise<any>[] = []
+      const promises: (() => Promise<any>)[] = []
 
       for (const row of rows) {
         const populatedRow: Record<string, any> = {}
@@ -1780,12 +1804,9 @@ export class SelectQueryBuilder<
           const populator: Populator<any, any> | undefined = fields[column]?.model.populator
 
           if (populator) {
-            promises.push(
-              new Promise<void>(async (resolve) => {
-                populatedRow[column] = await populator(value, fields[column].withContext(context, { path: column }))
-                resolve()
-              }),
-            )
+            promises.push(async () => {
+              populatedRow[column] = await populator(value, fields[column].withContext(context, { path: column }))
+            })
           } else {
             populatedRow[column] = value
           }
@@ -1794,7 +1815,7 @@ export class SelectQueryBuilder<
         populatedRows.push(populatedRow)
       }
 
-      await Promise.all(promises)
+      await promiseAllInBatches(promises, 50)
       return populatedRows
     }
 
@@ -1878,7 +1899,7 @@ export class SelectQueryBuilder<
     sql: string
     params: Record<string, any>
   } {
-    const selectedFields = override?.select ?? this.rawSelection?.raw ?? this.getColumnIdentifiers(this.selectedFields)
+    const selectedFields = override?.select ?? this.rawSelection?.raw ?? this.selectedFields
     const where = this.whereConditionToSQL(0)
     const params = this.rawSelection ? { ...this.rawSelection.params, ...where.params } : where.params
     const searchSelectSQL: string[] = []
@@ -1936,11 +1957,24 @@ export class SelectQueryBuilder<
       }
     }
 
-    let sql =
-      `select ${selectedFields}` +
-      (searchSelectSQL.length
-        ? `, (${searchSelectSQL.map((s) => `(${s})`).join(' + ')}) as "_searchRelevanceScore"`
-        : '')
+    let sql = ''
+
+    if (isArray(selectedFields)) {
+      const realColumns = this.filterRealColumns(selectedFields)
+
+      if (realColumns.length < selectedFields.length) {
+        sql += `select ${this.getColumnIdentifiers(uniqueArray(['id', ...realColumns]))}`
+      } else {
+        sql += `select ${this.getColumnIdentifiers(realColumns)}`
+      }
+    } else {
+      sql += `select ${selectedFields}`
+    }
+
+    if (searchSelectSQL.length) {
+      sql += `, (${searchSelectSQL.map((s) => `(${s})`).join(' + ')}) as "_searchRelevanceScore"`
+    }
+
     sql += this.rawInjections.afterSelectClause?.raw ? ` ${this.rawInjections.afterSelectClause.raw}` : ''
     sql += ` from ${this.getTableIdentifier()}`
     sql += this.rawInjections.afterFromClause?.raw ? ` ${this.rawInjections.afterFromClause.raw}` : ''

@@ -38,6 +38,8 @@ type BaseSerializableFieldOptions = Required<
      *
      * - `bigint`
      * - `boolean`
+     * - `junction`
+     * - `matrix`
      * - `numeric`
      * - `text`
      */

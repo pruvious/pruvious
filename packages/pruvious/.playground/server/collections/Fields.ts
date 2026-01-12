@@ -449,25 +449,53 @@ export default defineCollection({
         searchFields: 'lastName',
       },
     }),
-    recordsAllowDuplicates: recordsField({
-      collection: 'Users',
-      enforceUniqueItems: false,
-      ui: {
-        label: 'Records (allow duplicates)',
-        displayFields: ['firstName', 'email'],
-        searchFields: 'email',
-      },
-    }),
-    recordsDeduplicate: recordsField({
-      collection: 'Users',
-      deduplicateItems: true,
-      ui: { label: 'Records (deduplicate)' },
-    }),
     recordsPopulate: recordsField({
       collection: 'Users',
       fields: ['id', 'email', 'roles'],
       populate: true,
       ui: { label: 'Records (populate)' },
+    }),
+    recordsRepeater: repeaterField({
+      subfields: {
+        records: recordsField({
+          collection: 'Users',
+          fields: ['id', 'email', 'roles'],
+          ui: {
+            description: 'Select users',
+            placeholder: 'Select users',
+            displayFields: [['firstName', ' ', 'lastName'], 'email'],
+            searchFields: ['firstName', 'lastName', 'email'],
+          },
+        }),
+      },
+      ui: { label: 'Records (in repeater)' },
+    }),
+    recordsRepeaterMinMax: repeaterField({
+      subfields: {
+        records: recordsField({
+          collection: 'Users',
+          minItems: 2,
+          maxItems: 3,
+          default: [1, 2],
+          ui: {
+            label: 'Records (min/max)',
+            displayFields: 'lastName',
+            searchFields: 'lastName',
+          },
+        }),
+      },
+      ui: { label: 'Records (in repeater, min/max)' },
+    }),
+    recordsRepeaterPopulate: repeaterField({
+      subfields: {
+        records: recordsField({
+          collection: 'Users',
+          fields: ['id', 'email', 'roles'],
+          populate: true,
+          ui: { label: 'Record (populate)' },
+        }),
+      },
+      ui: { label: 'Records (in repeater, populate)' },
     }),
 
     // repeater
@@ -824,7 +852,14 @@ export default defineCollection({
             },
             {
               label: 'Records',
-              fields: ['records', 'recordsMinMax', 'recordsAllowDuplicates', 'recordsDeduplicate', 'recordsPopulate'],
+              fields: [
+                'records',
+                'recordsMinMax',
+                'recordsPopulate',
+                'recordsRepeater',
+                'recordsRepeaterMinMax',
+                'recordsRepeaterPopulate',
+              ],
             },
             {
               label: 'Repeater',

@@ -69,7 +69,16 @@ watch(
   (newValue, oldValue) => {
     if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
       const normalizedValue: WhereField = { ...newValue }
-      const matrixOperators: FilterOperator[] = ['includes', 'includesAny', 'excludes', 'excludesAny']
+      const junctionAndmatrixOperators: FilterOperator[] = [
+        'lt',
+        'lte',
+        'gt',
+        'gte',
+        'includes',
+        'includesAny',
+        'excludes',
+        'excludesAny',
+      ]
 
       if (!operatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
         normalizedValue.operator = operatorChoices.value[0]!.value
@@ -84,12 +93,12 @@ watch(
         (props.options._dataType === 'boolean' &&
           !isBoolean(normalizedValue.value) &&
           !isNull(normalizedValue.value)) ||
-        (props.options._dataType === 'text' &&
-          !matrixOperators.includes(normalizedValue.operator) &&
+        ((props.options._dataType === 'junction' || props.options._dataType === 'matrix') &&
+          !junctionAndmatrixOperators.includes(normalizedValue.operator) &&
           !isString(normalizedValue.value) &&
           !isNull(normalizedValue.value)) ||
-        (props.options._dataType === 'text' &&
-          matrixOperators.includes(normalizedValue.operator) &&
+        ((props.options._dataType === 'junction' || props.options._dataType === 'matrix') &&
+          junctionAndmatrixOperators.includes(normalizedValue.operator) &&
           !isArray(normalizedValue.value))
       ) {
         nextTick(

@@ -171,6 +171,29 @@ export interface ForeignKey<TFields extends Record<string, GenericField>> {
   action?: ReferentialActions
 }
 
+export interface Junction<TFields extends Record<string, GenericField>> {
+  /**
+   * The field/column name in the current collection that is part of the junction (many-to-many relationship).
+   * This field must be defined using the `junctionFieldModel`.
+   */
+  field: keyof TFields
+
+  /**
+   * The collection/table name that this junction refers to.
+   */
+  referencedCollection: string
+
+  /**
+   * An optional field/column name in the `referencedCollection` that has the corresponding junction to this collection.
+   * That field must also be defined using the `junctionFieldModel`.
+   *
+   * If not provided, the junction is assumed to be unidirectional.
+   *
+   * @default undefined
+   */
+  inverseField?: string
+}
+
 export interface CollectionHooks {
   /**
    * Functions to execute before the SQL query is generated from the current query builder context.
@@ -284,6 +307,7 @@ export class Collection<
   readonly fields: TFields
   readonly indexes: Index<Record<string, GenericField>>[]
   readonly foreignKeys: ForeignKey<Record<string, GenericField>>[]
+  readonly junctions: Junction<Record<string, GenericField>>[]
   readonly hooks: Required<CollectionHooks>
   readonly meta: TMeta
 
@@ -362,6 +386,13 @@ export class Collection<
     this.fields = definition.fields
     this.indexes = definition.indexes ?? ([] as any)
     this.foreignKeys = definition.foreignKeys ?? ([] as any)
+    this.junctions = Object.entries(definition.fields)
+      .filter(([_, { model }]) => model.dataType === 'junction')
+      .map(([fieldName, { options }]) => ({
+        field: fieldName,
+        referencedCollection: options.referencedCollection,
+        inverseField: options.inverseField,
+      }))
     this.hooks = {
       beforeQueryPreparation: definition.hooks?.beforeQueryPreparation ?? [],
       beforeQueryExecution: definition.hooks?.beforeQueryExecution ?? [],

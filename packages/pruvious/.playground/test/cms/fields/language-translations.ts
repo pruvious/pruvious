@@ -41,7 +41,7 @@ describe('language and translations fields', () => {
 
   test('validators (field)', async () => {
     expect(await $postAsAdmin(ff, { languageTest: true, language: 'en' })).toEqual(
-      $422([{ languageTest: expect.any(String) }]),
+      $422([{ languageTest: expect.any(String), translationsTest: expect.any(String) }]),
     )
     expect(await $postAsAdmin(ff, { languageTest: 'fr', language: 'en' })).toEqual(
       $422([{ languageTest: expect.any(String) }]),
@@ -92,7 +92,9 @@ describe('language and translations fields', () => {
   })
 
   test('validators (preset)', async () => {
-    expect(await $postAsAdmin(fp, { language: true, ...rnd() })).toEqual($422([{ language: expect.any(String) }]))
+    expect(await $postAsAdmin(fp, { language: true, ...rnd() })).toEqual(
+      $422([{ language: expect.any(String), translations: expect.any(String) }]),
+    )
     expect(await $postAsAdmin(fp, { language: 'fr', ...rnd() })).toEqual($422([{ language: expect.any(String) }]))
     expect(await $postAsAdmin(fp, { language: 'de', translations: 'foo', ...rnd() })).toEqual(
       $422([{ language: expect.any(String), translations: expect.any(String) }]),

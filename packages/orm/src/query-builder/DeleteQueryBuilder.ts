@@ -4,6 +4,7 @@ import {
   isArray,
   isBoolean,
   isDefined,
+  promiseAllInBatches,
   remap,
   toArray,
   uniqueArray,
@@ -569,10 +570,11 @@ export class DeleteQueryBuilder<
 
     try {
       const { result: rawResult, duration: queryExecutionTime } = (await this.db.execWithDuration(sql, params)) as any
-      const deserializedResult = await this.deserialize(rawResult)
-      const populatedResult = this.populateFields
-        ? await this.populateFieldValues(deserializedResult)
-        : deserializedResult
+      const deserializedResult = await this.deserialize(
+        this.returnType === 'count' && isArray(rawResult) ? rawResult.length : rawResult,
+      )
+      const preparedResult = await this.prepareResults(deserializedResult, this.returningFields)
+      const populatedResult = this.populateFields ? await this.populateFieldValues(preparedResult) : preparedResult
       const result = this.prepareOutput(populatedResult)
       await this.runHooksAfterQueryExecution({ ...baseQueryDetails, rawResult, queryExecutionTime, result })
       return result
@@ -636,7 +638,7 @@ export class DeleteQueryBuilder<
       const populatedRows: Record<string, any>[] = []
       const fields = this.c().fields
       const context = this.createContext()
-      const promises: Promise<any>[] = []
+      const promises: (() => Promise<any>)[] = []
 
       for (const row of rows) {
         const populatedRow: Record<string, any> = {}
@@ -645,12 +647,9 @@ export class DeleteQueryBuilder<
           const populator: Populator<any, any> | undefined = fields[column]?.model.populator
 
           if (populator) {
-            promises.push(
-              new Promise<void>(async (resolve) => {
-                populatedRow[column] = await populator(value, fields[column].withContext(context, { path: column }))
-                resolve()
-              }),
-            )
+            promises.push(async () => {
+              populatedRow[column] = await populator(value, fields[column].withContext(context, { path: column }))
+            })
           } else {
             populatedRow[column] = value
           }
@@ -659,7 +658,7 @@ export class DeleteQueryBuilder<
         populatedRows.push(populatedRow)
       }
 
-      await Promise.all(promises)
+      await promiseAllInBatches(promises, 50)
       return populatedRows
     }
 
@@ -744,7 +743,7 @@ export class DeleteQueryBuilder<
     sql += this.rawInjections.afterWhereClause ? ` ${this.rawInjections.afterWhereClause.raw}` : ''
 
     if (this.returnType === 'rows') {
-      sql += ` returning ${this.getColumnIdentifiers(this.returningFields)}`
+      sql += ` returning ${this.getColumnIdentifiers(uniqueArray(['id', ...this.filterRealColumns(this.returningFields)]))}`
     }
 
     sql += this.rawInjections.afterReturningClause ? ` ${this.rawInjections.afterReturningClause.raw}` : ''

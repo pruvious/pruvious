@@ -9,13 +9,25 @@ import {
   type ResolveFieldUIOptions,
 } from '#pruvious/server'
 import {
+  junctionFieldModel,
   matrixFieldModel,
   type ConditionalLogic,
   type Field,
   type FieldModel,
   type MatrixFieldModelOptions,
+  type Populator,
+  type Validator,
 } from '@pruvious/orm'
-import { isEmpty, isPositiveInteger, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
+import {
+  isArray,
+  isEmpty,
+  isPositiveInteger,
+  promiseAllInBatches,
+  uniqueArray,
+  type DefaultFalse,
+  type NonEmptyArray,
+  type StringKeys,
+} from '@pruvious/utils'
 import type { PropType } from 'vue'
 
 export interface CustomRecordsFieldOptions<
@@ -29,13 +41,6 @@ export interface CustomRecordsFieldOptions<
   collection: TCollection & string
 
   /**
-   * Ensures all items in the array are unique.
-   *
-   * @default true
-   */
-  enforceUniqueItems?: boolean
-
-  /**
    * Fields to return from the selected `collection` when populating this field.
    *
    * By default, only the 'id' field is returned.
@@ -44,6 +49,17 @@ export interface CustomRecordsFieldOptions<
    * ['id']
    */
   fields?: NonEmptyArray<TFields & string>
+
+  /**
+   * An optional field/column name in the referenced `collection` that has the corresponding relation to this collection.
+   * That field must also be defined using the `recordsField()`.
+   *
+   * This only applies if this field is used as a top-level field in a collection.
+   * If not provided, the relation is assumed to be unidirectional.
+   *
+   * @default undefined
+   */
+  inverseField?: keyof DynamicCollectionFieldTypes['Casted' | 'Populated'][TCollection] & string
 
   /**
    * Specifies which languages to show when selecting collection records.
@@ -117,7 +133,6 @@ export interface CustomRecordsFieldOptions<
 
 const customOptions: CustomRecordsFieldOptions<any, string, boolean> = {
   collection: '',
-  enforceUniqueItems: true,
   fields: ['id'],
   languages: 'current',
   populate: false,
@@ -151,14 +166,14 @@ export default {
     options: CombinedFieldOptions<
       FieldModel<
         MatrixFieldModelOptions<number[], TPopulatedType>,
-        'text',
+        'matrix',
         number[],
         TPopulatedType,
         (number | string)[],
         undefined,
         undefined
       >,
-      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'deduplicateItems' | 'enforceUniqueItems'> &
         CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
@@ -171,14 +186,14 @@ export default {
   ): Field<
     FieldModel<
       MatrixFieldModelOptions<number[], TPopulatedType>,
-      'text',
+      'matrix',
       number[],
       TPopulatedType,
       (number | string)[],
       undefined,
       undefined
     >,
-    Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
+    Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'deduplicateItems' | 'enforceUniqueItems'> &
       CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     false,
@@ -188,37 +203,55 @@ export default {
     TConditionalLogic,
     GenericDatabase
   > {
-    const bound = defineField({
-      model: matrixFieldModel<'number', number, number[], TPopulatedType>(),
-      customOptions,
-      uiOptions: { placeholder: true },
-      validators: [
-        (value, { context, path }, errors) => {
-          let hasErrors = false
+    const uiOptions = { placeholder: true }
 
-          for (const [i, id] of value.entries()) {
-            if (!isPositiveInteger(id)) {
-              errors[`${path}.${i}`] = context.__('pruvious-api', 'The ID must be a positive integer')
-              hasErrors = true
-            }
+    const validators: Validator<
+      FieldModel<
+        MatrixFieldModelOptions<number[], TPopulatedType>,
+        'matrix',
+        number[],
+        TPopulatedType,
+        (number | string)[],
+        undefined,
+        undefined
+      >,
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'deduplicateItems' | 'enforceUniqueItems'> &
+        CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
+        ResolveFieldUIOptions<{ placeholder: true }>,
+      false,
+      boolean,
+      boolean,
+      boolean,
+      ConditionalLogic | undefined,
+      GenericDatabase
+    >[] = [
+      (value, { context, path }, errors) => {
+        let hasErrors = false
+
+        for (const [i, id] of value.entries()) {
+          if (!isPositiveInteger(id)) {
+            errors[`${path}.${i}`] = context.__('pruvious-api', 'The ID must be a positive integer')
+            hasErrors = true
+          }
+        }
+
+        if (hasErrors) {
+          throw new Error(context.__('pruvious-orm', 'This field contains invalid values'))
+        }
+      },
+      async (value, { definition, context, path }, errors) => {
+        let hasErrors = false
+
+        if (!isEmpty(value)) {
+          const chunks: number[][] = []
+
+          for (let i = 0; i < value.length; i += 80) {
+            chunks.push(value.slice(i, i + 80))
           }
 
-          if (hasErrors) {
-            throw new Error(context.__('pruvious-orm', 'This field contains invalid values'))
-          }
-        },
-        async (value, { definition, context, path }, errors) => {
-          let hasErrors = false
-
-          if (!isEmpty(value)) {
-            const chunks: number[][] = []
-
-            for (let i = 0; i < value.length; i += 80) {
-              chunks.push(value.slice(i, i + 80))
-            }
-
-            const queries = await Promise.all(
-              chunks.map((chunk) =>
+          const queries = await promiseAllInBatches(
+            chunks.map(
+              (chunk) => () =>
                 context.database
                   .queryBuilder()
                   .selectFrom(definition.options.collection)
@@ -227,78 +260,120 @@ export default {
                   .select(definition.options.fields)
                   .useCache(context.cache)
                   .all(),
-              ),
-            )
-
-            if (queries.every((query) => query.success)) {
-              const ids: number[] = queries.flatMap((query) => query.data.map((record) => record.id))
-
-              for (const [i, id] of value.entries()) {
-                if (!ids.includes(id)) {
-                  errors[`${path}.${i}`] = context.__('pruvious-api', 'Record does not exist')
-                  hasErrors = true
-                }
-              }
-            } else {
-              const runtimeError = queries.find((query) => query.runtimeError)?.runtimeError
-
-              if (runtimeError) {
-                errors[path] = runtimeError
-                hasErrors = true
-              } else {
-                errors[path] = context.__('pruvious-orm', 'An unknown error occurred')
-                hasErrors = true
-              }
-            }
-          }
-
-          if (hasErrors) {
-            throw new Error(
-              context.__('pruvious-api', 'This field contains IDs that do not exist in the related collection'),
-            )
-          }
-        },
-      ],
-      populator: async (value, contextField) => {
-        if (!isEmpty(value)) {
-          const { definition, context } = contextField
-          const deepPopulate = definition.options.populate
-
-          if (deepPopulate) {
-            limitPopulation(value, contextField)
-          }
-
-          const chunks: number[][] = []
-
-          for (let i = 0; i < value.length; i += 80) {
-            chunks.push(value.slice(i, i + 80))
-          }
-
-          const queries = await Promise.all(
-            chunks.map((chunk) => {
-              const queryBuilder = context.database
-                .queryBuilder()
-                .selectFrom(definition.options.collection)
-                .where('id', 'in', chunk)
-                .select(definition.options.fields)
-                .useCache(context.cache)
-              return deepPopulate ? queryBuilder.populate().all() : queryBuilder.all()
-            }),
+            ),
+            50,
           )
 
           if (queries.every((query) => query.success)) {
-            return queries.flatMap((query) => query.data) as any
+            const ids: number[] = queries.flatMap((query) => query.data.map((record) => (record as any).id))
+
+            for (const [i, id] of value.entries()) {
+              if (!ids.includes(id)) {
+                errors[`${path}.${i}`] = context.__('pruvious-api', 'Record does not exist')
+                hasErrors = true
+              }
+            }
+          } else {
+            const runtimeError = queries.find((query) => query.runtimeError)?.runtimeError
+
+            if (runtimeError) {
+              errors[path] = runtimeError
+              hasErrors = true
+            } else {
+              errors[path] = context.__('pruvious-orm', 'An unknown error occurred')
+              hasErrors = true
+            }
           }
         }
 
-        return []
+        if (hasErrors) {
+          throw new Error(
+            context.__('pruvious-api', 'This field contains IDs that do not exist in the related collection'),
+          )
+        }
       },
-      castedTypeFn: () => 'number[]',
-      populatedTypeFn: ({ field }) =>
-        `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName) => `'${fieldName}'`).join(' | ')}>[]`,
-      inputTypeFn: () => '(number | string)[]',
+    ]
+
+    const populator: Populator<number[], TPopulatedType> = async (value, contextField) => {
+      if (!isEmpty(value)) {
+        const { definition, context } = contextField
+        const deepPopulate = definition.options.populate
+
+        if (deepPopulate) {
+          limitPopulation(value, contextField)
+        }
+
+        const chunks: number[][] = []
+
+        for (let i = 0; i < value.length; i += 80) {
+          chunks.push(value.slice(i, i + 80))
+        }
+
+        const queries = await promiseAllInBatches(
+          chunks.map((chunk) => () => {
+            const queryBuilder = context.database
+              .queryBuilder()
+              .selectFrom(definition.options.collection)
+              .where('id', 'in', chunk)
+              .select(definition.options.fields)
+              .useCache(context.cache)
+            return deepPopulate ? queryBuilder.populate().all() : queryBuilder.all()
+          }),
+          50,
+        )
+
+        if (queries.every((query) => query.success)) {
+          return queries.flatMap((query) => query.data) as any
+        }
+      }
+
+      return []
+    }
+
+    const castedTypeFn = () => 'number[]'
+    const populatedTypeFn = ({ field }: any) =>
+      `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}>[]`
+    const inputTypeFn = () => '(number | string)[]'
+
+    const bound = defineField({
+      model: matrixFieldModel<'number', number, number[], TPopulatedType>(),
+      customOptions: {
+        ...customOptions,
+        deduplicateItems: true,
+        enforceUniqueItems: true,
+        _collectionFieldTransformFn: undefined,
+      },
+      omitOptions: ['deduplicateItems', 'enforceUniqueItems'],
+      uiOptions,
+      validators,
+      populator: populator as any,
+      castedTypeFn,
+      populatedTypeFn,
+      inputTypeFn,
     }).serverFn.bind(this)
-    return bound(options as any) as any
+    return bound({
+      ...(options as any),
+      _collectionFieldTransformFn: () =>
+        defineField({
+          model: junctionFieldModel<TCollection, number[], TPopulatedType, (string | number)[]>(
+            options.collection,
+            options.inverseField,
+          ),
+          sanitizers: [(value) => (isArray(value) ? uniqueArray(value) : value)],
+          customOptions: {
+            ...customOptions,
+            referenceCollection: options.collection,
+            inverseField: options.inverseField,
+          },
+          omitOptions: ['referencedCollection', 'inverseField'] as any,
+          uiOptions,
+          validators: validators as any,
+          populator: populator as any,
+          castedTypeFn,
+          populatedTypeFn,
+          inputTypeFn,
+        }).serverFn.bind(this)(options as any),
+    }) as any
   },
 
   /**
@@ -323,14 +398,14 @@ export default {
     options: CombinedFieldOptions<
       FieldModel<
         MatrixFieldModelOptions<number[], TPopulatedType>,
-        'text',
+        'matrix',
         number[],
         TPopulatedType,
         (number | string)[],
         undefined,
         undefined
       >,
-      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'deduplicateItems' | 'enforceUniqueItems'> &
         CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
@@ -344,14 +419,14 @@ export default {
     field: Field<
       FieldModel<
         MatrixFieldModelOptions<number[], TPopulatedType>,
-        'text',
+        'matrix',
         number[],
         TPopulatedType,
         (number | string)[],
         undefined,
         undefined
       >,
-      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'enforceUniqueItems'> &
+      Omit<MatrixFieldModelOptions<number[], TPopulatedType>, 'deduplicateItems' | 'enforceUniqueItems'> &
         CustomRecordsFieldOptions<TCollection, TFields, TPopulate> &
         ResolveFieldUIOptions<{ placeholder: true }>,
       false,
@@ -373,14 +448,14 @@ export default {
   TOptions: undefined as unknown as CombinedFieldOptions<
     FieldModel<
       MatrixFieldModelOptions<number[], Record<string, any>[]>,
-      'text',
+      'matrix',
       number[],
       Record<string, any>[],
       (number | string)[],
       undefined,
       undefined
     >,
-    Omit<MatrixFieldModelOptions<number[], Record<string, any>[]>, 'enforceUniqueItems'> &
+    Omit<MatrixFieldModelOptions<number[], Record<string, any>[]>, 'deduplicateItems' | 'enforceUniqueItems'> &
       CustomRecordsFieldOptions<CollectionAPI['any']['read'], any, boolean | undefined> &
       ResolveFieldUIOptions<{ placeholder: true }>,
     false,

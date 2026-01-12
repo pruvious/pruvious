@@ -204,33 +204,38 @@ export type Operator =
   | 'notBetween'
 
 export type WhereOperator<TField extends GenericField> = TField['model']['dataType'] extends 'text'
-  ? Exclude<Operator, '<' | '<=' | '>' | '>=' | 'between' | 'notBetween'>
+  ? Extract<Operator, '=' | '!=' | 'in' | 'notIn' | 'like' | 'notLike' | 'ilike' | 'notIlike'>
   : TField['model']['dataType'] extends 'boolean'
     ? Extract<Operator, '=' | '!='>
-    : Exclude<
-        Operator,
-        'includes' | 'includesAny' | 'excludes' | 'excludesAny' | 'like' | 'notLike' | 'ilike' | 'notIlike'
-      >
+    : TField['model']['dataType'] extends 'junction' | 'matrix'
+      ? Extract<Operator, '<' | '<=' | '>' | '>=' | 'includes' | 'includesAny' | 'excludes' | 'excludesAny'>
+      : Extract<Operator, '=' | '!=' | '<' | '<=' | '>' | '>=' | 'in' | 'notIn' | 'between' | 'notBetween'>
 
 export type WhereValue<
   TField extends GenericField,
   TOperator extends Operator,
   TValue =
-    | (TField['model']['dataType'] extends 'bigint' | 'numeric' | 'text'
-        ? number | string
-        : TField['model']['dataType'] extends 'boolean'
-          ? Booleanish
-          : any)
+    | (TField['model']['TInputType'] extends string
+        ? TField['model']['TInputType']
+        : TField['model']['dataType'] extends 'bigint' | 'numeric' | 'text'
+          ? number | string
+          : TField['model']['dataType'] extends 'boolean'
+            ? Booleanish
+            : TField['model']['dataType'] extends 'junction' | 'matrix'
+              ? (number | string)[]
+              : any)
     | (TField['nullable'] extends false ? never : null),
 > = TOperator extends 'in' | 'notIn'
   ? NonNullable<TValue>[]
   : TOperator extends 'between' | 'notBetween'
     ? [NonNullable<TValue>, NonNullable<TValue>]
-    : TOperator extends '<' | '<=' | '>' | '>=' | 'like' | 'notLike' | 'ilike' | 'notIlike'
-      ? NonNullable<TValue>
-      : TOperator extends 'includes' | 'includesAny' | 'excludes' | 'excludesAny'
-        ? number | string | (number | string)[]
-        : TValue
+    : TOperator extends '<' | '<=' | '>' | '>='
+      ? number | string
+      : TOperator extends 'like' | 'notLike' | 'ilike' | 'notIlike'
+        ? NonNullable<TValue> | (string & {})
+        : TOperator extends 'includes' | 'includesAny' | 'excludes' | 'excludesAny'
+          ? number | string | (number | string)[]
+          : TValue
 
 export type GenericWhereValue = string | (string | number | null)[] | number | [number, number] | null
 

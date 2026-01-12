@@ -25,6 +25,7 @@ export const translatableStrings = {
   'Invalid timestamp': 'Invalid timestamp',
   'Invalid URL': 'Invalid URL',
   'Invalid value': 'Invalid value',
+  'Invalid value for field `$field`': createPattern('Invalid value for field `$field`', { field: 'string' }),
 
   'Missing `$key` property': 'Missing `$key` property',
 
@@ -55,6 +56,10 @@ export const translatableStrings = {
   'The field `$field` must be a number or `null`': createPattern('The field `$field` must be a number or `null`', {
     field: 'string',
   }),
+  'The field `$field` must be a string': createPattern('The field `$field` must be a string', { field: 'string' }),
+  'The field `$field` must be a string or `null`': createPattern('The field `$field` must be a string or `null`', {
+    field: 'string',
+  }),
   'The `$field` field must be an array containing exactly two numbers': createPattern(
     'The `$field` field must be an array containing exactly two numbers',
     { field: 'string' },
@@ -75,6 +80,11 @@ export const translatableStrings = {
     { operator: 'string', field: 'string' },
   ),
 
+  'The search field `$field` must be of type `text`': createPattern(
+    'The search field `$field` must be of type `text`',
+    { field: 'string' },
+  ),
+
   "The value cannot be 'false'": "The value cannot be 'false'",
   'The value cannot have more than `$count` decimals': createPattern(
     'The value cannot have more than `$count` $decimals',
@@ -86,6 +96,7 @@ export const translatableStrings = {
   'The value must be a boolean or `null`': 'The value must be a boolean or `null`',
   'The value must be a number': 'The value must be a number',
   'The value must be a number or `null`': 'The value must be a number or `null`',
+  'The value must be a positive integer': 'The value must be a positive integer',
   'The value must be a string': 'The value must be a string',
   'The value must be a string or `null`': 'The value must be a string or `null`',
   'The value must be an array': 'The value must be an array',
@@ -177,6 +188,7 @@ export const translatableStringsDe = {
   'Invalid timestamp': 'Ungültiger Zeitstempel',
   'Invalid URL': 'Ungültige URL',
   'Invalid value': 'Ungültiger Wert',
+  'Invalid value for field `$field`': createPattern('Ungültiger Wert für Feld `$field`', { field: 'string' }),
 
   'Missing `$key` property': 'Fehlende `$key`-Eigenschaft',
 
@@ -210,6 +222,13 @@ export const translatableStringsDe = {
   'The field `$field` must be a number or `null`': createPattern('Das Feld `$field` muss eine Zahl oder `null` sein', {
     field: 'string',
   }),
+  'The field `$field` must be a string': createPattern('Das Feld `$field` muss eine Zeichenkette sein', {
+    field: 'string',
+  }),
+  'The field `$field` must be a string or `null`': createPattern(
+    'Das Feld `$field` muss eine Zeichenkette oder `null` sein',
+    { field: 'string' },
+  ),
   'The `$field` field must be an array containing exactly two numbers': createPattern(
     'Das Feld `$field` muss ein Array mit genau zwei Zahlen sein',
     { field: 'string' },
@@ -219,9 +238,7 @@ export const translatableStringsDe = {
   }),
   'The field `$field` must be an array of strings': createPattern(
     'Das Feld `$field` muss ein Array von Zeichenketten sein',
-    {
-      field: 'string',
-    },
+    { field: 'string' },
   ),
   'This field must have a value that is not empty': 'Dieses Feld muss einen Wert haben, der nicht leer ist',
 
@@ -232,6 +249,10 @@ export const translatableStringsDe = {
     'Der Operator `$operator` wird für das Feld `$field` nicht unterstützt',
     { operator: 'string', field: 'string' },
   ),
+
+  'The search field `$field` must be of type `text`': createPattern('Das Suchfeld `$field` muss vom Typ `text` sein', {
+    field: 'string',
+  }),
 
   "The value cannot be 'false'": "Der Wert darf nicht 'false' sein",
   'The value cannot have more than `$count` decimals': createPattern(
@@ -244,6 +265,7 @@ export const translatableStringsDe = {
   'The value must be a boolean or `null`': 'Der Wert muss ein Boolean oder `null` sein',
   'The value must be a number': 'Der Wert muss eine Zahl sein',
   'The value must be a number or `null`': 'Der Wert muss eine Zahl oder `null` sein',
+  'The value must be a positive integer': 'Der Wert muss eine positive Ganzzahl sein',
   'The value must be a string': 'Der Wert muss eine Zeichenkette sein',
   'The value must be a string or `null`': 'Der Wert muss eine Zeichenkette oder `null` sein',
   'The value must be an array': 'Der Wert muss ein Array sein',

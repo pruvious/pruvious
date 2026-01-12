@@ -605,6 +605,93 @@ test('foreign key methods', async () => {
   await mf.dispose()
 })
 
+test('junction methods', async () => {
+  // SQLite
+  const sqlite = new Database({ driver: sqliteConnectionString('junction_methods') })
+  await sqlite.connect()
+  await sqlite.createTable('Foo')
+  await sqlite.createTable('Bar')
+  expect(await sqlite.createJunctionTable('Foo', 'junctionField', 'Bar')).toBeUndefined()
+  expect(await sqlite.listTables()).toEqual(['Options', 'Foo', 'Bar', 'JN_Foo__junctionField__Bar'])
+  expect(await sqlite.listColumns('JN_Foo__junctionField__Bar')).toEqual(['fooId', 'barId', 'order'])
+  expect(await sqlite.listForeignKeys('JN_Foo__junctionField__Bar')).toEqual([
+    'FK_JN_Foo__junctionField__Bar__fooId',
+    'FK_JN_Foo__junctionField__Bar__barId',
+  ])
+  await expect(() =>
+    sqlite.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await sqlite.exec('insert into "Foo" default values')).toBe(1)
+  expect(await sqlite.exec('insert into "Bar" default values')).toBe(1)
+  expect(await sqlite.exec('insert into "Bar" default values')).toBe(1)
+  expect(await sqlite.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 1)`)).toBe(1)
+  expect(await sqlite.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`)).toBe(1)
+  await expect(() =>
+    sqlite.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await sqlite.exec('delete from "Bar" where "id" = 1')).toBe(1)
+  expect(await sqlite.exec('select * from "JN_Foo__junctionField__Bar"')).toEqual([{ fooId: 1, barId: 2, order: null }])
+  await sqlite.close()
+
+  // PostgreSQL
+  const { pgConnectionString, PGPool, drop } = await pgConnection('junction_methods')
+  const pg = new Database({ driver: pgConnectionString, PGPool })
+  await pg.connect()
+  await pg.createTable('Foo')
+  await pg.createTable('Bar')
+  expect(await pg.createJunctionTable('Foo', 'junctionField', 'Bar')).toBeUndefined()
+  expect(await pg.listTables().then((t) => t.sort())).toEqual(['Bar', 'Foo', 'JN_Foo__junctionField__Bar', 'Options'])
+  expect(await pg.listColumns('JN_Foo__junctionField__Bar')).toEqual(['fooId', 'barId', 'order'])
+  expect(await pg.listForeignKeys('JN_Foo__junctionField__Bar')).toEqual([
+    'FK_JN_Foo__junctionField__Bar__fooId',
+    'FK_JN_Foo__junctionField__Bar__barId',
+  ])
+  await expect(() =>
+    pg.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await pg.exec('insert into "Foo" default values')).toBe(1)
+  expect(await pg.exec('insert into "Bar" default values')).toBe(1)
+  expect(await pg.exec('insert into "Bar" default values')).toBe(1)
+  expect(await pg.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 1)`)).toBe(1)
+  expect(await pg.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`)).toBe(1)
+  await expect(() =>
+    pg.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await pg.exec('delete from "Bar" where "id" = 1')).toBe(1)
+  expect(await pg.exec('select * from "JN_Foo__junctionField__Bar"')).toEqual([{ fooId: '1', barId: '2', order: null }])
+  await pg.close()
+  await drop()
+
+  // D1
+  const { mf, db } = await createMiniflare()
+  const d1 = new Database({ driver: db })
+  await d1.connect()
+  await d1.createTable('Foo')
+  await d1.createTable('Bar')
+  expect(await d1.createJunctionTable('Foo', 'junctionField', 'Bar')).toBeUndefined()
+  expect(await d1.listTables()).toEqual(['Options', 'Foo', 'Bar', 'JN_Foo__junctionField__Bar'])
+  expect(await d1.listColumns('JN_Foo__junctionField__Bar')).toEqual(['fooId', 'barId', 'order'])
+  expect(await d1.listForeignKeys('JN_Foo__junctionField__Bar')).toEqual([
+    'FK_JN_Foo__junctionField__Bar__fooId',
+    'FK_JN_Foo__junctionField__Bar__barId',
+  ])
+  await expect(() =>
+    d1.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await d1.exec('insert into "Foo" default values')).toBe(1)
+  expect(await d1.exec('insert into "Bar" default values')).toBe(1)
+  expect(await d1.exec('insert into "Bar" default values')).toBe(1)
+  expect(await d1.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 1)`)).toBe(1)
+  expect(await d1.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`)).toBe(1)
+  await expect(() =>
+    d1.exec(`insert into "JN_Foo__junctionField__Bar" ("fooId", "barId") values (1, 2)`),
+  ).rejects.toThrow()
+  expect(await d1.exec('delete from "Bar" where "id" = 1')).toBe(2) // probably including those affected by cascading constraints
+  expect(await d1.exec('select * from "JN_Foo__junctionField__Bar"')).toEqual([{ fooId: 1, barId: 2, order: null }])
+  await d1.close()
+  await mf.dispose()
+})
+
 test('transaction methods', async () => {
   // SQLite
   const sqlite = new Database({ driver: sqliteConnectionString('transaction_methods') })

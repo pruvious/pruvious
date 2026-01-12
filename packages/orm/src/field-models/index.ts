@@ -1,6 +1,7 @@
 export * from './arrayFieldModel'
 export * from './bigIntFieldModel'
 export * from './booleanFieldModel'
+export * from './junctionFieldModel'
 export * from './matrixFieldModel'
 export * from './numberFieldModel'
 export * from './objectFieldModel'

@@ -1,6 +1,7 @@
 import type { I18n } from '@pruvious/i18n'
 import {
   castToBoolean,
+  castToString,
   deepClone,
   isArray,
   isBoolean,
@@ -8,9 +9,12 @@ import {
   isNull,
   isNumber,
   isNumericString,
+  isPrimitive,
   isRealNumber,
+  isString,
   isUndefined,
   toArray,
+  toJunction,
   type ExtractSQLParams,
 } from '@pruvious/utils'
 import type { GenericCollection, GenericDatabase } from '../core'
@@ -244,6 +248,22 @@ export class ConditionalQueryBuilder<
                   ),
                 )
               }
+            } else if (dataType === 'text') {
+              if (!isString(castToString(condition.value))) {
+                return this.setRuntimeError(
+                  this._(
+                    nullable ? 'The field `$field` must be a string or `null`' : 'The field `$field` must be a string',
+                    { field: condition.field },
+                  ),
+                )
+              }
+            } else if (dataType === 'junction' || dataType === 'matrix') {
+              return this.setRuntimeError(
+                this._('The operator `$operator` is not supported for the field `$field`', {
+                  operator: condition.operator,
+                  field: condition.field,
+                }),
+              )
             }
           } else if (
             condition.operator === '<' ||
@@ -251,7 +271,7 @@ export class ConditionalQueryBuilder<
             condition.operator === '>' ||
             condition.operator === '>='
           ) {
-            if (dataType === 'bigint' || dataType === 'numeric') {
+            if (dataType === 'bigint' || dataType === 'junction' || dataType === 'matrix' || dataType === 'numeric') {
               if (!isRealNumber(condition.value) && !isNumericString(condition.value)) {
                 return this.setRuntimeError(this._('The field `$field` must be a number', { field: condition.field }))
               }
@@ -285,12 +305,31 @@ export class ConditionalQueryBuilder<
                   this._('The field `$field` must be an array of strings', { field: condition.field }),
                 )
               }
+            } else {
+              return this.setRuntimeError(
+                this._('The operator `$operator` is not supported for the field `$field`', {
+                  operator: condition.operator,
+                  field: condition.field,
+                }),
+              )
             }
           } else if (
             condition.operator === 'includes' ||
             condition.operator === 'includesAny' ||
             condition.operator === 'excludes' ||
-            condition.operator === 'excludesAny' ||
+            condition.operator === 'excludesAny'
+          ) {
+            if (!toArray(condition.value).every(isPrimitive)) {
+              return this.setRuntimeError(this._('Invalid value for field `$field`', { field: condition.field }))
+            } else if (dataType !== 'junction' && dataType !== 'matrix') {
+              return this.setRuntimeError(
+                this._('The operator `$operator` is not supported for the field `$field`', {
+                  operator: condition.operator,
+                  field: condition.field,
+                }),
+              )
+            }
+          } else if (
             condition.operator === 'like' ||
             condition.operator === 'notLike' ||
             condition.operator === 'ilike' ||
@@ -380,16 +419,74 @@ export class ConditionalQueryBuilder<
     for (const condition of whereCondition ?? this.whereCondition) {
       if ('field' in condition) {
         const columnName = condition.field
-        const dataType = condition.field === 'id' ? 'bigint' : this.c().fields[condition.field].model.dataType
+        const field = this.c().fields[condition.field]
+        const dataType = condition.field === 'id' ? 'bigint' : field.model.dataType
 
-        if (condition.operator === 'in' || condition.operator === 'notIn') {
+        if (dataType === 'junction') {
+          const junction = toJunction(
+            this.collectionName,
+            columnName,
+            field.options.referencedCollection,
+            field.options.inverseField,
+          )
+          const jn = this.escapeIdentifier(junction.tableName)
+          const ca = this.escapeIdentifier(junction.columnA)
+          const cb = this.escapeIdentifier(junction.columnB)
+          const wh = (val: string | number | (string | number)[], exists = true) => {
+            let existsSQL = `${exists ? 'exists' : 'not exists'} (select 1 from ${jn} where ${jn}.${ca} = ${this.escapeIdentifier(this.collectionName)}."id" and ${jn}.${cb} ${isArray(val) ? 'in' : '='} `
+            if (isArray(val)) {
+              existsSQL +=
+                '(' +
+                val
+                  .map((v, i) => {
+                    params[`p${++index}`] = v
+                    return `$p${index}`
+                  })
+                  .join(', ') +
+                ')'
+            } else {
+              existsSQL += `$p${++index}`
+              params[`p${index}`] = val
+            }
+            return `${existsSQL} group by ${jn}.${ca})`
+          }
+
+          if (condition.operator === 'includes') {
+            sql.push(
+              toArray(condition.value)
+                .map((v) => wh(v as string | number))
+                .join(' and '),
+            )
+          } else if (condition.operator === 'includesAny') {
+            sql.push(wh(condition.value as (string | number)[]))
+          } else if (condition.operator === 'excludes') {
+            const orGroupSQL: string[] = []
+            for (const v of toArray(condition.value)) {
+              orGroupSQL.push(wh(v as string | number, false))
+            }
+            sql.push(`(${orGroupSQL.join(' or ')})`)
+          } else if (condition.operator === 'excludesAny') {
+            sql.push(wh(condition.value as (string | number)[], false))
+          } else if (
+            condition.operator === '<' ||
+            condition.operator === '<=' ||
+            condition.operator === '>' ||
+            condition.operator === '>='
+          ) {
+            const op = condition.operator
+            const countValue = Number(condition.value)
+            const countSQL = `(select count(*) from ${jn} where ${jn}.${ca} = ${this.escapeIdentifier(this.collectionName)}."id") ${op} $p${++index}`
+            params[`p${index}`] = countValue
+            sql.push(countSQL)
+          }
+        } else if (condition.operator === 'in' || condition.operator === 'notIn') {
           const value = condition.value as (string | number | null)[]
           const sqlOperator = condition.operator === 'notIn' ? 'not in' : 'in'
           sql.push(
             `${this.escapeIdentifier(columnName)} ${sqlOperator} (${value
               .map((v) => {
-                params[`p${index + 1}`] = v
-                return `$p${++index}`
+                params[`p${++index}`] = v
+                return `$p${index}`
               })
               .join(', ')})`,
           )
@@ -408,14 +505,14 @@ export class ConditionalQueryBuilder<
         } else if (isNull(condition.value) && (condition.operator === '=' || condition.operator === '!=')) {
           const sqlOperator = condition.operator === '=' ? 'is' : 'is not'
           sql.push(`${this.escapeIdentifier(columnName)} ${sqlOperator} null`)
-        } else if (condition.operator === 'includes' || condition.operator === 'excludes') {
+        } else if (condition.operator === 'includes' || condition.operator === 'excludesAny') {
           const sqlOperator = condition.operator === 'includes' ? 'like' : 'not like'
           for (const v of toArray(condition.value)) {
             sql.push(`${this.escapeIdentifier(columnName)} ${sqlOperator} $p${++index}`)
             params[`p${index}`] = isNumber(v) ? `%[${v}]%` : `%["${v}"]%`
           }
-        } else if (condition.operator === 'includesAny' || condition.operator === 'excludesAny') {
-          const sqlOperator = condition.operator === 'includesAny' ? 'like' : 'not like'
+        } else if (condition.operator === 'excludes' || condition.operator === 'includesAny') {
+          const sqlOperator = condition.operator === 'excludes' ? 'not like' : 'like'
           const orGroupSQL: string[] = []
           for (const v of toArray(condition.value)) {
             orGroupSQL.push(`${this.escapeIdentifier(columnName)} ${sqlOperator} $p${++index}`)
@@ -424,6 +521,18 @@ export class ConditionalQueryBuilder<
           if (orGroupSQL.length) {
             sql.push(`(${orGroupSQL.join(' or ')})`)
           }
+        } else if (
+          dataType === 'matrix' &&
+          (condition.operator === '<' ||
+            condition.operator === '<=' ||
+            condition.operator === '>' ||
+            condition.operator === '>=')
+        ) {
+          const op = condition.operator
+          const countValue = Number(condition.value)
+          const countSQL = `case when ${this.escapeIdentifier(columnName)} = '[]' then 0 else (length(${this.escapeIdentifier(columnName)}) - length(replace(${this.escapeIdentifier(columnName)}, '],[', ''))) / 2 + 1 end ${op} $p${++index}`
+          params[`p${index}`] = countValue
+          sql.push(countSQL)
         } else {
           const sqlOperator =
             condition.operator === 'notLike'
