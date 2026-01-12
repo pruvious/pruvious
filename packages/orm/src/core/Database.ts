@@ -769,7 +769,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         await this.syncOptions.beforeSync?.(this as any)
 
         // Remove existing indexes and foreign keys
-        for (const table of await this.listTables()) {
+        for (const table of (await this.listTables()).sort((a, b) =>
+          a.startsWith('JN_') ? -1 : b.startsWith('JN_') ? 1 : 0,
+        )) {
           for (const name of await this.listIndexes(table)) {
             this.log(`Dropping index "${name}"`, 'sync')
             await this.dropIndex(name)
@@ -1419,10 +1421,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       const foreignKeys = await this.listForeignKeys(junction.tableName)
 
       if (
-        foreignKeys.length === 0 ||
-        (foreignKeys.length === 2 &&
-          foreignKeys.includes(toForeignKey(junction.tableName, junction.columnA)) &&
-          foreignKeys.includes(toForeignKey(junction.tableName, junction.columnB)))
+        foreignKeys.length === 2 &&
+        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnA)) &&
+        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnB))
       ) {
         return
       }
