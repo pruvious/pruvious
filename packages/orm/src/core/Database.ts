@@ -1419,9 +1419,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       const foreignKeys = await this.listForeignKeys(junction.tableName)
 
       if (
-        foreignKeys.length === 2 &&
-        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnA)) &&
-        foreignKeys.includes(toForeignKey(junction.tableName, junction.columnB))
+        foreignKeys.length === 0 ||
+        (foreignKeys.length === 2 &&
+          foreignKeys.includes(toForeignKey(junction.tableName, junction.columnA)) &&
+          foreignKeys.includes(toForeignKey(junction.tableName, junction.columnB)))
       ) {
         return
       }
@@ -1429,7 +1430,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       try {
         await createForeignKeysFn()
         return
-      } catch {}
+      } catch {
+        await this.dropTable(junction.tableName)
+      }
     }
 
     await createTableFn()
