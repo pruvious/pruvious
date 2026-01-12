@@ -2,10 +2,6 @@
   <PruviousFilterField
     :modelValue="modelValue"
     :operatorChoices="[
-      { value: 'eq', label: __('pruvious-dashboard', 'Equals') },
-      { value: 'ne', label: __('pruvious-dashboard', 'Does not equal') },
-      { value: 'startsWith', label: __('pruvious-dashboard', 'Starts with') },
-      { value: 'endsWith', label: __('pruvious-dashboard', 'Ends with') },
       { value: 'contains', label: __('pruvious-dashboard', 'Contains') },
       { value: 'notContains', label: __('pruvious-dashboard', 'Does not contain') },
     ]"
@@ -13,22 +9,45 @@
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
-    <PUIChips
+    <PUISelect
+      v-if="choices"
       :choices="choices"
-      :enforceUniqueItems="options.enforceUniqueItems"
       :id="id"
-      :maxItems="options.maxItems"
-      :minItems="options.minItems"
-      :modelValue="data"
+      :modelValue="data[0] || ''"
       :name="id"
-      :noResultsLabel="__('pruvious-dashboard', 'No results found')"
       :placeholder="placeholder"
-      :removeItemLabel="__('pruvious-dashboard', 'Remove')"
-      :trim="options.trim"
-      :variant="options.ui.variant"
+      @commit="
+        (value) => {
+          const preparedValue = prepareEmitValue([String(value)])
+          $emit('update:modelValue', { ...modelValue, value: preparedValue })
+          $emit('commit', { ...modelValue, value: preparedValue })
+        }
+      "
       @update:modelValue="
         (value) => {
-          const preparedValue = prepareEmitValue(value)
+          const preparedValue = prepareEmitValue([String(value)])
+          $emit('update:modelValue', { ...modelValue, value: preparedValue })
+          $emit('commit', { ...modelValue, value: preparedValue })
+        }
+      "
+    />
+
+    <PUIInput
+      v-else
+      :id="id"
+      :modelValue="data[0] || ''"
+      :name="id"
+      :placeholder="placeholder"
+      @blur="
+        (_, value) => {
+          const preparedValue = prepareEmitValue([value])
+          $emit('update:modelValue', { ...modelValue, value: preparedValue })
+          $emit('commit', { ...modelValue, value: preparedValue })
+        }
+      "
+      @update:modelValue="
+        (value) => {
+          const preparedValue = prepareEmitValue([value])
           $emit('update:modelValue', { ...modelValue, value: preparedValue })
           $emit('commit', { ...modelValue, value: preparedValue })
         }
@@ -91,9 +110,7 @@ const choices: PUIChipsChoiceModel[] | false = props.options.choices
 
 emit('commit', {
   ...props.modelValue,
-  operator: ['eq', 'ne', 'startsWith', 'endsWith', 'contains', 'notContains'].includes(props.modelValue.operator)
-    ? props.modelValue.operator
-    : 'eq',
+  operator: ['contains', 'notContains'].includes(props.modelValue.operator) ? props.modelValue.operator : 'contains',
   value: prepareEmitValue(data.value),
 })
 
@@ -106,16 +123,6 @@ watch(
 )
 
 function prepareEmitValue(value: string[]): string {
-  let str = JSON.stringify(value)
-
-  if (['startsWith', 'contains', 'notContains'].includes(props.modelValue.operator)) {
-    str = str.slice(0, -1)
-  }
-
-  if (['endsWith', 'contains', 'notContains'].includes(props.modelValue.operator)) {
-    str = str.slice(1)
-  }
-
-  return str
+  return JSON.stringify(value).slice(1, -1)
 }
 </script>

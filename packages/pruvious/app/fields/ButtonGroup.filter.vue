@@ -1,6 +1,7 @@
 <template>
   <PruviousFilterField
     :modelValue="modelValue"
+    :operatorChoices="operatorChoices"
     :options="options"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
@@ -22,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { maybeTranslate, type WhereField } from '#pruvious/dashboard'
+import { getValidFilterOperators, maybeTranslate, type WhereField } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
 import type { PUIButtonGroupChoiceModel } from '@pruvious/ui/components/PUIButtonGroup.vue'
 
@@ -50,6 +51,7 @@ defineEmits<{
 }>()
 
 const id = useId()
+const operatorChoices = getValidFilterOperators(props.options).filter(({ value }) => ['eq', 'ne'].includes(value))
 const choices: PUIButtonGroupChoiceModel[] = props.options.choices.map((choice) => ({
   label: choice.label ? maybeTranslate(choice.label) : choice.value,
   value: choice.value,

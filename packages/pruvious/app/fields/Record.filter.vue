@@ -1,6 +1,10 @@
 <template>
   <PruviousFilterField
     :modelValue="modelValue"
+    :operatorChoices="[
+      { value: 'eq', label: __('pruvious-dashboard', 'Equals') },
+      { value: 'ne', label: __('pruvious-dashboard', 'Does not equal') },
+    ]"
     :options="options"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
