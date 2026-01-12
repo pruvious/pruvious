@@ -1512,7 +1512,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     await exec(`insert into "${tmpTableName}" select * from "${tableName}"`)
     await exec(`drop table "${tableName}"`)
     await exec(`alter table "${tmpTableName}" rename to "${tableName}"`)
-    await Promise.all(indexes.map(async ({ sql }) => exec(sql)))
+    await Promise.all(indexes.map(async ({ sql }) => (sql ? exec(sql) : null)))
   }
 
   /**
@@ -1611,7 +1611,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     await exec(`insert into "${tmpTableName}" select * from "${tableName}"`)
     await exec(`drop table "${tableName}"`)
     await exec(`alter table "${tmpTableName}" rename to "${tableName}"`)
-    await Promise.all(indexes.map(async ({ sql }) => exec(sql)))
+    await Promise.all(indexes.map(async ({ sql }) => (sql ? exec(sql) : null)))
   }
 
   /**
