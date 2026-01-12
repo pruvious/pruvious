@@ -559,6 +559,8 @@ Returns an object containing:
 - If the generated name exceeds 63 characters, it will be shortened while remaining unique.
 - `columnA` - The junction column name for `tableA`.
 - `columnB` - The junction column name for `tableB`.
+- `columnOrderA` - The junction order column name for `tableA`.
+- `columnOrderB` - The junction order column name for `tableB`.
 
 **Example:**
 
@@ -568,6 +570,8 @@ toJunction('Products', 'categories', 'Categories')
 //   tableName: 'JN_Products__categories__Categories',
 //   columnA: 'productsId',
 //   columnB: 'categoriesId',
+//   columnOrderA: 'productsOrder',
+//   columnOrderB: 'categoriesOrder',
 // }
 
 toJunction('Products', 'categories', 'Categories', 'products')
@@ -575,6 +579,8 @@ toJunction('Products', 'categories', 'Categories', 'products')
 //   tableName: 'JN_Categories__products__Products__categories',
 //   columnA: 'productsId',
 //   columnB: 'categoriesId',
+//   columnOrderA: 'productsOrder',
+//   columnOrderB: 'categoriesOrder',
 // }
 ```
 

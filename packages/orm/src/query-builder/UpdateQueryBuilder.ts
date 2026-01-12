@@ -1049,18 +1049,37 @@ export class UpdateQueryBuilder<
               field.options.referencedCollection,
               field.options.inverseField,
             )
+            const preservedOrdersB: { [columnB: number]: number } = {}
 
             promisesDelete.push(() =>
-              this.db.exec(`delete from "${junction.tableName}" where "${junction.columnA}" = $id`, { id: row.id }),
+              this.db
+                .exec(
+                  `delete from "${junction.tableName}" where "${junction.columnA}" = $id returning "${junction.columnB}", "${junction.columnOrderB}"`,
+                  { id: row.id },
+                )
+                .then((rows: any[]) => {
+                  for (const delRow of rows) {
+                    preservedOrdersB[delRow[junction.columnB]] = delRow[junction.columnOrderB]
+                  }
+                  return rows.length
+                }),
             )
 
             for (const [i, relatedId] of value.entries()) {
-              promisesInsert.push(() =>
-                this.db.exec(
-                  `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "order") values ($id, $relatedId, $order)`,
-                  { id: row.id, relatedId, order: i + 1 },
-                ),
-              )
+              promisesInsert.push(() => {
+                if (isDefined(preservedOrdersB[relatedId])) {
+                  return this.db.exec(
+                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, $orderB)`,
+                    { id: row.id, relatedId, orderA: i + 1, orderB: preservedOrdersB[relatedId] },
+                  )
+                } else {
+                  const orderB = `(select coalesce(max("${junction.columnOrderB}"), 0) + 1 from "${junction.tableName}" where "${junction.columnB}" = $relatedId)`
+                  return this.db.exec(
+                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, ${orderB})`,
+                    { id: row.id, relatedId, orderA: i + 1 },
+                  )
+                }
+              })
             }
           }
         }

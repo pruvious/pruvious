@@ -482,6 +482,18 @@ describe('junction field', () => {
         await qb.selectFrom('Events').select(['title', 'attendees']).where('title', '=', 'Concert 4').all(),
       ).toEqual(qbo([{ title: 'Concert 4', attendees: [1, 2] }]))
 
+      // Set user2 and user1 (reversed order) as attendees of Concert 4
+      expect(
+        await qb
+          .update('Events')
+          .set({ attendees: [2, 1] })
+          .where('title', '=', 'Concert 4')
+          .run(),
+      ).toEqual(qbo(1))
+      expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user2@example.com').all()).toEqual(
+        qbo([{ events: [2, 3, 4] }]),
+      )
+
       // Remove Concert 4
       expect(
         await qb.deleteFrom('Events').where('title', '=', 'Concert 4').returning(['title', 'attendees']).run(),
@@ -494,7 +506,7 @@ describe('junction field', () => {
       expect(
         await qb
           .insertInto('Events')
-          .values([{ title: 'Concert 4', categories: [1] }])
+          .values([{ title: 'Concert 4', attendees: [3, 2, 1] }])
           .run(),
       ).toEqual(qbo(1))
       expect(
@@ -503,17 +515,17 @@ describe('junction field', () => {
           .select(['title', 'categories', 'attendees'])
           .where('title', '=', 'Concert 4')
           .all(),
-      ).toEqual(qbo([{ title: 'Concert 4', categories: [1], attendees: [] }]))
+      ).toEqual(qbo([{ title: 'Concert 4', categories: [], attendees: [3, 2, 1] }]))
 
       // Check inverse relation from Users side
       expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user1@example.com').all()).toEqual(
-        qbo([{ events: [1, 2, 3] }]),
+        qbo([{ events: [1, 2, 3, 5] }]),
       )
       expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user2@example.com').all()).toEqual(
-        qbo([{ events: [2, 3] }]),
+        qbo([{ events: [2, 3, 5] }]),
       )
       expect(await qb.selectFrom('Users').select('events').where('email', '=', 'user3@example.com').all()).toEqual(
-        qbo([{ events: [3] }]),
+        qbo([{ events: [3, 5] }]),
       )
 
       await db.close()

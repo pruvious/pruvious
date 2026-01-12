@@ -43,6 +43,8 @@ export function toForeignKey(table: string, column: string) {
  *   - If the generated name exceeds 63 characters, it will be shortened while remaining unique.
  * - `columnA` - The junction column name for `tableA`.
  * - `columnB` - The junction column name for `tableB`.
+ * - `columnOrderA` - The junction order column name for `tableA`.
+ * - `columnOrderB` - The junction order column name for `tableB`.
  *
  * @example
  * ```ts
@@ -51,6 +53,8 @@ export function toForeignKey(table: string, column: string) {
  * //   tableName: 'JN_Products__categories__Categories',
  * //   columnA: 'productsId',
  * //   columnB: 'categoriesId',
+ * //   columnOrderA: 'productsOrder',
+ * //   columnOrderB: 'categoriesOrder',
  * // }
  *
  * toJunction('Products', 'categories', 'Categories', 'products')
@@ -58,6 +62,8 @@ export function toForeignKey(table: string, column: string) {
  * //   tableName: 'JN_Categories__products__Products__categories',
  * //   columnA: 'productsId',
  * //   columnB: 'categoriesId',
+ * //   columnOrderA: 'productsOrder',
+ * //   columnOrderB: 'categoriesOrder',
  * // }
  * ```
  */
@@ -76,5 +82,7 @@ export function toJunction(tableA: string, fieldA: string, tableB: string, field
     tableName,
     columnA: `${camelCase(tableA).slice(0, 61)}Id`,
     columnB: `${camelCase(tableB).slice(0, 61)}Id`,
+    columnOrderA: `${camelCase(tableA).slice(0, 57)}Order`,
+    columnOrderB: `${camelCase(tableB).slice(0, 57)}Order`,
   }
 }

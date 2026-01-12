@@ -746,10 +746,22 @@ describe('matrix field', () => {
         await qb.selectFrom('Events').select(['title', 'attendees']).where('title', '=', 'Concert 4').all(),
       ).toEqual(qbo([{ title: 'Concert 4', attendees: [1, 2] }]))
 
+      // Set user2 and user1 (reversed order) as attendees of Concert 4
+      expect(
+        await qb
+          .update('Events')
+          .set({ attendees: [2, 1] })
+          .where('title', '=', 'Concert 4')
+          .run(),
+      ).toEqual(qbo(1))
+      expect(
+        await qb.selectFrom('Events').select(['title', 'attendees']).where('title', '=', 'Concert 4').all(),
+      ).toEqual(qbo([{ title: 'Concert 4', attendees: [2, 1] }]))
+
       // Remove Concert 4
       expect(
         await qb.deleteFrom('Events').where('title', '=', 'Concert 4').returning(['title', 'attendees']).run(),
-      ).toEqual(qbo([{ title: 'Concert 4', attendees: [1, 2] }]))
+      ).toEqual(qbo([{ title: 'Concert 4', attendees: [2, 1] }]))
       expect(
         await qb.selectFrom('Events').select(['title', 'attendees']).where('title', '=', 'Concert 4').all(),
       ).toEqual(qbo([]))

@@ -1394,9 +1394,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     const junction = toJunction(tableName, columnName, referencedTable, inverseColumnName)
     const createTableFn = async () => {
       const idType = this.dialect === 'postgres' ? 'bigserial' : 'integer'
-      const sql = `create table "${junction.tableName}" ("${junction.columnA}" ${idType} not null, "${junction.columnB}" ${idType} not null, "order" integer, constraint "PK_${junction.tableName}" primary key ("${junction.columnA}", "${junction.columnB}"))`
+      const sql = `create table "${junction.tableName}" ("${junction.columnA}" ${idType} not null, "${junction.columnB}" ${idType} not null, "${junction.columnOrderA}" integer, "${junction.columnOrderB}" integer, constraint "PK_${junction.tableName}" primary key ("${junction.columnA}", "${junction.columnB}"))`
       await this.exec(sql)
-      await this.createIndex(junction.tableName, ['order'])
+      await this.createIndex(junction.tableName, [junction.columnOrderA])
+      await this.createIndex(junction.tableName, [junction.columnOrderB])
     }
     const createForeignKeysFn = async () => {
       await this.createForeignKey(

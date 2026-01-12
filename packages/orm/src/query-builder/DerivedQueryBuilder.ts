@@ -279,7 +279,7 @@ export class DerivedQueryBuilder<
             promises.push(() =>
               this.db
                 .exec(
-                  `select "${junction.columnB}" from "${junction.tableName}" where "${junction.columnA}" = $id order by "order" nulls last`,
+                  `select "${junction.columnB}" from "${junction.tableName}" where "${junction.columnA}" = $id order by "${junction.columnOrderA}" nulls last`,
                   { id },
                 )
                 .then((junctionRows: any[]) => {

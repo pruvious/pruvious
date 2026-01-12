@@ -1055,10 +1055,11 @@ export class InsertQueryBuilder<
               )
 
               for (const [i, relatedId] of item[fieldName].entries()) {
+                const orderB = `(select coalesce(max("${junction.columnOrderB}"), 0) + 1 from "${junction.tableName}" where "${junction.columnB}" = $relatedId)`
                 promises.push(() =>
                   this.db.exec(
-                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "order") values ($id, $relatedId, $order)`,
-                    { id, relatedId, order: i + 1 },
+                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, ${orderB})`,
+                    { id, relatedId, orderA: i + 1 },
                   ),
                 )
               }

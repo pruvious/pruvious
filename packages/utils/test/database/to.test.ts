@@ -23,11 +23,15 @@ test('generate junction table name', () => {
     tableName: 'JN_Products__categories__Categories',
     columnA: 'productsId',
     columnB: 'categoriesId',
+    columnOrderA: 'productsOrder',
+    columnOrderB: 'categoriesOrder',
   })
   expect(toJunction('Products', 'categories', 'Categories', 'products')).toEqual({
     tableName: 'JN_Categories__products__Products__categories',
     columnA: 'productsId',
     columnB: 'categoriesId',
+    columnOrderA: 'productsOrder',
+    columnOrderB: 'categoriesOrder',
   })
   expect(toJunction('A', 'a', 'B'.repeat(50)).tableName).toMatch(/^JN_A__a__B{50}$/)
   expect(toJunction('A', 'a', 'B'.repeat(99)).tableName).toMatch(/^JN_A__a__B[0-9B_]{53}$/)
