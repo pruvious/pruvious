@@ -1,7 +1,6 @@
 <template>
-  <div>
+  <div v-if="notifications.length">
     <PUIButton
-      v-if="notifications.length"
       :title="__('pruvious-dashboard', 'Uploads')"
       :variant="widget.isOpen ? 'primary' : 'outline'"
       @click="widget.isOpen = true"
