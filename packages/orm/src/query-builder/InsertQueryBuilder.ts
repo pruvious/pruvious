@@ -1039,7 +1039,9 @@ export class InsertQueryBuilder<
    */
   protected async setRelationships(rawResult: any) {
     if (isArray<Record<string, any>>(rawResult)) {
-      const promises: (() => Promise<number>)[] = []
+      const promisesSelect: (() => Promise<void>)[] = []
+      const promisesInsert: (() => Promise<number>)[] = []
+      const ordersB: { [columnB: number]: number | null } = {}
 
       for (const [i, item] of this.sanitizedInput.entries()) {
         const id = rawResult[i]?.id
@@ -1054,12 +1056,30 @@ export class InsertQueryBuilder<
                 field.options.inverseField,
               )
 
-              for (const [i, relatedId] of item[fieldName].entries()) {
-                const orderB = `(select coalesce(max("${junction.columnOrderB}"), 0) + 1 from "${junction.tableName}" where "${junction.columnB}" = $relatedId)`
-                promises.push(() =>
+              for (const [j, relatedId] of item[fieldName].entries()) {
+                promisesSelect.push(
+                  () =>
+                    new Promise(async (resolve) => {
+                      if (isUndefined(ordersB[relatedId])) {
+                        ordersB[relatedId] = null
+                        await this.db
+                          .exec(
+                            `select coalesce(max(${this.escapeIdentifier(junction.columnOrderB)}), 0) + 1 as "orderB" from ${this.escapeIdentifier(junction.tableName)} where ${this.escapeIdentifier(junction.columnB)} = $relatedId`,
+                            { relatedId },
+                          )
+                          .then(async (rows: any[]) => {
+                            ordersB[relatedId] = rows[0]?.orderB ?? null
+                          })
+                      }
+
+                      resolve()
+                    }),
+                )
+
+                promisesInsert.push(() =>
                   this.db.exec(
-                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, ${orderB})`,
-                    { id, relatedId, orderA: i + 1 },
+                    `insert into ${this.escapeIdentifier(junction.tableName)} (${this.escapeIdentifier(junction.columnA)}, ${this.escapeIdentifier(junction.columnB)}, ${this.escapeIdentifier(junction.columnOrderA)}, ${this.escapeIdentifier(junction.columnOrderB)}) values ($id, $relatedId, $orderA, $orderB)`,
+                    { id, relatedId, orderA: j + 1, orderB: ordersB[relatedId] ? ordersB[relatedId]++ : null },
                   ),
                 )
               }
@@ -1068,7 +1088,8 @@ export class InsertQueryBuilder<
         }
       }
 
-      await promiseAllInBatches(promises, 50)
+      await promiseAllInBatches(promisesSelect, 50)
+      await promiseAllInBatches(promisesInsert, 50)
     }
   }
 

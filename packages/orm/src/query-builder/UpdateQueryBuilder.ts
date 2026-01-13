@@ -1037,7 +1037,9 @@ export class UpdateQueryBuilder<
 
     if (junctionFields.length && isArray<Record<string, any>>(rawResult)) {
       const promisesDelete: (() => Promise<number>)[] = []
+      const promisesSelect: (() => Promise<void>)[] = []
       const promisesInsert: (() => Promise<number>)[] = []
+      const ordersB: { [columnB: number]: number | null } = {}
 
       for (const row of rawResult) {
         if (row.id) {
@@ -1049,43 +1051,54 @@ export class UpdateQueryBuilder<
               field.options.referencedCollection,
               field.options.inverseField,
             )
-            const preservedOrdersB: { [columnB: number]: number } = {}
 
             promisesDelete.push(() =>
               this.db
                 .exec(
-                  `delete from "${junction.tableName}" where "${junction.columnA}" = $id returning "${junction.columnB}", "${junction.columnOrderB}"`,
+                  `delete from ${this.escapeIdentifier(junction.tableName)} where ${this.escapeIdentifier(junction.columnA)} = $id returning ${this.escapeIdentifier(junction.columnB)}, ${this.escapeIdentifier(junction.columnOrderB)}`,
                   { id: row.id },
                 )
                 .then((rows: any[]) => {
                   for (const delRow of rows) {
-                    preservedOrdersB[delRow[junction.columnB]] = delRow[junction.columnOrderB]
+                    ordersB[delRow[junction.columnB]] = delRow[junction.columnOrderB]
                   }
                   return rows.length
                 }),
             )
 
             for (const [i, relatedId] of value.entries()) {
-              promisesInsert.push(() => {
-                if (isDefined(preservedOrdersB[relatedId])) {
-                  return this.db.exec(
-                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, $orderB)`,
-                    { id: row.id, relatedId, orderA: i + 1, orderB: preservedOrdersB[relatedId] },
-                  )
-                } else {
-                  const orderB = `(select coalesce(max("${junction.columnOrderB}"), 0) + 1 from "${junction.tableName}" where "${junction.columnB}" = $relatedId)`
-                  return this.db.exec(
-                    `insert into "${junction.tableName}" ("${junction.columnA}", "${junction.columnB}", "${junction.columnOrderA}", "${junction.columnOrderB}") values ($id, $relatedId, $orderA, ${orderB})`,
-                    { id: row.id, relatedId, orderA: i + 1 },
-                  )
-                }
-              })
+              promisesSelect.push(
+                () =>
+                  new Promise(async (resolve) => {
+                    if (isUndefined(ordersB[relatedId])) {
+                      ordersB[relatedId] = null
+                      await this.db
+                        .exec(
+                          `select coalesce(max(${this.escapeIdentifier(junction.columnOrderB)}), 0) + 1 as "orderB" from ${this.escapeIdentifier(junction.tableName)} where ${this.escapeIdentifier(junction.columnB)} = $relatedId`,
+                          { relatedId },
+                        )
+                        .then(async (rows: any[]) => {
+                          ordersB[relatedId] = rows[0]?.orderB ?? null
+                        })
+                    }
+
+                    resolve()
+                  }),
+              )
+
+              promisesInsert.push(() =>
+                this.db.exec(
+                  `insert into ${this.escapeIdentifier(junction.tableName)} (${this.escapeIdentifier(junction.columnA)}, ${this.escapeIdentifier(junction.columnB)}, ${this.escapeIdentifier(junction.columnOrderA)}, ${this.escapeIdentifier(junction.columnOrderB)}) values ($id, $relatedId, $orderA, $orderB)`,
+                  { id: row.id, relatedId, orderA: i + 1, orderB: ordersB[relatedId] },
+                ),
+              )
             }
           }
         }
       }
 
       await promiseAllInBatches(promisesDelete, 50)
+      await promiseAllInBatches(promisesSelect, 50)
       await promiseAllInBatches(promisesInsert, 50)
     }
   }
