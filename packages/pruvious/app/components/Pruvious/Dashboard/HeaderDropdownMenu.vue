@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pui-flex">
     <PUIButton
       :title="__('pruvious-dashboard', 'Open user menu')"
       :variant="isVisible ? 'primary' : 'outline'"

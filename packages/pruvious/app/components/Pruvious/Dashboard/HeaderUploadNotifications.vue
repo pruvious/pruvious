@@ -1,5 +1,5 @@
 <template>
-  <div v-if="notifications.length">
+  <div v-if="notifications.length" class="pui-flex">
     <PUIButton
       :title="__('pruvious-dashboard', 'Uploads')"
       :variant="widget.isOpen ? 'primary' : 'outline'"
