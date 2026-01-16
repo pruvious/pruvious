@@ -507,7 +507,10 @@ function search() {
         page: 1,
         where: [
           { field: 'type', operator: '=', value: 'file' },
-          { field: 'path', operator: 'ilike', value: `%${keyword.replace(/ +/g, '%')}%` },
+          ...keyword
+            .split(' ')
+            .filter(Boolean)
+            .map((word) => ({ field: 'path', operator: 'ilike', value: `%${word}%` }) as const),
         ],
       })
     } else {
