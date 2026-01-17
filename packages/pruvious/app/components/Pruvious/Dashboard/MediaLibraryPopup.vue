@@ -171,7 +171,9 @@ watch(
             .all()
             .then(({ data }) => data ?? []),
         ).then((data) => {
-          state.value.selectedUploads = data
+          state.value.selectedUploads = data.sort(
+            (a, b) => toArray(props.modelValue).indexOf(a.id) - toArray(props.modelValue).indexOf(b.id),
+          )
         })
       } else {
         state.value.selectedUploads = []
