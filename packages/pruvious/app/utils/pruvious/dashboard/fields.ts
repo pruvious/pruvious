@@ -176,7 +176,7 @@ export function getValidFilterOperators({
 
   if (_dataType === 'junction' || _dataType === 'matrix') {
     return choices.filter(({ value }) =>
-      ['eq', 'ne', 'lt', 'lte', 'gt', 'gte', 'includes', 'includesAny', 'excludes', 'excludesAny'].includes(value),
+      ['lt', 'lte', 'gt', 'gte', 'includes', 'includesAny', 'excludes', 'excludesAny'].includes(value),
     )
   }
 

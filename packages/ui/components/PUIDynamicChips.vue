@@ -24,7 +24,7 @@
         ></span>
 
         <li
-          @dblclick="$emit('dblclick', choice.value)"
+          @dblclick="$emit('dblclick', choice.value, $event)"
           @mousedown="handleDrag(i, $event)"
           @touchstart.prevent="onTouchStart(i)"
           class="pui-dynamic-chips-item"
@@ -33,9 +33,16 @@
             'pui-dynamic-chips-item-destructive': erroredItemsMap[i] || removeIndex === i,
           }"
         >
-          <span :title="choice.label ?? String(choice.value)" class="pui-dynamic-chips-label">
-            {{ (choice.label ?? choice.value) || '-' }}
-          </span>
+          <slot :choice="choice" :index="i" name="label">
+            <span
+              v-pui-tooltip="choice.tooltip"
+              :title="choice.label ?? String(choice.value)"
+              class="pui-dynamic-chips-label"
+            >
+              {{ (choice.label ?? choice.value) || '-' }}
+            </span>
+          </slot>
+
           <button
             v-if="!disabled"
             :disabled="draggingIndex !== null"
@@ -73,6 +80,7 @@
       <input
         v-model="inputValue"
         :disabled="disabled || (maxItems !== false && modelValue.length >= maxItems)"
+        :id="id ? `${id}--input` : undefined"
         :name="`${name}--input`"
         :placeholder="placeholder"
         @blur="
@@ -174,10 +182,12 @@
           'pui-dynamic-chips-dropdown-item-detailed': hasDetails,
         }"
       >
-        <span class="pui-dynamic-chips-dropdown-item-label">{{ (choice.label ?? choice.value) || '-' }}</span>
-        <span v-if="choice.detail !== undefined" class="pui-dynamic-chips-dropdown-item-detail">
-          {{ choice.detail || '-' }}
-        </span>
+        <slot :choice="choice" :index="i" name="choice">
+          <span class="pui-dynamic-chips-dropdown-item-label">{{ (choice.label ?? choice.value) || '-' }}</span>
+          <span v-if="choice.detail !== undefined" class="pui-dynamic-chips-dropdown-item-detail">
+            {{ choice.detail || '-' }}
+          </span>
+        </slot>
       </button>
 
       <span v-if="!filteredChoices.length" class="pui-dynamic-chips-dropdown-no-results">
@@ -206,6 +216,11 @@ export interface PUIDynamicChipsChoiceModel {
    * It is displayed in a grayed out style below the label.
    */
   detail?: string
+
+  /**
+   * An optional tooltip text to display for the choice in the select field.
+   */
+  tooltip?: string
 
   /**
    * The value of the choice in the chips field.
@@ -410,7 +425,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   'update:modelValue': [value: Primitive[]]
-  'dblclick': [value: Primitive]
+  'dblclick': [value: Primitive, event: MouseEvent]
 }>()
 
 const choices = ref<PUIDynamicChipsChoiceModel[]>([])

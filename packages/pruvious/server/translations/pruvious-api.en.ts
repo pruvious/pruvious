@@ -154,8 +154,7 @@ export default defineTranslation({
     'This directory contains nested files or directories that cannot be deleted',
   'This directory contains nested files or directories that cannot be moved':
     'This directory contains nested files or directories that cannot be moved',
-  'This field contains IDs that do not exist in the related collection':
-    'This field contains IDs that do not exist in the related collection',
+  'This field contains non-existent records': 'This field contains non-existent records',
   'This query parameter is required': 'This query parameter is required',
 
   'Yes': 'Yes',

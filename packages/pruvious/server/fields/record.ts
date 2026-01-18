@@ -237,8 +237,8 @@ export default {
         const queryBuilder = context.database
           .queryBuilder()
           .selectFrom(definition.options.collection)
-          .where('id', '=', value)
           .select(definition.options.fields)
+          .where('id', '=', value)
           .useCache(context.cache)
 
         if (deepPopulate) {

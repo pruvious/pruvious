@@ -1928,7 +1928,7 @@ export function getServerFileContentPatch() {
       '    `    ${name}: {`,',
       '    `      id: number`,',
       '    ...Object.entries(collection.fields).map(([fieldName, field]) => [',
-      "    `      ${fieldName}: ${field.model.dataType === 'text' ? 'string' : field.model.dataType === 'boolean' ? 'boolean' : 'number'},`,",
+      "    `      ${fieldName}: ${field.model.dataType === 'junction' ? 'number[]' : field.model.dataType === 'text' ? 'string' : field.model.dataType === 'boolean' ? 'boolean' : 'number'},`,",
       '    ]).flat(),',
       '    `    },`',
       '    ]).flat(),',

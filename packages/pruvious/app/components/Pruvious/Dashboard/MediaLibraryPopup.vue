@@ -97,10 +97,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  selectLabel: {
-    type: String,
-    required: true,
-  },
   initialFilePath: {
     type: String,
   },

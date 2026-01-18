@@ -192,7 +192,7 @@ interface CustomOptions<
           filterable?: boolean
 
           /**
-           * Whether to show a thumbnail preview of the image in the data table.
+           * Controls whether a small preview of the image is displayed in the data table.
            *
            * @default true
            */
@@ -440,8 +440,8 @@ export default {
         const queryBuilder = context.database
           .queryBuilder()
           .selectFrom('Uploads')
-          .where('id', '=', value)
           .select(definition.options.fields)
+          .where('id', '=', value)
           .useCache(context.cache)
 
         if (deepPopulate) {

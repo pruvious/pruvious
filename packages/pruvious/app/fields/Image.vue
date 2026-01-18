@@ -25,13 +25,7 @@
         <div class="p-image-details">
           <div v-if="file">
             <span v-pui-tooltip="{ content: file.path, offset: [0, 6] }" class="p-image-title">
-              <span :title="filename" class="pui-flex">
-                <span class="pui-truncate">
-                  <span>{{ filenameWithoutExtension }}</span>
-                  <span v-if="extensionWithoutDot" class="pui-muted">.</span>
-                </span>
-                <span v-if="extensionWithoutDot" class="pui-shrink-0 pui-muted">{{ extensionWithoutDot }}</span>
-              </span>
+              <PruviousDashboardMediaFileName :path="file.path" showTitle />
             </span>
           </div>
 
@@ -107,9 +101,9 @@
 
     <input
       :accept="allowedTypes?.join(',')"
+      :id="`${id}-file-input`"
       @change="uploadFile()"
       hidden
-      id="p-file-input"
       ref="fileInput"
       type="file"
     />
@@ -119,7 +113,6 @@
       :initialFilePath="file?.path"
       :label="label"
       :modelValue="modelValue"
-      :selectLabel="selectLabel"
       :validation="validation"
       @update:isVisible="!$event && (isMediaLibraryPopupVisible = false)"
       @update:modelValue="
@@ -161,7 +154,6 @@ import { __, hasPermission, primaryLanguage } from '#pruvious/app'
 import {
   displayableImageTypes,
   maybeTranslate,
-  mediaCategories,
   resolveFieldLabel,
   selectFrom,
   upload,
@@ -170,11 +162,10 @@ import {
   usePruviousDashboard,
   type UploadItem,
 } from '#pruvious/dashboard'
-import type { MediaCategory, SerializableFieldOptions } from '#pruvious/server'
+import type { SerializableFieldOptions } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isDefined, parseBytes, toArray } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { basename, extname } from 'pathe'
 import { validateUpload, type UploadFieldValidation } from '../utils/pruvious/dashboard/upload-fields'
 
 const props = defineProps({
@@ -272,20 +263,8 @@ const canRead = hasPermission('collection:uploads:read')
 const canCreate = hasPermission('collection:uploads:create')
 const loadingFile = ref(false)
 const file = ref<UploadItem | null>(await fetchFileData())
-const filename = computed(() => basename(file.value?.path ?? ''))
-const extension = computed(() => extname(filename.value))
-const filenameWithoutExtension = computed(() =>
-  extension.value ? filename.value.slice(0, -extension.value.length) : filename.value,
-)
-const extensionWithoutDot = computed(() =>
-  extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
-)
 const allowedTypes = computed(() => {
   const mimes = toArray(props.options.allowedTypes)
-    .map((v) =>
-      v === '*' || v.includes('/') ? v : mediaCategories[v as MediaCategory] ? mediaCategories[v as MediaCategory] : v,
-    )
-    .flat()
   return mimes.includes('*') ? undefined : mimes
 })
 const validation = computed<UploadFieldValidation>(() => ({

@@ -19,13 +19,7 @@
           variant="outline"
           class="pui-shrink"
         >
-          <span :title="filename" class="pui-flex">
-            <span class="pui-truncate">
-              <span>{{ filenameWithoutExtension }}</span>
-              <span v-if="extensionWithoutDot" class="pui-muted">.</span>
-            </span>
-            <span v-if="extensionWithoutDot" class="pui-shrink-0 pui-muted">{{ extensionWithoutDot }}</span>
-          </span>
+          <PruviousDashboardMediaFileName :path="file.path" showTitle />
         </PUIButton>
 
         <PUIButton v-else-if="!loadingFile" disabled variant="outline" class="pui-shrink">
@@ -79,9 +73,9 @@
 
     <input
       :accept="allowedTypes?.join(',')"
+      :id="`${id}-file-input`"
       @change="uploadFile()"
       hidden
-      id="p-file-input"
       ref="fileInput"
       type="file"
     />
@@ -91,7 +85,6 @@
       :initialFilePath="file?.path"
       :label="label"
       :modelValue="modelValue"
-      :selectLabel="selectLabel"
       :validation="validation"
       @update:isVisible="!$event && (isMediaLibraryPopupVisible = false)"
       @update:modelValue="
@@ -138,7 +131,7 @@ import type { MediaCategory, SerializableFieldOptions } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
 import { isDefined, parseBytes, toArray } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { basename, dirname, extname } from 'pathe'
+import { dirname } from 'pathe'
 import { validateUpload, type UploadFieldValidation } from '../utils/pruvious/dashboard/upload-fields'
 
 const props = defineProps({
@@ -233,14 +226,6 @@ const canRead = hasPermission('collection:uploads:read')
 const canCreate = hasPermission('collection:uploads:create')
 const loadingFile = ref(false)
 const file = ref<UploadItem | null>(await fetchFileData())
-const filename = computed(() => basename(file.value?.path ?? ''))
-const extension = computed(() => extname(filename.value))
-const filenameWithoutExtension = computed(() =>
-  extension.value ? filename.value.slice(0, -extension.value.length) : filename.value,
-)
-const extensionWithoutDot = computed(() =>
-  extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
-)
 const dir = computed(() => dirname(file.value?.path ?? ''))
 const allowedTypes = computed(() => {
   const mimes = toArray(props.options.allowedTypes)

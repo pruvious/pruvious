@@ -17,7 +17,7 @@ describe('image field', () => {
   let svgRotatedId = 0
   let txtId = 0
 
-  test('create upload', async () => {
+  test('create uploads', async () => {
     const png = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.png')], 'test.png')
     const svg = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.svg')], 'test.svg')
     const svgRotated = new File(

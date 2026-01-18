@@ -27,7 +27,11 @@
             'pui-chips-item-destructive': erroredItemsMap[i] || removeIndex === i,
           }"
         >
-          <span :title="choices && labels[value] ? labels[value] : value" class="pui-chips-label">
+          <span
+            v-pui-tooltip="choices ? tooltips[value] : undefined"
+            :title="choices && labels[value] ? labels[value] : value"
+            class="pui-chips-label"
+          >
             {{ choices && labels[value] ? labels[value] : value }}
           </span>
           <button
@@ -67,6 +71,7 @@
       <input
         v-model="inputValue"
         :disabled="disabled || (maxItems !== false && modelValue.length >= maxItems)"
+        :id="id ? `${id}--input` : undefined"
         :name="`${name}--input`"
         :placeholder="placeholder"
         @blur="
@@ -193,6 +198,11 @@ export interface PUIChipsChoiceModel {
    * It must be unique among the choices in the group.
    */
   value: string
+
+  /**
+   * An optional tooltip text to display for the choice in the select field.
+   */
+  tooltip?: string
 }
 
 const props = defineProps({
@@ -384,6 +394,10 @@ const highlightedIndex = ref(0)
 const labels = computed(() => {
   if (!props.choices) return {}
   return Object.fromEntries(props.choices.map((choice) => [choice.value, choice.label ?? choice.value]))
+})
+const tooltips = computed(() => {
+  if (!props.choices) return {}
+  return Object.fromEntries(props.choices.map((choice) => [choice.value, choice.tooltip]))
 })
 const erroredItemsMap = ref<Record<number, boolean>>({})
 const backspaceIndex = ref<number | null>(null)

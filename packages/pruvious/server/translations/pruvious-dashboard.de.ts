@@ -7,6 +7,11 @@ export default defineTranslation({
     { count: 'number' },
     { subject: [{ conditions: [{ count: 1 }], output: 'Block konnte' }, 'Blöcke konnten'] },
   ),
+  '$entries': createPattern(
+    '$entries',
+    { count: 'number' },
+    { entries: [{ conditions: [{ count: 1 }], output: 'Eintrag' }, 'Einträge'] },
+  ),
   '$upload `$oldName` has been renamed to `$newName`': createPattern(
     '$upload `$oldName` wurde in `$newName` umbenannt',
     { upload: 'string', oldName: 'string', newName: 'string' },
@@ -337,6 +342,10 @@ export default defineTranslation({
   'Greater than': 'Größer als',
   'Greater than or equal to': 'Größer oder gleich',
 
+  'Has at least': 'Hat mindestens',
+  'Has at most': 'Hat höchstens',
+  'Has more than': 'Hat mehr als',
+  'Has less than': 'Hat weniger als',
   'Headers': 'Headers',
   'Heading $level': createPattern('Überschrift $level', { level: 'number' }),
   'Hidden': 'Versteckt',
@@ -406,6 +415,7 @@ export default defineTranslation({
   'Management': 'Management',
   'Match pattern': 'Abgleichungsmuster',
   'Media': 'Medien',
+  'Media library': 'Medienbibliothek',
   'Message': 'Nachricht',
   'Meta description': 'Meta-Beschreibung',
   'MIME type': 'MIME-Typ',

@@ -7,32 +7,51 @@
         <div
           v-else-if="file && showThumbnail"
           v-pui-tooltip="file.path"
-          @click="isDetailsPopupVisible = true"
           class="p-item p-image-preview p-media-item-box"
         >
           <PruviousDashboardMediaImageItem
             v-if="file.category === 'image' && displayableImageTypes[file.mime]"
-            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :linkHandler="
+              (_, event) => {
+                if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                  isDetailsPopupVisible = true
+                }
+              }
+            "
             :upload="file"
             compact
           />
           <PruviousDashboardMediaFileItem
             v-else-if="!loadingFile"
-            :linkHandler="() => (isDetailsPopupVisible = true)"
+            :linkHandler="
+              (_, event) => {
+                if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                  isDetailsPopupVisible = true
+                }
+              }
+            "
             :upload="file"
             compact
           />
         </div>
 
-        <button v-else-if="file" v-pui-tooltip="file.path" @click="isDetailsPopupVisible = true" class="p-item">
-          <span :title="__('pruvious-dashboard', 'Show details')" class="pui-flex">
-            <span class="pui-truncate">
-              <span>{{ filenameWithoutExtension }}</span>
-              <span v-if="extensionWithoutDot">.</span>
-            </span>
-            <span v-if="extensionWithoutDot" class="pui-shrink-0">{{ extensionWithoutDot }}</span>
-          </span>
-        </button>
+        <a
+          v-else-if="file"
+          v-pui-tooltip="file.path"
+          :href="`${dashboardBasePath}media${dir === '/' ? '' : dir}?details=${file.id}`"
+          @click="
+            (event) => {
+              if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                event.preventDefault()
+                isDetailsPopupVisible = true
+              }
+            }
+          "
+          target="_blank"
+          class="p-item"
+        >
+          <PruviousDashboardMediaFileName :path="file.path" :title="__('pruvious-dashboard', 'Show details')" />
+        </a>
 
         <span
           v-else-if="!loadingFile"
@@ -82,7 +101,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, hasPermission } from '#pruvious/app'
+import { __, dashboardBasePath, hasPermission } from '#pruvious/app'
 import {
   displayableImageTypes,
   selectFrom,
@@ -94,7 +113,7 @@ import type { Collections, SerializableCollection, SerializableFieldOptions } fr
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isObject, isString, isUndefined } from '@pruvious/utils'
 import { computedAsync } from '@vueuse/core'
-import { basename, extname } from 'pathe'
+import { dirname } from 'pathe'
 
 const props = defineProps({
   /**
@@ -174,14 +193,7 @@ const showThumbnail = computed(
 )
 const loadingFile = ref(false)
 const file = ref<UploadItem | null>(await fetchFileData())
-const filename = computed(() => basename(file.value?.path ?? ''))
-const extension = computed(() => extname(filename.value))
-const filenameWithoutExtension = computed(() =>
-  extension.value ? filename.value.slice(0, -extension.value.length) : filename.value,
-)
-const extensionWithoutDot = computed(() =>
-  extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
-)
+const dir = computed(() => dirname(file.value?.path ?? ''))
 const { resolver: permissionsResolver } = useCollectionRecordPermissions(uploadsCollection)
 const resolvedPermissions = computedAsync(() =>
   file.value
@@ -232,13 +244,14 @@ async function fetchFileData(): Promise<UploadItem | null> {
 </script>
 
 <style scoped>
-button.p-item {
+a.p-item {
+  --pui-muted-foreground: currentColor;
   color: hsl(var(--pui-muted-foreground));
   text-decoration: none;
 }
 
-button.p-item:hover,
-button.p-item:focus {
+a.p-item:hover,
+a.p-item:focus {
   color: hsl(var(--pui-foreground));
 }
 

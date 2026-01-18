@@ -15,7 +15,7 @@
           if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
             event.preventDefault()
             if (!disabled.value) {
-              linkHandler?.(upload)
+              linkHandler?.(upload, event)
               if (selectionMode === 'multiple') {
                 $emit(selected ? 'deselect' : ('select' as any), upload)
               }
@@ -58,12 +58,12 @@ import { NuxtLink } from '#components'
 import { useLanguage } from '#pruvious/app'
 import {
   dashboardBasePath,
-  resolveUploadPath,
+  resolveThumbnailPath,
   type ResolvedCollectionRecordPermissions,
   type UploadItem,
 } from '#pruvious/dashboard'
 import { formatBytes, omit } from '@pruvious/utils'
-import { dirname, extname } from 'pathe'
+import { dirname } from 'pathe'
 import { stringifyQuery } from 'ufo'
 
 const props = defineProps({
@@ -86,7 +86,7 @@ const props = defineProps({
     default: 'none',
   },
   linkHandler: {
-    type: Function as PropType<(upload: UploadItem) => any>,
+    type: Function as PropType<(upload: UploadItem, event: MouseEvent) => any>,
   },
   disabledResolver: {
     type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,
@@ -106,14 +106,7 @@ const route = useRoute()
 const language = useLanguage()
 const detailsPopup = useTemplateRef('detailsPopup')
 const formattedSize = computed(() => formatBytes(props.upload.size))
-const thumbnailURL = computed(() => {
-  if (props.upload.imageWidth <= 320 && props.upload.imageHeight <= 320) {
-    return resolveUploadPath(props.upload.path)
-  }
-  const ext = extname(props.upload.path)
-  const oext = ext ? '_oext' + extname(props.upload.path).slice(1) : ''
-  return resolveUploadPath(props.upload.path.slice(0, -ext.length) + oext + '_w320_h320_contain.webp')
-})
+const thumbnailURL = computed(() => resolveThumbnailPath(props.upload))
 const isDetailsPopupVisible = ref(false)
 const link = computed(() => {
   const dir = dirname(props.upload.path)

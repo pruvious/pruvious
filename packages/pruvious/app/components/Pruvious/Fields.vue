@@ -515,7 +515,13 @@ function parseLayout(layout: FieldsLayout): Item[] {
 }
 
 function getFieldErrors(fieldName: string): string | Record<string, string> | undefined {
-  if (props.errors && props.fields?.[fieldName] && props.fields[fieldName]._dataType === 'text') {
+  if (
+    props.errors &&
+    props.fields?.[fieldName] &&
+    (props.fields[fieldName]._dataType === 'junction' ||
+      props.fields[fieldName]._dataType === 'matrix' ||
+      props.fields[fieldName]._dataType === 'text')
+  ) {
     const subFieldErrors: Record<string, string> = {}
 
     for (const [key, value] of Object.entries(props.errors)) {

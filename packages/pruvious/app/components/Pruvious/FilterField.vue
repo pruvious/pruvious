@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { getValidFilterOperators, type FilterOperator, type WhereField } from '#pruvious/dashboard'
 import type { GenericSerializableFieldOptions } from '#pruvious/server'
-import { deepClone, isArray, isBoolean, isDefined, isNull, isNumber, isString } from '@pruvious/utils'
+import { deepClone, isArray, isBoolean, isDefined, isNull, isNumber } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -69,19 +69,28 @@ watch(
   (newValue, oldValue) => {
     if (newValue.field !== oldValue?.field || newValue.operator !== oldValue?.operator) {
       const normalizedValue: WhereField = { ...newValue }
-      const junctionAndmatrixOperators: FilterOperator[] = [
-        'lt',
-        'lte',
-        'gt',
-        'gte',
-        'includes',
-        'includesAny',
-        'excludes',
-        'excludesAny',
-      ]
 
       if (!operatorChoices.value.some(({ value }) => value === normalizedValue.operator)) {
         normalizedValue.operator = operatorChoices.value[0]!.value
+      }
+
+      if (props.options._dataType === 'junction' || props.options._dataType === 'matrix') {
+        if (['lt', 'lte', 'gt', 'gte'].includes(normalizedValue.operator) && isArray(normalizedValue.value)) {
+          nextTick(() => {
+            if (isArray(normalizedValue.value)) {
+              normalizedValue.value = normalizedValue.value.length
+            }
+          })
+        } else if (
+          ['includes', 'includesAny', 'excludes', 'excludesAny'].includes(normalizedValue.operator) &&
+          isNumber(normalizedValue.value)
+        ) {
+          nextTick(() => {
+            if (isNumber(normalizedValue.value)) {
+              normalizedValue.value = []
+            }
+          })
+        }
       }
 
       if (
@@ -94,19 +103,14 @@ watch(
           !isBoolean(normalizedValue.value) &&
           !isNull(normalizedValue.value)) ||
         ((props.options._dataType === 'junction' || props.options._dataType === 'matrix') &&
-          !junctionAndmatrixOperators.includes(normalizedValue.operator) &&
-          !isString(normalizedValue.value) &&
-          !isNull(normalizedValue.value)) ||
-        ((props.options._dataType === 'junction' || props.options._dataType === 'matrix') &&
-          junctionAndmatrixOperators.includes(normalizedValue.operator) &&
-          !isArray(normalizedValue.value))
+          !isArray(normalizedValue.value) &&
+          !isNumber(normalizedValue.value))
       ) {
-        nextTick(
-          () =>
-            (normalizedValue.value = deepClone(
-              isDefined(props.forcedDefault) ? props.forcedDefault : props.options.default,
-            )),
-        )
+        nextTick(() => {
+          normalizedValue.value = deepClone(
+            isDefined(props.forcedDefault) ? props.forcedDefault : props.options.default,
+          )
+        })
       }
 
       setTimeout(() => emit('commit', normalizedValue))

@@ -174,7 +174,7 @@ function getReExports() {
     `export { serializeTranslatableStringCallbacks } from '${resolvePruviousFile('translations/utils.shared')}'`,
 
     // Uploads
-    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath } from '${resolvePruviousFile('uploads/utils.client')}'`,
+    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath, resolveThumbnailPath } from '${resolvePruviousFile('uploads/utils.client')}'`,
     `export { type OptimizableImageType, mediaCategories, displayableImageTypes, optimizableImageTypes, playableVideoTypes } from '${resolvePruviousFile('uploads/utils.shared')}'`,
 
     // Various dashboard utils

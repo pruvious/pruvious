@@ -12,7 +12,7 @@ describe('file field', () => {
   let txtFileId = 0
   let svgFileId = 0
 
-  test('create upload', async () => {
+  test('create uploads', async () => {
     const txtFile = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.txt')], 'test.txt')
     const svgFile = new File([fs.readFileSync('packages/pruvious/.playground/test/files/test.svg')], 'test.svg')
     const txtFileResult: any = await $postFormData('/api/uploads', { '': txtFile })

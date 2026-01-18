@@ -160,8 +160,7 @@ export default defineTranslation({
     'Dieser Ordner enthält verschachtelte Dateien oder Ordner, die nicht gelöscht werden können',
   'This directory contains nested files or directories that cannot be moved':
     'Dieser Ordner enthält verschachtelte Dateien oder Ordner, die nicht verschoben werden können',
-  'This field contains IDs that do not exist in the related collection':
-    'Dieses Feld enthält IDs, die nicht in der zugehörigen Collection existieren',
+  'This field contains non-existent records': 'Dieses Feld enthält nicht existierende Datensätze',
   'This query parameter is required': 'Dieser Abfrageparameter ist erforderlich',
 
   'Yes': 'Ja',

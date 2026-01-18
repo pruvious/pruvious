@@ -161,6 +161,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const query = await selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
+    .orderBy(collection.definition.createdAtField ? ('createdAt' as any) : 'id', 'desc')
     .cache(3000)
     .paged(page, 50)
     .paginate()

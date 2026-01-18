@@ -6,12 +6,36 @@
       { value: 'includesAny', label: __('pruvious-dashboard', 'Includes any') },
       { value: 'excludes', label: __('pruvious-dashboard', 'Excludes all') },
       { value: 'excludesAny', label: __('pruvious-dashboard', 'Excludes any') },
+      { value: 'lt', label: __('pruvious-dashboard', 'Has less than') },
+      { value: 'gt', label: __('pruvious-dashboard', 'Has more than') },
+      { value: 'gte', label: __('pruvious-dashboard', 'Has at least') },
+      { value: 'lte', label: __('pruvious-dashboard', 'Has at most') },
     ]"
     :options="options"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
-    <div class="pui-row">
+    <div
+      v-if="
+        modelValue.operator === 'lt' ||
+        modelValue.operator === 'lte' ||
+        modelValue.operator === 'gt' ||
+        modelValue.operator === 'gte'
+      "
+    >
+      <PUINumber
+        :id="id"
+        :min="0"
+        :modelValue="typeof modelValue.value === 'number' ? modelValue.value : 0"
+        :name="id"
+        :suffix="__('pruvious-dashboard', '$entries', { count: Number(modelValue.value) })"
+        @commit="$emit('commit', { ...modelValue, value: $event })"
+        @update:modelValue="$emit('update:modelValue', { ...modelValue, value: $event })"
+        showSteppers
+      />
+    </div>
+
+    <div v-else class="pui-row">
       <PUIButton
         v-pui-tooltip="__('pruvious-dashboard', 'Table overview')"
         @click="isDataTablePopupVisible = true"
@@ -26,7 +50,7 @@
         :id="id"
         :maxItems="options.maxItems"
         :minItems="options.minItems"
-        :modelValue="(modelValue as any).value"
+        :modelValue="typeof (modelValue as any).value === 'object' ? (modelValue as any).value : []"
         :name="id"
         :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
@@ -47,7 +71,7 @@
       v-if="isDataTablePopupVisible"
       :collectionName="options.collection"
       :languages="options.languages"
-      :modelValue="modelValue.value ? (modelValue.value as any) : []"
+      :modelValue="typeof (modelValue as any).value === 'object' ? (modelValue as any).value : []"
       :title="label"
       @close="$event().then(() => (isDataTablePopupVisible = false))"
       @update:modelValue="
@@ -133,6 +157,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const query = await selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
+    .orderBy(collection.definition.createdAtField ? ('createdAt' as any) : 'id', 'desc')
     .cache(3000)
     .paged(page, 50)
     .paginate()
@@ -175,7 +200,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
 }
 
 async function selectedChoicesResolver(): Promise<PUIDynamicChipsChoiceModel[]> {
-  const ids = [...(props.modelValue.value as number[])]
+  const ids = isArray<number>(props.modelValue.value) ? [...props.modelValue.value] : []
 
   if (ids.length) {
     const displayFields = toArray(props.options.ui.displayFields!)

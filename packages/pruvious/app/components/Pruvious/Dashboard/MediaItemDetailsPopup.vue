@@ -2,14 +2,7 @@
   <PUIPopup :size="-1" :width="hasPreview ? '64rem' : '32rem'" @close="close()" fullHeight="auto" ref="popup">
     <template #header>
       <div class="pui-row">
-        <span :title="filename" class="pui-flex pui-medium">
-          <span class="pui-truncate">
-            <span>{{ filenameWithoutExtension }}</span>
-            <span v-if="extensionWithoutDot" class="pui-muted">.</span>
-          </span>
-          <span v-if="extensionWithoutDot" class="pui-shrink-0 pui-muted">{{ extensionWithoutDot }}</span>
-        </span>
-
+        <PruviousDashboardMediaFileName :path="upload.path" showTitle class="pui-medium" />
         <PUIButton
           :size="-2"
           :title="__('pruvious-dashboard', 'Close')"
@@ -237,7 +230,7 @@ import { puiDialog } from '@pruvious/ui/pui/dialog'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiQueueToast, puiToast } from '@pruvious/ui/pui/toast'
 import { blurActiveElement, formatBytes, lockAndLoad } from '@pruvious/utils'
-import { basename, extname } from 'pathe'
+import { extname } from 'pathe'
 
 interface Variant {
   label: string
@@ -276,14 +269,6 @@ const runtimeConfig = useRuntimeConfig()
 const dashboard = usePruviousDashboard()
 const popup = useTemplateRef('popup')
 const locationOrigin = import.meta.client ? window.location.origin : ''
-const filename = computed(() => basename(props.upload.path))
-const extension = computed(() => extname(filename.value))
-const filenameWithoutExtension = computed(() =>
-  extension.value ? filename.value.slice(0, -extension.value.length) : filename.value,
-)
-const extensionWithoutDot = computed(() =>
-  extension.value.startsWith('.') ? extension.value.slice(1) : extension.value,
-)
 const resolvedPath = computed(() => resolveUploadPath(props.upload.path))
 const TranslatableTextField = fieldComponents.translatableText?.()
 const isSubmitting = ref(false)

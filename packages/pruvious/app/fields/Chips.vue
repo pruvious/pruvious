@@ -1,6 +1,12 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+    <PruviousFieldLabel
+      :id="`${id}--input`"
+      :name="name"
+      :options="options"
+      :synced="synced"
+      :translatable="translatable"
+    />
 
     <PUIChips
       :choices="choices"
@@ -121,7 +127,7 @@ const choices: PUIChipsChoiceModel[] | false = props.options.choices
       value: choice.value,
     }))
   : false
-const fieldError = computed(() => (isString(props.error) ? props.error : props.error?.[props.path]))
+const fieldError = computed(() => (isString(props.error) ? props.error : props.error?.[props.name]))
 const erroredItems = computed<number[]>(() =>
   isObject(props.error) ? Object.keys(props.error).map(castToNumber).filter(isInteger) : [],
 )

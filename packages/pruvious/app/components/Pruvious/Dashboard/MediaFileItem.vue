@@ -9,7 +9,7 @@
           if ((linkHandler || selectionMode === 'multiple') && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
             event.preventDefault()
             if (!disabled.value) {
-              linkHandler?.(upload)
+              linkHandler?.(upload, event)
               if (selectionMode === 'multiple') {
                 $emit(selected ? 'deselect' : ('select' as any), upload)
               }
@@ -90,7 +90,7 @@ const props = defineProps({
     default: 'none',
   },
   linkHandler: {
-    type: Function as PropType<(upload: UploadItem) => any>,
+    type: Function as PropType<(upload: UploadItem, event: MouseEvent) => any>,
   },
   disabledResolver: {
     type: Function as PropType<(upload: UploadItem) => { value: false } | { value: true; reason: string }>,

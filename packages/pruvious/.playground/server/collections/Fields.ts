@@ -9,7 +9,9 @@ import {
   dateTimeRangeField,
   defineCollection,
   fileField,
+  filesField,
   imageField,
+  imagesField,
   nullableObjectField,
   nullableSelectField,
   nullableTextField,
@@ -199,7 +201,102 @@ export default defineCollection({
       ui: { label: 'File (max size)', description: 'Maximum size: 1 KB' },
     }),
 
-    // fileField
+    // filesField
+    files: filesField({
+      ui: { label: 'Files', placeholder: 'Select files' },
+    }),
+    filesCasted: filesField({
+      fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+      populate: false,
+      ui: { label: 'Files (casted)' },
+    }),
+    filesMinMax: filesField({
+      minItems: 0,
+      maxItems: 1,
+      ui: { label: 'Files (min/max)' },
+    }),
+    filesAllowedTypesMime: filesField({
+      allowedTypes: ['text/plain'],
+      ui: { label: 'Files (allowed types - MIME)', placeholder: 'Select text files' },
+    }),
+    filesAllowedTypesCategory: filesField({
+      allowedTypes: 'image',
+      ui: { label: 'Files (allowed types - category)', placeholder: 'Select images' },
+    }),
+    filesMinSize: filesField({
+      minSize: '1 KB',
+      ui: { label: 'Files (min size)', description: 'Minimum size: 1 KB' },
+    }),
+    filesMaxSize: filesField({
+      maxSize: '1 KB',
+      ui: { label: 'Files (max size)', description: 'Maximum size: 1 KB' },
+    }),
+    filesRepeater: repeaterField({
+      subfields: {
+        files: filesField({
+          ui: { label: 'Files', placeholder: 'Select files' },
+        }),
+      },
+      ui: { label: 'Files (in repeater)' },
+    }),
+    filesRepeaterCasted: repeaterField({
+      subfields: {
+        files: filesField({
+          fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+          populate: false,
+          ui: { label: 'Files (casted)' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, casted)' },
+    }),
+    filesRepeaterMinMax: repeaterField({
+      subfields: {
+        files: filesField({
+          minItems: 0,
+          maxItems: 1,
+          ui: { label: 'Files (min/max)' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, min/max)' },
+    }),
+    filesRepeaterAllowedTypesMime: repeaterField({
+      subfields: {
+        files: filesField({
+          allowedTypes: ['text/plain'],
+          ui: { label: 'Files (allowed types - MIME)', placeholder: 'Select text files' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, allowed types - MIME)' },
+    }),
+    filesRepeaterAllowedTypesCategory: repeaterField({
+      subfields: {
+        files: filesField({
+          allowedTypes: 'image',
+          ui: { label: 'Files (allowed types - category)', placeholder: 'Select images' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, allowed types - category)' },
+    }),
+    filesRepeaterMinSize: repeaterField({
+      subfields: {
+        files: filesField({
+          minSize: '1 KB',
+          ui: { label: 'Files (min size)', description: 'Minimum size: 1 KB' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, min size)' },
+    }),
+    filesRepeaterMaxSize: repeaterField({
+      subfields: {
+        files: filesField({
+          maxSize: '1 KB',
+          ui: { label: 'Files (max size)', description: 'Maximum size: 1 KB' },
+        }),
+      },
+      ui: { label: 'Files (in repeater, max size)' },
+    }),
+
+    // imageField
     image: imageField({
       ui: { label: 'Image', dataTable: { showThumbnail: false } },
     }),
@@ -235,6 +332,140 @@ export default defineCollection({
     imageMaxHeight: imageField({
       maxHeight: 100,
       ui: { label: 'Image (max height)', description: 'Maximum height: 100px' },
+    }),
+
+    // imagesField
+    images: imagesField({
+      ui: { label: 'Images', placeholder: 'Select images', dataTable: { showThumbnails: false } },
+    }),
+    imagesCasted: imagesField({
+      fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+      populate: false,
+      ui: { label: 'Images (casted)' },
+    }),
+    imagesMinMax: imagesField({
+      minItems: 0,
+      maxItems: 1,
+      ui: { label: 'Images (min/max)' },
+    }),
+    imagesAllowedTypesMime: imagesField({
+      allowedTypes: ['image/png'],
+      ui: { label: 'Images (allowed types - MIME)', placeholder: 'Select PNG images' },
+    }),
+    imagesMinSize: imagesField({
+      minSize: '5 KB',
+      ui: { label: 'Images (min size)', description: 'Minimum size: 5 KB' },
+    }),
+    imagesMaxSize: imagesField({
+      maxSize: '5 KB',
+      ui: { label: 'Images (max size)', description: 'Maximum size: 5 KB' },
+    }),
+    imagesMinWidth: imagesField({
+      minWidth: 100,
+      ui: { label: 'Images (min width)', description: 'Minimum width: 100px' },
+    }),
+    imagesMaxWidth: imagesField({
+      maxWidth: 100,
+      ui: { label: 'Images (max width)', description: 'Maximum width: 100px' },
+    }),
+    imagesMinHeight: imagesField({
+      minHeight: 100,
+      ui: { label: 'Images (min height)', description: 'Minimum height: 100px' },
+    }),
+    imagesMaxHeight: imagesField({
+      maxHeight: 100,
+      ui: { label: 'Images (max height)', description: 'Maximum height: 100px' },
+    }),
+    imagesRepeater: repeaterField({
+      subfields: {
+        images: imagesField({
+          ui: { label: 'Images', placeholder: 'Select images' },
+        }),
+      },
+      ui: { label: 'Images (in repeater)' },
+    }),
+    imagesRepeaterCasted: repeaterField({
+      subfields: {
+        images: imagesField({
+          fields: ['id', 'path', 'author', 'description', 'images', 'isLocked'],
+          populate: false,
+          ui: { label: 'Images (casted)' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, casted)' },
+    }),
+    imagesRepeaterMinMax: repeaterField({
+      subfields: {
+        images: imagesField({
+          minItems: 0,
+          maxItems: 1,
+          ui: { label: 'Images (min/max)' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, min/max)' },
+    }),
+    imagesRepeaterAllowedTypesMime: repeaterField({
+      subfields: {
+        images: imagesField({
+          allowedTypes: ['image/png'],
+          ui: { label: 'Images (allowed types - MIME)', placeholder: 'Select PNG images' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, allowed types - MIME)' },
+    }),
+    imagesRepeaterMinSize: repeaterField({
+      subfields: {
+        images: imagesField({
+          minSize: '5 KB',
+          ui: { label: 'Images (min size)', description: 'Minimum size: 5 KB' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, min size)' },
+    }),
+    imagesRepeaterMaxSize: repeaterField({
+      subfields: {
+        images: imagesField({
+          maxSize: '5 KB',
+          ui: { label: 'Images (max size)', description: 'Maximum size: 5 KB' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, max size)' },
+    }),
+    imagesRepeaterMinWidth: repeaterField({
+      subfields: {
+        images: imagesField({
+          minWidth: 100,
+          ui: { label: 'Images (min width)', description: 'Minimum width: 100px' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, min width)' },
+    }),
+    imagesRepeaterMaxWidth: repeaterField({
+      subfields: {
+        images: imagesField({
+          maxWidth: 100,
+          ui: { label: 'Images (max width)', description: 'Maximum width: 100px' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, max width)' },
+    }),
+    imagesRepeaterMinHeight: repeaterField({
+      subfields: {
+        images: imagesField({
+          minHeight: 100,
+          ui: { label: 'Images (min height)', description: 'Minimum height: 100px' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, min height)' },
+    }),
+    imagesRepeaterMaxHeight: repeaterField({
+      subfields: {
+        images: imagesField({
+          maxHeight: 100,
+          ui: { label: 'Images (max height)', description: 'Maximum height: 100px' },
+        }),
+      },
+      ui: { label: 'Images (in repeater, max height)' },
     }),
 
     // nullableObject
@@ -813,6 +1044,25 @@ export default defineCollection({
               ],
             },
             {
+              label: 'Files',
+              fields: [
+                'files',
+                'filesCasted',
+                'filesMinMax',
+                'filesAllowedTypesMime',
+                'filesAllowedTypesCategory',
+                'filesMinSize',
+                'filesMaxSize',
+                'filesRepeater',
+                'filesRepeaterCasted',
+                'filesRepeaterMinMax',
+                'filesRepeaterAllowedTypesMime',
+                'filesRepeaterAllowedTypesCategory',
+                'filesRepeaterMinSize',
+                'filesRepeaterMaxSize',
+              ],
+            },
+            {
               label: 'Image',
               fields: [
                 'image',
@@ -824,6 +1074,31 @@ export default defineCollection({
                 'imageMaxWidth',
                 'imageMinHeight',
                 'imageMaxHeight',
+              ],
+            },
+            {
+              label: 'Images',
+              fields: [
+                'images',
+                'imagesCasted',
+                'imagesMinMax',
+                'imagesAllowedTypesMime',
+                'imagesMinSize',
+                'imagesMaxSize',
+                'imagesMinWidth',
+                'imagesMaxWidth',
+                'imagesMinHeight',
+                'imagesMaxHeight',
+                'imagesRepeater',
+                'imagesRepeaterCasted',
+                'imagesRepeaterMinMax',
+                'imagesRepeaterAllowedTypesMime',
+                'imagesRepeaterMinSize',
+                'imagesRepeaterMaxSize',
+                'imagesRepeaterMinWidth',
+                'imagesRepeaterMaxWidth',
+                'imagesRepeaterMinHeight',
+                'imagesRepeaterMaxHeight',
               ],
             },
             {

@@ -8,7 +8,7 @@
         (event: MouseEvent) => {
           if (linkHandler && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
             event.preventDefault()
-            linkHandler(upload)
+            linkHandler(upload, event)
           }
         }
       "
@@ -53,7 +53,7 @@ const props = defineProps({
     type: Object as PropType<ResolvedCollectionRecordPermissions>,
   },
   linkHandler: {
-    type: Function as PropType<(upload: UploadItem) => any>,
+    type: Function as PropType<(upload: UploadItem, event: MouseEvent) => any>,
   },
   allowDrop: {
     type: Boolean,

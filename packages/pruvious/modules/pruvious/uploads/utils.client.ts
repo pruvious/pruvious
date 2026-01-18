@@ -36,7 +36,7 @@ import {
   remove,
   toArray,
 } from '@pruvious/utils'
-import { join } from 'pathe'
+import { extname, join } from 'pathe'
 import {
   usePruviousDashboardUploadNotifications,
   type DashboardUploadNotification,
@@ -869,15 +869,39 @@ export function splitFileIntoChunks(file: File, multipartThresholdBytes: number)
 }
 
 /**
- * Resolves the full URL path of an upload based on its relative path in the media library.
+ * Resolves the full URL `path` of an upload based on its relative path in the media library.
  *
  * @example
  * ```ts
  * const url = resolveUploadPath('/images/photo.jpg')
- * // /uploads/images/photo.jpg
+ * //=> '/uploads/images/photo.jpg'
  * ```
  */
 export function resolveUploadPath(path: string): string {
   const runtimeConfig = useRuntimeConfig()
   return join(runtimeConfig.app.baseURL, runtimeConfig.public.pruvious.uploadsBasePath, path)
+}
+
+/**
+ * Resolves the thumbnail URL path for a given image `upload`.
+ * If the image is smaller than or equal to 320x320 pixels, it returns the original image URL.
+ * Otherwise, it constructs and returns the URL for a 320x320 pixel thumbnail version of the image.
+ *
+ * @example
+ * ```ts
+ * const thumbnailUrl = resolveThumbnailURL({
+ *   imageWidth: 800,
+ *   imageHeight: 600,
+ *   path: '/images/photo.jpg',
+ * })
+ * //=> '/uploads/images/photo_oextjpg_w320_h320_contain.webp'
+ * ```
+ */
+export function resolveThumbnailPath(upload: { imageWidth: number; imageHeight: number; path: string }): string {
+  if (upload.imageWidth <= 320 && upload.imageHeight <= 320) {
+    return resolveUploadPath(upload.path)
+  }
+  const ext = extname(upload.path)
+  const oext = ext ? '_oext' + extname(upload.path).slice(1) : ''
+  return resolveUploadPath(upload.path.slice(0, -ext.length) + oext + '_w320_h320_contain.webp')
 }

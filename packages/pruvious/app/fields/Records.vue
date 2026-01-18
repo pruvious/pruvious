@@ -1,8 +1,14 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PruviousFieldLabel :id="id" :name="name" :options="options" :synced="synced" :translatable="translatable" />
+    <PruviousFieldLabel
+      :id="`${id}--input`"
+      :name="name"
+      :options="options"
+      :synced="synced"
+      :translatable="translatable"
+    />
 
-    <div class="pui-row">
+    <div class="p-records pui-row">
       <PUIButton
         v-pui-tooltip="__('pruvious-dashboard', 'Table overview')"
         :disabled="disabled"
@@ -112,7 +118,7 @@ const props = defineProps({
    * Represents an error message that can be displayed to the user.
    */
   error: {
-    type: String,
+    type: [String, Object] as PropType<string | Record<string, string>>,
   },
 
   /**
@@ -163,7 +169,7 @@ const collection = {
   slug: slugify(props.options.collection),
   definition: dashboard.value!.collections[props.options.collection]!,
 }
-const fieldError = computed(() => (isString(props.error) ? props.error : props.error?.[props.path]))
+const fieldError = computed(() => (isString(props.error) ? props.error : props.error?.[props.name]))
 const erroredItems = computed<number[]>(() =>
   isObject(props.error) ? Object.keys(props.error).map(castToNumber).filter(isInteger) : [],
 )
@@ -176,6 +182,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const query = await selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
+    .orderBy(collection.definition.createdAtField ? ('createdAt' as any) : 'id', 'desc')
     .cache(3000)
     .paged(page, 50)
     .paginate()
@@ -270,3 +277,9 @@ function open(id: number) {
   window.open(`${dashboardBasePath}collections/${collection.slug}/${id}`, '_blank')
 }
 </script>
+
+<style scoped>
+.p-records {
+  align-items: flex-start;
+}
+</style>

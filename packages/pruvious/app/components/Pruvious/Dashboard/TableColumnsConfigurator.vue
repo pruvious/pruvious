@@ -222,7 +222,7 @@ function addColumn(index?: number) {
 
 function resolveSortable(columnName: string): 'text' | 'numeric' | false {
   const field = props.collection.definition.fields[columnName]
-  return field ? (field._dataType === 'text' ? 'text' : 'numeric') : false
+  return field && field._dataType !== 'junction' ? (field._dataType === 'text' ? 'text' : 'numeric') : false
 }
 
 function emitCommit() {

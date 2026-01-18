@@ -257,7 +257,6 @@ export default {
                   .selectFrom(definition.options.collection)
                   .select('id')
                   .where('id', 'in', chunk)
-                  .select(definition.options.fields)
                   .useCache(context.cache)
                   .all(),
             ),
@@ -287,9 +286,7 @@ export default {
         }
 
         if (hasErrors) {
-          throw new Error(
-            context.__('pruvious-api', 'This field contains IDs that do not exist in the related collection'),
-          )
+          throw new Error(context.__('pruvious-api', 'This field contains non-existent records'))
         }
       },
     ]
@@ -314,8 +311,8 @@ export default {
             const queryBuilder = context.database
               .queryBuilder()
               .selectFrom(definition.options.collection)
-              .where('id', 'in', chunk)
               .select(definition.options.fields)
+              .where('id', 'in', chunk)
               .useCache(context.cache)
             return deepPopulate ? queryBuilder.populate().all() : queryBuilder.all()
           }),
