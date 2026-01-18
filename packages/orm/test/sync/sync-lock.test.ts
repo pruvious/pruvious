@@ -51,8 +51,15 @@ test('sync lock', async () => {
   const { mf, db } = await createMiniflare()
   const d1Fn = async () => {
     const d1 = new Database({ driver: db, collections })
-    const synced = await d1.connect()
-    expect(await d1.listTables()).toEqual(['Options', 'Foo'])
+    const synced = await d1.connect().catch((error) => {
+      if (error.message === 'Could not acquire database sync lock') {
+        return { createdOptionsTable: false, synced: false }
+      }
+      throw error
+    })
+    if (synced.createdOptionsTable) {
+      expect(await d1.listTables()).toEqual(['Options', 'Foo'])
+    }
     await d1.close()
     return synced
   }

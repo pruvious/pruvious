@@ -747,7 +747,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
     }
 
     // Lock
-    await this.lock('sync')
+    if (!(await this.lock('sync'))) {
+      throw new Error('Could not acquire database sync lock')
+    }
 
     try {
       // Get current schema map from the `Options` table
