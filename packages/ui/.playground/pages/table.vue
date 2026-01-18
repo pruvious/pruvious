@@ -42,7 +42,7 @@
           </div>
           <div v-else-if="key === 'height'">{{ row.height }} m</div>
           <div v-else-if="key === 'weight'">{{ row.weight }} kg</div>
-          <div v-else>{{ row[key] }}</div>
+          <div v-else>{{ row[key as keyof typeof row] }}</div>
         </template>
 
         <template #actions="{ row }">
