@@ -663,6 +663,7 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
    * It is optional and defaults to 25 milliseconds.
    *
    * Note: The `timeout` parameter is not supported for D1 databases due to Cloudflare Workers limitations.
+   *       In this case, the method will return `false` immediately if the lock cannot be acquired.
    *
    * @returns `true` if the lock was created, `false` if the timeout was reached.
    */
@@ -678,7 +679,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       if (changes > 0) {
         this.instanceLocks.push(key)
         return true
-      } else if (timeout && this.dialect !== 'd1' && performance.now() - start >= timeout) {
+      } else if (this.dialect === 'd1') {
+        return false
+      } else if (timeout && performance.now() - start >= timeout) {
         return false
       }
 
