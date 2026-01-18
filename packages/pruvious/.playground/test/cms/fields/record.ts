@@ -2,17 +2,17 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
 
 describe('record field', () => {
-  const record = '/api/collections/fields?returning=record'
-  const recordPopulate = '/api/collections/fields?returning=recordPopulate'
+  const record = '/api/collections/relation-fields?returning=record'
+  const recordPopulate = '/api/collections/relation-fields?returning=recordPopulate'
 
   test('create, filter, update', async () => {
     expect(await $postAsAdmin(record, { record: undefined })).toEqual([{ record: null }])
     expect(await $postAsAdmin(record, { record: 1 })).toEqual([{ record: 1 }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=record&where=record[=][1]`)).toEqual(
+    expect(await $getAsAdmin(`/api/collections/relation-fields?select=record&where=record[=][1]`)).toEqual(
       $paginated([{ record: 1 }]),
     )
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=record&where=record[=][1]`, {
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=record&where=record[=][1]`, {
         record: 2,
       }),
     ).toEqual([{ record: 2 }])
@@ -53,8 +53,10 @@ describe('record field', () => {
     const result = (await $postAsAdmin(`${record},id`, { record: user[0].id })) as [{ record: number; id: number }]
     expect(result).toEqual([{ record: user[0].id, id: expect.any(Number) }])
     expect(await $deleteAsAdmin(`/api/collections/users/${user[0].id}`)).toEqual(1)
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=record`)).toEqual({ record: null })
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=record&populate=1`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=record`)).toEqual({
+      record: null,
+    })
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=record&populate=1`)).toEqual({
       record: null,
     })
   })

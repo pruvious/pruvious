@@ -105,6 +105,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     },
     debug: {
       verbose: false,
+      warnings: 'all',
     },
     dir: {
       actions: { client: 'actions', server: 'actions' },
@@ -196,6 +197,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       },
       debug: {
         verbose,
+        warnings: resolvedOptions.debug.warnings!,
         logs: resolveDebugLogsConfig(resolvedOptions.debug.logs),
       },
       dir: {

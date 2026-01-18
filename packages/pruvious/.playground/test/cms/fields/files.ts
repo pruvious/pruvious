@@ -3,21 +3,22 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin, $postFormData } from '../utils'
 
 describe('files field', () => {
-  const files = '/api/collections/fields?returning=files'
-  const filesCasted = '/api/collections/fields?returning=filesCasted'
-  const filesMinMax = '/api/collections/fields?returning=filesMinMax'
-  const filesAllowedTypesMime = '/api/collections/fields?returning=filesAllowedTypesMime'
-  const filesAllowedTypesCategory = '/api/collections/fields?returning=filesAllowedTypesCategory'
-  const filesMinSize = '/api/collections/fields?returning=filesMinSize'
-  const filesMaxSize = '/api/collections/fields?returning=filesMaxSize'
+  const files = '/api/collections/relation-fields?returning=files'
+  const filesCasted = '/api/collections/relation-fields?returning=filesCasted'
+  const filesMinMax = '/api/collections/relation-fields?returning=filesMinMax'
+  const filesAllowedTypesMime = '/api/collections/relation-fields?returning=filesAllowedTypesMime'
+  const filesAllowedTypesCategory = '/api/collections/relation-fields?returning=filesAllowedTypesCategory'
+  const filesMinSize = '/api/collections/relation-fields?returning=filesMinSize'
+  const filesMaxSize = '/api/collections/relation-fields?returning=filesMaxSize'
 
-  const filesRepeater = '/api/collections/fields?returning=filesRepeater'
-  const filesRepeaterCasted = '/api/collections/fields?returning=filesRepeaterCasted'
-  const filesRepeaterMinMax = '/api/collections/fields?returning=filesRepeaterMinMax'
-  const filesRepeaterAllowedTypesMime = '/api/collections/fields?returning=filesRepeaterAllowedTypesMime'
-  const filesRepeaterAllowedTypesCategory = '/api/collections/fields?returning=filesRepeaterAllowedTypesCategory'
-  const filesRepeaterMinSize = '/api/collections/fields?returning=filesRepeaterMinSize'
-  const filesRepeaterMaxSize = '/api/collections/fields?returning=filesRepeaterMaxSize'
+  const filesRepeater = '/api/collections/relation-fields?returning=filesRepeater'
+  const filesRepeaterCasted = '/api/collections/relation-fields?returning=filesRepeaterCasted'
+  const filesRepeaterMinMax = '/api/collections/relation-fields?returning=filesRepeaterMinMax'
+  const filesRepeaterAllowedTypesMime = '/api/collections/relation-fields?returning=filesRepeaterAllowedTypesMime'
+  const filesRepeaterAllowedTypesCategory =
+    '/api/collections/relation-fields?returning=filesRepeaterAllowedTypesCategory'
+  const filesRepeaterMinSize = '/api/collections/relation-fields?returning=filesRepeaterMinSize'
+  const filesRepeaterMaxSize = '/api/collections/relation-fields?returning=filesRepeaterMaxSize'
 
   let txtFileId = 0
   let svgFileId = 0
@@ -39,17 +40,21 @@ describe('files field', () => {
     // Junction
     expect(await $postAsAdmin(files, { files: undefined })).toEqual([{ files: [] }])
     expect(await $postAsAdmin(files, { files: [txtFileId] })).toEqual([{ files: [txtFileId] }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=files&where=files[includes][${txtFileId}]`)).toEqual(
-      $paginated([{ files: [txtFileId] }]),
-    )
     expect(
-      await $getAsAdmin(`/api/collections/fields?select=files&where=files[includes][${txtFileId},${svgFileId}]`),
-    ).toEqual($paginated([]))
-    expect(
-      await $getAsAdmin(`/api/collections/fields?select=files&where=files[includesAny][${txtFileId},${svgFileId}]`),
+      await $getAsAdmin(`/api/collections/relation-fields?select=files&where=files[includes][${txtFileId}]`),
     ).toEqual($paginated([{ files: [txtFileId] }]))
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=files&where=files[includes][${txtFileId}]`, {
+      await $getAsAdmin(
+        `/api/collections/relation-fields?select=files&where=files[includes][${txtFileId},${svgFileId}]`,
+      ),
+    ).toEqual($paginated([]))
+    expect(
+      await $getAsAdmin(
+        `/api/collections/relation-fields?select=files&where=files[includesAny][${txtFileId},${svgFileId}]`,
+      ),
+    ).toEqual($paginated([{ files: [txtFileId] }]))
+    expect(
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=files&where=files[includes][${txtFileId}]`, {
         files: [svgFileId],
       }),
     ).toEqual([{ files: [svgFileId] }])
@@ -63,12 +68,12 @@ describe('files field', () => {
     ])
     expect(
       await $getAsAdmin(
-        `/api/collections/fields?select=filesRepeater&where=filesRepeater[like][%{"files":$[${txtFileId}$]}%]`,
+        `/api/collections/relation-fields?select=filesRepeater&where=filesRepeater[like][%{"files":$[${txtFileId}$]}%]`,
       ),
     ).toEqual($paginated([{ filesRepeater: [{ files: [txtFileId] }] }]))
     expect(
       await $patchAsAdmin(
-        `/api/collections/fields?returning=filesRepeater&where=filesRepeater[like][%{"files":$[${txtFileId}$]}%]`,
+        `/api/collections/relation-fields?returning=filesRepeater&where=filesRepeater[like][%{"files":$[${txtFileId}$]}%]`,
         { filesRepeater: [{ files: [svgFileId] }] },
       ),
     ).toEqual([{ filesRepeater: [{ files: [svgFileId] }] }])
@@ -325,10 +330,10 @@ describe('files field', () => {
     ])
 
     // Check junction recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=files`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=files`)).toEqual({
       files: [svgFileId],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=files&populate=1`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=files&populate=1`)).toEqual({
       files: [
         {
           id: svgFileId,
@@ -341,10 +346,12 @@ describe('files field', () => {
     })
 
     // Check matrix recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=filesRepeater`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=filesRepeater`)).toEqual({
       filesRepeater: [{ files: [txtFileId, svgFileId] }],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=filesRepeater&populate=1`)).toEqual({
+    expect(
+      await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=filesRepeater&populate=1`),
+    ).toEqual({
       filesRepeater: [
         {
           files: [

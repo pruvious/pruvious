@@ -2269,6 +2269,17 @@ export function defineCollection<
       }
     }
 
+    if (Object.keys(fields).length > 100 && useRuntimeConfig().pruvious.debug.warnings === 'all') {
+      warnWithContext(
+        `The collection ${colorize('yellow', resolveContext.collectionName)} has a high number of fields (${colorize('yellow', Object.keys(fields).length.toString())}).`,
+        [
+          `D1 databases have a limit of 100 columns per table.`,
+          `You can disable this warning by setting \`pruvious.debug.warnings\` to \`'critical'\` in your Nuxt config.`,
+          `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+        ],
+      )
+    }
+
     const collection = new Collection({
       key: options.key,
       fields: remap(fields, (fieldName, field) =>

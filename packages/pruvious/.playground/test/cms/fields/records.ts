@@ -2,28 +2,28 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
 
 describe('records field', () => {
-  const records = '/api/collections/fields?returning=records'
-  const recordsMinMax = '/api/collections/fields?returning=recordsMinMax'
-  const recordsPopulate = '/api/collections/fields?returning=recordsPopulate'
-  const recordsRepeater = '/api/collections/fields?returning=recordsRepeater'
-  const recordsRepeaterMinMax = '/api/collections/fields?returning=recordsRepeaterMinMax'
-  const recordsRepeaterPopulate = '/api/collections/fields?returning=recordsRepeaterPopulate'
+  const records = '/api/collections/relation-fields?returning=records'
+  const recordsMinMax = '/api/collections/relation-fields?returning=recordsMinMax'
+  const recordsPopulate = '/api/collections/relation-fields?returning=recordsPopulate'
+  const recordsRepeater = '/api/collections/relation-fields?returning=recordsRepeater'
+  const recordsRepeaterMinMax = '/api/collections/relation-fields?returning=recordsRepeaterMinMax'
+  const recordsRepeaterPopulate = '/api/collections/relation-fields?returning=recordsRepeaterPopulate'
 
   test('create, filter, update', async () => {
     // Junction
     expect(await $postAsAdmin(records, { records: undefined })).toEqual([{ records: [] }])
     expect(await $postAsAdmin(records, { records: [1] })).toEqual([{ records: [1] }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=records&where=records[includes][1]`)).toEqual(
+    expect(await $getAsAdmin(`/api/collections/relation-fields?select=records&where=records[includes][1]`)).toEqual(
       $paginated([{ records: [1] }]),
     )
-    expect(await $getAsAdmin(`/api/collections/fields?select=records&where=records[includes][1,2]`)).toEqual(
+    expect(await $getAsAdmin(`/api/collections/relation-fields?select=records&where=records[includes][1,2]`)).toEqual(
       $paginated([]),
     )
-    expect(await $getAsAdmin(`/api/collections/fields?select=records&where=records[includesAny][1,2]`)).toEqual(
-      $paginated([{ records: [1] }]),
-    )
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=records&where=records[includes][1]`, {
+      await $getAsAdmin(`/api/collections/relation-fields?select=records&where=records[includesAny][1,2]`),
+    ).toEqual($paginated([{ records: [1] }]))
+    expect(
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=records&where=records[includes][1]`, {
         records: [2],
       }),
     ).toEqual([{ records: [2] }])
@@ -37,12 +37,12 @@ describe('records field', () => {
     ])
     expect(
       await $getAsAdmin(
-        `/api/collections/fields?select=recordsRepeater&where=recordsRepeater[like][%{"records":$[1$]}%]`,
+        `/api/collections/relation-fields?select=recordsRepeater&where=recordsRepeater[like][%{"records":$[1$]}%]`,
       ),
     ).toEqual($paginated([{ recordsRepeater: [{ records: [1] }] }]))
     expect(
       await $patchAsAdmin(
-        `/api/collections/fields?returning=recordsRepeater&where=recordsRepeater[like][%{"records":$[1$]}%]`,
+        `/api/collections/relation-fields?returning=recordsRepeater&where=recordsRepeater[like][%{"records":$[1$]}%]`,
         { recordsRepeater: [{ records: [2] }] },
       ),
     ).toEqual([{ recordsRepeater: [{ records: [2] }] }])
@@ -186,10 +186,10 @@ describe('records field', () => {
     expect(await $deleteAsAdmin(`/api/collections/users/${user[0].id}`)).toEqual(1)
 
     // Check junction recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=records`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=records`)).toEqual({
       records: [1, 3],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=records&populate=1`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=records&populate=1`)).toEqual({
       records: [
         { id: 1, email: 'admin@pruvious.com', roles: [] },
         { id: 3, email: 'author@pruvious.com', roles: [1] },
@@ -197,10 +197,12 @@ describe('records field', () => {
     })
 
     // Check matrix recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=recordsRepeater`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=recordsRepeater`)).toEqual({
       recordsRepeater: [{ records: [1, user[0].id, 3] }],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=recordsRepeater&populate=1`)).toEqual({
+    expect(
+      await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=recordsRepeater&populate=1`),
+    ).toEqual({
       recordsRepeater: [
         {
           records: [

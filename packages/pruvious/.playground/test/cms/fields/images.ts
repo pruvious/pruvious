@@ -3,27 +3,27 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin, $postFormData } from '../utils'
 
 describe('images field', () => {
-  const images = '/api/collections/fields?returning=images'
-  const imagesCasted = '/api/collections/fields?returning=imagesCasted'
-  const imagesMinMax = '/api/collections/fields?returning=imagesMinMax'
-  const imagesAllowedTypesMime = '/api/collections/fields?returning=imagesAllowedTypesMime'
-  const imagesMinSize = '/api/collections/fields?returning=imagesMinSize'
-  const imagesMaxSize = '/api/collections/fields?returning=imagesMaxSize'
-  const imagesMinWidth = '/api/collections/fields?returning=imagesMinWidth'
-  const imagesMaxWidth = '/api/collections/fields?returning=imagesMaxWidth'
-  const imagesMinHeight = '/api/collections/fields?returning=imagesMinHeight'
-  const imagesMaxHeight = '/api/collections/fields?returning=imagesMaxHeight'
+  const images = '/api/collections/relation-fields?returning=images'
+  const imagesCasted = '/api/collections/relation-fields?returning=imagesCasted'
+  const imagesMinMax = '/api/collections/relation-fields?returning=imagesMinMax'
+  const imagesAllowedTypesMime = '/api/collections/relation-fields?returning=imagesAllowedTypesMime'
+  const imagesMinSize = '/api/collections/relation-fields?returning=imagesMinSize'
+  const imagesMaxSize = '/api/collections/relation-fields?returning=imagesMaxSize'
+  const imagesMinWidth = '/api/collections/relation-fields?returning=imagesMinWidth'
+  const imagesMaxWidth = '/api/collections/relation-fields?returning=imagesMaxWidth'
+  const imagesMinHeight = '/api/collections/relation-fields?returning=imagesMinHeight'
+  const imagesMaxHeight = '/api/collections/relation-fields?returning=imagesMaxHeight'
 
-  const imagesRepeater = '/api/collections/fields?returning=imagesRepeater'
-  const imagesRepeaterCasted = '/api/collections/fields?returning=imagesRepeaterCasted'
-  const imagesRepeaterMinMax = '/api/collections/fields?returning=imagesRepeaterMinMax'
-  const imagesRepeaterAllowedTypesMime = '/api/collections/fields?returning=imagesRepeaterAllowedTypesMime'
-  const imagesRepeaterMinSize = '/api/collections/fields?returning=imagesRepeaterMinSize'
-  const imagesRepeaterMaxSize = '/api/collections/fields?returning=imagesRepeaterMaxSize'
-  const imagesRepeaterMinWidth = '/api/collections/fields?returning=imagesRepeaterMinWidth'
-  const imagesRepeaterMaxWidth = '/api/collections/fields?returning=imagesRepeaterMaxWidth'
-  const imagesRepeaterMinHeight = '/api/collections/fields?returning=imagesRepeaterMinHeight'
-  const imagesRepeaterMaxHeight = '/api/collections/fields?returning=imagesRepeaterMaxHeight'
+  const imagesRepeater = '/api/collections/relation-fields?returning=imagesRepeater'
+  const imagesRepeaterCasted = '/api/collections/relation-fields?returning=imagesRepeaterCasted'
+  const imagesRepeaterMinMax = '/api/collections/relation-fields?returning=imagesRepeaterMinMax'
+  const imagesRepeaterAllowedTypesMime = '/api/collections/relation-fields?returning=imagesRepeaterAllowedTypesMime'
+  const imagesRepeaterMinSize = '/api/collections/relation-fields?returning=imagesRepeaterMinSize'
+  const imagesRepeaterMaxSize = '/api/collections/relation-fields?returning=imagesRepeaterMaxSize'
+  const imagesRepeaterMinWidth = '/api/collections/relation-fields?returning=imagesRepeaterMinWidth'
+  const imagesRepeaterMaxWidth = '/api/collections/relation-fields?returning=imagesRepeaterMaxWidth'
+  const imagesRepeaterMinHeight = '/api/collections/relation-fields?returning=imagesRepeaterMinHeight'
+  const imagesRepeaterMaxHeight = '/api/collections/relation-fields?returning=imagesRepeaterMaxHeight'
 
   let pngId = 0
   let svgId = 0
@@ -58,17 +58,17 @@ describe('images field', () => {
     // Junction
     expect(await $postAsAdmin(images, { images: undefined })).toEqual([{ images: [] }])
     expect(await $postAsAdmin(images, { images: [pngId] })).toEqual([{ images: [pngId] }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=images&where=images[includes][${pngId}]`)).toEqual(
-      $paginated([{ images: [pngId] }]),
-    )
     expect(
-      await $getAsAdmin(`/api/collections/fields?select=images&where=images[includes][${pngId},${svgId}]`),
-    ).toEqual($paginated([]))
-    expect(
-      await $getAsAdmin(`/api/collections/fields?select=images&where=images[includesAny][${pngId},${svgId}]`),
+      await $getAsAdmin(`/api/collections/relation-fields?select=images&where=images[includes][${pngId}]`),
     ).toEqual($paginated([{ images: [pngId] }]))
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=images&where=images[includes][${pngId}]`, {
+      await $getAsAdmin(`/api/collections/relation-fields?select=images&where=images[includes][${pngId},${svgId}]`),
+    ).toEqual($paginated([]))
+    expect(
+      await $getAsAdmin(`/api/collections/relation-fields?select=images&where=images[includesAny][${pngId},${svgId}]`),
+    ).toEqual($paginated([{ images: [pngId] }]))
+    expect(
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=images&where=images[includes][${pngId}]`, {
         images: [svgId],
       }),
     ).toEqual([{ images: [svgId] }])
@@ -82,12 +82,12 @@ describe('images field', () => {
     ])
     expect(
       await $getAsAdmin(
-        `/api/collections/fields?select=imagesRepeater&where=imagesRepeater[like][%{"images":$[${pngId}$]}%]`,
+        `/api/collections/relation-fields?select=imagesRepeater&where=imagesRepeater[like][%{"images":$[${pngId}$]}%]`,
       ),
     ).toEqual($paginated([{ imagesRepeater: [{ images: [pngId] }] }]))
     expect(
       await $patchAsAdmin(
-        `/api/collections/fields?returning=imagesRepeater&where=imagesRepeater[like][%{"images":$[${pngId}$]}%]`,
+        `/api/collections/relation-fields?returning=imagesRepeater&where=imagesRepeater[like][%{"images":$[${pngId}$]}%]`,
         { imagesRepeater: [{ images: [svgId] }] },
       ),
     ).toEqual([{ imagesRepeater: [{ images: [svgId] }] }])
@@ -467,10 +467,10 @@ describe('images field', () => {
     ])
 
     // Check junction recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=images`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=images`)).toEqual({
       images: [svgId],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${junction[0].id}?select=images&populate=1`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${junction[0].id}?select=images&populate=1`)).toEqual({
       images: [
         {
           id: svgId,
@@ -485,10 +485,12 @@ describe('images field', () => {
     })
 
     // Check matrix recovery
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=imagesRepeater`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=imagesRepeater`)).toEqual({
       imagesRepeater: [{ images: [pngId, svgId] }],
     })
-    expect(await $getAsAdmin(`/api/collections/fields/${matrix[0].id}?select=imagesRepeater&populate=1`)).toEqual({
+    expect(
+      await $getAsAdmin(`/api/collections/relation-fields/${matrix[0].id}?select=imagesRepeater&populate=1`),
+    ).toEqual({
       imagesRepeater: [
         {
           images: [

@@ -3,12 +3,12 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin, $postFormData } from '../utils'
 
 describe('file field', () => {
-  const file = '/api/collections/fields?returning=file'
-  const fileCasted = '/api/collections/fields?returning=fileCasted'
-  const fileAllowedTypesMime = '/api/collections/fields?returning=fileAllowedTypesMime'
-  const fileAllowedTypesCategory = '/api/collections/fields?returning=fileAllowedTypesCategory'
-  const fileMinSize = '/api/collections/fields?returning=fileMinSize'
-  const fileMaxSize = '/api/collections/fields?returning=fileMaxSize'
+  const file = '/api/collections/relation-fields?returning=file'
+  const fileCasted = '/api/collections/relation-fields?returning=fileCasted'
+  const fileAllowedTypesMime = '/api/collections/relation-fields?returning=fileAllowedTypesMime'
+  const fileAllowedTypesCategory = '/api/collections/relation-fields?returning=fileAllowedTypesCategory'
+  const fileMinSize = '/api/collections/relation-fields?returning=fileMinSize'
+  const fileMaxSize = '/api/collections/relation-fields?returning=fileMaxSize'
   let txtFileId = 0
   let svgFileId = 0
 
@@ -28,11 +28,11 @@ describe('file field', () => {
   test('create, filter, update', async () => {
     expect(await $postAsAdmin(file, { file: undefined })).toEqual([{ file: null }])
     expect(await $postAsAdmin(file, { file: txtFileId })).toEqual([{ file: txtFileId }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=file&where=file[=][${txtFileId}]`)).toEqual(
+    expect(await $getAsAdmin(`/api/collections/relation-fields?select=file&where=file[=][${txtFileId}]`)).toEqual(
       $paginated([{ file: txtFileId }]),
     )
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=file&where=file[=][${txtFileId}]`, {
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=file&where=file[=][${txtFileId}]`, {
         file: svgFileId,
       }),
     ).toEqual([{ file: svgFileId }])
@@ -112,7 +112,9 @@ describe('file field', () => {
     expect(await $deleteAsAdmin(`/api/uploads/${txtFileId}`)).toEqual([
       { success: true, data: expect.any(Object), details: expect.any(Object) },
     ])
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=file`)).toEqual({ file: null })
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=file&populate=1`)).toEqual({ file: null })
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=file`)).toEqual({ file: null })
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=file&populate=1`)).toEqual({
+      file: null,
+    })
   })
 })

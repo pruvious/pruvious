@@ -1078,6 +1078,14 @@ export interface PruviousModuleOptions {
                 interval?: string | number
               }
         }
+
+    /**
+     * Controls the display of warnings in the console during development.
+     * You can choose to see `all` warnings or only `critical` ones.
+     *
+     * @default 'all'
+     */
+    warnings?: 'all' | 'critical'
   }
 
   /**
@@ -1407,6 +1415,7 @@ export interface ResolvedDebugConfig {
       interval: string | number
     }
   }
+  warnings: 'all' | 'critical'
 }
 
 export interface ResolvedI18nConfig {

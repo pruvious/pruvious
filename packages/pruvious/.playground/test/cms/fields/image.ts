@@ -3,15 +3,15 @@ import { describe, expect, test } from 'vitest'
 import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin, $postFormData } from '../utils'
 
 describe('image field', () => {
-  const image = '/api/collections/fields?returning=image'
-  const imageCasted = '/api/collections/fields?returning=imageCasted'
-  const imageAllowedTypesMime = '/api/collections/fields?returning=imageAllowedTypesMime'
-  const imageMinSize = '/api/collections/fields?returning=imageMinSize'
-  const imageMaxSize = '/api/collections/fields?returning=imageMaxSize'
-  const imageMinWidth = '/api/collections/fields?returning=imageMinWidth'
-  const imageMaxWidth = '/api/collections/fields?returning=imageMaxWidth'
-  const imageMinHeight = '/api/collections/fields?returning=imageMinHeight'
-  const imageMaxHeight = '/api/collections/fields?returning=imageMaxHeight'
+  const image = '/api/collections/relation-fields?returning=image'
+  const imageCasted = '/api/collections/relation-fields?returning=imageCasted'
+  const imageAllowedTypesMime = '/api/collections/relation-fields?returning=imageAllowedTypesMime'
+  const imageMinSize = '/api/collections/relation-fields?returning=imageMinSize'
+  const imageMaxSize = '/api/collections/relation-fields?returning=imageMaxSize'
+  const imageMinWidth = '/api/collections/relation-fields?returning=imageMinWidth'
+  const imageMaxWidth = '/api/collections/relation-fields?returning=imageMaxWidth'
+  const imageMinHeight = '/api/collections/relation-fields?returning=imageMinHeight'
+  const imageMaxHeight = '/api/collections/relation-fields?returning=imageMaxHeight'
   let pngId = 0
   let svgId = 0
   let svgRotatedId = 0
@@ -44,11 +44,11 @@ describe('image field', () => {
   test('create, filter, update', async () => {
     expect(await $postAsAdmin(image, { image: undefined })).toEqual([{ image: null }])
     expect(await $postAsAdmin(image, { image: pngId })).toEqual([{ image: pngId }])
-    expect(await $getAsAdmin(`/api/collections/fields?select=image&where=image[=][${pngId}]`)).toEqual(
+    expect(await $getAsAdmin(`/api/collections/relation-fields?select=image&where=image[=][${pngId}]`)).toEqual(
       $paginated([{ image: pngId }]),
     )
     expect(
-      await $patchAsAdmin(`/api/collections/fields?returning=image&where=image[=][${pngId}]`, {
+      await $patchAsAdmin(`/api/collections/relation-fields?returning=image&where=image[=][${pngId}]`, {
         image: svgId,
       }),
     ).toEqual([{ image: svgId }])
@@ -164,8 +164,8 @@ describe('image field', () => {
     expect(await $deleteAsAdmin(`/api/uploads/${pngId}`)).toEqual([
       { success: true, data: expect.any(Object), details: expect.any(Object) },
     ])
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=image`)).toEqual({ image: null })
-    expect(await $getAsAdmin(`/api/collections/fields/${result[0].id}?select=image&populate=1`)).toEqual({
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=image`)).toEqual({ image: null })
+    expect(await $getAsAdmin(`/api/collections/relation-fields/${result[0].id}?select=image&populate=1`)).toEqual({
       image: null,
     })
   })
