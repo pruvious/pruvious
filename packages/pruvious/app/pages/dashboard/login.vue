@@ -27,12 +27,7 @@ definePageMeta({
   middleware: [
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'guest-guard'),
-    (to) =>
-      dashboardMiddleware(to, ({ usePruvious }) => {
-        if (!usePruvious().value?.installed) {
-          return navigateTo(dashboardBasePath + 'install', { replace: true })
-        }
-      }),
+    (to) => import('../../utils/pruvious/dashboard/middleware/login').then((m) => m.default(to)),
   ],
 })
 

@@ -320,19 +320,7 @@ definePageMeta({
   middleware: [
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
-    (to) =>
-      dashboardMiddleware(to, ({ __, getCollectionBySlug, puiQueueToast }) => {
-        const collection = getCollectionBySlug(to.params.collection)
-
-        if (!collection || collection.definition.ui.hidden) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'Page not found'),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + 'overview')
-        }
-      }),
+    (to) => import('../../../../utils/pruvious/dashboard/middleware/collection/index').then((m) => m.default(to)),
   ],
 })
 

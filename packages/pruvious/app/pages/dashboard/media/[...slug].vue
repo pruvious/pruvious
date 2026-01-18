@@ -52,18 +52,9 @@ definePageMeta({
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
     (to) =>
-      dashboardMiddleware(to, ({ __, hasPermission, puiQueueToast }) => {
-        if (!hasPermission('collection:uploads:read')) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-              page: to.path,
-            }),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + 'overview')
-        }
-      }),
+      import('../../../utils/pruvious/dashboard/middleware/media/[...slug]').then(({ default: middleware }) =>
+        middleware(to),
+      ),
   ],
 })
 

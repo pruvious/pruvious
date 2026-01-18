@@ -112,7 +112,7 @@ import {
   selectFrom,
   useDashboardContentLanguage,
 } from '#pruvious/dashboard'
-import type { LanguageCode, Permission } from '#pruvious/server'
+import type { LanguageCode } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiHTMLInit } from '@pruvious/ui/pui/html'
@@ -124,7 +124,6 @@ import {
   castToNumber,
   isDefined,
   isEmpty,
-  isPositiveInteger,
   isString,
   isUndefined,
   lockAndLoad,
@@ -140,48 +139,7 @@ definePageMeta({
   middleware: [
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
-    (to) =>
-      dashboardMiddleware(to, ({ __, getCollectionBySlug, isValidLanguageCode, hasPermission, puiQueueToast }) => {
-        const collection = getCollectionBySlug(to.params.collection)
-        const translationOf = isString(to.query.translationOf) ? castToNumber(to.query.translationOf) : undefined
-        const language = to.query.language
-
-        if (!collection || !collection.definition.api.create || collection.definition.ui.hidden) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'Page not found'),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + 'overview')
-        } else if (!hasPermission(`collection:${to.params.collection}:create` as Permission)) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-              page: to.path,
-            }),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-        } else if (
-          collection.definition.translatable &&
-          isDefined(translationOf) &&
-          !isPositiveInteger(translationOf)
-        ) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'Invalid `$param` parameter', { param: 'translationOf' }),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-        } else if (collection.definition.translatable && isDefined(language) && !isValidLanguageCode(language)) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'Invalid `$param` parameter', { param: 'language' }),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + `collections/${to.params.collection}`)
-        }
-      }),
+    (to) => import('../../../../utils/pruvious/dashboard/middleware/collection/new').then((m) => m.default(to)),
   ],
 })
 

@@ -339,18 +339,9 @@ definePageMeta({
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
     (to) =>
-      dashboardMiddleware(to, ({ __, puiQueueToast, usePruviousDashboard }) => {
-        if (!usePruviousDashboard().value?.logs?.queries) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'You do not have permission to access the page `$page`', {
-              page: to.path,
-            }),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + 'overview')
-        }
-      }),
+      import('../../../utils/pruvious/dashboard/middleware/logs/queries').then(({ default: middleware }) =>
+        middleware(to),
+      ),
   ],
 })
 

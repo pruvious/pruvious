@@ -159,18 +159,9 @@ definePageMeta({
     (to) => dashboardMiddleware(to, 'default'),
     (to) => dashboardMiddleware(to, 'auth-guard'),
     (to) =>
-      dashboardMiddleware(to, ({ __, puiQueueToast, getSingletonBySlug }) => {
-        const singleton = getSingletonBySlug(to.params.singleton)
-
-        if (!singleton || singleton.definition.ui.hidden) {
-          puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
-            type: 'error',
-            description: __('pruvious-dashboard', 'Page not found'),
-            showAfterRouteChange: true,
-          })
-          return navigateTo(dashboardBasePath + 'overview')
-        }
-      }),
+      import('../../../utils/pruvious/dashboard/middleware/singletons/[singleton]').then(({ default: middleware }) =>
+        middleware(to),
+      ),
   ],
 })
 
