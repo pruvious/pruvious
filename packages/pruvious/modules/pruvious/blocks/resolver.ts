@@ -283,9 +283,11 @@ function writeBlocks(): boolean {
     `/**`,
     ` * Type representing all block names utilized by the CMS.`,
     ` */`,
-    `export type BlockName = ${Object.keys(blockDefinitions)
-      .map((blockName) => `'${blockName}'`)
-      .join(' | ')}`,
+    `export type BlockName = ${
+      Object.keys(blockDefinitions)
+        .map((blockName) => `'${blockName}'`)
+        .join(' | ') || 'never'
+    }`,
     ``,
     `/**`,
     ` * Type representing all blocks utilized by the CMS.`,
