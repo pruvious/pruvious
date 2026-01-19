@@ -1,5 +1,5 @@
 import type { __, hasPermission, isValidLanguageCode } from '#pruvious/app'
-import { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } from '#pruvious/dashboard'
+import type { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } from '#pruvious/dashboard'
 import type { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isString, type slugify } from '@pruvious/utils'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
