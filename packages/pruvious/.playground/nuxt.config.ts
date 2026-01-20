@@ -12,11 +12,6 @@ export default defineNuxtConfig({
     uploads: {
       driver: isTest ? 'fs://packages/pruvious/.playground/test/tmp/.uploads' : 'fs://.playground/.uploads',
     },
-    auth: {
-      jwt: {
-        secret: 'https://pruvious.com/generate-jwt-secret',
-      },
-    },
     i18n: {
       languages: [
         { code: 'en', name: 'English' },

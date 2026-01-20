@@ -177,11 +177,19 @@ export default defineNuxtModule<PruviousModuleOptions>({
       queue: {
         driver: resolvedOptions.queue.driver!,
         mode: resolvedOptions.queue.mode!,
-        secret: resolvedOptions.queue.secret ?? generateSecureRandomString(),
+        secret:
+          resolvedOptions.queue.secret ??
+          (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+            ? 'dev'
+            : generateSecureRandomString()),
       },
       auth: {
         jwt: {
-          secret: resolvedOptions.auth.jwt!.secret ?? generateSecureRandomString(),
+          secret:
+            resolvedOptions.auth.jwt!.secret ??
+            (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+              ? 'dev'
+              : generateSecureRandomString()),
           expiration: resolvedOptions.auth.jwt!.expiration as any,
           claims: resolvedOptions.auth.jwt!.claims!,
         },
