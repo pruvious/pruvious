@@ -2,6 +2,12 @@
 
 <script lang="ts" setup>
 import { dashboardBasePath } from '#pruvious/app'
+import { dashboardMiddleware } from '#pruvious/dashboard'
+
+definePageMeta({
+  path: dashboardBasePath + '_redirect',
+  middleware: [(to) => dashboardMiddleware(to, 'default')],
+})
 
 const route = useRoute()
 

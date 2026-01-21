@@ -14,16 +14,7 @@ let isListening = false
 export function usePruviousHMR() {
   const eventHandler = useDebounceFn(async () => {
     const route = useRoute()
-    let to = route.fullPath
-
-    try {
-      const redirectURL = new URL(route.fullPath)
-      redirectURL.pathname = redirectURL.pathname.replace(/\/_redirect$/, '')
-      redirectURL.searchParams.delete('_redirect')
-      to = redirectURL.toString()
-    } catch {
-      to = to.split('?')[0]!
-    }
+    let to = route.path.match(/\/_redirect\/?$/) ? route.query.to : route.fullPath
 
     clear((i18n() as any).definitions)
     clear((i18n() as any).cache)
