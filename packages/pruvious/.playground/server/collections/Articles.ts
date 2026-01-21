@@ -39,7 +39,7 @@ export default defineCollection({
   },
   ui: {
     indexPage: {
-      table: {
+      dataTable: {
         columns: ['name', 'language', 'translations', 'createdAt'],
       },
     },

@@ -300,7 +300,7 @@ const columnFieldChoices = computed(() =>
           value: columnName,
           label: resolveFieldLabel(definition.ui?.label, columnName),
         })),
-      ...(props.collection.definition.ui.indexPage.table.columns ?? [])
+      ...(props.collection.definition.ui.indexPage.dataTable.columns ?? [])
         .filter((column) => isObject(column) && 'component' in column)
         .map((column) => ({
           value: column.key,
@@ -472,7 +472,7 @@ function restore() {
     ...props.params,
     where: undefined,
     orderBy: props.defaultOrderBy,
-    perPage: props.collection.definition.ui.indexPage.table.perPage,
+    perPage: props.collection.definition.ui.indexPage.dataTable.perPage,
   })
   history.clear()
   emit('close', popup.value!.close)

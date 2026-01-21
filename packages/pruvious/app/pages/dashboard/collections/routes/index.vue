@@ -379,12 +379,12 @@ const isTableSettingsPopupVisible = ref(false)
 const paginated = ref<Omit<Paginated<any>, 'records'>>({
   currentPage: 1,
   lastPage: 1,
-  perPage: collection.definition.ui.indexPage.table.perPage,
+  perPage: collection.definition.ui.indexPage.dataTable.perPage,
   total: 0,
 })
 const resolvedCustomComponents: Record<string, Component | string> = {}
 const initialized = ref(false)
-const defaultColumns = ref(resolveColumns(collection.definition.ui.indexPage.table.columns ?? null))
+const defaultColumns = ref(resolveColumns(collection.definition.ui.indexPage.dataTable.columns ?? null))
 const defaultColumnsWithoutSuffix = computed(() =>
   remap(defaultColumns.value, (k, v) => [removeSuffixFromColumns(k)!, v]),
 )
@@ -399,7 +399,7 @@ const defaultOrderByWithoutSuffix = computed(() =>
 const defaultParams: Omit<SelectQueryBuilderParams, 'select' | 'groupBy' | 'offset' | 'limit' | 'populate'> = {
   orderBy: defaultOrderByWithoutSuffix.value,
   page: 1,
-  perPage: collection.definition.ui.indexPage.table.perPage,
+  perPage: collection.definition.ui.indexPage.dataTable.perPage,
 }
 const stringifiedDefaultParams = Object.fromEntries(
   selectQueryBuilderParamsToQueryString(defaultParams)
@@ -472,7 +472,7 @@ watch(data, () => {
 
 watch(contentLanguage, async () => {
   columns.value = resolveColumns()
-  defaultColumns.value = resolveColumns(collection.definition.ui.indexPage.table.columns ?? null)
+  defaultColumns.value = resolveColumns(collection.definition.ui.indexPage.dataTable.columns ?? null)
   defaultOrderBy.value = resolveOrderBy()
   await refresh(true)
 })
@@ -512,13 +512,13 @@ listen('delete', () => {
 })
 
 function resolveColumns(
-  from: 'auto' | string | CollectionUIOptions['indexPage']['table']['columns'] | null = 'auto',
+  from: 'auto' | string | CollectionUIOptions['indexPage']['dataTable']['columns'] | null = 'auto',
 ): PUIColumns {
   const columns: PUIColumns = {}
   const source =
     from === 'auto'
       ? isEmpty(route.query.columns)
-        ? collection.definition.ui.indexPage.table.columns
+        ? collection.definition.ui.indexPage.dataTable.columns
         : String(route.query.columns).split(',')
       : isString(from)
         ? from.split(',')
@@ -570,7 +570,7 @@ function resolveColumns(
         const field = addSuffixToColumns(_field)
 
         if (field?.startsWith('$')) {
-          const column: any = collection.definition.ui.indexPage.table.columns?.find(
+          const column: any = collection.definition.ui.indexPage.dataTable.columns?.find(
             (column) => isObject(column) && 'component' in column && column.key === field,
           )
 
@@ -675,7 +675,7 @@ function resolveOrderBy(): {
   direction?: 'asc' | 'desc'
   nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
 }[] {
-  const orderBy = collection.definition.ui.indexPage.table.orderBy
+  const orderBy = collection.definition.ui.indexPage.dataTable.orderBy
 
   if (isDefined(orderBy)) {
     return toArray(orderBy).map((orderBy) => {

@@ -315,7 +315,7 @@ export default defineTemplate(() => ({
     icon: 'users',
     menu: { group: 'management', order: 1 },
     indexPage: {
-      table: {
+      dataTable: {
         columns: ['email', 'roles', 'isActive | 150px', 'isAdmin | 150px', 'createdAt | 150px'],
         orderBy: 'email:asc',
       },

@@ -477,7 +477,7 @@ const selectAllState = ref<boolean | 'indeterminate'>(false)
 const initialized = ref(false)
 const isTableSettingsPopupVisible = ref(false)
 const paginated = ref<Omit<Paginated<any>, 'records'>>({ currentPage: 1, lastPage: 1, perPage: 50, total: 0 })
-const defaultColumns = resolveColumns(props.logCollectionDefinition.ui.indexPage.table.columns ?? null)
+const defaultColumns = resolveColumns(props.logCollectionDefinition.ui.indexPage.dataTable.columns ?? null)
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: defaultColumns })
 const defaultOrderBy = resolveOrderBy()
@@ -580,13 +580,13 @@ listen('delete', () => {
 })
 
 function resolveColumns(
-  from: 'auto' | string | CollectionUIOptions['indexPage']['table']['columns'] | null = 'auto',
+  from: 'auto' | string | CollectionUIOptions['indexPage']['dataTable']['columns'] | null = 'auto',
 ): PUIColumns {
   const columns: PUIColumns = {}
   const source =
     from === 'auto'
       ? isEmpty(route.query.columns)
-        ? props.logCollectionDefinition.ui.indexPage.table.columns
+        ? props.logCollectionDefinition.ui.indexPage.dataTable.columns
         : String(route.query.columns).split(',')
       : isString(from)
         ? from.split(',')
@@ -697,7 +697,7 @@ function resolveOrderBy(): {
   direction?: 'asc' | 'desc'
   nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
 }[] {
-  const orderBy = props.logCollectionDefinition.ui.indexPage.table.orderBy
+  const orderBy = props.logCollectionDefinition.ui.indexPage.dataTable.orderBy
 
   if (isDefined(orderBy)) {
     return toArray(orderBy).map((orderBy) => {

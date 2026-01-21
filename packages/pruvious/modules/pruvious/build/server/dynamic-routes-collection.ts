@@ -249,7 +249,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `    icon: 'route',`,
     `    menu: { group: 'general', order: 2 },`,
     `    indexPage: {`,
-    `      table: {`,
+    `      dataTable: {`,
     `        columns: ['path', ${pruviousOptions.i18n.languages.length > 1 ? "{ component: 'RouteTranslationsColumn', key: '$translations', label: ({ __ }: any) => __('pruvious-dashboard', 'Translations') }, " : ''}'referencedCollections', 'referencedSingleton', 'isPublic | 150px', 'scheduledAt | 150px', 'createdAt | 150px', 'updatedAt | 150px'] as any,`,
     `        orderBy: 'createdAt:desc',`,
     `      },`,

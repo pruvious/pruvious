@@ -1023,9 +1023,9 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      */
     dashboardLayout: 'standard' | (string & {})
 
-    table: {
+    dataTable: {
       /**
-       * Defines which columns are shown in the table.
+       * Defines which columns are shown in the data table.
        * The order of columns is determined by the order they are defined in the array.
        *
        * You can provide an array of field names or objects to configure the columns.
@@ -2213,8 +2213,8 @@ export function defineCollection<
         : ui.indexPage.dashboardLayout
     }
 
-    if (isArray(ui?.indexPage?.table?.columns)) {
-      for (const column of ui.indexPage.table.columns) {
+    if (isArray(ui?.indexPage?.dataTable?.columns)) {
+      for (const column of ui.indexPage.dataTable.columns) {
         if (isObject(column)) {
           column.minWidth ??= '16rem'
           if ('component' in column) {
@@ -2332,7 +2332,7 @@ export function defineCollection<
           menu: { hidden: false, group: 'collections', order: 10 },
           indexPage: {
             dashboardLayout: 'standard',
-            table: { columns: undefined, orderBy: undefined as any, perPage: 50 },
+            dataTable: { columns: undefined, orderBy: undefined as any, perPage: 50 },
           },
           createPage: { dashboardLayout: 'auto', fieldsLayout: undefined },
           updatePage: { dashboardLayout: 'auto', fieldsLayout: undefined },

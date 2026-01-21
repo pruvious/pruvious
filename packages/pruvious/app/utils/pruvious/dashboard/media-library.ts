@@ -80,7 +80,7 @@ export const usePruviousDashboardMediaLibraryPopup = () =>
  */
 export function getDefaultDashboardMediaLibraryState(): DashboardMediaLibraryState {
   const dashboard = usePruviousDashboard()
-  const defaultOrderBy = dashboard.value?.collections.Uploads?.ui.indexPage.table.orderBy
+  const defaultOrderBy = dashboard.value?.collections.Uploads?.ui.indexPage.dataTable.orderBy
   const orderBy: DashboardMediaLibraryState['orderBy'] = []
 
   if (isString(defaultOrderBy)) {

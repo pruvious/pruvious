@@ -381,12 +381,12 @@ const isTableSettingsPopupVisible = ref(false)
 const paginated = ref<Omit<Paginated<any>, 'records'>>({
   currentPage: 1,
   lastPage: 1,
-  perPage: collection.definition.ui.indexPage.table.perPage,
+  perPage: collection.definition.ui.indexPage.dataTable.perPage,
   total: 0,
 })
 const resolvedCustomComponents: Record<string, Component | string> = {}
 const initialized = ref(false)
-const defaultColumns = resolveColumns(collection.definition.ui.indexPage.table.columns ?? null)
+const defaultColumns = resolveColumns(collection.definition.ui.indexPage.dataTable.columns ?? null)
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
 const refreshing = ref(false)
@@ -446,7 +446,7 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   defaultParams: {
     orderBy: defaultOrderBy,
     page: 1,
-    perPage: collection.definition.ui.indexPage.table.perPage,
+    perPage: collection.definition.ui.indexPage.dataTable.perPage,
   },
   checkDirty: ['where'],
 })
@@ -502,13 +502,13 @@ onMounted(() => {
 })
 
 function resolveColumns(
-  from: 'auto' | string | CollectionUIOptions['indexPage']['table']['columns'] | null = 'auto',
+  from: 'auto' | string | CollectionUIOptions['indexPage']['dataTable']['columns'] | null = 'auto',
 ): PUIColumns {
   const columns: PUIColumns = {}
   const source =
     from === 'auto'
       ? isEmpty(route.query.columns)
-        ? collection.definition.ui.indexPage.table.columns
+        ? collection.definition.ui.indexPage.dataTable.columns
         : String(route.query.columns).split(',')
       : isString(from)
         ? from.split(',')
@@ -588,7 +588,7 @@ function resolveColumns(
         const [field, width, minWidth] = column.split('|').map((p) => p.trim())
 
         if (field?.startsWith('$')) {
-          const column: any = collection.definition.ui.indexPage.table.columns?.find(
+          const column: any = collection.definition.ui.indexPage.dataTable.columns?.find(
             (column) => isObject(column) && 'component' in column && column.key === field,
           )
 
@@ -692,7 +692,7 @@ function resolveOrderBy(): {
   direction?: 'asc' | 'desc'
   nulls?: 'nullsAuto' | 'nullsFirst' | 'nullsLast'
 }[] {
-  const orderBy = collection.definition.ui.indexPage.table.orderBy
+  const orderBy = collection.definition.ui.indexPage.dataTable.orderBy
 
   if (isDefined(orderBy)) {
     return toArray(orderBy).map((orderBy) => {

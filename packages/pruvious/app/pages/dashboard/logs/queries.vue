@@ -506,7 +506,7 @@ const logCollectionDefinition = {
   } as Record<string, Partial<GenericSerializableFieldOptions>>,
   ui: {
     indexPage: {
-      table: {
+      dataTable: {
         columns: ['operation | 150px', 'sql', 'executionTime | 150px', 'success | 150px', 'createdAt | 220px'],
         orderBy: 'createdAt:desc',
       },

@@ -350,7 +350,7 @@ const logCollectionDefinition = {
   } as Record<string, Partial<GenericSerializableFieldOptions>>,
   ui: {
     indexPage: {
-      table: {
+      dataTable: {
         columns: ['method | 150px', 'path', 'queryString | 150px', 'user | 150px', 'createdAt | 220px'],
         orderBy: 'createdAt:desc',
       },

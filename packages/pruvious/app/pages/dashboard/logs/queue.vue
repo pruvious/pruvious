@@ -525,7 +525,7 @@ const logCollectionDefinition = {
   } as Record<string, Partial<GenericSerializableFieldOptions>>,
   ui: {
     indexPage: {
-      table: {
+      dataTable: {
         columns: ['priority | 150px', 'name', 'attempt | 150px', 'status | 150px', 'createdAt | 220px'],
         orderBy: 'createdAt:desc',
       },

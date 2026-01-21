@@ -252,7 +252,7 @@ export default defineTemplate(() => ({
   ui: {
     hidden: true,
     indexPage: {
-      table: {
+      dataTable: {
         orderBy: [
           { field: 'type', direction: 'asc' },
           { field: 'path', direction: 'asc' },
