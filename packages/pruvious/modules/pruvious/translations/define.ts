@@ -6,7 +6,7 @@ export interface DefineTranslationOptions {}
  * Defines translatable strings for internationalization purposes.
  *
  * Use this as the default export in a file within the `server/translations/` directory.
- * The filename pattern must be `{domain}.{language}` and in kebab-case format (e.g., `shop.en.ts`, `my-account.de.ts`, etc.).
+ * The filename pattern must be `{domain}.{language}.ts` and in kebab-case format (e.g., `shop.en.ts`, `my-account.de.ts`, etc.).
  * For the `default` domain translations, you can skip the domain in the filename (e.g., `en.ts`, `de.ts`, etc.).
  *
  * @see https://pruvious.com/docs/translations
