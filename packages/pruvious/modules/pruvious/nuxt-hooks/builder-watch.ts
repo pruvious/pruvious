@@ -1,6 +1,7 @@
 import { isDefined, remove } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import fs from 'node:fs'
+import { access, readdir, stat } from 'node:fs/promises'
 import { useNitro, useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer, WatchEvent } from 'nuxt/schema'
 import { join, relative } from 'pathe'
@@ -50,8 +51,9 @@ const skipped: string[] = []
 /**
  * Adds Pruvious server files to the Nuxt watcher.
  */
-export function watchPruviousServerFiles() {
+export async function watchPruviousServerFiles() {
   const nuxt = useNuxt()
+  const dirPaths: string[] = []
 
   for (const layer of nuxt.options._layers) {
     if (isDefined(layer.config.serverDir)) {
@@ -70,12 +72,32 @@ export function watchPruviousServerFiles() {
 
       for (const dir of serverDirs) {
         const dirPath = join(layer.config.serverDir, dir)
+        dirPaths.push(dirPath)
 
         if (!nuxt.options.watch.includes(dirPath)) {
           nuxt.options.watch.push(dirPath)
         }
       }
     }
+  }
+
+  for (const dirPath of dirPaths) {
+    try {
+      await access(dirPath)
+      const files = await readdir(dirPath, { recursive: true })
+
+      await Promise.all(
+        files.map(async (file) => {
+          const fullPath = join(dirPath, file)
+          try {
+            const stats = await stat(fullPath)
+            if (stats.isFile() && stats.size === 0) {
+              skipped.push(fullPath)
+            }
+          } catch {}
+        }),
+      )
+    } catch {}
   }
 }
 

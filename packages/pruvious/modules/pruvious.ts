@@ -307,7 +307,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     nuxt.hook('vite:serverCreated', onViteServerCreated)
 
     // Watch Pruvious files
-    watchPruviousServerFiles()
+    await watchPruviousServerFiles()
     nuxt.hook('builder:watch', pruviousWatchHandler)
 
     // Exclude dashboard routes from SSR

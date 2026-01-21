@@ -163,9 +163,7 @@ export interface ResolveFromLayersResultContextBinding {
  */
 export function* resolve(options: ResolveOptions): Generator<ResolveResult> {
   if (fs.existsSync(options.dir)) {
-    for (const file of fs.readdirSync(options.dir, {
-      recursive: true,
-    }) as string[]) {
+    for (const file of fs.readdirSync(options.dir, { recursive: true }) as string[]) {
       if (fs.statSync(join(options.dir, file)).isDirectory()) {
         continue
       }
