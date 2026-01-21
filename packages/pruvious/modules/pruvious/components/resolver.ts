@@ -151,7 +151,7 @@ export function resolveCustomComponentsInFile(options: ResolveCustomComponentsIn
   const { file, srcDir, srcDirs } = options
   const write = options.write ?? true
   const nuxt = useNuxt()
-  const code = fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : ''
+  const code = fs.existsSync(file) && fs.statSync(file).isFile() ? fs.readFileSync(file, 'utf-8') : ''
 
   if (nameMap[file]) {
     const omitNames = Object.values(omit(nameMap, [file])).flat()
