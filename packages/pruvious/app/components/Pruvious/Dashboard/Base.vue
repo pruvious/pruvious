@@ -15,6 +15,7 @@
 </template>
 
 <script lang="ts" setup>
+import { preloadTranslatableStrings } from '#pruvious/app'
 import { pruviousDashboardPost, useDashboardContentLanguage, usePruviousHMR } from '#pruvious/dashboard'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import '@pruvious/ui/styles'
@@ -37,6 +38,8 @@ useHead({
   ],
   meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' }],
 })
+
+await preloadTranslatableStrings('pruvious-dashboard', dashboardLanguage.value)
 
 onMounted(() => {
   if (import.meta.hot) {

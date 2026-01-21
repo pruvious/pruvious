@@ -11,15 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  __,
-  applyFilters,
-  hasPermission,
-  loadFilters,
-  preloadTranslatableStrings,
-  useAuth,
-  useLanguage,
-} from '#pruvious/app'
+import { __, applyFilters, hasPermission, loadFilters, useAuth } from '#pruvious/app'
 import {
   maybeTranslate,
   prepareDashboardMenu,
@@ -32,7 +24,6 @@ import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvi
 import { collator, isArray, isDefined, isEmpty, omit, slugify, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
-await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
 await loadFilters('dashboard:menu:utilities')
 
 const route = useRoute()

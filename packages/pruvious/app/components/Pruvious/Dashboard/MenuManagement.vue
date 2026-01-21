@@ -9,13 +9,12 @@
 </template>
 
 <script lang="ts" setup>
-import { __, applyFilters, hasPermission, loadFilters, preloadTranslatableStrings, useLanguage } from '#pruvious/app'
+import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
 import { maybeTranslate, prepareDashboardMenu, usePruviousDashboard, type DashboardMenuItem } from '#pruvious/dashboard'
 import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { collator, isArray, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
-await preloadTranslatableStrings('pruvious-dashboard', useLanguage().value as any)
 await loadFilters('dashboard:menu:management')
 
 const route = useRoute()
