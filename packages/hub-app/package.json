@@ -1,0 +1,32 @@
+{
+  "name": "@pruvious/hub-app",
+  "description": "Centralized dashboard for managing and deploying Pruvious websites.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/hub-app"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    ".output"
+  ],
+  "main": "./.output/server/index.mjs",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@iconify-json/tabler": "1.2.26",
+    "nuxt": "4.2.2",
+    "pruvious": "workspace:*",
+    "vue": "3.5.26",
+    "vue-router": "4.6.4"
+  }
+}
