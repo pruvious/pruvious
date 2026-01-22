@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "@nuxt/test-utils": "3.23.0",
-    "@pruvious/hub": "workspace:*",
     "consola": "3.4.2",
     "dotenv": "17.2.3",
     "execa": "9.6.1",
