@@ -277,6 +277,7 @@ function writeBlocks(): boolean {
   const content = [
     ...blocksTS,
     `import { uniqueArray } from '@pruvious/utils'`,
+    `import type { Block } from '${resolve('./define.server')}'`,
     `import type { BlockGroupDefinition, BlockTagDefinition } from '${resolve('./utils.server')}'`,
     `import { applyFilters } from '${resolve('../hooks/utils.server')}'`,
     ``,
@@ -301,7 +302,7 @@ function writeBlocks(): boolean {
     ` */`,
     `export const blocks = {`,
     ...Object.keys(blockDefinitions).map((blockName) => `  ${blockName},`),
-    `}`,
+    `}${Object.keys(blockDefinitions).length ? '' : ' as Record<string, Block<Record<string, any>>>'}`,
     ``,
     `/**`,
     ` * Retrieves all registered block groups.`,
