@@ -21,9 +21,9 @@
   ],
   "main": "./nuxt.config.ts",
   "scripts": {
-    "dev": "nuxi dev .playground",
-    "dev:prepare": "nuxt prepare .playground",
-    "typecheck": "nuxt prepare .playground && nuxi typecheck"
+    "dev": "nuxt dev .playground",
+    "prepare": "nuxt prepare .playground",
+    "typecheck": "nuxt prepare .playground && nuxt typecheck"
   },
   "dependencies": {
     "@babel/generator": "7.28.6",

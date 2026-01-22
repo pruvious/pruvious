@@ -20,9 +20,9 @@
   ],
   "main": "./nuxt.config.ts",
   "scripts": {
-    "dev": "nuxi dev .playground",
+    "dev": "nuxt dev .playground",
     "dev:prepare": "nuxt prepare .playground",
-    "typecheck": "nuxt prepare .playground && nuxi typecheck"
+    "typecheck": "nuxt prepare .playground && nuxt typecheck"
   },
   "dependencies": {
     "@floating-ui/vue": "1.1.9",
