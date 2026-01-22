@@ -13,6 +13,7 @@
   "type": "module",
   "files": [
     "app",
+    "bin",
     "modules",
     "public",
     "server",
@@ -20,6 +21,7 @@
     "nuxt.config.ts"
   ],
   "main": "./nuxt.config.ts",
+  "bin": "./bin/index.mjs",
   "scripts": {
     "dev": "nuxi dev .playground",
     "dev:prepare": "nuxt prepare .playground",
