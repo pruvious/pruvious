@@ -11,9 +11,6 @@ importers:
       '@nuxt/test-utils':
         specifier: 3.23.0
         version: 3.23.0(magicast@0.5.1)(typescript@5.9.3)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(terser@5.34.1)(yaml@2.8.2))
-      '@pruvious/hub':
-        specifier: workspace:*
-        version: link:packages/hub
       consola:
         specifier: 3.4.2
         version: 3.4.2
