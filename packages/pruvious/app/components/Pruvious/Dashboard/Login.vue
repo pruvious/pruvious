@@ -40,7 +40,9 @@
     </PUIField>
 
     <PUIField>
-      <PUICheckbox v-model="body.remember">{{ __('pruvious-dashboard', 'Remember me') }}</PUICheckbox>
+      <PUICheckbox v-model="body.remember" @keydown.enter.prevent="onSubmit()">
+        {{ __('pruvious-dashboard', 'Remember me') }}
+      </PUICheckbox>
     </PUIField>
 
     <PUIField>
