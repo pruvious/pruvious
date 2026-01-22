@@ -21,7 +21,7 @@
   "main": "./nuxt.config.ts",
   "scripts": {
     "dev": "nuxt dev .playground",
-    "dev:prepare": "nuxt prepare .playground",
+    "prepare": "nuxt prepare .playground",
     "typecheck": "nuxt prepare .playground && nuxt typecheck"
   },
   "dependencies": {

@@ -8,7 +8,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "pnpm --filter @pruvious/utils build && pnpm --filter @pruvious/i18n build && pnpm --filter @pruvious/orm build && pnpm --filter @pruvious/storage build && pnpm --filter @pruvious/hub-app build && pnpm --filter @pruvious/hub build",
+    "build": "pnpm --filter @pruvious/utils build && pnpm --filter @pruvious/i18n build && pnpm --filter @pruvious/orm build && pnpm --filter @pruvious/storage build && pnpm prepare && pnpm --filter @pruvious/hub-app build && pnpm --filter @pruvious/hub build",
     "build:hub": "pnpm --filter @pruvious/hub build",
     "build:hub-app": "pnpm --filter @pruvious/hub-app build",
     "build:i18n": "pnpm --filter @pruvious/i18n build",
@@ -22,13 +22,14 @@
     "format": "prettier --write .",
     "play": "node scripts/play.mjs",
     "postinstall": "pnpm build",
+    "prepare": "pnpm --filter @pruvious/ui prepare && pnpm --filter pruvious prepare && pnpm --filter @pruvious/hub-app prepare",
     "test": "vitest",
     "test:hub-app": "vitest packages/hub-app",
     "test:i18n": "vitest packages/i18n",
     "test:orm": "vitest packages/orm",
     "test:storage": "vitest packages/storage",
     "test:utils": "vitest packages/utils",
-    "typecheck": "pnpm --filter @pruvious/utils typecheck && pnpm --filter @pruvious/i18n typecheck && pnpm --filter @pruvious/orm typecheck && pnpm --filter @pruvious/storage typecheck && pnpm --filter @pruvious/hub typecheck && pnpm --filter @pruvious/ui typecheck && pnpm --filter pruvious typecheck"
+    "typecheck": "pnpm --filter @pruvious/utils typecheck && pnpm --filter @pruvious/i18n typecheck && pnpm --filter @pruvious/orm typecheck && pnpm --filter @pruvious/storage typecheck && pnpm --filter @pruvious/hub typecheck && pnpm --filter @pruvious/ui typecheck && pnpm --filter pruvious typecheck && pnpm --filter @pruvious/hub-app typecheck"
   },
   "devDependencies": {
     "@nuxt/test-utils": "3.23.0",
