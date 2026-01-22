@@ -1,10 +1,11 @@
 import { withTrailingSlash } from '@pruvious/utils'
 import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'pathe'
 
 const args = process.argv.slice(2)
 const url = new URL(import.meta.url)
-const rootDir = resolve(dirname(url.pathname), '../')
+const rootDir = resolve(dirname(fileURLToPath(url)), '..')
 const distDir = join(rootDir, 'dist')
 const sources = ['app', 'modules', 'public', 'server', 'shared', 'file://nuxt.config.ts']
 
