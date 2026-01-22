@@ -27,4 +27,7 @@ export default defineNuxtConfig({
       },
     },
   },
+  runtimeConfig: {
+    _tsCheckPruvious: true,
+  },
 })

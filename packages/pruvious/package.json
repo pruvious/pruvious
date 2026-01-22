@@ -12,15 +12,11 @@
   "license": "MIT",
   "type": "module",
   "files": [
-    "app",
-    "modules",
-    "public",
-    "server",
-    "shared",
-    "nuxt.config.ts"
+    "dist"
   ],
-  "main": "./nuxt.config.ts",
+  "main": "./dist/nuxt.config.ts",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "dev": "nuxt dev .playground",
     "prepare": "nuxt prepare .playground",
     "typecheck": "nuxt prepare .playground && nuxt typecheck"
@@ -72,6 +68,7 @@
     "@types/babel__traverse": "7.28.0",
     "@types/babel__generator": "7.27.0",
     "@types/pg": "8.16.0",
+    "execa": "9.6.1",
     "nitropack": "2.13.1",
     "nuxt": "4.2.2",
     "typescript": "5.9.3",

@@ -50,6 +50,4 @@ export default defineCollection({
       fieldsLayout: 'mirror',
     },
   },
-  copyTranslation: ({ source }) => ({ ...source, author: useEvent().context.pruvious.auth.user?.id }),
-  duplicate: ({ source }) => ({ ...source, author: useEvent().context.pruvious.auth.user?.id }),
 })

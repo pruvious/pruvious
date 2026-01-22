@@ -275,6 +275,7 @@ function writeBlocks(): boolean {
 
   const path = `${buildDir}/server/blocks.ts`
   const content = [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     ...blocksTS,
     `import { uniqueArray } from '@pruvious/utils'`,
     `import type { Block } from '${resolve('./define.server')}'`,

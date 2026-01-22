@@ -30,7 +30,7 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
-      - name: Install dependencies (and build)
+      - name: Install dependencies (and build with postinstall)
         run: pnpm install
 
       - name: Publish on pkg.pr.new

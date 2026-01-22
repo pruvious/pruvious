@@ -22,6 +22,7 @@ export function getDashboardFileContent() {
   resolveDashboardPageFiles()
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { type Component, defineAsyncComponent } from 'vue'`,
     `import type { ImageVariant } from '../server'`,
     `import type { ImageVariantOptions } from '${resolvePruviousFile('uploads/images')}'`,

@@ -122,9 +122,10 @@ export function getServerFileContent() {
   ]
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
     `import { capitalize, isEmpty, isObject, pick, remap, retry } from '@pruvious/utils'`,
-    `import { type CustomErrorMessage, Database, type GenericCollection, type GenericValidator, translatableStrings as _pruviousOrmEnTranslation, translatableStringsDe as _pruviousOrmDeTranslation } from '@pruvious/orm'`,
+    `import { Database, type GenericCollection, type GenericValidator, translatableStrings as _pruviousOrmEnTranslation, translatableStringsDe as _pruviousOrmDeTranslation } from '@pruvious/orm'`,
     `import { type PutResult, type GetResult, type StreamResult, type MoveResult, type DeleteResult, type MetaResult, Storage, type StorageFile } from '@pruvious/storage'`,
     `import { colorize } from 'consola/utils'`,
     `import { logsCollections } from '${resolvePruviousFile('debug/logs')}'`,
@@ -136,7 +137,7 @@ export function getServerFileContent() {
     `import { queueUniqueJob } from '${resolvePruviousFile('queue/utils.server')}'`,
     `import { parseConditionalLogic } from '${resolvePruviousFile('fields/utils.server')}'`,
     `import { warnWithContext } from '${resolvePruviousFile('debug/console')}'`,
-    `import type { CollectionAPI, DynamicCollectionFieldTypes } from './dynamic-container-types'`,
+    `import type { DynamicCollectionFieldTypes } from './dynamic-container-types'`,
     ...collectionEntries.map(([name, { file }]) => `import type ${name}Collection from '${file.import}'`),
     `import type routesCollection from './dynamic-routes-collection'`,
     ...templateEntries.map(([name, { file }]) => `import type ${name}Template from '${file.import}'`),

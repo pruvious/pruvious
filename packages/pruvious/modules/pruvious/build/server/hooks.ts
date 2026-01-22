@@ -28,6 +28,7 @@ export function getServerHooksFileContent() {
   const serverFilterCallbackEntries = Object.entries(filterCallbackFiles.server)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     ...serverActionDefinitionEntries.map(
       ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
     ),

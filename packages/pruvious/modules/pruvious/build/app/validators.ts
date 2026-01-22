@@ -16,6 +16,7 @@ export function getAppValidatorsFileContent() {
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `const _validatorFn: any = () => null`,
     ...simpleValidatorsMeta.flatMap(({ name, comment, exampleField }) => [
       ``,

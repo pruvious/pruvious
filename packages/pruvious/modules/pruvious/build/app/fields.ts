@@ -16,6 +16,7 @@ export function getAppFieldsFileContent() {
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     ...fieldDefinitionEntries.map(([name, { file }]) => `import type _${name}Field from '${file.import}'`),
     ``,
     `const _fieldFn = () => null`,
