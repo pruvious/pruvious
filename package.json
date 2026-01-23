@@ -25,6 +25,7 @@
     "format": "prettier --write .",
     "play": "node scripts/play.mjs",
     "postinstall": "pnpm build",
+    "purge": "node scripts/purge.mjs",
     "test": "vitest",
     "test:hub-app": "vitest packages/hub-app",
     "test:i18n": "vitest packages/i18n",
