@@ -18,8 +18,8 @@
   "scripts": {
     "build": "nuxt build && node scripts/build.mjs",
     "dev": "nuxt dev",
+    "dev:prepare": "nuxt prepare",
     "generate": "nuxt generate",
-    "prepare": "nuxt prepare",
     "preview": "nuxt preview",
     "typecheck": "nuxt prepare && nuxt typecheck"
   },
