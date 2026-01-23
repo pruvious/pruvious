@@ -50,10 +50,7 @@ export const dashboardDefaultMiddleware = async () => {
 
     // Translations
     const auth = useAuth()
-    const dashboardLanguage =
-      auth.value.isLoggedIn && isValidLanguageCode(auth.value.user!.dashboardLanguage)
-        ? auth.value.user.dashboardLanguage
-        : (useLanguage().value ?? 'en')
+    const dashboardLanguage = auth.value.isLoggedIn ? auth.value.user.dashboardLanguage : (useLanguage().value ?? 'en')
     const contentLanguage =
       auth.value.isLoggedIn &&
       hasPermission('update-own-account') &&
