@@ -56,19 +56,23 @@ function writeFile(path) {
     const dir = dirname(distPath)
 
     if (fs.existsSync(path)) {
-      let content = fs.readFileSync(path, 'utf-8')
-
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true })
       }
 
-      if (path.endsWith('.ts')) {
-        content = `// @ts-nocheck\n${content}`
-      } else if (path.endsWith('.vue')) {
-        content = content.replace(/<script\s+([^>]*\bsetup\b[^>]*)>/gi, '<script $1>\n// @ts-nocheck')
-      }
+      if (path.endsWith('.ts') || path.endsWith('.vue')) {
+        let content = fs.readFileSync(path, 'utf-8')
 
-      fs.writeFileSync(distPath, content)
+        if (path.endsWith('.ts')) {
+          content = `// @ts-nocheck\n${content}`
+        } else if (path.endsWith('.vue')) {
+          content = content.replace(/<script\s+([^>]*\bsetup\b[^>]*)>/gi, '<script $1>\n// @ts-nocheck')
+        }
+
+        fs.writeFileSync(distPath, content)
+      } else {
+        fs.copyFileSync(path, distPath)
+      }
     }
   }
 }
