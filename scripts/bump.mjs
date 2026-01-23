@@ -7,7 +7,7 @@ const dependencyBlockPattern = /"((?:dev)?[Dd]ependencies)":\s*{([^}]*)}/g
 const dependencyPattern = /"([^"]+)":\s*"([^"]+)"/g
 const packageVersionCache = {}
 const files = [{ path: resolve('package.json'), content: fs.readFileSync(resolve('package.json'), 'utf-8') }]
-const ignoreDependencies = ['@clack/prompts', 'ohash', 'vue-sonner']
+const ignoreDependencies = ['@clack/prompts', 'vue-sonner']
 
 for (const dir of fs.readdirSync(resolve('packages'))) {
   if (fs.statSync(resolve('packages', dir)).isDirectory()) {
