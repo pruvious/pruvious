@@ -141,7 +141,6 @@ export default defineCommand({
 
     const installSpinner = spinner()
     installSpinner.start('Installing dependencies')
-    console.log(join(ctx.args.dir, 'server'), fs.existsSync(join(ctx.args.dir, 'server', 'package.json')))
     await installDependencies({ cwd: join(ctx.args.dir, 'server'), packageManager: 'npm', silent: true })
     installSpinner.stop('Dependencies installed.')
 
