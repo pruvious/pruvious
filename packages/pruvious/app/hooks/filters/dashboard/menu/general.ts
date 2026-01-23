@@ -1,4 +1,4 @@
 import { defineFilter } from '#pruvious/app'
-import type { DashboardMenuItem } from '../../../../utils/pruvious/dashboard/menu'
+import type { OrderedDashboardMenuItem } from '#pruvious/dashboard'
 
-export default defineFilter<DashboardMenuItem[]>()
+export default defineFilter<OrderedDashboardMenuItem[]>()

@@ -10,7 +10,12 @@
 
 <script lang="ts" setup>
 import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
-import { maybeTranslate, prepareDashboardMenu, usePruviousDashboard, type DashboardMenuItem } from '#pruvious/dashboard'
+import {
+  maybeTranslate,
+  prepareDashboardMenu,
+  usePruviousDashboard,
+  type OrderedDashboardMenuItem,
+} from '#pruvious/dashboard'
 import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { collator, isArray, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
@@ -19,7 +24,7 @@ await loadFilters('dashboard:menu:collections')
 
 const route = useRoute()
 const dashboard = usePruviousDashboard()
-const orderedItems: (DashboardMenuItem & { order: number })[] = [
+const orderedItems: OrderedDashboardMenuItem[] = [
   ...Object.entries(dashboardPages)
     .filter(
       ([_, { group, permissions }]) =>

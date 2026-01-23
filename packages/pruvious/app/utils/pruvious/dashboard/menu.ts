@@ -14,7 +14,7 @@ import type { CollectionUIOptions } from '../../../../modules/pruvious/collectio
 import type { SingletonUIOptions } from '../../../../modules/pruvious/singletons/define'
 import { maybeTranslate } from './i18n'
 
-export type DashboardMenuItem = Pick<PUIVerticalMenuItemModel, 'action' | 'label' | 'icon' | 'submenu'> & {
+export interface DashboardMenuItem extends Pick<PUIVerticalMenuItemModel, 'action' | 'label' | 'icon'> {
   /**
    * Defines the target route location for navigation when the item is clicked.
    *
@@ -32,6 +32,40 @@ export type DashboardMenuItem = Pick<PUIVerticalMenuItemModel, 'action' | 'label
    * @default false
    */
   active?: boolean
+
+  /**
+   * An array of submenu items.
+   */
+  submenu?: DashboardMenuItem[]
+}
+
+export interface OrderedDashboardMenuItem extends DashboardMenuItem {
+  /**
+   * The menu category where the item is intended to be displayed in the dashboard sidebar.
+   */
+  group: 'general' | 'collections' | 'management' | 'utilities'
+
+  /**
+   * Controls the collection's position in the dashboard navigation menu.
+   * Items with lower numbers appear at the top.
+   * When items have the same order number, they are sorted by their label alphabetically.
+   *
+   * Standard menu item orders:
+   *
+   * - General menu:
+   *   - Overview (order 1)
+   *   - Routes (order 2)
+   *   - Media (order 3)
+   *   - SEO (order 20)
+   * - Collections menu:
+   *   - Pages (order 10)
+   * - Management menu:
+   *   - Users (order 1)
+   *   - Roles (order 2)
+   * - Utilities menu:
+   *   - Logs (order 50)
+   */
+  order: number
 }
 
 /**

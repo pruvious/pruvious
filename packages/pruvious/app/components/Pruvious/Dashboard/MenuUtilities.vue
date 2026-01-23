@@ -18,6 +18,7 @@ import {
   useDashboardMenuExpanded,
   usePruviousDashboard,
   type DashboardMenuItem,
+  type OrderedDashboardMenuItem,
 } from '#pruvious/dashboard'
 import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
@@ -30,7 +31,7 @@ const route = useRoute()
 const auth = useAuth()
 const dashboard = usePruviousDashboard()
 const expanded = useDashboardMenuExpanded()
-const orderedItems: (DashboardMenuItem & { order: number })[] = [
+const orderedItems: OrderedDashboardMenuItem[] = [
   ...Object.entries(dashboardPages)
     .filter(
       ([_, { group, permissions }]) =>
@@ -75,7 +76,13 @@ if (dashboard.value?.logs) {
   }
 
   if (!isEmpty(logItems)) {
-    orderedItems.push({ label: __('pruvious-dashboard', 'Logs'), icon: 'bug', order: 50, submenu: logItems })
+    orderedItems.push({
+      label: __('pruvious-dashboard', 'Logs'),
+      icon: 'bug',
+      group: 'utilities',
+      order: 50,
+      submenu: logItems,
+    })
   }
 }
 
