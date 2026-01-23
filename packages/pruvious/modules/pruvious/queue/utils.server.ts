@@ -126,14 +126,23 @@ async function _queueJob<TName extends keyof Jobs, TPayload extends Jobs[TName][
   jobFields?: { key?: string | null; attempt?: number },
 ): Promise<QueryBuilderResult<QueuedJob<TName>, Record<string, string>>> {
   const { jobs, getQueueDatabase, getLogsDatabase } = await import('#pruvious/server')
+  const queueDatabase = getQueueDatabase()
   const definition = jobs[name]
+
+  if (!queueDatabase) {
+    return {
+      success: false,
+      inputErrors: undefined,
+      runtimeError: 'Queue database is not ready',
+      data: undefined,
+    }
+  }
 
   if (!definition) {
     throw new Error(`Job \`${name}\` is not defined`)
   }
 
   const runtimeConfig = useRuntimeConfig()
-  const queueDatabase = getQueueDatabase()
   const logsDatabase = getLogsDatabase()
   const payload = omit(options, ['priority', 'scheduledAt'])
   const priority = options.priority ?? definition.defaultPriority
@@ -233,6 +242,10 @@ export async function getQueue<TJobName extends keyof Jobs>(
   const queueDatabase = getQueueDatabase()
   const queryBuilder = queueDatabase.queryBuilder().selectFrom('Queue')
 
+  if (!queueDatabase) {
+    return []
+  }
+
   if (jobNames) {
     const filterCallbacks: Parameters<typeof queryBuilder.orGroup>[0] = []
     for (const name of toArray(jobNames)) {
@@ -257,6 +270,11 @@ export async function getQueue<TJobName extends keyof Jobs>(
 export async function getJob<TName extends keyof Jobs>(id: number): Promise<QueuedJob<TName> | null> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
+
+  if (!queueDatabase) {
+    return null
+  }
+
   const query = await queueDatabase.queryBuilder().selectFrom('Queue').where('id', '=', id).first()
   return query.success && query.data ? (omit(query.data, ['debugId']) as any) : null
 }
@@ -314,6 +332,11 @@ export async function processJob<TName extends keyof Jobs>(
 ): Promise<JobResult<TName> | null> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
+
+  if (!queueDatabase) {
+    return null
+  }
+
   const queryBuilder = queueDatabase.queryBuilder().deleteFrom('Queue').where('id', '=', id)
 
   if (!force) {
@@ -345,6 +368,10 @@ export async function processNextJob<TName extends keyof Jobs>(
 ): Promise<JobResult<TName> | null> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
+
+  if (!queueDatabase) {
+    return null
+  }
 
   while (true) {
     const queryBuilder = queueDatabase
@@ -384,6 +411,11 @@ export async function clearQueue<TJobName extends keyof Jobs>(jobNames?: TJobNam
 export async function clearQueue<TJobName extends keyof Jobs>(jobNames?: TJobName | TJobName[]): Promise<number> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
+
+  if (!queueDatabase) {
+    return 0
+  }
+
   const queryBuilder = queueDatabase.queryBuilder().deleteFrom('Queue')
 
   if (jobNames) {
@@ -406,6 +438,11 @@ export async function clearQueue<TJobName extends keyof Jobs>(jobNames?: TJobNam
 export async function deleteJob(id: number): Promise<boolean> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
+
+  if (!queueDatabase) {
+    return false
+  }
+
   const query = await queueDatabase.queryBuilder().deleteFrom('Queue').where('id', '=', id).run()
   return query.success ? query.data === 1 : false
 }
