@@ -4,7 +4,8 @@ import { defineCommand } from 'citty'
 import { colors } from 'consola/utils'
 import { resolvePath as resolveModulePath } from 'mlly'
 import fs from 'node:fs'
-import { resolve } from 'pathe'
+import { installDependencies } from 'nypm'
+import { join, resolve } from 'pathe'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile, writeConfigFile } from '../utils/config'
 import { logger } from '../utils/logger'
@@ -132,11 +133,17 @@ export default defineCommand({
       fs.rmSync(ctx.args.dir, { recursive: true, force: true })
     }
 
-    const installSpinner = spinner()
-    installSpinner.start('Copying files')
+    const copySpinner = spinner()
+    copySpinner.start('Copying files')
     fs.mkdirSync(ctx.args.dir, { recursive: true })
     fs.cpSync(hubPackageDist, ctx.args.dir, { recursive: true })
-    installSpinner.stop('Files copied.')
+    copySpinner.stop('Files copied.')
+
+    const installSpinner = spinner()
+    installSpinner.start('Installing dependencies')
+    console.log(join(ctx.args.dir, 'server'), fs.existsSync(join(ctx.args.dir, 'server', 'package.json')))
+    await installDependencies({ cwd: join(ctx.args.dir, 'server'), packageManager: 'npm', silent: true })
+    installSpinner.stop('Dependencies installed.')
 
     if (!config.apps.some((app) => app.path === ctx.args.dir)) {
       config.apps.push({ path: ctx.args.dir, secret: generateSecureRandomString() })

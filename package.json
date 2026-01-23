@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@nuxt/test-utils": "3.23.0",
+    "@pruvious/hub": "workspace:*",
     "consola": "3.4.2",
     "dotenv": "17.2.3",
     "execa": "9.6.1",
@@ -50,6 +51,7 @@
     "pkg-pr-new": "0.0.62",
     "prettier": "3.8.0",
     "prettier-plugin-organize-attributes": "1.0.0",
+    "pruvious": "workspace:*",
     "typescript": "5.9.3",
     "vitest": "4.0.17"
   },

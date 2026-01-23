@@ -12,11 +12,11 @@
   "license": "MIT",
   "type": "module",
   "files": [
-    ".output"
+    "dist"
   ],
-  "main": "./.output/server/index.mjs",
+  "main": "./dist/server/index.mjs",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt build && node scripts/build.mjs",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "prepare": "nuxt prepare",
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "nuxt": "4.2.2",
+    "pathe": "2.0.3",
     "typescript": "5.9.3",
     "vue-tsc": "3.2.2",
     "vue": "3.5.26"

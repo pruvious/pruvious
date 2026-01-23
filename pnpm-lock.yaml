@@ -11,6 +11,9 @@ importers:
       '@nuxt/test-utils':
         specifier: 3.23.0
         version: 3.23.0(magicast@0.5.1)(typescript@5.9.3)(vitest@4.0.17(@types/node@25.0.9)(jiti@2.6.1)(terser@5.34.1)(yaml@2.8.2))
+      '@pruvious/hub':
+        specifier: workspace:*
+        version: link:packages/hub
       consola:
         specifier: 3.4.2
         version: 3.4.2
@@ -32,6 +35,9 @@ importers:
       prettier-plugin-organize-attributes:
         specifier: 1.0.0
         version: 1.0.0(prettier@3.8.0)
+      pruvious:
+        specifier: workspace:*
+        version: link:packages/pruvious
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -109,6 +115,9 @@ importers:
         specifier: 4.6.4
         version: 4.6.4(vue@3.5.26(typescript@5.9.3))
     devDependencies:
+      pathe:
+        specifier: 2.0.3
+        version: 2.0.3
       typescript:
         specifier: 5.9.3
         version: 5.9.3
