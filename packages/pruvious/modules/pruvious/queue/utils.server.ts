@@ -240,11 +240,12 @@ export async function getQueue<TJobName extends keyof Jobs>(
 ): Promise<QueuedJob<TJobName>[]> {
   const { getQueueDatabase } = await import('#pruvious/server')
   const queueDatabase = getQueueDatabase()
-  const queryBuilder = queueDatabase.queryBuilder().selectFrom('Queue')
 
   if (!queueDatabase) {
     return []
   }
+
+  const queryBuilder = queueDatabase.queryBuilder().selectFrom('Queue')
 
   if (jobNames) {
     const filterCallbacks: Parameters<typeof queryBuilder.orGroup>[0] = []
