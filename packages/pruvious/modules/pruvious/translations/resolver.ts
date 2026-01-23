@@ -38,7 +38,7 @@ export function resolveTranslationFiles(): ResolvedTranslationFiles {
       const domain = baseNameParts[1] ? kebabCase(baseNameParts[0]!) : 'default'
       const language = kebabCase(baseNameParts[1] ?? baseNameParts[0]!)
 
-      if (!languages.some(({ code }) => code === language)) {
+      if (domain !== 'pruvious-dashboard' && !languages.some(({ code }) => code === language)) {
         debug(`Skipping translation <${domain}.${language}> as the language is not defined in the Nuxt configuration`)
         continue
       }
