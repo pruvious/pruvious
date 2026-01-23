@@ -28,8 +28,6 @@
     "@babel/traverse": "7.28.6",
     "@babel/types": "7.28.6",
     "@iconify-json/tabler": "1.2.26",
-    "@img/sharp-libvips-dev": "1.2.4",
-    "@img/sharp-wasm32": "0.34.5",
     "@pruvious/i18n": "workspace:*",
     "@pruvious/orm": "workspace:*",
     "@pruvious/storage": "workspace:*",
@@ -74,5 +72,8 @@
     "typescript": "5.9.3",
     "vue": "3.5.26",
     "vue-tsc": "3.2.2"
+  },
+  "optionalDependencies": {
+    "@img/sharp-libvips-dev": "1.2.4"
   }
 }

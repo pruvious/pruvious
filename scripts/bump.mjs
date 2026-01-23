@@ -3,7 +3,7 @@ import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { resolve } from 'node:path'
 
-const dependencyBlockPattern = /"((?:dev)?[Dd]ependencies)":\s*{([^}]*)}/g
+const dependencyBlockPattern = /"((?:dev|optional)?[Dd]ependencies)":\s*{([^}]*)}/g
 const dependencyPattern = /"([^"]+)":\s*"([^"]+)"/g
 const packageVersionCache = {}
 const files = [{ path: resolve('package.json'), content: fs.readFileSync(resolve('package.json'), 'utf-8') }]

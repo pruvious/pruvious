@@ -150,8 +150,8 @@ importers:
         specifier: 12.6.2
         version: 12.6.2
       ohash:
-        specifier: 1.1.6
-        version: 1.1.6
+        specifier: 2.0.11
+        version: 2.0.11
       pathe:
         specifier: 2.0.3
         version: 2.0.3
@@ -204,12 +204,6 @@ importers:
       '@iconify-json/tabler':
         specifier: 1.2.26
         version: 1.2.26
-      '@img/sharp-libvips-dev':
-        specifier: 1.2.4
-        version: 1.2.4
-      '@img/sharp-wasm32':
-        specifier: 0.34.5
-        version: 0.34.5
       '@pruvious/i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -265,8 +259,8 @@ importers:
         specifier: 1.8.0
         version: 1.8.0
       ohash:
-        specifier: 1.1.6
-        version: 1.1.6
+        specifier: 2.0.11
+        version: 2.0.11
       pathe:
         specifier: 2.0.3
         version: 2.0.3
@@ -337,6 +331,10 @@ importers:
       vue-tsc:
         specifier: 3.2.2
         version: 3.2.2(typescript@5.9.3)
+    optionalDependencies:
+      '@img/sharp-libvips-dev':
+        specifier: 1.2.4
+        version: 1.2.4
 
   packages/storage:
     dependencies:
@@ -457,8 +455,8 @@ importers:
         specifier: 5.1.6
         version: 5.1.6
       ohash:
-        specifier: 1.1.6
-        version: 1.1.6
+        specifier: 2.0.11
+        version: 2.0.11
       zeptomatch:
         specifier: 2.1.0
         version: 2.1.0
@@ -4429,9 +4427,6 @@ packages:
   ofetch@1.5.1:
     resolution: {integrity: sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA==}
 
-  ohash@1.1.6:
-    resolution: {integrity: sha512-TBu7PtV8YkAZn0tSxobKY2n2aAQva936lhRrj6957aDaCf9IEtqsKbgMzXE/F/sjqYOwmrukeORHNLe5glk7Cg==}
-
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
@@ -6720,6 +6715,7 @@ snapshots:
   '@emnapi/runtime@1.7.1':
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   '@emnapi/wasi-threads@1.1.0':
     dependencies:
@@ -7024,7 +7020,8 @@ snapshots:
   '@img/sharp-libvips-darwin-x64@1.2.4':
     optional: true
 
-  '@img/sharp-libvips-dev@1.2.4': {}
+  '@img/sharp-libvips-dev@1.2.4':
+    optional: true
 
   '@img/sharp-libvips-linux-arm64@1.2.4':
     optional: true
@@ -7093,6 +7090,7 @@ snapshots:
   '@img/sharp-wasm32@0.34.5':
     dependencies:
       '@emnapi/runtime': 1.7.1
+    optional: true
 
   '@img/sharp-win32-arm64@0.34.5':
     optional: true
@@ -10551,8 +10549,6 @@ snapshots:
       destr: 2.0.5
       node-fetch-native: 1.6.7
       ufo: 1.6.1
-
-  ohash@1.1.6: {}
 
   ohash@2.0.11: {}
 
