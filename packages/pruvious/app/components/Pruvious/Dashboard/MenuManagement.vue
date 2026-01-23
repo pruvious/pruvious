@@ -36,7 +36,9 @@ const orderedItems: OrderedDashboardMenuItem[] = [
     .map(([_, d]) => ({
       ...omit(d, ['_path']),
       to: d.path ?? d._path,
-      label: isDefined(d.label) ? maybeTranslate(d.label) : __('pruvious-dashboard', titleCase(d._path, false) as any),
+      label: isDefined(d.label)
+        ? maybeTranslate(d.label)
+        : __('pruvious-dashboard', titleCase(d.path ?? d._path, false) as any),
     })),
   ...collectionsToMenuItems(dashboard.value?.collections).filter(({ group }) => group === 'management'),
   ...singletonsToMenuItems(dashboard.value?.singletons).filter(({ group }) => group === 'management'),
