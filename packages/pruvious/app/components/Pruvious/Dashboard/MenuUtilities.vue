@@ -5,7 +5,7 @@
     :ariaExpandLabel="__('pruvious-dashboard', 'Expand')"
     :expandedState="expanded.utilities"
     :items="items"
-    :title="__('pruvious-dashboard', 'Utilities')"
+    :title="title"
     @update:expandedState="expanded = { ...expanded, utilities: $event }"
   />
 </template>
@@ -26,11 +26,13 @@ import { collator, isArray, isDefined, isEmpty, omit, slugify, titleCase } from 
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await loadFilters('dashboard:menu:utilities')
+await loadFilters('dashboard:menu:utilities:title')
 
 const route = useRoute()
 const auth = useAuth()
 const dashboard = usePruviousDashboard()
 const expanded = useDashboardMenuExpanded()
+const title = await applyFilters('dashboard:menu:utilities:title', __('pruvious-dashboard', 'Utilities'), {})
 const orderedItems: OrderedDashboardMenuItem[] = [
   ...Object.entries(dashboardPages)
     .filter(

@@ -4,6 +4,7 @@
     :ariaCollapseLabel="__('pruvious-dashboard', 'Collapse')"
     :ariaExpandLabel="__('pruvious-dashboard', 'Expand')"
     :items="items"
+    :title="title"
   />
 </template>
 
@@ -20,9 +21,11 @@ import { collator, isArray, isDefined, omit, titleCase } from '@pruvious/utils'
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await loadFilters('dashboard:menu:general')
+await loadFilters('dashboard:menu:general:title')
 
 const route = useRoute()
 const dashboard = usePruviousDashboard()
+const title = await applyFilters('dashboard:menu:general:title', '', {})
 const orderedItems: OrderedDashboardMenuItem[] = [
   ...Object.entries(dashboardPages)
     .filter(
