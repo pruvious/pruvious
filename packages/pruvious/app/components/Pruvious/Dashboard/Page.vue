@@ -5,7 +5,7 @@
     </template>
 
     <template #sidebar>
-      <PruviousDashboardMenu />
+      <PruviousDashboardMenuWrapper />
     </template>
 
     <div class="p-page-wrapper">

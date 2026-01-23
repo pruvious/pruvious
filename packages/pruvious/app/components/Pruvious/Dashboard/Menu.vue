@@ -1,14 +1,6 @@
 <template>
-  <div class="p-menu">
-    <PruviousDashboardMenuGeneral key="general" />
-    <PruviousDashboardMenuCollections key="collections" />
-    <PruviousDashboardMenuManagement key="management" />
-    <PruviousDashboardMenuUtilities key="utilities" />
-  </div>
+  <PruviousDashboardMenuGeneral key="general" />
+  <PruviousDashboardMenuCollections key="collections" />
+  <PruviousDashboardMenuManagement key="management" />
+  <PruviousDashboardMenuUtilities key="utilities" />
 </template>
-
-<style scoped>
-.p-menu > * + * {
-  margin-top: 1.5em;
-}
-</style>
