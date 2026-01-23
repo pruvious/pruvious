@@ -1,4 +1,4 @@
-import type { __, hasPermission, isValidLanguageCode } from '#pruvious/app'
+import type { __, hasPermission, isValidLanguageCode, useAuth } from '#pruvious/app'
 import type { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } from '#pruvious/dashboard'
 import type { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { isString, type slugify } from '@pruvious/utils'
@@ -103,6 +103,12 @@ export interface DashboardMiddlewareContext {
   slugify: typeof slugify
 
   /**
+   * Composable that provides access to the current user's authentication state.
+   * The authentication is automatically resolved through either the `pruvious-auth` or `pruvious` middleware.
+   */
+  useAuth: typeof useAuth
+
+  /**
    * Composable that provides access to the current state of the Pruvious CMS.
    */
   usePruvious: typeof usePruvious
@@ -152,7 +158,7 @@ export async function dashboardMiddleware(
       throw new Error(`Invalid dashboard middleware option: ${middleware}`)
     }
   } else {
-    const { __, hasPermission, isValidLanguageCode } = await import('#pruvious/app')
+    const { __, hasPermission, isValidLanguageCode, useAuth } = await import('#pruvious/app')
     const { getCollectionBySlug, getSingletonBySlug, usePruvious, usePruviousDashboard } =
       await import('#pruvious/dashboard')
     const { puiQueueToast } = await import('@pruvious/ui/pui/toast')
@@ -167,6 +173,7 @@ export async function dashboardMiddleware(
       hasPermission,
       puiQueueToast,
       slugify,
+      useAuth,
       usePruvious,
       usePruviousDashboard,
     })
