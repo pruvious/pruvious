@@ -16,7 +16,7 @@
   ],
   "main": "./dist/server/index.mjs",
   "scripts": {
-    "build": "nuxt build && node scripts/build.mjs",
+    "build": "node scripts/build.mjs",
     "dev": "nuxt dev",
     "dev:prepare": "nuxt prepare",
     "generate": "nuxt generate",
@@ -31,6 +31,8 @@
     "vue-router": "4.6.4"
   },
   "devDependencies": {
+    "@pruvious/cli-utils": "workspace:*",
+    "execa": "9.6.1",
     "nuxt": "4.2.2",
     "pathe": "2.0.3",
     "typescript": "5.9.3",
