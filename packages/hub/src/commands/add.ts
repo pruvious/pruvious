@@ -1,4 +1,5 @@
 import { cancel, isCancel, text } from '@clack/prompts'
+import { isValidPath, resolvePath } from '@pruvious/cli-utils'
 import { generateSecureRandomString } from '@pruvious/utils'
 import { defineCommand } from 'citty'
 import { colors } from 'consola/utils'
@@ -7,7 +8,6 @@ import { sharedArgs } from '../utils/args'
 import { readConfigFile, writeConfigFile } from '../utils/config'
 import { getAppInfo } from '../utils/hub'
 import { logger } from '../utils/logger'
-import { isValidPath, resolvePath } from '../utils/path'
 
 export default defineCommand({
   meta: {

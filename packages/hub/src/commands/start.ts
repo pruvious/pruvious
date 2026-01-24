@@ -1,4 +1,5 @@
 import { cancel, isCancel, select } from '@clack/prompts'
+import { resolvePath } from '@pruvious/cli-utils'
 import { castToNumber, isPositiveInteger } from '@pruvious/utils'
 import { defineCommand } from 'citty'
 import { colors } from 'consola/utils'
@@ -10,7 +11,6 @@ import { readConfigFile } from '../utils/config'
 import { getAppInfo } from '../utils/hub'
 import { logger } from '../utils/logger'
 import { showNoRegisteredAppsMessages } from '../utils/messages'
-import { resolvePath } from '../utils/path'
 
 export default defineCommand({
   meta: {

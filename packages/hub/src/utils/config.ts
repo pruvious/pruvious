@@ -1,7 +1,7 @@
+import { resolvePath } from '@pruvious/cli-utils'
 import fs from 'node:fs'
 import os from 'node:os'
 import { dirname, join } from 'pathe'
-import { resolvePath } from './path'
 
 interface Config {
   apps: {

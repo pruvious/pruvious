@@ -1,4 +1,5 @@
 import { box, cancel, isCancel, select, spinner, text } from '@clack/prompts'
+import { isValidPath, resolvePath } from '@pruvious/cli-utils'
 import { generateSecureRandomString } from '@pruvious/utils'
 import { defineCommand } from 'citty'
 import { colors } from 'consola/utils'
@@ -9,7 +10,6 @@ import { join, resolve } from 'pathe'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile, writeConfigFile } from '../utils/config'
 import { logger } from '../utils/logger'
-import { isValidPath, resolvePath } from '../utils/path'
 import { updateApp } from '../utils/updater'
 
 export default defineCommand({

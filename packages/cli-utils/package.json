@@ -1,0 +1,38 @@
+{
+  "name": "@pruvious/cli-utils",
+  "description": "Common utilities for Pruvious CLI tools.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/cli-utils"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pathe": "2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.9",
+    "typescript": "5.9.3",
+    "unbuild": "3.6.1"
+  }
+}

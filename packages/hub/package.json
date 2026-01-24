@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@clack/prompts": "1.0.0-alpha.9",
+    "@pruvious/cli-utils": "workspace:*",
     "@pruvious/hub-app": "workspace:*",
     "@pruvious/utils": "workspace:*",
     "citty": "0.1.6",
