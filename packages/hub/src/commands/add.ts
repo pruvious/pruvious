@@ -36,7 +36,7 @@ export default defineCommand({
             return 'Please select a directory, not a file'
           } else if (!fs.existsSync(resolvePath(value))) {
             return 'The directory does not exist'
-          } else if (!getAppInfo(ctx.args.dir)) {
+          } else if (!getAppInfo(resolvePath(value))) {
             return 'The directory is not a valid Pruvious Hub app'
           }
         },
