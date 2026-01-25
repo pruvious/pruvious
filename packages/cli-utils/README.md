@@ -5,7 +5,7 @@ Common utilities for Pruvious CLI tools.
 ## Installation
 
 ```sh
-npm install @pruvious/cli-utils
+npm i @pruvious/cli-utils
 ```
 
 ## License

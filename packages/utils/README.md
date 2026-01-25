@@ -5,7 +5,7 @@ Compilation of JavaScript utility functions and TypeScript types.
 ## Installation
 
 ```sh
-npm install @pruvious/utils
+npm i @pruvious/utils
 ```
 
 ## Table of contents

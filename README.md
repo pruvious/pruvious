@@ -16,7 +16,7 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 2. Install Pruvious 4:
 
    ```sh
-   npm install https://pkg.pr.new/pruvious/pruvious/pruvious@v4
+   npm i https://pkg.pr.new/pruvious/pruvious/pruvious@v4
    ```
 
    You can also use specific git commits instead of `@v4`. For example: `https://pkg.pr.new/pruvious/pruvious/pruvious@b2cbc6afe7f2c2e8a80a1366ee20629e3583bc21`
