@@ -2,11 +2,10 @@ import { spinner } from '@clack/prompts'
 import { colors, isValidVersion, logger, satisfiesVersion } from '@pruvious/cli-utils'
 import { resolvePath as resolveModulePath } from 'mlly'
 import fs from 'node:fs'
-import { resolve } from 'pathe'
-import { eq, valid } from 'semver'
+import { installDependencies } from 'nypm'
+import { join, resolve } from 'pathe'
 import packageJSON from '../../package.json' with { type: 'json' }
 import { getAppInfo } from './hub'
-import { logger } from './logger'
 
 export async function updateApp(path: string) {
   const hubPackageMain = await resolveModulePath('@pruvious/hub-app', { url: import.meta.url })
@@ -35,8 +34,13 @@ export async function updateApp(path: string) {
   const updateSpinner = spinner()
   updateSpinner.start('Copying files')
   fs.cpSync(hubPackageDist, path, { recursive: true, force: true })
-
   updateSpinner.stop('Files copied.')
+
+  const installSpinner = spinner()
+  installSpinner.start('Installing dependencies')
+  await installDependencies({ cwd: join(path, 'server'), packageManager: 'npm', silent: true })
+  installSpinner.stop('Dependencies installed.')
+
   logger.success(
     `Pruvious Hub app updated successfully from version ${colors.gray(currentVersion)} to ${colors.greenBright(latestVersion)}.`,
   )
