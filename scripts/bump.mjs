@@ -46,7 +46,7 @@ for (const { path, content } of files) {
       if (!ignoreDependencies.includes(packageName)) {
         const currentVersion = allDependencies[blockType][packageName]
 
-        if (!currentVersion.startsWith('workspace:')) {
+        if (currentVersion.match(/^\d+\.\d+\.\d+$/)) {
           const latestVersion = await getLatestVersion(packageName)
 
           if (latestVersion && latestVersion !== currentVersion) {
