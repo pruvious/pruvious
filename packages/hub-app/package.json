@@ -31,10 +31,6 @@
   "devDependencies": {
     "@pruvious/cli-utils": "workspace:*",
     "execa": "9.6.1",
-    "nuxt": "4.2.2",
-    "pathe": "2.0.3",
-    "typescript": "5.9.3",
-    "vue-tsc": "3.2.2",
-    "vue": "3.5.26"
+    "pathe": "2.0.3"
   }
 }
