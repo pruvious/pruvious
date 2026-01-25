@@ -1,15 +1,13 @@
 import { cancel, isCancel, select } from '@clack/prompts'
-import { resolvePath } from '@pruvious/cli-utils'
+import { colors, logger, resolvePath } from '@pruvious/cli-utils'
 import { castToNumber, isPositiveInteger } from '@pruvious/utils'
 import { defineCommand } from 'citty'
-import { colors } from 'consola/utils'
 import { execa } from 'execa'
 import { checkPort, getPort } from 'get-port-please'
 import fs from 'node:fs'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile } from '../utils/config'
 import { getAppInfo } from '../utils/hub'
-import { logger } from '../utils/logger'
 import { showNoRegisteredAppsMessages } from '../utils/messages'
 
 export default defineCommand({
@@ -68,7 +66,7 @@ export default defineCommand({
     }
 
     if (!fs.existsSync(ctx.args.dir)) {
-      logger.error(`The directory ${colors.yellow(ctx.args.dir)} does not exist.`)
+      logger.error(`The directory ${colors.gray(ctx.args.dir)} does not exist.`)
       process.exit(1)
     }
 

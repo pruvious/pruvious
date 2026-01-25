@@ -1,14 +1,28 @@
 import os from 'node:os'
 import { join, parse, resolve } from 'pathe'
 
-let cwd = ''
+let _cwd = ''
 
 /**
  * Sets the current working directory for path resolution.
  * The `path` must be resolved beforehand.
  */
 export function setCurrentWorkingDirectory(path: string): void {
-  cwd = path
+  _cwd = path
+}
+
+/**
+ * Gets the current working directory used for path resolution.
+ */
+export function getCurrentWorkingDirectory(): string {
+  return _cwd
+}
+
+/**
+ * @alias getCurrentWorkingDirectory
+ */
+export function cwd(): string {
+  return _cwd
 }
 
 /**
@@ -23,7 +37,7 @@ export function resolvePath(path: string): string {
   } else if (path.startsWith('~/')) {
     resolvedPath = join(os.homedir(), path.slice(2))
   } else {
-    resolvedPath = resolve(cwd, path)
+    resolvedPath = resolve(_cwd, path)
   }
 
   return resolvedPath === '/' ? resolvedPath : resolvedPath.replace(/[\\\/]+$/, '')

@@ -1,15 +1,13 @@
 import { box, cancel, isCancel, select, spinner, text } from '@clack/prompts'
-import { isValidPath, resolvePath } from '@pruvious/cli-utils'
+import { colors, isValidPath, logger, resolvePath } from '@pruvious/cli-utils'
 import { generateSecureRandomString } from '@pruvious/utils'
 import { defineCommand } from 'citty'
-import { colors } from 'consola/utils'
 import { resolvePath as resolveModulePath } from 'mlly'
 import fs from 'node:fs'
 import { installDependencies } from 'nypm'
 import { join, resolve } from 'pathe'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile, writeConfigFile } from '../utils/config'
-import { logger } from '../utils/logger'
 import { updateApp } from '../utils/updater'
 
 export default defineCommand({

@@ -28,10 +28,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "pathe": "2.0.3"
+    "@clack/prompts": "1.0.0-alpha.9",
+    "pathe": "2.0.3",
+    "semver": "7.7.3"
   },
   "devDependencies": {
     "@types/node": "25.0.9",
+    "@types/semver": "7.7.1",
+    "citty": "0.1.6",
     "typescript": "5.9.3",
     "unbuild": "3.6.1"
   }

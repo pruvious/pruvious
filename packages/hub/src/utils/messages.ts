@@ -1,5 +1,4 @@
-import { colors } from 'consola/utils'
-import { logger } from './logger'
+import { colors, logger } from '@pruvious/cli-utils'
 
 export function showNoRegisteredAppsMessages() {
   logger.info('No Pruvious Hub apps are registered.')

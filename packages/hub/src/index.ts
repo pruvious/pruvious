@@ -1,12 +1,10 @@
 #!/usr/bin/env node
-import { setCurrentWorkingDirectory } from '@pruvious/cli-utils'
+import { checkEngines, setCurrentWorkingDirectory, setupGlobalConsole } from '@pruvious/cli-utils'
 import { defineCommand, runMain } from 'citty'
 import packageJSON from '../package.json' with { type: 'json' }
 import { commands } from './commands'
 import { sharedArgs } from './utils/args'
 import { setConfigPath } from './utils/config'
-import { setupGlobalConsole } from './utils/console'
-import { checkEngines } from './utils/engines'
 
 const main = defineCommand({
   meta: {
@@ -26,7 +24,7 @@ const main = defineCommand({
     setCurrentWorkingDirectory(ctx.args.cwd)
     setConfigPath(ctx.args.config)
     setupGlobalConsole()
-    checkEngines()
+    await checkEngines()
   },
 })
 

@@ -1,5 +1,5 @@
 import { spinner } from '@clack/prompts'
-import { colors } from 'consola/utils'
+import { colors, isValidVersion, logger, satisfiesVersion } from '@pruvious/cli-utils'
 import { resolvePath as resolveModulePath } from 'mlly'
 import fs from 'node:fs'
 import { resolve } from 'pathe'
@@ -20,12 +20,12 @@ export async function updateApp(path: string) {
   const currentVersion = getAppInfo(path)?.version
   const latestVersion = packageJSON.dependencies['@pruvious/hub-app'] as string
 
-  if (!currentVersion || !valid(currentVersion)) {
+  if (!currentVersion || !isValidVersion(currentVersion)) {
     logger.error(`Cannot determine the current version of the Pruvious Hub app at ${colors.gray(path)}.`)
     process.exit(1)
   }
 
-  if (valid(latestVersion) && eq(currentVersion, latestVersion)) {
+  if (isValidVersion(latestVersion) && (await satisfiesVersion(currentVersion, latestVersion))) {
     logger.info(
       `The Pruvious Hub app at ${colors.cyan(path)} is already up to date (version ${colors.cyan(currentVersion)}).`,
     )

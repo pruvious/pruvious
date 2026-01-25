@@ -1,7 +1,7 @@
+import { logger } from '@pruvious/cli-utils'
 import { defineCommand } from 'citty'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile } from '../utils/config'
-import { logger } from '../utils/logger'
 import { showNoRegisteredAppsMessages } from '../utils/messages'
 
 export default defineCommand({

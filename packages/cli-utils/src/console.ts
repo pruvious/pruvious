@@ -26,3 +26,5 @@ export function setupGlobalConsole() {
   process.on('unhandledRejection', (err) => consola.error('[unhandledRejection]', err))
   process.on('uncaughtException', (err) => consola.error('[uncaughtException]', err))
 }
+
+export { colors } from 'consola/utils'

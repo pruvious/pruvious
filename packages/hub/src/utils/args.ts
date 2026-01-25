@@ -1,13 +1,9 @@
+import { sharedArgs as _sharedArgs } from '@pruvious/cli-utils'
 import type { ArgDef } from 'citty'
 import { getDefaultConfigPath } from './config'
 
 export const sharedArgs = {
-  cwd: {
-    type: 'string',
-    description: 'Current working directory.',
-    valueHint: 'directory',
-    default: '.',
-  },
+  ..._sharedArgs,
   config: {
     type: 'string',
     description: `Path for storing the Pruvious Hub global configuration file (default: \`${getDefaultConfigPath()}\`).`,

@@ -1,12 +1,10 @@
 import { cancel, isCancel, select } from '@clack/prompts'
-import { resolvePath } from '@pruvious/cli-utils'
+import { colors, logger, resolvePath } from '@pruvious/cli-utils'
 import { defineCommand } from 'citty'
-import { colors } from 'consola/utils'
 import fs from 'node:fs'
 import { sharedArgs } from '../utils/args'
 import { readConfigFile, writeConfigFile } from '../utils/config'
 import { getAppInfo } from '../utils/hub'
-import { logger } from '../utils/logger'
 import { showNoRegisteredAppsMessages } from '../utils/messages'
 
 export default defineCommand({

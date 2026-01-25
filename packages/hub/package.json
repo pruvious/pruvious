@@ -25,18 +25,14 @@
     "@pruvious/hub-app": "workspace:*",
     "@pruvious/utils": "workspace:*",
     "citty": "0.1.6",
-    "consola": "3.4.2",
     "execa": "9.6.1",
     "get-port-please": "3.2.0",
     "mlly": "1.8.0",
     "nypm": "0.6.2",
-    "pathe": "2.0.3",
-    "semver": "7.7.3"
+    "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@types/debug": "4.1.12",
     "@types/node": "25.0.9",
-    "@types/semver": "7.7.1",
     "typescript": "5.9.3",
     "unbuild": "3.6.1"
   }
