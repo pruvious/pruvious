@@ -8,6 +8,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "bootstrap": "node scripts/bootstrap.mjs",
     "build": "pnpm --filter @pruvious/utils build && pnpm --filter @pruvious/i18n build && pnpm --filter @pruvious/orm build && pnpm --filter @pruvious/storage build && pnpm dev:prepare && pnpm --filter @pruvious/ui build && pnpm --filter pruvious build && pnpm --filter @pruvious/cli-utils build && pnpm --filter @pruvious/hub-app build && pnpm --filter @pruvious/hub build",
     "build:cli-utils": "pnpm --filter @pruvious/cli-utils build",
     "build:hub": "pnpm --filter @pruvious/hub build",
