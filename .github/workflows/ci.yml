@@ -30,7 +30,10 @@ jobs:
           node-version: 24
           cache: 'pnpm'
 
-      - name: Install dependencies (and build with postinstall)
+      - name: Bootstrap monorepo
+        run: pnpm bootstrap
+
+      - name: Install dependencies (and build afterwards)
         run: pnpm install
 
       - name: Publish on pkg.pr.new
