@@ -3,11 +3,11 @@ import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { resolve } from 'node:path'
 
-const dependencyBlockPattern = /"((?:dev)?[Dd]ependencies)":\s*{([^}]*)}/g
+const dependencyBlockPattern = /"((?:dev|optional)?[Dd]ependencies)":\s*{([^}]*)}/g
 const dependencyPattern = /"([^"]+)":\s*"([^"]+)"/g
 const packageVersionCache = {}
 const files = [{ path: resolve('package.json'), content: fs.readFileSync(resolve('package.json'), 'utf-8') }]
-const ignoreDependencies = ['ohash', 'vue-sonner']
+const ignoreDependencies = ['@clack/prompts', 'vue-sonner']
 
 for (const dir of fs.readdirSync(resolve('packages'))) {
   if (fs.statSync(resolve('packages', dir)).isDirectory()) {
@@ -46,7 +46,7 @@ for (const { path, content } of files) {
       if (!ignoreDependencies.includes(packageName)) {
         const currentVersion = allDependencies[blockType][packageName]
 
-        if (!currentVersion.startsWith('workspace:')) {
+        if (currentVersion.match(/^\d+\.\d+\.\d+$/)) {
           const latestVersion = await getLatestVersion(packageName)
 
           if (latestVersion && latestVersion !== currentVersion) {

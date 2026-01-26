@@ -1,0 +1,39 @@
+{
+  "name": "@pruvious/hub",
+  "description": "Centralized dashboard for managing and deploying Pruvious websites.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/hub"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "bin": "./dist/index.mjs",
+  "scripts": {
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.0.0-alpha.9",
+    "@pruvious/cli-utils": "workspace:*",
+    "@pruvious/hub-app": "workspace:*",
+    "@pruvious/utils": "workspace:*",
+    "citty": "0.1.6",
+    "execa": "9.6.1",
+    "get-port-please": "3.2.0",
+    "mlly": "1.8.0",
+    "nypm": "0.6.2",
+    "pathe": "2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.9",
+    "typescript": "5.9.3",
+    "unbuild": "3.6.1"
+  }
+}

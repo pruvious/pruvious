@@ -15,14 +15,14 @@
 </template>
 
 <script lang="ts" setup>
-import { preloadTranslatableStrings } from '#pruvious/app'
-import { pruviousDashboardPost, useDashboardContentLanguage, usePruviousHMR } from '#pruvious/dashboard'
+import { preloadTranslatableStrings, useLanguage } from '#pruvious/app'
+import { pruviousDashboardPost, usePruviousHMR } from '#pruvious/dashboard'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import '@pruvious/ui/styles'
 import { useEventListener } from '@vueuse/core'
 
 const runtimeConfig = useRuntimeConfig()
-const dashboardLanguage = useDashboardContentLanguage()
+const dashboardLanguage = useLanguage()
 const mac = puiIsMac()
 
 useHead({

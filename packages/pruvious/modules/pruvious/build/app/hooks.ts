@@ -28,6 +28,7 @@ export function getAppHooksFileContent() {
   const clientFilterCallbackEntries = Object.entries(filterCallbackFiles.client)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     ...clientActionDefinitionEntries.map(
       ([name, { file }]) => `import type _${name.split(':').map(camelCase).join('_')}Action from '${file.import}'`,
     ),

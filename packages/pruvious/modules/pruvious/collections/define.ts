@@ -988,6 +988,21 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      * Items with lower numbers appear at the top.
      * When items have the same order number, they are sorted by their label alphabetically.
      *
+     * Standard menu item orders:
+     *
+     * - General menu:
+     *   - Overview (order 1)
+     *   - Routes (order 2)
+     *   - Media (order 3)
+     *   - SEO (order 20)
+     * - Collections menu:
+     *   - Pages (order 10)
+     * - Management menu:
+     *   - Users (order 1)
+     *   - Roles (order 2)
+     * - Utilities menu:
+     *   - Logs (order 50)
+     *
      * @default 10
      */
     order: number

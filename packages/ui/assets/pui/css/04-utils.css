@@ -109,6 +109,10 @@
   transition: none !important;
 }
 
+.pui-pointer-events-none {
+  pointer-events: none;
+}
+
 .pui-no-interaction * {
   pointer-events: none !important;
 }

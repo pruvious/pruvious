@@ -5,7 +5,7 @@
     :ariaExpandLabel="__('pruvious-dashboard', 'Expand')"
     :expandedState="expanded.utilities"
     :items="items"
-    :title="__('pruvious-dashboard', 'Utilities')"
+    :title="title"
     @update:expandedState="expanded = { ...expanded, utilities: $event }"
   />
 </template>
@@ -18,6 +18,7 @@ import {
   useDashboardMenuExpanded,
   usePruviousDashboard,
   type DashboardMenuItem,
+  type OrderedDashboardMenuItem,
 } from '#pruvious/dashboard'
 import { dashboardPages } from '#pruvious/dashboard/dashboard-pages'
 import { decodeQueryString, selectQueryBuilderParamsToQueryString } from '@pruvious/orm/query-string'
@@ -25,12 +26,14 @@ import { collator, isArray, isDefined, isEmpty, omit, slugify, titleCase } from 
 import { collectionsToMenuItems, singletonsToMenuItems } from '../../../utils/pruvious/dashboard/menu'
 
 await loadFilters('dashboard:menu:utilities')
+await loadFilters('dashboard:menu:utilities:title')
 
 const route = useRoute()
 const auth = useAuth()
 const dashboard = usePruviousDashboard()
 const expanded = useDashboardMenuExpanded()
-const orderedItems: (DashboardMenuItem & { order: number })[] = [
+const title = await applyFilters('dashboard:menu:utilities:title', __('pruvious-dashboard', 'Utilities'), {})
+const orderedItems: OrderedDashboardMenuItem[] = [
   ...Object.entries(dashboardPages)
     .filter(
       ([_, { group, permissions }]) =>
@@ -42,7 +45,9 @@ const orderedItems: (DashboardMenuItem & { order: number })[] = [
     .map(([_, d]) => ({
       ...omit(d, ['_path']),
       to: d.path ?? d._path,
-      label: isDefined(d.label) ? maybeTranslate(d.label) : __('pruvious-dashboard', titleCase(d._path, false) as any),
+      label: isDefined(d.label)
+        ? maybeTranslate(d.label)
+        : __('pruvious-dashboard', titleCase(d.path ?? d._path, false) as any),
     })),
   ...collectionsToMenuItems(dashboard.value?.collections).filter(({ group }) => group === 'utilities'),
   ...singletonsToMenuItems(dashboard.value?.singletons).filter(({ group }) => group === 'utilities'),
@@ -75,7 +80,13 @@ if (dashboard.value?.logs) {
   }
 
   if (!isEmpty(logItems)) {
-    orderedItems.push({ label: __('pruvious-dashboard', 'Logs'), icon: 'bug', order: 50, submenu: logItems })
+    orderedItems.push({
+      label: __('pruvious-dashboard', 'Logs'),
+      icon: 'bug',
+      group: 'utilities',
+      order: 50,
+      submenu: logItems,
+    })
   }
 }
 

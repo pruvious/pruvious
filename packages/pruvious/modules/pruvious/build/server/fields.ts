@@ -17,6 +17,7 @@ export function getServerFieldsFileContent() {
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     ...fieldDefinitionEntries.map(([name, { file }]) => `import _${camelCase(name)}Field from '${file.import}'`),
     ``,
     `/**`,

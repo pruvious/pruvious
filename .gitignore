@@ -1,4 +1,5 @@
 # Build outputs
+.build
 .nuxt
 .output
 .pruvious
@@ -19,4 +20,4 @@ node_modules
 .env
 .env.*
 !.env.example
-!.env.test.example
+!.env.*.example

@@ -30,10 +30,13 @@ export function getAppTypeFileContent() {
 }
 
 function getReExports() {
+  const nuxt = useNuxt()
   const fieldDefinitionFiles = resolveFieldDefinitionFiles()
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
+
     // API
     `export { type PruviousPostRoute, type PruviousPostOptions, type PruviousPostResponse, type PruviousGetRoute, type PruviousGetOptions, type PruviousGetResponse, type PruviousPatchRoute, type PruviousPatchOptions, type PruviousPatchResponse, type PruviousDeleteRoute, type PruviousDeleteOptions, type PruviousDeleteResponse, type PruviousFetchResponse, type PruviousFetchError, pruviousPost, pruviousGet, pruviousPatch, pruviousDelete, pruviousFetchHeaders, $pfetch, pruviousFetch } from '${resolvePruviousFile('api/utils.client')}'`,
 

@@ -5,7 +5,12 @@ import type { RouteLocationNormalized } from 'vue-router'
  * It is intended for use in the dashboard.
  */
 export const dashboardAuthGuard = (to: RouteLocationNormalized) => {
+  const runtimeConfig = useRuntimeConfig()
   const { isLoggedIn, permissions } = useAuth().value
+
+  if (to.fullPath.startsWith(runtimeConfig.public.pruvious.apiBasePath)) {
+    return abortNavigation()
+  }
 
   if (!isLoggedIn) {
     let query = ''

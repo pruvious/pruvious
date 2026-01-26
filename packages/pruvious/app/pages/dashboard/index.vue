@@ -3,19 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useAuth } from '#pruvious/app'
 import { dashboardBasePath, dashboardMiddleware } from '#pruvious/dashboard'
 
 definePageMeta({
   path: dashboardBasePath,
-  middleware: [(to) => dashboardMiddleware(to, 'default')],
+  middleware: [
+    (to) => dashboardMiddleware(to, 'default'),
+    (to) => import('../../utils/pruvious/dashboard/middleware/index').then((m) => m.default(to)),
+  ],
 })
-
-const { isLoggedIn } = useAuth().value
-
-if (isLoggedIn) {
-  await navigateTo(dashboardBasePath + 'overview', { replace: true })
-} else {
-  await navigateTo(dashboardBasePath + 'login', { replace: true })
-}
 </script>

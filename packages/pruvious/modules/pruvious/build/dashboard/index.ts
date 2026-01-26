@@ -22,6 +22,7 @@ export function getDashboardFileContent() {
   resolveDashboardPageFiles()
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { type Component, defineAsyncComponent } from 'vue'`,
     `import type { ImageVariant } from '../server'`,
     `import type { ImageVariantOptions } from '${resolvePruviousFile('uploads/images')}'`,
@@ -188,7 +189,7 @@ function getReExports() {
     `export { type UploadItem, type DashboardMediaLibraryState, type DashboardMediaLibraryPopupState, usePruviousDashboardMediaLibraryPopup, getDefaultDashboardMediaLibraryState } from '${resolvePruviousUtilsFile('dashboard/media-library')}'`,
     `export { useDragImageLabel, useIsMoving, startMoving, stopMoving } from '${resolvePruviousUtilsFile('dashboard/move')}'`,
     `export { useLoginPopup } from '${resolvePruviousUtilsFile('dashboard/login')}'`,
-    `export { type DashboardMenuItem, useDashboardMenuExpanded, prepareDashboardMenu } from '${resolvePruviousUtilsFile('dashboard/menu')}'`,
+    `export { type DashboardMenuItem, type OrderedDashboardMenuItem, useDashboardMenuExpanded, prepareDashboardMenu } from '${resolvePruviousUtilsFile('dashboard/menu')}'`,
     `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissions } from '${resolvePruviousUtilsFile('dashboard/permissions')}'`,
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolvePruviousUtilsFile('dashboard/slugs')}'`,
     `export { type DashboardUploadNotification, type DashboardUploadNotificationWidget, usePruviousDashboardUploadNotifications, usePruviousDashboardUploadNotificationsWidget } from '${resolvePruviousUtilsFile('dashboard/upload-notifications')}'`,

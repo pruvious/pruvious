@@ -1,7 +1,7 @@
 import { parse } from '@babel/parser'
 import type { CallExpression, ObjectExpression } from '@babel/types'
 import { exportDefaultDeclaration, identifier, objectProperty, stringLiteral } from '@babel/types'
-import { isDefined, isNotNull, kebabCase, withoutLeadingSlash } from '@pruvious/utils'
+import { isDefined, isNotNull, kebabCase } from '@pruvious/utils'
 import { parse as parseSFC } from '@vue/compiler-sfc'
 import { useDebounceFn } from '@vueuse/core'
 import fs from 'node:fs'
@@ -146,9 +146,11 @@ export async function resolveDashboardPageDefinition(options: ResolveDashboardPa
 
         if (defineDashboardPageNode?.arguments.length === 1) {
           const arg = defineDashboardPageNode.arguments[0] as ObjectExpression
-          const dashboardBasePath = withoutLeadingSlash(nuxt.options.runtimeConfig.pruvious.dashboard.basePath)
-          const kebabPath = dashboardPagePath.split('/').map(kebabCase).join('/')
-          const _path = kebabPath.startsWith(dashboardBasePath) ? kebabPath.slice(dashboardBasePath.length) : kebabPath
+          const _path = dashboardPagePath
+            .replace(/^dashboard\//i, '')
+            .split('/')
+            .map(kebabCase)
+            .join('/')
 
           // Add fallback _path
           const _pathProperty = objectProperty(identifier('_path'), stringLiteral(_path))

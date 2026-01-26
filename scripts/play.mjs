@@ -7,7 +7,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { $fetch } from 'ofetch'
 
-dotenv.config({ path: '.env.test' })
+dotenv.config({ path: '.env.play' })
 
 const isNodeBuild = process.argv.includes('--build') || process.argv.includes('--node')
 const isCloudflareBuild = process.argv.includes('--cf')

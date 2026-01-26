@@ -21,6 +21,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
   )
 
   const output = [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import {`,
     `  chipsField,`,
     `  defineCollection,`,

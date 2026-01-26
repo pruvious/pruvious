@@ -5,7 +5,7 @@ Compilation of JavaScript utility functions and TypeScript types.
 ## Installation
 
 ```sh
-npm install @pruvious/utils
+npm i @pruvious/utils
 ```
 
 ## Table of contents
@@ -117,6 +117,7 @@ npm install @pruvious/utils
   - [isString](#isstring)
   - [isStringInteger](#isstringinteger)
   - [kebabCase](#kebabcase)
+  - [murmurHash](#murmurhash)
   - [normalizeCase](#normalizecase)
   - [parseBytes](#parsebytes)
   - [pascalCase](#pascalcase)
@@ -1480,6 +1481,13 @@ kebabCase('fooBar') // 'foo-bar'
 kebabCase('fooBAR') // 'foo-bar'
 ```
 
+### <a id="murmurhash">`murmurHash(key, seed)`</a>
+
+JS Implementation of MurmurHash3 (r136) (as of May 20, 2011).
+
+@source https://github.com/unjs/ohash
+@source https://github.com/unjs/ohash/blob/c280a0d6b4137722b63b4ed451fe82d633d5a6f4/src/crypto/js/murmur.ts
+
 ### <a id="normalizecase">`normalizeCase(string, fn)`</a>
 
 Splits a `string` by a casing pattern and join it with a custom function.
@@ -1587,8 +1595,7 @@ Truncates a `string` to a specified `length` and append a unique hash to ensure 
 If the `string` is shorter than the `length`, it will be returned as is.
 The `separator` (default: `_`) is used to separate the truncated `string` and the hash.
 
-**Note:** The hash is generated using the [`murmurHash`](https://www.npmjs.com/package/ohash) function.
-The `length` should be at least 10 characters to ensure uniqueness.
+**Note:** The `length` should be at least 10 characters to ensure uniqueness.
 
 **Example:**
 

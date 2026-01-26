@@ -13,6 +13,7 @@ export function getAppI18nFileContent() {
   debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/i18n.ts>`)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
     `import type { i18n as _i18n, LanguageCode } from '../server'`,
     `import { useLanguage } from '${resolvePruviousFile('translations/utils.client')}'`,

@@ -1,5 +1,6 @@
 import type {
   Collections,
+  CustomRoutes,
   FieldsLayout,
   GenericSerializableFieldOptions,
   httpStatusCodeMessages,
@@ -7,11 +8,10 @@ import type {
   PruviousDashboardState,
   PruviousState,
   RouteReferenceName,
-  StandardRoutes,
 } from '#pruvious/server'
 import type { TranslatableStrings } from '@pruvious/i18n'
 import { clear, isFunction } from '@pruvious/utils'
-import type { $Fetch, NitroFetchOptions } from 'nitropack/types'
+import type { NitroFetchOptions } from 'nitropack/types'
 import type { AuthState } from '../auth/utils.client'
 import { useLanguage } from '../translations/utils.client'
 
@@ -427,7 +427,7 @@ async function _pruviousFetch(
  * - `pruviousDelete()`
  */
 export async function $pfetch<
-  TRoute extends Exclude<Parameters<$Fetch>['0'], StandardRoutes>,
+  TRoute extends CustomRoutes,
   TOptions extends NitroFetchOptions<TRoute> & PruviousFetchBaseOptions,
 >(route: TRoute, options?: TOptions) {
   // Disable UI

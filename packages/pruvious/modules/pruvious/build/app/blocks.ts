@@ -16,6 +16,7 @@ export function getAppBlocksFileContent() {
   const blockEntries = Object.entries(blockFiles)
 
   return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import type { Blocks } from '../server'`,
     ``,
     `/**`,
