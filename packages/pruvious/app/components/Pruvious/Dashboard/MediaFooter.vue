@@ -232,7 +232,7 @@ import { puiHasModifierKey, puiIsEditingText, usePUIHotkeys } from '@pruvious/ui
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { puiColumn, type PUIColumns } from '@pruvious/ui/pui/table'
 import { puiToast } from '@pruvious/ui/pui/toast'
-import { deepCompare, isDefined, isObject, remap, titleCase } from '@pruvious/utils'
+import { deepCompare, isDefined, isObject, remap, sortNaturallyByProp, titleCase } from '@pruvious/utils'
 import { onKeyStroke, useEventListener } from '@vueuse/core'
 import { basename, join } from 'pathe'
 
@@ -561,8 +561,7 @@ function sortTargetDirectories(directories: { path: string }[]): TargetDirectory
 }
 
 function sortChildTargetDirectories(node: TargetDirectory) {
-  node.children.sort((a, b) => a.name.localeCompare(b.name))
-  for (const child of node.children) {
+  for (const child of sortNaturallyByProp(node.children, 'name')) {
     sortChildTargetDirectories(child)
   }
 }

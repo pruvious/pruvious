@@ -1,0 +1,37 @@
+{
+  "name": "@pruvious/local-path",
+  "description": "A Pruvious plugin that enables server-side file system browsing and selection directly within the dashboard.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/local-path"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/nuxt.config.ts",
+  "scripts": {
+    "build": "plugin build",
+    "dev": "nuxt dev src/.playground",
+    "dev:prepare": "nuxt prepare src/.playground",
+    "typecheck": "pnpm dev:prepare && nuxt typecheck src"
+  },
+  "dependencies": {
+    "pathe": "^2.0.3"
+  },
+  "devDependencies": {
+    "@pruvious/orm": "workspace:*",
+    "@pruvious/plugin": "workspace:*",
+    "@pruvious/utils": "workspace:*",
+    "nuxt": "4.2.2",
+    "pruvious": "workspace:*",
+    "typescript": "5.9.3",
+    "vue-tsc": "3.2.2",
+    "vue": "3.5.26"
+  }
+}

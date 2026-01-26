@@ -4,12 +4,13 @@
       <PUIBadge color="secondary" class="p-language-code pui-truncate">{{ language.code }}</PUIBadge>
       <span class="pui-truncate">{{ language.name }}</span>
     </div>
-    <PruviousTableFieldFallback v-else :modelValue="modelValue" />
+    <div v-else class="pui-truncate">
+      <span :title="modelValue">{{ modelValue || '-' }}</span>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { PruviousTableFieldFallback } from '#components'
 import { languages } from '#pruvious/app'
 import type { LanguageCode } from '#pruvious/server'
 

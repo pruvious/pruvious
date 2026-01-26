@@ -14,6 +14,9 @@ importers:
       '@pruvious/hub':
         specifier: workspace:*
         version: link:packages/hub
+      '@types/node':
+        specifier: 25.0.9
+        version: 25.0.9
       consola:
         specifier: 3.4.2
         version: 3.4.2
@@ -45,11 +48,42 @@ importers:
         specifier: 4.0.17
         version: 4.0.17(@types/node@25.0.9)(jiti@2.6.1)(terser@5.34.1)(yaml@2.8.2)
 
+  packages/cli-utils:
+    dependencies:
+      '@clack/prompts':
+        specifier: 1.0.0-alpha.9
+        version: 1.0.0-alpha.9
+      pathe:
+        specifier: 2.0.3
+        version: 2.0.3
+      semver:
+        specifier: 7.7.3
+        version: 7.7.3
+    devDependencies:
+      '@types/node':
+        specifier: 25.0.9
+        version: 25.0.9
+      '@types/semver':
+        specifier: 7.7.1
+        version: 7.7.1
+      citty:
+        specifier: 0.1.6
+        version: 0.1.6
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      unbuild:
+        specifier: 3.6.1
+        version: 3.6.1(typescript@5.9.3)(vue-tsc@3.2.2(typescript@5.9.3))(vue@3.5.26(typescript@5.9.3))
+
   packages/hub:
     dependencies:
       '@clack/prompts':
         specifier: 1.0.0-alpha.9
         version: 1.0.0-alpha.9
+      '@pruvious/cli-utils':
+        specifier: workspace:*
+        version: link:../cli-utils
       '@pruvious/hub-app':
         specifier: workspace:*
         version: link:../hub-app
@@ -59,9 +93,6 @@ importers:
       citty:
         specifier: 0.1.6
         version: 0.1.6
-      consola:
-        specifier: 3.4.2
-        version: 3.4.2
       execa:
         specifier: 9.6.1
         version: 9.6.1
@@ -77,19 +108,10 @@ importers:
       pathe:
         specifier: 2.0.3
         version: 2.0.3
-      semver:
-        specifier: 7.7.3
-        version: 7.7.3
     devDependencies:
-      '@types/debug':
-        specifier: 4.1.12
-        version: 4.1.12
       '@types/node':
         specifier: 25.0.9
         version: 25.0.9
-      '@types/semver':
-        specifier: 7.7.1
-        version: 7.7.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -102,6 +124,9 @@ importers:
       '@iconify-json/tabler':
         specifier: 1.2.26
         version: 1.2.26
+      '@pruvious/local-path':
+        specifier: workspace:*
+        version: link:../local-path
       nuxt:
         specifier: 4.2.2
         version: 4.2.2(@netlify/blobs@9.1.2)(@parcel/watcher@2.4.1)(@types/node@25.0.9)(@vue/compiler-sfc@3.5.26)(better-sqlite3@12.6.2)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.6.2))(ioredis@5.9.2)(magicast@0.5.1)(rollup@4.55.1)(terser@5.34.1)(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.9)(jiti@2.6.1)(terser@5.34.1)(yaml@2.8.2))(vue-tsc@3.2.2(typescript@5.9.3))(yaml@2.8.2)
@@ -115,15 +140,15 @@ importers:
         specifier: 4.6.4
         version: 4.6.4(vue@3.5.26(typescript@5.9.3))
     devDependencies:
+      '@pruvious/cli-utils':
+        specifier: workspace:*
+        version: link:../cli-utils
+      execa:
+        specifier: 9.6.1
+        version: 9.6.1
       pathe:
         specifier: 2.0.3
         version: 2.0.3
-      typescript:
-        specifier: 5.9.3
-        version: 5.9.3
-      vue-tsc:
-        specifier: 3.2.2
-        version: 3.2.2(typescript@5.9.3)
 
   packages/i18n:
     dependencies:
@@ -137,6 +162,37 @@ importers:
       unbuild:
         specifier: 3.6.1
         version: 3.6.1(typescript@5.9.3)(vue-tsc@3.2.2(typescript@5.9.3))(vue@3.5.26(typescript@5.9.3))
+
+  packages/local-path:
+    dependencies:
+      pathe:
+        specifier: ^2.0.3
+        version: 2.0.3
+    devDependencies:
+      '@pruvious/orm':
+        specifier: workspace:*
+        version: link:../orm
+      '@pruvious/plugin':
+        specifier: workspace:*
+        version: link:../plugin
+      '@pruvious/utils':
+        specifier: workspace:*
+        version: link:../utils
+      nuxt:
+        specifier: 4.2.2
+        version: 4.2.2(@netlify/blobs@9.1.2)(@parcel/watcher@2.4.1)(@types/node@25.0.9)(@vue/compiler-sfc@3.5.26)(better-sqlite3@12.6.2)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.6.2))(ioredis@5.9.2)(magicast@0.5.1)(rollup@4.55.1)(terser@5.34.1)(typescript@5.9.3)(vite@7.2.7(@types/node@25.0.9)(jiti@2.6.1)(terser@5.34.1)(yaml@2.8.2))(vue-tsc@3.2.2(typescript@5.9.3))(yaml@2.8.2)
+      pruvious:
+        specifier: workspace:*
+        version: link:../pruvious
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vue:
+        specifier: 3.5.26
+        version: 3.5.26(typescript@5.9.3)
+      vue-tsc:
+        specifier: 3.2.2
+        version: 3.2.2(typescript@5.9.3)
 
   packages/orm:
     dependencies:
@@ -177,6 +233,40 @@ importers:
       pg:
         specifier: 8.17.1
         version: 8.17.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      unbuild:
+        specifier: 3.6.1
+        version: 3.6.1(typescript@5.9.3)(vue-tsc@3.2.2(typescript@5.9.3))(vue@3.5.26(typescript@5.9.3))
+
+  packages/plugin:
+    dependencies:
+      '@clack/prompts':
+        specifier: 1.0.0-alpha.9
+        version: 1.0.0-alpha.9
+      '@pruvious/cli-utils':
+        specifier: workspace:*
+        version: link:../cli-utils
+      '@pruvious/utils':
+        specifier: workspace:*
+        version: link:../utils
+      citty:
+        specifier: 0.1.6
+        version: 0.1.6
+      ignore:
+        specifier: 7.0.5
+        version: 7.0.5
+      pathe:
+        specifier: 2.0.3
+        version: 2.0.3
+      pretty-ms:
+        specifier: 9.3.0
+        version: 9.3.0
+    devDependencies:
+      '@types/node':
+        specifier: 25.0.9
+        version: 25.0.9
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -2719,9 +2809,6 @@ packages:
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
 
-  '@types/debug@4.1.12':
-    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
-
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
@@ -2733,9 +2820,6 @@ packages:
 
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
-
-  '@types/ms@2.1.0':
-    resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
   '@types/node@25.0.9':
     resolution: {integrity: sha512-/rpCXHlCWeqClNBwUhDcusJxXYDjZTyE8v5oTO7WbL8eij2nKhUeU89/6xgjU7N4/Vh3He0BtyhJdQbDyhiXAw==}
@@ -4830,6 +4914,10 @@ packages:
 
   pretty-ms@9.2.0:
     resolution: {integrity: sha512-4yf0QO/sllf/1zbZWYnvWw3NxCQwLXKzIj0G849LSufP15BXKM0rbD2Z3wVnkMfjdn/CB0Dpp444gYAACdsplg==}
+    engines: {node: '>=18'}
+
+  pretty-ms@9.3.0:
+    resolution: {integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==}
     engines: {node: '>=18'}
 
   process-nextick-args@2.0.1:
@@ -8520,10 +8608,6 @@ snapshots:
     dependencies:
       '@types/deep-eql': 4.0.2
 
-  '@types/debug@4.1.12':
-    dependencies:
-      '@types/ms': 2.1.0
-
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.8': {}
@@ -8535,8 +8619,6 @@ snapshots:
   '@types/mdast@4.0.4':
     dependencies:
       '@types/unist': 3.0.3
-
-  '@types/ms@2.1.0': {}
 
   '@types/node@25.0.9':
     dependencies:
@@ -10982,6 +11064,10 @@ snapshots:
   pretty-bytes@7.1.0: {}
 
   pretty-ms@9.2.0:
+    dependencies:
+      parse-ms: 4.0.0
+
+  pretty-ms@9.3.0:
     dependencies:
       parse-ms: 4.0.0
 
