@@ -14,6 +14,14 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/nuxt.config.ts"
+    },
+    "./kit": {
+      "import": "./dist/modules/pruvious/build/kit.ts"
+    }
+  },
   "main": "./dist/nuxt.config.ts",
   "scripts": {
     "build": "node scripts/build.mjs",

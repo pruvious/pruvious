@@ -4,6 +4,12 @@ import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { basename, extname, join, resolve } from 'pathe'
 
+export interface SimpleValidatorMeta {
+  name: string
+  comment: string[]
+  exampleField: string
+}
+
 /**
  * Resolves a file path relative to the Pruvious module directory (`packages/pruvious/modules/pruvious/`).
  */
@@ -24,7 +30,7 @@ export function resolvePruviousUtilsFile(path: string) {
  * Retrieves metadata for all basic validation rules.
  * Also includes a field type suggestion for documentation purposes.
  */
-export function getSimpleValidatorsMeta() {
+export function getSimpleValidatorsMeta(): SimpleValidatorMeta[] {
   return validatorsMeta
     .filter(({ name }) => !['unique'].includes(name))
     .map(({ name, comment }) => ({

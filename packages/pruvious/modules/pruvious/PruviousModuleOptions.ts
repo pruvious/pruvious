@@ -1141,6 +1141,15 @@ export interface PruviousModuleOptions {
     build?: string
 
     /**
+     * Directory path where autoloaded module files are stored.
+     * These files are automatically imported during the Pruvious module build process.
+     * This path is relative to the project's `<serverDir>` directory.
+     *
+     * @default 'build'
+     */
+    buildAutoload?: string
+
+    /**
      * Directory path where Pruvious collections are stored.
      * This path is relative to the project's `<serverDir>` directory.
      *

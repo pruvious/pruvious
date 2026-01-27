@@ -10,12 +10,31 @@ import { resolveJobFiles } from '../../queue/resolver'
 import { resolveSingletonFiles } from '../../singletons/resolver'
 import { resolveTemplateFiles } from '../../templates/resolver'
 import { resolveTranslationFiles } from '../../translations/resolver'
-import { getIconNames, getSimpleValidatorsMeta, resolvePruviousFile } from '../utils'
+import type { ResolveFromLayersResult } from '../../utils/resolve'
+import { applyBuildFilters, doBuildActions } from '../kit'
+import { getIconNames, getSimpleValidatorsMeta, resolvePruviousFile, type SimpleValidatorMeta } from '../utils'
+
+export interface ServerFileContext {
+  templateFiles: Record<string, ResolveFromLayersResult>
+  templateEntries: [string, ResolveFromLayersResult][]
+  collectionFiles: Record<string, ResolveFromLayersResult>
+  collectionEntries: [string, ResolveFromLayersResult][]
+  singletonFiles: Record<string, ResolveFromLayersResult>
+  singletonEntries: [string, ResolveFromLayersResult][]
+  jobFiles: Record<string, ResolveFromLayersResult>
+  jobEntries: [string, ResolveFromLayersResult][]
+  translationFiles: Record<string, Record<string, string[]>>
+  dashboardLanguages: { code: string; name: string }[]
+  simpleValidatorsMeta: SimpleValidatorMeta[]
+  iconNames: string[]
+  permissions: string[]
+  standardRoutes: string[]
+}
 
 /**
  * Generates the `#pruvious/server` file content.
  */
-export function getServerFileContent() {
+export async function getServerFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
 
@@ -36,93 +55,118 @@ export function getServerFileContent() {
   }))
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
   const iconNames = getIconNames()
-  const permissions = [
-    'access-dashboard',
-    'update-own-account',
-    'read-logs',
-    'delete-logs',
-    'clear-page-cache',
-    'logout-other-users',
-    ...collectionEntries
-      .map(([name]) => kebabCase(name))
-      .flatMap((name) =>
-        ['create', 'read', 'update', 'delete', 'manage'].map((action) => `collection:${name}:${action}`),
-      ),
-    'collection:routes:create',
-    'collection:routes:read',
-    'collection:routes:update',
-    'collection:routes:delete',
-    'collection:routes:manage',
-    ...singletonEntries
-      .map(([name]) => kebabCase(name))
-      .flatMap((name) => ['read', 'update'].map((action) => `singleton:${name}:${action}`)),
-  ]
-  const standardRoutes = [
-    'auth/login',
-    'auth/logout',
-    'auth/logout/others',
-    'auth/permissions',
-    'auth/renew-token',
-    'auth/state',
-    'collections/:collection',
-    'collections/:collection/:id',
-    'collections/:collection/:id/copy-translation',
-    'collections/:collection/:id/duplicate',
-    'collections/:collection/query/create',
-    'collections/:collection/query/read',
-    'collections/:collection/query/update',
-    'collections/:collection/query/delete',
-    'collections/:collection/validate/create',
-    'collections/:collection/validate/update',
-    'collections/:collection/validate/update/:id',
-    'logs/custom',
-    'logs/custom/:id',
-    'logs/custom/query/delete',
-    'logs/custom/query/read',
-    'logs/errors',
-    'logs/errors/:id',
-    'logs/errors/query/delete',
-    'logs/errors/query/read',
-    'logs/queries',
-    'logs/queries/:id',
-    'logs/queries/query/delete',
-    'logs/queries/query/read',
-    'logs/queue',
-    'logs/queue/:id',
-    'logs/queue/query/delete',
-    'logs/queue/query/read',
-    'logs/requests',
-    'logs/requests/:id',
-    'logs/requests/query/delete',
-    'logs/requests/query/read',
-    'logs/responses',
-    'logs/responses/:id',
-    'logs/responses/query/delete',
-    'logs/responses/query/read',
-    'me',
-    'me/structure',
-    'populate-route-data',
-    'process-queue',
-    'pruvious',
-    'pruvious/dashboard',
-    'pruvious/install',
-    'routes',
-    'routes/**',
-    'singletons/:singleton',
-    'singletons/:singleton/copy-translation',
-    'singletons/:singleton/validate',
-    'translations',
-    'uploads',
-    'uploads/:id',
-    'uploads/move/:id',
-    'uploads/move/path/**',
-    'uploads/multipart',
-    'uploads/multipart/:key',
-    'uploads/optimize-image/**',
-    'uploads/path/**',
-  ]
+  const permissions = await applyBuildFilters(
+    'permissions',
+    [
+      'access-dashboard',
+      'update-own-account',
+      'read-logs',
+      'delete-logs',
+      'clear-page-cache',
+      'logout-other-users',
+      ...collectionEntries
+        .map(([name]) => kebabCase(name))
+        .flatMap((name) =>
+          ['create', 'read', 'update', 'delete', 'manage'].map((action) => `collection:${name}:${action}`),
+        ),
+      'collection:routes:create',
+      'collection:routes:read',
+      'collection:routes:update',
+      'collection:routes:delete',
+      'collection:routes:manage',
+      ...singletonEntries
+        .map(([name]) => kebabCase(name))
+        .flatMap((name) => ['read', 'update'].map((action) => `singleton:${name}:${action}`)),
+    ],
+    {},
+  )
+  const standardRoutes = await applyBuildFilters(
+    'standardRoutes',
+    [
+      'auth/login',
+      'auth/logout',
+      'auth/logout/others',
+      'auth/permissions',
+      'auth/renew-token',
+      'auth/state',
+      'collections/:collection',
+      'collections/:collection/:id',
+      'collections/:collection/:id/copy-translation',
+      'collections/:collection/:id/duplicate',
+      'collections/:collection/query/create',
+      'collections/:collection/query/read',
+      'collections/:collection/query/update',
+      'collections/:collection/query/delete',
+      'collections/:collection/validate/create',
+      'collections/:collection/validate/update',
+      'collections/:collection/validate/update/:id',
+      'logs/custom',
+      'logs/custom/:id',
+      'logs/custom/query/delete',
+      'logs/custom/query/read',
+      'logs/errors',
+      'logs/errors/:id',
+      'logs/errors/query/delete',
+      'logs/errors/query/read',
+      'logs/queries',
+      'logs/queries/:id',
+      'logs/queries/query/delete',
+      'logs/queries/query/read',
+      'logs/queue',
+      'logs/queue/:id',
+      'logs/queue/query/delete',
+      'logs/queue/query/read',
+      'logs/requests',
+      'logs/requests/:id',
+      'logs/requests/query/delete',
+      'logs/requests/query/read',
+      'logs/responses',
+      'logs/responses/:id',
+      'logs/responses/query/delete',
+      'logs/responses/query/read',
+      'me',
+      'me/structure',
+      'populate-route-data',
+      'process-queue',
+      'pruvious',
+      'pruvious/dashboard',
+      'pruvious/install',
+      'routes',
+      'routes/**',
+      'singletons/:singleton',
+      'singletons/:singleton/copy-translation',
+      'singletons/:singleton/validate',
+      'translations',
+      'uploads',
+      'uploads/:id',
+      'uploads/move/:id',
+      'uploads/move/path/**',
+      'uploads/multipart',
+      'uploads/multipart/:key',
+      'uploads/optimize-image/**',
+      'uploads/path/**',
+    ],
+    {},
+  )
 
-  return [
+  const context: ServerFileContext = {
+    templateFiles,
+    templateEntries,
+    collectionFiles,
+    collectionEntries,
+    singletonFiles,
+    singletonEntries,
+    jobFiles,
+    jobEntries,
+    translationFiles,
+    dashboardLanguages,
+    simpleValidatorsMeta,
+    iconNames,
+    permissions,
+    standardRoutes,
+  }
+
+  const content = [
     ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
     `import { capitalize, isEmpty, isObject, pick, remap, retry } from '@pruvious/utils'`,
@@ -1713,7 +1757,11 @@ export function getServerFileContent() {
     `}`,
     ``,
     getReExports(),
-  ].join('\n')
+  ]
+
+  await doBuildActions('#pruvious/server:before-generate-content', { ...context, content })
+
+  return applyBuildFilters('#pruvious/server', content, context).then((content) => content.join('\n'))
 }
 
 /**

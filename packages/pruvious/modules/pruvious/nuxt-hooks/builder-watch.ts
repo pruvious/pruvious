@@ -37,6 +37,7 @@ type PruviousFileType =
   | 'template-definition'
   | 'translation-definition'
   | 'server-handler'
+  | 'build-autoload'
   | 'client-hook'
   | 'server-hook'
   | 'client-action'
@@ -65,6 +66,7 @@ export async function watchPruviousServerFiles() {
         layer.config.pruvious?.dir?.templates ?? 'templates',
         layer.config.pruvious?.dir?.translations ?? 'translations',
         layer.config.pruvious?.dir?.api ?? 'pruvious-api',
+        layer.config.pruvious?.dir?.buildAutoload ?? 'build',
         layer.config.pruvious?.dir?.hooks?.server ?? 'hooks',
         layer.config.pruvious?.dir?.actions?.server ?? 'actions',
         layer.config.pruvious?.dir?.filters?.server ?? 'filters',
@@ -128,7 +130,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetCollectionsResolver()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -145,7 +147,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetSingletonsResolver()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -160,7 +162,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetBlocksResolver()
       resetSingletonsResolver()
       generateAppFiles()
-      generateServerFiles()
+      await generateServerFiles()
       resolveBlockFiles()
       reloadOnNitroCompiled(event, path)
     } else {
@@ -187,7 +189,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetSingletonsResolver()
       resetBlocksResolver()
       generateDashboardFiles()
-      generateServerFiles()
+      await generateServerFiles()
       resolveBlockFiles()
     }
 
@@ -204,7 +206,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetSingletonsResolver()
       resetBlocksResolver()
       generateDashboardFiles()
-      generateServerFiles()
+      await generateServerFiles()
       resolveBlockFiles()
       reloadOnNitroCompiled(event, path)
     }
@@ -214,7 +216,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
 
   if (type === 'job-definition') {
     resetJobsResolver()
-    generateServerFiles()
+    await generateServerFiles()
     return
   }
 
@@ -230,7 +232,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       resetTemplatesResolver()
       resetCollectionsResolver()
       resetSingletonsResolver()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -242,7 +244,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       remove(path, skipped)
       resetTranslationsResolver()
       generateDashboardFiles()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -253,10 +255,15 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       resetServerHandlersResolver()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
+    return
+  }
+
+  if (type === 'build-autoload') {
+    restart(true)
     return
   }
 
@@ -270,7 +277,7 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
     if (event === 'add' || event === 'unlink' || skipped.includes(path)) {
       remove(path, skipped)
       clearCachedServerHooks()
-      generateServerFiles()
+      await generateServerFiles()
     }
 
     reloadOnNitroCompiled(event, path)
@@ -378,6 +385,14 @@ function resolvePruviousFile(
       return { type: 'server-handler', layer }
     }
 
+    // Autoloaded build files
+    if (
+      layer.config.serverDir &&
+      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.buildAutoload ?? 'build') + '/')
+    ) {
+      return { type: 'build-autoload', layer }
+    }
+
     // Client hooks
     if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.hooks?.client ?? 'hooks') + '/')) {
       return { type: 'client-hook', layer }
@@ -440,8 +455,13 @@ function reload(event: WatchEvent, path: string) {
     servers.forEach(({ hot }) => hot.send('pruvious:reload'))
   } else {
     debug(`Restarting development server due to <${event}> event in <${relative(nuxt.options.workspaceDir, path)}>`)
-    nuxt.callHook('restart')
+    restart()
   }
+}
+
+function restart(hard = false) {
+  const nuxt = useNuxt()
+  nuxt.callHook('restart', { hard })
 }
 
 function reloadOnNitroCompiled(event: WatchEvent, path: string) {

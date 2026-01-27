@@ -16,7 +16,9 @@ import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/a
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
 import { resetBlocksResolver } from './pruvious/blocks/resolver'
 import { generateAppFiles } from './pruvious/build/app'
+import { autoloadBuildFiles } from './pruvious/build/autoload'
 import { generateDashboardFiles } from './pruvious/build/dashboard'
+import { doBuildActions } from './pruvious/build/kit'
 import { generateServerFiles } from './pruvious/build/server'
 import { resetCollectionsResolver } from './pruvious/collections/resolver'
 import { resolveCustomComponents } from './pruvious/components/resolver'
@@ -110,6 +112,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
     dir: {
       actions: { client: 'actions', server: 'actions' },
       api: 'pruvious-api',
+      blocks: 'blocks',
+      buildAutoload: 'build',
       build: '.pruvious',
       collections: 'collections',
       fields: { components: 'fields', definitions: 'fields' },
@@ -216,6 +220,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
         api: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.api!)),
         blocks: withoutTrailingSlash(join(nuxt.options.srcDir, resolvedOptions.dir.blocks!)),
         build: withoutTrailingSlash(buildDir),
+        buildAutoload: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.buildAutoload!)),
         collections: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.collections!)),
         fields: {
           components: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.fields!.components!)),
@@ -248,6 +253,9 @@ export default defineNuxtModule<PruviousModuleOptions>({
       uploadsBasePath: nuxt.options.runtimeConfig.pruvious.uploads.basePath,
     }
 
+    // Autoload build files
+    await autoloadBuildFiles()
+
     // Set `#pruvious/*` aliases
     nuxt.options.alias['#pruvious/app'] = `${buildDir}/app`
     nuxt.options.alias['#pruvious/dashboard'] = `${buildDir}/dashboard`
@@ -277,7 +285,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     // Generate `#pruvious/*` files
     generateAppFiles()
     generateDashboardFiles()
-    generateServerFiles()
+    await generateServerFiles()
 
     // Optimize TypeScript configs for `#pruvious/*` imports
     nuxt.hook('prepare:types', optimizeTsConfig)
@@ -337,5 +345,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
         throw new Error('Pruvious build failed. Check the logs above for more information.')
       }
     }
+
+    await doBuildActions('module:ready', {})
   },
 })

@@ -13,7 +13,7 @@ import {
 /**
  * Generates the `#pruvious/server` files.
  */
-export function generateServerFiles() {
+export async function generateServerFiles() {
   const nuxt = useNuxt()
   const buildDir = nuxt.options.runtimeConfig.pruvious.dir.build
 
@@ -30,7 +30,7 @@ export function generateServerFiles() {
 
   fs.writeFileSync(`${buildDir}/server/hooks.ts`, getServerHooksFileContent() + '\n')
 
-  fs.writeFileSync(`${buildDir}/server/index.ts`, getServerFileContent() + '\n')
+  fs.writeFileSync(`${buildDir}/server/index.ts`, (await getServerFileContent()) + '\n')
   fs.writeFileSync(`${buildDir}/server/index.d.ts`, getServerTypeFileContent() + '\n')
 
   fs.appendFileSync(`${buildDir}/server/index.ts`, getServerFileContentPatch() + '\n')
