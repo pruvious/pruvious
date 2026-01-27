@@ -1,14 +1,14 @@
 <template>
   <PruviousDashboardPage>
     <input v-model="dir" placeholder="Enter directory to scan" type="text" />
-    <pre v-if="status === 'success'">{{ data }}</pre>
-    <pre v-else-if="status === 'error'">{{ (error?.data as PruviousFetchError).message }}</pre>
+    <pre>{{ data }}</pre>
   </PruviousDashboardPage>
 </template>
 
 <script lang="ts" setup>
 import { $pfetch, __, type PruviousFetchError } from '#pruvious/app'
 import { dashboardBasePath, dashboardMiddleware } from '#pruvious/dashboard'
+import { computedAsync } from '@vueuse/core'
 
 definePageMeta({
   path: dashboardBasePath + 'overview',
@@ -20,10 +20,8 @@ useHead({
 })
 
 const dir = ref('')
-const { data, error, status } = await useAsyncData(
-  'test',
-  () => $pfetch('/api/local-path', { query: { dir: dir.value } }),
-  { watch: [dir] },
+const data = computedAsync(() =>
+  $pfetch('/api/local-path', { query: { dir: dir.value } }).catch((error: PruviousFetchError) => error.message),
 )
 </script>
 

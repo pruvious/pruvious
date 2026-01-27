@@ -22,6 +22,7 @@
     "typecheck": "pnpm dev:prepare && nuxt typecheck src"
   },
   "dependencies": {
+    "@vueuse/core": "^14.1.0",
     "pathe": "^2.0.3"
   },
   "devDependencies": {

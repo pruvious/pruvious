@@ -60,7 +60,7 @@
         </div>
       </template>
 
-      <div v-if="!error">
+      <div v-if="response?.success">
         <div :title="resolvedDir" class="p-local-path-selector-current-dir">
           <span class="pui-truncate">
             {{ parentDir }}
@@ -89,7 +89,7 @@
             <span>..</span>
           </PUIButton>
 
-          <div v-for="file in data" class="p-local-path-selector-group">
+          <div v-for="file in response.data" class="p-local-path-selector-group">
             <PUIButton
               v-if="file.type === 'directory' || selectionType !== 'directory'"
               :tabindex="file.type === 'file' ? -1 : 0"
@@ -126,8 +126,8 @@
         </div>
       </div>
 
-      <p v-else class="pui-muted">
-        {{ (error.data as PruviousFetchError)?.message || error }}
+      <p v-else-if="response" class="pui-muted">
+        {{ response.error }}
       </p>
 
       <template #footer>
@@ -143,8 +143,9 @@
 
 <script lang="ts" setup>
 import { $pfetch, __, type PruviousFetchError } from '#pruvious/app'
-import { collator } from '@pruvious/utils'
+import { collator, isString } from '@pruvious/utils'
 import { basename, dirname } from 'pathe'
+import type { LocalPathFile } from '../../../../modules/pruvious-local-path/types'
 
 const props = defineProps({
   /**
@@ -212,11 +213,10 @@ const emit = defineEmits<{
 
 const finderPopup = useTemplateRef('finderPopup')
 const isFinderPopupVisible = ref(false)
-const id = useId()
 const dir = ref(props.initialDirectory)
 const resolvedDir = computed(() => {
-  if (data.value?.length) {
-    const parent = dirname(data.value[0]!.path)
+  if (response.value?.success && response.value.data.length) {
+    const parent = dirname(response.value.data[0]!.path)
     return parent === '.' ? '/' : parent
   }
   return dir.value
@@ -231,19 +231,7 @@ const parentDir = computed(() => {
   return null
 })
 const dirName = computed(() => (resolvedDir.value ? basename(resolvedDir.value) : ''))
-const { data, error, refresh } = await useAsyncData(
-  id,
-  () =>
-    $pfetch('/api/local-path', { query: { dir: dir.value } }).then((files) =>
-      files.sort((a, b) => {
-        if (a.type === b.type) {
-          return collator.compare(a.name, b.name)
-        }
-        return a.type === 'directory' ? -1 : 1
-      }),
-    ),
-  { immediate: false, watch: [dir] },
-)
+const response = ref<{ success: true; data: LocalPathFile[] } | { success: false; error: string }>()
 const resolvedSelectLabel = computed(() => {
   if (props.selectLabel) {
     return props.selectLabel
@@ -266,8 +254,25 @@ watch(
   { immediate: true },
 )
 
+watch(dir, refreshData)
+
+async function refreshData() {
+  const _response = await $pfetch('/api/local-path', { query: { dir: dir.value } })
+    .then((files) =>
+      files.sort((a, b) => {
+        if (a.type === b.type) {
+          return collator.compare(a.name, b.name)
+        }
+        return a.type === 'directory' ? -1 : 1
+      }),
+    )
+    .catch((error: PruviousFetchError) => error.message)
+
+  response.value = isString(_response) ? { success: false, error: _response } : { success: true, data: _response }
+}
+
 async function openFinderPopup() {
-  await refresh()
+  await refreshData()
   isFinderPopupVisible.value = true
 }
 

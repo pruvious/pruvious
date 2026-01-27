@@ -128,18 +128,16 @@ You can query the directory listing endpoint directly if you need to build custo
 ```vue
 <template>
   <input v-model="dir" placeholder="Enter directory to scan" type="text" />
-  <pre v-if="status === 'success'">{{ data }}</pre>
-  <pre v-else-if="status === 'error'">{{ (error?.data as PruviousFetchError).message }}</pre>
+  <pre>{{ data }}</pre>
 </template>
 
 <script setup lang="ts">
 import { $pfetch, type PruviousFetchError } from '#pruvious/app'
+import { computedAsync } from '@vueuse/core'
 
 const dir = ref('')
-const { data, error, status } = await useAsyncData(
-  'test',
-  () => $pfetch('/api/local-path', { query: { dir: dir.value } }),
-  { watch: [dir] },
+const data = computedAsync(() =>
+  $pfetch('/api/local-path', { query: { dir: dir.value } }).catch((error: PruviousFetchError) => error.message),
 )
 </script>
 ```
