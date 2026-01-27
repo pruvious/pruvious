@@ -88,7 +88,7 @@
             @close="isSingletonMenuVisible = false"
           >
             <PUIDropdownItem
-              v-if="singleton.definition.translatable"
+              v-if="singleton.definition.translatable && languages.length > 1"
               :title="__('pruvious-dashboard', 'Translate')"
               @click="isTranslationPopupVisible = true"
             >
@@ -125,7 +125,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
+import { __, applyFilters, hasPermission, languages, loadFilters } from '#pruvious/app'
 import {
   dashboardBasePath,
   dashboardMiddleware,

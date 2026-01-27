@@ -111,7 +111,7 @@
             <hr />
 
             <PUIDropdownItem
-              v-if="collection.definition.translatable"
+              v-if="collection.definition.translatable && languages.length > 1"
               :title="__('pruvious-dashboard', 'Translate')"
               @click="isTranslationPopupVisible = true"
             >
@@ -153,7 +153,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, applyFilters, hasPermission, isValidLanguageCode, loadFilters, useAuth } from '#pruvious/app'
+import { __, applyFilters, hasPermission, isValidLanguageCode, languages, loadFilters, useAuth } from '#pruvious/app'
 import {
   dashboardBasePath,
   dashboardMiddleware,
