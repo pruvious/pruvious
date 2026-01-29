@@ -1259,6 +1259,21 @@ export interface PruviousModuleOptions {
      */
     templates?: string
   }
+
+  /**
+   * A string prefix prepended to block components during global auto-registration.
+   *
+   * Use this to avoid namespace collisions between your block components and standard components.
+   *
+   * @example
+   * ```markdown
+   * - Default: `blocks/Hero.vue` -> `<Hero />`
+   * - With prefix "My": `blocks/Hero.vue` -> `<MyHero />`
+   * ```
+   *
+   * @default ''
+   */
+  blocksPrefix?: string
 }
 
 export type ServerTokenSource =
@@ -1442,7 +1457,7 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     pruvious: Pick<
       DeepRequired<PruviousModuleOptions>,
-      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'routing' | 'dashboard' | 'dir'
+      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'routing' | 'dashboard' | 'dir' | 'blocksPrefix'
     > & {
       auth: Pick<DeepRequired<PruviousModuleOptions['auth']>, 'jwt' | 'hash'> & {
         tokenResolution: DeepRequired<ServerTokenSource>[]

@@ -3,6 +3,7 @@ import {
   generateSecureRandomString,
   isString,
   omit,
+  pascalCase,
   remap,
   withLeadingSlash,
   withoutTrailingSlash,
@@ -124,6 +125,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       templates: 'templates',
       translations: 'translations',
     },
+    blocksPrefix: '',
   },
   setup: async (resolvedOptions, nuxt) => {
     const start = performance.now()
@@ -239,6 +241,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
         translations: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.translations!)),
         templates: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.templates!)),
       },
+      blocksPrefix: pascalCase(resolvedOptions.blocksPrefix!),
     }
 
     nuxt.options.runtimeConfig.public.pruvious = {
@@ -305,7 +308,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       for (const [i, layer] of [...nuxt.options._layers].reverse().entries()) {
         const path = withoutTrailingSlash(join(layer.config.srcDir, layer.config.pruvious?.dir?.blocks ?? 'blocks'))
         if (fs.existsSync(path) && !dirs.some((dir) => (isString(dir) ? dir === path : dir.path === path))) {
-          dirs.push({ path, priority: 100 + i })
+          dirs.push({ path, prefix: layer.config.pruvious?.blocksPrefix, priority: 100 + i })
         }
       }
     })
