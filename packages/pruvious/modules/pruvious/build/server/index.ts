@@ -1871,7 +1871,7 @@ function getReExports() {
     `export { type CustomLogOptions, type ErrorLogOptions, customLog, logError } from '${resolvePruviousFile('debug/utils.server')}'`,
 
     // Fields
-    `export { type Fields, type FieldOptions${fieldDefinitionEntries.map(([name]) => `, ${camelCase(name)}Field`).join('')} } from './fields'`,
+    `export { type Fields, type FieldType, type FieldOptions${fieldDefinitionEntries.map(([name]) => `, ${camelCase(name)}Field`).join('')} } from './fields'`,
     `export { defineField, type DefineFieldOptions, type PickFieldUIOptions, type FieldUIOptions, type GenericFieldUIOptions, type ResolveFieldUIOptions, type CombinedFieldOptions, type FieldGuard } from '${resolvePruviousFile('fields/define')}'`,
     `export { transformFieldGuardsToValidators } from '${resolvePruviousFile('fields/guards')}'`,
     `export { type LanguageFieldPresetOptions, type TranslationsFieldPresetOptions, type CreatedAtFieldPresetOptions, type UpdatedAtFieldPresetOptions, type AuthorFieldPresetOptions, type EditorsFieldPresetOptions, type SubpathFieldPresetOptions, type IsPublicFieldPresetOptions, type ScheduledAtFieldPresetOptions, type SEOFieldPresetOptions, languageFieldPreset, translationsFieldPreset, createdAtFieldPreset, updatedAtFieldPreset, authorFieldPreset, editorsFieldPreset, subpathFieldPreset, isPublicFieldPreset, scheduledAtFieldPreset, seoFieldPreset } from '${resolvePruviousFile('fields/presets')}'`,

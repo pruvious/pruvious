@@ -23,7 +23,7 @@
 import { customComponents, tableFieldComponents, type CollectionRecordPermissionsResolver } from '#pruvious/dashboard'
 import type {
   Collections,
-  Fields,
+  FieldType,
   GenericFieldUIOptions,
   GenericSerializableFieldOptions,
   SerializableCollection,
@@ -62,7 +62,7 @@ const props = defineProps({
    * The field type (e.g. `text`, `image`, `repeater`, etc.).
    */
   type: {
-    type: String as PropType<keyof Fields>,
+    type: String as PropType<FieldType>,
     required: true,
   },
 

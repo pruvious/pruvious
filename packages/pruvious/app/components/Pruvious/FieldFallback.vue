@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Fields } from '#pruvious/server'
+import type { FieldType } from '#pruvious/server'
 import { pascalCase } from '@pruvious/utils'
 
 defineProps({
@@ -29,7 +29,7 @@ defineProps({
    * The field type (e.g. `text`, `image`, `repeater`, etc.).
    */
   type: {
-    type: String as PropType<keyof Fields>,
+    type: String as PropType<FieldType>,
     required: true,
   },
 })

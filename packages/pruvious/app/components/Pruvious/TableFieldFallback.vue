@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Collections, Fields, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
+import type { Collections, FieldType, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isString } from '@pruvious/utils'
 
@@ -53,7 +53,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<keyof Fields>>,
+    type: Object as PropType<SerializableFieldOptions<FieldType>>,
     required: true,
   },
 

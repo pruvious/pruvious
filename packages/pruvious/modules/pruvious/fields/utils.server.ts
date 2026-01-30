@@ -1,4 +1,4 @@
-import type { BlockName, Fields, GenericDatabase } from '#pruvious/server'
+import type { BlockName, Fields, FieldType, GenericDatabase } from '#pruvious/server'
 import { blocks } from '#pruvious/server/blocks'
 import {
   type ConditionalLogic,
@@ -28,7 +28,7 @@ type BaseSerializableFieldOptions = Required<
     /**
      * The registered field type.
      */
-    _fieldType: keyof Fields
+    _fieldType: FieldType
 
     /**
      * The primitive data type of the field.
@@ -51,7 +51,7 @@ type BaseSerializableFieldOptions = Required<
     _hasPopulator: boolean
   }
 
-export type SerializableFieldOptions<TField extends keyof Fields> = Readonly<
+export type SerializableFieldOptions<TField extends FieldType> = Readonly<
   BaseSerializableFieldOptions &
     Omit<Fields[TField]['options'], 'populator' | 'structure' | 'subfields'> &
     (Fields[TField]['options'] extends { structure: any }
