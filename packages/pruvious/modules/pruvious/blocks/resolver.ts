@@ -180,7 +180,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
     if (defineBlockNode.arguments.length === 1) {
       const arg = defineBlockNode.arguments[0] as ObjectExpression
 
-      // Add fields property if it doesn't exist
+      // Add `fields` property if it doesn't exist
       if (
         !arg.properties.some(
           (prop) => prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === 'fields',
@@ -189,7 +189,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
         arg.properties.push(objectProperty(identifier('fields'), objectExpression([])))
       }
 
-      // Merge defineProps properties into defineBlock fields
+      // Merge `defineProps` fields into `defineBlock` fields
       if (definePropsNode) {
         const fieldsProperty = arg.properties.find(
           (prop) => prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === 'fields',
@@ -198,7 +198,9 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
 
         if (definePropsNode.arguments[0]?.type === 'ObjectExpression') {
           for (const prop of definePropsNode.arguments[0].properties) {
-            fieldsValue.properties.push(prop)
+            if (prop.type === 'ObjectProperty' && prop.value.type === 'CallExpression') {
+              fieldsValue.properties.push(prop)
+            }
           }
         }
       }
@@ -220,7 +222,7 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
       locationProperty.leadingComments = [{ type: 'CommentLine', value: ' @ts-expect-error' }]
       arg.properties.push(locationProperty)
 
-      // Export default defineBlock
+      // Export default `defineBlock`
       ast.program.body.push(exportDefaultDeclaration(defineBlockNode))
     }
 
