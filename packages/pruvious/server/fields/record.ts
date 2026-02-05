@@ -17,7 +17,7 @@ import {
   type ForeignKey,
   type GenericField,
 } from '@pruvious/orm'
-import { isNull, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
+import { isNull, isNumber, type DefaultFalse, type NonEmptyArray, type StringKeys } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
 export interface CustomRecordFieldOptions<
@@ -223,7 +223,7 @@ export default {
         },
       ],
       populator: async (value, contextField) => {
-        if (isNull(value)) {
+        if (!isNumber(value)) {
           return null
         }
 

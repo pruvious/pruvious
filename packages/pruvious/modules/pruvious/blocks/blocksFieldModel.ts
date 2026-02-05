@@ -670,7 +670,7 @@ export function blockFieldModel(): FieldModel<
         return contextField.definition.options.populator(value, contextField)
       }
 
-      if (!isNull(value)) {
+      if (isArray<Record<string, any>>(value)) {
         // Run the `populator` of all fields
         const { blocks } = await import('#pruvious/server/blocks')
         const structure: { [blockName: string]: Record<string, GenericField> } = remap(blocks, (blockName, block) => [

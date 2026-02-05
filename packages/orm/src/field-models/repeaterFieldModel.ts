@@ -509,7 +509,7 @@ export function repeaterFieldModel<
         return contextField.definition.options.populator(value, contextField)
       }
 
-      if (!isNull(value)) {
+      if (isArray<Record<string, any>>(value)) {
         // Run the `populator` of all subfields
         const promises: Promise<any>[] = []
 

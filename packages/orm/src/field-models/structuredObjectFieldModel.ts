@@ -373,7 +373,7 @@ export function structuredObjectFieldModel<
         return contextField.definition.options.populator(value, contextField as any)
       }
 
-      if (isNotNull(value)) {
+      if (isObject<Record<string, any>>(value)) {
         // Run the `populator` of all subfields
         const promises: Promise<any>[] = []
 
