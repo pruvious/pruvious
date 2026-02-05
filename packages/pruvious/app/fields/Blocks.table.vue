@@ -24,8 +24,12 @@
               dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration?.fieldValue &&
               item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string] !== ''
                 ? dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false
-                  ? `(${item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]})`
-                  : item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]
+                  ? `(${dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.stripHTML ? sanitizedLabels[item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]] : item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]})`
+                  : dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.stripHTML
+                    ? sanitizedLabels[
+                        item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]
+                      ]
+                    : item[dashboard!.blocks[item.$key]!.ui.itemLabelConfiguration!.fieldValue as string]
                 : ''
             }}
           </span>
@@ -52,7 +56,7 @@
 
 <script lang="ts" setup>
 import { __ } from '#pruvious/app'
-import { maybeTranslate, usePruviousDashboard } from '#pruvious/dashboard'
+import { maybeTranslate, usePruviousDashboard, useSanitizedFieldValueLabels } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isDefined, isString, sortNaturallyByProp, titleCase } from '@pruvious/utils'
@@ -123,6 +127,7 @@ const props = defineProps({
 
 const route = useRoute()
 const dashboard = usePruviousDashboard()
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const blockLabels = computed(() =>
   Object.fromEntries(
     sortNaturallyByProp(

@@ -23,8 +23,10 @@
               options.ui.itemLabelConfiguration?.[item.$key]?.subfieldValue &&
               item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string] !== ''
                 ? options.ui.itemLabelConfiguration?.[item.$key]?.showItemType !== false
-                  ? `(${item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]})`
-                  : item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]
+                  ? `(${options.ui.itemLabelConfiguration[item.$key]!.stripHTML ? sanitizedLabels[item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]] : item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]})`
+                  : options.ui.itemLabelConfiguration[item.$key]!.stripHTML
+                    ? sanitizedLabels[item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]]
+                    : item[options.ui.itemLabelConfiguration[item.$key]!.subfieldValue as string]
                 : ''
             }}
           </span>
@@ -51,7 +53,7 @@
 
 <script lang="ts" setup>
 import { __ } from '#pruvious/app'
-import { maybeTranslate } from '#pruvious/dashboard'
+import { maybeTranslate, useSanitizedFieldValueLabels } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isDefined, isString, remap, titleCase } from '@pruvious/utils'
@@ -121,6 +123,7 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const itemTypeLabels = computed(() =>
   remap(props.options.structure, ($key) => [
     $key,

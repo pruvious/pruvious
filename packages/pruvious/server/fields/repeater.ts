@@ -98,6 +98,13 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
        * @default false
        */
       subfieldValue?: keyof TSubfields | false
+
+      /**
+       * Removes HTML tags from the `subfieldValue` before showing it in the item label.
+       *
+       * @default false
+       */
+      stripHTML?: boolean
     }
 
     /**
@@ -186,6 +193,7 @@ const customOptions: CustomOptions<Record<string, GenericField>> = {
     itemLabelConfiguration: {
       showItemNumber: true,
       subfieldValue: false,
+      stripHTML: false,
     },
     subfieldsLayout: undefined,
   },

@@ -11,8 +11,10 @@
           <span v-if="options.ui.itemLabelConfiguration?.subfieldValue" class="pui-truncate">
             {{
               options.ui.itemLabelConfiguration?.showItemNumber !== false
-                ? `${index + 1}. ${item[options.ui.itemLabelConfiguration.subfieldValue]}`
-                : item[options.ui.itemLabelConfiguration.subfieldValue]
+                ? `${index + 1}. ${options.ui.itemLabelConfiguration.stripHTML ? sanitizedLabels[item[options.ui.itemLabelConfiguration.subfieldValue]] : item[options.ui.itemLabelConfiguration.subfieldValue]}`
+                : options.ui.itemLabelConfiguration.stripHTML
+                  ? sanitizedLabels[item[options.ui.itemLabelConfiguration.subfieldValue]]
+                  : item[options.ui.itemLabelConfiguration.subfieldValue]
             }}
           </span>
           <span v-else class="pui-truncate">#{{ index + 1 }}</span>
@@ -37,6 +39,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useSanitizedFieldValueLabels } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isString } from '@pruvious/utils'
@@ -106,6 +109,7 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const isEditPopupVisible = ref(false)
 
 watch(

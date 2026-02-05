@@ -28,8 +28,10 @@
         <span v-if="options.ui.itemLabelConfiguration?.subfieldValue" class="pui-muted pui-truncate">
           {{
             options.ui.itemLabelConfiguration?.showItemNumber !== false
-              ? `${index + 1}. ${item[options.ui.itemLabelConfiguration.subfieldValue]}`
-              : item[options.ui.itemLabelConfiguration.subfieldValue]
+              ? `${index + 1}. ${options.ui.itemLabelConfiguration.stripHTML ? sanitizedLabels[item[options.ui.itemLabelConfiguration.subfieldValue]] : item[options.ui.itemLabelConfiguration.subfieldValue]}`
+              : options.ui.itemLabelConfiguration.stripHTML
+                ? sanitizedLabels[item[options.ui.itemLabelConfiguration.subfieldValue]]
+                : item[options.ui.itemLabelConfiguration.subfieldValue]
           }}
         </span>
         <span v-else class="pui-muted pui-truncate">#{{ index + 1 }}</span>
@@ -395,6 +397,7 @@ import {
   parseConditionalLogic,
   usePruviousClipboard,
   usePruviousClipboardData,
+  useSanitizedFieldValueLabels,
 } from '#pruvious/dashboard'
 import type {
   Collections,
@@ -572,6 +575,7 @@ const emit = defineEmits<{
 const clipboard = usePruviousClipboard()
 const clipboardData = usePruviousClipboardData()
 const root = useTemplateRef('root')
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const prevModelValue = ref<Record<string, any>[]>()
 const structuredValue = ref<Record<string, any>[]>([])
 const hasSubfields = computed(() => !isEmpty(props.options.subfields))

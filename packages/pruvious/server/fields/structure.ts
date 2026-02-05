@@ -117,6 +117,13 @@ interface CustomOptions<TStructure extends { [$key: string]: Record<string, Gene
              * @default false
              */
             subfieldValue?: (keyof TStructure[K] & string) | false
+
+            /**
+             * Removes HTML tags from the `subfieldValue` before showing it in the item label.
+             *
+             * @default false
+             */
+            stripHTML?: boolean
           }
         }
       | undefined

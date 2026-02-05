@@ -155,6 +155,13 @@ export interface Block<TFields extends Record<string, GenericField>> {
        * @default false
        */
       fieldValue?: (keyof TFields & string) | false | undefined
+
+      /**
+       * Removes HTML tags from the `fieldValue` before showing it in the block's label.
+       *
+       * @default false
+       */
+      stripHTML?: boolean
     }
 
     /**
@@ -379,6 +386,7 @@ export function defineBlock<const TFields extends Record<string, GenericField>>(
       itemLabelConfiguration: {
         showBlockLabel: options.ui?.itemLabelConfiguration?.showBlockLabel ?? true,
         fieldValue: options.ui?.itemLabelConfiguration?.fieldValue ?? false,
+        stripHTML: options.ui?.itemLabelConfiguration?.stripHTML ?? false,
       },
       description: options.ui?.description,
       standardFieldsLayout: options.ui?.standardFieldsLayout,

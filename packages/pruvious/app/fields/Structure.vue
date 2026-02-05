@@ -42,8 +42,10 @@
             options.ui.itemLabelConfiguration?.[item.$itemKey]?.subfieldValue &&
             item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string] !== ''
               ? options.ui.itemLabelConfiguration?.[item.$itemKey]?.showItemType !== false
-                ? `(${item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]})`
-                : item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]
+                ? `(${options.ui.itemLabelConfiguration[item.$itemKey]!.stripHTML ? sanitizedLabels[item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]] : item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]})`
+                : options.ui.itemLabelConfiguration[item.$itemKey]!.stripHTML
+                  ? sanitizedLabels[item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]]
+                  : item[options.ui.itemLabelConfiguration[item.$itemKey]!.subfieldValue as string]
               : ''
           }}
         </span>
@@ -464,6 +466,7 @@ import {
   parseConditionalLogic,
   usePruviousClipboard,
   usePruviousClipboardData,
+  useSanitizedFieldValueLabels,
 } from '#pruvious/dashboard'
 import type {
   Collections,
@@ -643,6 +646,7 @@ const emit = defineEmits<{
 const clipboard = usePruviousClipboard()
 const clipboardData = usePruviousClipboardData()
 const root = useTemplateRef('root')
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const prevModelValue = ref<Record<string, any>[]>()
 const structuredValue = ref<Record<string, any>[]>([])
 const hasSubfields = computed(() =>

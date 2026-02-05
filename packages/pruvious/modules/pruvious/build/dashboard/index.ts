@@ -181,7 +181,7 @@ function getReExports() {
     // Various dashboard utils
     `export { dashboardBasePath } from './base'`,
     `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard } from '${resolvePruviousUtilsFile('dashboard/clipboard')}'`,
-    `export { type WhereField, type FilterOperator, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolvePruviousUtilsFile('dashboard/fields')}'`,
+    `export { type WhereField, type FilterOperator, useSanitizedFieldValueLabels, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolvePruviousUtilsFile('dashboard/fields')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolvePruviousUtilsFile('dashboard/history')}'`,
     `export { usePruviousHMR } from '${resolvePruviousUtilsFile('dashboard/hmr')}'`,
     `export { maybeTranslate } from '${resolvePruviousUtilsFile('dashboard/i18n')}'`,

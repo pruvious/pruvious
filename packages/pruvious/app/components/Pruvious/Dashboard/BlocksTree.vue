@@ -410,6 +410,7 @@ import {
   usePruviousClipboard,
   usePruviousClipboardData,
   usePruviousDashboard,
+  useSanitizedFieldValueLabels,
   type PruviousClipboardData,
 } from '#pruvious/dashboard'
 import type {
@@ -580,6 +581,7 @@ const dashboard = usePruviousDashboard()
 const clipboard = usePruviousClipboard()
 const clipboardData = usePruviousClipboardData()
 const treeComponent = useTemplateRef('treeComponent')
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const treeMapper: PUITreeMapper<ExtendedBlockValue> = (blocks) =>
   blocks
     .filter((block) => !block.$virtualSlotName || props.conditionalLogic[block.$path])
@@ -590,19 +592,31 @@ const treeMapper: PUITreeMapper<ExtendedBlockValue> = (blocks) =>
           source: block,
           label: block.$virtualSlotName
             ? resolveFieldLabel(
-                dashboard.value!.blocks[block.$parent!.$key]!.fields[block.$virtualSlotName]!.ui.label,
+                dashboard.value!.blocks[block.$parent!.$key]?.fields[block.$virtualSlotName]?.ui.label,
                 block.$virtualSlotName,
               )
-            : dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false ||
-                dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration?.fieldValue
-              ? (dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false
+            : dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration?.showBlockLabel !== false ||
+                dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration?.fieldValue
+              ? (dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration?.showBlockLabel !== false
                   ? blockLabels[block.$key]
                   : '') +
-                (dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration?.fieldValue &&
-                block[dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration!.fieldValue as string] !== ''
-                  ? dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration?.showBlockLabel !== false
-                    ? ` (${block[dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration!.fieldValue as string]})`
-                    : block[dashboard.value!.blocks[block.$key]!.ui.itemLabelConfiguration!.fieldValue as string]
+                (dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration?.fieldValue &&
+                block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string] !== ''
+                  ? dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration?.showBlockLabel !== false
+                    ? ` (${
+                        dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.stripHTML
+                          ? sanitizedLabels[
+                              block[
+                                dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string
+                              ]
+                            ]
+                          : block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
+                      })`
+                    : dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.stripHTML
+                      ? sanitizedLabels[
+                          block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
+                        ]
+                    : block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
                   : '')
               : '',
           nestable: !!block.$virtualSlotName || Object.keys(block.$nestedBlocksFields).length > 0,

@@ -3,7 +3,7 @@ import { dashboardBasePath } from '#pruvious/dashboard/base'
 import type { GenericFieldUIOptions, GenericSerializableFieldOptions } from '#pruvious/server'
 import type { WhereField as _WhereField, Operator } from '@pruvious/orm'
 import { puiMarkdown } from '@pruvious/ui/pui/html'
-import { isDefined, isFunction, isObject, titleCase } from '@pruvious/utils'
+import { isDefined, isFunction, isObject, stripHTML, titleCase } from '@pruvious/utils'
 import { maybeTranslate } from './i18n'
 
 interface ResolvedFieldDescriptionBase {
@@ -91,6 +91,24 @@ export const filterOperatorsMap: Record<FilterOperator, Operator> = {
   includesAny: 'includesAny',
   excludes: 'excludes',
   excludesAny: 'excludesAny',
+}
+
+/**
+ * Provides a reactive object that caches sanitized versions of field value labels.
+ * When a label is accessed for the first time, it is sanitized using the `stripHTML` function and stored in the cache.
+ */
+export const useSanitizedFieldValueLabels = () => {
+  const state = useState<Record<string, string>>('pruvious-sanitized-field-value-labels', () => ({}))
+
+  return new Proxy(state.value, {
+    get: (target, key: string) => {
+      if (!(key in target)) {
+        const brIndex = key.indexOf('<br>')
+        target[key] = stripHTML(brIndex > -1 ? key.slice(0, brIndex) : key)
+      }
+      return target[key]
+    },
+  })
 }
 
 /**

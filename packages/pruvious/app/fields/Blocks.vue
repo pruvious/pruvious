@@ -42,8 +42,12 @@
             dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration?.fieldValue &&
             item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string] !== ''
               ? dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration?.showBlockLabel !== false
-                ? `(${item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]})`
-                : item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]
+                ? `(${dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.stripHTML ? sanitizedLabels[item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]] : item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]})`
+                : dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.stripHTML
+                  ? sanitizedLabels[
+                      item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]
+                    ]
+                  : item[dashboard!.blocks[item.$blockName]!.ui.itemLabelConfiguration!.fieldValue as string]
               : ''
           }}
         </span>
@@ -460,6 +464,7 @@ import {
   usePruviousClipboard,
   usePruviousClipboardData,
   usePruviousDashboard,
+  useSanitizedFieldValueLabels,
 } from '#pruvious/dashboard'
 import type {
   BlockGroupName,
@@ -645,6 +650,7 @@ provide('isLivePreview', false)
 const dashboard = usePruviousDashboard()
 const clipboard = usePruviousClipboard()
 const clipboardData = usePruviousClipboardData()
+const sanitizedLabels = useSanitizedFieldValueLabels()
 const root = useTemplateRef('root')
 const structure = useTemplateRef('structure')
 const prevModelValue = ref<Record<string, any>[]>()
