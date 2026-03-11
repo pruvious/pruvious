@@ -189,7 +189,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField<T extends string = 'width' | 'height'>(
   options?: FieldOptions['size'] & {
@@ -209,7 +209,7 @@ export function vueField<T extends string = 'width' | 'height'>(
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield<T extends string = 'width' | 'height'>(
   options?: FieldOptions['size'] & {

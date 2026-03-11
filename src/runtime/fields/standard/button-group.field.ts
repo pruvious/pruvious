@@ -113,7 +113,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField<T, S extends T>(
   // @ts-ignore
@@ -131,7 +131,7 @@ export function vueField<T, S extends T>(
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield<T, S extends T>(
   // @ts-ignore

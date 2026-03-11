@@ -257,7 +257,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField<
   CollectionName extends MultiCollectionName,
@@ -286,7 +286,7 @@ export function vueField<
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield<
   CollectionName extends MultiCollectionName,

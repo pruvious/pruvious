@@ -248,7 +248,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField<
   ReturnableFieldName extends SelectableFieldName['uploads'] = 'directory' | 'filename',
@@ -275,7 +275,7 @@ export function vueField<
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield<
   ReturnableFieldName extends SelectableFieldName['uploads'] = 'directory' | 'filename',

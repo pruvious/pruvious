@@ -141,7 +141,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField(options?: Omit<FieldOptions['text'], 'overrideType'>, additional?: FieldAdditional) {
   return String as unknown as PropType<string>
@@ -155,7 +155,7 @@ export function vueField(options?: Omit<FieldOptions['text'], 'overrideType'>, a
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield(options?: Omit<FieldOptions['text'], 'overrideType'>, additional?: FieldAdditional) {
   return String as unknown as string

@@ -540,7 +540,7 @@ export default defineField({
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueField<T extends Record<string, Array<any> | Boolean | Number | Object | String | null>>(
   options: Omit<FieldOptions['repeater'], 'subfields' | 'overrideType'> & {
@@ -571,7 +571,7 @@ export function vueField<T extends Record<string, Array<any> | Boolean | Number 
  *
  * @returns The **populated** field type used to annotate a Vue `prop`.
  *
- * @see https://pruvious.com/docs/creating-blocks
+ * @see https://pruvious.com/docs/blocks
  */
 export function vueSubfield<T extends Record<string, Array<any> | Boolean | Number | Object | String | null>>(
   options: Omit<FieldOptions['repeater'], 'subfields' | 'overrideType'> & {
