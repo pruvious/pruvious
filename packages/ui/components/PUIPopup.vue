@@ -15,7 +15,7 @@
         },
         additionalClasses,
       ]"
-      :style="{ '--pui-size': size }"
+      :style="{ '--pui-size': size, '--pui-overlay-transition-duration': `${overlayTransitionDuration}ms` }"
     >
       <div @click="$emit('close', close)" class="pui-popup-overlay"></div>
       <div class="pui-popup-container" :style="{ width }">
@@ -48,7 +48,7 @@ import { puiIsEditingText } from '../pui/hotkeys'
 import { usePUIOverlayCounter } from '../pui/overlay'
 import PUIContainer from './PUIContainer.vue'
 
-defineProps({
+const props = defineProps({
   /**
    * The CSS width of the popup.
    *
@@ -93,11 +93,22 @@ defineProps({
   size: {
     type: Number,
   },
+
+  /**
+   * The duration of the popup's open and close transition in milliseconds.
+   *
+   * @default 300
+   */
+  overlayTransitionDuration: {
+    type: Number,
+    default: 300,
+  },
 })
 
 const emit = defineEmits<{
   close: [close: () => Promise<void>]
   keydown: [event: KeyboardEvent]
+  overlayAnimated: []
 }>()
 
 const rootRef = useTemplateRef<InstanceType<typeof PUIContainer> | HTMLDivElement>('rootRef')
@@ -113,7 +124,6 @@ const visible = ref(false)
 const overlayCounter = usePUIOverlayCounter()
 
 let currentOverlay = -1
-let transitionDuration = 300
 
 defineExpose({ root, content, close, focus })
 
@@ -126,13 +136,16 @@ onMounted(() => {
     overlayCounter.value++
     currentOverlay = overlayCounter.value
     document.body.classList.add('pui-overlay-active')
-    const potd = getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration')
-    transitionDuration = potd.endsWith('ms') ? parseInt(potd) : potd.endsWith('s') ? parseFloat(potd) * 1000 : 300
     visible.value = true
     autofocus()
     nextTick(activate)
     setTimeout(autofocus)
-    setTimeout(() => dispatchEvent(new CustomEvent('pui-overlay-animated')), transitionDuration)
+    setTimeout(() => {
+      setTimeout(() => {
+        dispatchEvent(new CustomEvent('pui-overlay-animated'))
+        emit('overlayAnimated')
+      }, props.overlayTransitionDuration)
+    })
   })
 })
 
@@ -181,7 +194,7 @@ async function close() {
     document.body.classList.remove('pui-overlay-active')
   }
   visible.value = false
-  await sleep(transitionDuration)
+  await sleep(props.overlayTransitionDuration)
 }
 
 /**
@@ -192,7 +205,7 @@ function autofocus() {
   const el = root.value?.querySelector('[autofocus], [data-autofocus]')
   if (el instanceof HTMLElement) {
     el.focus()
-    setTimeout(() => el.focus(), transitionDuration)
+    setTimeout(() => el.focus(), props.overlayTransitionDuration)
   } else {
     focusRoot()
   }
@@ -203,7 +216,7 @@ function autofocus() {
  */
 function focusRoot() {
   root.value?.focus()
-  setTimeout(() => root.value?.focus(), transitionDuration)
+  setTimeout(() => root.value?.focus(), props.overlayTransitionDuration)
 }
 </script>
 

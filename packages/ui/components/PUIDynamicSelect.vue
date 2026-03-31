@@ -32,7 +32,8 @@
           }
         }
       "
-      @keydown.tab.prevent="focusFirst()"
+      @keydown.space="selectHighlightedOrToggle"
+      @keydown.tab="focusFirst"
       @keydown.up.prevent.stop="
         () => {
           if (isExpanded) {
@@ -527,11 +528,12 @@ function focusNext() {
 /**
  * Focuses the first choice in the list.
  */
-function focusFirst() {
+function focusFirst(event?: Event) {
   if (isExpanded.value) {
     highlightedChoice.value = choices.value.filter(({ disabled }) => !disabled)[0]
     mousePaused.value = true
     scrollToHighlighted()
+    event?.preventDefault()
   }
 }
 
@@ -555,6 +557,17 @@ function selectHighlightedOrClose(event?: Event) {
     } else {
       close(event)
     }
+  }
+}
+
+/**
+ * Selects the highlighted choice and/or toggles the visibility of the choices list.
+ */
+function selectHighlightedOrToggle(event?: Event) {
+  if (isExpanded.value && highlightedChoice.value) {
+    selectHighlighted(event)
+  } else {
+    toggle(event)
   }
 }
 

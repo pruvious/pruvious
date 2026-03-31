@@ -1,6 +1,6 @@
 <template>
   <div class="prose">
-    <PruviousBlocks field="elements" />
+    <PruviousBlocks field="content" />
   </div>
 </template>
 
@@ -15,10 +15,16 @@ defineBlock({
 })
 
 defineProps({
-  elements: blocksField({
-    allowRootBlocks: ['ProseElement'],
-    default: [{ $key: 'ProseElement', tag: 'p', text: '' }],
-    ui: { label: ({ __ }) => __('pruvious-dashboard', 'Prose elements') },
+  content: blocksField({
+    allowRootBlocks: ['ProseList', 'ProseNode'],
+    default: [{ $key: 'ProseNode', tag: 'p', text: '' }],
+    ui: { label: ({ __ }) => __('pruvious-dashboard', 'Content') },
   }),
 })
 </script>
+
+<style scoped>
+.prose {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+</style>

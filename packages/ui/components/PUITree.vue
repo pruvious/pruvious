@@ -53,6 +53,13 @@
           @focusNext="focusNext"
           @focusPrevious="focusPrevious"
           @highlight="$emit('update:highlightedItem', $event)"
+          @mouseup="
+            () => {
+              isDragging = false
+              isTouchDragging = false
+              dropTarget = null
+            }
+          "
           @select="$emit('update:selectedItems', puiSortTreeItems($event, modelValue))"
           @update:tree="$emit('update:modelValue', $event)"
         >
@@ -246,6 +253,7 @@ defineExpose({
   scrollToSelection,
   scrollable,
   updatePlaceholder,
+  calcItemSizes,
   root,
 })
 

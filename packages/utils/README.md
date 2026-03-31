@@ -61,6 +61,7 @@ npm i @pruvious/utils
   - [isDescendant](#isdescendant)
   - [resolveRelativeDotNotation](#resolverelativedotnotation)
   - [sleep](#sleep)
+  - [stripHTML](#striphtml)
   - [withLeadingSlash](#withleadingslash)
   - [withoutLeadingSlash](#withoutleadingslash)
   - [withoutTrailingSlash](#withouttrailingslash)
@@ -106,6 +107,8 @@ npm i @pruvious/utils
   - [capitalize](#capitalize)
   - [castToNumericString](#casttonumericstring)
   - [castToString](#casttostring)
+  - [countCommonPrefix](#countcommonprefix)
+  - [escapeHTML](#escapehtml)
   - [excerpt](#excerpt)
   - [extractKeywords](#extractkeywords)
   - [formatBytes](#formatbytes)
@@ -119,6 +122,7 @@ npm i @pruvious/utils
   - [kebabCase](#kebabcase)
   - [murmurHash](#murmurhash)
   - [normalizeCase](#normalizecase)
+  - [normalizeWhitespace](#normalizewhitespace)
   - [parseBytes](#parsebytes)
   - [pascalCase](#pascalcase)
   - [randomIdentifier](#randomidentifier)
@@ -796,6 +800,18 @@ Pauses execution for the specified `milliseconds`.
 await sleep(50)
 ```
 
+### <a id="striphtml">`stripHTML(html)`</a>
+
+Strips HTML tags from a string.
+
+Note: This function uses the DOM and should be run in a browser environment.
+
+**Example:**
+
+```ts
+stripHTML('<p>Hello, <strong>World</strong></p>') // 'Hello World'
+```
+
 ### <a id="withleadingslash">`withLeadingSlash(path)`</a>
 
 Normalizes a path to have a single leading slash.
@@ -1351,6 +1367,28 @@ castToString(NaN)   // NaN
 castToString(true)  // true
 ```
 
+### <a id="countcommonprefix">`countCommonPrefix(str1, str2)`</a>
+
+Counts the number of common characters from the start of two strings.
+
+**Example:**
+
+```ts
+countCommonPrefix('foo', 'foobar') // 3
+countCommonPrefix('foobar', 'foo') // 3
+countCommonPrefix('foo', 'bar')    // 0
+```
+
+### <a id="escapehtml">`escapeHTML(html)`</a>
+
+Escapes special HTML characters in the given `html` string.
+
+**Example:**
+
+```ts
+escapeHTML('<div>Hello & "world"</div>') // '&lt;div&gt;Hello &amp; &quot;world&quot;&lt;/div&gt;'
+```
+
 ### <a id="excerpt">`excerpt(string, options)`</a>
 
 Generates an excerpt from the given `string` based on the provided `options`.
@@ -1496,6 +1534,21 @@ Splits a `string` by a casing pattern and join it with a custom function.
 
 ```ts
 normalizeCase('foo-bar', ({ curr }) => curr.toUpperCase()) // 'FooBar'
+```
+
+### <a id="normalizewhitespace">`normalizeWhitespace(html)`</a>
+
+Removes extra whitespace from the `html` content.
+Multiple spaces in a row become a single space.
+Spaces at the start and end are removed.
+
+@default true
+
+**Example:**
+
+```ts
+' <strong> Hello, </strong>World! '  //=> '<strong>Hello,</strong> World!'
+' <strong> Hello </strong>, World! ' //=> '<strong>Hello</strong> , World!'
 ```
 
 ### <a id="parsebytes">`parseBytes(value)`</a>

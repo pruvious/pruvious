@@ -1,7 +1,5 @@
 <template>
-  <button>
-    <PruviousEditableText field="label" />
-  </button>
+  <PruviousEditableText field="text" tag="li" />
 </template>
 
 <script lang="ts" setup>
@@ -9,18 +7,13 @@ import { defineBlock, richTextField } from '#pruvious/app'
 
 defineBlock({
   ui: {
-    itemLabelConfiguration: {
-      fieldValue: 'label',
-      stripHTML: true,
-    },
+    icon: 'text-wrap-disabled',
+    label: ({ __ }) => __('pruvious-dashboard', 'List item'),
   },
 })
 
 defineProps({
-  label: richTextField({
-    required: true,
-    default: 'Button',
-    allowLineBreaks: false,
+  text: richTextField({
     ui: {
       liveEditor: {
         deleteBlockWhenEmpty: true,

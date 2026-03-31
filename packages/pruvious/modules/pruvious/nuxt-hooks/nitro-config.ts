@@ -9,4 +9,5 @@ export function disableDashboardSSR(nitroConfig: NitroConfig) {
 
   nitroConfig.routeRules ??= {}
   nitroConfig.routeRules[nuxt.options.runtimeConfig.pruvious.dashboard.basePath + '**'] = { ssr: false }
+  nitroConfig.routeRules['_pruviousPreview'] = { ssr: false }
 }

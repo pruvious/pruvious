@@ -199,7 +199,7 @@ onMounted(() => {
     setTimeout(() => {
       stop.push(
         useEventListener(parentContainer.value, 'keydown', (event) => {
-          if (!['Enter', 'Escape', 'Space'].includes(event.code)) {
+          if (!['Enter', 'NumpadEnter', 'Escape', 'Space'].includes(event.code)) {
             event.preventDefault()
             event.stopPropagation()
           }

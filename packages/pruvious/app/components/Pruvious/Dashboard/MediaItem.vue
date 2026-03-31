@@ -202,7 +202,7 @@
 </template>
 
 <script lang="ts" setup>
-import { NuxtLink, PruviousDashboardMediaDirectoryItem } from '#components'
+import { NuxtLink } from '#components'
 import { __ } from '#pruvious/app'
 import {
   $pfetchDashboard,

@@ -456,7 +456,6 @@
 </template>
 
 <script lang="ts" setup>
-import { PruviousDashboardBlockPickerPopup } from '#components'
 import { __ } from '#pruvious/app'
 import {
   maybeTranslate,

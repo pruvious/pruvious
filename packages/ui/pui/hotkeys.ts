@@ -8,6 +8,8 @@ export type PUIHotkeyAction =
   | 'cut'
   | 'delete'
   | 'duplicate'
+  | 'insertAfter'
+  | 'insertBefore'
   | 'moveDown'
   | 'moveUp'
   | 'paste'
@@ -217,6 +219,12 @@ export function usePUIHotkeys(options?: PUIHotkeysOptions): PUIHotkeys {
     } else if (letter === 'arrowup' || letter === 'arrowdown') {
       if (!event.shiftKey && !puiIsEditingText() && !disabled) {
         return listeners.get(letter === 'arrowup' ? 'moveUp' : 'moveDown')?.forEach((callback) => callback(event))
+      }
+    } else if (letter === 'enter') {
+      if (event.shiftKey && !puiIsEditingText() && !disabled) {
+        return listeners.get('insertBefore')?.forEach((callback) => callback(event))
+      } else if (!event.shiftKey && !puiIsEditingText() && !disabled) {
+        return listeners.get('insertAfter')?.forEach((callback) => callback(event))
       }
     }
   }

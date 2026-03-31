@@ -16,9 +16,9 @@
       <slot />
     </span>
 
-    <div v-if="$slots.bubble" class="pui-button-bubble">
+    <span v-if="$slots.bubble" class="pui-button-bubble">
       <slot name="bubble" />
-    </div>
+    </span>
   </component>
 </template>
 
@@ -34,8 +34,6 @@ defineProps({
    *
    * - When no `to` prop is set, renders as a native `<button>` element.
    * - If `to` prop exists, renders as a `<NuxtLink>` component for navigation.
-   *
-   * @default 'button'
    */
   is: {
     type: [Object, String] as PropType<'a' | 'button' | 'span' | Component>,

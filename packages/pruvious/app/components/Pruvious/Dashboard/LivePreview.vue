@@ -66,6 +66,16 @@
                 :fields="fields"
                 :modelValue="data[name]"
                 @commit="$emit('commit', Object.assign({}, data, { [name]: $event }))"
+                @pickBlock="
+                  (block) => {
+                    if (block) {
+                      messagePreviewIframe('dashboard:allowBlockSelection', { focustFirstEditableField: true })
+                    } else if (focusIframeAfterClosingBlockPicker) {
+                      messagePreviewIframe('dashboard:restoreFocus', {})
+                      focusIframeAfterClosingBlockPicker = false
+                    }
+                  }
+                "
                 @queueConditionalLogicUpdate="$emit('queueConditionalLogicUpdate', $event)"
                 @update:highlightedBlock="updateHighlightedBlockInPreview($event)"
                 @update:modelValue="$emit('update:data', Object.assign({}, data, { [name]: $event }))"
@@ -102,7 +112,7 @@
         <div class="p-lp-panel-middle">
           <div ref="livePanel" class="p-lp-panel-live">
             <iframe
-              :src="`${runtimeConfig.app.baseURL}?pruviousPreview`"
+              :src="`${runtimeConfig.app.baseURL}_pruviousPreview`"
               @mouseleave="updateHighlightedBlockInPreview(undefined)"
               ref="iframe"
               class="p-lp-iframe"
@@ -197,7 +207,7 @@
             </div>
           </div>
 
-          <PUIContainer>
+          <PUIContainer :inert="selectedBlocks.length === 1">
             <PruviousFields
               v-if="data"
               :conditionalLogic="conditionalLogic"
@@ -282,13 +292,14 @@ import {
   useDashboardLayout,
   usePruviousClipboardData,
   usePruviousDashboard,
+  type DashboardMessage,
+  type IframeMessage,
 } from '#pruvious/dashboard'
 import type {
   Collections,
   Fields,
   FieldsLayout,
   GenericSerializableFieldOptions,
-  ResolvedRoute,
   RouteReferenceName,
   SerializableCollection,
   SerializableFieldOptions,
@@ -303,10 +314,12 @@ import { puiToast } from '@pruvious/ui/pui/toast'
 import { puiFlatTreeItems } from '@pruvious/ui/pui/tree'
 import {
   deepClone,
+  filterObject,
   getProperty,
   isArray,
   isDefined,
   isEmpty,
+  isNull,
   isObject,
   isString,
   omit,
@@ -315,7 +328,8 @@ import {
   setProperty,
   titleCase,
 } from '@pruvious/utils'
-import { useElementSize, useEventListener, useStorage, useWindowSize } from '@vueuse/core'
+import { useDebounceFn, useElementSize, useEventListener, useStorage, useWindowSize } from '@vueuse/core'
+import { hash } from 'ohash'
 import { usePruviousDashboardSerialized } from '../../../../modules/pruvious/pruvious/utils.client'
 import type { ExtendedBlockValue } from './BlocksTree.vue'
 
@@ -482,7 +496,11 @@ const rightPanelMaxWidth = computed(() =>
 const selectedBlocks = ref<PUITreeItemModel<ExtendedBlockValue>[]>([])
 const highlightedBlock = ref<PUITreeItemModel<ExtendedBlockValue> | undefined>()
 const hasBlockFields = computed(() =>
-  remap(dashboard.value!.blocks, (blockName, { fields }) => [blockName, !isEmpty(fields)]),
+  remap(dashboard.value!.blocks, (blockName, { fields, ui }) => [
+    blockName,
+    !isEmpty(filterObject(fields, (_, { _fieldType }) => _fieldType !== 'blocks')) ||
+      !isEmpty(ui.livePreviewFieldsLayout),
+  ]),
 )
 const selectedBlockValue = computed<Record<string, any> | undefined>(() =>
   selectedBlocks.value.length === 1 ? getProperty(props.data, selectedBlocks.value[0]!.source.$path) : undefined,
@@ -511,11 +529,12 @@ const selectedBlockIcon = computed(() => {
   return 'cube'
 })
 const routeReferences = getRouteReferences()
-const previewKey = ref<string>()
 const populatedDataCache: Record<string, any> = {}
+const isIframeFocused = ref(false)
+const focusIframeAfterClosingBlockPicker = ref(false)
 
-let updatingPreviewRoute = false
-let updatePreviewRouteDebounced = false
+let lastPreviewDataHash: string | undefined
+let saveTimeout: NodeJS.Timeout | undefined
 
 watch(
   () => props.errors,
@@ -524,7 +543,12 @@ watch(
 
 watch(
   () => props.data,
-  () => updatePreviewRoute(),
+  () => updatePreviewDataDebounced(lastPreviewDataHash).catch(() => null),
+)
+
+watch(
+  () => props.history.undoCount.value,
+  () => updatePreviewHistoryState(),
 )
 
 useEventListener('keydown', (event) => {
@@ -534,101 +558,105 @@ useEventListener('keydown', (event) => {
   }
 })
 
-useEventListener('message', (event) => {
+useEventListener('message', (event: MessageEvent<IframeMessage>) => {
   if (event.origin === window.location.origin) {
     if (event.data.name === 'iframe:ready') {
       setUpPreview()
-      updatePreviewRoute()
-    } else if (event.data.name === 'iframe:update') {
-      if (isDefined(getProperty(props.data, event.data.path))) {
-        previewKey.value = event.data.key
-        const newData = deepClone(props.data)
-        setProperty(newData, event.data.path, event.data.value)
-        emit('update:data', newData)
-        emit('commit', newData)
-        emit('update:errors', {})
-        emit('queueConditionalLogicUpdate', event.data.path)
+    } else if (event.data.name === 'iframe:toast') {
+      if (event.data.title) {
+        puiToast(event.data.title, { type: event.data.type, description: event.data.message })
       } else {
-        puiToast(__('pruvious-dashboard', 'Live editing misconfiguration'), {
-          id: 'live-editing-misconfiguration',
-          type: 'info',
-          description: __('pruvious-dashboard', 'Unable to resolve field path `$path`.', {
-            path: event.data.path,
-          }),
-        })
+        puiToast(event.data.message, { type: event.data.type })
       }
-    } else if (event.data.name === 'iframe:addBlockBefore') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block && treeRef.canHaveSiblings(block.source)) {
-        treeRef.addBlockBefore(block.source)
-      }
-    } else if (event.data.name === 'iframe:addBlockAfter') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block && treeRef.canHaveSiblings(block.source)) {
-        treeRef.addBlockAfter(block.source)
+    } else if (event.data.name === 'iframe:data') {
+      const newData = { ...props.data, ...event.data.data }
+      lastPreviewDataHash = hash(event.data.data)
+      emit('update:data', newData)
+      emit('commit', newData)
+      emit('update:errors', {})
+      emit('queueConditionalLogicUpdate', '$reset')
+    } else if (event.data.name === 'iframe:focus') {
+      isIframeFocused.value = true
+    } else if (event.data.name === 'iframe:blur') {
+      isIframeFocused.value = false
+    } else if (event.data.name === 'iframe:save') {
+      clearTimeout(saveTimeout)
+      saveTimeout = setTimeout(() => emit('save'), 250)
+    } else if (event.data.name === 'iframe:undo') {
+      const undoState = props.history.undo()
+      if (undoState) {
+        emit('update:data', undoState)
+        emit('update:errors', {})
+        lastPreviewDataHash = hash(undoState)
       }
     } else if (event.data.name === 'iframe:redo') {
       const redoState = props.history.redo()
       if (redoState) {
         emit('update:data', redoState)
         emit('update:errors', {})
+        lastPreviewDataHash = hash(redoState)
       }
-    } else if (event.data.name === 'iframe:undo') {
-      const undoState = props.history.undo()
-      if (undoState) {
-        emit('update:data', undoState)
-        emit('update:errors', {})
+    } else if (event.data.name === 'iframe:addBlock') {
+      if (event.data.blockPath) {
+        const { block, treeRef } = getBlockTreeItemByPath(event.data.blockPath)
+        let insertionMethod: 'direct' | 'popup' | false = false
+        if (block) {
+          messagePreviewIframe('dashboard:allowBlockSelection', { focustFirstEditableField: true })
+          if (
+            event.data.position === 'inside' &&
+            block.nestable &&
+            (block.source.$virtualSlotName ||
+              (Object.keys(block.source.$nestedBlocksFields).length === 1 && treeRef.canHaveChildren(block.source)))
+          ) {
+            insertionMethod = treeRef.addBlockInside(block.source)
+          } else if (event.data.position === 'self') {
+            insertionMethod = treeRef.replaceBlock(block.source, true)
+          } else if (treeRef.canHaveSiblings(block.source)) {
+            if (event.data.position === 'after') {
+              insertionMethod = treeRef.addBlockAfter(block.source)
+            } else {
+              insertionMethod = treeRef.addBlockBefore(block.source)
+            }
+          }
+          if (insertionMethod === 'popup') {
+            focusIframeAfterClosingBlockPicker.value = true
+          }
+        }
+      } else {
+        const index = Object.entries(blocksFields).findIndex(([name]) => name === activeBlocksFieldsTab.value)
+        const treeRef = blocksTree.value?.[index]
+        if (treeRef) {
+          treeRef.addTopLevelBlock(event.data.position === 'after' ? 'end' : 'start')
+        }
       }
-    } else if (event.data.name === 'iframe:deleteBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block) {
-        treeRef.deleteItems([block])
-      }
-    } else if (event.data.name === 'iframe:duplicateBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block && treeRef.canHaveSiblings(block.source)) {
-        treeRef.duplicateItems([block])
-      }
+    } else if (event.data.name === 'iframe:selectBlock') {
+      onIframeSelectionDebounced(event.data.blockPath)
     } else if (event.data.name === 'iframe:copyBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.blockPath)
       if (block) {
         treeRef.copyItems([block])
       }
     } else if (event.data.name === 'iframe:cutBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
+      const { block, treeRef } = getBlockTreeItemByPath(event.data.blockPath)
       if (block) {
         treeRef.cutItems([block])
       }
     } else if (event.data.name === 'iframe:pasteBlocks') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
       const clipboardData = usePruviousClipboardData()
-      if (
-        clipboardData.value?.pruviousClipboardDataType === 'blocks' &&
-        block &&
-        treeRef.canHaveSiblings(block.source)
-      ) {
-        treeRef.pasteItems(clipboardData.value.data, [block], 'after')
+      if (clipboardData.value?.pruviousClipboardDataType === 'blocks') {
+        if (event.data.blockPath) {
+          const { block, treeRef } = getBlockTreeItemByPath(event.data.blockPath)
+          if (block && treeRef) {
+            treeRef.pasteItems(clipboardData.value.data, [block], 'after')
+          }
+        } else {
+          const index = Object.entries(blocksFields).findIndex(([name]) => name === activeBlocksFieldsTab.value)
+          const treeRef = blocksTree.value?.[index]
+          if (treeRef) {
+            treeRef.pasteItems(clipboardData.value.data, [], 'after')
+          }
+        }
       }
-    } else if (event.data.name === 'iframe:save') {
-      setTimeout(() => emit('save'), 250)
-    } else if (event.data.name === 'iframe:moveUpBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block) {
-        treeRef.moveItems('up', [block])
-      }
-    } else if (event.data.name === 'iframe:moveDownBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block) {
-        treeRef.moveItems('down', [block])
-      }
-    } else if (event.data.name === 'iframe:selectBlock') {
-      const { block, treeRef } = getBlockTreeItemByPath(event.data.path)
-      if (block) {
-        selectedBlocks.value = [block]
-        treeRef.scrollToSelection()
-      }
-    } else if (event.data.name === 'iframe:deselectBlocks') {
-      selectedBlocks.value = []
     }
   }
 })
@@ -646,14 +674,34 @@ useEventListener('resize', () => {
   })
 })
 
-function setUpPreview() {
-  iframe.value?.contentWindow?.postMessage(
+function messagePreviewIframe<TName extends DashboardMessage['name']>(
+  name: TName,
+  data: Omit<Extract<DashboardMessage, { name: TName }>, 'name'>,
+) {
+  iframe.value?.contentWindow?.postMessage({ name, ...data }, window.location.origin)
+}
+
+async function setUpPreview() {
+  const ref = Object.entries(routeReferences).find(
+    ([_, { dataContainerType, dataContainerName }]) =>
+      dataContainerType === containerType && dataContainerName === container.name,
+  )
+  const data = await getPopulatedPreviewData()
+
+  lastPreviewDataHash = hash(data)
+
+  messagePreviewIframe(
+    'dashboard:setup',
     deepClone({
-      name: 'dashboard:setup',
-      fields:
+      isEditable: !props.disabled,
+      dashboardLanguage: useLanguage().value,
+      routeReferences: remap(routeReferences, (key, value) => [key, omit(value, ['publicFields'])]),
+      fields: serializeTranslatableStringCallbacks(
         dashboardSerialized.value![containerType === 'collection' ? 'collections' : 'singletons'][container.name]!
           .fields,
-      blocks: dashboardSerialized.value!.blocks,
+      ),
+      publicFields: serializeTranslatableStringCallbacks(ref![1].publicFields),
+      blocks: serializeTranslatableStringCallbacks(dashboardSerialized.value!.blocks),
       blockLabels: Object.fromEntries(
         Object.entries(dashboard.value!.blocks)
           .map(([blockName, block]) => ({
@@ -664,22 +712,55 @@ function setUpPreview() {
           }))
           .map(({ blockName, label }) => [blockName, label]),
       ),
-      routeReferences: remap(routeReferences, (key, value) => [key, omit(value, ['publicFields'])]),
-      editable: props.canUpdate,
-      dashboardLanguage: useLanguage().value,
+      route: {
+        language: container.definition.translatable ? props.data.language : primaryLanguage,
+        translations: Object.fromEntries(languages.map(({ code }) => [code, null])) as any,
+        seo: {
+          title: __('pruvious-dashboard', 'Live Preview'),
+          description: '',
+          url: '',
+          isIndexable: false,
+        },
+        ref: ref?.[0] as RouteReferenceName,
+        data,
+        layout: ref?.[1].layout,
+      },
+      historyIndex: props.history.getCurrentIndex(),
+      historySize: props.history.size.value,
     }),
-    window.location.origin,
   )
 }
 
-async function updatePreviewRoute() {
-  if (updatingPreviewRoute) {
-    updatePreviewRouteDebounced = true
-    return
+async function updatePreviewData() {
+  const data = await getPopulatedPreviewData()
+  if (!isIframeFocused.value || hash(omit(data, ['_casted'])) !== lastPreviewDataHash) {
+    messagePreviewIframe('dashboard:data', {
+      data,
+      historyIndex: props.history.getCurrentIndex(),
+      historySize: props.history.size.value,
+      focusBlock: selectedBlocks.value.length === 1 ? selectedBlocks.value[0]!.source.$path : null,
+    })
   }
+}
 
-  updatingPreviewRoute = true
+function updatePreviewHistoryState() {
+  messagePreviewIframe('dashboard:history', {
+    historyIndex: props.history.getCurrentIndex(),
+    historySize: props.history.size.value,
+  })
+}
 
+const updatePreviewDataDebounced = useDebounceFn(
+  async (previewDataHash: string | undefined) => {
+    if (!isIframeFocused.value || previewDataHash === lastPreviewDataHash) {
+      return updatePreviewData()
+    }
+  },
+  50,
+  { rejectOnCancel: true },
+)
+
+async function getPopulatedPreviewData() {
   const ref = Object.entries(routeReferences).find(
     ([_, { dataContainerType, dataContainerName }]) =>
       dataContainerType === containerType && dataContainerName === container.name,
@@ -710,7 +791,7 @@ async function updatePreviewRoute() {
         }
       }
     }
-    data[key] = value
+    setProperty(data, key, value)
     populatedData[key] = { fieldType: _fieldType, value }
   }
 
@@ -749,51 +830,16 @@ async function updatePreviewRoute() {
 
   data._casted = publicData
 
-  iframe.value?.contentWindow?.postMessage(
-    deepClone({
-      name: 'dashboard:route',
-      key: previewKey.value,
-      parsedFields: serializeTranslatableStringCallbacks(parsedFields),
-      route: {
-        language: container.definition.translatable ? props.data.language : primaryLanguage,
-        translations: Object.fromEntries(languages.map(({ code }) => [code, null])) as any,
-        seo: {
-          title: __('pruvious-dashboard', 'Live Preview'),
-          description: '',
-          url: '',
-          isIndexable: false,
-        },
-        ref: ref?.[0] as RouteReferenceName,
-        data,
-        layout: ref?.[1].layout,
-      } satisfies ResolvedRoute,
-    }),
-    window.location.origin,
-  )
-
-  updatingPreviewRoute = false
-
-  if (updatePreviewRouteDebounced) {
-    updatePreviewRouteDebounced = false
-    updatePreviewRoute()
-  }
+  return deepClone(data)
 }
 
-function updateHighlightedBlockInPreview(block: PUITreeItemModel<ExtendedBlockValue> | undefined) {
-  iframe.value?.contentWindow?.postMessage(
-    block ? { name: 'dashboard:highlightBlock', block: block.source.$path } : { name: 'dashboard:unhighlightBlock' },
-    window.location.origin,
-  )
-}
+const updateHighlightedBlockInPreview = useDebounceFn((block: PUITreeItemModel<ExtendedBlockValue> | undefined) => {
+  messagePreviewIframe('dashboard:highlightBlock', { blockPath: block?.source.$path ?? null })
+}, 50)
 
-function updateFocusedBlocksInPreview(blocks: PUITreeItemModel<ExtendedBlockValue>[]) {
-  iframe.value?.contentWindow?.postMessage(
-    blocks.length
-      ? { name: 'dashboard:focusBlocks', blocks: blocks.filter(Boolean).map((block) => block.source.$path) }
-      : { name: 'dashboard:unfocusBlocks' },
-    window.location.origin,
-  )
-}
+const updateFocusedBlocksInPreview = useDebounceFn((blocks: PUITreeItemModel<ExtendedBlockValue>[]) => {
+  messagePreviewIframe('dashboard:focusBlock', { blockPath: blocks.length === 1 ? blocks[0]!.source.$path : null })
+}, 50)
 
 function reloadIframe() {
   iframe.value?.contentWindow?.postMessage({ name: 'dashboard:reload' }, window.location.origin)
@@ -844,11 +890,14 @@ function refreshErrors(): void {
   })
 }
 
-function getBlockTreeItemByPath(path: string) {
+function getBlockTreeItemByPath(path: string, refreshTree = false) {
   const blocksField = path.split('.')[0]
   const index = Object.entries(blocksFields).findIndex(([name]) => name === blocksField)
   const treeRef = blocksTree.value?.[index]
   if (treeRef) {
+    if (refreshTree) {
+      treeRef.refreshTree()
+    }
     const block = puiFlatTreeItems(treeRef.tree).find(({ source }) => source.$path === path)
     if (block) {
       return { block, treeRef }
@@ -856,6 +905,20 @@ function getBlockTreeItemByPath(path: string) {
   }
   return { block: null, treeRef: null }
 }
+
+const onIframeSelectionDebounced = useDebounceFn((blockPath: string | null, refreshTree = false) => {
+  if (isNull(blockPath)) {
+    selectedBlocks.value = []
+  } else {
+    const { block, treeRef } = getBlockTreeItemByPath(blockPath, refreshTree)
+    if (block) {
+      selectedBlocks.value = [block]
+      nextTick(() => treeRef.scrollToSelection('smooth'))
+    } else {
+      selectedBlocks.value = []
+    }
+  }
+}, 50)
 </script>
 
 <style scoped>

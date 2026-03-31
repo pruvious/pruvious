@@ -152,6 +152,13 @@ export class History<T extends Record<string, any> = Record<string, any>> {
   }
 
   /**
+   * Returns the current history index, where `-1` means no states in history, `0` is the first state, and so on.
+   */
+  getCurrentIndex(): number {
+    return this.currentIndex
+  }
+
+  /**
    * Returns a copy of all states in history.
    */
   getAllStates(): T[] {

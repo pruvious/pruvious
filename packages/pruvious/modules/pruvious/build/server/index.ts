@@ -1850,9 +1850,8 @@ function getReExports() {
 
     // Blocks
     `export { type BlockName, type Blocks, blocks, getBlockGroups, getBlockTags } from './blocks'`,
-    `export { type Block, type GenericBlock, type DefineBlockOptions } from '${resolvePruviousFile('blocks/define.server')}'`,
-    `export type { SerializableBlock } from '${resolvePruviousFile('blocks/utils.client')}'`,
-    `export type { BlockGroupDefinition, BlockTagDefinition } from '${resolvePruviousFile('blocks/utils.server')}'`,
+    `export type { Block, GenericBlock, DefineBlockOptions } from '${resolvePruviousFile('blocks/define.server')}'`,
+    `export type { BlockGroupDefinition, BlockTagDefinition, SerializableBlock } from '${resolvePruviousFile('blocks/utils.server')}'`,
 
     // Cache
     `export { setCache, appendCache, getCache, getCacheKeys, hasCache, deleteCache, clearCache, removeExpiredCacheEntries } from '${resolvePruviousFile('cache/utils.server')}'`,
@@ -1880,6 +1879,7 @@ function getReExports() {
 
     // Field types
     `export type { ButtonGroupChoice } from '${resolve('../../../../server/fields/buttonGroup.ts')}'`,
+    `export type { Mark } from '${resolve('../../../../server/fields/richText.ts')}'`,
     `export type { SelectChoice, SelectChoiceGroup } from '${resolve('../../../../server/fields/select.ts')}'`,
 
     // Hooks

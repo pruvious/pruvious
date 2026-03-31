@@ -8,10 +8,36 @@ import { computed } from 'vue'
 const props = defineProps({
   /**
    * The HTML tag name to use for the root element when rendering this component.
+   *
+   * @default 'div'
    */
   tag: {
     type: String as PropType<
-      'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'pre' | 'ul' | 'ol' | 'li' | (string & {})
+      | 'div'
+      | 'section'
+      | 'article'
+      | 'aside'
+      | 'p'
+      | 'h1'
+      | 'h2'
+      | 'h3'
+      | 'h4'
+      | 'h5'
+      | 'h6'
+      | 'blockquote'
+      | 'pre'
+      | 'ul'
+      | 'ol'
+      | 'li'
+      | 'span'
+      | 'code'
+      | 'a'
+      | 'button'
+      | 'label'
+      | 'strong'
+      | 'em'
+      | 'small'
+      | (string & {})
     >,
     default: 'div',
   },

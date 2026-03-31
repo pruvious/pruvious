@@ -1,51 +1,50 @@
 import { useEventListener } from '@vueuse/core'
-import type { EditorState, PluginView } from 'prosemirror-state'
+import type { EditorState, PluginKey, PluginView } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 
 export class ToolbarPluginView implements PluginView {
   toolbar: HTMLElement
   state: EditorState | null = null
+  showTimeout: NodeJS.Timeout | undefined
 
   constructor(
     public view: EditorView,
-    public focused: Ref<boolean>,
+    public isFocused: Ref<boolean>,
+    public key: PluginKey,
   ) {
     this.toolbar = document.createElement('div')
     this.toolbar.className = 'p-rich-text-toolbar'
     document.body.appendChild(this.toolbar)
 
-    this.update(view, null)
-
-    watch(focused, () => {
-      if (focused.value) {
-        this.show()
-      } else {
-        this.hide()
-      }
-    })
-
+    watch(isFocused, () => this.update())
     useEventListener('resize', () => this.updatePosition())
+    this.update()
   }
 
-  update(view: EditorView, lastState: EditorState | null) {
-    if (
-      !this.focused.value ||
-      (lastState && lastState.doc.eq(view.state.doc) && lastState.selection.eq(view.state.selection))
-    ) {
-      return
-    }
+  update() {
+    const state = this.key.getState(this.view.state)
+    const isForceHidden = state?.forceHide || false
+    const shouldBeVisible = this.isFocused.value && !isForceHidden
 
-    this.show()
-    this.toolbar.textContent = String(Math.random())
-    this.updatePosition()
+    if (shouldBeVisible) {
+      this.toolbar.textContent = String(Math.random())
+      this.updatePosition()
+      this.show()
+    } else {
+      this.hide()
+    }
   }
 
   protected show() {
-    this.toolbar.style.display = 'flex'
+    clearTimeout(this.showTimeout)
+    this.showTimeout = setTimeout(() => {
+      this.toolbar.classList.add('p-rich-text-toolbar-visible')
+    }, 150)
   }
 
   protected hide() {
-    this.toolbar.style.removeProperty('display')
+    clearTimeout(this.showTimeout)
+    this.toolbar.classList.remove('p-rich-text-toolbar-visible')
   }
 
   protected updatePosition() {

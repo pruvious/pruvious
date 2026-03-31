@@ -1,5 +1,6 @@
 <template>
   <PruviousBlockRectBase
+    v-if="parentBlocksField"
     :deepest="deepest"
     :editable="editable"
     :el="el"
@@ -7,12 +8,12 @@
     :highlighted="highlighted"
     :label="blockLabels[name] ?? name"
     :path="path"
+    @mousedown.stop
   >
     <button
-      v-if="parent.length > 1"
-      :disabled="index >= parent.length - 1"
+      :disabled="parentBlocksField.index >= parentBlocksField.fieldData.length - 1"
       :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Move down')"
-      @mousedown="moveDown()"
+      @mousedown="onMove(1)"
       tabindex="-1"
       type="button"
     >
@@ -20,10 +21,9 @@
     </button>
 
     <button
-      v-if="parent.length > 1"
-      :disabled="index < 1"
+      :disabled="parentBlocksField.index < 1"
       :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Move up')"
-      @mousedown="moveUp()"
+      @mousedown="onMove(-1)"
       tabindex="-1"
       type="button"
     >
@@ -31,8 +31,50 @@
     </button>
 
     <button
+      :disabled="!canHaveMoreSiblings"
+      :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Add after')"
+      @mousedown.prevent="onAddAfter()"
+      tabindex="-1"
+      type="button"
+    >
+      <Icon mode="svg" name="tabler:arrow-bar-to-down" />
+    </button>
+
+    <button
+      v-if="onlyBlocksField"
+      :disabled="!canHaveMoreChildren"
+      :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Add inside')"
+      @mousedown.prevent="onAddInside()"
+      tabindex="-1"
+      type="button"
+    >
+      <Icon mode="svg" name="tabler:circle-plus" />
+    </button>
+
+    <button
+      :disabled="!canHaveMoreSiblings"
+      :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Add before')"
+      @mousedown.prevent="onAddBefore()"
+      tabindex="-1"
+      type="button"
+    >
+      <Icon mode="svg" name="tabler:arrow-bar-to-up" />
+    </button>
+
+    <button
+      :disabled="!canHaveMoreSiblings"
+      :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Duplicate')"
+      @mousedown="onDuplicateBlock()"
+      tabindex="-1"
+      type="button"
+    >
+      <Icon mode="svg" name="tabler:copy" />
+    </button>
+
+    <button
       :title="t.__$('pruvious-dashboard', dashboardLanguage, 'Delete')"
-      @mousedown="deleteBlock()"
+      @mousedown="onDeleteBlock()"
+      data-destructive
       tabindex="-1"
       type="button"
     >
@@ -42,10 +84,9 @@
 </template>
 
 <script lang="ts" setup>
-import { i18n, preloadTranslatableStrings, usePruviousRoute } from '#pruvious/app'
-import { usePreviewBlockLabels, usePreviewDashboardLanguage } from '#pruvious/dashboard'
+import { i18n } from '#pruvious/app'
+import { usePreview } from '#pruvious/dashboard'
 import type { BlockName, SerializableBlock } from '#pruvious/server'
-import { castToNumber, getProperty } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -114,23 +155,83 @@ const props = defineProps({
 })
 
 const t = i18n()
-const route = usePruviousRoute()
-const blockLabels = usePreviewBlockLabels()
-const dashboardLanguage = usePreviewDashboardLanguage()
-const parent = computed<any[]>(() => getProperty(route.value?.data ?? {}, props.path.split('.').slice(0, -1).join('.')))
-const index = computed(() => Number(castToNumber(props.path.split('.').pop()) ?? -1))
+const {
+  dashboardLanguage,
+  blockLabels,
+  messageDashboard,
+  resolveBlocksField,
+  resolveParentBlocksField,
+  moveBlock,
+  duplicateBlock,
+  deleteBlock,
+  commitData,
+  selectBlockAfterMutation,
+  selectNearestBlock,
+  deselectBlocks,
+  rememberBlockSelection,
+  rememberEditableFieldSelection,
+} = usePreview()
+const parentBlocksField = computed(() => resolveParentBlocksField(props.path))
+const canHaveMoreSiblings = computed(() => parentBlocksField.value?.canHaveMoreChildren() ?? false)
+const onlyBlocksField = computed(() => {
+  const bfe = Object.entries(props.block.fields).filter(([_, { _fieldType }]) => _fieldType === 'blocks')
+  return bfe.length === 1 ? resolveBlocksField(`${props.path}.${bfe[0]![0]}`) : null
+})
+const canHaveMoreChildren = computed(() => onlyBlocksField.value?.canHaveMoreChildren() ?? false)
 
-await preloadTranslatableStrings('pruvious-dashboard', dashboardLanguage.value as any)
+function onMove(offset: number) {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
 
-function moveUp() {
-  window.parent.postMessage({ name: 'iframe:moveUpBlock', path: props.path }, window.location.origin)
+  const newBlockPath = moveBlock(props.path, offset)
+
+  if (newBlockPath) {
+    selectBlockAfterMutation(newBlockPath)
+    commitData()
+  }
 }
 
-function moveDown() {
-  window.parent.postMessage({ name: 'iframe:moveDownBlock', path: props.path }, window.location.origin)
+function onDuplicateBlock() {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
+
+  const duplicatedBlockPath = duplicateBlock(props.path)
+
+  if (duplicatedBlockPath) {
+    selectBlockAfterMutation(duplicatedBlockPath)
+    commitData()
+  }
 }
 
-function deleteBlock() {
-  window.parent.postMessage({ name: 'iframe:deleteBlock', path: props.path }, window.location.origin)
+function onDeleteBlock() {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
+
+  const selectedBlock = selectNearestBlock(props.path) || deselectBlocks()
+  const diff = deleteBlock(props.path)
+
+  if (selectedBlock && diff[selectedBlock]) {
+    selectBlockAfterMutation(diff[selectedBlock])
+  }
+
+  commitData()
+}
+
+function onAddBefore() {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
+  messageDashboard('iframe:addBlock', { blockPath: props.path, position: 'before' })
+}
+
+function onAddInside() {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
+  messageDashboard('iframe:addBlock', { blockPath: props.path, position: 'inside' })
+}
+
+function onAddAfter() {
+  rememberBlockSelection()
+  rememberEditableFieldSelection()
+  messageDashboard('iframe:addBlock', { blockPath: props.path, position: 'after' })
 }
 </script>

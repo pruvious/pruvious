@@ -118,7 +118,7 @@ function leave() {
 
 function onKeyDown(event: KeyboardEvent) {
   if (
-    event.code === 'Enter' &&
+    event.key === 'Enter' &&
     !(document.activeElement instanceof HTMLButtonElement) &&
     !event.metaKey &&
     !event.altKey &&

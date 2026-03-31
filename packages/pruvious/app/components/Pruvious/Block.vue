@@ -1,14 +1,14 @@
 <template>
   <component
     v-bind="dynamicProps"
-    :data-block="dataAttrs || preview ? block.$key : undefined"
-    :data-field="dataAttrs || preview ? fieldPath : undefined"
+    :data-block-name="dataAttrs || preview ? block.$key : undefined"
+    :data-block-path="dataAttrs || preview ? fieldPath : undefined"
     :is="component"
   />
 </template>
 
 <script lang="ts" setup>
-import { blockComponents, isPreview } from '#pruvious/app'
+import { blockComponents, blockDataInjection, blockNameInjection, blockPathInjection, isPreview } from '#pruvious/app'
 import type { BlockName, DynamicBlockFieldTypes } from '#pruvious/server'
 import { omit } from '@pruvious/utils'
 
@@ -23,7 +23,7 @@ const props = defineProps({
 
   /**
    * The full field path in dot notation associated with this block.
-   * Required for enabling live editing in the Pruvious dashboard.
+   * Required for live editing from the Pruvious dashboard.
    *
    * @example
    * ```ts
@@ -58,8 +58,8 @@ const props = defineProps({
    *
    * When true, adds:
    *
-   * - `data-field` - Contains the full field path.
-   * - `data-block` - Contains the block name.
+   * - `data-block-name` - Contains the block name.
+   * - `data-block-path` - Contains the full path to the block in dot notation.
    *
    * These attributes help identify elements in the DOM.
    *
@@ -81,7 +81,18 @@ const dynamicProps = computed(() => ({
   _index: props.index,
 }))
 
-provide('pruviousParentBlockPath', props.fieldPath)
+provide(
+  blockDataInjection,
+  computed(() => props.block),
+)
+provide(
+  blockNameInjection,
+  computed(() => props.block.$key),
+)
+provide(
+  blockPathInjection,
+  computed(() => props.fieldPath),
+)
 
 watch(
   () => props.block.$key,

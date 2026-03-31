@@ -97,7 +97,10 @@ export default defineEventHandler(async () => {
     }
 
     // Blocks
-    state.blocks = remap(blocks, ($key, block) => [$key, { ...block, fields: serializeFields(block.fields) }])
+    state.blocks = remap(blocks, ($key, block) => [
+      $key,
+      { ...block, fields: serializeFields(block.fields), ui: serializeTranslatableStringCallbacks(block.ui) },
+    ])
     state.blockGroups = await getBlockGroups().then(serializeTranslatableStringCallbacks)
     state.blockTags = await getBlockTags().then(serializeTranslatableStringCallbacks)
 

@@ -141,6 +141,25 @@ watch(
   color: var(--pui-foreground);
 }
 
+.pui-toast blockquote {
+  border-left-color: hsl(var(--pui-primary-foreground));
+  line-height: 1.625em;
+}
+
+.pui-toast blockquote + blockquote {
+  margin-top: 0.5em;
+}
+
+.pui-toast-error blockquote,
+.pui-toast[data-type='error'] blockquote,
+.pui-toast[data-type='warning'] blockquote {
+  border-left-color: rgba(0, 0, 0, 0.2);
+}
+
+.dark .pui-toast blockquote {
+  border-left-color: rgba(0, 0, 0, 0.2);
+}
+
 .pui-toast [data-icon] {
   flex-shrink: 0;
   display: block;

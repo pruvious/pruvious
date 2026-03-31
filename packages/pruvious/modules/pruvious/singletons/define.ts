@@ -903,7 +903,7 @@ export type SingletonRoutingOptions<TFieldNames extends string = string> = {
    *
    * ```vue
    * <template>
-   *   <NuxtLayout :name="route?.layout">
+   *   <NuxtLayout :name="proute?.layout">
    *     <Header />
    *     <PruviousBlocks field="blocks" />
    *     <Footer />
@@ -918,7 +918,7 @@ export type SingletonRoutingOptions<TFieldNames extends string = string> = {
    *   middleware: ['pruvious'],
    * })
    *
-   * const route = usePruviousRoute()
+   * const proute = usePruviousRoute()
    * </script>
    * ```
    *

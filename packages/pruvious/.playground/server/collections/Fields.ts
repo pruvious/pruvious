@@ -26,7 +26,6 @@ import {
   translatableTextField,
   trueFalseField,
 } from '#pruvious/server'
-import { repeaterTestField } from '#shared/repeaterTestField'
 
 export default defineCollection({
   fields: {

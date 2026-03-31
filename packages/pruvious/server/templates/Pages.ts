@@ -2,7 +2,9 @@ import { blocksField, defineTemplate } from '#pruvious/server'
 
 export default defineTemplate(() => ({
   fields: {
-    blocks: blocksField({}),
+    blocks: blocksField({
+      denyRootBlocks: ['Button', 'ProseNode'],
+    }),
   },
   routing: {
     publicFields: ['blocks', 'seo', 'createdAt', 'updatedAt'],

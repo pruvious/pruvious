@@ -46,6 +46,7 @@ function getReExports() {
     // Blocks
     `export { blockComponents } from './blocks'`,
     `export { defineBlock } from '${resolvePruviousFile('blocks/define.client')}'`,
+    `export { blockDataInjection, blockNameInjection, blockPathInjection, proseListItemBlockPathInjection } from '${resolvePruviousFile('blocks/utils.client')}'`,
 
     // Dashboard
     `export { dashboardBasePath } from '../dashboard/base'`,

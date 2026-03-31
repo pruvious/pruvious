@@ -106,6 +106,7 @@
                   $emit('queueConditionalLogicUpdate', '$reset')
                 }
               "
+              tabindex="-1"
               variant="ghost"
             >
               <Icon mode="svg" name="tabler:plus" />
@@ -118,6 +119,7 @@
               :title="__('pruvious-dashboard', 'Actions')"
               :variant="visibleActions?.id === item.id ? 'primary' : 'ghost'"
               @click="visibleActions = visibleActions?.id === item.id ? null : item"
+              tabindex="-1"
             >
               <Icon mode="svg" name="tabler:dots" />
             </PUIButton>
@@ -190,6 +192,7 @@
                   $emit('queueConditionalLogicUpdate', '$reset')
                 }
               "
+              tabindex="-1"
               variant="ghost"
             >
               <Icon mode="svg" name="tabler:plus" />
@@ -234,22 +237,7 @@
           canHaveChildren(selectedBlocks[0]!.source)
         "
         :title="__('pruvious-dashboard', 'Add inside')"
-        @click="
-          () => {
-            const nestedBlocksField = getNestedBlocksField(selectedBlocks[0]!.source)!
-            const parent = selectedBlocks[0]!.source
-            const pathPrefix = `${parent.$path}.${parent.$virtualSlotName ?? Object.keys(parent.$nestedBlocksFields)[0]}`
-            const index = parent.$children.length
-            const _allowedBlocks = nestedBlocksField.$allowedBlocks
-            if (_allowedBlocks.length > 1) {
-              addBlockPopup = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
-            } else {
-              addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
-            }
-            emitValue()
-            $emit('queueConditionalLogicUpdate', '$reset')
-          }
-        "
+        @click="addBlockInside(selectedBlocks[0]!.source)"
       >
         <Icon mode="svg" name="tabler:circle-plus" />
         <span>{{ __('pruvious-dashboard', 'Add inside') }}</span>
@@ -357,6 +345,7 @@
         <PUIButton
           v-if="typeof localErrors === 'object' && localErrors[props.fieldName]"
           v-pui-tooltip="localErrors[props.fieldName]"
+          tabindex="-1"
           variant="destructive"
           class="p-blocks-tree-error-button"
         >
@@ -370,15 +359,7 @@
             !allowedBlocks.length ||
             (fieldOptions.maxItems !== false && extendedModelValue.length >= (fieldOptions.maxItems as number))
           "
-          @click="
-            () => {
-              if (allowedBlocks.length > 1) {
-                addBlockPopup = { parent: null, index: extendedModelValue.length, pathPrefix: fieldName, allowedBlocks }
-              } else {
-                addBlock(allowedBlocks[0]!, null, extendedModelValue.length, fieldName)
-              }
-            }
-          "
+          @click="addTopLevelBlock()"
           variant="outline"
           class="p-blocks-tree-add-button"
         >
@@ -390,10 +371,28 @@
     <PruviousDashboardBlockPickerPopup
       v-if="addBlockPopup"
       :allowedBlocks="addBlockPopup.allowedBlocks"
-      @close="$event().then(() => (addBlockPopup = null))"
+      @close="
+        (close, picked) => {
+          close().then(() => {
+            addBlockPopup = null
+            $nextTick(() => {
+              if (!picked) {
+                $emit('pickBlock', null)
+              }
+            })
+          })
+        }
+      "
       @pick="
         (blockName, close) => {
-          addBlock(blockName, addBlockPopup!.parent, addBlockPopup!.index, addBlockPopup!.pathPrefix)
+          $emit('pickBlock', blockName)
+          addBlock(
+            blockName,
+            addBlockPopup!.parent,
+            addBlockPopup!.index,
+            addBlockPopup!.pathPrefix,
+            addBlockPopup!.replace,
+          )
           close().then(() => (addBlockPopup = null))
         }
       "
@@ -429,10 +428,12 @@ import {
   puiDeleteTreeItems,
   puiDropTreeItems,
   puiMoveTreeItems,
+  puiNormalizeTreeSelection,
   puiTree,
   type PUITreeMapper,
 } from '@pruvious/ui/pui/tree'
 import {
+  clamp,
   deepClone,
   isArray,
   isDefined,
@@ -575,6 +576,7 @@ const emit = defineEmits<{
   'queueConditionalLogicUpdate': [path: (string & {}) | string[] | '$reset']
   'update:selectedBlocks': [value: PUITreeItemModel<ExtendedBlockValue>[]]
   'update:highlightedBlock': [value: PUITreeItemModel<ExtendedBlockValue> | undefined]
+  'pickBlock': [blockName: BlockName | null]
 }>()
 
 const dashboard = usePruviousDashboard()
@@ -586,7 +588,7 @@ const treeMapper: PUITreeMapper<ExtendedBlockValue> = (blocks) =>
   blocks
     .filter((block) => !block.$virtualSlotName || props.conditionalLogic[block.$path])
     .map(
-      (block) =>
+      (block, i) =>
         ({
           id: block.$id,
           source: block,
@@ -616,7 +618,7 @@ const treeMapper: PUITreeMapper<ExtendedBlockValue> = (blocks) =>
                       ? sanitizedLabels[
                           block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
                         ]
-                    : block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
+                      : block[dashboard.value!.blocks[block.$key]?.ui.itemLabelConfiguration!.fieldValue as string]
                   : '')
               : '',
           nestable: !!block.$virtualSlotName || Object.keys(block.$nestedBlocksFields).length > 0,
@@ -627,13 +629,17 @@ const treeMapper: PUITreeMapper<ExtendedBlockValue> = (blocks) =>
             if (!props.disabled) {
               if (zone === 'inside') {
                 if (!!block.$virtualSlotName || Object.keys(block.$nestedBlocksFields).length === 1) {
-                  const _allowedBlocks = getNestedBlocksField(block)!.$allowedBlocks
-                  return items.every((item) => _allowedBlocks.includes(item.source.$key))
+                  const _allowedBlocks = getNestedBlocksField(block, i)!.$allowedBlocks
+                  return puiNormalizeTreeSelection(items, tree.value).every((item) =>
+                    _allowedBlocks.includes(item.source.$key),
+                  )
                 }
               } else {
                 if (!block.$virtualSlotName) {
-                  const _allowedBlocks = getParentNestedBlocksField(block)?.$allowedBlocks ?? allowedBlocks
-                  return items.every((item) => _allowedBlocks.includes(item.source.$key))
+                  const _allowedBlocks = getParentNestedBlocksField(block, i)?.$allowedBlocks ?? allowedBlocks
+                  return puiNormalizeTreeSelection(items, tree.value).every((item) =>
+                    _allowedBlocks.includes(item.source.$key),
+                  )
                 }
               }
             }
@@ -671,6 +677,7 @@ const addBlockPopup = ref<{
   index: number
   pathPrefix: string
   allowedBlocks: BlockName[]
+  replace?: boolean
 } | null>(null)
 const { tree, refresh } = puiTree(extendedModelValue, treeMapper)
 const blockLabels = Object.fromEntries(
@@ -843,11 +850,16 @@ const clearScrollPosition = useDebounceFn(() => {
   scrollPosition = undefined
 }, 250)
 
+let focusSelectedBlockTimeout: NodeJS.Timeout | undefined
+
 defineExpose({
   tree,
   updateTreePlaceholder,
   addBlockBefore,
+  addBlockInside,
   addBlockAfter,
+  addTopLevelBlock,
+  replaceBlock,
   copyItems,
   cutItems,
   pasteItems,
@@ -855,40 +867,15 @@ defineExpose({
   deleteItems,
   duplicateItems,
   canHaveSiblings,
-  scrollToSelection: () => treeComponent.value?.scrollToSelection(),
+  canHaveChildren,
+  scrollToSelection,
+  refreshTree,
+  updateFromModelValue,
 })
 
 refreshTree()
 
-watchDebounced(
-  () => props.modelValue,
-  async (value) => {
-    const newValue = JSON.stringify(value)
-    if (newValue !== prevModelValueStringified.value) {
-      modelValueDiff.workerTerminate()
-      const { structureChanged, diff } = await modelValueDiff.workerFn(newValue, prevModelValueStringified.value)
-      if (structureChanged) {
-        localErrors.value = undefined
-        extendedModelValue.splice(
-          0,
-          extendedModelValue.length,
-          ...extendBlocksValue(props.modelValue, props.fieldName, null, true),
-        )
-        emit('queueConditionalLogicUpdate', '$reset')
-      } else {
-        for (const { path, newValue } of diff) {
-          if (pathMap[`${props.fieldName}.${path}`]) {
-            setProperty({ [props.fieldName]: extendedModelValue }, pathMap[`${props.fieldName}.${path}`]!, newValue)
-            emit('queueConditionalLogicUpdate', `${props.fieldName}.${path}`)
-          }
-        }
-      }
-      prevModelValueStringified.value = newValue
-      refresh()
-    }
-  },
-  { debounce: 10 },
-)
+watchDebounced(() => props.modelValue, updateFromModelValue, { debounce: 10 })
 
 watch(
   () => props.conditionalLogic,
@@ -923,10 +910,34 @@ watch(tree, () => {
 
 useEventListener('paste', pasteItemsFromEvent)
 
+useEventListener('resize', () => updateTreePlaceholderDebounced())
+
 listen('selectAll', (event) => {
   if (treeComponent.value?.focused) {
     event.preventDefault()
     emit('update:selectedBlocks', treeComponent.value?.flatItems())
+  }
+})
+
+listen('insertBefore', (event) => {
+  if (
+    treeComponent.value?.focused &&
+    props.selectedBlocks.length === 1 &&
+    canHaveSiblings(props.selectedBlocks[0]!.source)
+  ) {
+    event.preventDefault()
+    addBlockBefore(props.selectedBlocks[0]!.source)
+  }
+})
+
+listen('insertAfter', (event) => {
+  if (
+    treeComponent.value?.focused &&
+    props.selectedBlocks.length === 1 &&
+    canHaveSiblings(props.selectedBlocks[0]!.source)
+  ) {
+    event.preventDefault()
+    addBlockAfter(props.selectedBlocks[0]!.source)
   }
 })
 
@@ -943,6 +954,8 @@ function updateTreePlaceholder() {
   }
 }
 
+const updateTreePlaceholderDebounced = useDebounceFn(updateTreePlaceholder, 50)
+
 function refreshTree() {
   extendedModelValue.splice(
     0,
@@ -951,6 +964,32 @@ function refreshTree() {
   )
   prevModelValueStringified.value = JSON.stringify(props.modelValue)
   refresh()
+}
+
+async function updateFromModelValue(value: BlockValue[]) {
+  const newValue = JSON.stringify(value)
+  if (newValue !== prevModelValueStringified.value) {
+    modelValueDiff.workerTerminate()
+    const { structureChanged, diff } = await modelValueDiff.workerFn(newValue, prevModelValueStringified.value)
+    if (structureChanged) {
+      localErrors.value = undefined
+      extendedModelValue.splice(
+        0,
+        extendedModelValue.length,
+        ...extendBlocksValue(props.modelValue, props.fieldName, null, true),
+      )
+      emit('queueConditionalLogicUpdate', '$reset')
+    } else {
+      for (const { path, newValue } of diff) {
+        if (pathMap[`${props.fieldName}.${path}`]) {
+          setProperty({ [props.fieldName]: extendedModelValue }, pathMap[`${props.fieldName}.${path}`]!, newValue)
+          emit('queueConditionalLogicUpdate', `${props.fieldName}.${path}`)
+        }
+      }
+    }
+    prevModelValueStringified.value = newValue
+    refresh()
+  }
 }
 
 function extendBlocksValue(
@@ -978,7 +1017,9 @@ function extendBlocksValue(
           $virtualSlotName: null,
           ...blockValue,
         }
-        const extendedPath = extendedPathPrefix ?? resolveExtendedPathPrefix(extendedBlockValue)
+        const extendedPath = extendedPathPrefix
+          ? `${extendedPathPrefix}.${i}`
+          : resolveExtendedPathPrefix(extendedBlockValue)
 
         pathMap[$path] = extendedPath
 
@@ -1001,7 +1042,7 @@ function extendBlocksValue(
               reuseIds,
               _extendedPath,
             )
-            for (const [i, children] of Object.entries(blockValue[keys[0]!])) {
+            for (const [i, children] of Object.entries(blockValue[keys[0]!] ?? {})) {
               for (const fieldName of Object.keys(children as any)) {
                 pathMap[`${$path}.${i}.${fieldName}`] = `${_extendedPath}.${i}.${fieldName}`
               }
@@ -1010,7 +1051,7 @@ function extendBlocksValue(
             extendedBlockValue.$children = keys.map((fieldName, i) => {
               const $path = `${extendedBlockValue.$path}.${fieldName}`
               const existingTreeItem = flattenedTreeItems?.find((item) => item.source.$path === $path)
-              pathMap[$path] = `${extendedPath}.$children.${i}`
+              pathMap[$path] = `${extendedPath}.$children.${i}.$children`
               return {
                 $id:
                   existingTreeItem?.source.$parent?.$key === blockValue.$key ? existingTreeItem!.source.$id : nanoid(),
@@ -1028,7 +1069,7 @@ function extendBlocksValue(
                 virtualSlot.$path,
                 virtualSlot,
                 reuseIds,
-                `${extendedPath}.$children.${i}`,
+                `${extendedPath}.$children.${i}.$children`,
               )
               for (const [j, children] of Object.entries(blockValue[virtualSlot.$virtualSlotName!])) {
                 for (const fieldName of Object.keys(children as any)) {
@@ -1209,7 +1250,7 @@ function retractExtendedBlocksValue(extendedBlocksValue: ExtendedBlockValue[]): 
     const block = dashboard.value!.blocks[extendedBlockValue.$key]
 
     if (block) {
-      const nestedBlocksFieldNames = Object.entries(block.fields)
+      const nestedBlocksFieldNames = Object.entries<any>(block.fields)
         .filter(([_, { _fieldType }]) => _fieldType === 'blocks')
         .map(([fieldName]) => fieldName)
 
@@ -1248,11 +1289,17 @@ function emitValue() {
   emit('commit', modelValue)
 }
 
-function addBlock(blockName: BlockName, parent: ExtendedBlockValue | null, index: number, pathPrefix: string) {
+function addBlock(
+  blockName: BlockName,
+  parent: ExtendedBlockValue | null,
+  index: number,
+  pathPrefix: string,
+  replace = false,
+) {
   const block = createBlock(blockName)
   const extendedBlock = extendBlocksValue([block], pathPrefix, parent)[0]!
   const { $children } = parent ? getLists(parent) : { $children: extendedModelValue }
-  $children.splice(index, 0, extendedBlock)
+  $children.splice(index, +replace, extendedBlock)
   $children.splice(0, $children.length, ...repairExtendedBlocksValue($children, pathPrefix, parent))
   const newModelValue = retractExtendedBlocksValue(extendedModelValue)
   prevModelValueStringified.value = JSON.stringify(newModelValue)
@@ -1269,10 +1316,11 @@ function addBlock(blockName: BlockName, parent: ExtendedBlockValue | null, index
     emitValue()
     emit('update:selectedBlocks', [treeItem])
     emit('queueConditionalLogicUpdate', '$reset')
+    setTimeout(() => scrollToSelection('smooth'))
   })
 }
 
-function addBlockBefore(block: ExtendedBlockValue) {
+function addBlockBefore(block: ExtendedBlockValue): 'direct' | 'popup' {
   const nestedBlocksField = getParentNestedBlocksField(block)
   const parent = block.$parent
   const { $children } = getParentLists(block)
@@ -1286,9 +1334,26 @@ function addBlockBefore(block: ExtendedBlockValue) {
   }
   emitValue()
   emit('queueConditionalLogicUpdate', '$reset')
+  return _allowedBlocks.length > 1 ? 'popup' : 'direct'
 }
 
-function addBlockAfter(block: ExtendedBlockValue) {
+function addBlockInside(block: ExtendedBlockValue): 'direct' | 'popup' {
+  const nestedBlocksField = getNestedBlocksField(block)
+  const parent = block
+  const pathPrefix = `${parent.$path}.${parent.$virtualSlotName ?? Object.keys(parent.$nestedBlocksFields)[0]}`
+  const index = parent.$children.length
+  const _allowedBlocks = nestedBlocksField?.$allowedBlocks ?? allowedBlocks
+  if (_allowedBlocks.length > 1) {
+    addBlockPopup.value = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks }
+  } else {
+    addBlock(_allowedBlocks[0]!, parent, index, pathPrefix)
+  }
+  emitValue()
+  emit('queueConditionalLogicUpdate', '$reset')
+  return _allowedBlocks.length > 1 ? 'popup' : 'direct'
+}
+
+function addBlockAfter(block: ExtendedBlockValue): 'direct' | 'popup' {
   const nestedBlocksField = getParentNestedBlocksField(block)
   const parent = block.$parent
   const { $children } = getParentLists(block)
@@ -1302,6 +1367,42 @@ function addBlockAfter(block: ExtendedBlockValue) {
   }
   emitValue()
   emit('queueConditionalLogicUpdate', '$reset')
+  return _allowedBlocks.length > 1 ? 'popup' : 'direct'
+}
+
+function addTopLevelBlock(position: 'start' | 'end' = 'end'): 'direct' | 'popup' | false {
+  const index = position === 'start' ? 0 : extendedModelValue.length
+
+  if (props.fieldOptions.maxItems === false || extendedModelValue.length < props.fieldOptions.maxItems!) {
+    if (allowedBlocks.length > 1) {
+      addBlockPopup.value = { parent: null, index, pathPrefix: props.fieldName, allowedBlocks }
+    } else {
+      addBlock(allowedBlocks[0]!, null, index, props.fieldName)
+    }
+
+    return allowedBlocks.length > 1 ? 'popup' : 'direct'
+  }
+
+  return false
+}
+
+function replaceBlock(block: ExtendedBlockValue, forcePopup = false): 'direct' | 'popup' {
+  const nestedBlocksField = getParentNestedBlocksField(block)
+  const parent = block.$parent
+  const { $children } = getParentLists(block)
+  const pathPrefix = block.$path.split('.').slice(0, -1).join('.')
+  const index = $children.indexOf(toRaw(block))
+  const _allowedBlocks = (nestedBlocksField?.$allowedBlocks ?? allowedBlocks).filter(
+    (blockName) => blockName !== block.$key,
+  )
+  if (_allowedBlocks.length > 1 || forcePopup) {
+    addBlockPopup.value = { parent, index, pathPrefix, allowedBlocks: _allowedBlocks, replace: true }
+  } else {
+    addBlock(_allowedBlocks[0]!, parent, index, pathPrefix, true)
+  }
+  emitValue()
+  emit('queueConditionalLogicUpdate', '$reset')
+  return _allowedBlocks.length > 1 || forcePopup ? 'popup' : 'direct'
 }
 
 function createBlock(blockName: BlockName) {
@@ -1314,20 +1415,19 @@ function createBlock(blockName: BlockName) {
   }
 }
 
-function getNestedBlocksField(extendedBlockValue: ExtendedBlockValue) {
+function getNestedBlocksField(extendedBlockValue: ExtendedBlockValue, slotIndex = 0) {
   if (extendedBlockValue.$virtualSlotName) {
     return extendedBlockValue.$parent!.$nestedBlocksFields[extendedBlockValue.$virtualSlotName]!
   } else if (!isEmpty(extendedBlockValue.$nestedBlocksFields)) {
-    return extendedBlockValue.$nestedBlocksFields[Object.keys(extendedBlockValue.$nestedBlocksFields)[0]!]!
+    const i = clamp(slotIndex, 0, Object.keys(extendedBlockValue.$nestedBlocksFields).length - 1)
+    return extendedBlockValue.$nestedBlocksFields[Object.keys(extendedBlockValue.$nestedBlocksFields)[i]!]!
   }
   return null
 }
 
-function getParentNestedBlocksField(extendedBlockValue: ExtendedBlockValue) {
+function getParentNestedBlocksField(extendedBlockValue: ExtendedBlockValue, slotIndex = 0) {
   if (extendedBlockValue.$parent) {
-    return extendedBlockValue.$parent.$virtualSlotName
-      ? extendedBlockValue.$parent.$parent!.$nestedBlocksFields[extendedBlockValue.$parent.$virtualSlotName]!
-      : extendedBlockValue.$parent.$nestedBlocksFields[Object.keys(extendedBlockValue.$parent.$nestedBlocksFields)[0]!]!
+    return getNestedBlocksField(extendedBlockValue.$parent, slotIndex)
   }
   return null
 }
@@ -1386,13 +1486,41 @@ function canHaveSiblings(extendedBlockValue: ExtendedBlockValue) {
   }
 }
 
-function canHaveChildren(extendedBlockValue: ExtendedBlockValue) {
-  const nestedBlocksField = getNestedBlocksField(extendedBlockValue)
+function canHaveChildren(extendedBlockValue: ExtendedBlockValue, slotIndex = 0) {
+  const nestedBlocksField = getNestedBlocksField(extendedBlockValue, slotIndex)
   return (
     !!nestedBlocksField &&
     nestedBlocksField.$allowedBlocks.length > 0 &&
     (nestedBlocksField.maxItems === false || nestedBlocksField.maxItems > extendedBlockValue.$children.length)
   )
+}
+
+function scrollToSelection(behavior: ScrollBehavior = 'instant') {
+  if (props.selectedBlocks.length && treeComponent.value?.scrollable) {
+    const item = props.selectedBlocks[0]!
+    const { activeItems, scrollable, calcItemSizes } = treeComponent.value
+    const { itemHeight } = calcItemSizes()
+
+    let offset = 0
+    let found = false
+
+    for (const i of activeItems.map(({ item }) => item)) {
+      if (i.id === item.id) {
+        found = true
+        break
+      } else {
+        offset++
+      }
+    }
+
+    const itemTop = found ? itemHeight * offset : 0
+    const scrollTop = scrollable.scroll.y.value
+    const scrollBottom = scrollTop + scrollable.$el.offsetHeight
+
+    if (itemTop < scrollTop || itemTop + itemHeight > scrollBottom) {
+      scrollable?.$el.scrollTo({ top: itemTop + itemHeight / 2 - (scrollBottom - scrollTop) / 2, behavior })
+    }
+  }
 }
 
 function deleteItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: Event) {
@@ -1472,10 +1600,8 @@ function moveItems(
       emitValue()
       emit('queueConditionalLogicUpdate', '$reset')
       nextTick(() => {
-        treeComponent.value?.scrollToSelection()
-        setTimeout(() =>
-          (treeComponent.value?.root?.querySelector('.pui-tree-item-button-selected') as HTMLElement)?.focus(),
-        )
+        scrollToSelection()
+        setTimeout(focusSelectedBlock)
       })
     })
   }
@@ -1518,9 +1644,7 @@ function dropItems(
       )
       emitValue()
       emit('queueConditionalLogicUpdate', '$reset')
-      nextTick(() =>
-        (treeComponent.value?.root?.querySelector('.pui-tree-item-button-selected') as HTMLElement)?.focus(),
-      )
+      nextTick(focusSelectedBlock)
     })
   }
 }
@@ -1559,6 +1683,7 @@ function duplicateItems(items: PUITreeItemModel<ExtendedBlockValue>[], event?: E
         clones.map((clone) => treeComponent.value?.flatItems().find((item) => item.source.$id === clone.$id)!),
       )
       emit('queueConditionalLogicUpdate', '$reset')
+      setTimeout(scrollToSelection)
     })
   }
 }
@@ -1599,13 +1724,35 @@ function pasteItems(
 ) {
   if (blockValues.length) {
     const newIds: string[] = []
+    const errors: string[] = []
+
     if (targets.length) {
       for (const target of targets) {
         const keys = Object.keys(target.source.$nestedBlocksFields)
+
         if (keys.length > 0 && position === 'auto') {
-          const nestedBlocksField = getNestedBlocksField(target.source)!
+          const nestedBlocksField = getNestedBlocksField(target.source) as NestedBlocksField
+
           for (const blockValue of blockValues) {
-            if (nestedBlocksField.$allowedBlocks.includes(blockValue.$key) && canHaveChildren(target.source)) {
+            const parentLabel =
+              target.source.$nestedBlocksFields && Object.keys(target.source.$nestedBlocksFields).length > 1
+                ? `${target.source.$key}.${Object.keys(target.source.$nestedBlocksFields)[0]!}`
+                : target.source.$key
+
+            if (!nestedBlocksField.$allowedBlocks.includes(blockValue.$key)) {
+              errors.push(
+                __('pruvious-dashboard', 'Block `$block` is not allowed inside `$parent`', {
+                  block: blockValue.$key,
+                  parent: parentLabel,
+                }),
+              )
+            } else if (!canHaveChildren(target.source)) {
+              errors.push(
+                __('pruvious-dashboard', 'Parent block `$parent` cannot have more child blocks', {
+                  parent: parentLabel,
+                }),
+              )
+            } else {
               const extendedBlock = extendBlocksValue([blockValue], target.source.$path, target.source)[0]!
               const $children = keys.length === 1 ? target.source.$children : target.source.$children[0]!.$children
               $children.push(extendedBlock)
@@ -1614,13 +1761,36 @@ function pasteItems(
           }
         } else {
           const nestedBlocksField = getParentNestedBlocksField(target.source)
+
           for (const blockValue of blockValues) {
-            if (
-              nestedBlocksField
-                ? nestedBlocksField.$allowedBlocks.includes(blockValue.$key) && canHaveSiblings(target.source)
-                : allowedBlocks.includes(blockValue.$key) &&
-                  (props.fieldOptions.maxItems === false || extendedModelValue.length < props.fieldOptions.maxItems)
+            const parentLabel = target.source.$parent?.$virtualSlotName
+              ? `${target.source.$parent.$parent?.$key}.${target.source.$parent.$virtualSlotName}`
+              : target.source.$parent?.$key
+
+            if (nestedBlocksField && !nestedBlocksField.$allowedBlocks.includes(blockValue.$key)) {
+              errors.push(
+                __('pruvious-dashboard', 'Block `$block` is not allowed inside `$parent`', {
+                  block: blockValue.$key,
+                  parent: parentLabel,
+                }),
+              )
+            } else if (nestedBlocksField && !canHaveSiblings(target.source)) {
+              errors.push(
+                __('pruvious-dashboard', 'Parent block `$parent` cannot have more child blocks', {
+                  parent: parentLabel,
+                }),
+              )
+            } else if (!nestedBlocksField && !allowedBlocks.includes(blockValue.$key)) {
+              errors.push(
+                __('pruvious-dashboard', 'Block `$block` is not allowed at the top level', { block: blockValue.$key }),
+              )
+            } else if (
+              !nestedBlocksField &&
+              props.fieldOptions.maxItems !== false &&
+              extendedModelValue.length >= props.fieldOptions.maxItems
             ) {
+              errors.push(__('pruvious-dashboard', 'Cannot add more blocks at the top level'))
+            } else {
               const extendedBlock = extendBlocksValue([blockValue], target.source.$path, target.source)[0]!
               const $children = target.source.$parent?.$children ?? extendedModelValue
               const index = $children.indexOf(toRaw(target.source)) + (1 - Number(position === 'before'))
@@ -1632,40 +1802,57 @@ function pasteItems(
       }
     } else {
       for (const blockValue of blockValues) {
-        if (
-          allowedBlocks.includes(blockValue.$key) &&
-          (props.fieldOptions.maxItems === false || extendedModelValue.length < props.fieldOptions.maxItems)
-        ) {
+        if (!allowedBlocks.includes(blockValue.$key)) {
+          errors.push(
+            __('pruvious-dashboard', 'Block `$block` is not allowed at the top level', { block: blockValue.$key }),
+          )
+        } else if (props.fieldOptions.maxItems !== false && extendedModelValue.length >= props.fieldOptions.maxItems) {
+          errors.push(__('pruvious-dashboard', 'Cannot add more blocks at the top level'))
+        } else {
           const extendedBlock = extendBlocksValue([blockValue], props.fieldName)[0]!
           extendedModelValue.push(extendedBlock)
           newIds.push(extendedBlock.$id)
         }
       }
     }
+
     extendedModelValue.splice(
       0,
       extendedModelValue.length,
       ...repairExtendedBlocksValue(extendedModelValue, props.fieldName),
     )
+
     const newModelValue = retractExtendedBlocksValue(extendedModelValue)
+    const newData = { ...props.data, [props.fieldName]: newModelValue }
+
     prevModelValueStringified.value = JSON.stringify(newModelValue)
     localErrors.value = undefined
-    const newData = { ...props.data, [props.fieldName]: newModelValue }
+
     props.conditionalLogicResolver
       ?.setInput(newData)
       .setConditionalLogic(parseConditionalLogic(props.fields ?? {}, newData))
       .resolve()
+
     Object.assign(props.conditionalLogic ?? {}, props.conditionalLogicResolver?.results)
     refresh()
+
     setTimeout(() => {
       const treeItems = treeComponent.value!.flatItems().filter((item) => newIds.includes(item.source.$id))
-      emitValue()
-      emit('update:selectedBlocks', treeItems)
-      emit('queueConditionalLogicUpdate', '$reset')
+      if (treeItems.length) {
+        emitValue()
+        emit('update:selectedBlocks', treeItems)
+        emit('queueConditionalLogicUpdate', '$reset')
+        setTimeout(scrollToSelection)
+      }
     })
+
     const notPasted = blockValues.length * (targets.length || 1) - newIds.length
+
     if (notPasted) {
-      puiToast(__('pruvious-dashboard', '$count blocks could not be pasted', { count: notPasted }), { type: 'warning' })
+      puiToast(__('pruvious-dashboard', '$count blocks could not be pasted', { count: notPasted }), {
+        type: 'warning',
+        description: errors.map((error) => `> ${error}.`).join('\n\n') || undefined,
+      })
     }
   }
 }
@@ -1687,6 +1874,16 @@ function cloneBlock(extendedBlockValue: ExtendedBlockValue): ExtendedBlockValue 
 function randomizeIds(extendedBlockValue: ExtendedBlockValue) {
   extendedBlockValue.$id = nanoid()
   extendedBlockValue.$children.forEach(randomizeIds)
+}
+
+function focusSelectedBlock(retries = 3, delay = 50) {
+  const button = treeComponent.value?.root?.querySelector('.pui-tree-item-button-selected') as HTMLElement
+  clearTimeout(focusSelectedBlockTimeout)
+  if (button) {
+    button.focus()
+  } else if (retries > 0) {
+    focusSelectedBlockTimeout = setTimeout(() => focusSelectedBlock(retries - 1, delay * 2), delay)
+  }
 }
 </script>
 

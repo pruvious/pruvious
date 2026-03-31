@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePruviousRoute } from '#pruvious/app'
+import { blockPathInjection, usePruviousRoute } from '#pruvious/app'
 import type { BlockName, DynamicBlockFieldTypes } from '#pruvious/server'
 import { getProperty } from '@pruvious/utils'
 
@@ -28,7 +28,7 @@ const props = defineProps({
   /**
    * The name of this `blocks` field.
    * Can be a relative path using dot notation, starting from the closest parent block, collection, or singleton.
-   * Required for enabling live editing in the Pruvious dashboard.
+   * Required for live editing from the Pruvious dashboard.
    *
    * When using this prop, you don't need to provide the `blocks` prop as the blocks value will be
    * automatically resolved from the current route data.
@@ -59,8 +59,8 @@ const props = defineProps({
    *
    * When true, adds:
    *
-   * - `data-field` - Contains the full field path.
-   * - `data-block` - Contains the block name.
+   * - `data-block-name` - Contains the block name.
+   * - `data-block-path` - Contains the full path to the block in dot notation.
    *
    * These attributes help identify elements in the DOM.
    *
@@ -73,8 +73,8 @@ const props = defineProps({
 })
 
 const proute = usePruviousRoute()
-const parentBlockPath = inject<string | undefined>('pruviousParentBlockPath', undefined)
-const blocksFieldPath = computed(() => (parentBlockPath ? `${parentBlockPath}.${props.field}` : props.field))
+const parentBlockPath = inject(blockPathInjection, undefined)
+const blocksFieldPath = computed(() => (parentBlockPath ? `${parentBlockPath.value}.${props.field}` : props.field))
 const resolvedBlocks = computed(
   () => props.blocks ?? (props.field ? getProperty(proute.value?.data ?? {}, blocksFieldPath.value!) : undefined),
 )

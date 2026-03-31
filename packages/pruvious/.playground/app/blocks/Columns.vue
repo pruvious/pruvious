@@ -31,6 +31,7 @@ defineProps({
   column2: blocksField({
     allowNestedBlocks: ['Button', 'Image'],
     conditionalLogic: { orGroup: [{ columns: { '=': 2 } }, { columns: { '=': 3 } }, { columns: { '=': 4 } }] },
+    maxItems: 5,
   }),
   column3: blocksField({
     denyRootBlocks: ['Button', 'Image'],

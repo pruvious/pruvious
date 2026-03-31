@@ -155,8 +155,8 @@ function getReExports() {
     `export { type DashboardMiddleware, type DashboardMiddlewareContext, dashboardMiddleware } from '${resolvePruviousFile('middleware/utils.client')}'`,
 
     // Preview
-    `export { usePreviewKey } from '${resolvePruviousFile('preview/composable')}'`,
-    `export { usePreviewParsedFields, usePreviewHighlightedBlocks, usePreviewFocusedBlocks, usePreviewFields, usePreviewBlocks, usePreviewBlockLabels, usePreviewRouteReferences, usePreviewIsEditable, usePreviewFocusNext, usePreviewDashboardLanguage, initializePreview } from '${resolvePruviousFile('preview/utils.client')}'`,
+    `export { type UsePreview, usePreview, initializePreview } from '${resolvePruviousFile('preview/utils.client')}'`,
+    `export type { IframeMessage, IframeMessageReady, IframeMessageToast, IframeMessageData, IframeMessageFocus, IframeMessageBlur, IframeMessageUndo, IframeMessageRedo, IframeSelectBlock, DashboardMessage, DashboardMessageSetup, DashboardMessageData, DashboardMessageHistory, DashboardHighlightBlock, DashboardFocusBlock, DashboardRestoreFocus, DashboardAllowBlockSelection } from '${resolvePruviousFile('preview/utils/messages')}'`,
 
     // Pruvious
     `export { usePruvious, usePruviousDashboard, refreshPruviousState, refreshPruviousDashboardState, deserializeTranslatableStringCallbacks } from '${resolvePruviousFile('pruvious/utils.client')}'`,

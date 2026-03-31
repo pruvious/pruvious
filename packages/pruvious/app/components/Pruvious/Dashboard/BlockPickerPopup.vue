@@ -1,5 +1,13 @@
 <template>
-  <PUIPopup :size="-1" @close="close()" fullHeight="auto" ref="popup" width="36rem">
+  <PUIPopup
+    :overlayTransitionDuration="150"
+    :size="-1"
+    @close="close()"
+    @overlayAnimated="focusSearchInput()"
+    fullHeight="auto"
+    ref="popup"
+    width="36rem"
+  >
     <template #header>
       <span class="p-title pui-row">
         <span class="pui-truncate">{{ __('pruvious-dashboard', 'Select block') }}</span>
@@ -16,10 +24,76 @@
     </template>
 
     <div v-if="!allowedBlocks || allowedBlocks.length">
-      <div v-if="!allowedBlocks || allowedBlocks.length > 1" class="p-block-picker-search">
+      <div class="p-block-picker-search">
         <PUIInput
           v-model="searchValue"
           :placeholder="__('pruvious-dashboard', 'Search...')"
+          @blur="
+            () => {
+              searchInputFocused = false
+              mousePaused = false
+              highlightedBlock = null
+            }
+          "
+          @focus="
+            () => {
+              searchInputFocused = true
+              mousePaused = true
+              highlightedBlock = getFirstFilteredBlock()
+            }
+          "
+          @input="
+            () => {
+              mousePaused = true
+              $nextTick(() => {
+                highlightedBlock = getFirstFilteredBlock()
+              })
+            }
+          "
+          @keydown.down="
+            (event: KeyboardEvent) => {
+              if (!event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+                highlightNext(true)
+              }
+            }
+          "
+          @keydown.enter="
+            () => {
+              if (highlightedBlock) {
+                picked = highlightedBlock
+                $emit('pick', highlightedBlock, close)
+              }
+            }
+          "
+          @keydown.left="
+            (event: KeyboardEvent) => {
+              if (!event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+                highlightPrevious()
+              }
+            }
+          "
+          @keydown.right="
+            (event: KeyboardEvent) => {
+              if (!event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+                highlightNext()
+              }
+            }
+          "
+          @keydown.tab="
+            (event: KeyboardEvent) => {
+              if (!event.shiftKey) {
+                mousePaused = false
+                $nextTick(focusFirstFilteredBlock)
+              }
+            }
+          "
+          @keydown.up="
+            (event: KeyboardEvent) => {
+              if (!event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+                highlightPrevious(true)
+              }
+            }
+          "
           name="p-block-picker-search"
         />
         <PUIButton
@@ -67,8 +141,15 @@
         <div class="p-block-picker-blocks">
           <button
             v-for="block of group.blocks"
-            @click="$emit('pick', block.name, close)"
+            :disabled="mousePaused"
+            @click="
+              () => {
+                picked = block.name
+                $emit('pick', block.name, close)
+              }
+            "
             class="p-block-picker-block pui-raw"
+            :class="{ 'p-block-picker-block-highlighted': highlightedBlock === block.name }"
           >
             <Icon :name="`tabler:${block.icon}`" mode="svg" class="p-block-picker-block-icon" />
             <span class="p-block-picker-block-meta">
@@ -94,6 +175,7 @@ import { __ } from '#pruvious/app'
 import { maybeTranslate, usePruviousDashboard } from '#pruvious/dashboard'
 import type { BlockName } from '#pruvious/server'
 import { isDefined, isObject, searchByKeywords, titleCase } from '@pruvious/utils'
+import { useEventListener } from '@vueuse/core'
 
 interface BlockItem {
   name: BlockName
@@ -122,7 +204,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  close: [close: () => Promise<void>]
+  close: [close: () => Promise<void>, picked: BlockName | null]
   pick: [blockName: BlockName, close: () => Promise<void>]
 }>()
 
@@ -202,21 +284,183 @@ const filteredGroups = computed<BlockGroupItem[]>(() => {
     }))
     .filter((group) => group.blocks.length)
 })
+const prevFocus = document.activeElement as HTMLElement | null
+const searchInputFocused = ref(true)
+const mousePaused = ref(true)
+const highlightedBlock = ref<BlockName | null>(null)
+const picked = ref<BlockName | null>(null)
 
-let transitionDuration = 300
+let initialFocus = false
 
-onMounted(() => {
-  const potd = getComputedStyle(document.body).getPropertyValue('--pui-overlay-transition-duration')
-  transitionDuration = potd.endsWith('ms') ? parseInt(potd) : potd.endsWith('s') ? parseFloat(potd) * 1000 : 300
-  setTimeout(() => setTimeout(focusSearchInput, transitionDuration), transitionDuration)
+const stopKeyDownListener = useEventListener(
+  'keydown',
+  (event: KeyboardEvent) => {
+    if (initialFocus) {
+      stopKeyDownListener()
+    } else {
+      if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        searchValue.value += event.key
+        event.preventDefault()
+      }
+    }
+  },
+  { capture: true },
+)
+
+useEventListener('mousemove', () => {
+  mousePaused.value = false
 })
 
 function focusSearchInput() {
+  initialFocus = true
   popup.value?.root?.querySelector('input')?.focus()
 }
 
+function getFirstFilteredBlock(): BlockName | null {
+  for (const group of filteredGroups.value) {
+    if (group.blocks.length) {
+      return group.blocks[0]!.name
+    }
+  }
+  return null
+}
+
+function getLastFilteredBlock(): BlockName | null {
+  for (let i = filteredGroups.value.length - 1; i >= 0; i--) {
+    const group = filteredGroups.value[i]!
+    if (group.blocks.length) {
+      return group.blocks[group.blocks.length - 1]!.name
+    }
+  }
+  return null
+}
+
+function focusFirstFilteredBlock() {
+  const firstBlockName = getFirstFilteredBlock()
+  if (firstBlockName) {
+    popup.value?.root?.querySelector<HTMLButtonElement>('.p-block-picker-block:not([disabled])')?.focus()
+  }
+}
+
+function highlightPrevious(up = false) {
+  const isTwoColumn = window.innerWidth > 520
+  const sameColumn = up && isTwoColumn
+
+  if (!highlightedBlock.value) {
+    highlightedBlock.value = getLastFilteredBlock()
+    return
+  }
+
+  let groupIndex = -1
+  let blockIndex = -1
+
+  for (let i = 0; i < filteredGroups.value.length; i++) {
+    const foundIndex = filteredGroups.value[i]!.blocks.findIndex((b) => b.name === highlightedBlock.value)
+    if (foundIndex !== -1) {
+      groupIndex = i
+      blockIndex = foundIndex
+      break
+    }
+  }
+
+  if (groupIndex === -1) return
+
+  const step = sameColumn ? 2 : 1
+  const newBlockIndex = blockIndex - step
+
+  if (newBlockIndex >= 0) {
+    highlightedBlock.value = filteredGroups.value[groupIndex]!.blocks[newBlockIndex]!.name
+    return
+  }
+
+  if (groupIndex > 0) {
+    const prevGroup = filteredGroups.value[groupIndex - 1]!
+    const prevLen = prevGroup.blocks.length
+
+    if (!sameColumn) {
+      highlightedBlock.value = prevGroup.blocks[prevLen - 1]!.name
+      return
+    }
+
+    const currentColumn = blockIndex % 2
+    const lastPrevColumn = (prevLen - 1) % 2
+
+    let targetIndex = prevLen - 1
+    if (currentColumn !== lastPrevColumn) {
+      targetIndex = prevLen - 2
+    }
+
+    if (targetIndex >= 0) {
+      highlightedBlock.value = prevGroup.blocks[targetIndex]!.name
+    } else {
+      highlightedBlock.value = prevGroup.blocks[prevLen - 1]!.name
+    }
+  }
+}
+
+function highlightNext(down = false) {
+  const isTwoColumn = window.innerWidth > 520
+  const sameColumn = down && isTwoColumn
+
+  if (!highlightedBlock.value) {
+    highlightedBlock.value = getFirstFilteredBlock()
+    return
+  }
+
+  let groupIndex = -1
+  let blockIndex = -1
+
+  for (let i = 0; i < filteredGroups.value.length; i++) {
+    const foundIndex = filteredGroups.value[i]!.blocks.findIndex((b) => b.name === highlightedBlock.value)
+    if (foundIndex !== -1) {
+      groupIndex = i
+      blockIndex = foundIndex
+      break
+    }
+  }
+
+  if (groupIndex === -1) return
+
+  const step = sameColumn ? 2 : 1
+  const newBlockIndex = blockIndex + step
+  const currentGroupBlocks = filteredGroups.value[groupIndex]!.blocks
+
+  if (newBlockIndex < currentGroupBlocks.length) {
+    highlightedBlock.value = currentGroupBlocks[newBlockIndex]!.name
+    return
+  }
+
+  if (groupIndex < filteredGroups.value.length - 1) {
+    const nextGroup = filteredGroups.value[groupIndex + 1]!
+
+    if (!sameColumn) {
+      highlightedBlock.value = nextGroup.blocks[0]!.name
+      return
+    }
+
+    const currentColumn = blockIndex % 2
+
+    if (currentColumn === 0) {
+      highlightedBlock.value = nextGroup.blocks[0]!.name
+    } else {
+      if (nextGroup.blocks.length > 1) {
+        highlightedBlock.value = nextGroup.blocks[1]!.name
+      } else {
+        highlightedBlock.value = nextGroup.blocks[0]!.name
+      }
+    }
+  }
+}
+
 async function close() {
-  emit('close', popup.value!.close)
+  emit(
+    'close',
+    async () => {
+      await popup.value!.close()
+      setTimeout(() => prevFocus?.focus())
+    },
+    picked.value,
+  )
 }
 </script>
 
@@ -301,7 +545,12 @@ async function close() {
   transition-property: background-color, border-color, box-shadow, color;
 }
 
-.p-block-picker-block:hover {
+.p-block-picker-block[disabled] {
+  pointer-events: none;
+}
+
+.p-block-picker-block:hover,
+.p-block-picker-block-highlighted {
   background-color: hsl(var(--pui-accent));
   border-color: hsl(var(--pui-accent));
   color: hsl(var(--pui-accent-foreground));

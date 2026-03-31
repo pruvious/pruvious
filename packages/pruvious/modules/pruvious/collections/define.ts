@@ -1655,7 +1655,7 @@ export type CollectionRoutingOptions<
    *
    * ```vue
    * <template>
-   *   <NuxtLayout :name="route?.layout">
+   *   <NuxtLayout :name="proute?.layout">
    *     <Header />
    *     <PruviousBlocks field="blocks" />
    *     <Footer />
@@ -1670,7 +1670,7 @@ export type CollectionRoutingOptions<
    *   middleware: ['pruvious'],
    * })
    *
-   * const route = usePruviousRoute()
+   * const proute = usePruviousRoute()
    * </script>
    * ```
    *

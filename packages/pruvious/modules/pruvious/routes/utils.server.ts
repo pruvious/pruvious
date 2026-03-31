@@ -10,7 +10,7 @@ import {
   type RouteReferences,
   type Singletons,
 } from '#pruvious/server'
-import type { ExtractPopulatedTypes, GenericField } from '@pruvious/orm'
+import type { ExtractCastedTypes, ExtractPopulatedTypes, GenericField } from '@pruvious/orm'
 import { isNotNull, pick, withLeadingSlash, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
 
 export interface GenericRouteReference {
@@ -101,7 +101,9 @@ export type ResolvedRoute<TRef extends RouteReferenceName = RouteReferenceName> 
   /**
    * The `routing.publicFields` values of the referenced collection or singleton.
    */
-  data: ExtractPopulatedTypes<RouteReferences[TRef]['publicFields']>
+  data: ExtractPopulatedTypes<RouteReferences[TRef]['publicFields']> & {
+    _casted?: ExtractCastedTypes<RouteReferences[TRef]['publicFields']>
+  }
 
   /**
    * The layout key used to render the collection's route.

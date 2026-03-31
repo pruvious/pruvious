@@ -13,6 +13,7 @@ defineBlock({
     itemLabelConfiguration: {
       fieldValue: 'text',
       showBlockLabel: false,
+      stripHTML: true,
     },
   },
 })

@@ -1,23 +1,43 @@
 <template>
-  <PruviousRichText
-    :data-field="parentBlockPath ? `${parentBlockPath}.${fieldPath}` : fieldPath"
-    :key="tag"
-    :modelValue="html"
-    :placeholder="placeholder"
+  <PruviousRichTextController
+    :blocks="blocks"
+    :castedData="(proute?.data as any)._casted ?? {}"
+    :data="proute?.data ?? {}"
+    :fieldOptions="parsedFields[fieldPath] ?? ({} as any)"
+    :fieldPath="fieldPath"
+    :focusedBlocks="focusedBlocks"
+    :focusNext="focusNext"
+    :html="html"
+    :parsedFields="parsedFields"
     :tag="tag"
-    @commit="commit"
-    @enterKey="onEnterKey()"
-    @redo="onRedo()"
-    @undo="onUndo()"
-    @update:modelValue="key = nanoid()"
-    ref="root"
+    @deselectBlock="onDeselectBlock"
+    @input="onInput"
+    @queueBlockSelection="onQueueBlockSelection"
+    @selectBlock="onSelectBlock"
+    @update:blocksField="onUpdateBlocksField"
+    @update:blocksFieldCasted="onUpdateBlocksFieldCasted"
+    @update:castedData="onUpdateCastedData"
+    @update:data="onUpdateData"
+    @update:focusedBlocks="onUpdateFocusedBlocks"
+    @update:focusNext="onUpdateFocusNext"
   />
 </template>
 
 <script lang="ts" setup>
 import { usePruviousRoute } from '#pruvious/app'
-import { usePreviewFocusNext, usePreviewIsEditable, usePreviewKey } from '#pruvious/dashboard'
-import { isStringInteger, nanoid } from '@pruvious/utils'
+import {
+  parseFields,
+  postMessageToDashboard,
+  queueBlockSelection,
+  queuePostMessageUpdates,
+  usePreviewBlocks,
+  usePreviewFocusedBlocks,
+  usePreviewFocusNext,
+  usePreviewParsedFields,
+  usePreviewPublicFields,
+} from '#pruvious/dashboard'
+import type { BlockName } from '#pruvious/server'
+import { isNull, setProperty } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -32,9 +52,7 @@ const props = defineProps({
    * The HTML tag name to use for the root element when rendering this component.
    */
   tag: {
-    type: String as PropType<
-      'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'pre' | 'ul' | 'ol' | 'li' | (string & {})
-    >,
+    type: String,
     required: true,
   },
 
@@ -54,56 +72,76 @@ const props = defineProps({
   },
 })
 
-const root = useTemplateRef('root')
 const proute = usePruviousRoute()
-const key = usePreviewKey()
-const editable = usePreviewIsEditable() // @todo disable `PruviousRichText` if not editable
+const publicFields = usePreviewPublicFields()
+const parsedFields = usePreviewParsedFields()
+const blocks = usePreviewBlocks()
+const focusedBlocks = usePreviewFocusedBlocks()
 const focusNext = usePreviewFocusNext()
-const fieldOptions = undefined // @todo resolve field options
-const placeholder = undefined // @todo resolve placeholder from field options
-const parentBlockPath = inject<string | undefined>('pruviousParentBlockPath')
 
-watch(
-  focusNext,
-  (focus) => {
-    if (focus?.path === props.fieldPath && focus.timestamp + 500 > Date.now()) {
-      setTimeout(() => {
-        root.value?.$el.focus()
-      })
-    }
-  },
-  { immediate: true },
-)
-
-function commit(value: string) {
-  window.parent.postMessage(
-    {
-      name: 'iframe:update',
-      key: key.value,
-      path: props.fieldPath,
-      value,
-    },
-    window.location.origin,
-  )
-}
-
-function onEnterKey() {
-  const blockPath = props.fieldPath.split('.').slice(0, -1).join('.')
-  const indexString = blockPath.split('.').pop()
-  const index = isStringInteger(indexString) ? +indexString : -1
-
-  if (parentBlockPath === blockPath && index > -1) {
-    const newPath = `${blockPath.split('.').slice(0, -1).join('.')}.${index + 1}.${props.fieldPath.split('.').pop()}`
-    window.parent.postMessage({ name: 'iframe:addBlockAfter', path: parentBlockPath }, window.location.origin)
-    focusNext.value = { path: newPath, timestamp: Date.now() }
+function onUpdateData(newData: any) {
+  if (proute.value) {
+    proute.value.data = newData
   }
 }
 
-function onUndo() {
-  window.parent.postMessage({ name: 'iframe:undo' }, window.location.origin)
+function onUpdateCastedData(newCastedData: any) {
+  if (proute.value) {
+    const data = proute.value.data as any
+    data._casted = newCastedData
+    parsedFields.value = parseFields(publicFields.value, newCastedData)
+  }
 }
 
-function onRedo() {
-  window.parent.postMessage({ name: 'iframe:redo' }, window.location.origin)
+function onUpdateBlocksField(fieldPath: string, fieldValue: any) {
+  if (proute.value) {
+    setProperty(proute.value.data, fieldPath, fieldValue)
+  }
+}
+
+function onUpdateBlocksFieldCasted(fieldPath: string, fieldValue: any) {
+  if (proute.value) {
+    const data = proute.value.data as any
+    setProperty(data._casted, fieldPath, fieldValue)
+    queuePostMessageUpdates(fieldPath, fieldValue)
+  }
+}
+
+function onUpdateFocusedBlocks(newFocusedBlocks: { path: string; block: BlockName; el: HTMLElement }[]) {
+  if (proute.value) {
+    focusedBlocks.value = newFocusedBlocks
+  }
+}
+
+function onUpdateFocusNext(fieldPath: string | null, selection?: { from: number; to: number } | number) {
+  if (proute.value) {
+    focusNext.value = isNull(fieldPath) ? null : { path: fieldPath, selection, timestamp: Date.now() }
+  }
+}
+
+function onInput(html: string) {
+  if (proute.value) {
+    setProperty(proute.value.data, props.fieldPath, html)
+    setProperty((proute.value.data as any)._casted, props.fieldPath, html)
+    queuePostMessageUpdates(props.fieldPath, html)
+  }
+}
+
+function onSelectBlock(blockPath: string) {
+  if (proute.value) {
+    postMessageToDashboard({ name: 'iframe:selectBlock', path: blockPath })
+  }
+}
+
+function onDeselectBlock() {
+  if (proute.value) {
+    postMessageToDashboard({ name: 'iframe:deselectBlocks' })
+  }
+}
+
+function onQueueBlockSelection(blockPath: string) {
+  if (proute.value) {
+    queueBlockSelection(blockPath)
+  }
 }
 </script>

@@ -9,8 +9,14 @@
     :style="{ top: `${top}px`, left: `${left}px`, width: `${width}px`, height: `${height}px` }"
   >
     <div
-      v-if="deepest && (!focused || !hasHighlightedDescendant) && width > 100 && height > 24"
+      v-if="((focused && deepest) || (highlighted && deepestHighlighted)) && width > 196 && height > 24"
+      @mouseout.stop
+      @mouseover.stop
       class="p-field-rect-inner"
+      :class="{
+        'p-field-rect-inner-focused': focused && deepest,
+        'p-field-rect-inner-above': focused && top - 20 > 0,
+      }"
     >
       <slot v-if="editable" />
       <span v-if="label" class="p-field-rect-label">
@@ -22,8 +28,9 @@
 
 <script lang="ts" setup>
 import { usePruviousRoute } from '#pruvious/app'
-import { usePreviewFocusedBlocks, usePreviewHighlightedBlocks } from '#pruvious/dashboard'
-import { useElementBounding } from '@vueuse/core'
+import { usePreview } from '#pruvious/dashboard'
+import { last } from '@pruvious/utils'
+import { useElementBounding, useElementSize } from '@vueuse/core'
 
 const props = defineProps({
   /**
@@ -84,12 +91,11 @@ const props = defineProps({
 
 const proute = usePruviousRoute()
 const { top, left, width, height, update } = useElementBounding(() => props.el)
-const focused = usePreviewFocusedBlocks()
-const highlighted = usePreviewHighlightedBlocks()
-const hasHighlightedDescendant = computed(
-  () => props.focused && highlighted.value.some((h) => h.path.startsWith(`${props.path}.`)),
-)
+const { width: windowWidth, height: windowHeight } = useElementSize(document.body)
+const { highlightedBlocks } = usePreview()
+const deepestHighlighted = computed(() => last(highlightedBlocks.value)?.path === props.path)
 
+watch([windowWidth, windowHeight], update)
 watch(proute, () => setTimeout(update))
 </script>
 
@@ -100,23 +106,43 @@ watch(proute, () => setTimeout(update))
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  overflow: hidden;
-  border: 1px dashed var(--pui-preview, #4c7be5);
+  outline: 1px dashed var(--pui-preview, #4c7be5);
+  outline-offset: 1px;
   box-sizing: border-box;
   pointer-events: none;
 }
 
 .p-field-rect-focused.p-field-rect-deepest {
-  border-style: solid;
+  outline-style: solid;
 }
 
 .p-field-rect-inner {
   display: flex;
-  gap: 0.0625rem;
+  gap: 1px;
   max-width: 100%;
-  margin: 0.0625rem;
-  overflow: hidden;
   pointer-events: auto;
+}
+
+.p-field-rect-inner:not(.p-field-rect-inner-focused) {
+  opacity: 0.64;
+}
+
+.p-field-rect-inner > *:first-child {
+  border-bottom-left-radius: 0.25rem;
+}
+
+.p-field-rect-inner-above {
+  max-width: calc(100% + 4px);
+  transform: translate3d(2px, calc(-100% - 3px), 0);
+}
+
+.p-field-rect-inner-above > *:first-child {
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0;
+}
+
+.p-field-rect-inner-above > *:last-child {
+  border-top-right-radius: 0.25rem;
 }
 
 .p-field-rect-inner :deep(button) {
@@ -141,6 +167,11 @@ watch(proute, () => setTimeout(update))
 .p-field-rect-inner :deep(button:hover, button:focus) {
   background-color: var(--pui-preview-hover, #3a6bbf);
   color: var(--pui-preview-foreground-hover, #ffffff);
+}
+
+.p-field-rect-inner :deep(button[data-destructive]:hover, button[data-destructive]:focus) {
+  background-color: var(--pui-preview-destructive, #ef5945);
+  color: var(--pui-preview-destructive-foreground, #ffffff);
 }
 
 .p-field-rect-inner :deep(button:disabled) {
