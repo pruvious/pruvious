@@ -8,6 +8,7 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  linkField,
   nullableObjectField,
   nullableSelectField,
   nullableTextField,
@@ -168,6 +169,27 @@ export default defineCollection({
       minRange: { days: 1 },
       maxRange: '10 days',
       ui: { timezone: 'Europe/Berlin', label: 'Date-time range (Europe/Berlin, bounded)' },
+    }),
+
+    // link
+    link: linkField({
+      ui: { label: 'Link' },
+    }),
+    linkInternalOnly: linkField({
+      allowExternal: false,
+      ui: { label: 'Link (internal only)' },
+    }),
+    linkNoHash: linkField({
+      allowHash: false,
+      ui: { label: 'Link (no hash)' },
+    }),
+    linkNoAttributes: linkField({
+      allowAttributes: false,
+      ui: { label: 'Link (no attributes)' },
+    }),
+    linkAllowedReferences: linkField({
+      allowedReferences: ['Articles'],
+      ui: { label: 'Link (Articles only)' },
     }),
 
     // nullableObject
@@ -699,6 +721,10 @@ export default defineCollection({
                 'dateTimeRangeBerlinMinMax',
                 'dateTimeRangeBerlinBounded',
               ],
+            },
+            {
+              label: 'Link',
+              fields: ['link', 'linkInternalOnly', 'linkNoHash', 'linkNoAttributes', 'linkAllowedReferences'],
             },
             {
               label: 'Nullable object',
