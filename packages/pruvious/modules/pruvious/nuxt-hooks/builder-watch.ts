@@ -59,17 +59,17 @@ export async function watchPruviousServerFiles() {
   for (const layer of nuxt.options._layers) {
     if (isDefined(layer.config.serverDir)) {
       const serverDirs = [
-        layer.config.pruvious?.dir?.collections ?? 'collections',
-        layer.config.pruvious?.dir?.singletons ?? 'singletons',
-        layer.config.pruvious?.dir?.fields?.definitions ?? 'fields',
-        layer.config.pruvious?.dir?.jobs ?? 'jobs',
-        layer.config.pruvious?.dir?.templates ?? 'templates',
-        layer.config.pruvious?.dir?.translations ?? 'translations',
-        layer.config.pruvious?.dir?.api ?? 'pruvious-api',
-        layer.config.pruvious?.dir?.buildAutoload ?? 'build',
-        layer.config.pruvious?.dir?.hooks?.server ?? 'hooks',
-        layer.config.pruvious?.dir?.actions?.server ?? 'actions',
-        layer.config.pruvious?.dir?.filters?.server ?? 'filters',
+        (layer.config.pruvious || undefined)?.dir?.collections ?? 'collections',
+        (layer.config.pruvious || undefined)?.dir?.singletons ?? 'singletons',
+        (layer.config.pruvious || undefined)?.dir?.fields?.definitions ?? 'fields',
+        (layer.config.pruvious || undefined)?.dir?.jobs ?? 'jobs',
+        (layer.config.pruvious || undefined)?.dir?.templates ?? 'templates',
+        (layer.config.pruvious || undefined)?.dir?.translations ?? 'translations',
+        (layer.config.pruvious || undefined)?.dir?.api ?? 'pruvious-api',
+        (layer.config.pruvious || undefined)?.dir?.buildAutoload ?? 'build',
+        (layer.config.pruvious || undefined)?.dir?.hooks?.server ?? 'hooks',
+        (layer.config.pruvious || undefined)?.dir?.actions?.server ?? 'actions',
+        (layer.config.pruvious || undefined)?.dir?.filters?.server ?? 'filters',
       ]
 
       for (const dir of serverDirs) {
@@ -322,7 +322,7 @@ function resolvePruviousFile(
     // Collection definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.collections ?? 'collections') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.collections ?? 'collections') + '/')
     ) {
       return { type: 'collection-definition', layer }
     }
@@ -330,33 +330,33 @@ function resolvePruviousFile(
     // Singleton definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.singletons ?? 'singletons') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.singletons ?? 'singletons') + '/')
     ) {
       return { type: 'singleton-definition', layer }
     }
 
     // Block components
-    if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.blocks ?? 'blocks') + '/')) {
+    if (path.startsWith(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.blocks ?? 'blocks') + '/')) {
       return { type: 'block-component', layer }
     }
 
     // Field definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.fields?.definitions ?? 'fields') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.fields?.definitions ?? 'fields') + '/')
     ) {
       return { type: 'field-definition', layer }
     }
 
     // Field components
-    if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.fields?.components ?? 'fields') + '/')) {
+    if (path.startsWith(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.fields?.components ?? 'fields') + '/')) {
       return { type: 'field-component', layer }
     }
 
     // Job definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.jobs ?? 'jobs') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.jobs ?? 'jobs') + '/')
     ) {
       return { type: 'job-definition', layer }
     }
@@ -364,7 +364,7 @@ function resolvePruviousFile(
     // Template definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.templates ?? 'templates') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.templates ?? 'templates') + '/')
     ) {
       return { type: 'template-definition', layer }
     }
@@ -372,7 +372,7 @@ function resolvePruviousFile(
     // Translation definitions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.translations ?? 'translations') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.translations ?? 'translations') + '/')
     ) {
       return { type: 'translation-definition', layer }
     }
@@ -380,7 +380,7 @@ function resolvePruviousFile(
     // Server handlers
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.api ?? 'pruvious-api') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.api ?? 'pruvious-api') + '/')
     ) {
       return { type: 'server-handler', layer }
     }
@@ -388,46 +388,46 @@ function resolvePruviousFile(
     // Autoloaded build files
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.buildAutoload ?? 'build') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.buildAutoload ?? 'build') + '/')
     ) {
       return { type: 'build-autoload', layer }
     }
 
     // Client hooks
-    if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.hooks?.client ?? 'hooks') + '/')) {
+    if (path.startsWith(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.hooks?.client ?? 'hooks') + '/')) {
       return { type: 'client-hook', layer }
     }
 
     // Server hooks
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.hooks?.server ?? 'hooks') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.hooks?.server ?? 'hooks') + '/')
     ) {
       return { type: 'server-hook', layer }
     }
 
     // Client actions
-    if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.actions?.client ?? 'actions') + '/')) {
+    if (path.startsWith(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.actions?.client ?? 'actions') + '/')) {
       return { type: 'client-action', layer }
     }
 
     // Server actions
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.actions?.server ?? 'actions') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.actions?.server ?? 'actions') + '/')
     ) {
       return { type: 'server-action', layer }
     }
 
     // Client filters
-    if (path.startsWith(join(layer.config.srcDir, layer.config.pruvious?.dir?.filters?.client ?? 'filters') + '/')) {
+    if (path.startsWith(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.filters?.client ?? 'filters') + '/')) {
       return { type: 'client-filter', layer }
     }
 
     // Server filters
     if (
       layer.config.serverDir &&
-      path.startsWith(join(layer.config.serverDir, layer.config.pruvious?.dir?.filters?.server ?? 'filters') + '/')
+      path.startsWith(join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.filters?.server ?? 'filters') + '/')
     ) {
       return { type: 'server-filter', layer }
     }

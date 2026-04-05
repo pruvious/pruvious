@@ -26,7 +26,7 @@ export async function resolveServerHandlers(): Promise<ServerHandlers> {
       debug(`Resolving server handler in layer <${relative(nuxt.options.workspaceDir, layer.cwd) || '.'}>`)
 
       if (isDefined(layer.config.serverDir)) {
-        const apiDir = join(layer.config.serverDir, layer.config.pruvious?.dir?.api ?? 'pruvious-api')
+        const apiDir = join(layer.config.serverDir, (layer.config.pruvious || undefined)?.dir?.api ?? 'pruvious-api')
         const fullPathsWithoutExt: string[] = []
         const fullPaths: string[] = []
 

@@ -1,4 +1,4 @@
-import type { LayoutKey } from '#build/types/layouts'
+import type { LayoutKey } from 'nuxt/app'
 import {
   collections,
   getRouteReferences,

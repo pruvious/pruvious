@@ -236,7 +236,7 @@ export function* resolveFromLayers(options: ResolveFromLayersOptions): Generator
     const nuxtDir = layer.config[options.nuxtDir]
 
     if (isDefined(nuxtDir)) {
-      const pruviousDir = options.pruviousDir(layer.config.pruvious ?? {}, layer)
+      const pruviousDir = options.pruviousDir(layer.config.pruvious || {}, layer)
       const dir = join(nuxtDir, pruviousDir)
 
       for (const res of resolve({ dir, extensions: options.extensions })) {

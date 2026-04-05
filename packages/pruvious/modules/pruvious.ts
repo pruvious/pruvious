@@ -306,9 +306,9 @@ export default defineNuxtModule<PruviousModuleOptions>({
     // Register block component directories
     nuxt.hook('components:dirs', (dirs) => {
       for (const [i, layer] of [...nuxt.options._layers].reverse().entries()) {
-        const path = withoutTrailingSlash(join(layer.config.srcDir, layer.config.pruvious?.dir?.blocks ?? 'blocks'))
+        const path = withoutTrailingSlash(join(layer.config.srcDir, (layer.config.pruvious || undefined)?.dir?.blocks ?? 'blocks'))
         if (fs.existsSync(path) && !dirs.some((dir) => (isString(dir) ? dir === path : dir.path === path))) {
-          dirs.push({ path, prefix: layer.config.pruvious?.blocksPrefix, priority: 100 + i })
+          dirs.push({ path, prefix: (layer.config.pruvious || undefined)?.blocksPrefix, priority: 100 + i })
         }
       }
     })
