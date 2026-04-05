@@ -1,4 +1,5 @@
-import { dashboardBasePath, useAuth } from '#pruvious/app'
+import { dashboardBasePath } from '#pruvious/dashboard/base'
+import { useAuth } from '../auth/utils.client'
 
 /**
  * Pruvious client middleware that guards against logged-in users.

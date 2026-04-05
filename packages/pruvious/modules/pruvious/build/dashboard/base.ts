@@ -18,5 +18,11 @@ export function getDashboardBaseFileContent() {
     ` */`,
     `export const dashboardBasePath = '${pruviousOptions.dashboard.basePath}'`,
     ``,
+    `/**`,
+    ` * Controls which stylesheets are retained in the dashboard by filtering based on selector content.`,
+    ` * Any stylesheet without rules containing these strings will be automatically disabled.`,
+    ` */`,
+    `export const filterStylesheets = ${JSON.stringify(pruviousOptions.dashboard.filterStylesheets)}`,
+    ``,
   ].join('\n')
 }

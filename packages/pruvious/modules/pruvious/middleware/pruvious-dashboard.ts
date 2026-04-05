@@ -1,20 +1,10 @@
-import {
-  hasPermission,
-  isValidLanguageCode,
-  preloadTranslatableStrings,
-  primaryLanguage,
-  refreshAuthState,
-  useAuth,
-  useLanguage,
-} from '#pruvious/app'
-import {
-  dashboardBasePath,
-  filterStylesheets,
-  refreshPruviousDashboardState,
-  refreshPruviousState,
-  useDashboardContentLanguage,
-} from '#pruvious/dashboard'
+import { isValidLanguageCode, primaryLanguage } from '#pruvious/app/i18n'
+import { dashboardBasePath, filterStylesheets } from '#pruvious/dashboard/base'
 import type { LanguageCode } from '#pruvious/server'
+import { hasPermission, refreshAuthState, useAuth } from '../auth/utils.client'
+import { refreshPruviousDashboardState, refreshPruviousState } from '../pruvious/utils.client'
+import { useDashboardContentLanguage } from '../translations/dashboard-utils.client'
+import { preloadTranslatableStrings, useLanguage } from '../translations/utils.client'
 import { getCleanupDashboardStylesheetsScript } from '../dashboard/stylesheets'
 
 /**
