@@ -194,6 +194,102 @@ describe('richText field', () => {
     ])
   })
 
+  test('XSS prevention - disallowed attributes on allowed tags', async () => {
+    // event handlers on allowed tags
+    expect(await $postAsAdmin(richText, { richText: '<strong onclick="alert(1)">bold</strong>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+    expect(await $postAsAdmin(richText, { richText: '<em onmouseover="alert(1)">italic</em>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+    expect(await $postAsAdmin(richText, { richText: '<u onerror="alert(1)">underline</u>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+
+    // style attribute on non-span tags
+    expect(await $postAsAdmin(richText, { richText: '<strong style="color:red">bold</strong>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+
+    // class attribute on non-span tags
+    expect(await $postAsAdmin(richText, { richText: '<em class="malicious">italic</em>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+
+    // data attributes on allowed tags
+    expect(await $postAsAdmin(richText, { richText: '<code data-exploit="true">code</code>' })).toEqual(
+      $422([{ richText: expect.any(String) }]),
+    )
+
+    // allowed tags without attributes still pass
+    expect(await $postAsAdmin(richText, { richText: '<strong>bold</strong>' })).toEqual([
+      { richText: '<strong>bold</strong>' },
+    ])
+    expect(await $postAsAdmin(richText, { richText: '<em>italic</em>' })).toEqual([
+      { richText: '<em>italic</em>' },
+    ])
+  })
+
+  test('XSS prevention - span marks with attrs', async () => {
+    // correct span attrs pass
+    expect(
+      await $postAsAdmin(richTextCustomMarks, {
+        richTextCustomMarks: '<span class="highlight">text</span>',
+      }),
+    ).toEqual([{ richTextCustomMarks: '<span class="highlight">text</span>' }])
+
+    // span with extra malicious attributes fails
+    expect(
+      await $postAsAdmin(richTextCustomMarks, {
+        richTextCustomMarks: '<span class="highlight" onclick="alert(1)">text</span>',
+      }),
+    ).toEqual($422([{ richTextCustomMarks: expect.any(String) }]))
+  })
+
+  test('deeply nested marks', async () => {
+    // valid deep nesting
+    expect(
+      await $postAsAdmin(richText, {
+        richText: '<strong><em><u>bold italic underline</u></em></strong>',
+      }),
+    ).toEqual([{ richText: '<strong><em><u>bold italic underline</u></em></strong>' }])
+
+    // valid deep nesting with custom span mark
+    expect(
+      await $postAsAdmin(richTextCustomMarks, {
+        richTextCustomMarks: '<strong><em><span class="highlight">nested highlight</span></em></strong>',
+      }),
+    ).toEqual([{ richTextCustomMarks: '<strong><em><span class="highlight">nested highlight</span></em></strong>' }])
+
+    // disallowed tag nested inside allowed marks
+    expect(
+      await $postAsAdmin(richText, {
+        richText: '<strong><em><div>nested div</div></em></strong>',
+      }),
+    ).toEqual($422([{ richText: expect.any(String) }]))
+
+    // malicious attribute on deeply nested allowed tag
+    expect(
+      await $postAsAdmin(richText, {
+        richText: '<strong><em><u onclick="alert(1)">xss</u></em></strong>',
+      }),
+    ).toEqual($422([{ richText: expect.any(String) }]))
+
+    // script nested inside allowed marks
+    expect(
+      await $postAsAdmin(richText, {
+        richText: '<strong><script>alert(1)</script></strong>',
+      }),
+    ).toEqual($422([{ richText: expect.any(String) }]))
+
+    // wrong span attrs nested inside valid marks
+    expect(
+      await $postAsAdmin(richTextCustomMarks, {
+        richTextCustomMarks: '<strong><span class="wrong">bad</span></strong>',
+      }),
+    ).toEqual($422([{ richTextCustomMarks: expect.any(String) }]))
+  })
+
   test('wrong type validators', async () => {
     expect(await $postAsAdmin(richText, { richText: null })).toEqual($422([{ richText: expect.any(String) }]))
     expect(await $postAsAdmin(richText, { richText: true })).toEqual($422([{ richText: expect.any(String) }]))

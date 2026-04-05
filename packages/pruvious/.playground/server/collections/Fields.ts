@@ -368,7 +368,7 @@ export default defineCollection({
       ui: { label: 'Rich text', placeholder: 'Enter rich text...' },
     }),
     richTextNoMarks: richTextField({
-      ui: { label: 'Rich text (no marks)' },
+      ui: { label: 'Rich text (no marks)', dataTable: { filterable: false, truncate: { lines: 2 }, hyphenate: true } },
     }),
     richTextNoLineBreaks: richTextField({
       marks: commonMarks,
