@@ -117,7 +117,7 @@ const props = defineProps({
           },
         ],
         mergeGroups: ['prose'],
-        toolbar: ['mark:bold'],
+        toolbar: ['mark:bold', 'mark:italic', 'mark:underline', 'mark:code', 'mark:strikethrough', 'clearFormatting'],
       },
     },
   }),
