@@ -22,12 +22,19 @@ defineProps({
         shortcut: 'Mod-Shift-m',
         icon: 'star-half-filled',
         label: 'Custom mark (with label)',
+        dashboardStyle: { 'background-color': 'black', 'color': 'cyan' },
       },
       customMark2: {
         tag: 'span',
         attrs: { class: 'custom-mark-2' },
         shortcut: 'Mod-Shift-n',
         icon: 'star-filled',
+        dashboardStyle: {
+          backgroundColor: 'hsl(var(--pui-accent))',
+          color: 'hsl(var(--pui-accent-foreground))',
+          padding: '0.125rem 0.25rem',
+          borderRadius: '0.25rem',
+        },
       },
     },
     ui: {
