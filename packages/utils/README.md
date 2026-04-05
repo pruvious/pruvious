@@ -57,8 +57,11 @@ npm i @pruvious/utils
   - [toPromise](#topromise)
 - [Misc](#misc)
   - [blurActiveElement](#bluractiveelement)
+  - [buildRelURL](#buildrelurl)
   - [deselectAll](#deselectall)
   - [isDescendant](#isdescendant)
+  - [isRelURL](#isrelurl)
+  - [parseRelURL](#parserelurl)
   - [resolveRelativeDotNotation](#resolverelativedotnotation)
   - [sleep](#sleep)
   - [stripHTML](#striphtml)
@@ -758,6 +761,20 @@ blurActiveElement()
 console.log(document.activeElement) // `<body>`
 ```
 
+### <a id="buildrelurl">`buildRelURL(parts)`</a>
+
+Builds a `rel://` URL string from its component parts.
+
+**Example:**
+
+```ts
+buildRelURL({ routeId: 1 })
+// 'rel://routes:1'
+
+buildRelURL({ routeId: 1, collection: 'articles', recordId: 5, query: 'foo=bar', hash: 'section' })
+// 'rel://routes:1/articles:5?foo=bar#section'
+```
+
 ### <a id="deselectall">`deselectAll`</a>
 
 Deselects all text on the page.
@@ -773,6 +790,34 @@ const button = document.querySelector('...')
 const header = document.querySelector('...')
 
 isDescendant(button, header) // `true` if the button is inside the header
+```
+
+### <a id="isrelurl">`isRelURL(url)`</a>
+
+Checks whether a URL string uses the `rel://` protocol.
+
+### <a id="parserelurl">`parseRelURL(url)`</a>
+
+Parses a `rel://` URL into its component parts.
+
+Supported formats:
+- `rel://routes:{routeId}`
+- `rel://routes:{routeId}/{collection}:{recordId}`
+- Either format with optional `?query` and/or `#hash`
+
+**Returns** The parsed components, or `null` if the URL is not a valid `rel://` URL.
+
+**Example:**
+
+```ts
+parseRelURL('rel://routes:1')
+// { routeId: 1 }
+
+parseRelURL('rel://routes:1/articles:5')
+// { routeId: 1, collection: 'articles', recordId: 5 }
+
+parseRelURL('rel://routes:1/articles:5?foo=bar#section')
+// { routeId: 1, collection: 'articles', recordId: 5, query: 'foo=bar', hash: 'section' }
 ```
 
 ### <a id="resolverelativedotnotation">`resolveRelativeDotNotation(from, to)`</a>
