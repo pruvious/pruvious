@@ -1,10 +1,10 @@
 import {
   defineField,
   limitPopulation,
-  type OptimizableImageType,
   type CombinedFieldOptions,
   type DynamicCollectionFieldTypes,
   type GenericDatabase,
+  type OptimizableImageType,
   type ResolveFieldUIOptions,
 } from '#pruvious/server'
 import {
@@ -611,7 +611,7 @@ export default {
 
     const castedTypeFn = () => 'number[]'
     const populatedTypeFn = ({ field }: any) =>
-      `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['${field.options.collection}'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}>[]`
+      `Pick<DynamicCollectionFieldTypes[${field.options.populate ? "'Populated'" : "'Casted'"}]['Uploads'], ${(field.options.fields ?? ['id']).map((fieldName: string) => `'${fieldName}'`).join(' | ')}>[]`
     const inputTypeFn = () => '(number | string)[]'
 
     const bound = defineField({
