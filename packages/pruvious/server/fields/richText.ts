@@ -15,6 +15,7 @@ import {
   textFieldModel,
   type TextFieldModelOptions,
 } from '@pruvious/orm'
+import { isString, normalizeWhitespace } from '@pruvious/utils'
 import type { PropType } from 'vue'
 
 export interface RichTextCustomOptions<TMark extends string = never> {
@@ -380,23 +381,7 @@ export type RichTextFormatter = (context: {
   oldText: string
 }) => (Partial<DynamicBlockFieldTypes['Casted'][BlockName]> & { $key: BlockName }) | undefined
 
-// @todo marks?: Record<TMark, Mark>
-//       - tag?: string // like 'strong', 'em', 'underline', 'code', 'link', etc. (default: 'span')
-//         - try subscript and superscript too
-//       - parseTags?: string[] // converts multiple tags to the same mark (like 'i' and 'em' both to 'em')
-//       - attrs?: Attrs
-//         - type Attrs = { class: string | string[] } | { style: Record<string, string> } | Record<string, string> // test if this type works
-//       - shortcut?: string // like Mod+U etc. (hint reserved + examples)
-//       - icon?: keyof typeof icons // find good default icon
-//       - label?: string // default: capitalized tag name (show as tooltip if icon btn, otherwise use icon + label in dropdowns)
-// @todo handle mark mixing
-//       - disallow mixing marks that have the same tag
 // @todo allowLinks?: boolean
-// @todo ui.toolbar?: 'auto' | (ToolbarItem<TMark> | ToolbarGroup<TMark>)[] | false // default: 'auto'
-//       - Example: ['mark:bold', { icon, label, items: ['mark:myMark', 'mark:italic'] }, 'undo', 'redo', 'clearFormatting']
-//       - Never show empty groups in toolbar
-//       - Never show toolbar if no items are available
-//       - Never show toolbar if disabled
 // @todo export commonMarks(pickWhatYouWant): Pick<TYPED> from '#pruvious/server' and '#pruvious/app' (like bold, italic, underline, etc.)
 // @todo richTextValidator() -> export from validators (parse HTML and validate marks)
 //       - validate links if allowLinks is enabled
@@ -418,20 +403,6 @@ export type RichTextFormatter = (context: {
 // @todo create ProseList.vue and ProseListItem.vue block (stub)
 //       - enable ProseList.vue in Prose.vue block
 //       - that brings more complexity for inserting and cloning blocks
-// @todo allow '- ' | '+ ' | '* ' and '1. ' to create new list block when at the end of the content
-//       - also resolve insets for nested lists
-//       - this should only work with 'Prose' block and EditorEmitter.vue (with enabled ul and/or li rootTags) to reduce issues with custom blocks
-// @todo allow '> ' to create blockquote when at the beginning of the line (only if blockquote is allowed in rootTags)
-//        - `**text**` or `__text__` → **bold**
-//        - `*text*` or `_text_` → *italic*
-//        - `~~text~~` → ~~strikethrough~~
-//        - `` `code` `` → inline code
-//        - `==text==` → highlight (if supported)
-//        - Headlines:
-//          - `# ` → H1
-//          - `## ` → H2
-//          - `### ` → H3
-//          - etc. (at beginning of line)
 // @todo resolve allowedBlocks in RichTextEmitter.vue (from blocks root to the current field)
 //       - onEnter before/after always change tag to 'paragraph' if allowed
 //       - again, only for 'Prose' block to reduce issues with custom blocks
@@ -440,9 +411,9 @@ export type RichTextFormatter = (context: {
 //       - try same with Editor.vue
 
 const customOptions: RichTextCustomOptions<string> = {
-  allowLineBreaks: true, // @todo write test
-  normalizeWhitespace: true, // @todo write test
-  marks: {}, // @todo write test
+  allowLineBreaks: true,
+  normalizeWhitespace: true,
+  marks: {},
   ui: {
     dataTable: {
       hyphenate: true,
@@ -498,6 +469,16 @@ export default {
       model: textFieldModel(),
       customOptions,
       uiOptions: { placeholder: true },
+      sanitizers: [
+        (value, { definition }) =>
+          isString(value) && definition.options.normalizeWhitespace ? normalizeWhitespace(value) : value,
+      ],
+      validators: [
+        async (value, sanitizedContextField, errors) => {
+          const { richTextValidator } = await import('#pruvious/server')
+          await richTextValidator()(value, sanitizedContextField, errors)
+        },
+      ],
     }).serverFn.bind(this)
     return bound(options as any) as any
   },

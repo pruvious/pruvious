@@ -87,8 +87,6 @@ import { ToolbarPluginView } from '../../utils/pruvious/dashboard/rich-text/tool
 
 const { maybeTranslate } = usePreview()
 
-const tagAliases: Record<string, string> = { underline: 'u' }
-
 const reservedShortcuts = new Set([
   'ArrowDown',
   'ArrowLeft',
@@ -118,7 +116,7 @@ const reservedShortcuts = new Set([
 
 function resolveTag(markDef: MarkDef): string {
   const tag = markDef.tag ?? 'span'
-  return tagAliases[tag] ?? tag
+  return tag
 }
 
 function buildAttrsObject(attrs: MarkDef['attrs']): Record<string, string> | undefined {
