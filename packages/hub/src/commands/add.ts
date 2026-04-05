@@ -21,8 +21,10 @@ export default defineCommand({
     },
   },
   async run(ctx) {
-    if (!ctx.args.dir) {
-      const dir = await text({
+    let dir = ctx.args.dir
+
+    if (!dir) {
+      const input = await text({
         message: 'Enter the path to an existing Pruvious Hub app:',
         initialValue: resolvePath(ctx.args.cwd),
         validate: (value) => {
@@ -40,35 +42,35 @@ export default defineCommand({
         },
       })
 
-      if (isCancel(dir)) {
+      if (isCancel(input)) {
         cancel('Operation cancelled')
         process.exit(1)
       }
 
-      ctx.args.dir = dir
+      dir = input
     }
 
-    ctx.args.dir = resolvePath(ctx.args.dir)
+    dir = resolvePath(dir)
 
-    if (!fs.existsSync(ctx.args.dir)) {
-      logger.error(`The directory ${colors.gray(ctx.args.dir)} does not exist.`)
+    if (!fs.existsSync(dir)) {
+      logger.error(`The directory ${colors.gray(dir)} does not exist.`)
       process.exit(1)
     }
 
-    if (!getAppInfo(ctx.args.dir)) {
-      logger.error(`The directory ${colors.gray(ctx.args.dir)} is not a valid Pruvious Hub app.`)
+    if (!getAppInfo(dir)) {
+      logger.error(`The directory ${colors.gray(dir)} is not a valid Pruvious Hub app.`)
       process.exit(1)
     }
 
     const config = readConfigFile()
 
-    if (config.apps.some((app) => app.path === ctx.args.dir)) {
-      logger.warning(`The app at ${colors.yellow(ctx.args.dir)} is already registered.`)
+    if (config.apps.some((app) => app.path === dir)) {
+      logger.warning(`The app at ${colors.yellow(dir)} is already registered.`)
       process.exit(0)
     }
 
-    config.apps.push({ path: ctx.args.dir, secret: generateSecureRandomString() })
+    config.apps.push({ path: dir, secret: generateSecureRandomString() })
     writeConfigFile(config)
-    logger.success(`Successfully registered the app at ${colors.greenBright(ctx.args.dir)}.`)
+    logger.success(`Successfully registered the app at ${colors.greenBright(dir)}.`)
   },
 })

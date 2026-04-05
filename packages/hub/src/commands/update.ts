@@ -21,38 +21,39 @@ export default defineCommand({
   },
   async run(ctx) {
     const config = readConfigFile()
+    let dir = ctx.args.dir
 
-    if (!ctx.args.dir) {
+    if (!dir) {
       if (!config.apps.length) {
         showNoRegisteredAppsMessages()
         process.exit(0)
       }
 
       if (config.apps.length === 1) {
-        ctx.args.dir = config.apps[0].path
+        dir = config.apps[0].path
       } else {
-        const dir = await select({
+        const input = await select({
           message: 'Choose the Pruvious Hub app to update:',
           options: config.apps.map((app) => ({ label: app.path, value: app.path })),
           initialValue: config.apps[0].path,
         })
 
-        if (isCancel(dir)) {
+        if (isCancel(input)) {
           cancel('Operation cancelled')
           process.exit(1)
         }
 
-        ctx.args.dir = dir
+        dir = input
       }
     }
 
-    ctx.args.dir = resolvePath(ctx.args.dir)
+    dir = resolvePath(dir)
 
-    if (!config.apps.some((app) => app.path === ctx.args.dir)) {
-      logger.error(`The app at ${colors.gray(ctx.args.dir)} is not registered.`)
+    if (!config.apps.some((app) => app.path === dir)) {
+      logger.error(`The app at ${colors.gray(dir)} is not registered.`)
       process.exit(1)
     }
 
-    await updateApp(ctx.args.dir)
+    await updateApp(dir)
   },
 })

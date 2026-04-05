@@ -31,47 +31,48 @@ export default defineCommand({
   async run(ctx) {
     const config = readConfigFile()
     const port = ctx.args.port ? castToNumber(ctx.args.port) : 4096
+    let dir = ctx.args.dir
 
-    if (!ctx.args.dir) {
+    if (!dir) {
       if (!config.apps.length) {
         showNoRegisteredAppsMessages()
         process.exit(0)
       }
 
       if (config.apps.length === 1) {
-        ctx.args.dir = config.apps[0].path
+        dir = config.apps[0].path
       } else {
-        const dir = await select({
+        const input = await select({
           message: 'Choose the Pruvious Hub app to start:',
           options: config.apps.map((app) => ({ label: app.path, value: app.path })),
           initialValue: config.apps[0].path,
         })
 
-        if (isCancel(dir)) {
+        if (isCancel(input)) {
           cancel('Operation cancelled')
           process.exit(1)
         }
 
-        ctx.args.dir = dir
+        dir = input
       }
     }
 
-    ctx.args.dir = resolvePath(ctx.args.dir)
+    dir = resolvePath(dir)
 
-    const app = config.apps.find((app) => app.path === ctx.args.dir)
+    const app = config.apps.find((app) => app.path === dir)
 
     if (!app) {
-      logger.error(`The app at ${colors.gray(ctx.args.dir)} is not registered.`)
+      logger.error(`The app at ${colors.gray(dir)} is not registered.`)
       process.exit(1)
     }
 
-    if (!fs.existsSync(ctx.args.dir)) {
-      logger.error(`The directory ${colors.gray(ctx.args.dir)} does not exist.`)
+    if (!fs.existsSync(dir)) {
+      logger.error(`The directory ${colors.gray(dir)} does not exist.`)
       process.exit(1)
     }
 
-    if (!getAppInfo(ctx.args.dir)) {
-      logger.error(`The directory ${colors.yellow(ctx.args.dir)} is not a valid Pruvious Hub app.`)
+    if (!getAppInfo(dir)) {
+      logger.error(`The directory ${colors.yellow(dir)} is not a valid Pruvious Hub app.`)
       process.exit(1)
     }
 
@@ -87,7 +88,7 @@ export default defineCommand({
 
     const availablePort = await getPort({ portRange: [port, 65535] })
     const server = execa('node', ['server/index.mjs'], {
-      cwd: ctx.args.dir,
+      cwd: dir,
       env: {
         PORT: availablePort.toString(),
         NUXT_PRUVIOUS_AUTH_JWT_SECRET: app.secret,

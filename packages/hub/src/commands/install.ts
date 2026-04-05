@@ -43,12 +43,13 @@ export default defineCommand({
       process.exit(1)
     }
 
+    let dir = ctx.args.dir
     let dirResolved = false
     let initialDir = resolvePath(ctx.args.cwd)
 
     while (!dirResolved) {
-      if (!ctx.args.dir) {
-        const dir = await text({
+      if (!dir) {
+        const input = await text({
           message: 'Where do you want to install the Pruvious Hub app?',
           initialValue: initialDir,
           validate: (value) => {
@@ -62,19 +63,19 @@ export default defineCommand({
           },
         })
 
-        if (isCancel(dir)) {
+        if (isCancel(input)) {
           cancel('Operation cancelled')
           process.exit(1)
         }
 
-        ctx.args.dir = dir
+        dir = input
       }
 
-      ctx.args.dir = resolvePath(ctx.args.dir)
+      dir = resolvePath(dir)
 
-      if (!ctx.args.force && fs.existsSync(ctx.args.dir)) {
+      if (!ctx.args.force && fs.existsSync(dir)) {
         const action = await select({
-          message: `The directory ${colors.cyan(ctx.args.dir)} already exists. What would you like to do?`,
+          message: `The directory ${colors.cyan(dir)} already exists. What would you like to do?`,
           options: [
             { value: 'override', label: 'Override its contents' },
             { value: 'different', label: 'Select different directory' },
@@ -88,8 +89,8 @@ export default defineCommand({
         }
 
         if (action === 'different') {
-          initialDir = ctx.args.dir
-          ctx.args.dir = ''
+          initialDir = dir
+          dir = ''
           continue
         } else if (action === 'abort') {
           process.exit(1)
@@ -99,14 +100,14 @@ export default defineCommand({
       dirResolved = true
     }
 
-    if (!ctx.args.force && fs.existsSync(ctx.args.dir) && config.apps.some((app) => app.path === ctx.args.dir)) {
+    if (!ctx.args.force && fs.existsSync(dir) && config.apps.some((app) => app.path === dir)) {
       if (ctx.args.update) {
-        await updateApp(ctx.args.dir)
+        await updateApp(dir)
         process.exit(0)
       }
 
       const action = await select({
-        message: `The app at ${colors.yellow(ctx.args.dir)} is already registered. What would you like to do?`,
+        message: `The app at ${colors.yellow(dir)} is already registered. What would you like to do?`,
         options: [
           { value: 'update', label: 'Update to latest version' },
           { value: 'override', label: 'Replace contents (will delete all app data)' },
@@ -120,30 +121,30 @@ export default defineCommand({
       }
 
       if (action === 'update') {
-        await updateApp(ctx.args.dir)
+        await updateApp(dir)
         process.exit(0)
       } else if (action === 'abort') {
         process.exit(1)
       }
     }
 
-    if (fs.existsSync(ctx.args.dir)) {
-      fs.rmSync(ctx.args.dir, { recursive: true, force: true })
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true, force: true })
     }
 
     const copySpinner = spinner()
     copySpinner.start('Copying files')
-    fs.mkdirSync(ctx.args.dir, { recursive: true })
-    fs.cpSync(hubPackageDist, ctx.args.dir, { recursive: true })
+    fs.mkdirSync(dir, { recursive: true })
+    fs.cpSync(hubPackageDist, dir, { recursive: true })
     copySpinner.stop('Files copied.')
 
     const installSpinner = spinner()
     installSpinner.start('Installing dependencies')
-    await installDependencies({ cwd: join(ctx.args.dir, 'server'), packageManager: 'npm', silent: true })
+    await installDependencies({ cwd: join(dir, 'server'), packageManager: 'npm', silent: true })
     installSpinner.stop('Dependencies installed.')
 
-    if (!config.apps.some((app) => app.path === ctx.args.dir)) {
-      config.apps.push({ path: ctx.args.dir, secret: generateSecureRandomString() })
+    if (!config.apps.some((app) => app.path === dir)) {
+      config.apps.push({ path: dir, secret: generateSecureRandomString() })
       writeConfigFile(config)
     }
 
