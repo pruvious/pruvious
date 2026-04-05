@@ -205,8 +205,6 @@ export interface RichTextCustomOptions<TMark extends string = never> {
        *   },
        *
        *   // Standard toolbar items
-       *   'undo',
-       *   'redo',
        *   'clearFormatting',
        * ]
        * ```
@@ -252,7 +250,7 @@ export interface RichTextCustomOptions<TMark extends string = never> {
 
                 /**
                  * The items to show in this toolbar group.
-                 * Can be any combination of mark identifiers (e.g. `mark:bold`) or standard toolbar items (e.g. `undo`).
+                 * Can be any combination of mark identifiers (e.g. `mark:bold`) or standard toolbar items (e.g. `clearFormatting`).
                  *
                  * @example
                  * ```ts
@@ -373,7 +371,7 @@ export interface Mark {
   label?: string | ((context: TranslatableStringCallbackContext) => string)
 }
 
-type StandardToolbarItem = 'undo' | 'redo' | 'clearFormatting'
+export type StandardToolbarItem = 'clearFormatting'
 
 export type RichTextFormatter = (context: {
   newHTML: string

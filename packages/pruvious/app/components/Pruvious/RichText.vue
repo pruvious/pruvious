@@ -8,23 +8,291 @@
       'p-rich-text-focused': isFocused,
       'p-rich-text-ready': isReady,
     }"
-  ></component>
+  >
+    <Teleport to="body">
+      <div
+        v-if="resolvedToolbarItems.length > 0"
+        ref="toolbarEl"
+        class="p-rich-text-toolbar"
+        :class="{ 'p-rich-text-toolbar-visible': toolbarVisible }"
+        :style="toolbarStyle"
+      >
+        <template
+          v-for="(item, index) in resolvedToolbarItems"
+          :key="item.type === 'mark' ? `mark:${item.name}` : item.type === 'standard' ? item.action : `group:${index}`"
+        >
+          <button
+            v-if="item.type === 'mark'"
+            :title="item.label"
+            @mousedown.prevent.stop="onToggleMark(item.name)"
+            class="p-rich-text-toolbar-btn"
+            :class="{ 'p-rich-text-toolbar-btn-active': activeMarks.has(item.name) }"
+          >
+            <Icon :name="`tabler:${item.icon}`" mode="svg" />
+          </button>
+          <button
+            v-else-if="item.type === 'standard'"
+            :title="item.label"
+            @mousedown.prevent.stop="onStandardAction(item.action)"
+            class="p-rich-text-toolbar-btn"
+          >
+            <Icon :name="`tabler:${item.icon}`" mode="svg" />
+          </button>
+          <div v-else-if="item.type === 'group'" class="p-rich-text-toolbar-group">
+            <button
+              :title="item.tooltip"
+              @mousedown.prevent.stop="toggleGroup(index)"
+              class="p-rich-text-toolbar-btn"
+              :class="{
+                'p-rich-text-toolbar-btn-active': isGroupActive(item),
+                'p-rich-text-toolbar-btn-open': openGroupIndex === index,
+              }"
+            >
+              <Icon :name="`tabler:${item.icon}`" mode="svg" />
+            </button>
+            <div v-if="openGroupIndex === index" @mousedown.prevent.stop class="p-rich-text-toolbar-group-dropdown">
+              <button
+                v-for="subItem in item.items"
+                :key="subItem.type === 'mark' ? `mark:${subItem.name}` : subItem.action"
+                :title="subItem.label"
+                @mousedown.prevent.stop="onGroupItemClick(subItem)"
+                class="p-rich-text-toolbar-group-item"
+                :class="{ 'p-rich-text-toolbar-btn-active': subItem.type === 'mark' && activeMarks.has(subItem.name) }"
+              >
+                <Icon v-if="subItem.icon" :name="`tabler:${subItem.icon}`" mode="svg" />
+                <span>{{ subItem.label || ('name' in subItem ? subItem.name : subItem.action) }}</span>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </Teleport>
+  </component>
 </template>
 
 <script lang="ts" setup>
+import { usePreview } from '#pruvious/dashboard'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
-import { normalizeWhitespace } from '@pruvious/utils'
+import { isObject, isString, normalizeWhitespace } from '@pruvious/utils'
 import { refDebounced, useDebounceFn } from '@vueuse/core'
 import { chainCommands, exitCode, toggleMark } from 'prosemirror-commands'
 import { keymap } from 'prosemirror-keymap'
-import { DOMParser, DOMSerializer, Schema, type NodeSpec } from 'prosemirror-model'
+import { DOMParser, DOMSerializer, Schema, type MarkSpec, type MarkType, type NodeSpec } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import type { EditableTextNextFocus } from '../../../modules/pruvious/preview/utils/rich-text'
-import type { RichTextCustomOptions } from '../../../server/fields/richText'
-import { LinkNodeView } from '../../utils/pruvious/dashboard/rich-text/link'
+import type { Mark as MarkDef, RichTextCustomOptions, StandardToolbarItem } from '../../../server/fields/richText'
 import { createPlaceholderPlugin } from '../../utils/pruvious/dashboard/rich-text/placeholder'
 import { ToolbarPluginView } from '../../utils/pruvious/dashboard/rich-text/toolbar'
+
+const { maybeTranslate } = usePreview()
+
+const tagAliases: Record<string, string> = { underline: 'u' }
+
+const reservedShortcuts = new Set([
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'Backspace',
+  'Ctrl-d',
+  'Delete',
+  'End',
+  'Enter',
+  'Escape',
+  'Home',
+  'Mod-ArrowDown',
+  'Mod-ArrowUp',
+  'Mod-Backspace',
+  'Mod-d',
+  'Mod-Enter',
+  'Mod-k',
+  'Mod-Shift-Enter',
+  'Mod-Shift-z',
+  'Mod-y',
+  'Mod-z',
+  'Shift-Enter',
+  'Shift-Tab',
+  'Tab',
+])
+
+function resolveTag(markDef: MarkDef): string {
+  const tag = markDef.tag ?? 'span'
+  return tagAliases[tag] ?? tag
+}
+
+function buildAttrsObject(attrs: MarkDef['attrs']): Record<string, string> | undefined {
+  if (attrs) {
+    if ('class' in attrs) {
+      return { class: Array.isArray(attrs.class) ? attrs.class.join(' ') : attrs.class }
+    }
+
+    if ('style' in attrs && isObject(attrs.style)) {
+      return {
+        style: Object.entries(attrs.style)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join('; '),
+      }
+    }
+
+    return attrs as Record<string, string>
+  }
+}
+
+function buildParseDOM(tag: string, attrs: MarkDef['attrs'], parseTags?: string[]) {
+  const entries: { tag: string; getAttrs?: (node: HTMLElement) => Record<string, never> | false }[] = []
+  const attrsObj = buildAttrsObject(attrs)
+
+  if (attrsObj && tag === 'span') {
+    entries.push({
+      tag,
+      getAttrs: (node: HTMLElement) => {
+        if ('class' in (attrs ?? {})) {
+          const expected = attrsObj.class!
+          return expected.split(' ').every((c) => node.classList.contains(c)) ? {} : false
+        }
+
+        if ('style' in (attrs ?? {}) && isObject((attrs as any).style)) {
+          return Object.entries((attrs as any).style).every(([k, v]) => node.style.getPropertyValue(k) === v)
+            ? {}
+            : false
+        }
+
+        return Object.entries(attrsObj).every(([k, v]) => node.getAttribute(k) === v) ? {} : false
+      },
+    })
+  } else {
+    entries.push({ tag })
+  }
+
+  for (const parseTag of parseTags ?? []) {
+    entries.push({ tag: parseTag })
+  }
+
+  return entries
+}
+
+interface ResolvedMarkToolbarItem {
+  type: 'mark'
+  name: string
+  icon: string
+  label?: string
+}
+
+interface ResolvedStandardToolbarItem {
+  type: 'standard'
+  action: StandardToolbarItem
+  icon: string
+  label?: string
+}
+
+interface ResolvedGroupToolbarItem {
+  type: 'group'
+  icon: string
+  tooltip?: string
+  items: (ResolvedMarkToolbarItem | ResolvedStandardToolbarItem)[]
+}
+
+type ResolvedToolbarItem = ResolvedMarkToolbarItem | ResolvedStandardToolbarItem | ResolvedGroupToolbarItem
+
+const standardToolbarItems: Record<string, { icon: string; label: string }> = {
+  clearFormatting: { icon: 'clear-formatting', label: 'Clear formatting' },
+  undo: { icon: 'arrow-back-up', label: 'Undo' },
+  redo: { icon: 'arrow-forward-up', label: 'Redo' },
+}
+
+function resolveStringEntry(
+  entry: string,
+  marks: Record<string, MarkDef>,
+): ResolvedMarkToolbarItem | ResolvedStandardToolbarItem | undefined {
+  if (entry.startsWith('mark:')) {
+    const markName = entry.slice(5)
+    const markDef = marks[markName]
+
+    if (markDef) {
+      return {
+        type: 'mark',
+        name: markName,
+        icon: markDef.icon ?? 'asterisk',
+        label: maybeTranslate(markDef.label),
+      }
+    }
+  } else if (entry in standardToolbarItems) {
+    const std = standardToolbarItems[entry]!
+
+    return {
+      type: 'standard',
+      action: entry as StandardToolbarItem,
+      icon: std.icon,
+      label: std.label,
+    }
+  }
+}
+
+function resolveToolbarItems(
+  toolbar: RichTextCustomOptions<string>['ui'] extends infer U
+    ? U extends { liveEditor?: { toolbar?: infer T } }
+      ? T
+      : never
+    : never,
+  marks: Record<string, MarkDef>,
+): ResolvedToolbarItem[] {
+  if (toolbar === false) return []
+
+  const entries: (string | { icon?: string; tooltip?: string | Function; items: string[] })[] =
+    toolbar === 'auto' || toolbar === undefined
+      ? [...Object.keys(marks).map((name) => `mark:${name}`), 'clearFormatting']
+      : (toolbar as any[])
+
+  const items: ResolvedToolbarItem[] = []
+
+  for (const entry of entries) {
+    if (isString(entry)) {
+      const resolved = resolveStringEntry(entry, marks)
+
+      if (resolved) {
+        items.push(resolved)
+      }
+    } else if (isObject(entry) && 'items' in entry) {
+      const groupItems: (ResolvedMarkToolbarItem | ResolvedStandardToolbarItem)[] = []
+
+      for (const subEntry of (entry as { items: string[] }).items) {
+        const resolved = resolveStringEntry(subEntry, marks)
+
+        if (resolved) {
+          groupItems.push(resolved as ResolvedMarkToolbarItem | ResolvedStandardToolbarItem)
+        }
+      }
+
+      if (groupItems.length > 0) {
+        items.push({
+          type: 'group',
+          icon: (entry as any).icon ?? 'paint',
+          tooltip: maybeTranslate((entry as any).tooltip),
+          items: groupItems,
+        })
+      }
+    }
+  }
+
+  return items
+}
+
+function buildMarksSpec(marks: Record<string, MarkDef>): Record<string, MarkSpec> {
+  const specs: Record<string, MarkSpec> = {}
+
+  for (const [name, markDef] of Object.entries(marks)) {
+    const tag = resolveTag(markDef)
+    const attrsObj = buildAttrsObject(markDef.attrs)
+
+    specs[name] = {
+      toDOM: () => (attrsObj ? [tag, attrsObj, 0] : [tag, 0]),
+      parseDOM: buildParseDOM(tag, markDef.attrs, markDef.parseTags),
+    }
+  }
+
+  return specs
+}
 
 const props = defineProps({
   /**
@@ -169,6 +437,7 @@ const emit = defineEmits<{
 const root = useTemplateRef<HTMLElement>('root')
 const isFocused = ref(false)
 const isReady = refDebounced(isFocused, 100)
+const resolvedMarks = buildMarksSpec(props.marks)
 const schema = new Schema({
   nodes: {
     text: {
@@ -193,33 +462,29 @@ const schema = new Schema({
       parseDOM: [{ tag: props.tag }],
     },
   },
-  marks: {
-    em: {
-      toDOM: () => ['em', 0],
-      parseDOM: [{ tag: 'em' }, { tag: 'i' }],
-    },
-    strong: {
-      toDOM: () => ['strong', 0],
-      parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
-    },
-  },
+  marks: resolvedMarks,
   topNode: 'root',
 })
-const toggleItalic = toggleMark(schema.marks.em, null, { removeWhenPresent: false })
-const toggleBold = toggleMark(schema.marks.strong, null, { removeWhenPresent: false })
+const markToggleCommands: Record<string, ReturnType<typeof toggleMark>> = {}
+const markShortcuts: Record<string, ReturnType<typeof toggleMark>> = {}
+
+for (const [name, markDef] of Object.entries(props.marks)) {
+  if (schema.marks[name]) {
+    markToggleCommands[name] = toggleMark(schema.marks[name], null, { removeWhenPresent: false })
+    if (markDef.shortcut && !reservedShortcuts.has(markDef.shortcut)) {
+      markShortcuts[markDef.shortcut] = markToggleCommands[name]
+    }
+  }
+}
+
 const hardBreak = chainCommands(exitCode, (state, dispatch) => {
   if (dispatch) {
     dispatch(state.tr.replaceSelectionWith(schema.nodes.hardBreak.create()).scrollIntoView())
   }
   return true
 })
-console.log({ marks: props.marks, toolbar: props.toolbar })
 const keymapPlugin = keymap({
-  'Mod-i': toggleItalic,
-  'Mod-b': toggleBold,
-  // 'Mod-u': toggleUnderline, @todo
-  // 'Mod-k': toggleLink, @todo
-  // 'Mod-e': toggleCode, @todo
+  ...markShortcuts,
   'Mod-Enter': () => onModeEnter('after'),
   'Mod-Shift-Enter': () => onModeEnter('before'),
   ...(props.allowLineBreaks ? { 'Shift-Enter': hardBreak } : {}),
@@ -260,6 +525,7 @@ const focusPlugin = new Plugin({
       },
       blur: (view) => {
         isFocused.value = false
+        openGroupIndex.value = null
         const html = getNormalizedHTML(view.state)
         const newState = createState(html)
         view.updateState(newState)
@@ -274,12 +540,40 @@ const selectionPlugin = new Plugin({
     apply(_tr, _value, oldState, newState) {
       if (!oldState.selection.eq(newState.selection)) {
         dataSelection.value = `${newState.selection.from},${newState.selection.to}`
+        openGroupIndex.value = null
       }
     },
   },
 })
 const placeholderPlugin = createPlaceholderPlugin(props.placeholder)
 const toolbarPluginKey = new PluginKey('toolbar')
+const toolbarEl = useTemplateRef<HTMLElement>('toolbarEl')
+const toolbarPosition = ref({ top: 0, left: 0 })
+const toolbarVisible = ref(false)
+const activeMarks = ref(new Set<string>())
+const resolvedToolbarItems = resolveToolbarItems(props.toolbar, props.marks)
+const toolbarBuffer = 4
+const toolbarStyle = computed(() => {
+  const el = toolbarEl.value
+  const width = el?.offsetWidth ?? 0
+  const height = el?.offsetHeight ?? 0
+  const viewportWidth = document.documentElement.clientWidth
+
+  let top = toolbarPosition.value.top - height - 4
+  let left = toolbarPosition.value.left - width / 2
+
+  if (top < toolbarBuffer) {
+    top = toolbarBuffer
+  }
+
+  if (left < toolbarBuffer) {
+    left = toolbarBuffer
+  } else if (left + width > viewportWidth - toolbarBuffer) {
+    left = viewportWidth - toolbarBuffer - width
+  }
+
+  return { top: `${top}px`, left: `${left}px` }
+})
 const toolbarPlugin = new Plugin({
   key: toolbarPluginKey,
   state: {
@@ -299,12 +593,73 @@ const toolbarPlugin = new Plugin({
       return value
     },
   },
-  view: (view) => new ToolbarPluginView(view, isFocused, toolbarPluginKey),
+  view: (editorView) =>
+    new ToolbarPluginView(
+      editorView,
+      isFocused,
+      toolbarPluginKey,
+      toolbarPosition,
+      toolbarVisible,
+      activeMarks,
+      Object.keys(props.marks),
+      openGroupIndex,
+    ),
 })
 const emitModelValue = () => emit('update:modelValue', currentValue, currentText)
 const commit = () => emit('commit', currentValue, currentText)
 const commitDebounced = useDebounceFn(commit, 250)
 const dataSelection = ref<string>()
+
+const openGroupIndex = ref<number | null>(null)
+
+function toggleGroup(index: number) {
+  openGroupIndex.value = openGroupIndex.value === index ? null : index
+}
+
+function isGroupActive(item: ResolvedGroupToolbarItem): boolean {
+  return item.items.some((sub) => sub.type === 'mark' && activeMarks.value.has(sub.name))
+}
+
+function onGroupItemClick(subItem: ResolvedMarkToolbarItem | ResolvedStandardToolbarItem) {
+  if (subItem.type === 'mark') {
+    onToggleMark(subItem.name)
+  } else {
+    onStandardAction(subItem.action)
+  }
+
+  openGroupIndex.value = null
+}
+
+function onToggleMark(markName: string) {
+  openGroupIndex.value = null
+
+  if (view && markToggleCommands[markName]) {
+    markToggleCommands[markName](view.state, view.dispatch)
+  }
+}
+
+function onStandardAction(action: StandardToolbarItem) {
+  openGroupIndex.value = null
+
+  if (view) {
+    if (action === 'clearFormatting') {
+      const { from, to } = view.state.selection
+      if (from !== to) {
+        const tr = view.state.tr
+
+        for (const markType of Object.values(view.state.schema.marks) as MarkType[]) {
+          tr.removeMark(from, to, markType)
+        }
+
+        view.dispatch(tr)
+      }
+    } else if (action === 'undo') {
+      emit('undo')
+    } else if (action === 'redo') {
+      emit('redo')
+    }
+  }
+}
 
 defineExpose({ getSelection, setSelection })
 
@@ -330,9 +685,6 @@ onMounted(() => {
     { mount: root.value! },
     {
       state: createState(props.modelValue),
-      nodeViews: {
-        strong: (node, view, getPos) => new LinkNodeView(node, view, getPos),
-      },
       dispatchTransaction(tr) {
         const newState = view!.state.apply(tr)
         view!.updateState(newState)
@@ -513,6 +865,11 @@ function onEnd(state: EditorState) {
 }
 
 function onEscape(state: EditorState, dispatch?: (tr: Transaction) => void) {
+  if (openGroupIndex.value !== null) {
+    openGroupIndex.value = null
+    return true
+  }
+
   const toolbarState = toolbarPluginKey.getState(state)
 
   if (toolbarState && !toolbarState.forceHide) {
@@ -561,19 +918,155 @@ function setSelection(from: number, to: number) {
 .p-rich-text-toolbar {
   position: absolute;
   z-index: 999999;
-  padding: 0.125rem;
-  background-color: var(--pui-toolbar, #ffffff);
-  border-radius: 0.5rem;
+  display: flex;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%));
+  border-radius: 0.375rem;
   box-sizing: border-box;
-  color: var(--pui-toolbar-foreground, #260d1c);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
   opacity: 0;
   visibility: hidden;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  transition-property: opacity, visibility;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .p-rich-text-toolbar-visible {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+}
+
+.p-rich-text-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.p-rich-text-toolbar-btn:hover:not(.p-rich-text-toolbar-btn-active),
+.p-rich-text-toolbar-btn-open:not(.p-rich-text-toolbar-btn-active) {
+  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%));
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%));
+}
+
+.p-rich-text-toolbar-btn-active {
+  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%));
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%));
+}
+
+.p-rich-text-toolbar-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.p-rich-text-toolbar-group {
+  position: relative;
+}
+
+.p-rich-text-toolbar-group-dropdown {
+  position: absolute;
+  top: 100%;
+  left: -0.25rem;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: max-content;
+  margin-top: 0.375rem;
+  padding: 0.25rem;
+  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%));
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
+}
+
+.p-rich-text-toolbar-group-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 1.625rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p-rich-text-toolbar-group-item:hover:not(.p-rich-text-toolbar-btn-active) {
+  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%));
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%));
+}
+
+.p-rich-text-toolbar-group-item.p-rich-text-toolbar-btn-active {
+  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%));
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%));
+}
+
+.p-rich-text-toolbar-group-item svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.p-rich-text-toolbar-group-item span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8125rem;
+}
+
+.dark .p-rich-text-toolbar {
+  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+}
+
+.dark .p-rich-text-toolbar-btn {
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+}
+
+.dark .p-rich-text-toolbar-btn:hover:not(.p-rich-text-toolbar-btn-active),
+.dark .p-rich-text-toolbar-btn-open:not(.p-rich-text-toolbar-btn-active) {
+  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%));
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%));
+}
+
+.dark .p-rich-text-toolbar-btn-active {
+  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%));
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%));
+}
+
+.dark .p-rich-text-toolbar-group-dropdown {
+  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+}
+
+.dark .p-rich-text-toolbar-group-item {
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+}
+
+.dark .p-rich-text-toolbar-group-item:hover:not(.p-rich-text-toolbar-btn-active) {
+  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%));
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%));
+}
+
+.dark .p-rich-text-toolbar-group-item.p-rich-text-toolbar-btn-active {
+  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%));
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%));
 }
 
 .p-rich-text-placeholder {
