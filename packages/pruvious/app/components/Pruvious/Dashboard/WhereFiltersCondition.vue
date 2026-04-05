@@ -7,7 +7,8 @@
         collection.definition.fields[modelValue.field]?.structure ||
         collection.definition.fields[modelValue.field]?._fieldType === 'blocks' ||
         collection.definition.fields[modelValue.field]?._fieldType === 'translatableText' ||
-        collection.definition.fields[modelValue.field]?._fieldType === 'textArea',
+        collection.definition.fields[modelValue.field]?._fieldType === 'textArea' ||
+        collection.definition.fields[modelValue.field]?._fieldType === 'richText',
     }"
   >
     <PUISelect
