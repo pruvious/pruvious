@@ -76,9 +76,10 @@
 
 <script lang="ts" setup>
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
-import { isObject, isString, normalizeWhitespace } from '@pruvious/utils'
+import { isObject, isString, kebabCase, normalizeWhitespace } from '@pruvious/utils'
 import { refDebounced, useDebounceFn } from '@vueuse/core'
 import { chainCommands, exitCode, toggleMark } from 'prosemirror-commands'
+import { history, undo, redo } from 'prosemirror-history'
 import { keymap } from 'prosemirror-keymap'
 import { DOMParser, DOMSerializer, Schema, type MarkSpec, type MarkType, type NodeSpec } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state'
@@ -279,15 +280,31 @@ function resolveToolbarItems(
   return items
 }
 
-function buildMarksSpec(marks: Record<string, MarkDef>): Record<string, MarkSpec> {
+function buildMarksSpec(marks: Record<string, MarkDef>, dashboard: boolean): Record<string, MarkSpec> {
   const specs: Record<string, MarkSpec> = {}
 
   for (const [name, markDef] of Object.entries(marks)) {
     const tag = resolveTag(markDef)
     const attrsObj = buildAttrsObject(markDef.attrs)
+    const dashboardStyleStr =
+      dashboard && markDef.dashboardStyle
+        ? Object.entries(markDef.dashboardStyle)
+            .map(([k, v]) => `${kebabCase(k)}: ${v}`)
+            .join('; ')
+        : undefined
+
+    let toDOMAttrs: Record<string, string> | undefined
+
+    if (attrsObj && dashboardStyleStr) {
+      toDOMAttrs = { ...attrsObj, style: [attrsObj.style, dashboardStyleStr].filter(Boolean).join('; ') }
+    } else if (attrsObj) {
+      toDOMAttrs = attrsObj
+    } else if (dashboardStyleStr) {
+      toDOMAttrs = { style: dashboardStyleStr }
+    }
 
     specs[name] = {
-      toDOM: () => (attrsObj ? [tag, attrsObj, 0] : [tag, 0]),
+      toDOM: () => (toDOMAttrs ? [tag, toDOMAttrs, 0] : [tag, 0]),
       parseDOM: buildParseDOM(tag, markDef.attrs, markDef.parseTags),
     }
   }
@@ -478,7 +495,7 @@ const emit = defineEmits<{
 const root = useTemplateRef<HTMLElement>('root')
 const isFocused = ref(false)
 const isReady = refDebounced(isFocused, 100)
-const resolvedMarks = buildMarksSpec(props.marks)
+const resolvedMarks = buildMarksSpec(props.marks, props.dashboard)
 const schema = new Schema({
   nodes: {
     text: {
@@ -534,9 +551,9 @@ const keymapPlugin = keymap({
   ...(puiIsMac() ? { 'Ctrl-d': onDelete } : undefined),
   'Backspace': onBackspace,
   'Mod-Backspace': onModBackspace,
-  'Mod-z': onUndo,
-  'Mod-y': onRedo,
-  'Mod-Shift-z': onRedo,
+  ...(props.dashboard
+    ? { 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }
+    : { 'Mod-z': onUndo, 'Mod-y': onRedo, 'Mod-Shift-z': onRedo }),
   'ArrowUp': onArrowPrev,
   'ArrowLeft': onArrowPrev,
   'ArrowDown': onArrowNext,
@@ -767,7 +784,14 @@ function createState(content: string) {
   return EditorState.create({
     schema,
     doc,
-    plugins: [focusPlugin, keymapPlugin, placeholderPlugin, selectionPlugin, toolbarPlugin],
+    plugins: [
+      ...(props.dashboard ? [history()] : []),
+      focusPlugin,
+      keymapPlugin,
+      placeholderPlugin,
+      selectionPlugin,
+      toolbarPlugin,
+    ],
     selection: view ? TextSelection.create(doc, Math.min(view.state.selection.from, doc.content.size)) : undefined,
   })
 }

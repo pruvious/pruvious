@@ -59,6 +59,7 @@
     "pg": "8.17.1",
     "pkg-types": "2.3.0",
     "prosemirror-commands": "1.7.1",
+    "prosemirror-history": "1.5.0",
     "prosemirror-keymap": "1.2.3",
     "prosemirror-model": "1.25.4",
     "prosemirror-state": "1.4.4",
@@ -70,9 +71,9 @@
   },
   "devDependencies": {
     "@types/accept-language-parser": "1.5.8",
+    "@types/babel__generator": "7.27.0",
     "@types/babel__template": "7.4.4",
     "@types/babel__traverse": "7.28.0",
-    "@types/babel__generator": "7.27.0",
     "@types/pg": "8.16.0",
     "execa": "9.6.1",
     "nitropack": "2.13.1",
