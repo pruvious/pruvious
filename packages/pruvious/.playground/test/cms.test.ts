@@ -53,6 +53,7 @@ describe('cms', async () => {
   await import('./cms/fields/record')
   await import('./cms/fields/records')
   await import('./cms/fields/repeater')
+  await import('./cms/fields/richText')
   await import('./cms/fields/select')
   await import('./cms/fields/structure')
   await import('./cms/fields/subpath')

@@ -14,6 +14,7 @@ import {
   numberField,
   objectField,
   repeaterField,
+  richTextField,
   selectField,
   structureField,
   subpathField,
@@ -361,6 +362,64 @@ export default defineCollection({
       ui: { label: 'Repeater (nested)' },
     }),
 
+    // richText
+    richText: richTextField({
+      marks: commonMarks,
+      ui: { label: 'Rich text', placeholder: 'Enter rich text...' },
+    }),
+    richTextNoMarks: richTextField({
+      ui: { label: 'Rich text (no marks)' },
+    }),
+    richTextNoLineBreaks: richTextField({
+      marks: commonMarks,
+      allowLineBreaks: false,
+      ui: { label: 'Rich text (no line breaks)' },
+    }),
+    richTextCustomMarks: richTextField({
+      marks: {
+        bold: commonMarks.bold,
+        italic: commonMarks.italic,
+        highlight: {
+          tag: 'span',
+          attrs: { class: 'highlight' },
+          icon: 'highlight',
+          label: 'Highlight',
+        },
+      },
+      ui: { label: 'Rich text (custom marks)' },
+    }),
+    richTextToolbarGroups: richTextField({
+      marks: commonMarks,
+      ui: {
+        label: 'Rich text (toolbar groups)',
+        liveEditor: {
+          toolbar: [
+            'mark:bold',
+            'mark:italic',
+            {
+              icon: 'typography',
+              tooltip: 'More formats',
+              items: ['mark:underline', 'mark:strikethrough', 'mark:code'],
+            },
+            'clearFormatting',
+          ],
+        },
+      },
+    }),
+    richTextToolbarFalse: richTextField({
+      marks: commonMarks,
+      ui: {
+        label: 'Rich text (no toolbar)',
+        liveEditor: { toolbar: false },
+      },
+    }),
+    richTextNoNormalize: richTextField({
+      marks: commonMarks,
+      normalizeWhitespace: false,
+      trim: false,
+      ui: { label: 'Rich text (no normalize)' },
+    }),
+
     // select
     select: selectField({
       choices: [
@@ -663,6 +722,18 @@ export default defineCollection({
             {
               label: 'Repeater',
               fields: ['repeater', 'repeaterMinMax', 'repeaterUnique', 'repeaterDeduplicate', 'repeaterNested'],
+            },
+            {
+              label: 'Rich text',
+              fields: [
+                'richText',
+                'richTextNoMarks',
+                'richTextNoLineBreaks',
+                'richTextCustomMarks',
+                'richTextToolbarGroups',
+                'richTextToolbarFalse',
+                'richTextNoNormalize',
+              ],
             },
             {
               label: 'Select',
