@@ -8,7 +8,7 @@
           'pui-clamp': truncate.lines && truncate.lines > 1,
           'pui-hyphenate': options.ui.dataTable?.hyphenate,
         }"
-        :style="{ '--pui-clamp': truncate.lines }"
+        :style="{ '--pui-clamp': truncate.lines, 'white-space': truncate.lines === 1 ? undefined : 'pre-line' }"
       >
         {{ formattedValue }}
       </span>
