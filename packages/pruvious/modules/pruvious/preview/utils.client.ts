@@ -41,6 +41,7 @@ import {
   type DOMBlock,
 } from './utils/dom'
 import { onKeyDown } from './utils/hotkeys'
+import { maybeTranslate } from './utils/i18n'
 import { commitData, commitDataDebounced, messageDashboard, onDashboardMessage } from './utils/messages'
 import {
   focusEditableField,
@@ -121,6 +122,24 @@ export interface UsePreview {
    * The field path of an editable field that should be focused next within the next 500 milliseconds.
    */
   editableTextNextFocus: Ref<EditableTextNextFocus | null>
+
+  /**
+   * Executes a translatable string callback or returns the provided string.
+   *
+   * Translatable string callbacks are used for translating field option values, usually in the UI.
+   * They are anonymous functions that receive an object with `_` and `__` properties to access the translation functions.
+   * The language is automatically resolved from the `useLanguage()` composable.
+   *
+   * @example
+   * ```ts
+   * // String
+   * maybeTranslate('First Name') // 'First Name'
+   *
+   * // Function
+   * maybeTranslate(({ _ }) => _('First Name')) // 'Vorname'
+   * ```
+   */
+  maybeTranslate: typeof maybeTranslate
 
   /**
    * Posts a message from the preview iframe to the parent dashboard window.
@@ -430,6 +449,7 @@ export function usePreview(): UsePreview {
     highlightedBlocks,
     focusedBlocks,
     editableTextNextFocus,
+    maybeTranslate,
     messageDashboard,
     resolveBlocksField,
     resolveParentBlocksField,

@@ -33,7 +33,7 @@
 
 <script lang="ts" setup>
 import { blockPathInjection, proseListItemBlockPathInjection, usePruviousRoute } from '#pruvious/app'
-import { maybeTranslate, usePreview, type PruviousClipboardData } from '#pruvious/dashboard'
+import { usePreview, type PruviousClipboardData } from '#pruvious/dashboard'
 import type { BlockName } from '#pruvious/server'
 import {
   blurActiveElement,
@@ -96,6 +96,7 @@ const {
   parsedFields,
   focusedBlocks,
   editableTextNextFocus,
+  maybeTranslate,
   messageDashboard,
   resolveBlocksField,
   resolveAllParentBlocksFields,
