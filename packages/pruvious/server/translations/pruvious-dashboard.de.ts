@@ -137,8 +137,10 @@ export default defineTranslation({
   'Choose `301` for permanent redirects or `302` for temporary redirects.':
     'Wählen Sie `301` für permanente Weiterleitungen oder `302` für temporäre Weiterleitungen.',
   'Clear': 'Löschen',
+  'Clear formatting': 'Formatierung löschen',
   'Clear selection': 'Auswahl aufheben',
   'Close': 'Schließen',
+  'Code': 'Code',
   'Collapse': 'Einklappen',
   'Collapse all': 'Alle einklappen',
   'Collections': 'Collections',
@@ -395,6 +397,7 @@ export default defineTranslation({
     'Bildbreite zu klein.<br>Minimum: `$minWidth`<br>Aktuell: `$width`',
     { minWidth: 'string', width: 'string' },
   ),
+  'Italic': 'Kursiv',
   'Inactive': 'Inaktiv',
   'Includes all': 'Enthält alle',
   'Includes any': 'Enthält mindestens eines',
@@ -681,8 +684,11 @@ export default defineTranslation({
   'Status code': 'Statuscode',
   'Status message': 'Statusmeldung',
   'Stop sharing': 'Teilen beenden',
+  'Strikethrough': 'Durchgestrichen',
   'Subpath': 'Unterpfad',
+  'Subscript': 'Tiefgestellt',
   'Success': 'Erfolg',
+  'Superscript': 'Hochgestellt',
   'Switched content language to `$language`': createPattern('Inhaltssprache auf `$language` umgeschaltet', {
     language: 'string',
   }),
@@ -793,6 +799,7 @@ export default defineTranslation({
   'Unable to resolve blocks field at `$path`.': createPattern('Das Blockfeld existiert nicht unter `$path`.', {
     path: 'string',
   }),
+  'Underline': 'Unterstrichen',
   'Undo': 'Rückgängig',
   'Uncategorized': 'Unkategorisiert',
   'unique-subpath': 'eindeutiger-unterpfad',

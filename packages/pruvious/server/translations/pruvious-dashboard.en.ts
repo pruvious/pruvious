@@ -135,8 +135,10 @@ export default defineTranslation({
   'Choose `301` for permanent redirects or `302` for temporary redirects.':
     'Choose `301` for permanent redirects or `302` for temporary redirects.',
   'Clear': 'Clear',
+  'Clear formatting': 'Clear formatting',
   'Clear selection': 'Clear selection',
   'Close': 'Close',
+  'Code': 'Code',
   'Collapse': 'Collapse',
   'Collapse all': 'Collapse all',
   'Collections': 'Collections',
@@ -393,6 +395,7 @@ export default defineTranslation({
     'Image width too large.<br>Maximum: `$maxWidth`<br>Current: `$width`',
     { maxWidth: 'string', width: 'string' },
   ),
+  'Italic': 'Italic',
   'Inactive': 'Inactive',
   'Includes all': 'Includes all',
   'Includes any': 'Includes any',
@@ -679,8 +682,11 @@ export default defineTranslation({
   'Status code': 'Status code',
   'Status message': 'Status message',
   'Stop sharing': 'Stop sharing',
+  'Strikethrough': 'Strikethrough',
   'Subpath': 'Subpath',
+  'Subscript': 'Subscript',
   'Success': 'Success',
+  'Superscript': 'Superscript',
   'Switched content language to `$language`': createPattern('Switched content language to `$language`', {
     language: 'string',
   }),
@@ -787,6 +793,7 @@ export default defineTranslation({
   'Unable to resolve blocks field at `$path`.': createPattern('Unable to resolve blocks field at `$path`.', {
     path: 'string',
   }),
+  'Underline': 'Underline',
   'Undo': 'Undo',
   'Uncategorized': 'Uncategorized',
   'unique-subpath': 'unique-subpath',
