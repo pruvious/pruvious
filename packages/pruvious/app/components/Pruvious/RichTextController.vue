@@ -6,6 +6,7 @@
     :disabled="!isEditable"
     :key="key"
     :marks="marks"
+    :maybeTranslate="maybeTranslate"
     :modelValue="html"
     :normalizeWhitespace="normalizeWhitespace"
     :placeholder="placeholder"

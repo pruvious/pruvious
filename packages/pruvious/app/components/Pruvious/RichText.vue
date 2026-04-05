@@ -25,6 +25,7 @@
             v-if="item.type === 'mark'"
             :title="item.label"
             @mousedown.prevent.stop="onToggleMark(item.name)"
+            type="button"
             class="p-rich-text-toolbar-btn"
             :class="{ 'p-rich-text-toolbar-btn-active': activeMarks.has(item.name) }"
           >
@@ -34,6 +35,7 @@
             v-else-if="item.type === 'standard'"
             :title="item.label"
             @mousedown.prevent.stop="onStandardAction(item.action)"
+            type="button"
             class="p-rich-text-toolbar-btn"
           >
             <Icon :name="`tabler:${item.icon}`" mode="svg" />
@@ -42,6 +44,7 @@
             <button
               :title="item.tooltip"
               @mousedown.prevent.stop="toggleGroup(index)"
+              type="button"
               class="p-rich-text-toolbar-btn"
               :class="{
                 'p-rich-text-toolbar-btn-active': isGroupActive(item),
@@ -56,6 +59,7 @@
                 :key="subItem.type === 'mark' ? `mark:${subItem.name}` : subItem.action"
                 :title="subItem.label"
                 @mousedown.prevent.stop="onGroupItemClick(subItem)"
+                type="button"
                 class="p-rich-text-toolbar-group-item"
                 :class="{ 'p-rich-text-toolbar-btn-active': subItem.type === 'mark' && activeMarks.has(subItem.name) }"
               >
@@ -71,7 +75,6 @@
 </template>
 
 <script lang="ts" setup>
-import { usePreview } from '#pruvious/dashboard'
 import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { isObject, isString, normalizeWhitespace } from '@pruvious/utils'
 import { refDebounced, useDebounceFn } from '@vueuse/core'
@@ -84,8 +87,6 @@ import type { EditableTextNextFocus } from '../../../modules/pruvious/preview/ut
 import type { Mark as MarkDef, RichTextCustomOptions, StandardToolbarItem } from '../../../server/fields/richText'
 import { createPlaceholderPlugin } from '../../utils/pruvious/dashboard/rich-text/placeholder'
 import { ToolbarPluginView } from '../../utils/pruvious/dashboard/rich-text/toolbar'
-
-const { maybeTranslate } = usePreview()
 
 const reservedShortcuts = new Set([
   'ArrowDown',
@@ -202,6 +203,7 @@ const standardToolbarItems: Record<string, { icon: string; label: string }> = {
 function resolveStringEntry(
   entry: string,
   marks: Record<string, MarkDef>,
+  translate: (value: any) => string | undefined,
 ): ResolvedMarkToolbarItem | ResolvedStandardToolbarItem | undefined {
   if (entry.startsWith('mark:')) {
     const markName = entry.slice(5)
@@ -212,7 +214,7 @@ function resolveStringEntry(
         type: 'mark',
         name: markName,
         icon: markDef.icon ?? 'asterisk',
-        label: maybeTranslate(markDef.label),
+        label: translate(markDef.label),
       }
     }
   } else if (entry in standardToolbarItems) {
@@ -234,6 +236,7 @@ function resolveToolbarItems(
       : never
     : never,
   marks: Record<string, MarkDef>,
+  translate: (value: any) => string | undefined,
 ): ResolvedToolbarItem[] {
   if (toolbar === false) return []
 
@@ -246,7 +249,7 @@ function resolveToolbarItems(
 
   for (const entry of entries) {
     if (isString(entry)) {
-      const resolved = resolveStringEntry(entry, marks)
+      const resolved = resolveStringEntry(entry, marks, translate)
 
       if (resolved) {
         items.push(resolved)
@@ -255,7 +258,7 @@ function resolveToolbarItems(
       const groupItems: (ResolvedMarkToolbarItem | ResolvedStandardToolbarItem)[] = []
 
       for (const subEntry of (entry as { items: string[] }).items) {
-        const resolved = resolveStringEntry(subEntry, marks)
+        const resolved = resolveStringEntry(subEntry, marks, translate)
 
         if (resolved) {
           groupItems.push(resolved as ResolvedMarkToolbarItem | ResolvedStandardToolbarItem)
@@ -266,7 +269,7 @@ function resolveToolbarItems(
         items.push({
           type: 'group',
           icon: (entry as any).icon ?? 'paint',
-          tooltip: maybeTranslate((entry as any).tooltip),
+          tooltip: translate((entry as any).tooltip),
           items: groupItems,
         })
       }
@@ -409,6 +412,46 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+
+  /**
+   * A function that resolves translatable strings.
+   * Used to translate mark labels in the toolbar.
+   */
+  maybeTranslate: {
+    type: Function as PropType<(value: any) => string | undefined>,
+    default: () => (value: any) => (isString(value) ? value : undefined),
+  },
+
+  /**
+   * When enabled, the Enter key inserts a line break (`<br>`) instead of emitting the `enterKey` event.
+   * Only applies when `allowLineBreaks` is `true`.
+   *
+   * @default false
+   */
+  enterInsertsLineBreak: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * When enabled, Tab and Shift-Tab use native browser focus navigation instead of emitting `selectNext`/`selectPrevious` events.
+   *
+   * @default false
+   */
+  nativeTabNavigation: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * When enabled, applies dashboard-specific styles (e.g. placeholder color).
+   *
+   * @default false
+   */
+  dashboard: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -486,7 +529,7 @@ const keymapPlugin = keymap({
   'Mod-Enter': () => onModeEnter('after'),
   'Mod-Shift-Enter': () => onModeEnter('before'),
   ...(props.allowLineBreaks ? { 'Shift-Enter': hardBreak } : {}),
-  'Enter': onEnter,
+  ...(props.enterInsertsLineBreak && props.allowLineBreaks ? { Enter: hardBreak } : { Enter: onEnter }),
   'Delete': onDelete,
   ...(puiIsMac() ? { 'Ctrl-d': onDelete } : undefined),
   'Backspace': onBackspace,
@@ -498,8 +541,7 @@ const keymapPlugin = keymap({
   'ArrowLeft': onArrowPrev,
   'ArrowDown': onArrowNext,
   'ArrowRight': onArrowNext,
-  'Tab': onTab,
-  'Shift-Tab': onShiftTab,
+  ...(props.nativeTabNavigation ? {} : { 'Tab': onTab, 'Shift-Tab': onShiftTab }),
   'Mod-d': onDuplicate,
   'Mod-ArrowUp': onMoveUp,
   'Mod-ArrowDown': onMoveDown,
@@ -543,13 +585,13 @@ const selectionPlugin = new Plugin({
     },
   },
 })
-const placeholderPlugin = createPlaceholderPlugin(props.placeholder)
+const placeholderPlugin = createPlaceholderPlugin(props.placeholder, props.dashboard)
 const toolbarPluginKey = new PluginKey('toolbar')
 const toolbarEl = useTemplateRef<HTMLElement>('toolbarEl')
 const toolbarPosition = ref({ top: 0, left: 0 })
 const toolbarVisible = ref(false)
 const activeMarks = ref(new Set<string>())
-const resolvedToolbarItems = resolveToolbarItems(props.toolbar, props.marks)
+const resolvedToolbarItems = resolveToolbarItems(props.toolbar, props.marks, props.maybeTranslate)
 const toolbarBuffer = 4
 const toolbarStyle = computed(() => {
   const el = toolbarEl.value
@@ -642,7 +684,10 @@ function onStandardAction(action: StandardToolbarItem) {
   if (view) {
     if (action === 'clearFormatting') {
       const { from, to } = view.state.selection
-      if (from !== to) {
+
+      if (from === to) {
+        view.dispatch(view.state.tr.setStoredMarks([]))
+      } else {
         const tr = view.state.tr
 
         for (const markType of Object.values(view.state.schema.marks) as MarkType[]) {
@@ -903,179 +948,225 @@ function setSelection(from: number, to: number) {
 
 <style>
 .p-rich-text {
-  position: relative;
-  outline: none;
-  cursor: text;
-  white-space: pre-wrap;
+  position: relative !important;
+  outline: none !important;
+  cursor: text !important;
+  white-space: pre-wrap !important;
 }
 
 .p-rich-text:not(.p-rich-text-ready) {
-  caret-color: transparent;
+  caret-color: transparent !important;
 }
 
 .p-rich-text-toolbar {
-  position: absolute;
-  z-index: 999999;
-  display: flex;
-  gap: 0.125rem;
-  padding: 0.25rem;
-  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%));
-  border-radius: 0.375rem;
-  box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition-property: opacity, visibility;
-  transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  gap: 0.125rem !important;
+  padding: 0.25rem !important;
+  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%)) !important;
+  border: 1px solid var(--p-editable-text-toolbar-border, hsl(210 8% 90.2%)) !important;
+  border-radius: 0.375rem !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%)) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition-property: opacity, visibility !important;
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .p-rich-text-toolbar-visible {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .p-rich-text-toolbar-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
-  padding: 0;
-  border: none;
-  border-radius: 0.25rem;
-  background: none;
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
-  cursor: pointer;
-  transition: background-color 150ms;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.625rem !important;
+  height: 1.625rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%)) !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition-property: background-color !important;
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .p-rich-text-toolbar-btn:hover:not(.p-rich-text-toolbar-btn-active),
 .p-rich-text-toolbar-btn-open:not(.p-rich-text-toolbar-btn-active) {
-  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%));
-  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%));
+  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%)) !important;
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%)) !important;
 }
 
 .p-rich-text-toolbar-btn-active {
-  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%));
-  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%));
+  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%)) !important;
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%)) !important;
 }
 
 .p-rich-text-toolbar-btn svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1rem !important;
+  height: 1rem !important;
 }
 
 .p-rich-text-toolbar-group {
-  position: relative;
+  position: relative !important;
 }
 
 .p-rich-text-toolbar-group-dropdown {
-  position: absolute;
-  top: 100%;
-  left: -0.25rem;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: max-content;
-  margin-top: 0.375rem;
-  padding: 0.25rem;
-  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%));
-  border-radius: 0.375rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
+  position: absolute !important;
+  top: 100% !important;
+  left: -0.25rem !important;
+  z-index: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.125rem !important;
+  min-width: max-content !important;
+  margin-top: 0.375rem !important;
+  padding: 0.25rem !important;
+  background-color: var(--p-editable-text-toolbar, hsl(0 0% 100%)) !important;
+  border: 1px solid var(--p-editable-text-toolbar-border, hsl(210 8% 90.2%)) !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%)) !important;
 }
 
 .p-rich-text-toolbar-group-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 1.625rem;
-  padding: 0 0.5rem;
-  border: none;
-  border-radius: 0.25rem;
-  background: none;
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%));
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  height: 1.625rem !important;
+  margin: 0 !important;
+  padding: 0 0.5rem !important;
+  border: none !important;
+  border-radius: 0.25rem !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 44%)) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: inherit !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition-property: background-color !important;
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .p-rich-text-toolbar-group-item:hover:not(.p-rich-text-toolbar-btn-active) {
-  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%));
-  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%));
+  background-color: var(--p-editable-text-toolbar-hover, hsl(240 4.8% 94%)) !important;
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(324 49% 10%)) !important;
 }
 
 .p-rich-text-toolbar-group-item.p-rich-text-toolbar-btn-active {
-  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%));
-  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%));
+  background-color: var(--p-editable-text-toolbar-active, hsl(209 71% 88%)) !important;
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(324 49% 10%)) !important;
 }
 
 .p-rich-text-toolbar-group-item svg {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
+  width: 1rem !important;
+  height: 1rem !important;
+  flex-shrink: 0 !important;
 }
 
 .p-rich-text-toolbar-group-item span {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.8125rem;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
 }
 
 .dark .p-rich-text-toolbar {
-  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%)) !important;
+  border: 1px solid var(--p-editable-text-toolbar-border, hsl(231 16.7% 24%)) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%)) !important;
 }
 
 .dark .p-rich-text-toolbar-btn {
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%)) !important;
 }
 
 .dark .p-rich-text-toolbar-btn:hover:not(.p-rich-text-toolbar-btn-active),
 .dark .p-rich-text-toolbar-btn-open:not(.p-rich-text-toolbar-btn-active) {
-  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%));
-  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%));
+  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%)) !important;
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%)) !important;
 }
 
 .dark .p-rich-text-toolbar-btn-active {
-  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%));
-  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%));
+  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%)) !important;
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%)) !important;
 }
 
 .dark .p-rich-text-toolbar-group-dropdown {
-  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%));
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+  background-color: var(--p-editable-text-toolbar, hsl(231 16.7% 16.5%)) !important;
+  border: 1px solid var(--p-editable-text-toolbar-border, hsl(231 16.7% 24%)) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%)) !important;
 }
 
 .dark .p-rich-text-toolbar-group-item {
-  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%));
+  color: var(--p-editable-text-toolbar-foreground, hsl(228 11% 65%)) !important;
 }
 
 .dark .p-rich-text-toolbar-group-item:hover:not(.p-rich-text-toolbar-btn-active) {
-  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%));
-  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%));
+  background-color: var(--p-editable-text-toolbar-hover, hsl(231 16.7% 24%)) !important;
+  color: var(--p-editable-text-toolbar-foreground-hover, hsl(0 0% 98%)) !important;
 }
 
 .dark .p-rich-text-toolbar-group-item.p-rich-text-toolbar-btn-active {
-  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%));
-  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%));
+  background-color: var(--p-editable-text-toolbar-active, hsl(208 52% 28%)) !important;
+  color: var(--p-editable-text-toolbar-active-foreground, hsl(0 0% 98%)) !important;
 }
 
 .p-rich-text-placeholder {
-  position: absolute;
-  max-width: 100%;
-  overflow: hidden;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  opacity: 0.5;
-  filter: grayscale(1);
+  position: absolute !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.p-rich-text-placeholder-dashboard {
+  color: var(--p-placeholder, hsl(228 11% 44%)) !important;
+}
+
+.dark .p-rich-text-placeholder-dashboard {
+  color: var(--p-placeholder, hsl(228 11% 65%)) !important;
+}
+
+.p-rich-text-placeholder:not(.p-rich-text-placeholder-dashboard) {
+  opacity: 0.5 !important;
+  filter: grayscale(1) !important;
 }
 </style>

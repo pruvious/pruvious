@@ -29,6 +29,7 @@ export class ToolbarPluginView implements PluginView {
     watch(isFocused, () => this.updateVisibility())
     watch(openGroupIndex, () => this.updateVisibility())
     useEventListener('resize', () => this.updatePosition())
+    useEventListener(document, 'scroll', () => this.updatePosition(), { capture: true, passive: true })
     this.updateVisibility()
   }
 
@@ -77,16 +78,18 @@ export class ToolbarPluginView implements PluginView {
   }
 
   protected updatePosition() {
-    const { from, to, anchor } = this.view.state.selection
-    const start = this.view.coordsAtPos(from)
-    const end = this.view.coordsAtPos(to)
-    const baseTop = from === anchor ? end.top : start.top
-    const baseLeft = from === anchor ? end.left : start.left
+    try {
+      const { from, to, anchor } = this.view.state.selection
+      const start = this.view.coordsAtPos(from)
+      const end = this.view.coordsAtPos(to)
+      const baseTop = from === anchor ? end.top : start.top
+      const baseLeft = from === anchor ? end.left : start.left
 
-    this.toolbarPosition.value = {
-      top: baseTop + window.scrollY,
-      left: baseLeft + window.scrollX,
-    }
+      this.toolbarPosition.value = {
+        top: baseTop + window.scrollY,
+        left: baseLeft + window.scrollX,
+      }
+    } catch {}
   }
 
   destroy() {
