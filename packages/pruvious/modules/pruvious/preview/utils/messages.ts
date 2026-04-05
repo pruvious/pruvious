@@ -1,4 +1,4 @@
-import { parseFields } from '#pruvious/dashboard'
+import { parseFields } from '../../fields/utils.client'
 import type {
   DashboardLanguageCode,
   GenericRouteReference,
