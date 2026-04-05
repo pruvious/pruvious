@@ -38,19 +38,19 @@
   "dependencies": {
     "@pruvious/i18n": "workspace:*",
     "@pruvious/utils": "workspace:*",
-    "better-sqlite3": "12.6.2",
+    "better-sqlite3": "12.8.0",
     "ohash": "2.0.11",
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260118.0",
+    "@cloudflare/workers-types": "4.20260405.1",
     "@types/better-sqlite3": "7.6.13",
-    "@types/node": "25.0.9",
-    "@types/pg": "8.16.0",
+    "@types/node": "25.5.2",
+    "@types/pg": "8.20.0",
     "get-port-please": "3.2.0",
-    "miniflare": "4.20260114.0",
-    "pg": "8.17.1",
-    "typescript": "5.9.3",
+    "miniflare": "4.20260401.0",
+    "pg": "8.20.0",
+    "typescript": "6.0.2",
     "unbuild": "3.6.1"
   }
 }

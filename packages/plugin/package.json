@@ -25,14 +25,14 @@
     "@clack/prompts": "1.0.0-alpha.9",
     "@pruvious/cli-utils": "workspace:*",
     "@pruvious/utils": "workspace:*",
-    "citty": "0.1.6",
+    "citty": "0.2.2",
     "ignore": "7.0.5",
     "pathe": "2.0.3",
     "pretty-ms": "9.3.0"
   },
   "devDependencies": {
-    "@types/node": "25.0.9",
-    "typescript": "5.9.3",
+    "@types/node": "25.5.2",
+    "typescript": "6.0.2",
     "unbuild": "3.6.1"
   }
 }

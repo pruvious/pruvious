@@ -24,16 +24,16 @@
     "@pruvious/cli-utils": "workspace:*",
     "@pruvious/hub-app": "workspace:*",
     "@pruvious/utils": "workspace:*",
-    "citty": "0.1.6",
+    "citty": "0.2.2",
     "execa": "9.6.1",
     "get-port-please": "3.2.0",
-    "mlly": "1.8.0",
-    "nypm": "0.6.2",
+    "mlly": "1.8.2",
+    "nypm": "0.6.5",
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@types/node": "25.0.9",
-    "typescript": "5.9.3",
+    "@types/node": "25.5.2",
+    "typescript": "6.0.2",
     "unbuild": "3.6.1"
   }
 }

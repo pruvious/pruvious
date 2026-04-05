@@ -30,13 +30,13 @@
   "dependencies": {
     "@clack/prompts": "1.0.0-alpha.9",
     "pathe": "2.0.3",
-    "semver": "7.7.3"
+    "semver": "7.7.4"
   },
   "devDependencies": {
-    "@types/node": "25.0.9",
+    "@types/node": "25.5.2",
     "@types/semver": "7.7.1",
-    "citty": "0.1.6",
-    "typescript": "5.9.3",
+    "citty": "0.2.2",
+    "typescript": "6.0.2",
     "unbuild": "3.6.1"
   }
 }
