@@ -550,7 +550,7 @@ async function handleFormatting(newHTML: string, oldHTML: string, newText: strin
 
     if (isArray(fieldOptions.value.ui.liveEditor.formatters)) {
       for (const formatter of fieldOptions.value.ui.liveEditor.formatters as RichTextFormatter[]) {
-        const result = formatter({ newHTML, oldHTML, newText, oldText })
+        const result = formatter({ newHTML, oldHTML, newText, oldText }) as any
 
         if (result) {
           await nextTick()
@@ -560,13 +560,13 @@ async function handleFormatting(newHTML: string, oldHTML: string, newText: strin
             fieldOptions.value?._fieldType === 'richText' &&
             listInfo.value &&
             listInfo.value.listContentField.blockName === result.$key &&
-            isArray(result[listInfo.value.listContentField.fieldName as keyof typeof result]) &&
-            result[listInfo.value.listContentField.fieldName as keyof typeof result].length === 1
+            isArray(result[listInfo.value.listContentField.fieldName]) &&
+            result[listInfo.value.listContentField.fieldName].length === 1
           ) {
             const { listContentField, listItemContentField } = listInfo.value
             const prevSibling = listItemContentField.fieldData[listItemContentField.index - 1]
             const nextSibling = listItemContentField.fieldData[listItemContentField.index + 1]
-            const resultListItem = result[listInfo.value.listContentField.fieldName as keyof typeof result][0] as any
+            const resultListItem = result[listInfo.value.listContentField.fieldName][0]
 
             if (prevSibling && prevSibling.$key === listContentField.blockName) {
               // Merge with previous sibling list
