@@ -225,9 +225,7 @@ describe('richText field', () => {
     expect(await $postAsAdmin(richText, { richText: '<strong>bold</strong>' })).toEqual([
       { richText: '<strong>bold</strong>' },
     ])
-    expect(await $postAsAdmin(richText, { richText: '<em>italic</em>' })).toEqual([
-      { richText: '<em>italic</em>' },
-    ])
+    expect(await $postAsAdmin(richText, { richText: '<em>italic</em>' })).toEqual([{ richText: '<em>italic</em>' }])
   })
 
   test('XSS prevention - span marks with attrs', async () => {
