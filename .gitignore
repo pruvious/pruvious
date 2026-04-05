@@ -10,6 +10,7 @@ tmp
 node_modules
 
 # Misc
+.claude
 .DS_Store
 .uploads
 *.sqlite
