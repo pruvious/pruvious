@@ -80,6 +80,8 @@ export const translatableStrings = {
     { operator: 'string', field: 'string' },
   ),
 
+  'The rich text content contains disallowed HTML': 'The rich text content contains disallowed HTML',
+
   'The search field `$field` must be of type `text`': createPattern(
     'The search field `$field` must be of type `text`',
     { field: 'string' },
@@ -249,6 +251,9 @@ export const translatableStringsDe = {
     'Der Operator `$operator` wird für das Feld `$field` nicht unterstützt',
     { operator: 'string', field: 'string' },
   ),
+
+  'The rich text content contains disallowed HTML':
+    'Der Rich-Text-Inhalt enthält nicht erlaubtes HTML',
 
   'The search field `$field` must be of type `text`': createPattern('Das Suchfeld `$field` muss vom Typ `text` sein', {
     field: 'string',
