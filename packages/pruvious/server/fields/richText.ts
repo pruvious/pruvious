@@ -16,7 +16,7 @@ import {
   type TextFieldModelOptions,
 } from '@pruvious/orm'
 import { isString, normalizeWhitespace } from '@pruvious/utils'
-import type { PropType } from 'vue'
+import type { CSSProperties, PropType } from 'vue'
 
 export interface RichTextCustomOptions<TMark extends string = never> {
   /**
@@ -370,6 +370,44 @@ export interface Mark {
    * ```
    */
   label?: string | ((context: TranslatableStringCallbackContext) => string)
+
+  /**
+   * Inline styles applied to this mark only when rendered in the dashboard editor.
+   *
+   * This is useful for custom marks (e.g. `<span class="highlight">`) that rely on
+   * user-defined CSS on their website. Since the dashboard doesn't load those styles,
+   * this option provides a visual representation for content editors.
+   *
+   * These styles do **not** affect the stored HTML or the live preview - they are applied
+   * only in the ProseMirror editor within the dashboard.
+   *
+   * You can use PUI CSS variables for colors that adapt to light/dark mode:
+   *
+   * - `hsl(var(--pui-background))` / `hsl(var(--pui-foreground))`
+   * - `hsl(var(--pui-card))` / `hsl(var(--pui-card-foreground))`
+   * - `hsl(var(--pui-popover))` / `hsl(var(--pui-popover-foreground))`
+   * - `hsl(var(--pui-primary))` / `hsl(var(--pui-primary-foreground))`
+   * - `hsl(var(--pui-secondary))` / `hsl(var(--pui-secondary-foreground))`
+   * - `hsl(var(--pui-muted))` / `hsl(var(--pui-muted-foreground))`
+   * - `hsl(var(--pui-accent))` / `hsl(var(--pui-accent-foreground))`
+   * - `hsl(var(--pui-destructive))` / `hsl(var(--pui-destructive-foreground))`
+   * - `hsl(var(--pui-border))`
+   * - `hsl(var(--pui-input))`
+   * - `hsl(var(--pui-ring))`
+   *
+   * @default undefined
+   *
+   * @example
+   * ```ts
+   * dashboardStyle: {
+   *   padding: '0.125rem 0.25rem',
+   *   borderRadius: '0.25rem',
+   *   backgroundColor: 'hsl(var(--pui-accent))',
+   *   color: 'hsl(var(--pui-accent-foreground))',
+   * }
+   * ```
+   */
+  dashboardStyle?: CSSProperties
 }
 
 export type StandardToolbarItem = 'clearFormatting'
