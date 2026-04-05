@@ -10,6 +10,7 @@
     "strict": true,
     "rootDir": "src",
     "target": "ESNext",
+    "types": ["node"],
     "verbatimModuleSyntax": true
   },
   "include": ["src"]
