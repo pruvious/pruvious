@@ -1,8 +1,6 @@
 import { remap } from '@pruvious/utils'
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
 import { resolveDashboardPageFiles } from '../../dashboard-pages/resolver'
-import { debug } from '../../debug/console'
 import { resolveFieldComponentFiles } from '../../fields/resolver'
 import { stringifyImageTransformOptions } from '../../uploads/images'
 import { resolvePruviousFile, resolvePruviousUtilsFile } from '../utils'
@@ -13,8 +11,6 @@ import { resolvePruviousFile, resolvePruviousUtilsFile } from '../utils'
 export function getDashboardFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/dashboard/index.ts>`)
 
   const fieldComponentFiles = resolveFieldComponentFiles()
   const fieldComponentEntries = Object.entries(fieldComponentFiles)
@@ -112,11 +108,6 @@ export function getDashboardFileContent() {
  * Generates the `#pruvious/dashboard` type file content.
  */
 export function getDashboardTypeFileContent() {
-  const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/dashboard/index.d.ts>`)
-
   return [
     `export const fieldComponents: any`,
     `export const tableFieldComponents: any`,

@@ -1,7 +1,5 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
 import { resolveCollectionFiles } from '../../collections/resolver'
-import { debug } from '../../debug/console'
 import { resolveSingletonFiles } from '../../singletons/resolver'
 
 /**
@@ -15,10 +13,6 @@ export function getServerDynamicRoutesCollectionFileContent() {
   const collectionEntries = Object.entries(collectionFiles)
   const singletonFiles = resolveSingletonFiles()
   const singletonEntries = Object.entries(singletonFiles)
-
-  debug(
-    `Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/dynamic-routes-collection.ts>`,
-  )
 
   const output = [
     ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),

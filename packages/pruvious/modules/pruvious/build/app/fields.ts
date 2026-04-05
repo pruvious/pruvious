@@ -1,6 +1,4 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 import { resolveFieldDefinitionFiles } from '../../fields/resolver'
 
 /**
@@ -8,9 +6,6 @@ import { resolveFieldDefinitionFiles } from '../../fields/resolver'
  */
 export function getAppFieldsFileContent() {
   const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/fields.ts>`)
 
   const fieldDefinitionFiles = resolveFieldDefinitionFiles()
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)

@@ -1,6 +1,4 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 import { resolveTranslationFiles } from '../../translations/resolver'
 
 /**
@@ -9,8 +7,6 @@ import { resolveTranslationFiles } from '../../translations/resolver'
 export function getDashboardI18nFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/dashboard/i18n.ts>`)
 
   const translationFiles = resolveTranslationFiles()
   const dashboardLanguages = Object.keys(translationFiles['pruvious-dashboard'] ?? {}).map((code) => ({

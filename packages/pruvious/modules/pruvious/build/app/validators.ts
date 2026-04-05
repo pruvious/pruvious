@@ -1,7 +1,5 @@
 import { validatorsMeta } from '@pruvious/orm'
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 import { getSimpleValidatorsMeta } from '../utils'
 
 /**
@@ -9,9 +7,6 @@ import { getSimpleValidatorsMeta } from '../utils'
  */
 export function getAppValidatorsFileContent() {
   const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/validators.ts>`)
 
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
 

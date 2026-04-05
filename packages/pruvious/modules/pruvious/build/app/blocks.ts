@@ -1,16 +1,11 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
 import { resolveBlockFiles } from '../../blocks/resolver'
-import { debug } from '../../debug/console'
 
 /**
  * Generates the `#pruvious/app/blocks.ts` file content.
  */
 export function getAppBlocksFileContent() {
   const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/blocks.ts>`)
 
   const blockFiles = resolveBlockFiles()
   const blockEntries = Object.entries(blockFiles)

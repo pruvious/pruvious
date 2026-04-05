@@ -1,6 +1,4 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 
 /**
  * Generates the `#pruvious/dashboard/base.ts` file content.
@@ -8,8 +6,6 @@ import { debug } from '../../debug/console'
 export function getDashboardBaseFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/dashboard/base.ts>`)
 
   return [
     `/**`,

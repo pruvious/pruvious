@@ -1,7 +1,5 @@
 import { camelCase } from '@pruvious/utils'
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 import {
   resolveActionCallbackFiles,
   resolveActionDefinitionFiles,
@@ -14,9 +12,6 @@ import {
  */
 export function getServerHooksFileContent() {
   const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/hooks.ts>`)
 
   const actionDefinitionFiles = resolveActionDefinitionFiles()
   const serverActionDefinitionEntries = Object.entries(actionDefinitionFiles.server)

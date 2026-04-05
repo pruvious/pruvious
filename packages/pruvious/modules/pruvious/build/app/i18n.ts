@@ -1,6 +1,4 @@
 import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
 import { resolvePruviousFile } from '../utils'
 
 /**
@@ -9,8 +7,6 @@ import { resolvePruviousFile } from '../utils'
 export function getAppI18nFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/i18n.ts>`)
 
   return [
     ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
