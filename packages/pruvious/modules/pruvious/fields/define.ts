@@ -235,7 +235,7 @@ export interface DefineFieldOptions<
     /**
      * The input value to sanitize.
      */
-    value: TModel['TCastedType'],
+    value: unknown,
 
     /**
      * The current context field object.
@@ -251,7 +251,7 @@ export interface DefineFieldOptions<
       Database,
       InsertContext<GenericDatabase> | UpdateContext<GenericDatabase>
     >,
-  ) => TModel['TCastedType'] | null | Promise<TModel['TCastedType'] | null>)[]
+  ) => any | Promise<any>)[]
 
   /**
    * An array of callback functions that validate an input value for this field.

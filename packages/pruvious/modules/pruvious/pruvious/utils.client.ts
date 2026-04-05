@@ -1,7 +1,7 @@
 import type { BlockGroupDefinition, BlockTagDefinition } from '#pruvious/server'
 import { deepClone, isArray, isObject, isString } from '@pruvious/utils'
 import { pruviousGet } from '../api/utils.client'
-import type { SerializableBlock } from '../blocks/utils.client'
+import type { SerializableBlock } from '../blocks/utils.server'
 import type { SerializableCollection } from '../collections/utils.client'
 import type { SerializableSingleton } from '../singletons/utils.client'
 
