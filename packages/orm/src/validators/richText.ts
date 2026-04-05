@@ -34,6 +34,13 @@ function resolveExpectedAttrs(
 }
 
 function matchesSpanAttrs(parsedAttrs: Record<string, string>, expectedAttrs: Record<string, string>): boolean {
+  const expectedKeys = Object.keys(expectedAttrs)
+  const actualKeys = Object.keys(parsedAttrs)
+
+  if (actualKeys.length !== expectedKeys.length) {
+    return false
+  }
+
   for (const [key, expectedValue] of Object.entries(expectedAttrs)) {
     const actualValue = parsedAttrs[key]
 
@@ -44,6 +51,10 @@ function matchesSpanAttrs(parsedAttrs: Record<string, string>, expectedAttrs: Re
     if (key === 'class') {
       const expectedClasses = expectedValue.split(' ')
       const actualClasses = actualValue.split(' ')
+
+      if (expectedClasses.length !== actualClasses.length) {
+        return false
+      }
 
       if (!expectedClasses.every((c) => actualClasses.includes(c))) {
         return false
@@ -136,11 +147,16 @@ export function richTextValidator<TDatabase extends GenericDatabase = GenericDat
         throw new Error(resolveCustomErrorMessage(errorMessage, defaultErrorMessage, pick(context, ['_', '__'])))
       }
 
-      if (!isClosing && tagName === 'span' && spanAttrsConfigs.length > 0) {
-        const parsedAttrs = parseAttrsString(attrsStr)
-        const matchesAny = spanAttrsConfigs.some((expected) => matchesSpanAttrs(parsedAttrs, expected))
+      if (!isClosing) {
+        if (tagName === 'span' && spanAttrsConfigs.length > 0) {
+          const parsedAttrs = parseAttrsString(attrsStr)
+          const matchesAny = spanAttrsConfigs.some((expected) => matchesSpanAttrs(parsedAttrs, expected))
 
-        if (!matchesAny) {
+          if (!matchesAny) {
+            const defaultErrorMessage = context.__('pruvious-orm', 'The rich text content contains disallowed HTML')
+            throw new Error(resolveCustomErrorMessage(errorMessage, defaultErrorMessage, pick(context, ['_', '__'])))
+          }
+        } else if (tagName !== 'span' && attrsStr.trim()) {
           const defaultErrorMessage = context.__('pruvious-orm', 'The rich text content contains disallowed HTML')
           throw new Error(resolveCustomErrorMessage(errorMessage, defaultErrorMessage, pick(context, ['_', '__'])))
         }
