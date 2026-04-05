@@ -4,7 +4,6 @@ import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { isAbsolute, relative } from 'pathe'
 import { resolveCollectionFiles } from '../../collections/resolver'
-import { debug } from '../../debug/console'
 import { resolveFieldDefinitionFiles } from '../../fields/resolver'
 import { resolveJobFiles } from '../../queue/resolver'
 import { resolveSingletonFiles } from '../../singletons/resolver'
@@ -37,8 +36,6 @@ export interface ServerFileContext {
 export async function getServerFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/index.ts>`)
 
   const templateFiles = resolveTemplateFiles()
   const templateEntries = Object.entries(templateFiles)
@@ -1768,11 +1765,6 @@ export async function getServerFileContent() {
  * Generates the `#pruvious/server` type file content.
  */
 export function getServerTypeFileContent() {
-  const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/server/index.d.ts>`)
-
   return [
     `export type PruviousContext = any`,
     `export type Permission = any`,
@@ -1878,9 +1870,10 @@ function getReExports() {
     `export { type GenericFieldDefinition, type SerializableFieldOptions, type GenericSerializableFieldOptions, limitPopulation, parseConditionalLogic, parseFields } from '${resolvePruviousFile('fields/utils.server')}'`,
 
     // Field types
-    `export type { ButtonGroupChoice } from '${resolve('../../../../server/fields/buttonGroup.ts')}'`,
-    `export type { Mark } from '${resolve('../../../../server/fields/richText.ts')}'`,
-    `export type { SelectChoice, SelectChoiceGroup } from '${resolve('../../../../server/fields/select.ts')}'`,
+    `export type { ButtonGroupChoice } from '${resolve('../../../../server/fields/buttonGroup')}'`,
+    `export { commonMarks, type CommonMark } from '${resolve('../../../../shared/pruvious/rich-text')}'`,
+    `export type { Mark } from '${resolve('../../../../server/fields/richText')}'`,
+    `export type { SelectChoice, SelectChoiceGroup } from '${resolve('../../../../server/fields/select')}'`,
 
     // Hooks
     `export { type Actions, type Filters, actions, filters, loadActions, loadFilters } from './hooks'`,

@@ -41,6 +41,29 @@ export function getSimpleValidatorsMeta(): SimpleValidatorMeta[] {
 }
 
 /**
+ * Parses export statements from a generated index file content string
+ * and builds a map of export names to their source file paths.
+ */
+export function resolveExportSources(content: string): Record<string, string> {
+  const map: Record<string, string> = {}
+
+  for (const match of content.matchAll(/export\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/g)) {
+    const names = match[1]!
+    const source = match[2]!
+
+    for (const name of names.split(',')) {
+      const trimmed = name.replace(/\b(type|as)\s+\w+/g, '').trim()
+
+      if (trimmed) {
+        map[trimmed] = source
+      }
+    }
+  }
+
+  return map
+}
+
+/**
  * Retrieves the names of all custom icon collections defined across Nuxt layers.
  */
 export function getIconNames() {

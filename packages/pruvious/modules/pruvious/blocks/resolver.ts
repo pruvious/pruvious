@@ -1,7 +1,14 @@
 import { parse } from '@babel/parser'
 import template from '@babel/template'
 import type { CallExpression, ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types'
-import { exportDefaultDeclaration, identifier, objectExpression, objectProperty, stringLiteral } from '@babel/types'
+import {
+  exportDefaultDeclaration,
+  identifier,
+  importDeclaration,
+  objectExpression,
+  objectProperty,
+  stringLiteral,
+} from '@babel/types'
 import { isDefined, pascalCase } from '@pruvious/utils'
 import { parse as parseSFC } from '@vue/compiler-sfc'
 import { useDebounceFn } from '@vueuse/core'
@@ -10,6 +17,9 @@ import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import type { NuxtConfigLayer } from 'nuxt/schema'
 import { dirname, relative, resolve } from 'pathe'
+import { getAppFileContent } from '../build/app/index'
+import { getDashboardFileContent } from '../build/dashboard/index'
+import { resolveExportSources } from '../build/utils'
 import { debug, warnWithContext } from '../debug/console'
 import { resolveFieldDefinitionFiles } from '../fields/resolver'
 import { cleanupUnusedCode, generate, traverse } from '../utils/ast'
@@ -43,6 +53,11 @@ let blocks: Record<string, ResolveFromLayersResult> | undefined
  * Key-value object containing block names and their resolved definitions (as code).
  */
 let blockDefinitions: Record<string, string> = {}
+
+/**
+ * Cached map of export names to their source file paths, built from the generated app and dashboard index files.
+ */
+let cachedExportSources: Record<string, string> | undefined
 
 /**
  * Retrieves a key-value object containing block names and their component file locations.
@@ -151,12 +166,17 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
             if (
               specifier.type === 'ImportSpecifier' &&
               specifier.imported.type === 'Identifier' &&
-              !fieldDefinitionImports.includes(specifier.imported.name)
+              ['defineBlock', 'defineProps'].includes(specifier.imported.name)
             ) {
               path.node.specifiers.splice(i, 1)
             }
           }
-          path.node.source.value = '#pruvious/server/fields'
+
+          if (path.node.specifiers.length === 0) {
+            path.remove()
+          } else {
+            path.node.source.value = '#pruvious/server'
+          }
         } else if (path.node.source.value.startsWith('.')) {
           path.node.source.value = relative(
             `${buildDir}/server/blocks`,
@@ -226,12 +246,52 @@ export async function resolveBlockDefinition(options: ResolveBlockDefinitionOpti
       ast.program.body.push(exportDefaultDeclaration(defineBlockNode))
     }
 
-    blockDefinitions[blockName] =
-      cleanupUnusedCode({
-        code: generate(ast).code,
-        mode: isTS ? 'ts' : 'js',
-        targetFunctionNames: ['defineBlock'],
-      }) + '\n'
+    const cleanedCode = cleanupUnusedCode({
+      code: generate(ast).code,
+      mode: isTS ? 'ts' : 'js',
+      targetFunctionNames: ['defineBlock'],
+    })
+
+    const cleanedAst = parse(cleanedCode, {
+      sourceType: 'module',
+      plugins: isTS ? ['typescript'] : [],
+    })
+
+    const exportSources = (cachedExportSources ??= {
+      ...resolveExportSources(getAppFileContent()),
+      ...resolveExportSources(getDashboardFileContent()),
+    })
+
+    for (let i = cleanedAst.program.body.length - 1; i >= 0; i--) {
+      const node = cleanedAst.program.body[i]!
+
+      if (node.type === 'ImportDeclaration' && node.source.value === '#pruvious/server') {
+        const groups: Record<string, typeof node.specifiers> = {}
+
+        for (const specifier of node.specifiers) {
+          const name =
+            specifier.type === 'ImportSpecifier' && specifier.imported.type === 'Identifier'
+              ? specifier.imported.name
+              : undefined
+
+          const source = name
+            ? fieldDefinitionImports.includes(name)
+              ? '#pruvious/server/fields'
+              : (exportSources[name] ?? '#pruvious/server')
+            : '#pruvious/server'
+
+          ;(groups[source] ??= []).push(specifier)
+        }
+
+        const replacements = Object.entries(groups).map(([source, specifiers]) =>
+          importDeclaration(specifiers, stringLiteral(source)),
+        )
+
+        cleanedAst.program.body.splice(i, 1, ...replacements)
+      }
+    }
+
+    blockDefinitions[blockName] = generate(cleanedAst, { jsescOption: { quotes: 'single' } }).code + '\n'
 
     if (write) {
       return !!(await debouncedWriteBlocks())
@@ -335,4 +395,5 @@ const debouncedWriteBlocks = useDebounceFn(writeBlocks, 250)
 export function resetBlocksResolver() {
   blocks = undefined
   blockDefinitions = {}
+  cachedExportSources = undefined
 }

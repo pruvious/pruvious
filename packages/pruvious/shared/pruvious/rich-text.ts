@@ -1,27 +1,41 @@
-import type { Mark } from '#pruvious/server'
+import type { Mark } from '../../server/fields/richText'
 
-type CommonMark = 'bold' | 'italic' | 'underline' | 'code' | 'strikethrough' | 'subscript' | 'superscript'
+/**
+ * Identifier for a built-in common mark.
+ */
+export type CommonMark = 'bold' | 'italic' | 'underline' | 'code' | 'strikethrough' | 'subscript' | 'superscript'
 
 /**
  * A collection of commonly used marks for rich text editors with their default settings.
  *
- * Use these marks directly or as a starting point for your own custom marks.
+ * Use all marks, pick specific ones, or mix with custom marks.
  *
  * @example
  * ```ts
- * import { richTextField } from '#pruvious/app'
+ * import { commonMarks, richTextField } from '#pruvious/server'
  *
- * defineProps({
- *   content: richTextField({
- *     marks: {
- *       ...commonMarks.bold,
- *       ...commonMarks.italic,
- *       ...commonMarks.underline,
- *       myCustomMark: {
- *         // ...
- *       },
+ * // Use all common marks
+ * richTextField({ marks: commonMarks })
+ *
+ * // Pick specific marks
+ * richTextField({
+ *   marks: {
+ *     bold: commonMarks.bold,
+ *     italic: commonMarks.italic,
+ *   },
+ * })
+ *
+ * // Mix with custom marks
+ * richTextField({
+ *   marks: {
+ *     ...commonMarks,
+ *     highlight: {
+ *       tag: 'span',
+ *       attrs: { class: 'highlight' },
+ *       icon: 'highlight',
+ *       label: 'Highlight',
  *     },
- *   })
+ *   },
  * })
  * ```
  */

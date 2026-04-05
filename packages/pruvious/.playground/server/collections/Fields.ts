@@ -26,6 +26,7 @@ import {
   timestampField,
   translatableTextField,
   trueFalseField,
+  commonMarks,
 } from '#pruvious/server'
 
 export default defineCollection({

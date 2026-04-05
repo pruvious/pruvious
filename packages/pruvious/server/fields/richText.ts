@@ -420,7 +420,6 @@ export type RichTextFormatter = (context: {
 }) => (Partial<DynamicBlockFieldTypes['Casted'][BlockName]> & { $key: BlockName }) | undefined
 
 // @todo allowLinks?: boolean
-// @todo export commonMarks(pickWhatYouWant): Pick<TYPED> from '#pruvious/server' and '#pruvious/app' (like bold, italic, underline, etc.)
 // @todo richTextValidator() -> export from validators (parse HTML and validate marks)
 //       - validate links if allowLinks is enabled
 //       - mby validator is not needed, just parser helper fns + do the whole thing in one validator (to not parse HTML multiple times)

@@ -1,7 +1,5 @@
 import { validatorsMeta } from '@pruvious/orm'
-import { useNuxt } from 'nuxt/kit'
-import { relative } from 'pathe'
-import { debug } from '../../debug/console'
+import { createResolver, useNuxt } from 'nuxt/kit'
 import { resolveFieldDefinitionFiles } from '../../fields/resolver'
 import { resolvePruviousFile } from '../utils'
 
@@ -9,11 +7,6 @@ import { resolvePruviousFile } from '../utils'
  * Generates the `#pruvious/app` file content.
  */
 export function getAppFileContent() {
-  const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/index.ts>`)
-
   return [getReExports()].join('\n')
 }
 
@@ -21,15 +14,11 @@ export function getAppFileContent() {
  * Generates the `#pruvious/app` type file content.
  */
 export function getAppTypeFileContent() {
-  const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
-
-  debug(`Generating <${relative(nuxt.options.workspaceDir, pruviousOptions.dir.build)}/app/index.d.ts>`)
-
   return [getReExports()].join('\n')
 }
 
 function getReExports() {
+  const { resolve } = createResolver(import.meta.url)
   const nuxt = useNuxt()
   const fieldDefinitionFiles = resolveFieldDefinitionFiles()
   const fieldDefinitionEntries = Object.entries(fieldDefinitionFiles)
@@ -53,6 +42,9 @@ function getReExports() {
 
     // Fields
     ...fieldDefinitionEntries.map(([name]) => `export { ${name}Field } from './fields'`),
+
+    // Field types
+    `export { commonMarks, type CommonMark } from '${resolve('../../../../shared/pruvious/rich-text')}'`,
 
     // Hooks
     `export { type Actions, type Filters, actions, filters, loadActions, loadFilters } from './hooks'`,

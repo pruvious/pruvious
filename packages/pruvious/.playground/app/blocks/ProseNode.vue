@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineBlock, richTextField, selectField } from '#pruvious/app'
+import { commonMarks, defineBlock, richTextField, selectField } from '#pruvious/app'
 
 defineBlock({
   ui: {
