@@ -47,7 +47,7 @@
     <PruviousDashboardDataTablePopup
       v-if="isDataTablePopupVisible"
       :collectionName="options.collection"
-      :languages="options.languages"
+      :languages="options.ui.languages"
       :modelValue="modelValue"
       :title="label"
       @close="$event().then(() => (isDataTablePopupVisible = false))"
@@ -72,6 +72,7 @@ import {
   maybeTranslate,
   resolveFieldLabel,
   selectFrom,
+  useDashboardContentLanguage,
   usePruviousDashboard,
 } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
@@ -163,6 +164,7 @@ const id = useId()
 const label = resolveFieldLabel(props.options.ui.label, props.name)
 const placeholder = maybeTranslate(props.options.ui.placeholder)
 const isDataTablePopupVisible = ref(false)
+const contentLanguage = useDashboardContentLanguage()
 const dashboard = usePruviousDashboard()
 const collection = {
   name: props.options.collection,
@@ -179,16 +181,25 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
   const displayFields = toArray(props.options.ui.displayFields!)
   const searchFields = toArray(props.options.ui.searchFields!)
   const select = displayFields.flatMap((x) => (isArray(x) ? x.filter((y) => collection.definition.fields[y]) : x))
-  const query = await selectFrom(collection.name)
+  const query = selectFrom(collection.name)
     .select(['id', ...select] as any)
     .search(keyword, searchFields as any)
     .orderBy(collection.definition.createdAtField ? ('createdAt' as any) : 'id', 'desc')
     .cache(3000)
     .paged(page, 50)
-    .paginate()
 
-  if (query.success) {
-    const choices = query.data.records.map((record) => ({
+  if (collection.definition.translatable) {
+    if (props.options.ui.languages === 'current') {
+      query.where('language', '=', contentLanguage.value)
+    } else if (isArray(props.options.ui.languages)) {
+      query.where('language', 'in', props.options.ui.languages)
+    }
+  }
+
+  const response = await query.paginate()
+
+  if (response.success) {
+    const choices = response.data.records.map((record) => ({
       value: record.id,
       label: toArray(displayFields[0])!
         .flatMap((x) => (isArray(x) ? x.map((y: any) => record[y] ?? y) : (record[x] ?? x)))
@@ -208,10 +219,10 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
 
     return {
       choices,
-      currentPage: query.data.currentPage,
-      lastPage: query.data.lastPage,
-      perPage: query.data.perPage,
-      total: query.data.total,
+      currentPage: response.data.currentPage,
+      lastPage: response.data.lastPage,
+      perPage: response.data.perPage,
+      total: response.data.total,
     }
   }
 

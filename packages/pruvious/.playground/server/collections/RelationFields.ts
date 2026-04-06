@@ -324,6 +324,33 @@ export default defineCollection({
         searchFields: 'lastName',
       },
     }),
+    recordLanguagesAll: recordField({
+      collection: 'Articles',
+      ui: {
+        label: 'Record (all languages)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: 'all',
+      },
+    }),
+    recordLanguagesCurrent: recordField({
+      collection: 'Articles',
+      ui: {
+        label: 'Record (current language)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: 'current',
+      },
+    }),
+    recordLanguagesSpecific: recordField({
+      collection: 'Articles',
+      ui: {
+        label: 'Record (DE only)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: ['de'],
+      },
+    }),
 
     // records
     records: recordsField({
@@ -352,6 +379,33 @@ export default defineCollection({
       fields: ['id', 'email', 'roles'],
       populate: true,
       ui: { label: 'Records (populate)' },
+    }),
+    recordsLanguagesAll: recordsField({
+      collection: 'Articles',
+      ui: {
+        label: 'Records (all languages)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: 'all',
+      },
+    }),
+    recordsLanguagesCurrent: recordsField({
+      collection: 'Articles',
+      ui: {
+        label: 'Records (current language)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: 'current',
+      },
+    }),
+    recordsLanguagesSpecific: recordsField({
+      collection: 'Articles',
+      ui: {
+        label: 'Records (DE only)',
+        displayFields: 'name',
+        searchFields: 'name',
+        languages: ['de'],
+      },
     }),
     recordsRepeater: repeaterField({
       subfields: {
@@ -475,7 +529,13 @@ export default defineCollection({
             },
             {
               label: 'Record',
-              fields: ['record', 'recordPopulate'],
+              fields: [
+                'record',
+                'recordPopulate',
+                'recordLanguagesAll',
+                'recordLanguagesCurrent',
+                'recordLanguagesSpecific',
+              ],
             },
             {
               label: 'Records',
@@ -483,6 +543,9 @@ export default defineCollection({
                 'records',
                 'recordsMinMax',
                 'recordsPopulate',
+                'recordsLanguagesAll',
+                'recordsLanguagesCurrent',
+                'recordsLanguagesSpecific',
                 'recordsRepeater',
                 'recordsRepeaterMinMax',
                 'recordsRepeaterPopulate',

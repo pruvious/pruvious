@@ -41,13 +41,6 @@ export interface CustomRecordFieldOptions<
   fields?: NonEmptyArray<TFields & string>
 
   /**
-   * Specifies which languages to show when selecting collection records.
-   *
-   * @default 'current'
-   */
-  languages?: 'all' | 'current' | LanguageCode[]
-
-  /**
    * Controls whether to populate the selected `fields` from the related `collection`.
    *
    * Use this option with care to avoid infinite population loops that can occur when related fields require additional population chains.
@@ -88,6 +81,13 @@ export interface CustomRecordFieldOptions<
         ]
 
     /**
+     * Specifies which languages to show when selecting collection records.
+     *
+     * @default 'current'
+     */
+    languages?: 'all' | 'current' | LanguageCode[]
+
+    /**
      * An array of field names to be searched when the user types into the select.
      * The select options will be filtered to include only the items that have a match in at least one of the specified fields.
      *
@@ -121,10 +121,10 @@ export interface CustomRecordFieldOptions<
 const customOptions: CustomRecordFieldOptions<any, string, boolean> = {
   collection: '',
   fields: ['id'],
-  languages: 'current',
   populate: false,
   ui: {
     displayFields: 'id',
+    languages: 'current',
     searchFields: 'id',
   },
   foreignKey: 'set null',
