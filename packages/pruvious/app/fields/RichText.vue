@@ -25,6 +25,7 @@
         dashboard
         enterInsertsLineBreak
         nativeTabNavigation
+        ref="richTextRef"
         tag="div"
       />
     </div>
@@ -36,6 +37,7 @@
 <script lang="ts" setup>
 import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
+import { puiTrigger } from '@pruvious/ui/pui/trigger'
 
 const props = defineProps({
   /**
@@ -114,8 +116,16 @@ const emit = defineEmits<{
 }>()
 
 const id = useId()
+const { listen } = puiTrigger()
 const isFocused = ref(false)
 const placeholder = maybeTranslate(props.options.ui.placeholder)
+const richTextRef = ref<ComponentPublicInstance>()
+
+listen(`focus:${id}`, () => {
+  if (!props.disabled) {
+    richTextRef.value?.$el?.focus()
+  }
+})
 
 function onUpdate(html: string) {
   emit('update:modelValue', html)
