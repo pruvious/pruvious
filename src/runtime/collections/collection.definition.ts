@@ -16,7 +16,7 @@ import { isDefined } from '../utils/common'
 import { isKeyOf, isObject, objectOmit } from '../utils/object'
 import { isString, joinRouteParts, titleCase } from '../utils/string'
 import { uniqueValidator } from '../validators/unique'
-import { query } from './query'
+import type { query } from './query'
 
 interface BaseCollectionDefinition {
   /**

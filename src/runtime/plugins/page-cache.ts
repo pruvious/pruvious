@@ -1,7 +1,9 @@
 import type { useNitroApp } from '#build/types/nitro-imports'
-// @ts-ignore
-import { defineNitroPlugin, useRuntimeConfig, type RenderResponse } from '#imports'
 import crypto from 'crypto'
+// @ts-ignore
+import { defineNitroPlugin, useRuntimeConfig } from 'nitropack/runtime'
+// @ts-ignore
+import type { RenderResponse } from 'nitropack/types'
 import fs from 'fs-extra'
 import { isProduction } from 'std-env'
 import { resolveAppPath } from '../instances/path'

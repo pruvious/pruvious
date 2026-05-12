@@ -1,7 +1,7 @@
 import type { CollectionName, MultiCollectionName, SingleCollectionName, UploadsCollectionName } from '#pruvious'
 import type { MultiQueryBuilderMethod, QueryBuilder } from './collections/query-builder'
-import { SingleQueryBuilder } from './collections/single-query-builder'
-import { UploadsQueryBuilder } from './collections/uploads-query-builder'
+import type { SingleQueryBuilder } from './collections/single-query-builder'
+import type { UploadsQueryBuilder } from './collections/uploads-query-builder'
 
 export type Booleanish = boolean | 1 | 0 | 'true' | 'false' | 't' | 'f' | 'yes' | 'no' | 'y' | 'n'
 

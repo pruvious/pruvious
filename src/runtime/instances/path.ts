@@ -1,4 +1,4 @@
-import { type Resolver } from '@nuxt/kit'
+import type { Resolver } from '@nuxt/kit'
 import { existsSync } from 'fs'
 import { join, relative, resolve } from 'path'
 import { getModuleOption } from './state'
