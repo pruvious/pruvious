@@ -48,26 +48,26 @@ describe('link field', () => {
   })
 
   test('create with internal singleton route', async () => {
-    expect(await $postAsAdmin(link, { link: { url: `rel://routes:${routeId}` } })).toEqual([
-      { link: { url: `rel://routes:${routeId}`, target: '', rel: '' } },
+    expect(await $postAsAdmin(link, { link: { url: `rel://Routes:${routeId}` } })).toEqual([
+      { link: { url: `rel://Routes:${routeId}`, target: '', rel: '' } },
     ])
   })
 
   test('create with internal collection record', async () => {
-    expect(await $postAsAdmin(link, { link: { url: `rel://routes:${routeId}/Articles:${articleId}` } })).toEqual([
-      { link: { url: `rel://routes:${routeId}/Articles:${articleId}`, target: '', rel: '' } },
+    expect(await $postAsAdmin(link, { link: { url: `rel://Routes:${routeId}/Articles:${articleId}` } })).toEqual([
+      { link: { url: `rel://Routes:${routeId}/Articles:${articleId}`, target: '', rel: '' } },
     ])
   })
 
   test('create with hash and query', async () => {
     expect(
-      await $postAsAdmin(link, { link: { url: `rel://routes:${routeId}/Articles:${articleId}?page=2#comments` } }),
-    ).toEqual([{ link: { url: `rel://routes:${routeId}/Articles:${articleId}?page=2#comments`, target: '', rel: '' } }])
+      await $postAsAdmin(link, { link: { url: `rel://Routes:${routeId}/Articles:${articleId}?page=2#comments` } }),
+    ).toEqual([{ link: { url: `rel://Routes:${routeId}/Articles:${articleId}?page=2#comments`, target: '', rel: '' } }])
   })
 
   test('populate resolves internal link', async () => {
     const result = await $postAsAdmin(`${link},id&populate=t`, {
-      link: { url: `rel://routes:${routeId}/Articles:${articleId}` },
+      link: { url: `rel://Routes:${routeId}/Articles:${articleId}` },
     })
     expect(result).toEqual([
       {
@@ -79,7 +79,7 @@ describe('link field', () => {
 
   test('populate resolves internal link with query and hash', async () => {
     const result = await $postAsAdmin(`${link}&populate=t`, {
-      link: { url: `rel://routes:${routeId}/Articles:${articleId}?page=2#comments` },
+      link: { url: `rel://Routes:${routeId}/Articles:${articleId}?page=2#comments` },
     })
     expect(result).toEqual([{ link: { url: '/blog/test-article?page=2#comments', target: '', rel: '' } }])
   })
@@ -93,7 +93,7 @@ describe('link field', () => {
 
   test('populate returns undefined url for broken link', async () => {
     const result = await $postAsAdmin(`${link},id&populate=t`, {
-      link: { url: `rel://routes:${routeId}/Articles:${articleId}` },
+      link: { url: `rel://Routes:${routeId}/Articles:${articleId}` },
     })
     const id = (result as any)[0].id
 
@@ -128,13 +128,13 @@ describe('link field', () => {
   })
 
   test('reject non-existent route', async () => {
-    expect(await $postAsAdmin(link, { link: { url: 'rel://routes:99999' } })).toEqual(
+    expect(await $postAsAdmin(link, { link: { url: 'rel://Routes:99999' } })).toEqual(
       $422([{ 'link.url': expect.any(String) }]),
     )
   })
 
   test('reject non-existent record', async () => {
-    expect(await $postAsAdmin(link, { link: { url: `rel://routes:${routeId}/Articles:99999` } })).toEqual(
+    expect(await $postAsAdmin(link, { link: { url: `rel://Routes:${routeId}/Articles:99999` } })).toEqual(
       $422([{ 'link.url': expect.any(String) }]),
     )
   })
@@ -154,21 +154,21 @@ describe('link field', () => {
   })
 
   test('linkInternalOnly: accept internal URL', async () => {
-    expect(await $postAsAdmin(linkInternalOnly, { linkInternalOnly: { url: `rel://routes:${routeId}` } })).toEqual([
-      { linkInternalOnly: { url: `rel://routes:${routeId}`, target: '', rel: '' } },
+    expect(await $postAsAdmin(linkInternalOnly, { linkInternalOnly: { url: `rel://Routes:${routeId}` } })).toEqual([
+      { linkInternalOnly: { url: `rel://Routes:${routeId}`, target: '', rel: '' } },
     ])
   })
 
   // allowHash: false
   test('linkNoHash: reject URL with hash', async () => {
-    expect(await $postAsAdmin(linkNoHash, { linkNoHash: { url: `rel://routes:${routeId}#section` } })).toEqual(
+    expect(await $postAsAdmin(linkNoHash, { linkNoHash: { url: `rel://Routes:${routeId}#section` } })).toEqual(
       $422([{ linkNoHash: expect.any(String) }]),
     )
   })
 
   test('linkNoHash: accept URL without hash', async () => {
-    expect(await $postAsAdmin(linkNoHash, { linkNoHash: { url: `rel://routes:${routeId}` } })).toEqual([
-      { linkNoHash: { url: `rel://routes:${routeId}`, target: '', rel: '' } },
+    expect(await $postAsAdmin(linkNoHash, { linkNoHash: { url: `rel://Routes:${routeId}` } })).toEqual([
+      { linkNoHash: { url: `rel://Routes:${routeId}`, target: '', rel: '' } },
     ])
   })
 
@@ -185,17 +185,17 @@ describe('link field', () => {
   test('linkAllowedReferences: accept Articles link', async () => {
     expect(
       await $postAsAdmin(linkAllowedReferences, {
-        linkAllowedReferences: { url: `rel://routes:${routeId}/Articles:${articleId}` },
+        linkAllowedReferences: { url: `rel://Routes:${routeId}/Articles:${articleId}` },
       }),
     ).toEqual([
-      { linkAllowedReferences: { url: `rel://routes:${routeId}/Articles:${articleId}`, target: '', rel: '' } },
+      { linkAllowedReferences: { url: `rel://Routes:${routeId}/Articles:${articleId}`, target: '', rel: '' } },
     ])
   })
 
   test('linkAllowedReferences: reject non-Articles collection', async () => {
     expect(
       await $postAsAdmin(linkAllowedReferences, {
-        linkAllowedReferences: { url: `rel://routes:${routeId}/Public:1` },
+        linkAllowedReferences: { url: `rel://Routes:${routeId}/Public:1` },
       }),
     ).toEqual($422([{ linkAllowedReferences: expect.any(String) }]))
   })
@@ -203,9 +203,9 @@ describe('link field', () => {
   test('linkAllowedReferences: accept singleton route (no collection restriction)', async () => {
     expect(
       await $postAsAdmin(linkAllowedReferences, {
-        linkAllowedReferences: { url: `rel://routes:${routeId}` },
+        linkAllowedReferences: { url: `rel://Routes:${routeId}` },
       }),
-    ).toEqual([{ linkAllowedReferences: { url: `rel://routes:${routeId}`, target: '', rel: '' } }])
+    ).toEqual([{ linkAllowedReferences: { url: `rel://Routes:${routeId}`, target: '', rel: '' } }])
   })
 
   // Cleanup

@@ -29,26 +29,26 @@ export interface ParsedRelURL {
  * Parses a `rel://` URL into its component parts.
  *
  * Supported formats:
- * - `rel://routes:{routeId}`
- * - `rel://routes:{routeId}/{collection}:{recordId}`
+ * - `rel://Routes:{routeId}`
+ * - `rel://Routes:{routeId}/{Collection}:{recordId}`
  * - Either format with optional `?query` and/or `#hash`
  *
  * @returns The parsed components, or `null` if the URL is not a valid `rel://` URL.
  *
  * @example
  * ```ts
- * parseRelURL('rel://routes:1')
+ * parseRelURL('rel://Routes:1')
  * // { routeId: 1 }
  *
- * parseRelURL('rel://routes:1/articles:5')
- * // { routeId: 1, collection: 'articles', recordId: 5 }
+ * parseRelURL('rel://Routes:1/Articles:5')
+ * // { routeId: 1, collection: 'Articles', recordId: 5 }
  *
- * parseRelURL('rel://routes:1/articles:5?foo=bar#section')
- * // { routeId: 1, collection: 'articles', recordId: 5, query: 'foo=bar', hash: 'section' }
+ * parseRelURL('rel://Routes:1/Articles:5?foo=bar#section')
+ * // { routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' }
  * ```
  */
 export function parseRelURL(url: string): ParsedRelURL | null {
-  const relURLRegex = /^rel:\/\/routes:(\d+)(?:\/([a-zA-Z][a-zA-Z0-9]*):(\d+))?(?:\?([^#]*))?(?:#(.*))?$/
+  const relURLRegex = /^rel:\/\/Routes:(\d+)(?:\/([A-Z][a-zA-Z0-9]*):(\d+))?(?:\?([^#]*))?(?:#(.*))?$/
   const match = relURLRegex.exec(url)
 
   if (!match) {
@@ -88,14 +88,14 @@ export function isRelURL(url: string): boolean {
  * @example
  * ```ts
  * buildRelURL({ routeId: 1 })
- * // 'rel://routes:1'
+ * // 'rel://Routes:1'
  *
- * buildRelURL({ routeId: 1, collection: 'articles', recordId: 5, query: 'foo=bar', hash: 'section' })
- * // 'rel://routes:1/articles:5?foo=bar#section'
+ * buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' })
+ * // 'rel://Routes:1/Articles:5?foo=bar#section'
  * ```
  */
 export function buildRelURL(parts: ParsedRelURL): string {
-  let url = `rel://routes:${parts.routeId}`
+  let url = `rel://Routes:${parts.routeId}`
 
   if (parts.collection && parts.recordId !== undefined) {
     url += `/${parts.collection}:${parts.recordId}`

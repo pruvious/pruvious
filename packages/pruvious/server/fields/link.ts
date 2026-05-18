@@ -116,7 +116,7 @@ interface LinkFieldCastedValue {
   /**
    * The link URL.
    *
-   * Internal links use the `rel://` protocol (e.g., `rel://routes:1/articles:5`).
+   * Internal links use the `rel://` protocol (e.g., `rel://Routes:1/Articles:5`).
    * External links use standard URL protocols (e.g., `https://example.com`).
    */
   url: string
