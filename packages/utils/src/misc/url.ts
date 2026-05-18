@@ -15,6 +15,11 @@ export interface ParsedRelURL {
   recordId?: number
 
   /**
+   * An optional language pin (e.g. `en`, `de`, etc.).
+   */
+  language?: string
+
+  /**
    * The query string (without the leading `?`).
    */
   query?: string
@@ -31,24 +36,33 @@ export interface ParsedRelURL {
  * Supported formats:
  * - `rel://Routes:{routeId}`
  * - `rel://Routes:{routeId}/{Collection}:{recordId}`
- * - Either format with optional `?query` and/or `#hash`
+ * - `rel://Routes:{routeId}@{language}`
+ * - `rel://Routes:{routeId}/{Collection}:{recordId}@{language}`
+ * - Any of the above with optional `?query` and/or `#hash`
+ *
+ * @param url - The `rel://` URL string to parse.
+ * @param primaryLanguage - The primary language to use when the URL has no `@{language}` pin.
  *
  * @returns The parsed components, or `null` if the URL is not a valid `rel://` URL.
  *
  * @example
  * ```ts
- * parseRelURL('rel://Routes:1')
- * // { routeId: 1 }
+ * parseRelURL('rel://Routes:1', 'en')
+ * // { routeId: 1, language: 'en' }
  *
- * parseRelURL('rel://Routes:1/Articles:5')
- * // { routeId: 1, collection: 'Articles', recordId: 5 }
+ * parseRelURL('rel://Routes:1/Articles:5', 'en')
+ * // { routeId: 1, collection: 'Articles', recordId: 5, language: 'en' }
  *
- * parseRelURL('rel://Routes:1/Articles:5?foo=bar#section')
- * // { routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' }
+ * parseRelURL('rel://Routes:1@de', 'en')
+ * // { routeId: 1, language: 'de' }
+ *
+ * parseRelURL('rel://Routes:1/Articles:5@de?foo=bar#section', 'en')
+ * // { routeId: 1, collection: 'Articles', recordId: 5, language: 'de', query: 'foo=bar', hash: 'section' }
  * ```
  */
-export function parseRelURL(url: string): ParsedRelURL | null {
-  const relURLRegex = /^rel:\/\/Routes:(\d+)(?:\/([A-Z][a-zA-Z0-9]*):(\d+))?(?:\?([^#]*))?(?:#(.*))?$/
+export function parseRelURL(url: string, primaryLanguage: string): ParsedRelURL | null {
+  const relURLRegex =
+    /^rel:\/\/Routes:(\d+)(?:\/([A-Z][a-zA-Z0-9]*):(\d+))?(?:@([a-zA-Z]{2,8}(?:-[a-zA-Z0-9]{2,8})*))?(?:\?([^#]*))?(?:#(.*))?$/
   const match = relURLRegex.exec(url)
 
   if (!match) {
@@ -64,12 +78,14 @@ export function parseRelURL(url: string): ParsedRelURL | null {
     result.recordId = Number(match[3])
   }
 
-  if (match[4]) {
-    result.query = match[4]
+  result.language = match[4] || primaryLanguage
+
+  if (match[5]) {
+    result.query = match[5]
   }
 
-  if (match[5] !== undefined && match[5] !== '') {
-    result.hash = match[5]
+  if (match[6] !== undefined && match[6] !== '') {
+    result.hash = match[6]
   }
 
   return result
@@ -92,6 +108,12 @@ export function isRelURL(url: string): boolean {
  *
  * buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' })
  * // 'rel://Routes:1/Articles:5?foo=bar#section'
+ *
+ * buildRelURL({ routeId: 1, language: 'de' })
+ * // 'rel://Routes:1@de'
+ *
+ * buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, language: 'de' })
+ * // 'rel://Routes:1/Articles:5@de'
  * ```
  */
 export function buildRelURL(parts: ParsedRelURL): string {
@@ -99,6 +121,10 @@ export function buildRelURL(parts: ParsedRelURL): string {
 
   if (parts.collection && parts.recordId !== undefined) {
     url += `/${parts.collection}:${parts.recordId}`
+  }
+
+  if (parts.language) {
+    url += `@${parts.language}`
   }
 
   if (parts.query) {

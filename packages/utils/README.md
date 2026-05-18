@@ -773,6 +773,12 @@ buildRelURL({ routeId: 1 })
 
 buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' })
 // 'rel://Routes:1/Articles:5?foo=bar#section'
+
+buildRelURL({ routeId: 1, language: 'de' })
+// 'rel://Routes:1@de'
+
+buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, language: 'de' })
+// 'rel://Routes:1/Articles:5@de'
 ```
 
 ### <a id="deselectall">`deselectAll`</a>
@@ -796,28 +802,36 @@ isDescendant(button, header) // `true` if the button is inside the header
 
 Checks whether a URL string uses the `rel://` protocol.
 
-### <a id="parserelurl">`parseRelURL(url)`</a>
+### <a id="parserelurl">`parseRelURL(url, primaryLanguage)`</a>
 
 Parses a `rel://` URL into its component parts.
 
 Supported formats:
 - `rel://Routes:{routeId}`
 - `rel://Routes:{routeId}/{Collection}:{recordId}`
-- Either format with optional `?query` and/or `#hash`
+- `rel://Routes:{routeId}@{language}`
+- `rel://Routes:{routeId}/{Collection}:{recordId}@{language}`
+- Any of the above with optional `?query` and/or `#hash`
+
+- `url` - - The `rel://` URL string to parse.
+- `primaryLanguage` - - The primary language to use when the URL has no `@{language}` pin.
 
 **Returns** The parsed components, or `null` if the URL is not a valid `rel://` URL.
 
 **Example:**
 
 ```ts
-parseRelURL('rel://Routes:1')
-// { routeId: 1 }
+parseRelURL('rel://Routes:1', 'en')
+// { routeId: 1, language: 'en' }
 
-parseRelURL('rel://Routes:1/Articles:5')
-// { routeId: 1, collection: 'Articles', recordId: 5 }
+parseRelURL('rel://Routes:1/Articles:5', 'en')
+// { routeId: 1, collection: 'Articles', recordId: 5, language: 'en' }
 
-parseRelURL('rel://Routes:1/Articles:5?foo=bar#section')
-// { routeId: 1, collection: 'Articles', recordId: 5, query: 'foo=bar', hash: 'section' }
+parseRelURL('rel://Routes:1@de', 'en')
+// { routeId: 1, language: 'de' }
+
+parseRelURL('rel://Routes:1/Articles:5@de?foo=bar#section', 'en')
+// { routeId: 1, collection: 'Articles', recordId: 5, language: 'de', query: 'foo=bar', hash: 'section' }
 ```
 
 ### <a id="resolverelativedotnotation">`resolveRelativeDotNotation(from, to)`</a>
