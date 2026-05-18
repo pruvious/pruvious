@@ -17,16 +17,16 @@ import { isArray, withLeadingSlash, withoutTrailingSlash } from '@pruvious/utils
  * // languages: ['en', 'de', 'fr']
  * // primaryLanguage: 'en'
  * // prefixPrimaryLanguage: false
- * createRoutePath('/contact')       // '/contact'
- * createRoutePath('/kontakt', 'de') // '/de/kontakt'
- * createRoutePath('/contact', 'fr') // '/fr/contact'
+ * resolvePath('/contact')       // '/contact'
+ * resolvePath('/kontakt', 'de') // '/de/kontakt'
+ * resolvePath('/contact', 'fr') // '/fr/contact'
  *
  * // languages: ['en', 'de', 'fr']
  * // primaryLanguage: 'de'
  * // prefixPrimaryLanguage: true
- * createRoutePath('/kontakt')       // '/de/kontakt'
- * createRoutePath('/contact', 'en') // '/en/contact'
- * createRoutePath('/contact', 'fr') // '/fr/contact'
+ * resolvePath('/kontakt')       // '/de/kontakt'
+ * resolvePath('/contact', 'en') // '/en/contact'
+ * resolvePath('/contact', 'fr') // '/fr/contact'
  * ```
  */
 export function resolvePath(path: string | string[], language?: LanguageCode): string {
