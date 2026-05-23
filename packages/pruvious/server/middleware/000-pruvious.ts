@@ -43,14 +43,8 @@ export default defineEventHandler(async (event) => {
     // Debug ID
     event.context.pruvious.requestDebugId = runtimeConfig.pruvious.debug.logs.enabled ? randomIdentifier() : ''
 
-    // Language
-    await resolveContextLanguage()
-
-    // Auth
-    await resolveCurrentUser()
-
-    // Body
-    await parseBody(event)
+    // Language, auth, body
+    await Promise.all([resolveContextLanguage(), resolveCurrentUser(), parseBody(event)])
 
     // Log request
     event.waitUntil(logRequest())
