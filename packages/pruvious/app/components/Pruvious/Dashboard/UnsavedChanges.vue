@@ -22,7 +22,7 @@ import { getOverlayTransitionDuration, History, unsavedChanges } from '#pruvious
 import { puiIsEditingText, puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { blurActiveElement, isDefined } from '@pruvious/utils'
 import { useEventListener, watchOnce } from '@vueuse/core'
-import { onBeforeRouteLeave, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'
+import { onBeforeRouteLeave, type RouteLocationNormalized } from 'vue-router'
 
 const popup = useTemplateRef('popup')
 const isVisible = ref(false)
@@ -77,7 +77,7 @@ useEventListener(window, 'beforeunload', async (event) => {
   }
 })
 
-function leaveGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+function leaveGuard(to: RouteLocationNormalized, from: RouteLocationNormalized) {
   const [shorterPath, longerPath] =
     to.fullPath.length > from.fullPath.length ? [from.fullPath, to.fullPath] : [to.fullPath, from.fullPath]
 
@@ -88,14 +88,14 @@ function leaveGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, 
       unsavedChanges.history = prevHistory
       prevHistory = null
     }
-    next()
+    return true
   } else if (unsavedChanges.history?.isDirty.value) {
     isVisible.value = true
     destination.value = to
-    next(false)
+    return false
   } else {
     unsavedChanges.history = null
-    next()
+    return true
   }
 }
 
