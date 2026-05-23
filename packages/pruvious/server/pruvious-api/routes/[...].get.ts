@@ -2,6 +2,7 @@ import {
   __,
   pruviousError,
   resolveContextLanguage,
+  resolveCurrentUser,
   resolveRoute,
   type ResolvedRoute,
   type RouteRedirect,
@@ -20,10 +21,17 @@ export async function resolveRouteEventHandler(event: H3Event, path: string): Pr
   const runtimeConfig = useRuntimeConfig()
   const subpaths = path.split('/').filter(Boolean)
 
-  event.context.pruvious ??= { auth: { isLoggedIn: false, user: null, permissions: [] } } as any
+  event.context.pruvious ??= {} as any
   event.context.pruvious.requestDebugId = runtimeConfig.pruvious.debug.logs.enabled ? randomIdentifier() : ''
 
   await resolveContextLanguage()
+
+  try {
+    await resolveCurrentUser()
+  } catch {
+    event.context.pruvious.auth = { isLoggedIn: false, user: null, permissions: [] }
+  }
+
   event.waitUntil(logRequest()) // @todo replace with analytics
 
   if (
@@ -33,6 +41,11 @@ export async function resolveRouteEventHandler(event: H3Event, path: string): Pr
     const code = isProduction ? 301 : 302
     setResponseStatus(event, code)
     return { to: withLeadingSlash(subpaths.slice(1).join('/')), code, forwardQueryParams: true }
+  }
+
+  if (event.context.pruvious.auth.isLoggedIn) {
+    setResponseHeader(event, 'Cache-Control', 'private, no-store')
+    appendResponseHeader(event, 'Vary', 'Authorization, Cookie')
   }
 
   const resolvedRoute = await resolveRoute(path)

@@ -2,7 +2,7 @@ import type { ResolvedRoute, RouteRedirect, RouteReferenceName } from '#pruvious
 import { withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
 import { stringifyQuery } from 'ufo'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
-import { useLanguage } from '../translations/utils.client'
+import { pruviousFetchHeaders } from '../api/utils.client'
 
 export interface SimpleRedirect {
   to: string
@@ -67,11 +67,11 @@ export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric
     }
   }
 
-  const language = useLanguage()
   const nuxtApp = useNuxtApp()
+  const fetcher = import.meta.server ? useRequestFetch() : $fetch
   const handler = () =>
-    $fetch<ResolvedRoute | RouteRedirect>(apiBasePath + 'routes' + route.path, {
-      headers: { 'Accept-Language': language.value },
+    fetcher<ResolvedRoute | RouteRedirect>(apiBasePath + 'routes' + route.path, {
+      headers: pruviousFetchHeaders(),
     })
   const response =
     import.meta.server || nuxtApp.isHydrating

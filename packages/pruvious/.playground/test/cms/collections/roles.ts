@@ -94,7 +94,11 @@ describe('roles collection', () => {
             'singleton:seo:update',
           ],
         },
+        {
+          name: 'Previewer',
+          permissions: ['access-dashboard', 'preview-drafts'],
+        },
       ]),
-    ).toEqual(3)
+    ).toEqual(4)
   })
 })

@@ -10,6 +10,7 @@ import {
   setAuthorToken,
   setEditorToken,
   setManagerToken,
+  setPreviewerToken,
   setUserToken,
 } from '../utils'
 
@@ -79,6 +80,18 @@ describe('users collection', () => {
     })
     expect(managerLoginResponse).toEqual({ token: expect.any(String) })
     setManagerToken(managerLoginResponse.token)
+
+    expect(
+      await $postAsAdmin('/api/collections/users', [
+        { email: 'previewer@pruvious.com', password: '12345678', isActive: true, roles: [4] },
+      ]),
+    ).toEqual(1)
+    const previewerLoginResponse: any = await $post('/api/auth/login', {
+      email: 'previewer@pruvious.com',
+      password: '12345678',
+    })
+    expect(previewerLoginResponse).toEqual({ token: expect.any(String) })
+    setPreviewerToken(previewerLoginResponse.token)
   })
 
   test('validate email', async () => {

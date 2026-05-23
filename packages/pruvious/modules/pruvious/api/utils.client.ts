@@ -328,7 +328,7 @@ export function pruviousFetchHeaders(headers?: HeadersInit): HeadersInit {
   const authorizationHeader: Record<string, string> = {}
   const { tokenStorage } = useRuntimeConfig().public.pruvious
 
-  if (tokenStorage.storage === 'localStorage') {
+  if (import.meta.client && tokenStorage.storage === 'localStorage') {
     const token = localStorage.getItem(tokenStorage.key)
 
     if (token) {

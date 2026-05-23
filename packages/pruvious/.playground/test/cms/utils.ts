@@ -1,4 +1,4 @@
-import { $fetch } from '@nuxt/test-utils/e2e'
+import { $fetch, fetch } from '@nuxt/test-utils/e2e'
 import type { Paginated } from '@pruvious/orm'
 import type { NitroFetchOptions, NitroFetchRequest } from 'nitropack/types'
 import { expect } from 'vitest'
@@ -8,6 +8,7 @@ let userToken: string
 let authorToken: string
 let editorToken: string
 let managerToken: string
+let previewerToken: string
 
 export function $post(
   request: NitroFetchRequest,
@@ -198,6 +199,32 @@ export function $getAsManager(
     headers: withAuth(opts, 'manager'),
   })
 }
+
+export async function $fetchRaw(
+  request: NitroFetchRequest,
+  opts?: Omit<NitroFetchOptions<NitroFetchRequest, 'get'>, 'method'> | undefined,
+  role?: 'admin' | 'user' | 'author' | 'editor' | 'manager' | 'previewer',
+): Promise<{ status: number; headers: Headers; data: any }> {
+  const headers = role ? withAuth(opts, role) : (opts?.headers as Record<string, string> | undefined)
+  const res = await fetch(request as string, { ...opts, method: 'GET', headers })
+  const text = await res.text()
+  let data: any
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch {
+    data = text
+  }
+  return { status: res.status, headers: res.headers, data }
+}
+
+export const $getRaw = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
+  $fetchRaw(request, opts)
+export const $getRawAsAdmin = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
+  $fetchRaw(request, opts, 'admin')
+export const $getRawAsEditor = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
+  $fetchRaw(request, opts, 'editor')
+export const $getRawAsPreviewer = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
+  $fetchRaw(request, opts, 'previewer')
 
 export function $patch(
   request: NitroFetchRequest,
@@ -409,9 +436,13 @@ export function setManagerToken(token: string) {
   managerToken = token
 }
 
+export function setPreviewerToken(token: string) {
+  previewerToken = token
+}
+
 function withAuth(
   opts: Omit<NitroFetchOptions<NitroFetchRequest, 'post'>, 'method' | 'body'> | undefined,
-  user: 'admin' | 'user' | 'author' | 'editor' | 'manager' = 'admin',
+  user: 'admin' | 'user' | 'author' | 'editor' | 'manager' | 'previewer' = 'admin',
 ) {
   const headers: Record<string, any> = opts?.headers ?? {}
 
@@ -425,6 +456,8 @@ function withAuth(
     headers['Authorization'] = `Bearer ${editorToken}`
   } else if (user === 'manager' && managerToken) {
     headers['Authorization'] = `Bearer ${managerToken}`
+  } else if (user === 'previewer' && previewerToken) {
+    headers['Authorization'] = `Bearer ${previewerToken}`
   }
 
   return headers

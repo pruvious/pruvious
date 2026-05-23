@@ -70,4 +70,5 @@ describe('cms', async () => {
   // Routes
   await import('./cms/routes/rel-url')
   await import('./cms/routes/link-choices')
+  await import('./cms/routes/api-routes')
 })
