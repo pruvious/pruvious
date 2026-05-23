@@ -38,6 +38,7 @@ export default defineTranslation({
   'Add condition group': 'Bedingungsgruppe hinzufügen',
   'Add inside': 'Innen hinzufügen',
   'Add item': 'Eintrag hinzufügen',
+  'Add meta tag': 'Meta-Tag hinzufügen',
   'Add nested block': 'Verschachtelten Block hinzufügen',
   'Add redirect': 'Weiterleitung hinzufügen',
   'Add top-level block': 'Block auf oberster Ebene hinzufügen',
@@ -45,6 +46,12 @@ export default defineTranslation({
     'Wird der URL nach einem `#` angehängt, um zu einem Abschnitt auf der Zielseite zu springen.',
   'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.':
     'Wird der URL nach einem `?` angehängt, zum Beispiel `page=2&sort=asc`.',
+  'Additional meta tags rendered in the document head for this language. Individual routes and pages may override entries by attribute and key.':
+    'Zusätzliche Meta-Tags, die für diese Sprache im Dokumentkopf gerendert werden. Einzelne Routen und Seiten können Einträge anhand von Attribut und Schlüssel überschreiben.',
+  'Additional meta tags rendered in the document head. Entries with the same attribute and key override matching entries from the site SEO settings.':
+    'Zusätzliche Meta-Tags, die im Dokumentkopf gerendert werden. Einträge mit demselben Attribut und Schlüssel überschreiben passende Einträge aus den SEO-Einstellungen der Website.',
+  'Additional meta tags rendered in the document head. Individual routes and pages may override entries by attribute and key.':
+    'Zusätzliche Meta-Tags, die im Dokumentkopf gerendert werden. Einzelne Routen und Seiten können Einträge anhand von Attribut und Schlüssel überschreiben.',
   'Administrator': 'Administrator',
   'After': 'Nach',
   'After or equal to': 'Nach oder gleich',
@@ -87,6 +94,7 @@ export default defineTranslation({
     'Sind Sie sicher, dass Sie sich von allen anderen Geräten abmelden möchten? Ihre aktuelle Sitzung bleibt aktiv.',
   'At least one of the following conditions must be met': 'Mindestens eine der folgenden Bedingungen muss erfüllt sein',
   'Attempts': 'Versuche',
+  'Attribute': 'Attribut',
   'Author': 'Autor',
   'Auto (device settings)': 'Auto (Geräteeinstellungen)',
   'Auto width': 'Automatische Breite',
@@ -278,8 +286,12 @@ export default defineTranslation({
   'Disabled': 'Deaktiviert',
   'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.':
     'Halten Sie Suchmaschinen davon ab, die gesamte Website zu indexieren. Wenn ausgeblendet, werden Sichtbarkeitseinstellungen pro Route und pro Seite ignoriert. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
-  'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.':
-    'Halten Sie Suchmaschinen davon ab, diese Seite zu indexieren. Hat keine Auswirkung, wenn die globale Sichtbarkeit für Suchmaschinen ausgeblendet ist. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
+  'Discourage search engines from indexing the site in this language. When hidden, per-route and per-page visibility settings are ignored for this language. It is up to search engines to honor this request.':
+    'Halten Sie Suchmaschinen davon ab, die Website in dieser Sprache zu indexieren. Wenn ausgeblendet, werden Sichtbarkeitseinstellungen pro Route und pro Seite für diese Sprache ignoriert. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
+  'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden for this language. It is up to search engines to honor this request.':
+    'Halten Sie Suchmaschinen davon ab, diese Seite zu indexieren. Hat keine Auswirkung, wenn die Sichtbarkeit für diese Sprache websiteweit ausgeblendet ist. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
+  'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden. It is up to search engines to honor this request.':
+    'Halten Sie Suchmaschinen davon ab, diese Seite zu indexieren. Hat keine Auswirkung, wenn die websiteweite Sichtbarkeit ausgeblendet ist. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
   'Does not contain': 'Enthält nicht',
   'Does not contain (case-insensitive)': 'Enthält nicht (Groß-/Kleinschreibung ignorieren)',
   'Does not equal': 'Ungleich',
@@ -384,6 +396,7 @@ export default defineTranslation({
   'Hide description': 'Beschreibung verbergen',
   'Hide password': 'Passwort verbergen',
   'https://example.com': 'https://beispiel.de',
+  'HTTP header': 'HTTP-Header',
   'HTTP Method': 'HTTP Methode',
 
   'ID': 'ID',
@@ -452,6 +465,7 @@ export default defineTranslation({
   'Media library': 'Medienbibliothek',
   'Message': 'Nachricht',
   'Meta description': 'Meta-Beschreibung',
+  'Meta tags': 'Meta-Tags',
   'MIME type': 'MIME-Typ',
   'More actions': 'Weitere Aktionen',
   'Move down': 'Nach unten verschieben',
@@ -538,6 +552,7 @@ export default defineTranslation({
   'Off': 'Aus',
   'OK': 'OK',
   'On': 'Ein',
+  'Open Graph': 'Open Graph',
   'Open user menu': 'Benutzer-Menü öffnen',
   'Operation': 'Operation',
   'or': 'oder',
@@ -665,6 +680,7 @@ export default defineTranslation({
   'Share': 'Teilen',
   'shared': 'geteilt',
   'Shared bookmarks': 'Geteilte Merklisten',
+  'Sharing image': 'Sharing-Bild',
   'Short description of the file used for alt text in images and accessibility purposes.':
     'Kurze Beschreibung der Datei, die als Alt-Text in Bildern und für Barrierefreiheitszwecke verwendet wird.',
   'Show': 'Anzeigen',
@@ -681,6 +697,7 @@ export default defineTranslation({
   'Singleton not found': 'Singleton nicht gefunden',
   'Size': 'Größe',
   'Smart clipboard': 'Intelligente Zwischenablage',
+  'Social media': 'Soziale Medien',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
     'Einige Systemeinstellungen wurden aktualisiert. Bitte laden Sie die Seite neu, damit die Änderungen wirksam werden.',
   'Some uploads already exist in the target directory. Do you want to overwrite them?':
@@ -723,12 +740,20 @@ export default defineTranslation({
     'Die Übersetzung für die Sprache `$language` existiert nicht. Möchten Sie sie erstellen?',
     { language: 'string' },
   ),
+  'The attribute used to identify the meta tag. Use Open Graph (`property`) for `og:*` tags, HTTP header (`http-equiv`) for response-header-like directives such as `Content-Security-Policy`, and Standard (`name`) for everything else.':
+    'Das Attribut, das den Meta-Tag identifiziert. Verwenden Sie Open Graph (`property`) für `og:*`-Tags, HTTP-Header (`http-equiv`) für Anweisungen wie `Content-Security-Policy`, und Standard (`name`) für alles andere.',
   'The content language.': 'Die Inhaltsprache.',
   'The dashboard language has been updated. Please reload the page for the changes to take effect.':
     'Die Sprache des Dashboards wurde aktualisiert. Bitte laden Sie die Seite neu, damit die Änderungen wirksam werden.',
   'The date and time when the record was created.': 'Das Datum und die Uhrzeit, wann der Eintrag erstellt wurde.',
   'The date and time when the record was last updated.':
     'Das Datum und die Uhrzeit, wann der Eintrag zuletzt aktualisiert wurde.',
+  'The default image used when pages are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
+    'Das Standardbild, das verwendet wird, wenn Seiten in sozialen Medien geteilt werden. Einzelne Routen und Seiten können dieses Bild überschreiben. Empfohlene Größe ist 1200x630 Pixel.',
+  'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
+    'Das Standardbild, das verwendet wird, wenn Seiten dieser Sprache in sozialen Medien geteilt werden. Einzelne Routen und Seiten können dieses Bild überschreiben. Empfohlene Größe ist 1200x630 Pixel.',
+  'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.':
+    'Das Bild, das verwendet wird, wenn diese Seite in sozialen Medien geteilt wird. Lassen Sie das Feld leer, um den Standardwert der Website zu übernehmen. Empfohlene Größe ist 1200x630 Pixel.',
   'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).':
     'Der Dateiname wird in ein URL-freundliches Format konvertiert (z. B. wird aus `Meine Datei` -> `meine-datei`).',
   'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
@@ -747,6 +772,9 @@ export default defineTranslation({
     'Die URL oder der Pfad, auf den die Benutzer weitergeleitet werden.',
   'The user who created the record.': 'Der Benutzer, der den Eintrag erstellt hat.',
   'The users who can edit the record.': 'Die Benutzer, die den Eintrag bearbeiten können.',
+  'The value of the `content` attribute on the meta tag.': 'Der Wert des `content`-Attributs des Meta-Tags.',
+  'The value of the attribute (e.g. `og:type`, `description`, `twitter:card`).':
+    'Der Wert des Attributs (z. B. `og:type`, `description`, `twitter:card`).',
   'There are no folders available to move the selected uploads to.':
     'Es sind keine Ordner verfügbar, um die ausgewählten Uploads zu verschieben.',
   'This block is not allowed here': 'Dieser Block ist hier nicht erlaubt',

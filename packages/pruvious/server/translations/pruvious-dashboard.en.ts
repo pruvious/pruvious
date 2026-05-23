@@ -38,6 +38,7 @@ export default defineTranslation({
   'Add condition group': 'Add condition group',
   'Add inside': 'Add inside',
   'Add item': 'Add item',
+  'Add meta tag': 'Add meta tag',
   'Add nested block': 'Add nested block',
   'Add redirect': 'Add redirect',
   'Add top-level block': 'Add top-level block',
@@ -45,6 +46,12 @@ export default defineTranslation({
     'Added to the end of the URL after a `#` to scroll to a section on the target page.',
   'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.':
     'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.',
+  'Additional meta tags rendered in the document head for this language. Individual routes and pages may override entries by attribute and key.':
+    'Additional meta tags rendered in the document head for this language. Individual routes and pages may override entries by attribute and key.',
+  'Additional meta tags rendered in the document head. Entries with the same attribute and key override matching entries from the site SEO settings.':
+    'Additional meta tags rendered in the document head. Entries with the same attribute and key override matching entries from the site SEO settings.',
+  'Additional meta tags rendered in the document head. Individual routes and pages may override entries by attribute and key.':
+    'Additional meta tags rendered in the document head. Individual routes and pages may override entries by attribute and key.',
   'Administrator': 'Administrator',
   'After': 'After',
   'After or equal to': 'After or equal to',
@@ -87,6 +94,7 @@ export default defineTranslation({
     'Are you sure you want to Sign out from all other devices? Your current session will remain active.',
   'At least one of the following conditions must be met': 'At least one of the following conditions must be met',
   'Attempts': 'Attempts',
+  'Attribute': 'Attribute',
   'Author': 'Author',
   'Auto (device settings)': 'Auto (device settings)',
   'Auto width': 'Auto width',
@@ -276,8 +284,12 @@ export default defineTranslation({
   'Disabled': 'Disabled',
   'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.':
     'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.',
-  'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.':
-    'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.',
+  'Discourage search engines from indexing the site in this language. When hidden, per-route and per-page visibility settings are ignored for this language. It is up to search engines to honor this request.':
+    'Discourage search engines from indexing the site in this language. When hidden, per-route and per-page visibility settings are ignored for this language. It is up to search engines to honor this request.',
+  'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden for this language. It is up to search engines to honor this request.':
+    'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden for this language. It is up to search engines to honor this request.',
+  'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden. It is up to search engines to honor this request.':
+    'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden. It is up to search engines to honor this request.',
   'Division': 'Division',
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',
@@ -382,6 +394,7 @@ export default defineTranslation({
   'Hide description': 'Hide description',
   'Hide password': 'Hide password',
   'https://example.com': 'https://example.com',
+  'HTTP header': 'HTTP header',
   'HTTP Method': 'HTTP Method',
 
   'ID': 'ID',
@@ -450,6 +463,7 @@ export default defineTranslation({
   'Media library': 'Media library',
   'Message': 'Message',
   'Meta description': 'Meta description',
+  'Meta tags': 'Meta tags',
   'MIME type': 'MIME type',
   'More actions': 'More actions',
   'Move down': 'Move down',
@@ -536,6 +550,7 @@ export default defineTranslation({
   'Off': 'Off',
   'OK': 'OK',
   'On': 'On',
+  'Open Graph': 'Open Graph',
   'Open user menu': 'Open user menu',
   'Operation': 'Operation',
   'or': 'or',
@@ -663,6 +678,7 @@ export default defineTranslation({
   'Share': 'Share',
   'shared': 'shared',
   'Shared bookmarks': 'Shared bookmarks',
+  'Sharing image': 'Sharing image',
   'Short description of the file used for alt text in images and accessibility purposes.':
     'Short description of the file used for alt text in images and accessibility purposes.',
   'Show': 'Show',
@@ -679,6 +695,7 @@ export default defineTranslation({
   'Singleton not found': 'Singleton not found',
   'Size': 'Size',
   'Smart clipboard': 'Smart clipboard',
+  'Social media': 'Social media',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
     'Some system settings have been updated. Please reload the page for the changes to take effect.',
   'Some uploads already exist in the target directory. Do you want to overwrite them?':
@@ -720,11 +737,19 @@ export default defineTranslation({
     'The `$language` translation does not exist. Do you want to create it?',
     { language: 'string' },
   ),
+  'The attribute used to identify the meta tag. Use Open Graph (`property`) for `og:*` tags, HTTP header (`http-equiv`) for response-header-like directives such as `Content-Security-Policy`, and Standard (`name`) for everything else.':
+    'The attribute used to identify the meta tag. Use Open Graph (`property`) for `og:*` tags, HTTP header (`http-equiv`) for response-header-like directives such as `Content-Security-Policy`, and Standard (`name`) for everything else.',
   'The content language.': 'The content language.',
   'The dashboard language has been updated. Please reload the page for the changes to take effect.':
     'The dashboard language has been updated. Please reload the page for the changes to take effect.',
   'The date and time when the record was created.': 'The date and time when the record was created.',
   'The date and time when the record was last updated.': 'The date and time when the record was last updated.',
+  'The default image used when pages are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
+    'The default image used when pages are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
+  'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
+    'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
+  'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.':
+    'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.',
   'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).':
     'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).',
   'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
@@ -742,6 +767,9 @@ export default defineTranslation({
   'The URL or path where users will be redirected.': 'The URL or path where users will be redirected.',
   'The user who created the record.': 'The user who created the record.',
   'The users who can edit the record.': 'The users who can edit the record.',
+  'The value of the `content` attribute on the meta tag.': 'The value of the `content` attribute on the meta tag.',
+  'The value of the attribute (e.g. `og:type`, `description`, `twitter:card`).':
+    'The value of the attribute (e.g. `og:type`, `description`, `twitter:card`).',
   'There are no folders available to move the selected uploads to.':
     'There are no folders available to move the selected uploads to.',
   'This block is not allowed here': 'This block is not allowed here',

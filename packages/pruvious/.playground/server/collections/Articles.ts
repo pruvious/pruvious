@@ -37,6 +37,7 @@ export default defineCollection({
   routing: {
     publicFields: ['name'],
     labelField: ['name', ' #', 'price'],
+    seo: true,
   },
   ui: {
     indexPage: {

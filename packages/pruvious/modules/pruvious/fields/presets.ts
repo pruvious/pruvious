@@ -1,10 +1,13 @@
 import {
+  buttonGroupField,
   dateTimeField,
+  imageField,
   languageField,
   objectField,
   primaryLanguage,
   recordField,
   recordsField,
+  repeaterField,
   subpathField,
   textField,
   timestampField,
@@ -16,6 +19,7 @@ import {
 } from '#pruvious/server'
 import { createdAtFieldBeforeQueryExecution, updatedAtFieldBeforeQueryExecution } from '@pruvious/orm'
 import { defu, isNull, isString, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
+
 import type { CustomRecordFieldOptions } from '../../../server/fields/record'
 import type { CustomRecordsFieldOptions } from '../../../server/fields/records'
 import type { TimestampFieldOptions } from '../../../server/fields/timestamp'
@@ -444,15 +448,82 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
           label: ({ __ }) => __('pruvious-dashboard', 'Search engine visibility'),
           yesLabel: ({ __ }) => __('pruvious-dashboard', 'Visible'),
           noLabel: ({ __ }) => __('pruvious-dashboard', 'Hidden'),
+          description:
+            useRuntimeConfig().pruvious.i18n.languages.length > 1
+              ? ({ __ }) =>
+                  __(
+                    'pruvious-dashboard',
+                    'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden for this language. It is up to search engines to honor this request.',
+                  )
+              : ({ __ }) =>
+                  __(
+                    'pruvious-dashboard',
+                    'Discourage search engines from indexing this page. Has no effect when the site-wide visibility is hidden. It is up to search engines to honor this request.',
+                  ),
+        },
+      }),
+      sharingImage: imageField({
+        minWidth: 600,
+        minHeight: 315,
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Sharing image'),
           description: ({ __ }) =>
             __(
               'pruvious-dashboard',
-              'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.',
+              'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.',
             ),
         },
       }),
-      // @todo sharingImage
-      // @todo metaTags
+      metaTags: repeaterField({
+        subfields: {
+          attribute: buttonGroupField({
+            default: 'name',
+            choices: [
+              { value: 'name', label: ({ __ }) => __('pruvious-dashboard', 'Standard') },
+              { value: 'property', label: ({ __ }) => __('pruvious-dashboard', 'Open Graph') },
+              { value: 'http-equiv', label: ({ __ }) => __('pruvious-dashboard', 'HTTP header') },
+            ],
+            ui: {
+              label: ({ __ }) => __('pruvious-dashboard', 'Attribute'),
+              description: ({ __ }) =>
+                __(
+                  'pruvious-dashboard',
+                  'The attribute used to identify the meta tag. Use Open Graph (`property`) for `og:*` tags, HTTP header (`http-equiv`) for response-header-like directives such as `Content-Security-Policy`, and Standard (`name`) for everything else.',
+                ),
+            },
+          }),
+          key: textField({
+            required: true,
+            sanitizers: [(value) => (isString(value) ? value.trim() : value)],
+            ui: {
+              label: ({ __ }) => __('pruvious-dashboard', 'Key'),
+              description: ({ __ }) =>
+                __('pruvious-dashboard', 'The value of the attribute (e.g. `og:type`, `description`, `twitter:card`).'),
+              placeholder: 'og:type',
+            },
+          }),
+          content: textField({
+            required: true,
+            ui: {
+              label: ({ __ }) => __('pruvious-dashboard', 'Content'),
+              description: ({ __ }) =>
+                __('pruvious-dashboard', 'The value of the `content` attribute on the meta tag.'),
+              placeholder: 'website',
+            },
+          }),
+        },
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Meta tags'),
+          description: ({ __ }) =>
+            __(
+              'pruvious-dashboard',
+              'Additional meta tags rendered in the document head. Entries with the same attribute and key override matching entries from the site SEO settings.',
+            ),
+          addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add meta tag'),
+          itemLabelConfiguration: { subfieldValue: 'key' },
+          subfieldsLayout: ['attribute', { row: ['key', 'content'] }],
+        },
+      }),
     },
     ui: defu((options.ui as any) ?? {}, {
       label: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'SEO'),
@@ -462,6 +533,10 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
             {
               label: ({ __ }) => __('pruvious-dashboard', 'General'),
               fields: ['title', 'baseTitle', 'description', 'isIndexable'],
+            },
+            {
+              label: ({ __ }) => __('pruvious-dashboard', 'Social media'),
+              fields: ['sharingImage', 'metaTags'],
             },
           ],
         },

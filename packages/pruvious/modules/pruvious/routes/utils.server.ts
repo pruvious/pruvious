@@ -25,6 +25,7 @@ import {
   withTrailingSlash,
   type ParsedRelURL,
 } from '@pruvious/utils'
+import { joinURL } from 'ufo'
 import type { LayoutKey } from 'nuxt/app'
 import { getLinkIndex, getRecordTranslations, resolveRelURLFromIndex, type LinkIndexRoute } from './link-index.server'
 
@@ -64,6 +65,51 @@ export interface GenericRouteData {
   $data: Record<string, any>
 }
 
+export interface ResolvedRouteSharingImage {
+  /**
+   * The URL of the sharing image.
+   * Includes the SEO singleton's `baseURL` when configured, so it is safe to use as `og:image` content.
+   */
+  url: string
+
+  /**
+   * The MIME type of the image.
+   */
+  mime: string
+
+  /**
+   * The image width in pixels, or `null` for vector formats.
+   */
+  width: number | null
+
+  /**
+   * The image height in pixels, or `null` for vector formats.
+   */
+  height: number | null
+
+  /**
+   * The image description used as alt text and the `og:image:alt` value.
+   */
+  alt: string
+}
+
+export interface ResolvedRouteMetaTag {
+  /**
+   * The attribute used to identify the meta tag (e.g. `name`, `property`, `http-equiv`).
+   */
+  attribute: 'name' | 'property' | 'http-equiv'
+
+  /**
+   * The value of the identifying attribute (e.g. `og:type`, `description`, `twitter:card`).
+   */
+  key: string
+
+  /**
+   * The value of the meta tag's `content` attribute.
+   */
+  content: string
+}
+
 export interface ResolvedRouteSEO {
   /**
    * The final page title displayed in search results and browser tabs.
@@ -86,6 +132,18 @@ export interface ResolvedRouteSEO {
    * Indicates whether the route is indexable by search engines.
    */
   isIndexable: boolean
+
+  /**
+   * The resolved sharing image used by Open Graph and Twitter cards.
+   * Resolved with `record.seo.sharingImage > route.seo{LANG}.sharingImage > SEO.sharingImage` precedence.
+   */
+  sharingImage: ResolvedRouteSharingImage | null
+
+  /**
+   * Additional meta tags rendered in the document head.
+   * Entries are deduplicated by `attribute:key`; per-record entries override per-route entries, which override the SEO singleton's entries.
+   */
+  metaTags: ResolvedRouteMetaTag[]
 }
 
 export type ResolvedRoute<TRef extends RouteReferenceName = RouteReferenceName> = {
@@ -252,6 +310,90 @@ export interface ListRoutesResult {
   total: number
 }
 
+interface PopulatedSharingImage {
+  id: number
+  path: string
+  mime: string
+  size?: number
+  description?: string | null
+  imageWidth?: number | null
+  imageHeight?: number | null
+}
+
+interface RawMetaTag {
+  attribute: 'name' | 'property' | 'http-equiv' | (string & {})
+  key: string | null
+  content: string | null
+}
+
+const META_ATTRIBUTES = ['name', 'property', 'http-equiv'] as const
+
+/**
+ * Builds a `ResolvedRouteSharingImage` from a populated `Uploads` record.
+ *
+ * Returns `null` when no image is provided. The resulting `url` is absolute when `seoBaseURL` is
+ * set, otherwise it is a root-relative path.
+ */
+function toResolvedSharingImage(
+  image: PopulatedSharingImage | null | undefined,
+  seoBaseURL: string,
+  appBaseURL: string,
+  uploadsBasePath: string,
+): ResolvedRouteSharingImage | null {
+  if (!image || !image.path) {
+    return null
+  }
+  return {
+    url: joinURL(seoBaseURL, appBaseURL, uploadsBasePath, image.path),
+    mime: image.mime,
+    width: image.imageWidth ?? null,
+    height: image.imageHeight ?? null,
+    alt: image.description ?? '',
+  }
+}
+
+/**
+ * Picks the highest-priority sharing image from the given sources.
+ *
+ * Sources are listed from lowest to highest priority - later entries win when they are not null.
+ */
+function pickSharingImage(
+  ...sources: (PopulatedSharingImage | null | undefined)[]
+): PopulatedSharingImage | null {
+  let result: PopulatedSharingImage | null = null
+  for (const src of sources) {
+    if (src && src.path) {
+      result = src
+    }
+  }
+  return result
+}
+
+/**
+ * Merges meta tag lists with dedup-by-`attribute:key` semantics.
+ *
+ * Sources are listed from lowest to highest priority - later entries override matching earlier
+ * ones. Entries with missing key or content are skipped.
+ */
+function composeMetaTags(...sources: (RawMetaTag[] | null | undefined)[]): ResolvedRouteMetaTag[] {
+  const merged = new Map<string, ResolvedRouteMetaTag>()
+  for (const list of sources) {
+    if (!list) {
+      continue
+    }
+    for (const tag of list) {
+      const attribute = (META_ATTRIBUTES as readonly string[]).includes(tag.attribute) ? tag.attribute : 'name'
+      const key = (tag.key ?? '').trim()
+      const content = tag.content ?? ''
+      if (!key || !content) {
+        continue
+      }
+      merged.set(`${attribute}:${key}`, { attribute: attribute as ResolvedRouteMetaTag['attribute'], key, content })
+    }
+  }
+  return Array.from(merged.values())
+}
+
 /**
  * Finds and returns a route by its full URL `path`.
  *
@@ -261,7 +403,10 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   path: string,
 ): Promise<ResolvedRoute<TRef> | RouteRedirect | null> {
   const subpaths = path.split('/').filter(Boolean)
-  const { languages, primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const runtimeConfig = useRuntimeConfig()
+  const { languages, primaryLanguage, prefixPrimaryLanguage } = runtimeConfig.pruvious.i18n
+  const uploadsBasePath = runtimeConfig.pruvious.uploads.basePath
+  const appBaseURL = runtimeConfig.app.baseURL
   const language = (languages.find(({ code }) => subpaths[0]?.toLowerCase() === code.toLowerCase())?.code ??
     primaryLanguage) as LanguageCode
   const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
@@ -360,6 +505,13 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             description: exactRoute[`seo${languageSuffix}`].description,
             url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
             isIndexable: baseSEO.isIndexable && exactRoute[`seo${languageSuffix}`].isIndexable,
+            sharingImage: toResolvedSharingImage(
+              pickSharingImage(baseSEO.sharingImage as any, routeSEO.sharingImage as any),
+              baseSEO.baseURL ?? '',
+              appBaseURL,
+              uploadsBasePath,
+            ),
+            metaTags: composeMetaTags(baseSEO.metaTags as any, routeSEO.metaTags as any),
           },
           ref: singletonReference[0] as TRef,
           data: (await selectSingleton(exactRoute.referencedSingleton)
@@ -462,6 +614,13 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
           description: seo.description || routeSEO.description,
           url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
           isIndexable: baseSEO.isIndexable && routeSEO.isIndexable && (seo.isIndexable ?? true),
+          sharingImage: toResolvedSharingImage(
+            pickSharingImage(baseSEO.sharingImage as any, routeSEO.sharingImage as any, seo.sharingImage as any),
+            baseSEO.baseURL ?? '',
+            appBaseURL,
+            uploadsBasePath,
+          ),
+          metaTags: composeMetaTags(baseSEO.metaTags as any, routeSEO.metaTags as any, seo.metaTags as any),
         },
         ref,
         data: pick(data, collection.meta.routing.publicFields) as any,
@@ -708,11 +867,20 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
     ? (languages.map(({ code }) => code) as LanguageCode[])
     : [(options?.language ?? primaryLanguage) as LanguageCode]
 
+  let singletonIndexable: Record<string, boolean> | null = null
+
   if (indexableOnly) {
-    const baseSEO = (await selectSingleton('SEO').populate().get()).data
-    if (baseSEO?.isIndexable === false) {
+    const map: Record<string, boolean> = {}
+    await Promise.all(
+      languages.map(async ({ code }) => {
+        const data = (await selectSingleton('SEO').language(code as LanguageCode).populate().get()).data
+        map[code] = data?.isIndexable !== false
+      }),
+    )
+    if (languages.every(({ code }) => !map[code])) {
       return { data: [], currentPage: page, lastPage: 1, perPage, total: 0 }
     }
+    singletonIndexable = map
   }
 
   const index = await getLinkIndex()
@@ -722,7 +890,7 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
     if (isNull(path) || (!includeDrafts && route.isPublic[code] !== true)) {
       return null
     }
-    if (indexableOnly && route.isIndexable[code] !== true) {
+    if (indexableOnly && (route.isIndexable[code] !== true || singletonIndexable![code] !== true)) {
       return null
     }
     return path

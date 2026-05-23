@@ -18,12 +18,8 @@ export default defineEventHandler(async (event) => {
   event.context.pruvious ??= {} as any
   await resolveContextLanguage()
 
-  const baseSEO = (await selectSingleton('SEO').populate().get()).data ?? ({} as any)
+  const baseSEO = (await selectSingleton('SEO').select(['baseURL']).get()).data ?? ({} as any)
   const baseURL = isString(baseSEO.baseURL) ? withoutTrailingSlash(baseSEO.baseURL) : ''
-
-  if (baseSEO.isIndexable === false) {
-    return emptyUrlset()
-  }
 
   const perPage = routing.sitemap.perPage
   const path = event.path.split('?')[0]!.toLowerCase()
@@ -69,10 +65,6 @@ function escapeXML(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
-}
-
-function emptyUrlset(): string {
-  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n'
 }
 
 function renderUrlset(baseURL: string, paths: string[]): string {

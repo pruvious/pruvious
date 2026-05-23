@@ -720,6 +720,8 @@ async function setUpPreview() {
           description: '',
           url: '',
           isIndexable: false,
+          sharingImage: null,
+          metaTags: [],
         },
         ref: ref?.[0] as RouteReferenceName,
         data,

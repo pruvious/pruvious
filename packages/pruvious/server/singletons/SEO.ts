@@ -1,5 +1,15 @@
-import { buttonGroupField, defineSingleton, textField, trueFalseField, urlValidator } from '#pruvious/server'
+import {
+  buttonGroupField,
+  defineSingleton,
+  imageField,
+  repeaterField,
+  textField,
+  trueFalseField,
+  urlValidator,
+} from '#pruvious/server'
 import { isString, withoutTrailingSlash } from '@pruvious/utils'
+
+const isMultiLanguage = useRuntimeConfig().pruvious.i18n.languages.length > 1
 
 export default defineSingleton({
   fields: {
@@ -54,22 +64,98 @@ export default defineSingleton({
         label: ({ __ }) => __('pruvious-dashboard', 'Search engine visibility'),
         yesLabel: ({ __ }) => __('pruvious-dashboard', 'Visible'),
         noLabel: ({ __ }) => __('pruvious-dashboard', 'Hidden'),
-        description: ({ __ }) =>
-          __(
-            'pruvious-dashboard',
-            'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.',
-          ),
+        description: isMultiLanguage
+          ? ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'Discourage search engines from indexing the site in this language. When hidden, per-route and per-page visibility settings are ignored for this language. It is up to search engines to honor this request.',
+              )
+          : ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.',
+              ),
       },
     }),
-    // @todo sharingImage
+    sharingImage: imageField({
+      minWidth: 600,
+      minHeight: 315,
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Sharing image'),
+        description: isMultiLanguage
+          ? ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
+              )
+          : ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'The default image used when pages are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
+              ),
+      },
+    }),
+    metaTags: repeaterField({
+      subfields: {
+        attribute: buttonGroupField({
+          default: 'name',
+          choices: [
+            { value: 'name', label: ({ __ }) => __('pruvious-dashboard', 'Standard') },
+            { value: 'property', label: ({ __ }) => __('pruvious-dashboard', 'Open Graph') },
+            { value: 'http-equiv', label: ({ __ }) => __('pruvious-dashboard', 'HTTP header') },
+          ],
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Attribute'),
+            description: ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'The attribute used to identify the meta tag. Use Open Graph (`property`) for `og:*` tags, HTTP header (`http-equiv`) for response-header-like directives such as `Content-Security-Policy`, and Standard (`name`) for everything else.',
+              ),
+          },
+        }),
+        key: textField({
+          required: true,
+          sanitizers: [(value) => (isString(value) ? value.trim() : value)],
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Key'),
+            description: ({ __ }) =>
+              __('pruvious-dashboard', 'The value of the attribute (e.g. `og:type`, `description`, `twitter:card`).'),
+            placeholder: 'og:type',
+          },
+        }),
+        content: textField({
+          required: true,
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Content'),
+            description: ({ __ }) => __('pruvious-dashboard', 'The value of the `content` attribute on the meta tag.'),
+            placeholder: 'website',
+          },
+        }),
+      },
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Meta tags'),
+        description: isMultiLanguage
+          ? ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'Additional meta tags rendered in the document head for this language. Individual routes and pages may override entries by attribute and key.',
+              )
+          : ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'Additional meta tags rendered in the document head. Individual routes and pages may override entries by attribute and key.',
+              ),
+        addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add meta tag'),
+        itemLabelConfiguration: { subfieldValue: 'key' },
+        subfieldsLayout: ['attribute', { row: ['key', 'content'] }],
+      },
+    }),
     // @todo logo
     // @todo favicon
-    // @todo socialMediaMeta
-    // @todo metaTags
     // @todo scripts
     // @todo styles
   },
-  syncedFields: ['baseURL', 'isIndexable'],
+  syncedFields: ['baseURL'],
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'SEO'),
     icon: 'eye-search',
@@ -84,6 +170,10 @@ export default defineSingleton({
               { row: ['baseTitle', 'titleSeparator | 16rem', 'baseTitlePosition | 16rem'] },
               { card: ['isIndexable'] },
             ],
+          },
+          {
+            label: ({ __ }) => __('pruvious-dashboard', 'Social media'),
+            fields: ['sharingImage', 'metaTags'],
           },
         ],
       },
