@@ -443,6 +443,7 @@ export interface PickFieldUIOptions<
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
   TCustomFilterComponent extends boolean | undefined,
+  TDisabled extends boolean | undefined,
 > {
   /**
    * Specifies whether to include a hidden option for the field.
@@ -451,6 +452,14 @@ export interface PickFieldUIOptions<
    * @default true
    */
   hidden?: THidden
+
+  /**
+   * Specifies whether to include a disabled option for the field.
+   * This option renders the field as read-only in the dashboard form.
+   *
+   * @default true
+   */
+  disabled?: TDisabled
 
   /**
    * Specifies whether to include a label option for the field.
@@ -517,6 +526,7 @@ type GenericPickFieldUIOptions = PickFieldUIOptions<
   boolean | undefined,
   boolean | undefined,
   boolean | undefined,
+  boolean | undefined,
   boolean | undefined
 >
 
@@ -529,6 +539,7 @@ export interface FieldUIOptions<
   TCustomComponent extends boolean | undefined,
   TCustomTableComponent extends boolean | undefined,
   TCustomFilterComponent extends boolean | undefined,
+  TDisabled extends boolean | undefined,
 > {
   /**
    * Controls the visibility of the field in the user interface.
@@ -539,6 +550,20 @@ export interface FieldUIOptions<
    * @default false
    */
   hidden?: DefaultTrue<THidden> extends true ? boolean : never
+
+  /**
+   * Renders the field as read-only in the dashboard form.
+   *
+   * Has no effect when the page is already read-only (e.g. the user lacks update permission)
+   * - this option only narrows, never widens. Useful for locking inputs that are derived
+   * automatically (e.g. by a `dashboard:collections:*:change` filter) so the user cannot fight
+   * the derivation.
+   *
+   * For parent fields (Repeater, Object, Blocks) the disabled state cascades into subfields.
+   *
+   * @default false
+   */
+  disabled?: DefaultTrue<TDisabled> extends true ? boolean : never
 
   /**
    * The label for the field.
@@ -882,6 +907,7 @@ export type GenericFieldUIOptions = FieldUIOptions<
   undefined,
   undefined,
   undefined,
+  undefined,
   undefined
 >
 
@@ -905,7 +931,8 @@ export type ResolveFieldUIOptions<TUIOptions extends GenericPickFieldUIOptions |
                 TUIOptions['dataTable'],
                 TUIOptions['customComponent'],
                 TUIOptions['customTableComponent'],
-                TUIOptions['customFilterComponent']
+                TUIOptions['customFilterComponent'],
+                TUIOptions['disabled']
               >
             >
           : never
@@ -1299,6 +1326,7 @@ export function defineField<
                       fieldTypeOptions.uiOptions?.customComponent === false ? undefined : 'customComponent',
                       fieldTypeOptions.uiOptions?.customTableComponent === false ? undefined : 'customTableComponent',
                       fieldTypeOptions.uiOptions?.customFilterComponent === false ? undefined : 'customFilterComponent',
+                      fieldTypeOptions.uiOptions?.disabled === false ? undefined : 'disabled',
                     ].filter(Boolean) as (keyof GenericFieldUIOptions)[],
                   ),
                   ...(defaultCustomOptions as any).ui,

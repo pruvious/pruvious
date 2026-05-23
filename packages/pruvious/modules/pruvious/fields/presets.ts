@@ -35,7 +35,7 @@ export interface LanguageFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The content language.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
 }
 
 export interface TranslationsFieldPresetOptions {
@@ -49,7 +49,7 @@ export interface TranslationsFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The unique identifier for translations.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
 }
 
 export interface CreatedAtFieldPresetOptions {
@@ -63,7 +63,7 @@ export interface CreatedAtFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was created.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface UpdatedAtFieldPresetOptions {
@@ -77,7 +77,7 @@ export interface UpdatedAtFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The date and time when the record was last updated.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>> & TimestampFieldOptions['ui']
 }
 
 export interface AuthorFieldPresetOptions {
@@ -100,7 +100,7 @@ export interface AuthorFieldPresetOptions {
    *   searchFields: ['firstName', 'lastName', 'email'],
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>> &
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true, true>> &
     CustomRecordFieldOptions<any, string, boolean>['ui']
 }
 
@@ -122,7 +122,7 @@ export interface EditorsFieldPresetOptions {
    *   description: ({ __ }) => __('pruvious-dashboard', 'The users who can edit the record.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>> &
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true, true>> &
     CustomRecordsFieldOptions<any, string, boolean>['ui']
 }
 
@@ -137,7 +137,7 @@ export type SubpathFieldPresetOptions = Parameters<typeof subpathField>[0] & {
    *   placeholder: ({ __ }) => __('pruvious-dashboard', 'unique-subpath'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
 }
 
 export type IsPublicFieldPresetOptions = Parameters<typeof trueFalseField>[0] & {
@@ -152,7 +152,7 @@ export type IsPublicFieldPresetOptions = Parameters<typeof trueFalseField>[0] & 
    *   yesLabel: ({ __ }) => __('pruvious-dashboard', 'Public'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
 }
 
 export type ScheduledAtFieldPresetOptions = Parameters<typeof dateTimeField>[0] & {
@@ -165,7 +165,7 @@ export type ScheduledAtFieldPresetOptions = Parameters<typeof dateTimeField>[0] 
    *   description: ({ __ }) => __('pruvious-dashboard', 'Sets when this content will be published. Use current date and time for immediate publication or a future date to schedule it.'),
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
 }
 
 export type SEOFieldPresetOptions = Omit<Parameters<typeof objectField>[0], 'subfields'> & {
@@ -187,7 +187,7 @@ export type SEOFieldPresetOptions = Omit<Parameters<typeof objectField>[0], 'sub
    *   ],
    * }
    */
-  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true>>
+  ui?: OmitUndefined<FieldUIOptions<true, true, true, false, true, true, true, true, true>>
 }
 
 /**
