@@ -13,11 +13,14 @@ import {
 import type { ExtractCastedTypes, ExtractPopulatedTypes, GenericField } from '@pruvious/orm'
 import {
   buildRelURL,
+  isArray,
   isDefined,
   isNotNull,
   isNull,
+  isObject,
   isPositiveInteger,
   isRelURL,
+  isString,
   parseRelURL,
   pick,
   withLeadingSlash,
@@ -25,8 +28,8 @@ import {
   withTrailingSlash,
   type ParsedRelURL,
 } from '@pruvious/utils'
-import { joinURL } from 'ufo'
 import type { LayoutKey } from 'nuxt/app'
+import { joinURL } from 'ufo'
 import { getLinkIndex, getRecordTranslations, resolveRelURLFromIndex, type LinkIndexRoute } from './link-index.server'
 
 export interface GenericRouteReference {
@@ -93,6 +96,40 @@ export interface ResolvedRouteSharingImage {
   alt: string
 }
 
+export interface ResolvedRouteImage {
+  /**
+   * The absolute URL of the image, prefixed with the SEO `baseURL` when configured.
+   */
+  url: string
+
+  /**
+   * The MIME type of the image.
+   */
+  mime: string
+
+  /**
+   * The image width in pixels, or `null` for vector formats.
+   */
+  width: number | null
+
+  /**
+   * The image height in pixels, or `null` for vector formats.
+   */
+  height: number | null
+}
+
+export interface ResolvedRouteAlternate {
+  /**
+   * The BCP47 language tag (e.g. `en`, `de`) or the literal `'x-default'`.
+   */
+  hreflang: string
+
+  /**
+   * The absolute URL of the alternate. Includes the SEO `baseURL` when configured.
+   */
+  href: string
+}
+
 export interface ResolvedRouteMetaTag {
   /**
    * The attribute used to identify the meta tag (e.g. `name`, `property`, `http-equiv`).
@@ -123,10 +160,30 @@ export interface ResolvedRouteSEO {
   description: string
 
   /**
-   * The full URL of the page, used for canonical links and sharing.
-   * This is the absolute URL including the protocol and domain.
+   * The absolute URL used for the canonical link, `og:url`, and JSON-LD `WebPage.url`.
+   *
+   * When a `canonicalURL` override is set on the per-record or per-route SEO, this is the resolved
+   * override (external URL as-is, or `baseURL + resolved internal path`). Otherwise it is the
+   * auto-derived URL (`baseURL + realPath`).
    */
   url: string
+
+  /**
+   * The auto-derived URL of the page (`baseURL + realPath`), ignoring any `canonicalURL` override.
+   * Useful when you need the page's own URL even when canonical points elsewhere.
+   */
+  autoURL: string
+
+  /**
+   * `true` when the user has supplied a non-empty `canonicalURL` on this route or record, regardless
+   * of whether it resolves successfully or self-resolves to `autoURL`. When `true`:
+   *
+   * - `alternates` is `[]` (Google focuses on the canonical and ignores `hreflang` on duplicates)
+   * - the route/record is excluded from the sitemap
+   * - `url` may still equal `autoURL` (broken `rel://` falls back) but the intent to override
+   *   stands
+   */
+  hasCanonicalOverride: boolean
 
   /**
    * Indicates whether the route is indexable by search engines.
@@ -144,6 +201,44 @@ export interface ResolvedRouteSEO {
    * Entries are deduplicated by `attribute:key`; per-record entries override per-route entries, which override the SEO singleton's entries.
    */
   metaTags: ResolvedRouteMetaTag[]
+
+  /**
+   * The site name used for `og:site_name` and as the `Organization`/`WebSite` name in JSON-LD.
+   */
+  siteName: string
+
+  /**
+   * The resolved `og:type` value for the current page, derived from the merged `metaTags` entries.
+   * Falls back to `'website'` when no `og:type` meta tag is present in any layer.
+   */
+  ogType: string
+
+  /**
+   * The site logo from the SEO singleton, used in the JSON-LD `Organization` entry.
+   */
+  logo: ResolvedRouteImage | null
+
+  /**
+   * The site favicon from the SEO singleton, rendered as `<link rel="icon">`.
+   */
+  favicon: ResolvedRouteImage | null
+
+  /**
+   * Public URLs of the official social profiles, used as `sameAs` entries in JSON-LD.
+   */
+  socialLinks: string[]
+
+  /**
+   * The alternate URLs for every configured language, including a self-referential entry and an `x-default` pointing at the primary language.
+   * Empty when the SEO `baseURL` is not configured or when `hasCanonicalOverride` is `true`.
+   */
+  alternates: ResolvedRouteAlternate[]
+
+  /**
+   * Pre-rendered structured data objects to emit as `<script type="application/ld+json">`.
+   * Always includes a `WebSite` and `WebPage` entry; adds an `Organization` entry when the singleton has identity information.
+   */
+  jsonLd: Record<string, any>[]
 }
 
 export type ResolvedRoute<TRef extends RouteReferenceName = RouteReferenceName> = {
@@ -209,25 +304,6 @@ export interface RouteRedirect {
   forwardQueryParams: boolean
 }
 
-export interface RouteRedirect {
-  /**
-   * The URL to redirect to.
-   * It can be an absolute URL or a relative path.
-   */
-  to: string
-
-  /**
-   * The HTTP status code for the redirect.
-   * Use `301` for permanent redirects or `302` for temporary redirects.
-   */
-  code: 301 | 302
-
-  /**
-   * Indicates whether to forward query parameters from the current URL to the redirect URL.
-   */
-  forwardQueryParams: boolean
-}
-
 export interface ListRoutesOptions {
   /**
    * The number of results per page.
@@ -260,8 +336,13 @@ export interface ListRoutesOptions {
   includeDrafts?: boolean
 
   /**
-   * Whether to return only routes and records marked as indexable by search engines.
-   * Honors the SEO singleton master switch - when the singleton hides the site, the result is always empty.
+   * Whether to return only routes and records that are indexable by search engines.
+   *
+   * Excludes:
+   *
+   * - routes/records flagged as not indexable in their per-language SEO,
+   * - all routes when the SEO singleton's master switch hides the site (for the given language),
+   * - routes/records that set a `canonicalURL` override (those advertise themselves as duplicates).
    *
    * @default false
    */
@@ -281,6 +362,17 @@ export interface ListRoutesEntry {
    * - Values are full route paths of translations (or `null` if the translation doesn't exist or is not public).
    */
   translations: Record<LanguageCode, string | null>
+
+  /**
+   * The language code of this entry (matches `path`'s language prefix).
+   */
+  language: LanguageCode
+
+  /**
+   * Epoch milliseconds of the last update to the underlying route or record.
+   * `null` when no `updatedAt` field is available on the source data container.
+   */
+  updatedAt: number | null
 }
 
 export interface ListRoutesResult {
@@ -368,6 +460,24 @@ function pickSharingImage(...sources: (PopulatedSharingImage | null | undefined)
 }
 
 /**
+ * Forces `property` for Open-Graph-family keys (`og:*`, `fb:*`, `article:*`, `book:*`, `profile:*`,
+ * `music:*`, `video:*`) and `name` for Twitter Card keys (`twitter:*`), regardless of the attribute
+ * the user picked in the dashboard. These specs are unambiguous about which attribute to use, and
+ * picking the wrong one means the meta tag is silently ignored by the consuming platform.
+ */
+function normalizeMetaAttribute(attribute: string, key: string): 'name' | 'property' | 'http-equiv' {
+  if (/^(og|fb|article|book|profile|music|video|business|restaurant|place):/.test(key)) {
+    return 'property'
+  }
+  if (key.startsWith('twitter:')) {
+    return 'name'
+  }
+  return (META_ATTRIBUTES as readonly string[]).includes(attribute)
+    ? (attribute as 'name' | 'property' | 'http-equiv')
+    : 'name'
+}
+
+/**
  * Merges meta tag lists with dedup-by-`attribute:key` semantics.
  *
  * Sources are listed from lowest to highest priority - later entries override matching earlier
@@ -380,16 +490,307 @@ function composeMetaTags(...sources: (RawMetaTag[] | null | undefined)[]): Resol
       continue
     }
     for (const tag of list) {
-      const attribute = (META_ATTRIBUTES as readonly string[]).includes(tag.attribute) ? tag.attribute : 'name'
       const key = (tag.key ?? '').trim()
-      const content = tag.content ?? ''
+      let content = tag.content ?? ''
       if (!key || !content) {
         continue
       }
-      merged.set(`${attribute}:${key}`, { attribute: attribute as ResolvedRouteMetaTag['attribute'], key, content })
+      const attribute = normalizeMetaAttribute(tag.attribute ?? '', key)
+      if (attribute === 'property' && key === 'og:type') {
+        content = content.toLowerCase()
+      }
+      merged.set(`${attribute}:${key}`, { attribute, key, content })
     }
   }
   return Array.from(merged.values())
+}
+
+/**
+ * Resolves a per-route or per-record `canonicalURL` override to an absolute URL.
+ *
+ * The input is the populated value of a `linkField` (either `null` when the user did not set the
+ * field, or `{ url: string | undefined, ... }` where `url` is an external `https://` URL, a
+ * resolved internal path (`/foo`), or `undefined` when an internal `rel://` link points to a
+ * deleted target).
+ *
+ * Returns `null` when the override resolves to nothing (unset or broken link), or the absolute
+ * URL (external as-is, internal prefixed with `seoBaseURL`).
+ */
+function resolveCanonicalOverride(
+  populatedLink: { url?: string | null } | null | undefined,
+  seoBaseURL: string,
+): string | null {
+  const raw = populatedLink?.url
+  if (!isString(raw) || !raw) {
+    return null
+  }
+  if (/^https?:\/\//.test(raw)) {
+    return raw
+  }
+  return withoutTrailingSlash(seoBaseURL) + (raw === '/' ? '' : raw)
+}
+
+/**
+ * Returns `true` when the user has supplied any non-empty `canonicalURL` on the populated SEO,
+ * regardless of whether the link resolves (e.g., a `rel://` whose target was deleted still
+ * counts). Matches `LinkIndex*.hasCanonicalOverride` so sitemap exclusion and on-page
+ * `hreflang`/canonical behavior stay in sync.
+ */
+function hasCanonicalOverrideSet(populatedLink: { url?: string | null } | null | undefined): boolean {
+  return populatedLink !== null && populatedLink !== undefined
+}
+
+/**
+ * Builds a `ResolvedRouteImage` from a populated `Uploads` record.
+ *
+ * Returns `null` when no image is provided. The resulting `url` is absolute when `seoBaseURL`
+ * is set, otherwise it is a root-relative path.
+ */
+function toResolvedImage(
+  image: PopulatedSharingImage | null | undefined,
+  seoBaseURL: string,
+  appBaseURL: string,
+  uploadsBasePath: string,
+): ResolvedRouteImage | null {
+  if (!image || !image.path) {
+    return null
+  }
+  return {
+    url: joinURL(seoBaseURL, appBaseURL, uploadsBasePath, image.path),
+    mime: image.mime,
+    width: image.imageWidth ?? null,
+    height: image.imageHeight ?? null,
+  }
+}
+
+/**
+ * Builds the `<link rel="alternate" hreflang>` entries for a resolved route, including a
+ * self-referential entry and an `x-default` pointing at the primary language version.
+ *
+ * Returns an empty array when the SEO `baseURL` is not configured, since hreflang requires
+ * absolute URLs.
+ */
+function composeAlternates(
+  currentLanguage: string,
+  primaryLanguage: string,
+  realPath: string,
+  translations: Record<string, string | null>,
+  seoBaseURL: string,
+): ResolvedRouteAlternate[] {
+  if (!seoBaseURL) {
+    return []
+  }
+  const base = withoutTrailingSlash(seoBaseURL)
+  const toHref = (path: string) => base + (path === '/' ? '' : path)
+  const result: ResolvedRouteAlternate[] = []
+  const selfHref = toHref(realPath)
+  result.push({ hreflang: currentLanguage, href: selfHref })
+  let primaryHref = currentLanguage === primaryLanguage ? selfHref : null
+  for (const [code, path] of Object.entries(translations)) {
+    if (code === currentLanguage || !isString(path)) {
+      continue
+    }
+    const href = toHref(path)
+    result.push({ hreflang: code, href })
+    if (code === primaryLanguage) {
+      primaryHref = href
+    }
+  }
+  if (primaryHref) {
+    result.push({ hreflang: 'x-default', href: primaryHref })
+  }
+  return result
+}
+
+/**
+ * Builds the baseline structured data emitted on every page:
+ * `Organization` and `WebSite` from the SEO singleton, plus a per-page `WebPage` (or
+ * `Article` when `ogType` is `article`).
+ *
+ * Identity entries are skipped when the SEO singleton lacks `baseURL` or `baseTitle`,
+ * since the resulting URLs/names would be ambiguous.
+ */
+function composeJsonLd(opts: {
+  language: string
+  pageUrl: string
+  title: string
+  description: string
+  siteName: string
+  baseURL: string
+  logo: ResolvedRouteImage | null
+  socialLinks: string[]
+  ogType: string
+  sharingImage: ResolvedRouteSharingImage | null
+}): Record<string, any>[] {
+  const result: Record<string, any>[] = []
+  const { language, pageUrl, title, description, siteName, baseURL, logo, socialLinks, ogType, sharingImage } = opts
+  const hasIdentity = !!(baseURL && siteName)
+
+  if (hasIdentity) {
+    const organization: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': siteName,
+      'url': baseURL,
+    }
+    if (logo) {
+      organization.logo = {
+        '@type': 'ImageObject',
+        'url': logo.url,
+        ...(logo.width ? { width: logo.width } : {}),
+        ...(logo.height ? { height: logo.height } : {}),
+      }
+    }
+    if (socialLinks.length) {
+      organization.sameAs = socialLinks
+    }
+    result.push(organization)
+
+    result.push({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      'name': siteName,
+      'url': baseURL,
+      'inLanguage': language,
+    })
+  }
+
+  const isArticle = ogType === 'article'
+  const page: Record<string, any> = {
+    '@context': 'https://schema.org',
+    '@type': isArticle ? 'Article' : 'WebPage',
+    'url': pageUrl,
+    'name': title,
+    'inLanguage': language,
+  }
+  if (description) {
+    page.description = description
+  }
+  if (sharingImage) {
+    page.image = sharingImage.url
+  }
+  if (isArticle && hasIdentity) {
+    const publisher: Record<string, any> = { '@type': 'Organization', 'name': siteName }
+    if (logo) {
+      publisher.logo = { '@type': 'ImageObject', 'url': logo.url }
+    }
+    page.publisher = publisher
+  }
+  result.push(page)
+
+  return result
+}
+
+/**
+ * Composes a `ResolvedRouteSEO` from the SEO singleton, the per-language route entry, and an
+ * optional per-record SEO object.
+ *
+ * Inheritance precedence (lowest to highest):
+ *
+ * - `baseSEO` (the SEO singleton, per current language)
+ * - `routeSEO` (the per-language `seo{LANG}` of the matched `Routes` row)
+ * - `recordSEO` (only present when the route resolves to a collection record)
+ */
+function buildResolvedSEO(opts: {
+  language: string
+  primaryLanguage: string
+  realPath: string
+  translations: Record<string, string | null>
+  baseSEO: Record<string, any>
+  routeSEO: Record<string, any> | null | undefined
+  recordSEO?: Record<string, any> | null | undefined
+  appBaseURL: string
+  uploadsBasePath: string
+}): ResolvedRouteSEO {
+  const {
+    language,
+    primaryLanguage,
+    realPath,
+    translations,
+    baseSEO,
+    routeSEO,
+    recordSEO,
+    appBaseURL,
+    uploadsBasePath,
+  } = opts
+  const seoBaseURL = (baseSEO.baseURL as string | undefined) ?? ''
+
+  const pageTitle = (recordSEO?.title as string | undefined) || (routeSEO?.title as string | undefined) || ''
+  const showBaseTitle =
+    (recordSEO?.baseTitle as boolean | undefined) ?? (routeSEO?.baseTitle as boolean | undefined) ?? true
+  const baseTitle = (baseSEO.baseTitle as string | undefined) ?? ''
+  const titleSeparator = (baseSEO.titleSeparator as string | undefined) ?? ' | '
+  const title = pageTitle
+    ? showBaseTitle && baseTitle
+      ? baseSEO.baseTitlePosition === 'before'
+        ? baseTitle + titleSeparator + pageTitle
+        : pageTitle + titleSeparator + baseTitle
+      : pageTitle
+    : baseTitle
+
+  const description =
+    (recordSEO?.description as string | undefined) || (routeSEO?.description as string | undefined) || ''
+  const autoURL = seoBaseURL + (realPath === '/' ? '' : realPath)
+  const populatedCanonical =
+    recordSEO !== undefined ? ((recordSEO?.canonicalURL as any) ?? null) : ((routeSEO?.canonicalURL as any) ?? null)
+  const hasCanonicalOverride = hasCanonicalOverrideSet(populatedCanonical)
+  const url = resolveCanonicalOverride(populatedCanonical, seoBaseURL) ?? autoURL
+  const isIndexable =
+    baseSEO.isIndexable !== false &&
+    (routeSEO?.isIndexable ?? true) !== false &&
+    (recordSEO?.isIndexable ?? true) !== false
+
+  const sharingImage = toResolvedSharingImage(
+    pickSharingImage(baseSEO.sharingImage as any, routeSEO?.sharingImage as any, recordSEO?.sharingImage as any),
+    seoBaseURL,
+    appBaseURL,
+    uploadsBasePath,
+  )
+  const metaTags = composeMetaTags(baseSEO.metaTags as any, routeSEO?.metaTags as any, recordSEO?.metaTags as any)
+
+  const siteName = baseTitle
+  const ogType = metaTags.find((tag) => tag.attribute === 'property' && tag.key === 'og:type')?.content ?? 'website'
+  const logo = toResolvedImage(baseSEO.logo as any, seoBaseURL, appBaseURL, uploadsBasePath)
+  const favicon = toResolvedImage(baseSEO.favicon as any, seoBaseURL, appBaseURL, uploadsBasePath)
+  const socialLinks: string[] = isArray(baseSEO.socialLinks)
+    ? (baseSEO.socialLinks as any[])
+        .map((item) => (isObject(item) ? (item as any).url : item))
+        .filter((u): u is string => isString(u) && u.length > 0)
+    : []
+
+  const alternates = hasCanonicalOverride
+    ? []
+    : composeAlternates(language, primaryLanguage, realPath, translations, seoBaseURL)
+  const jsonLd = composeJsonLd({
+    language,
+    pageUrl: url,
+    title,
+    description,
+    siteName,
+    baseURL: seoBaseURL,
+    logo,
+    socialLinks,
+    ogType,
+    sharingImage,
+  })
+
+  return {
+    title,
+    description,
+    url,
+    autoURL,
+    hasCanonicalOverride,
+    isIndexable,
+    sharingImage,
+    metaTags,
+    siteName,
+    ogType,
+    logo,
+    favicon,
+    socialLinks,
+    alternates,
+    jsonLd,
+  }
 }
 
 /**
@@ -434,7 +835,10 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       if (!hasPermission('preview-drafts')) {
         query.where(`isPublic${language.toUpperCase()}` as any, '=', true)
       }
-      return query.first().then(({ data }) => data)
+      return query
+        .populate()
+        .first()
+        .then(({ data }) => data)
     }),
   ] as unknown as (ExtractPopulatedTypes<Collections['Routes']['fields']> | null)[])
 
@@ -480,37 +884,29 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       if (singletonReference) {
         const routeSEO = exactRoute[`seo${languageSuffix}`]
         const realPath = normalizeRoutePath(languagePrefix + exactRoute[`path${languageSuffix}`])
+        const translations = Object.fromEntries(
+          otherLanguages.map(({ code }, i) => [
+            code,
+            isNotNull(exactRoute![`path${otherLanguageSuffixes[i]!}`]) &&
+            (exactRoute![`isPublic${otherLanguageSuffixes[i]!}`] || hasPermission('preview-drafts'))
+              ? normalizeRoutePath(code + exactRoute![`path${otherLanguageSuffixes[i]!}`])
+              : null,
+          ]),
+        ) as Record<LanguageCode, string | null>
 
         return {
           language,
-          translations: Object.fromEntries(
-            otherLanguages.map(({ code }, i) => [
-              code,
-              isNotNull(exactRoute![`path${otherLanguageSuffixes[i]!}`]) &&
-              (exactRoute![`isPublic${otherLanguageSuffixes[i]!}`] || hasPermission('preview-drafts'))
-                ? normalizeRoutePath(code + exactRoute![`path${otherLanguageSuffixes[i]!}`])
-                : null,
-            ]),
-          ) as any,
-          seo: {
-            title: routeSEO.title
-              ? routeSEO.baseTitle
-                ? baseSEO.baseTitlePosition === 'before'
-                  ? baseSEO.baseTitle + baseSEO.titleSeparator + routeSEO.title
-                  : routeSEO.title + baseSEO.titleSeparator + baseSEO.baseTitle
-                : routeSEO.title
-              : baseSEO.baseTitle,
-            description: exactRoute[`seo${languageSuffix}`].description,
-            url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
-            isIndexable: baseSEO.isIndexable && exactRoute[`seo${languageSuffix}`].isIndexable,
-            sharingImage: toResolvedSharingImage(
-              pickSharingImage(baseSEO.sharingImage as any, routeSEO.sharingImage as any),
-              baseSEO.baseURL ?? '',
-              appBaseURL,
-              uploadsBasePath,
-            ),
-            metaTags: composeMetaTags(baseSEO.metaTags as any, routeSEO.metaTags as any),
-          },
+          translations,
+          seo: buildResolvedSEO({
+            language,
+            primaryLanguage,
+            realPath,
+            translations,
+            baseSEO: baseSEO as any,
+            routeSEO: routeSEO as any,
+            appBaseURL,
+            uploadsBasePath,
+          }),
           ref: singletonReference[0] as TRef,
           data: (await selectSingleton(exactRoute.referencedSingleton)
             .select(Object.keys(singletonReference[1].publicFields) as any)
@@ -581,45 +977,37 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       const { ref, collection, data, route } = record
       const basePath = route[`path${languageSuffix}`]
       const realPath = normalizeRoutePath(`${languagePrefix}/${basePath}/${data.subpath}`)
-      const seo = collection.meta.routing.seo.enabled ? data.seo : {}
+      const recordSEO = collection.meta.routing.seo.enabled ? data.seo : {}
       const routeSEO = route[`seo${languageSuffix}`]
-      const title = seo.title || routeSEO.title
+      const translations = Object.fromEntries(
+        otherLanguages.map(({ code }, i) => {
+          const otherSuffix = otherLanguageSuffixes[i]!
+          const otherBasePath = route[`path${otherSuffix}`]
+          const otherSubpath = data[`subpath_${code}`]
+          const otherIsPublic = route[`isPublic${otherSuffix}`] || hasPermission('preview-drafts')
+          return [
+            code,
+            isNotNull(otherBasePath) && isNotNull(otherSubpath) && otherIsPublic
+              ? normalizeRoutePath(`${code}/${otherBasePath}/${otherSubpath}`)
+              : null,
+          ]
+        }),
+      ) as Record<LanguageCode, string | null>
 
       return {
         language,
-        translations: Object.fromEntries(
-          otherLanguages.map(({ code }, i) => {
-            const otherSuffix = otherLanguageSuffixes[i]!
-            const otherBasePath = route[`path${otherSuffix}`]
-            const otherSubpath = data[`subpath_${code}`]
-            const otherIsPublic = route[`isPublic${otherSuffix}`] || hasPermission('preview-drafts')
-            return [
-              code,
-              isNotNull(otherBasePath) && isNotNull(otherSubpath) && otherIsPublic
-                ? normalizeRoutePath(`${code}/${otherBasePath}/${otherSubpath}`)
-                : null,
-            ]
-          }),
-        ) as any,
-        seo: {
-          title: title
-            ? (seo.baseTitle ?? routeSEO.baseTitle)
-              ? baseSEO.baseTitlePosition === 'before'
-                ? baseSEO.baseTitle + baseSEO.titleSeparator + title
-                : title + baseSEO.titleSeparator + baseSEO.baseTitle
-              : title
-            : baseSEO.baseTitle,
-          description: seo.description || routeSEO.description,
-          url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
-          isIndexable: baseSEO.isIndexable && routeSEO.isIndexable && (seo.isIndexable ?? true),
-          sharingImage: toResolvedSharingImage(
-            pickSharingImage(baseSEO.sharingImage as any, routeSEO.sharingImage as any, seo.sharingImage as any),
-            baseSEO.baseURL ?? '',
-            appBaseURL,
-            uploadsBasePath,
-          ),
-          metaTags: composeMetaTags(baseSEO.metaTags as any, routeSEO.metaTags as any, seo.metaTags as any),
-        },
+        translations,
+        seo: buildResolvedSEO({
+          language,
+          primaryLanguage,
+          realPath,
+          translations,
+          baseSEO: baseSEO as any,
+          routeSEO: routeSEO as any,
+          recordSEO: recordSEO as any,
+          appBaseURL,
+          uploadsBasePath,
+        }),
         ref,
         data: pick(data, collection.meta.routing.publicFields) as any,
         layout: collection.meta.routing.layout,
@@ -893,7 +1281,10 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
     if (isNull(path) || (!includeDrafts && route.isPublic[code] !== true)) {
       return null
     }
-    if (indexableOnly && (route.isIndexable[code] !== true || singletonIndexable![code] !== true)) {
+    if (
+      indexableOnly &&
+      (route.isIndexable[code] !== true || (singletonIndexable && singletonIndexable[code] !== true))
+    ) {
       return null
     }
     return path
@@ -912,17 +1303,20 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
       const basePath = route.path[language]!
 
       if (route.referencedSingleton) {
-        languageEntries.push({
-          path: normalizeRoutePath(languagePrefix + basePath),
-          translations: allLanguages
-            ? ({} as Record<LanguageCode, string | null>)
-            : (Object.fromEntries(
-                otherLanguages.map(({ code }) => {
-                  const otherPath = routePathInLanguage(route, code)
-                  return [code, isNotNull(otherPath) ? normalizeRoutePath(code + otherPath) : null]
-                }),
-              ) as Record<LanguageCode, string | null>),
-        })
+        const singletonExcluded = indexableOnly && route.hasCanonicalOverride[language] === true
+        if (!singletonExcluded) {
+          languageEntries.push({
+            path: normalizeRoutePath(languagePrefix + basePath),
+            language: language as LanguageCode,
+            updatedAt: route.updatedAt,
+            translations: Object.fromEntries(
+              otherLanguages.map(({ code }) => {
+                const otherPath = routePathInLanguage(route, code)
+                return [code, isNotNull(otherPath) ? normalizeRoutePath(code + otherPath) : null]
+              }),
+            ) as Record<LanguageCode, string | null>,
+          })
+        }
       }
 
       for (const collectionName of route.referencedCollections) {
@@ -937,35 +1331,35 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
           (record) =>
             (translatable ? record.language === language : true) &&
             (includeDrafts || record.isPublic) &&
-            (!indexableOnly || record.isIndexable),
+            (!indexableOnly || (record.isIndexable && !record.hasCanonicalOverride)),
         )
 
         for (const record of records) {
           languageEntries.push({
             path: normalizeRoutePath(`${languagePrefix}/${basePath}/${record.subpath}`),
-            translations: allLanguages
-              ? ({} as Record<LanguageCode, string | null>)
-              : (Object.fromEntries(
-                  otherLanguages.map(({ code }) => {
-                    const otherPath = routePathInLanguage(route, code)
+            language: language as LanguageCode,
+            updatedAt: record.updatedAt ?? route.updatedAt,
+            translations: Object.fromEntries(
+              otherLanguages.map(({ code }) => {
+                const otherPath = routePathInLanguage(route, code)
 
-                    if (isNull(otherPath)) {
-                      return [code, null]
-                    }
+                if (isNull(otherPath)) {
+                  return [code, null]
+                }
 
-                    if (translatable) {
-                      const sibling = getRecordTranslations(index, collectionName, record).find(
-                        (translation) =>
-                          translation.language === code &&
-                          (includeDrafts || translation.isPublic) &&
-                          (!indexableOnly || translation.isIndexable),
-                      )
-                      return [code, sibling ? normalizeRoutePath(`${code}/${otherPath}/${sibling.subpath}`) : null]
-                    }
+                if (translatable) {
+                  const sibling = getRecordTranslations(index, collectionName, record).find(
+                    (translation) =>
+                      translation.language === code &&
+                      (includeDrafts || translation.isPublic) &&
+                      (!indexableOnly || (translation.isIndexable && !translation.hasCanonicalOverride)),
+                  )
+                  return [code, sibling ? normalizeRoutePath(`${code}/${otherPath}/${sibling.subpath}`) : null]
+                }
 
-                    return [code, normalizeRoutePath(`${code}/${otherPath}/${record.subpath}`)]
-                  }),
-                ) as Record<LanguageCode, string | null>),
+                return [code, normalizeRoutePath(`${code}/${otherPath}/${record.subpath}`)]
+              }),
+            ) as Record<LanguageCode, string | null>,
           })
         }
       }

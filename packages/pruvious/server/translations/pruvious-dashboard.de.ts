@@ -30,6 +30,7 @@ export default defineTranslation({
   'Action failed': 'Aktion fehlgeschlagen',
   'Actions': 'Aktionen',
   'Active': 'Aktiv',
+  'Advanced': 'Erweitert',
   'Add after': 'Danach hinzufügen',
   'Add before': 'Davor hinzufügen',
   'Add block': 'Block hinzufügen',
@@ -40,6 +41,7 @@ export default defineTranslation({
   'Add item': 'Eintrag hinzufügen',
   'Add meta tag': 'Meta-Tag hinzufügen',
   'Add nested block': 'Verschachtelten Block hinzufügen',
+  'Add profile': 'Profil hinzufügen',
   'Add redirect': 'Weiterleitung hinzufügen',
   'Add top-level block': 'Block auf oberster Ebene hinzufügen',
   'Added to the end of the URL after a `#` to scroll to a section on the target page.':
@@ -64,6 +66,7 @@ export default defineTranslation({
   'An error occurred while renaming the upload': 'Beim Umbenennen des Uploads ist ein Fehler aufgetreten',
   'An unknown error occurred': 'Es ist ein unbekannter Fehler aufgetreten',
   'and': 'und',
+  'Appearance': 'Darstellung',
   'Apply': 'Anwenden',
   'Are you sure you want to delete $count $entries?': createPattern(
     'Sind Sie sicher, dass Sie $count $entries löschen möchten?',
@@ -104,6 +107,7 @@ export default defineTranslation({
   'Base title': 'Basistitel',
   'Base title position': 'Position des Basistitels',
   'Base URL': 'Basis-URL',
+  'Basic': 'Grundlegend',
   'Before': 'Vor',
   'Before or equal to': 'Vor oder gleich',
   'Block `$block` is not allowed at the top level': createPattern(
@@ -121,11 +125,13 @@ export default defineTranslation({
   'Bold': 'Fett',
   'Bookmark': 'Merkliste',
   'Bookmarks': 'Merklisten',
+  'Branding': 'Branding',
   'Broken link': 'Defekter Link',
 
   'Calendar': 'Kalender',
   'Calendar (seconds precision)': 'Kalender (Sekunden-Präzision)',
   'Cancel': 'Abbrechen',
+  'Canonical URL': 'Kanonische URL',
   'Cannot add more blocks at the top level': 'Es können nicht mehr Blöcke auf oberster Ebene hinzugefügt werden',
   'cat:3d': '3D',
   'cat:archive': 'Archiv',
@@ -270,7 +276,6 @@ export default defineTranslation({
       ],
     },
   ),
-  'Deleted record': 'Gelöschter Eintrag',
   'Deleting a folder will also delete all of its contents.':
     'Das Löschen eines Ordners löscht auch alle darin enthaltenen Inhalte.',
   'Dependencies': 'Abhängigkeiten',
@@ -343,6 +348,7 @@ export default defineTranslation({
 
   'Failed': 'Fehlgeschlagen',
   'False': 'Falsch',
+  'Favicon': 'Favicon',
   'Fields': 'Felder',
   'File': 'Datei',
   'File deleted': 'Datei gelöscht',
@@ -457,6 +463,7 @@ export default defineTranslation({
   'Load configuration': 'Konfiguration laden',
   'Loaded': 'Geladen',
   'Login': 'Login',
+  'Logo': 'Logo',
   'Logs': 'Logs',
 
   'Management': 'Management',
@@ -562,6 +569,8 @@ export default defineTranslation({
   'Output': 'Ausgabe',
   'Output (database)': 'Ausgabe (Datenbank)',
   'Output (ORM)': 'Ausgabe (ORM)',
+  "Override this page's canonical URL. When set, the page advertises itself as a duplicate of the target and is excluded from the sitemap and `hreflang` alternates. Leave empty to canonicalize to this page's own URL.":
+    'Überschreibe die kanonische URL dieser Seite. Wenn gesetzt, gibt die Seite sich selbst als Duplikat des Ziels an und wird aus der Sitemap und den `hreflang`-Alternativen ausgeschlossen. Leer lassen, um zur eigenen URL dieser Seite zu kanonisieren.',
   'Overview': 'Übersicht',
 
   'Page': 'Seite',
@@ -592,6 +601,8 @@ export default defineTranslation({
   'Priority': 'Priorität',
   'Prose': 'Prosa',
   'Public': 'Öffentlich',
+  'Public URLs of the official social media profiles for the site. Rendered as `sameAs` entries in the Organization structured data.':
+    'Öffentliche URLs der offiziellen Social-Media-Profile der Website. Werden als `sameAs`-Einträge in den strukturierten Organisationsdaten gerendert.',
   'Publish date': 'Veröffentlichungsdatum',
 
   'Queries': 'Abfragen',
@@ -698,7 +709,9 @@ export default defineTranslation({
   'Singleton not found': 'Singleton nicht gefunden',
   'Size': 'Größe',
   'Smart clipboard': 'Intelligente Zwischenablage',
+  'Social': 'Sozial',
   'Social media': 'Soziale Medien',
+  'Social profiles': 'Soziale Profile',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
     'Einige Systemeinstellungen wurden aktualisiert. Bitte laden Sie die Seite neu, damit die Änderungen wirksam werden.',
   'Some uploads already exist in the target directory. Do you want to overwrite them?':
@@ -753,8 +766,14 @@ export default defineTranslation({
     'Das Standardbild, das verwendet wird, wenn Seiten in sozialen Medien geteilt werden. Einzelne Routen und Seiten können dieses Bild überschreiben. Empfohlene Größe ist 1200x630 Pixel.',
   'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
     'Das Standardbild, das verwendet wird, wenn Seiten dieser Sprache in sozialen Medien geteilt werden. Einzelne Routen und Seiten können dieses Bild überschreiben. Empfohlene Größe ist 1200x630 Pixel.',
+  'The full URL of the social profile (e.g. `https://twitter.com/example`).':
+    'Die vollständige URL des Social-Profils (z. B. `https://twitter.com/example`).',
+  'The icon shown in browser tabs and bookmarks. Square images of at least 32x32 pixels are recommended.':
+    'Das Symbol, das in Browser-Tabs und Lesezeichen angezeigt wird. Empfohlen werden quadratische Bilder mit mindestens 32x32 Pixeln.',
   'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.':
     'Das Bild, das verwendet wird, wenn diese Seite in sozialen Medien geteilt wird. Lassen Sie das Feld leer, um den Standardwert der Website zu übernehmen. Empfohlene Größe ist 1200x630 Pixel.',
+  'The site logo used in structured data (JSON-LD Organization). Recommended size is at least 112x112 pixels with a transparent background.':
+    'Das Site-Logo, das in strukturierten Daten (JSON-LD Organization) verwendet wird. Empfohlen sind mindestens 112x112 Pixel mit transparentem Hintergrund.',
   'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).':
     'Der Dateiname wird in ein URL-freundliches Format konvertiert (z. B. wird aus `Meine Datei` -> `meine-datei`).',
   'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
@@ -863,6 +882,7 @@ export default defineTranslation({
   'Uploading': 'Hochladen',
   'Uploads': 'Uploads',
   'Upload aborted': 'Upload abgebrochen',
+  'URL': 'URL',
   'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
     'Verwenden Sie `$1`, `$2` usw., um Capture-Gruppen aus dem Abgleichungsmuster zu referenzieren.',
   'Use a relative path (without leading slash) to append to the current route path.':
@@ -882,8 +902,6 @@ export default defineTranslation({
   'View translation': 'Übersetzung anzeigen',
   'Visible': 'Sichtbar',
 
-  'When enabled, this option takes priority over all other routing configurations.':
-    'Wenn aktiviert, hat diese Option Vorrang vor allen anderen Routing-Konfigurationen.',
   'Would you like to duplicate all translations or only the current one?':
     'Möchten Sie alle Übersetzungen duplizieren oder nur die aktuelle?',
   'Would you like to select $perPage $perPageEntries on this page or all $total entries?': createPattern(

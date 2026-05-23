@@ -33,24 +33,42 @@ export interface SimpleRedirect {
 export const usePruviousRoute = <TRef extends RouteReferenceName = RouteReferenceName>() =>
   useState<ResolvedRoute<TRef> | null>('pruvious-route', () => null)
 
+export interface ResolvePruviousRouteOptions {
+  /**
+   * Whether to emit SEO-related head tags (title, meta, link, script, `htmlAttrs.lang`) for this route.
+   *
+   * Set to `false` for routes that manage their own document head, or for routes that should
+   * not be indexed and should not contribute any SEO signals. The route data is still resolved into
+   * `usePruviousRoute` so the page component can render content as usual.
+   *
+   * @default true
+   */
+  seo?: boolean
+}
+
 /**
  * Resolves the Pruvious route data based on the provided Vue `route`.
  *
  * - Updates the route state in the `usePruviousRoute` composable.
  * - Handles route redirects automatically (if `pruvious.routing.followRedirects` is enabled).
- * - Sets SEO metadata based on the resolved route (if `pruvious.routing.seo` is enabled).
+ * - Sets SEO metadata based on the resolved route (if `pruvious.routing.seo` is enabled and `options.seo` is not `false`).
  *
  * This function is automatically called by the `pruvious` and `pruvious-route` middleware, so you typically do not need to call it manually.
  *
  * @returns a `SimpleRedirect` object or `null` if no redirect is needed.
  */
-export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric): Promise<SimpleRedirect | null> {
+export async function resolvePruviousRoute(
+  route: RouteLocationNormalizedGeneric,
+  options?: ResolvePruviousRouteOptions,
+): Promise<SimpleRedirect | null> {
   if (isPreview(route)) {
     if (import.meta.client) {
       const { initializePreview } = await import('../preview/utils.client')
       initializePreview()
     }
-    useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
+    if (options?.seo !== false) {
+      useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet, noimageindex' }] })
+    }
     return null
   }
 
@@ -109,18 +127,29 @@ export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric
   } else {
     pruviousRoute.value = response
 
-    if (routing.seo) {
-      const sharingImage = response.seo.sharingImage
+    if (routing.seo && options?.seo !== false) {
+      const { languages } = useRuntimeConfig().public.pruvious
+      const seo = response.seo
+      const sharingImage = seo.sharingImage
       const baseline: { attribute: 'name' | 'property'; key: string; content: string }[] = [
-        { attribute: 'name', key: 'description', content: response.seo.description },
-        { attribute: 'property', key: 'og:title', content: response.seo.title },
-        { attribute: 'property', key: 'og:description', content: response.seo.description },
-        { attribute: 'property', key: 'og:url', content: response.seo.url },
-        { attribute: 'name', key: 'twitter:title', content: response.seo.title },
-        { attribute: 'name', key: 'twitter:description', content: response.seo.description },
-        { attribute: 'name', key: 'twitter:card', content: 'summary_large_image' },
-        { attribute: 'name', key: 'robots', content: response.seo.isIndexable ? 'index, follow' : 'noindex, nofollow' },
+        { attribute: 'name', key: 'description', content: seo.description },
+        { attribute: 'property', key: 'og:title', content: seo.title },
+        { attribute: 'property', key: 'og:description', content: seo.description },
+        { attribute: 'property', key: 'og:url', content: seo.url },
+        { attribute: 'property', key: 'og:type', content: seo.ogType },
+        { attribute: 'property', key: 'og:site_name', content: seo.siteName },
+        { attribute: 'property', key: 'og:locale', content: response.language },
+        { attribute: 'name', key: 'twitter:title', content: seo.title },
+        { attribute: 'name', key: 'twitter:description', content: seo.description },
+        { attribute: 'name', key: 'twitter:card', content: sharingImage ? 'summary_large_image' : 'summary' },
+        { attribute: 'name', key: 'robots', content: seo.isIndexable ? 'index, follow' : 'noindex, nofollow' },
       ]
+
+      for (const code of languages) {
+        if (code !== response.language) {
+          baseline.push({ attribute: 'property', key: `og:locale:alternate:${code}`, content: code })
+        }
+      }
 
       if (sharingImage) {
         baseline.push(
@@ -142,13 +171,58 @@ export async function resolvePruviousRoute(route: RouteLocationNormalizedGeneric
         }
       }
 
-      const userKeys = new Set(response.seo.metaTags.map((tag) => `${tag.attribute}:${tag.key}`))
+      const userKeys = new Set(seo.metaTags.map((tag) => `${tag.attribute}:${tag.key}`))
+      const userOverridesOgImage = userKeys.has('property:og:image')
+      const userOverridesTwitterImage = userKeys.has('name:twitter:image')
       const meta = [
-        ...baseline.filter((entry) => !userKeys.has(`${entry.attribute}:${entry.key}`)),
-        ...response.seo.metaTags,
-      ].map((entry) => ({ [entry.attribute]: entry.key, content: entry.content }))
+        ...baseline.filter((entry) => {
+          if (!entry.content || userKeys.has(`${entry.attribute}:${entry.key}`)) {
+            return false
+          }
+          // Suppress companion image tags when the user overrides the primary image.
+          // The auto-derived dimensions/mime/alt no longer describe the user's image.
+          if (userOverridesOgImage && entry.attribute === 'property' && entry.key.startsWith('og:image:')) {
+            return false
+          }
+          if (userOverridesTwitterImage && entry.attribute === 'name' && entry.key.startsWith('twitter:image:')) {
+            return false
+          }
+          return true
+        }),
+        ...seo.metaTags,
+      ].map((entry) => {
+        const key = entry.key.startsWith('og:locale:alternate:') ? 'og:locale:alternate' : entry.key
+        return { [entry.attribute]: key, content: entry.content }
+      })
 
-      useHead({ title: response.seo.title, meta })
+      const link: { rel: string; href: string; hreflang?: string; type?: string }[] = []
+      if (seo.url) {
+        link.push({ rel: 'canonical', href: seo.url })
+      }
+      for (const alternate of seo.alternates) {
+        link.push({ rel: 'alternate', hreflang: alternate.hreflang, href: alternate.href })
+      }
+      if (seo.favicon) {
+        link.push({ rel: 'icon', href: seo.favicon.url, type: seo.favicon.mime })
+      }
+
+      const script = seo.jsonLd.length
+        ? seo.jsonLd.map((entry) => ({
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(entry)
+              .replace(/</g, '\\u003c')
+              .replace(/\u2028/g, '\\u2028')
+              .replace(/\u2029/g, '\\u2029'),
+          }))
+        : []
+
+      useHead({
+        title: seo.title,
+        htmlAttrs: { lang: response.language },
+        meta,
+        link,
+        script,
+      })
     }
 
     if (response.softRedirect) {

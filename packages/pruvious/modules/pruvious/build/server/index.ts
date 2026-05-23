@@ -1888,8 +1888,8 @@ function getReExports() {
     `export { type JobResult, queueJob, queueUniqueJob, getQueue, getJob, processQueue, triggerQueueProcessing, processJob, processNextJob, clearQueue, deleteJob } from '${resolvePruviousFile('queue/utils.server')}'`,
 
     // Routes
-    `export { type GenericRouteReference, type GenericRouteData, type ResolvedRouteSEO, type ResolvedRoute, type RouteRedirect, type ListRoutesOptions, type RelURLError, resolveRoute, normalizeRoutePath, translateRelURL, populateRelURL, isValidRelURL, validateRelURL, listRoutes } from '${resolvePruviousFile('routes/utils.server')}'`,
-    `export { type LinkIndex, type LinkIndexRoute, type LinkIndexRecord, LINK_INDEX_VERSION, buildLinkIndex, getLinkIndex, flushLinkIndex, resolveRelURLFromIndex, getRecordTranslations, labelSegments, resolveRecordLabel, labelSelectFields } from '${resolvePruviousFile('routes/link-index.server')}'`,
+    `export { type GenericRouteReference, type GenericRouteData, type ResolvedRouteSEO, type ResolvedRoute, type RouteRedirect, type ListRoutesOptions, type ListRoutesEntry, type ListRoutesResult, type ResolvedRouteAlternate, type ResolvedRouteImage, type ResolvedRouteSharingImage, type ResolvedRouteMetaTag, type RelURLError, resolveRoute, normalizeRoutePath, translateRelURL, populateRelURL, isValidRelURL, validateRelURL, listRoutes } from '${resolvePruviousFile('routes/utils.server')}'`,
+    `export { type LinkIndex, type LinkIndexRoute, type LinkIndexRecord, type CanonicalRef, LINK_INDEX_VERSION, buildLinkIndex, getLinkIndex, flushLinkIndex, resolveRelURLFromIndex, getRecordTranslations, labelSegments, resolveRecordLabel, labelSelectFields } from '${resolvePruviousFile('routes/link-index.server')}'`,
     `export { resolvePath } from '${resolvePruviousFile('routes/utils.shared')}'`,
 
     // Singletons

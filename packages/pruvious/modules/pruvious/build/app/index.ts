@@ -55,7 +55,7 @@ function getReExports() {
     `export { i18n, _, __, languages, primaryLanguage, isValidLanguageCode } from './i18n'`,
 
     // Routes
-    `export { usePruviousRoute, resolvePruviousRoute, isPreview } from '${resolvePruviousFile('routes/composable')}'`,
+    `export { usePruviousRoute, resolvePruviousRoute, isPreview, type ResolvePruviousRouteOptions, type SimpleRedirect } from '${resolvePruviousFile('routes/composable')}'`,
     `export { resolvePath } from '${resolvePruviousFile('routes/utils.shared')}'`,
 
     // Translations

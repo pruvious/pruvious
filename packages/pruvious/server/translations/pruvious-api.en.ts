@@ -1,6 +1,7 @@
 import { createPattern, defineTranslation } from '#pruvious/server'
 
 export default defineTranslation({
+  'A page cannot canonicalize to itself': 'A page cannot canonicalize to itself',
   'A translation for this language already exists': 'A translation for this language already exists',
 
   'Collection not found': 'Collection not found',
@@ -126,6 +127,8 @@ export default defineTranslation({
   ),
   'The new path cannot be a subdirectory of the current path':
     'The new path cannot be a subdirectory of the current path',
+  'The target of this canonical URL canonicalizes back to this page':
+    'The target of this canonical URL canonicalizes back to this page',
   'The new path cannot be the root directory': 'The new path cannot be the root directory',
   'The new path must be different from the current path': 'The new path must be different from the current path',
   'The file part has already been uploaded': 'The file part has already been uploaded',

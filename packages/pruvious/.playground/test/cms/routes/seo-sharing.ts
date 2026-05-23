@@ -233,6 +233,180 @@ describe('SEO sharing image and meta tags', () => {
     ])
   })
 
+  test('exposes canonical url, hreflang alternates and inLanguage in JSON-LD', async () => {
+    const en: any = await $getRaw('/api/routes/seo-share-bilingual')
+    expect(en.status).toBe(200)
+    const enSeo = en.data.seo
+
+    expect(enSeo.url).toBe('https://example.test/seo-share-bilingual')
+
+    const alternates = enSeo.alternates as { hreflang: string; href: string }[]
+    expect(alternates.find((a) => a.hreflang === 'en')?.href).toBe('https://example.test/seo-share-bilingual')
+    expect(alternates.find((a) => a.hreflang === 'de')?.href).toBe('https://example.test/de/seo-share-bilingual-de')
+    expect(alternates.find((a) => a.hreflang === 'x-default')?.href).toBe('https://example.test/seo-share-bilingual')
+
+    const webPage = (enSeo.jsonLd as any[]).find((entry) => entry['@type'] === 'WebPage')
+    expect(webPage).toBeTruthy()
+    expect(webPage.inLanguage).toBe('en')
+    expect(webPage.url).toBe('https://example.test/seo-share-bilingual')
+  })
+
+  test('emits Organization + WebSite JSON-LD when identity is configured', async () => {
+    let logoId = 0
+    try {
+      const logo: any = await $postFormData('/api/uploads', {
+        '': new File([fs.readFileSync('packages/pruvious/.playground/test/files/test-og.png')], 'seo-logo.png'),
+      })
+      logoId = logo[0].details.id
+
+      await $patchAsAdmin('/api/singletons/seo', {
+        logo: logoId,
+        socialLinks: [{ url: 'https://twitter.com/example' }, { url: 'https://github.com/example' }],
+        metaTags: [
+          { attribute: 'property', key: 'og:type', content: 'article' },
+          { attribute: 'name', key: 'twitter:creator', content: '@pruvious' },
+        ],
+      })
+
+      const res = await $getRaw('/api/routes/seo-share-inherit')
+      expect(res.status).toBe(200)
+      const seo = (res.data as any).seo
+
+      expect(seo.siteName).toBeTruthy()
+      expect(seo.ogType).toBe('article')
+      expect(seo.logo?.url).toMatch(/seo-logo\.png$/)
+      expect(seo.socialLinks).toEqual(['https://twitter.com/example', 'https://github.com/example'])
+
+      const jsonLd = seo.jsonLd as Record<string, any>[]
+      const organization = jsonLd.find((entry) => entry['@type'] === 'Organization')
+      expect(organization).toBeTruthy()
+      expect(organization!.url).toBe('https://example.test')
+      expect(organization!.sameAs).toEqual(['https://twitter.com/example', 'https://github.com/example'])
+      expect(organization!.logo?.url).toMatch(/seo-logo\.png$/)
+
+      const website = jsonLd.find((entry) => entry['@type'] === 'WebSite')
+      expect(website).toBeTruthy()
+
+      const article = jsonLd.find((entry) => entry['@type'] === 'Article')
+      expect(article).toBeTruthy()
+      expect(article!.publisher?.name).toBe(seo.siteName)
+    } finally {
+      await $patchAsAdmin('/api/singletons/seo', {
+        logo: null,
+        socialLinks: [],
+        metaTags: [
+          { attribute: 'property', key: 'og:type', content: 'website' },
+          { attribute: 'name', key: 'twitter:creator', content: '@pruvious' },
+        ],
+      })
+      if (logoId) {
+        await $deleteAsAdmin(`/api/uploads/${logoId}`)
+      }
+    }
+  })
+
+  test('canonical override: external URL sets seo.url and suppresses alternates', async () => {
+    const route: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-external',
+      pathDE: '/canonical-external-de',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+      isPublicDE: true,
+      seoEN: { canonicalURL: { url: 'https://master.example/article', target: '', rel: '' } },
+    })
+
+    try {
+      const res = await $getRaw('/api/routes/canonical-external')
+      expect(res.status).toBe(200)
+      const seo = (res.data as any).seo
+      expect(seo.url).toBe('https://master.example/article')
+      expect(seo.autoURL).toBe('https://example.test/canonical-external')
+      expect(seo.hasCanonicalOverride).toBe(true)
+      expect(seo.alternates).toEqual([])
+
+      // German still has its own canonical (no override) - alternates remain
+      const de = await $getRaw('/api/routes/de/canonical-external-de')
+      expect((de.data as any).seo.hasCanonicalOverride).toBe(false)
+      expect((de.data as any).seo.alternates.length).toBeGreaterThan(0)
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${route[0].id}`)
+    }
+  })
+
+  test('canonical override: internal `rel://` link resolves to baseURL + path', async () => {
+    const targetRoute: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-target',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+    })
+    const route: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-internal',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+      seoEN: { canonicalURL: { url: `rel://Routes:${targetRoute[0].id}`, target: '', rel: '' } },
+    })
+
+    try {
+      const res = await $getRaw('/api/routes/canonical-internal')
+      expect(res.status).toBe(200)
+      const seo = (res.data as any).seo
+      expect(seo.url).toBe('https://example.test/canonical-target')
+      expect(seo.autoURL).toBe('https://example.test/canonical-internal')
+      expect(seo.hasCanonicalOverride).toBe(true)
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${route[0].id}`)
+      await $deleteAsAdmin(`/api/collections/routes/${targetRoute[0].id}`)
+    }
+  })
+
+  test('canonical override: self-reference is rejected', async () => {
+    const route: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-self',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+    })
+
+    try {
+      const patchResult: any = await $patchAsAdmin(`/api/collections/routes/${route[0].id}`, {
+        pathEN: '/canonical-self',
+        seoEN: { canonicalURL: { url: `rel://Routes:${route[0].id}`, target: '', rel: '' } },
+      })
+      expect(patchResult.error).toBe(true)
+      expect(patchResult.statusCode).toBe(422)
+      expect(JSON.stringify(patchResult.data)).toContain('canonicalize to itself')
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${route[0].id}`)
+    }
+  })
+
+  test('canonical override: mutual cycle (A -> B, B -> A) is rejected', async () => {
+    const a: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-cycle-a',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+    })
+    const b: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/canonical-cycle-b',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+      seoEN: { canonicalURL: { url: `rel://Routes:${a[0].id}`, target: '', rel: '' } },
+    })
+
+    try {
+      // Now try to canonicalize A -> B; B already canonicalizes to A.
+      const patchResult: any = await $patchAsAdmin(`/api/collections/routes/${a[0].id}`, {
+        pathEN: '/canonical-cycle-a',
+        seoEN: { canonicalURL: { url: `rel://Routes:${b[0].id}`, target: '', rel: '' } },
+      })
+      expect(patchResult.error).toBe(true)
+      expect(patchResult.statusCode).toBe(422)
+      expect(JSON.stringify(patchResult.data)).toContain('canonicalizes back to this page')
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${a[0].id}`)
+      await $deleteAsAdmin(`/api/collections/routes/${b[0].id}`)
+    }
+  })
+
   test('cleanup: delete records, uploads, and reset SEO singleton', async () => {
     for (const id of routeIds) {
       expect(await $deleteAsAdmin(`/api/collections/routes/${id}`)).toBe(1)

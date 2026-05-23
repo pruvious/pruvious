@@ -152,6 +152,25 @@ describe('link-choices endpoint (GET /api/pruvious/link-choices)', () => {
     expect(res.data.find((r: any) => r.value === `rel://Routes:${cr}/Articles:${aEn}`)).toBeTruthy()
   })
 
+  test('search by route-prefixed path matches collection records under that route', async () => {
+    const res: any = await $getAsAdmin(
+      `/api/pruvious/link-choices?q=${encodeURIComponent('/lc-blog/lc-article')}&perPage=100`,
+    )
+    expect(res.data.find((r: any) => r.value === `rel://Routes:${cr}/Articles:${aEn}`)).toBeTruthy()
+  })
+
+  test('search by route prefix alone matches records under that route', async () => {
+    const res: any = await $getAsAdmin(`/api/pruvious/link-choices?q=lc-blog&perPage=100`)
+    expect(res.data.find((r: any) => r.value === `rel://Routes:${cr}/Articles:${aEn}`)).toBeTruthy()
+  })
+
+  test('search by language-prefixed path matches non-primary-language routes', async () => {
+    const res: any = await $getAsAdmin(
+      `/api/pruvious/link-choices?languages=en,de&allowedReferences=Routes&q=${encodeURIComponent('/de/lc-multi-de')}&perPage=100`,
+    )
+    expect(res.data.find((r: any) => r.value === `rel://Routes:${mr}@de`)).toBeTruthy()
+  })
+
   test('languages=en,de: enumerates routes per language and pins non-primary languages', async () => {
     const res: any = await $getAsAdmin(
       '/api/pruvious/link-choices?languages=en,de&allowedReferences=Routes&perPage=100',

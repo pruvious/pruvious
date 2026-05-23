@@ -8,7 +8,7 @@ import {
   type RouteCollectionReferenceName,
 } from '#pruvious/server'
 import { Field, structuredObjectFieldModel, textFieldModel, type GenericField } from '@pruvious/orm'
-import { isArray, isDefined, isNull, isRelURL, isString, parseRelURL } from '@pruvious/utils'
+import { isArray, isDefined, isNull, isObject, isRelURL, isString, parseRelURL } from '@pruvious/utils'
 
 const validTargets = ['', '_blank', '_self', '_parent', '_top']
 
@@ -306,11 +306,11 @@ export default defineField({
   customOptions,
   uiOptions: { placeholder: true },
   populator: async (value) => {
-    if (isNull(value)) {
+    if (!isObject(value) || !isString(value.url) || !value.url) {
       return null
     }
 
-    const resolved = await populateRelURL(value.url as string)
+    const resolved = await populateRelURL(value.url)
 
     return {
       url: resolved || undefined,

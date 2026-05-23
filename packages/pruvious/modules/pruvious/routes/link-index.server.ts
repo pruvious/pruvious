@@ -1,6 +1,16 @@
 import { collections, database, type Collections } from '#pruvious/server'
-import { isArray, isDefined, isNull, isNumber, isString, isUndefined } from '@pruvious/utils'
+import { isArray, isDefined, isNull, isNumber, isRelURL, isString, isUndefined, parseRelURL } from '@pruvious/utils'
 import { normalizeRoutePath } from './utils.server'
+
+/**
+ * A parsed `rel://` canonical override target. `null` when the override is absent or external.
+ * Cycle-detection validators consult this to follow canonical chains without hitting the database.
+ */
+export interface CanonicalRef {
+  routeId: number
+  collection?: string
+  recordId?: number
+}
 
 export interface LinkIndexRoute {
   id: number
@@ -9,6 +19,9 @@ export interface LinkIndexRoute {
   path: Record<string, string | null>
   isPublic: Record<string, boolean>
   isIndexable: Record<string, boolean>
+  hasCanonicalOverride: Record<string, boolean>
+  canonicalRef: Record<string, CanonicalRef | null>
+  updatedAt: number | null
 }
 
 export interface LinkIndexRecord {
@@ -17,9 +30,12 @@ export interface LinkIndexRecord {
   subpath: string
   isPublic: boolean
   isIndexable: boolean
+  hasCanonicalOverride: boolean
+  canonicalRef: CanonicalRef | null
   translations: string | null
   label: string
   search: string
+  updatedAt: number | null
 }
 
 /** A precomputed snapshot of every internal link target, cached in the `Options` table. */
@@ -31,7 +47,7 @@ export interface LinkIndex {
   records: Record<string, LinkIndexRecord[]>
 }
 
-export const LINK_INDEX_VERSION = 2
+export const LINK_INDEX_VERSION = 1
 
 const LINK_INDEX_KEY = 'linkIndex'
 const LINK_INDEX_FLUSHED_AT_KEY = 'linkIndexFlushedAt'
@@ -73,6 +89,26 @@ export function labelSelectFields(fields: Record<string, any>, labelField: strin
   return [...new Set(labelSegments(labelField).filter((segment) => isFieldSegment(fields, segment)))]
 }
 
+/**
+ * Parses a stored `canonicalURL.url` value into a `CanonicalRef`. Returns `null` for unset,
+ * external (`https://...`), or unparseable values - cycle detection only cares about `rel://`
+ * targets that resolve to other Pruvious entities.
+ */
+function parseCanonicalRef(rawUrl: unknown, primaryLanguage: string): CanonicalRef | null {
+  if (!isString(rawUrl) || !rawUrl || !isRelURL(rawUrl)) {
+    return null
+  }
+  const parsed = parseRelURL(rawUrl, primaryLanguage)
+  if (!parsed || !isNumber(parsed.routeId)) {
+    return null
+  }
+  return {
+    routeId: parsed.routeId,
+    collection: parsed.collection,
+    recordId: parsed.recordId,
+  }
+}
+
 /** Builds a fresh {@link LinkIndex} from the database. */
 export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
   const { languages, primaryLanguage } = useRuntimeConfig().pruvious.i18n
@@ -88,6 +124,8 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
     const path: Record<string, string | null> = {}
     const isPublic: Record<string, boolean> = {}
     const isIndexable: Record<string, boolean> = {}
+    const hasCanonicalOverride: Record<string, boolean> = {}
+    const canonicalRef: Record<string, CanonicalRef | null> = {}
 
     for (const { code } of languages) {
       const suffix = code.toUpperCase()
@@ -95,6 +133,8 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
       isPublic[code] = row[`isPublic${suffix}`] === true
       const seo = row[`seo${suffix}`]
       isIndexable[code] = !seo || seo.isIndexable !== false
+      hasCanonicalOverride[code] = isString(seo?.canonicalURL?.url) && seo.canonicalURL.url.length > 0
+      canonicalRef[code] = parseCanonicalRef(seo?.canonicalURL?.url, primaryLanguage)
     }
 
     routes.push({
@@ -104,6 +144,9 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
       path,
       isPublic,
       isIndexable,
+      hasCanonicalOverride,
+      canonicalRef,
+      updatedAt: isNumber(row.updatedAt) ? row.updatedAt : null,
     })
   }
 
@@ -118,6 +161,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
     const translatable = !!collection.meta.translatable
     const hasIsPublic = !!collection.meta.routing.isPublic.enabled
     const hasSEO = !!collection.meta.routing.seo.enabled
+    const hasUpdatedAt = collection.meta?.updatedAt?.enabled === true
     const selectFields = [
       ...new Set([
         'id',
@@ -126,6 +170,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
         ...(translatable ? ['language', 'translations'] : []),
         ...(hasIsPublic ? ['isPublic'] : []),
         ...(hasSEO ? ['seo'] : []),
+        ...(hasUpdatedAt ? ['updatedAt'] : []),
       ]),
     ]
 
@@ -153,9 +198,12 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
         subpath: row.subpath,
         isPublic: hasIsPublic ? row.isPublic === true : true,
         isIndexable: hasSEO ? !row.seo || row.seo.isIndexable !== false : true,
+        hasCanonicalOverride: hasSEO && isString(row.seo?.canonicalURL?.url) && row.seo.canonicalURL.url.length > 0,
+        canonicalRef: hasSEO ? parseCanonicalRef(row.seo?.canonicalURL?.url, primaryLanguage) : null,
         translations: translatable ? row.translations || null : null,
         label,
         search: `${label} ${row.subpath}`.toLowerCase(),
+        updatedAt: hasUpdatedAt && isNumber(row.updatedAt) ? row.updatedAt : null,
       })
     }
 

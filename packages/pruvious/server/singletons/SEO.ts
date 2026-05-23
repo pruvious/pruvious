@@ -150,12 +150,52 @@ export default defineSingleton({
         subfieldsLayout: ['attribute', { row: ['key', 'content'] }],
       },
     }),
-    // @todo logo
-    // @todo favicon
-    // @todo scripts
-    // @todo styles
+    logo: imageField({
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Logo'),
+        description: ({ __ }) =>
+          __(
+            'pruvious-dashboard',
+            'The site logo used in structured data (JSON-LD Organization). Recommended size is at least 112x112 pixels with a transparent background.',
+          ),
+      },
+    }),
+    favicon: imageField({
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Favicon'),
+        description: ({ __ }) =>
+          __(
+            'pruvious-dashboard',
+            'The icon shown in browser tabs and bookmarks. Square images of at least 32x32 pixels are recommended.',
+          ),
+      },
+    }),
+    socialLinks: repeaterField({
+      subfields: {
+        url: textField({
+          required: true,
+          validators: [urlValidator()],
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'URL'),
+            description: ({ __ }) =>
+              __('pruvious-dashboard', 'The full URL of the social profile (e.g. `https://twitter.com/example`).'),
+            placeholder: 'https://twitter.com/example',
+          },
+        }),
+      },
+      ui: {
+        label: ({ __ }) => __('pruvious-dashboard', 'Social profiles'),
+        description: ({ __ }) =>
+          __(
+            'pruvious-dashboard',
+            'Public URLs of the official social media profiles for the site. Rendered as `sameAs` entries in the Organization structured data.',
+          ),
+        addItemLabel: ({ __ }) => __('pruvious-dashboard', 'Add profile'),
+        itemLabelConfiguration: { subfieldValue: 'url' },
+      },
+    }),
   },
-  syncedFields: ['baseURL'],
+  syncedFields: ['baseURL', 'logo', 'favicon', 'socialLinks'],
   ui: {
     label: ({ __ }) => __('pruvious-dashboard', 'SEO'),
     icon: 'eye-search',
@@ -169,11 +209,16 @@ export default defineSingleton({
               'baseURL',
               { row: ['baseTitle', 'titleSeparator | 16rem', 'baseTitlePosition | 16rem'] },
               { card: ['isIndexable'] },
+              'metaTags',
             ],
           },
           {
-            label: ({ __ }) => __('pruvious-dashboard', 'Social media'),
-            fields: ['sharingImage', 'metaTags'],
+            label: ({ __ }) => __('pruvious-dashboard', 'Branding'),
+            fields: ['logo', '---', 'favicon'],
+          },
+          {
+            label: ({ __ }) => __('pruvious-dashboard', 'Social'),
+            fields: ['sharingImage', '---', 'socialLinks'],
           },
         ],
       },

@@ -3,12 +3,14 @@ import {
   dateTimeField,
   imageField,
   languageField,
+  linkField,
   objectField,
   primaryLanguage,
   recordField,
   recordsField,
   repeaterField,
   subpathField,
+  textAreaField,
   textField,
   timestampField,
   translationsField,
@@ -18,7 +20,19 @@ import {
   type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import { createdAtFieldBeforeQueryExecution, updatedAtFieldBeforeQueryExecution } from '@pruvious/orm'
-import { defu, isNull, isString, isUndefined, kebabCase, nanoid, type OmitUndefined } from '@pruvious/utils'
+import {
+  defu,
+  isNull,
+  isObject,
+  isRelURL,
+  isString,
+  isUndefined,
+  kebabCase,
+  nanoid,
+  parseRelURL,
+  type OmitUndefined,
+} from '@pruvious/utils'
+import { getLinkIndex, type CanonicalRef } from '../routes/link-index.server'
 
 import type { CustomRecordFieldOptions } from '../../../server/fields/record'
 import type { CustomRecordsFieldOptions } from '../../../server/fields/records'
@@ -179,8 +193,16 @@ export type SEOFieldPresetOptions = Omit<Parameters<typeof objectField>[0], 'sub
    *     {
    *       tabs: [
    *         {
-   *           label: ({ __ }) => __('pruvious-dashboard', 'General'),
-   *           fields: ['title', 'baseTitle', 'description', 'isIndexable'],
+   *           label: ({ __ }) => __('pruvious-dashboard', 'Basic'),
+   *           fields: ['title', 'description', 'isIndexable'],
+   *         },
+   *         {
+   *           label: ({ __ }) => __('pruvious-dashboard', 'Appearance'),
+   *           fields: ['baseTitle', 'sharingImage'],
+   *         },
+   *         {
+   *           label: ({ __ }) => __('pruvious-dashboard', 'Advanced'),
+   *           fields: ['canonicalURL', 'metaTags'],
    *         },
    *       ],
    *     },
@@ -429,8 +451,8 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
             ),
         },
       }),
-      // @todo textAreaField
-      description: textField({
+      description: textAreaField({
+        allowLineBreaks: false,
         sanitizers: [(value) => (isString(value) ? value.replace(/\s+/g, ' ') : value)],
         ui: {
           label: ({ __ }) => __('pruvious-dashboard', 'Meta description'),
@@ -472,6 +494,83 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
               'pruvious-dashboard',
               'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.',
             ),
+        },
+      }),
+      canonicalURL: linkField({
+        allowHash: false,
+        allowQuery: true,
+        allowExternal: true,
+        allowDrafts: false,
+        validators: [
+          async (value, { context, path }, errors) => {
+            const url = isObject(value) ? (value as any).url : null
+            if (!isString(url) || !url || !isRelURL(url)) {
+              return
+            }
+
+            const { primaryLanguage } = useRuntimeConfig().pruvious.i18n
+            const parsed = parseRelURL(url, primaryLanguage)
+            if (!parsed) {
+              return
+            }
+
+            if (context.operation !== 'update' || !context.collectionName) {
+              return
+            }
+
+            const ownRows = await context.database
+              .queryBuilder()
+              .selectFrom(context.collectionName as any)
+              .select(['id'] as any)
+              .setWhereCondition(context.whereCondition)
+              .all()
+
+            if (!ownRows.success || !ownRows.data?.length) {
+              return
+            }
+            const ownIds = (ownRows.data as Array<{ id: number }>).map((r) => r.id)
+            const isEditingRoutes = context.collectionName === 'Routes'
+
+            const refMatchesAnyOwn = (ref: { routeId: number; collection?: string; recordId?: number }): boolean =>
+              ownIds.some((ownId) =>
+                isEditingRoutes
+                  ? !ref.collection && ref.routeId === ownId
+                  : ref.collection === context.collectionName && ref.recordId === ownId,
+              )
+
+            if (refMatchesAnyOwn(parsed)) {
+              errors[`${path}.url`] = context.__('pruvious-api' as any, 'A page cannot canonicalize to itself' as any)
+            }
+
+            const index = await getLinkIndex()
+            let targetCanonical: CanonicalRef | null = null
+            if (parsed.collection && parsed.recordId) {
+              const targetRecord = (index.records[parsed.collection] ?? []).find(
+                (r) => r.id === parsed.recordId && (!parsed.language || r.language === parsed.language),
+              )
+              targetCanonical = targetRecord?.canonicalRef ?? null
+            } else {
+              const targetRoute = index.routes.find((r) => r.id === parsed.routeId)
+              targetCanonical = targetRoute?.canonicalRef[parsed.language || primaryLanguage] ?? null
+            }
+
+            if (targetCanonical && refMatchesAnyOwn(targetCanonical)) {
+              errors[`${path}.url`] = context.__(
+                'pruvious-api' as any,
+                'The target of this canonical URL canonicalizes back to this page' as any,
+              )
+            }
+          },
+        ],
+        ui: {
+          label: ({ __ }) => __('pruvious-dashboard', 'Canonical URL'),
+          description: ({ __ }) =>
+            __(
+              'pruvious-dashboard',
+              "Override this page's canonical URL. When set, the page advertises itself as a duplicate of the target and is excluded from the sitemap and `hreflang` alternates. Leave empty to canonicalize to this page's own URL.",
+            ),
+          showTarget: false,
+          showRel: false,
         },
       }),
       metaTags: repeaterField({
@@ -531,12 +630,16 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
         {
           tabs: [
             {
-              label: ({ __ }) => __('pruvious-dashboard', 'General'),
-              fields: ['title', 'baseTitle', 'description', 'isIndexable'],
+              label: ({ __ }) => __('pruvious-dashboard', 'Basic'),
+              fields: ['title', 'description', 'isIndexable'],
             },
             {
-              label: ({ __ }) => __('pruvious-dashboard', 'Social media'),
-              fields: ['sharingImage', 'metaTags'],
+              label: ({ __ }) => __('pruvious-dashboard', 'Appearance'),
+              fields: ['baseTitle', 'sharingImage'],
+            },
+            {
+              label: ({ __ }) => __('pruvious-dashboard', 'Advanced'),
+              fields: ['canonicalURL', 'metaTags'],
             },
           ],
         },

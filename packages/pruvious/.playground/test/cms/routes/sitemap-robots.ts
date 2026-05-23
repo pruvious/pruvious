@@ -138,6 +138,36 @@ describe('sitemap.xml and robots.txt', () => {
     }
   })
 
+  test('sitemap emits <lastmod> for each url', async () => {
+    const res = await $getRaw('/sitemap.xml')
+    expect(res.status).toBe(200)
+    const xml = String(res.data)
+    expect(xml).toContain('<lastmod>')
+    expect(xml).toMatch(/<lastmod>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    expect(xml).not.toContain('xmlns:xhtml')
+    expect(xml).not.toContain('<xhtml:link')
+  })
+
+  test('sitemap excludes routes with canonical override', async () => {
+    const canonical: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/sitemap-canonical-overridden',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+      seoEN: {
+        isIndexable: true,
+        canonicalURL: { url: 'https://master.example/article', target: '', rel: '' },
+      },
+    })
+    try {
+      const res = await $getRaw('/sitemap.xml')
+      expect(res.status).toBe(200)
+      const xml = String(res.data)
+      expect(xml).not.toContain('sitemap-canonical-overridden')
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${canonical[0].id}`)
+    }
+  })
+
   test('cleanup: delete routes and reset SEO singleton', async () => {
     for (const id of routeIds) {
       expect(await $deleteAsAdmin(`/api/collections/routes/${id}`)).toBe(1)

@@ -74,6 +74,8 @@
       @save="applyOptions"
     />
 
+    <PruviousFieldMessage :error="urlError" :name="name" :options="options" />
+
     <div v-if="!urlError && resolvedDetail" class="p-resolved-path">
       <NuxtLink
         :title="__('pruvious-dashboard', 'Open in new tab')"
@@ -85,7 +87,6 @@
         <Icon mode="svg" name="tabler:external-link" class="pui-shrink-0" />
       </NuxtLink>
     </div>
-    <PruviousFieldMessage v-else :error="urlError" :name="name" :options="options" />
   </PUIField>
 </template>
 

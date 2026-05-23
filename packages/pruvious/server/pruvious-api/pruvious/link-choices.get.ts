@@ -174,8 +174,8 @@ export default defineEventHandler(async (event): Promise<LinkChoicesResult> => {
 
       if (offerBareRoute && (!allowedNames || allowedNames.has('Routes'))) {
         const label = isString(route.referencedSingleton) ? route.referencedSingleton : routePath
-        if (matchesSearch(label.toLowerCase())) {
-          const detail = normalizeRoutePath(prefix + routePath)
+        const detail = normalizeRoutePath(prefix + routePath)
+        if (matchesSearch(`${label} ${detail}`.toLowerCase())) {
           languageRows.push({
             value: buildRelURL({ routeId: route.id, language: languagePin }),
             label,
@@ -200,18 +200,17 @@ export default defineEventHandler(async (event): Promise<LinkChoicesResult> => {
         const translatable = !!collection.meta.translatable
         const collectionSlug = kebabCase(collectionName)
 
-        const records = (index.records[collectionName] ?? []).filter((record) => {
+        for (const record of index.records[collectionName] ?? []) {
           if (translatable && record.language !== browseLanguage) {
-            return false
+            continue
           }
           if (!allowDrafts && !record.isPublic) {
-            return false
+            continue
           }
-          return matchesSearch(record.search)
-        })
-
-        for (const record of records) {
           const detail = normalizeRoutePath(`${prefix}/${routePath}/${record.subpath}`)
+          if (!matchesSearch(`${record.search} ${detail.toLowerCase()}`)) {
+            continue
+          }
           languageRows.push({
             value: buildRelURL({
               routeId: route.id,

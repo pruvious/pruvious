@@ -30,6 +30,7 @@ export default defineTranslation({
   'Action failed': 'Action failed',
   'Actions': 'Actions',
   'Active': 'Active',
+  'Advanced': 'Advanced',
   'Add after': 'Add after',
   'Add before': 'Add before',
   'Add block': 'Add block',
@@ -40,6 +41,7 @@ export default defineTranslation({
   'Add item': 'Add item',
   'Add meta tag': 'Add meta tag',
   'Add nested block': 'Add nested block',
+  'Add profile': 'Add profile',
   'Add redirect': 'Add redirect',
   'Add top-level block': 'Add top-level block',
   'Added to the end of the URL after a `#` to scroll to a section on the target page.':
@@ -64,6 +66,7 @@ export default defineTranslation({
   'An error occurred while renaming the upload': 'An error occurred while renaming the upload',
   'An unknown error occurred': 'An unknown error occurred',
   'and': 'and',
+  'Appearance': 'Appearance',
   'Apply': 'Apply',
   'Are you sure you want to delete $count $entries?': createPattern(
     'Are you sure you want to delete $count $entries?',
@@ -104,6 +107,7 @@ export default defineTranslation({
   'Base title': 'Base title',
   'Base title position': 'Base title position',
   'Base URL': 'Base URL',
+  'Basic': 'Basic',
   'Before': 'Before',
   'Before or equal to': 'Before or equal to',
   'Block `$block` is not allowed at the top level': createPattern('Block `$block` is not allowed at the top level', {
@@ -120,11 +124,13 @@ export default defineTranslation({
   'Bold': 'Bold',
   'Bookmark': 'Bookmark',
   'Bookmarks': 'Bookmarks',
+  'Branding': 'Branding',
   'Broken link': 'Broken link',
 
   'Calendar': 'Calendar',
   'Calendar (seconds precision)': 'Calendar (seconds precision)',
   'Cancel': 'Cancel',
+  'Canonical URL': 'Canonical URL',
   'Cannot add more blocks at the top level': 'Cannot add more blocks at the top level',
   'cat:3d': '3D',
   'cat:archive': 'Archive',
@@ -341,6 +347,7 @@ export default defineTranslation({
 
   'Failed': 'Failed',
   'False': 'False',
+  'Favicon': 'Favicon',
   'Fields': 'Fields',
   'File': 'File',
   'File deleted': 'File deleted',
@@ -455,6 +462,7 @@ export default defineTranslation({
   'Load configuration': 'Load configuration',
   'Loaded': 'Loaded',
   'Login': 'Login',
+  'Logo': 'Logo',
   'Logs': 'Logs',
 
   'Management': 'Management',
@@ -560,6 +568,8 @@ export default defineTranslation({
   'Output': 'Output',
   'Output (database)': 'Output (database)',
   'Output (ORM)': 'Output (ORM)',
+  "Override this page's canonical URL. When set, the page advertises itself as a duplicate of the target and is excluded from the sitemap and `hreflang` alternates. Leave empty to canonicalize to this page's own URL.":
+    "Override this page's canonical URL. When set, the page advertises itself as a duplicate of the target and is excluded from the sitemap and `hreflang` alternates. Leave empty to canonicalize to this page's own URL.",
   'Overview': 'Overview',
 
   'Page': 'Page',
@@ -590,6 +600,8 @@ export default defineTranslation({
   'Priority': 'Priority',
   'Prose': 'Prose',
   'Public': 'Public',
+  'Public URLs of the official social media profiles for the site. Rendered as `sameAs` entries in the Organization structured data.':
+    'Public URLs of the official social media profiles for the site. Rendered as `sameAs` entries in the Organization structured data.',
   'Publish date': 'Publish date',
 
   'Queries': 'Queries',
@@ -696,7 +708,9 @@ export default defineTranslation({
   'Singleton not found': 'Singleton not found',
   'Size': 'Size',
   'Smart clipboard': 'Smart clipboard',
+  'Social': 'Social',
   'Social media': 'Social media',
+  'Social profiles': 'Social profiles',
   'Some system settings have been updated. Please reload the page for the changes to take effect.':
     'Some system settings have been updated. Please reload the page for the changes to take effect.',
   'Some uploads already exist in the target directory. Do you want to overwrite them?':
@@ -749,8 +763,14 @@ export default defineTranslation({
     'The default image used when pages are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
   'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.':
     'The default image used when pages in this language are shared on social media. Individual routes and pages can override this image. Recommended size is 1200x630 pixels.',
+  'The full URL of the social profile (e.g. `https://twitter.com/example`).':
+    'The full URL of the social profile (e.g. `https://twitter.com/example`).',
+  'The icon shown in browser tabs and bookmarks. Square images of at least 32x32 pixels are recommended.':
+    'The icon shown in browser tabs and bookmarks. Square images of at least 32x32 pixels are recommended.',
   'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.':
     'The image used when this page is shared on social media. Leave empty to inherit the site default. Recommended size is 1200x630 pixels.',
+  'The site logo used in structured data (JSON-LD Organization). Recommended size is at least 112x112 pixels with a transparent background.':
+    'The site logo used in structured data (JSON-LD Organization). Recommended size is at least 112x112 pixels with a transparent background.',
   'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).':
     'The file name will be converted to a URL-friendly format (e.g., `My File` becomes `my-file`).',
   'The folder name will be converted to a URL-friendly format (e.g., `My Folder` becomes `my-folder`).':
@@ -857,6 +877,7 @@ export default defineTranslation({
   'Uploading': 'Uploading',
   'Uploads': 'Uploads',
   'Upload aborted': 'Upload aborted',
+  'URL': 'URL',
   'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.':
     'Use `$1`, `$2`, etc. to reference capture groups from the match pattern.',
   'Use a relative path (without leading slash) to append to the current route path.':
