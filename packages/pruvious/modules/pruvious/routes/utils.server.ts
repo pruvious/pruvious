@@ -438,12 +438,18 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       return {
         language,
         translations: Object.fromEntries(
-          otherLanguages.map(({ code }) => [
-            code,
-            isNotNull(data[`subpath_${code}`])
-              ? normalizeRoutePath(`${code}/${basePath}/${data[`subpath_${code}`]}`)
-              : null,
-          ]),
+          otherLanguages.map(({ code }, i) => {
+            const otherSuffix = otherLanguageSuffixes[i]!
+            const otherBasePath = route[`path${otherSuffix}`]
+            const otherSubpath = data[`subpath_${code}`]
+            const otherIsPublic = route[`isPublic${otherSuffix}`] || hasPermission('preview-drafts')
+            return [
+              code,
+              isNotNull(otherBasePath) && isNotNull(otherSubpath) && otherIsPublic
+                ? normalizeRoutePath(`${code}/${otherBasePath}/${otherSubpath}`)
+                : null,
+            ]
+          }),
         ) as any,
         seo: {
           title: title

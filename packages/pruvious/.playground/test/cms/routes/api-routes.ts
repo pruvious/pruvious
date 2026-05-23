@@ -142,10 +142,16 @@ describe('routes API (auth-aware)', () => {
     expect(res.status).toBe(404)
   })
 
-  test('translations map: translated sibling-language path is resolved', async () => {
+  test('translations map: anonymous sees no draft sibling-language path', async () => {
     const anon = await $getRaw('/api/routes/api-routes-trans/a-trans-en')
     expect(anon.status).toBe(200)
-    expect((anon.data as any).translations.de).toMatch(/\/de\/.+\/a-trans-de/)
+    expect((anon.data as any).translations.de).toBeNull()
+  })
+
+  test('translations map: previewer sees sibling-language path with the other-language route base', async () => {
+    const prev = await $getRawAsPreviewer('/api/routes/api-routes-trans/a-trans-en')
+    expect(prev.status).toBe(200)
+    expect((prev.data as any).translations.de).toBe('/de/api-routes-trans-de/a-trans-de')
   })
 
   test('softRedirect on case-different path: returned for previewer on draft; anonymous gets 404', async () => {
