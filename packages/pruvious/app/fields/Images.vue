@@ -286,6 +286,10 @@ const validation = computed<UploadFieldValidation>(() => ({
   allowedMimes: allowedTypes.value,
   minBytes: parseBytes(props.options.minSize),
   maxBytes: parseBytes(props.options.maxSize),
+  minImageWidth: props.options.minWidth,
+  maxImageWidth: props.options.maxWidth,
+  minImageHeight: props.options.minHeight,
+  maxImageHeight: props.options.maxHeight,
 }))
 const { resolver: permissionsResolver } = useCollectionRecordPermissions(uploadsCollection)
 const resolvedPermissions = ref<Record<number, ResolvedCollectionRecordPermissions>>({})

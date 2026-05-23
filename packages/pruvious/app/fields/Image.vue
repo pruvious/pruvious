@@ -271,7 +271,7 @@ const validation = computed<UploadFieldValidation>(() => ({
   allowedMimes: allowedTypes.value,
   minBytes: parseBytes(props.options.minSize),
   maxBytes: parseBytes(props.options.maxSize),
-  minImageWIdth: props.options.minWidth,
+  minImageWidth: props.options.minWidth,
   maxImageWidth: props.options.maxWidth,
   minImageHeight: props.options.minHeight,
   maxImageHeight: props.options.maxHeight,
