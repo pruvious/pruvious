@@ -15,9 +15,9 @@ export interface ParsedRelURL {
   recordId?: number
 
   /**
-   * An optional language pin (e.g. `en`, `de`, etc.).
+   * The language pin (e.g. `@en`, `@de`, etc.).
    */
-  language?: string
+  language: string
 
   /**
    * The query string (without the leading `?`).
@@ -71,6 +71,7 @@ export function parseRelURL(url: string, primaryLanguage: string): ParsedRelURL 
 
   const result: ParsedRelURL = {
     routeId: Number(match[1]),
+    language: match[4] || primaryLanguage,
   }
 
   if (match[2] && match[3]) {
@@ -78,13 +79,11 @@ export function parseRelURL(url: string, primaryLanguage: string): ParsedRelURL 
     result.recordId = Number(match[3])
   }
 
-  result.language = match[4] || primaryLanguage
-
   if (match[5]) {
     result.query = match[5]
   }
 
-  if (match[6] !== undefined && match[6] !== '') {
+  if (match[6]) {
     result.hash = match[6]
   }
 
@@ -116,7 +115,7 @@ export function isRelURL(url: string): boolean {
  * // 'rel://Routes:1/Articles:5@de'
  * ```
  */
-export function buildRelURL(parts: ParsedRelURL): string {
+export function buildRelURL(parts: Omit<ParsedRelURL, 'language'> & Partial<Pick<ParsedRelURL, 'language'>>): string {
   let url = `rel://Routes:${parts.routeId}`
 
   if (parts.collection && parts.recordId !== undefined) {
