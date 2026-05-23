@@ -186,10 +186,13 @@ export interface ListRoutesOptions {
   page?: number
 
   /**
-   * The language code to list routes for.
-   * Defaults to the primary language.
+   * The language(s) to list routes for.
+   *
+   * - A single language code returns URLs for that language only.
+   * - `'all'` aggregates URLs from every configured language (each translation gets its own entry).
+   * - Omitted defaults to the primary language.
    */
-  language?: LanguageCode
+  language?: LanguageCode | 'all'
 
   /**
    * Whether to include non-public (draft) routes and records.
@@ -197,6 +200,14 @@ export interface ListRoutesOptions {
    * @default false
    */
   includeDrafts?: boolean
+
+  /**
+   * Whether to return only routes and records marked as indexable by search engines.
+   * Honors the SEO singleton master switch - when the singleton hides the site, the result is always empty.
+   *
+   * @default false
+   */
+  indexableOnly?: boolean
 }
 
 export interface ListRoutesEntry {
@@ -348,7 +359,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
               : baseSEO.baseTitle,
             description: exactRoute[`seo${languageSuffix}`].description,
             url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
-            isIndexable: exactRoute[`seo${languageSuffix}`].isIndexable,
+            isIndexable: baseSEO.isIndexable && exactRoute[`seo${languageSuffix}`].isIndexable,
           },
           ref: singletonReference[0] as TRef,
           data: (await selectSingleton(exactRoute.referencedSingleton)
@@ -444,7 +455,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             : baseSEO.baseTitle,
           description: seo.description || routeSEO.description,
           url: baseSEO.baseURL + (realPath === '/' ? '' : realPath),
-          isIndexable: seo.isIndexable ?? routeSEO.isIndexable,
+          isIndexable: baseSEO.isIndexable && routeSEO.isIndexable && (seo.isIndexable ?? true),
         },
         ref,
         data: pick(data, collection.meta.routing.publicFields) as any,
@@ -684,10 +695,20 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
   const perPage = options?.perPage ?? 50
   const page = options?.page ?? 1
   const { languages, primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
-  const language = (options?.language ?? primaryLanguage) as LanguageCode
   const includeDrafts = options?.includeDrafts ?? false
-  const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
-  const otherLanguages = languages.filter(({ code }) => code !== language)
+  const indexableOnly = options?.indexableOnly ?? false
+  const allLanguages = options?.language === 'all'
+  const targetLanguages = allLanguages
+    ? (languages.map(({ code }) => code) as LanguageCode[])
+    : [(options?.language ?? primaryLanguage) as LanguageCode]
+
+  if (indexableOnly) {
+    const baseSEO = (await selectSingleton('SEO').populate().get()).data
+    if (baseSEO?.isIndexable === false) {
+      return { data: [], currentPage: page, lastPage: 1, perPage, total: 0 }
+    }
+  }
+
   const index = await getLinkIndex()
 
   const routePathInLanguage = (route: LinkIndexRoute, code: string): string | null => {
@@ -695,70 +716,86 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
     if (isNull(path) || (!includeDrafts && route.isPublic[code] !== true)) {
       return null
     }
+    if (indexableOnly && route.isIndexable[code] !== true) {
+      return null
+    }
     return path
   }
 
   const entries: ListRoutesEntry[] = []
 
-  const sortedRoutes = index.routes
-    .filter((route) => isNotNull(routePathInLanguage(route, language)))
-    .sort((a, b) => {
-      const pa = a.path[language]!
-      const pb = b.path[language]!
-      return pa < pb ? -1 : pa > pb ? 1 : 0
-    })
+  for (const language of targetLanguages) {
+    const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
+    const otherLanguages = languages.filter(({ code }) => code !== language)
+    const languageEntries: ListRoutesEntry[] = []
 
-  for (const route of sortedRoutes) {
-    const basePath = route.path[language]!
+    const routesInLanguage = index.routes.filter((route) => isNotNull(routePathInLanguage(route, language)))
 
-    if (route.referencedSingleton) {
-      entries.push({
-        path: normalizeRoutePath(languagePrefix + basePath),
-        translations: Object.fromEntries(
-          otherLanguages.map(({ code }) => {
-            const otherPath = routePathInLanguage(route, code)
-            return [code, isNotNull(otherPath) ? normalizeRoutePath(code + otherPath) : null]
-          }),
-        ) as Record<LanguageCode, string | null>,
-      })
-    }
+    for (const route of routesInLanguage) {
+      const basePath = route.path[language]!
 
-    for (const collectionName of route.referencedCollections) {
-      const collection = collections[collectionName as keyof Collections]
-
-      if (!collection?.meta?.routing?.enabled) {
-        continue
-      }
-
-      const translatable = collection.meta.translatable
-      const records = (index.records[collectionName] ?? [])
-        .filter((record) => (translatable ? record.language === language : true) && (includeDrafts || record.isPublic))
-        .sort((a, b) => (a.subpath < b.subpath ? -1 : a.subpath > b.subpath ? 1 : 0))
-
-      for (const record of records) {
-        entries.push({
-          path: normalizeRoutePath(`${languagePrefix}/${basePath}/${record.subpath}`),
-          translations: Object.fromEntries(
-            otherLanguages.map(({ code }) => {
-              const otherPath = routePathInLanguage(route, code)
-
-              if (isNull(otherPath)) {
-                return [code, null]
-              }
-
-              if (translatable) {
-                const sibling = getRecordTranslations(index, collectionName, record).find(
-                  (translation) => translation.language === code && (includeDrafts || translation.isPublic),
-                )
-                return [code, sibling ? normalizeRoutePath(`${code}/${otherPath}/${sibling.subpath}`) : null]
-              }
-
-              return [code, normalizeRoutePath(`${code}/${otherPath}/${record.subpath}`)]
-            }),
-          ) as Record<LanguageCode, string | null>,
+      if (route.referencedSingleton) {
+        languageEntries.push({
+          path: normalizeRoutePath(languagePrefix + basePath),
+          translations: allLanguages
+            ? ({} as Record<LanguageCode, string | null>)
+            : (Object.fromEntries(
+                otherLanguages.map(({ code }) => {
+                  const otherPath = routePathInLanguage(route, code)
+                  return [code, isNotNull(otherPath) ? normalizeRoutePath(code + otherPath) : null]
+                }),
+              ) as Record<LanguageCode, string | null>),
         })
       }
+
+      for (const collectionName of route.referencedCollections) {
+        const collection = collections[collectionName as keyof Collections]
+
+        if (!collection?.meta?.routing?.enabled) {
+          continue
+        }
+
+        const translatable = collection.meta.translatable
+        const records = (index.records[collectionName] ?? []).filter(
+          (record) =>
+            (translatable ? record.language === language : true) &&
+            (includeDrafts || record.isPublic) &&
+            (!indexableOnly || record.isIndexable),
+        )
+
+        for (const record of records) {
+          languageEntries.push({
+            path: normalizeRoutePath(`${languagePrefix}/${basePath}/${record.subpath}`),
+            translations: allLanguages
+              ? ({} as Record<LanguageCode, string | null>)
+              : (Object.fromEntries(
+                  otherLanguages.map(({ code }) => {
+                    const otherPath = routePathInLanguage(route, code)
+
+                    if (isNull(otherPath)) {
+                      return [code, null]
+                    }
+
+                    if (translatable) {
+                      const sibling = getRecordTranslations(index, collectionName, record).find(
+                        (translation) =>
+                          translation.language === code &&
+                          (includeDrafts || translation.isPublic) &&
+                          (!indexableOnly || translation.isIndexable),
+                      )
+                      return [code, sibling ? normalizeRoutePath(`${code}/${otherPath}/${sibling.subpath}`) : null]
+                    }
+
+                    return [code, normalizeRoutePath(`${code}/${otherPath}/${record.subpath}`)]
+                  }),
+                ) as Record<LanguageCode, string | null>),
+          })
+        }
+      }
     }
+
+    languageEntries.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+    entries.push(...languageEntries)
   }
 
   const total = entries.length

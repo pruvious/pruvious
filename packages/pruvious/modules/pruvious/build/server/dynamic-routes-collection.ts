@@ -249,7 +249,11 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `          if (context.operation === 'update') {`,
     `            const input = context.sanitizedInput ?? {}`,
     `            const relevant = ['referencedCollections', 'referencedSingleton', ${pruviousOptions.i18n.languages
-      .flatMap(({ code }) => [`'path${code.toUpperCase()}'`, `'isPublic${code.toUpperCase()}'`])
+      .flatMap(({ code }) => [
+        `'path${code.toUpperCase()}'`,
+        `'isPublic${code.toUpperCase()}'`,
+        `'seo${code.toUpperCase()}'`,
+      ])
       .join(', ')}]`,
     `            if (!relevant.some((field) => isDefined(input[field]))) {`,
     `              return`,

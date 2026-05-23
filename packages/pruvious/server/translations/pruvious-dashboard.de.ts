@@ -165,10 +165,6 @@ export default defineTranslation({
   'Content language': 'Inhaltssprache',
   'Controls whether query parameters from the current URL are added to the redirect URL.':
     'Steuert, ob Query-Parameter aus der aktuellen URL zur Weiterleitungs-URL hinzugefügt werden.',
-  'Controls whether search engines are allowed to index this page.':
-    'Steuert, ob Suchmaschinen diese Seite indexieren dürfen.',
-  'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).':
-    'Regelt, ob Ihre Website von Suchmaschinen indexiert werden darf. Ist die Indexierung deaktiviert, erhalten Suchmaschinen die Anweisung, die Website zu ignorieren. Diese Vorgabe wird jedoch nicht von allen Suchmaschinen garantiert befolgt.',
   'Controls whether the base title appears before or after the page title.':
     'Steuert, ob der Basistitel vor oder nach dem Seitentitel angezeigt wird.',
   'Controls whether to combine the page title with the base title defined in the SEO settings.':
@@ -280,6 +276,10 @@ export default defineTranslation({
   'Disable': 'Deaktivieren',
   'Disable to use the exact route path.': 'Deaktivieren Sie dies, um den genauen Routenpfad zu verwenden.',
   'Disabled': 'Deaktiviert',
+  'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.':
+    'Halten Sie Suchmaschinen davon ab, die gesamte Website zu indexieren. Wenn ausgeblendet, werden Sichtbarkeitseinstellungen pro Route und pro Seite ignoriert. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
+  'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.':
+    'Halten Sie Suchmaschinen davon ab, diese Seite zu indexieren. Hat keine Auswirkung, wenn die globale Sichtbarkeit für Suchmaschinen ausgeblendet ist. Es liegt an den Suchmaschinen, diese Anweisung zu respektieren.',
   'Does not contain': 'Enthält nicht',
   'Does not contain (case-insensitive)': 'Enthält nicht (Groß-/Kleinschreibung ignorieren)',
   'Does not equal': 'Ungleich',

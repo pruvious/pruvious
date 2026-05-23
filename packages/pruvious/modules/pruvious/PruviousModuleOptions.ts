@@ -745,6 +745,7 @@ export interface PruviousModuleOptions {
    * - Automatically follows redirects on client-side route resolution.
    * - No trailing slashes on routes.
    * - Adds SEO metadata to page headers.
+   * - Serves `/sitemap.xml` and `/robots.txt` at the site root.
    */
   routing: {
     /**
@@ -770,6 +771,29 @@ export interface PruviousModuleOptions {
      * @default true
      */
     seo?: boolean
+
+    /**
+     * Controls the `/sitemap.xml` endpoint.
+     *
+     * Set to `false` to disable the built-in sitemap (for example, when serving your own).
+     * Pass an object to customize pagination - when the number of URLs exceeds `perPage`,
+     * `/sitemap.xml` is served as a sitemap index linking to `/sitemap-1.xml`, `/sitemap-2.xml`, etc.
+     *
+     * Search engines reject single sitemap files larger than 50,000 URLs, so keep `perPage` at or below that limit.
+     *
+     * @default
+     * { perPage: 5000 }
+     */
+    sitemap?: boolean | { perPage?: number }
+
+    /**
+     * Controls the `/robots.txt` endpoint.
+     *
+     * Set to `false` to disable the built-in `/robots.txt` (for example, when serving your own).
+     *
+     * @default true
+     */
+    robots?: boolean
   }
 
   /**
@@ -1457,7 +1481,7 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     pruvious: Pick<
       DeepRequired<PruviousModuleOptions>,
-      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'routing' | 'dashboard' | 'dir' | 'blocksPrefix'
+      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'dashboard' | 'dir' | 'blocksPrefix'
     > & {
       auth: Pick<DeepRequired<PruviousModuleOptions['auth']>, 'jwt' | 'hash'> & {
         tokenResolution: DeepRequired<ServerTokenSource>[]
@@ -1467,6 +1491,13 @@ declare module 'nuxt/schema' {
       debug: ResolvedDebugConfig
       images: {
         variants: Record<string, Required<ImageVariantOptions>>
+      }
+      routing: {
+        followRedirects: NonNullable<PruviousModuleOptions['routing']['followRedirects']>
+        trailingSlash: NonNullable<PruviousModuleOptions['routing']['trailingSlash']>
+        seo: NonNullable<PruviousModuleOptions['routing']['seo']>
+        sitemap: false | { perPage: number }
+        robots: boolean
       }
     }
   }
@@ -1523,7 +1554,31 @@ declare module 'nuxt/schema' {
       /**
        * Controls how routes are handled in the `pruvious` or `pruvious-route` client middleware.
        */
-      routing: Required<PruviousModuleOptions['routing']>
+      routing: {
+        /**
+         * Whether to automatically follow redirects when resolving routes on the client side.
+         *
+         * This setting is derived from the Nuxt config `pruvious.routing.followRedirects`.
+         */
+        followRedirects: NonNullable<PruviousModuleOptions['routing']['followRedirects']>
+
+        /**
+         * Whether to add a trailing slash to all routes.
+         *
+         * - When `true`: Routes end with a slash (e.g., `/page/`)
+         * - When `false`: Routes have no trailing slash (e.g., `/page`)
+         *
+         * This setting is derived from the Nuxt config `pruvious.routing.trailingSlash`.
+         */
+        trailingSlash: NonNullable<PruviousModuleOptions['routing']['trailingSlash']>
+
+        /**
+         * Whether to add SEO metadata to the head section of pages using the `pruvious` or `pruvious-route` middleware.
+         *
+         * This setting is derived from the Nuxt config `pruvious.routing.seo`.
+         */
+        seo: NonNullable<PruviousModuleOptions['routing']['seo']>
+      }
 
       /**
        * Client-side token storage configuration.

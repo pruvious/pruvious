@@ -163,10 +163,6 @@ export default defineTranslation({
   'Content language': 'Content language',
   'Controls whether query parameters from the current URL are added to the redirect URL.':
     'Controls whether query parameters from the current URL are added to the redirect URL.',
-  'Controls whether search engines are allowed to index this page.':
-    'Controls whether search engines are allowed to index this page.',
-  'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).':
-    'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).',
   'Controls whether the base title appears before or after the page title.':
     'Controls whether the base title appears before or after the page title.',
   'Controls whether to combine the page title with the base title defined in the SEO settings.':
@@ -278,6 +274,10 @@ export default defineTranslation({
   'Disable': 'Disable',
   'Disable to use the exact route path.': 'Disable to use the exact route path.',
   'Disabled': 'Disabled',
+  'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.':
+    'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.',
+  'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.':
+    'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.',
   'Division': 'Division',
   'Does not contain': 'Does not contain',
   'Does not contain (case-insensitive)': 'Does not contain (case-insensitive)',

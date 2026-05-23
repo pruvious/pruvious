@@ -8,6 +8,7 @@ export interface LinkIndexRoute {
   referencedCollections: string[]
   path: Record<string, string | null>
   isPublic: Record<string, boolean>
+  isIndexable: Record<string, boolean>
 }
 
 export interface LinkIndexRecord {
@@ -15,6 +16,7 @@ export interface LinkIndexRecord {
   language: string
   subpath: string
   isPublic: boolean
+  isIndexable: boolean
   translations: string | null
   label: string
   search: string
@@ -29,7 +31,7 @@ export interface LinkIndex {
   records: Record<string, LinkIndexRecord[]>
 }
 
-export const LINK_INDEX_VERSION = 1
+export const LINK_INDEX_VERSION = 2
 
 const LINK_INDEX_KEY = 'linkIndex'
 const LINK_INDEX_FLUSHED_AT_KEY = 'linkIndexFlushedAt'
@@ -85,11 +87,14 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
   for (const row of (routesResult.data ?? []) as any[]) {
     const path: Record<string, string | null> = {}
     const isPublic: Record<string, boolean> = {}
+    const isIndexable: Record<string, boolean> = {}
 
     for (const { code } of languages) {
       const suffix = code.toUpperCase()
       path[code] = row[`path${suffix}`] ?? null
       isPublic[code] = row[`isPublic${suffix}`] === true
+      const seo = row[`seo${suffix}`]
+      isIndexable[code] = !seo || seo.isIndexable !== false
     }
 
     routes.push({
@@ -98,6 +103,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
       referencedCollections: row.referencedCollections ?? [],
       path,
       isPublic,
+      isIndexable,
     })
   }
 
@@ -111,6 +117,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
     const labelField = collection.meta.routing.labelField
     const translatable = !!collection.meta.translatable
     const hasIsPublic = !!collection.meta.routing.isPublic.enabled
+    const hasSEO = !!collection.meta.routing.seo.enabled
     const selectFields = [
       ...new Set([
         'id',
@@ -118,6 +125,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
         ...labelSelectFields(collection.fields, labelField),
         ...(translatable ? ['language', 'translations'] : []),
         ...(hasIsPublic ? ['isPublic'] : []),
+        ...(hasSEO ? ['seo'] : []),
       ]),
     ]
 
@@ -144,6 +152,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
         language: translatable ? row.language : primaryLanguage,
         subpath: row.subpath,
         isPublic: hasIsPublic ? row.isPublic === true : true,
+        isIndexable: hasSEO ? !row.seo || row.seo.isIndexable !== false : true,
         translations: translatable ? row.translations || null : null,
         label,
         search: `${label} ${row.subpath}`.toLowerCase(),

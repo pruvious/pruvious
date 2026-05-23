@@ -217,8 +217,7 @@ export async function $fetchRaw(
   return { status: res.status, headers: res.headers, data }
 }
 
-export const $getRaw = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
-  $fetchRaw(request, opts)
+export const $getRaw = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) => $fetchRaw(request, opts)
 export const $getRawAsAdmin = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>
   $fetchRaw(request, opts, 'admin')
 export const $getRawAsEditor = (request: NitroFetchRequest, opts?: Parameters<typeof $fetchRaw>[1]) =>

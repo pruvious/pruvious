@@ -93,6 +93,8 @@ export default defineNuxtModule<PruviousModuleOptions>({
       followRedirects: true,
       trailingSlash: false,
       seo: true,
+      sitemap: { perPage: 5000 },
+      robots: true,
     },
     dashboard: {
       basePath: '/dashboard/',
@@ -204,7 +206,22 @@ export default defineNuxtModule<PruviousModuleOptions>({
         hash: resolvedOptions.auth.hash as any,
       },
       i18n: resolveTranslationsConfig(resolvedOptions.i18n),
-      routing: resolvedOptions.routing as Required<PruviousModuleOptions['routing']>,
+      routing: {
+        followRedirects: resolvedOptions.routing.followRedirects!,
+        trailingSlash: resolvedOptions.routing.trailingSlash!,
+        seo: resolvedOptions.routing.seo!,
+        sitemap:
+          resolvedOptions.routing.sitemap === false
+            ? false
+            : {
+                perPage: Math.max(
+                  1,
+                  (resolvedOptions.routing.sitemap === true ? undefined : resolvedOptions.routing.sitemap?.perPage) ??
+                    5000,
+                ),
+              },
+        robots: resolvedOptions.routing.robots !== false,
+      },
       dashboard: {
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.dashboard.basePath!)),
         filterStylesheets: resolvedOptions.dashboard.filterStylesheets!,
@@ -250,7 +267,11 @@ export default defineNuxtModule<PruviousModuleOptions>({
       languages: nuxt.options.runtimeConfig.pruvious.i18n.languages.map(({ code }) => code) as LanguageCode[],
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage as LanguageCode,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
-      routing: nuxt.options.runtimeConfig.pruvious.routing,
+      routing: {
+        followRedirects: nuxt.options.runtimeConfig.pruvious.routing.followRedirects,
+        trailingSlash: nuxt.options.runtimeConfig.pruvious.routing.trailingSlash,
+        seo: nuxt.options.runtimeConfig.pruvious.routing.seo,
+      },
       tokenStorage: nuxt.options.runtimeConfig.pruvious.auth.tokenStorage,
       translatableStringsPreloadRules: nuxt.options.runtimeConfig.pruvious.i18n.preloadTranslatableStrings,
       uploadsBasePath: nuxt.options.runtimeConfig.pruvious.uploads.basePath,
@@ -302,6 +323,18 @@ export default defineNuxtModule<PruviousModuleOptions>({
       route: nuxt.options.runtimeConfig.pruvious.uploads.basePath + '**',
       handler: resolve('./pruvious/uploads/handler.ts'),
     })
+    if (nuxt.options.runtimeConfig.pruvious.routing.sitemap !== false) {
+      const sitemapHandler = resolve('./pruvious/routes/sitemap.handler.ts')
+      addServerHandler({ route: '/sitemap.xml', handler: sitemapHandler, method: 'get' })
+      addServerHandler({ route: '/sitemap-:page.xml', handler: sitemapHandler, method: 'get' })
+    }
+    if (nuxt.options.runtimeConfig.pruvious.routing.robots) {
+      addServerHandler({
+        route: '/robots.txt',
+        handler: resolve('./pruvious/routes/robots.handler.ts'),
+        method: 'get',
+      })
+    }
 
     // Register block component directories
     nuxt.hook('components:dirs', (dirs) => {

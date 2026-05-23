@@ -1,13 +1,6 @@
 import { nanoid } from '@pruvious/utils'
 import { describe, expect, test } from 'vitest'
-import {
-  $deleteAsAdmin,
-  $getRaw,
-  $getRawAsAdmin,
-  $getRawAsEditor,
-  $getRawAsPreviewer,
-  $postAsAdmin,
-} from '../utils'
+import { $deleteAsAdmin, $getRaw, $getRawAsAdmin, $getRawAsEditor, $getRawAsPreviewer, $postAsAdmin } from '../utils'
 
 describe('routes API (auth-aware)', () => {
   let publicRouteId: number
@@ -142,8 +135,7 @@ describe('routes API (auth-aware)', () => {
   })
 
   test('malformed JWT on draft route: 404 (treated as anonymous)', async () => {
-    const fakeJwt =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ4IiwiZXhwIjoxLCJpYXQiOjF9.invalidsignature'
+    const fakeJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ4IiwiZXhwIjoxLCJpYXQiOjF9.invalidsignature'
     const res = await $getRaw('/api/routes/api-routes-draft/a-draft', {
       headers: { Authorization: `Bearer ${fakeJwt}` },
     })

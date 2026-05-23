@@ -2130,6 +2130,7 @@ export function defineCollection<
       const linkIndexRelevantFields = new Set<string>([
         'subpath',
         ...(routing.isPublic.enabled ? ['isPublic'] : []),
+        ...(routing.seo.enabled ? ['seo'] : []),
         ...(translatable ? ['language', 'translations'] : []),
         ...labelSelectFields(fields, routing.labelField),
       ])

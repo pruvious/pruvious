@@ -445,7 +445,10 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
           yesLabel: ({ __ }) => __('pruvious-dashboard', 'Visible'),
           noLabel: ({ __ }) => __('pruvious-dashboard', 'Hidden'),
           description: ({ __ }) =>
-            __('pruvious-dashboard', 'Controls whether search engines are allowed to index this page.'),
+            __(
+              'pruvious-dashboard',
+              'Discourage search engines from indexing this page. Has no effect when global search engine visibility is hidden. It is up to search engines to honor this request.',
+            ),
         },
       }),
       // @todo sharingImage

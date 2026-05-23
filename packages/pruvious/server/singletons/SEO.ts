@@ -57,7 +57,7 @@ export default defineSingleton({
         description: ({ __ }) =>
           __(
             'pruvious-dashboard',
-            'Controls whether search engines can index your site. When hidden, search engines are asked not to index the site (though they may not always respect this setting).',
+            'Discourage search engines from indexing the entire site. When hidden, per-route and per-page visibility settings are ignored. It is up to search engines to honor this request.',
           ),
       },
     }),
