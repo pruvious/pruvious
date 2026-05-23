@@ -212,7 +212,6 @@ export function pruviousError(
  * ```ts
  * // server/api/auth/login.post.ts
  * import { parseBody } from '#pruvious/server'
- * import { isObject } from '@pruvious/utils'
  *
  * export default defineEventHandler(async (event) => {
  *   const { email, password, remember } = await parseBody(event, 'object').then(({ input }) => input)

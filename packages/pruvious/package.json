@@ -27,7 +27,7 @@
     "build": "node scripts/build.mjs",
     "dev": "nuxt dev .playground",
     "dev:prepare": "nuxt prepare .playground",
-    "typecheck": "pnpm dev:prepare && nuxt typecheck"
+    "typecheck": "pnpm dev:prepare && nuxt typecheck .playground"
   },
   "dependencies": {
     "@babel/generator": "7.29.1",

@@ -5,19 +5,4 @@ export default defineNuxtConfig({
     experimental: { asyncContext: true },
     unenv: { external: ['node:async_hooks'] },
   },
-  vite: {
-    optimizeDeps: {
-      include: [
-        '@floating-ui/vue',
-        '@vueuse/core',
-        '@vueuse/integrations/useFocusTrap',
-        'dompurify',
-        'dot-prop',
-        'marked',
-        'nanoid',
-        'tippy.js',
-        'vue-sonner',
-      ],
-    },
-  },
 })
