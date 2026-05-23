@@ -3,6 +3,7 @@ import {
   buttonGroupField,
   checkboxField,
   chipsField,
+  commonMarks,
   dateField,
   dateRangeField,
   dateTimeField,
@@ -27,7 +28,6 @@ import {
   timestampField,
   translatableTextField,
   trueFalseField,
-  commonMarks,
 } from '#pruvious/server'
 
 export default defineCollection({
@@ -173,7 +173,7 @@ export default defineCollection({
 
     // link
     link: linkField({
-      ui: { label: 'Link' },
+      ui: { label: 'Link', placeholder: 'Enter a URL or select a reference', description: 'Description' },
     }),
     linkInternalOnly: linkField({
       allowExternal: false,
@@ -183,13 +183,27 @@ export default defineCollection({
       allowHash: false,
       ui: { label: 'Link (no hash)' },
     }),
+    linkNoQuery: linkField({
+      allowQuery: false,
+      ui: { label: 'Link (no query string)' },
+    }),
     linkNoAttributes: linkField({
-      allowAttributes: false,
-      ui: { label: 'Link (no attributes)' },
+      ui: { label: 'Link (no attributes)', showTarget: false, showRel: false },
     }),
     linkAllowedReferences: linkField({
       allowedReferences: ['Articles'],
       ui: { label: 'Link (Articles only)' },
+    }),
+    linkAllowedReferencesWithRoutes: linkField({
+      allowedReferences: ['Articles', 'Routes'],
+      ui: { label: 'Link (Articles or bare routes)' },
+    }),
+    linkNoDrafts: linkField({
+      allowDrafts: false,
+      ui: { label: 'Link (no drafts)' },
+    }),
+    linkAllLanguages: linkField({
+      ui: { label: 'Link (all languages)', languages: 'all' },
     }),
 
     // nullableObject
@@ -724,7 +738,17 @@ export default defineCollection({
             },
             {
               label: 'Link',
-              fields: ['link', 'linkInternalOnly', 'linkNoHash', 'linkNoAttributes', 'linkAllowedReferences'],
+              fields: [
+                'link',
+                'linkInternalOnly',
+                'linkNoHash',
+                'linkNoQuery',
+                'linkNoAttributes',
+                'linkAllowedReferences',
+                'linkAllowedReferencesWithRoutes',
+                'linkNoDrafts',
+                'linkAllLanguages',
+              ],
             },
             {
               label: 'Nullable object',

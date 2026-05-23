@@ -4,4 +4,5 @@ export default defineSingleton({
   fields: {
     blocks: blocksField({}),
   },
+  routing: true,
 })

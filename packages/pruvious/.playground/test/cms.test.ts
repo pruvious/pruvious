@@ -66,4 +66,8 @@ describe('cms', async () => {
   await import('./cms/fields/timestamp')
   await import('./cms/fields/translatableText')
   await import('./cms/fields/trueFalse')
+
+  // Routes
+  await import('./cms/routes/rel-url')
+  await import('./cms/routes/link-choices')
 })

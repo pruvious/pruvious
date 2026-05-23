@@ -36,15 +36,16 @@ export default defineCollection({
   editors: { strict: true },
   routing: {
     publicFields: ['name'],
+    labelField: ['name', ' #', 'price'],
   },
   ui: {
     indexPage: {
       dataTable: {
-        columns: ['name', 'language', 'translations', 'createdAt'],
+        columns: ['name', 'subpath', 'language', 'translations', 'createdAt'],
       },
     },
     createPage: {
-      fieldsLayout: [{ row: ['name', 'price | auto'] }, 'variants'],
+      fieldsLayout: [{ row: ['name', 'price | auto'] }, 'subpath', 'variants'],
     },
     updatePage: {
       fieldsLayout: 'mirror',
