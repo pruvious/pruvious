@@ -1,7 +1,7 @@
-import type { LayoutKey } from 'nuxt/app'
 import {
   collections,
   getRouteReferences,
+  hasPermission,
   selectFrom,
   selectSingleton,
   type Collections,
@@ -11,7 +11,22 @@ import {
   type Singletons,
 } from '#pruvious/server'
 import type { ExtractCastedTypes, ExtractPopulatedTypes, GenericField } from '@pruvious/orm'
-import { isNotNull, pick, withLeadingSlash, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
+import {
+  buildRelURL,
+  isDefined,
+  isNotNull,
+  isNull,
+  isPositiveInteger,
+  isRelURL,
+  parseRelURL,
+  pick,
+  withLeadingSlash,
+  withoutTrailingSlash,
+  withTrailingSlash,
+  type ParsedRelURL,
+} from '@pruvious/utils'
+import type { LayoutKey } from 'nuxt/app'
+import { getLinkIndex, getRecordTranslations, resolveRelURLFromIndex, type LinkIndexRoute } from './link-index.server'
 
 export interface GenericRouteReference {
   /**
@@ -155,6 +170,77 @@ export interface RouteRedirect {
   forwardQueryParams: boolean
 }
 
+export interface ListRoutesOptions {
+  /**
+   * The number of results per page.
+   *
+   * @default 50
+   */
+  perPage?: number
+
+  /**
+   * The current page number (1-based).
+   *
+   * @default 1
+   */
+  page?: number
+
+  /**
+   * The language code to list routes for.
+   * Defaults to the primary language.
+   */
+  language?: LanguageCode
+
+  /**
+   * Whether to include non-public (draft) routes and records.
+   *
+   * @default false
+   */
+  includeDrafts?: boolean
+}
+
+export interface ListRoutesEntry {
+  /**
+   * The full resolved URL path (e.g. `/blog/my-post` or `/de/blog/mein-beitrag`).
+   */
+  path: string
+
+  /**
+   * A map of translations for this route.
+   *
+   * - Keys are language codes of other configured languages.
+   * - Values are full route paths of translations (or `null` if the translation doesn't exist or is not public).
+   */
+  translations: Record<LanguageCode, string | null>
+}
+
+export interface ListRoutesResult {
+  /**
+   * The listed route entries for the current page.
+   */
+  data: ListRoutesEntry[]
+
+  /**
+   * The current page number.
+   */
+  currentPage: number
+
+  /**
+   * The last page number.
+   */
+  lastPage: number
+
+  /**
+   * The number of results per page.
+   */
+  perPage: number
+
+  /**
+   * The total number of available routes across all pages.
+   */
+  total: number
+}
+
 /**
  * Finds and returns a route by its full URL `path`.
  *
@@ -189,13 +275,13 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
 
   const routeCandidates = await Promise.all([
     selectSingleton('SEO').language(language).populate().get(),
-    ...tryPaths.map((tryPath) =>
-      selectFrom('Routes')
-        .where(`path${language.toUpperCase()}` as any, 'ilike', tryPath)
-        .where(`isPublic${language.toUpperCase()}` as any, '=', true)
-        .first()
-        .then(({ data }) => data),
-    ),
+    ...tryPaths.map(async (tryPath) => {
+      const query = selectFrom('Routes').where(`path${language.toUpperCase()}` as any, 'ilike', tryPath)
+      if (!hasPermission('preview-drafts')) {
+        query.where(`isPublic${language.toUpperCase()}` as any, '=', true)
+      }
+      return query.first().then(({ data }) => data)
+    }),
   ] as unknown as (ExtractPopulatedTypes<Collections['Routes']['fields']> | null)[])
 
   const baseSEO = (routeCandidates.shift() as any).data as ExtractPopulatedTypes<Singletons['SEO']['fields']>
@@ -247,7 +333,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             otherLanguages.map(({ code }, i) => [
               code,
               isNotNull(exactRoute![`path${otherLanguageSuffixes[i]!}`]) &&
-              exactRoute![`isPublic${otherLanguageSuffixes[i]!}`]
+              (exactRoute![`isPublic${otherLanguageSuffixes[i]!}`] || hasPermission('preview-drafts'))
                 ? normalizeRoutePath(code + exactRoute![`path${otherLanguageSuffixes[i]!}`])
                 : null,
             ]),
@@ -293,7 +379,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         const select = ['id', 'subpath', ...collection.meta.routing.publicFields]
         const subpath = normalizedRoutePath.slice(withTrailingSlash(route![`path${languageSuffix}`]!).length)
 
-        if (collection.meta.routing.isPublic.enabled) {
+        if (collection.meta.routing.isPublic.enabled && !hasPermission('preview-drafts')) {
           query.where('isPublic', '=', true)
         }
 
@@ -305,7 +391,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
           query.where('language', '=', language)
 
           const whereIsPublic = (code: string) =>
-            collection.meta.routing.isPublic.enabled ? ` and "${collectionName}_${code}"."isPublic" = 1` : ''
+            collection.meta.routing.isPublic.enabled && !hasPermission('preview-drafts')
+              ? ` and "${collectionName}_${code}"."isPublic" = 1`
+              : ''
 
           for (const { code } of languages) {
             if (code !== language) {
@@ -394,4 +482,288 @@ export function normalizeRoutePath(path: string, trailingSlash: boolean | 'auto'
   }
 
   return path || '/'
+}
+
+/**
+ * Translates a `rel://` URL to the equivalent URL for the given target language.
+ *
+ * Returns `null` if the route or collection record has no translation in the target language.
+ * The result always emits an explicit `@{language}` pin. Query strings and hash fragments are preserved.
+ *
+ * @example
+ * ```ts
+ * await translateRelURL('rel://Routes:1/Pages:5@en', 'de')
+ * // 'rel://Routes:1/Pages:8@de'
+ * ```
+ */
+export async function translateRelURL(url: string, targetLanguage: LanguageCode): Promise<string | null> {
+  const { languages, primaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const parsed = parseRelURL(url, primaryLanguage)
+
+  if (!parsed || !isValidRelURL(parsed) || !languages.some(({ code }) => code === targetLanguage)) {
+    return null
+  }
+
+  if (targetLanguage === parsed.language) {
+    return url
+  }
+
+  const index = await getLinkIndex()
+  const includeDrafts = hasPermission('preview-drafts')
+  const route = index.routes.find((r) => r.id === parsed.routeId)
+
+  if (!route || isNull(route.path[targetLanguage] ?? null)) {
+    return null
+  }
+
+  if (!includeDrafts && route.isPublic[targetLanguage] !== true) {
+    return null
+  }
+
+  if (parsed.collection) {
+    const collection = collections[parsed.collection as keyof Collections]!
+
+    if (!collection.meta.translatable) {
+      return buildRelURL({
+        routeId: parsed.routeId,
+        collection: parsed.collection,
+        recordId: parsed.recordId,
+        language: targetLanguage,
+        query: parsed.query,
+        hash: parsed.hash,
+      })
+    }
+
+    const sourceRecord = (index.records[parsed.collection] ?? []).find(
+      (record) => record.id === parsed.recordId && record.language === parsed.language,
+    )
+
+    if (!sourceRecord) {
+      return null
+    }
+
+    const translatedRecord = getRecordTranslations(index, parsed.collection, sourceRecord).find(
+      (record) => record.language === targetLanguage && (includeDrafts || record.isPublic),
+    )
+
+    if (!translatedRecord) {
+      return null
+    }
+
+    return buildRelURL({
+      routeId: parsed.routeId,
+      collection: parsed.collection,
+      recordId: translatedRecord.id,
+      language: targetLanguage,
+      query: parsed.query,
+      hash: parsed.hash,
+    })
+  }
+
+  return buildRelURL({
+    routeId: parsed.routeId,
+    language: targetLanguage,
+    query: parsed.query,
+    hash: parsed.hash,
+  })
+}
+
+/**
+ * Resolves a `rel://` URL to its public URL path (e.g. `rel://Routes:1/Articles:5@de` → `/de/blog/my-article`).
+ *
+ * Non-`rel://` URLs (external, relative, or empty) are returned unchanged, so any `href` value can be piped
+ * through this function. Query strings and hash fragments are preserved, and the pinned `@{language}` is
+ * respected as-is - use {@link translateRelURL} first if you need to switch languages.
+ *
+ * Returns `null` only when the input is a `rel://` URL that cannot be resolved: malformed, or pointing at a
+ * missing or unpublished route/record.
+ *
+ * @example
+ * ```ts
+ * await populateRelURL('rel://Routes:1/Articles:5@de?foo=bar#section')
+ * // '/de/blog/my-article?foo=bar#section'
+ *
+ * await populateRelURL('https://example.com')
+ * // 'https://example.com'
+ * ```
+ */
+export async function populateRelURL(url: string): Promise<string | null> {
+  if (!isRelURL(url)) {
+    return url
+  }
+
+  const { primaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const parsed = parseRelURL(url, primaryLanguage)
+
+  if (!parsed || !isValidRelURL(parsed)) {
+    return null
+  }
+
+  const index = await getLinkIndex()
+  const resolvedPath = resolveRelURLFromIndex(
+    index,
+    {
+      routeId: parsed.routeId,
+      collection: parsed.collection,
+      recordId: parsed.recordId,
+      language: parsed.language,
+    },
+    { includeDrafts: hasPermission('preview-drafts') },
+  )
+
+  if (isNull(resolvedPath)) {
+    return null
+  }
+
+  const querySuffix = parsed.query ? `?${parsed.query}` : ''
+  const hashSuffix = parsed.hash ? `#${parsed.hash}` : ''
+
+  return resolvedPath + querySuffix + hashSuffix
+}
+
+/**
+ * The reason a parsed `rel://` URL failed structural validation.
+ *
+ * - `invalid-route-id` - the route ID is not a positive integer.
+ * - `unknown-collection` - the collection does not exist or is not routable.
+ * - `unsupported-language` - the language pin is not a configured language.
+ * - `invalid-record-id` - the record ID is not a positive integer.
+ */
+export type RelURLError =
+  | { reason: 'invalid-route-id' }
+  | { reason: 'unknown-collection'; collection: string }
+  | { reason: 'unsupported-language'; language: string }
+  | { reason: 'invalid-record-id' }
+
+/**
+ * Validates the components of a parsed `rel://` URL to ensure they reference existing routes, collections, and languages.
+ * Returns the first failing reason, or `null` if the components are valid.
+ * It does not validate the existence of specific record IDs.
+ */
+export function validateRelURL(parsed: ParsedRelURL): RelURLError | null {
+  if (!isPositiveInteger(parsed.routeId)) {
+    return { reason: 'invalid-route-id' }
+  }
+
+  if (parsed.collection) {
+    const collection = collections[parsed.collection as keyof Collections]
+    if (!collection || !collection.meta.routing.enabled) {
+      return { reason: 'unknown-collection', collection: parsed.collection }
+    }
+  }
+
+  if (parsed.language) {
+    const { languages } = useRuntimeConfig().pruvious.i18n
+    if (!languages.some(({ code }) => code === parsed.language)) {
+      return { reason: 'unsupported-language', language: parsed.language }
+    }
+  }
+
+  if (isDefined(parsed.recordId) && !isPositiveInteger(parsed.recordId)) {
+    return { reason: 'invalid-record-id' }
+  }
+
+  return null
+}
+
+/**
+ * Validates the components of a parsed `rel://` URL to ensure they reference existing routes, collections, and languages.
+ * It does not validate the existence of specific record IDs.
+ */
+export function isValidRelURL(parsed: ParsedRelURL): boolean {
+  return isNull(validateRelURL(parsed))
+}
+
+/**
+ * Lists all available URL paths for the website with pagination support.
+ *
+ * Enumerates URLs from both singleton routes (exact path match) and
+ * collection routes (route path + record subpath), including their translations.
+ */
+export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoutesResult> {
+  const perPage = options?.perPage ?? 50
+  const page = options?.page ?? 1
+  const { languages, primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
+  const language = (options?.language ?? primaryLanguage) as LanguageCode
+  const includeDrafts = options?.includeDrafts ?? false
+  const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
+  const otherLanguages = languages.filter(({ code }) => code !== language)
+  const index = await getLinkIndex()
+
+  const routePathInLanguage = (route: LinkIndexRoute, code: string): string | null => {
+    const path = route.path[code] ?? null
+    if (isNull(path) || (!includeDrafts && route.isPublic[code] !== true)) {
+      return null
+    }
+    return path
+  }
+
+  const entries: ListRoutesEntry[] = []
+
+  const sortedRoutes = index.routes
+    .filter((route) => isNotNull(routePathInLanguage(route, language)))
+    .sort((a, b) => {
+      const pa = a.path[language]!
+      const pb = b.path[language]!
+      return pa < pb ? -1 : pa > pb ? 1 : 0
+    })
+
+  for (const route of sortedRoutes) {
+    const basePath = route.path[language]!
+
+    if (route.referencedSingleton) {
+      entries.push({
+        path: normalizeRoutePath(languagePrefix + basePath),
+        translations: Object.fromEntries(
+          otherLanguages.map(({ code }) => {
+            const otherPath = routePathInLanguage(route, code)
+            return [code, isNotNull(otherPath) ? normalizeRoutePath(code + otherPath) : null]
+          }),
+        ) as Record<LanguageCode, string | null>,
+      })
+    }
+
+    for (const collectionName of route.referencedCollections) {
+      const collection = collections[collectionName as keyof Collections]
+
+      if (!collection?.meta?.routing?.enabled) {
+        continue
+      }
+
+      const translatable = collection.meta.translatable
+      const records = (index.records[collectionName] ?? [])
+        .filter((record) => (translatable ? record.language === language : true) && (includeDrafts || record.isPublic))
+        .sort((a, b) => (a.subpath < b.subpath ? -1 : a.subpath > b.subpath ? 1 : 0))
+
+      for (const record of records) {
+        entries.push({
+          path: normalizeRoutePath(`${languagePrefix}/${basePath}/${record.subpath}`),
+          translations: Object.fromEntries(
+            otherLanguages.map(({ code }) => {
+              const otherPath = routePathInLanguage(route, code)
+
+              if (isNull(otherPath)) {
+                return [code, null]
+              }
+
+              if (translatable) {
+                const sibling = getRecordTranslations(index, collectionName, record).find(
+                  (translation) => translation.language === code && (includeDrafts || translation.isPublic),
+                )
+                return [code, sibling ? normalizeRoutePath(`${code}/${otherPath}/${sibling.subpath}`) : null]
+              }
+
+              return [code, normalizeRoutePath(`${code}/${otherPath}/${record.subpath}`)]
+            }),
+          ) as Record<LanguageCode, string | null>,
+        })
+      }
+    }
+  }
+
+  const total = entries.length
+  const lastPage = Math.max(1, Math.ceil(total / perPage))
+  const start = (page - 1) * perPage
+
+  return { data: entries.slice(start, start + perPage), currentPage: page, lastPage, perPage, total }
 }

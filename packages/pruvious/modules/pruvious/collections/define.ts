@@ -1,4 +1,3 @@
-import type { LayoutKey } from 'nuxt/app'
 import {
   walkFieldLayoutItems,
   type FieldsLayout,
@@ -39,6 +38,7 @@ import {
   type PartialMax4Levels,
 } from '@pruvious/utils'
 import { colorize } from 'consola/utils'
+import type { LayoutKey } from 'nuxt/app'
 import { hash } from 'ohash'
 import { isDevelopment } from 'std-env'
 import { httpStatusCodeMessages } from '../api/utils.server'
@@ -64,6 +64,7 @@ import {
   type SubpathFieldPresetOptions,
   type UpdatedAtFieldPresetOptions,
 } from '../fields/presets'
+import { flushLinkIndex, labelSelectFields } from '../routes/link-index.server'
 import type { ResolveFromLayersResultContextBinding } from '../utils/resolve'
 import { collectionPermissionGuard } from './guards'
 
@@ -1561,6 +1562,23 @@ export type CollectionRoutingOptions<
   publicFields?: TFieldNames[]
 
   /**
+   * Defines the human-readable label shown for a record of this collection in the dashboard link picker.
+   *
+   * - A single field name - the label is that field's value (e.g. `'title'`).
+   * - An array mixing field names and literal strings, concatenated into one string.
+   *   Field-name segments resolve to the record's value; any other string is used verbatim.
+   *
+   * When the resolved label is empty, the picker falls back to `#<id>`.
+   *
+   * @default 'subpath'
+   *
+   * @example
+   * 'title'
+   * ['firstName', ' ', 'lastName']
+   */
+  labelField?: TFieldNames | (TFieldNames | (string & {}))[]
+
+  /**
    * Specifies the `subpath` field options for the collection.
    *
    * This field generates unique URLs for each record in the collection.
@@ -1694,6 +1712,7 @@ interface ResolveContext {
 interface CollectionRoutingMeta {
   enabled: boolean
   publicFields: string[]
+  labelField: string | string[]
   subpath: SubpathFieldPresetOptions & Required<BaseSubpathFieldOptions>
   isPublic: AutoFieldEnabled & IsPublicFieldPresetOptions & Required<BaseIsPublicFieldOptions>
   scheduledAt: AutoFieldEnabled & ScheduledAtFieldPresetOptions
@@ -1925,6 +1944,7 @@ export function defineCollection<
           ...(createdAt.enabled ? ['createdAt'] : []),
           ...(updatedAt.enabled ? ['updatedAt'] : []),
         ],
+        labelField: 'subpath',
         subpath: { index: true },
         isPublic: {
           enabled: isObject(options.routing) && !!options.routing.isPublic,
@@ -2106,6 +2126,27 @@ export function defineCollection<
       }
 
       fields = { ...routingFields, ...fields }
+
+      const linkIndexRelevantFields = new Set<string>([
+        'subpath',
+        ...(routing.isPublic.enabled ? ['isPublic'] : []),
+        ...(translatable ? ['language', 'translations'] : []),
+        ...labelSelectFields(fields, routing.labelField),
+      ])
+      hooks.afterQueryExecution.push(async (context, { result }) => {
+        try {
+          if (!result.success || context.operation === 'select') {
+            return
+          }
+          if (context.operation === 'update') {
+            const input = context.sanitizedInput ?? {}
+            if (![...linkIndexRelevantFields].some((field) => isDefined(input[field]))) {
+              return
+            }
+          }
+          await flushLinkIndex()
+        } catch {}
+      })
     }
 
     if (translatable) {

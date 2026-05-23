@@ -1,4 +1,3 @@
-import type { LayoutKey } from 'nuxt/app'
 import {
   walkFieldLayoutItems,
   type FieldsLayout,
@@ -36,6 +35,7 @@ import {
   type PartialMax2Levels,
 } from '@pruvious/utils'
 import { colorize } from 'consola/utils'
+import type { LayoutKey } from 'nuxt/app'
 import { hash } from 'ohash'
 import { resolveCustomComponentPath } from '../components/utils.server'
 import { warnWithContext } from '../debug/console'
@@ -783,7 +783,7 @@ export interface DefineSingletonOptions<
    * </script>
    * ```
    */
-  routing?: SingletonRoutingOptions<PublicRoutingFieldNames<TFields, TTranslatable, TUpdatedAt>>
+  routing?: SingletonRoutingOptions<PublicRoutingFieldNames<TFields, TTranslatable, TUpdatedAt>> | boolean
 
   /**
    * @default
