@@ -1,6 +1,14 @@
-import { defineField, normalizeRoutePath, selectFrom, type LanguageCode } from '#pruvious/server'
+import {
+  collections,
+  defineField,
+  getLinkIndex,
+  populateRelURL,
+  validateRelURL,
+  type LanguageCode,
+  type RouteCollectionReferenceName,
+} from '#pruvious/server'
 import { Field, structuredObjectFieldModel, textFieldModel, type GenericField } from '@pruvious/orm'
-import { isNull, isRelURL, isString, parseRelURL } from '@pruvious/utils'
+import { isArray, isDefined, isNull, isRelURL, isString, parseRelURL } from '@pruvious/utils'
 
 const validTargets = ['', '_blank', '_self', '_parent', '_top']
 
@@ -10,51 +18,149 @@ const subfields: Record<string, GenericField> = {
     options: {},
     required: true,
     validators: [
-      async (value, { context }) => {
+      async (value, { context, path }) => {
         if (!isString(value) || value === '') {
           return
         }
 
+        let parentField: any = null
+        let nextFields: any = context.collection?.fields
+        for (const segment of path.split('.').slice(0, -1)) {
+          if (/^\d+$/.test(segment)) {
+            continue
+          }
+          parentField = nextFields?.[segment]
+          if (!parentField) {
+            break
+          }
+          nextFields = parentField.model?.subfields
+        }
+        const parentOpts: Record<string, any> = parentField?.options ?? {}
+
+        if (!(parentOpts.allowHash ?? true) && value.includes('#')) {
+          throw new Error(context.__('pruvious-api' as any, 'Hash fragments are not allowed in this field' as any))
+        }
+
+        if (!(parentOpts.allowQuery ?? true) && value.includes('?')) {
+          throw new Error(context.__('pruvious-api' as any, 'Query strings are not allowed in this field' as any))
+        }
+
         if (isRelURL(value)) {
-          const parsed = parseRelURL(value)
+          const { primaryLanguage } = useRuntimeConfig().pruvious.i18n
+          const parsed = parseRelURL(value, primaryLanguage)
 
           if (!parsed) {
-            throw new Error(context.__('pruvious-api' as any, 'Invalid input'))
+            throw new Error(context.__('pruvious-api' as any, 'This link is not formatted correctly' as any))
           }
 
-          // Verify route exists
-          const routeCount = await context.database
-            .queryBuilder()
-            .selectFrom('Routes')
-            .where('id', '=', parsed.routeId)
-            .useCache(context.cache)
-            .count()
+          const relError = validateRelURL(parsed)
+          if (relError) {
+            if (relError.reason === 'unknown-collection') {
+              throw new Error(
+                context.__(
+                  'pruvious-api' as any,
+                  'The collection `$collection` cannot be linked to' as any,
+                  {
+                    collection: relError.collection,
+                  } as any,
+                ),
+              )
+            } else if (relError.reason === 'unsupported-language') {
+              throw new Error(
+                context.__(
+                  'pruvious-api' as any,
+                  'The language `$language` is not supported' as any,
+                  {
+                    language: relError.language,
+                  } as any,
+                ),
+              )
+            } else {
+              throw new Error(context.__('pruvious-api' as any, 'This link is not formatted correctly' as any))
+            }
+          }
 
-          if (!routeCount.success || routeCount.data === 0) {
+          const allowed = parentOpts.allowedReferences ?? '*'
+          if (allowed !== '*') {
+            const list = (isArray(allowed) ? allowed : [allowed]) as (RouteCollectionReferenceName | 'Routes')[]
+            const key = (parsed.collection ?? 'Routes') as RouteCollectionReferenceName | 'Routes'
+
+            if (!list.includes(key)) {
+              throw new Error(
+                context.__(
+                  'pruvious-api' as any,
+                  'Linking to `$reference` is not allowed in this field' as any,
+                  {
+                    reference: key,
+                  } as any,
+                ),
+              )
+            }
+          }
+
+          const effectiveLanguage = parsed.language as LanguageCode
+          const allowDrafts = (parentOpts.allowDrafts ?? true) as boolean
+          const index = await getLinkIndex()
+
+          const route = index.routes.find((r) => r.id === parsed.routeId)
+
+          if (!route) {
             throw new Error(context.__('pruvious-api' as any, 'Record does not exist' as any))
           }
 
-          // Verify record exists (if collection link)
-          if (parsed.collection && parsed.recordId !== undefined) {
-            const recordCount = await context.database
-              .queryBuilder()
-              .selectFrom(parsed.collection)
-              .where('id', '=', parsed.recordId)
-              .useCache(context.cache)
-              .count()
+          const routeIsPublic = route.isPublic[effectiveLanguage] === true
 
-            if (!recordCount.success || recordCount.data === 0) {
+          if (isNull(route.path[effectiveLanguage] ?? null)) {
+            throw new Error(
+              context.__('pruvious-api' as any, 'Route is not available in the specified language' as any),
+            )
+          }
+
+          if (!routeIsPublic && !allowDrafts) {
+            throw new Error(context.__('pruvious-api' as any, 'Linking to drafts is not allowed in this field' as any))
+          }
+
+          // Verify the linked record (if any). Records with a `null` subpath are not routed (no
+          // resolvable URL) and are absent from the index, so they are treated as non-existent.
+          if (parsed.collection && isDefined(parsed.recordId)) {
+            const collection = collections[parsed.collection as keyof typeof collections]! as any
+            const translatable = !!collection.meta?.translatable
+            const record = (index.records[parsed.collection] ?? []).find((rec) => rec.id === parsed.recordId)
+
+            if (!record) {
               throw new Error(context.__('pruvious-api' as any, 'Record does not exist' as any))
+            }
+
+            const recordIsDraft = !record.isPublic
+
+            if (translatable && record.language !== effectiveLanguage) {
+              throw new Error(
+                context.__(
+                  'pruvious-api' as any,
+                  'The linked record is not available in the language `$language`' as any,
+                  { language: effectiveLanguage } as any,
+                ),
+              )
+            }
+
+            if (recordIsDraft && !allowDrafts) {
+              throw new Error(
+                context.__('pruvious-api' as any, 'Linking to drafts is not allowed in this field' as any),
+              )
             }
           }
         } else if (value.startsWith('http://') || value.startsWith('https://')) {
+          if (parentOpts.allowExternal === false) {
+            throw new Error(context.__('pruvious-api' as any, 'External links are not allowed in this field' as any))
+          }
+
           try {
             new URL(value)
           } catch {
-            throw new Error(context.__('pruvious-api' as any, 'Invalid input'))
+            throw new Error(context.__('pruvious-api' as any, 'This is not a valid external URL' as any))
           }
         } else {
-          throw new Error(context.__('pruvious-api' as any, 'Invalid input'))
+          throw new Error(context.__('pruvious-api' as any, 'Only internal and external links are allowed' as any))
         }
       },
     ],
@@ -65,7 +171,7 @@ const subfields: Record<string, GenericField> = {
     validators: [
       (value, { context }) => {
         if (isString(value) && !validTargets.includes(value)) {
-          throw new Error(context.__('pruvious-api' as any, 'Invalid input'))
+          throw new Error(context.__('pruvious-api' as any, 'Invalid link target' as any))
         }
       },
     ],
@@ -78,12 +184,25 @@ const subfields: Record<string, GenericField> = {
 
 const customOptions: {
   /**
-   * Restrict selectable links to specific route reference names (collection or singleton names).
-   * When `undefined`, all routable collections and singletons are available.
+   * Whether to allow linking to drafts (non-public routes and records).
    *
-   * @default undefined
+   * When `false`, links to drafts are rejected. Affects `rel://` URLs only.
+   *
+   * @default true
    */
-  allowedReferences?: string[]
+  allowDrafts?: boolean
+
+  /**
+   * Restrict the kinds of links this field accepts. Affects `rel://` URLs only; external URLs are gated separately via `allowExternal`.
+   *
+   * - `'*'` (default) - all routable collections and bare-route links are allowed.
+   * - A collection name (e.g. `'Articles'`) - only `rel://Routes:{id}/{Collection}:{recordId}` links to that collection.
+   * - `'Routes'` - only bare `rel://Routes:{id}` links (singletons, redirects, reference-less routes).
+   * - An array - any of the listed kinds is allowed.
+   *
+   * @default '*'
+   */
+  allowedReferences?: '*' | RouteCollectionReferenceName | 'Routes' | (RouteCollectionReferenceName | 'Routes')[]
 
   /**
    * Whether to allow external URLs (http:// and https://).
@@ -100,23 +219,52 @@ const customOptions: {
   allowHash?: boolean
 
   /**
-   * Whether to show `target` and `rel` attribute fields.
+   * Whether to allow query strings in the URL.
    *
    * @default true
    */
-  allowAttributes?: boolean
+  allowQuery?: boolean
+
+  ui?: {
+    /**
+     * Specifies which languages to show when selecting links.
+     *
+     * @default 'current'
+     */
+    languages?: 'all' | 'current' | LanguageCode[]
+
+    /**
+     * Whether to show the `target` attribute field in the dashboard link picker.
+     *
+     * @default true
+     */
+    showTarget?: boolean
+
+    /**
+     * Whether to show the `rel` attribute field in the dashboard link picker.
+     *
+     * @default true
+     */
+    showRel?: boolean
+  }
 } = {
-  allowedReferences: undefined,
+  allowDrafts: true,
+  allowedReferences: '*',
   allowExternal: true,
   allowHash: true,
-  allowAttributes: true,
+  allowQuery: true,
+  ui: {
+    languages: 'current',
+    showTarget: true,
+    showRel: true,
+  },
 }
 
 interface LinkFieldCastedValue {
   /**
    * The link URL.
    *
-   * Internal links use the `rel://` protocol (e.g., `rel://Routes:1/Articles:5`).
+   * Internal links use the `rel://` protocol (e.g., `rel://Routes:1/Articles:5@en`).
    * External links use standard URL protocols (e.g., `https://example.com`).
    */
   url: string
@@ -124,7 +272,7 @@ interface LinkFieldCastedValue {
   /**
    * The `target` attribute for the link (e.g., `'_blank'`, `'_self'`, or `''`).
    */
-  target: string
+  target: (typeof validTargets)[number]
 
   /**
    * The `rel` attribute for the link (e.g., `'noopener nofollow'` or `''`).
@@ -141,7 +289,7 @@ interface LinkFieldPopulatedValue {
   /**
    * The `target` attribute for the link (e.g., `'_blank'`, `'_self'`, or `''`).
    */
-  target: string
+  target: (typeof validTargets)[number]
 
   /**
    * The `rel` attribute for the link (e.g., `'noopener nofollow'` or `''`).
@@ -156,97 +304,16 @@ export default defineField({
   nullable: true,
   default: null,
   customOptions,
-  validators: [
-    (value, { definition, context }) => {
-      if (isNull(value) || !isString(value.url) || value.url === '') {
-        return
-      }
-
-      const url = value.url as string
-
-      if (!(definition.options.allowHash ?? true) && url.includes('#')) {
-        throw new Error(context.__('pruvious-api', 'Invalid input'))
-      }
-
-      if (!(definition.options.allowExternal ?? true) && !isRelURL(url)) {
-        throw new Error(context.__('pruvious-api', 'Invalid input'))
-      }
-
-      if (definition.options.allowedReferences?.length && isRelURL(url)) {
-        const parsed = parseRelURL(url)
-
-        if (parsed?.collection && !definition.options.allowedReferences.includes(parsed.collection)) {
-          throw new Error(context.__('pruvious-api', 'Invalid input'))
-        }
-      }
-    },
-  ],
-  populator: async (value, contextField) => {
+  uiOptions: { placeholder: true },
+  populator: async (value) => {
     if (isNull(value)) {
       return null
     }
 
-    const { context } = contextField
-    const url = value.url as string
-
-    if (!isRelURL(url)) {
-      // External URL or empty: pass through as-is
-      return {
-        url: url || undefined,
-        target: value.target ?? '',
-        rel: value.rel ?? '',
-      }
-    }
-
-    const parsed = parseRelURL(url)
-
-    if (!parsed) {
-      return { url: undefined, target: value.target ?? '', rel: value.rel ?? '' }
-    }
-
-    const language = (context.customData?.language ?? useRuntimeConfig().pruvious.i18n.primaryLanguage) as LanguageCode
-    const languageSuffix = language.toUpperCase()
-    const { primaryLanguage, prefixPrimaryLanguage } = useRuntimeConfig().pruvious.i18n
-    const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
-
-    // Look up the route base path
-    const route = await selectFrom('Routes').selectRaw(`path${languageSuffix}`).where('id', '=', parsed.routeId).first()
-
-    if (!route.success || !route.data) {
-      return { url: undefined, target: value.target ?? '', rel: value.rel ?? '' }
-    }
-
-    const basePath = route.data[`path${languageSuffix}` as keyof typeof route.data] as string | null
-
-    if (!basePath) {
-      return { url: undefined, target: value.target ?? '', rel: value.rel ?? '' }
-    }
-
-    let resolvedPath: string
-
-    if (parsed.collection && parsed.recordId !== undefined) {
-      // Collection record: look up subpath
-      const record = await (selectFrom as any)(parsed.collection)
-        .selectRaw('subpath')
-        .where('id', '=', parsed.recordId)
-        .first()
-
-      if (!record.success || !record.data) {
-        return { url: undefined, target: value.target ?? '', rel: value.rel ?? '' }
-      }
-
-      resolvedPath = normalizeRoutePath(`${languagePrefix}/${basePath}/${record.data.subpath}`)
-    } else {
-      // Singleton route
-      resolvedPath = normalizeRoutePath(`${languagePrefix}${basePath}`)
-    }
-
-    // Append query and hash
-    const querySuffix = parsed.query ? `?${parsed.query}` : ''
-    const hashSuffix = parsed.hash ? `#${parsed.hash}` : ''
+    const resolved = await populateRelURL(value.url as string)
 
     return {
-      url: resolvedPath + querySuffix + hashSuffix,
+      url: resolved || undefined,
       target: value.target ?? '',
       rel: value.rel ?? '',
     }

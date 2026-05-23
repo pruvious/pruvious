@@ -7,6 +7,8 @@ export default defineTranslation({
 
   'Directory': 'Directory',
 
+  'External links are not allowed in this field': 'External links are not allowed in this field',
+
   'Failed to abort multipart upload': 'Failed to abort multipart upload',
   'Failed to create image variant': 'Failed to create image variant',
   'Failed to create multipart upload': 'Failed to create multipart upload',
@@ -20,6 +22,8 @@ export default defineTranslation({
   'File': 'File',
   'File not found': 'File not found',
 
+  'Hash fragments are not allowed in this field': 'Hash fragments are not allowed in this field',
+
   'Image variant not found': 'Image variant not found',
   'Incorrect credentials': 'Incorrect credentials',
   'Invalid `$param` value. Must be one of: $values': createPattern('Invalid `$param` value. Must be one of: $values', {
@@ -28,8 +32,15 @@ export default defineTranslation({
   }),
   'Invalid input': 'Invalid input',
   'Invalid language code': 'Invalid language code',
+  'Invalid link target': 'Invalid link target',
   'Invalid path': 'Invalid path',
   'Invalid RegExp pattern': 'Invalid RegExp pattern',
+
+  'Linking to `$reference` is not allowed in this field': createPattern(
+    'Linking to `$reference` is not allowed in this field',
+    { reference: 'string' },
+  ),
+  'Linking to drafts is not allowed in this field': 'Linking to drafts is not allowed in this field',
 
   'Missing file parts: $parts': createPattern('Missing file parts: $parts', { parts: 'string' }),
   'Missing image optimization parameters': 'Missing image optimization parameters',
@@ -43,13 +54,17 @@ export default defineTranslation({
   'No file parts have been uploaded': 'No file parts have been uploaded',
   'None': 'None',
 
+  'Only internal and external links are allowed': 'Only internal and external links are allowed',
   'Only one file part can be uploaded at a time': 'Only one file part can be uploaded at a time',
 
   'Pruvious is already installed': 'Pruvious is already installed',
 
+  'Query strings are not allowed in this field': 'Query strings are not allowed in this field',
+
   'Record does not exist': 'Record does not exist',
   'Request content type must be `$type`': createPattern('Request content type must be `$type`', { type: 'string' }),
   'Resource not found': 'Resource not found',
+  'Route is not available in the specified language': 'Route is not available in the specified language',
   'Route reference not found': 'Route reference not found',
 
   'Singleton not found': 'Singleton not found',
@@ -79,6 +94,10 @@ export default defineTranslation({
     { param: 'string', min: 'number', max: 'number' },
   ),
   'The $subject must be an image': createPattern('The $subject must be an image', { subject: 'string' }),
+  'The collection `$collection` cannot be linked to': createPattern(
+    'The collection `$collection` cannot be linked to',
+    { collection: 'string' },
+  ),
   'The difference between the values must be greater than or equal to `$minRange`': createPattern(
     'The difference between the values must be greater than or equal to `$minRange`',
     { minRange: 'string' },
@@ -101,6 +120,10 @@ export default defineTranslation({
   'The language `$language` is not supported': createPattern('The language `$language` is not supported', {
     language: 'string',
   }),
+  'The linked record is not available in the language `$language`': createPattern(
+    'The linked record is not available in the language `$language`',
+    { language: 'string' },
+  ),
   'The new path cannot be a subdirectory of the current path':
     'The new path cannot be a subdirectory of the current path',
   'The new path cannot be the root directory': 'The new path cannot be the root directory',
@@ -155,6 +178,8 @@ export default defineTranslation({
   'This directory contains nested files or directories that cannot be moved':
     'This directory contains nested files or directories that cannot be moved',
   'This field contains non-existent records': 'This field contains non-existent records',
+  'This is not a valid external URL': 'This is not a valid external URL',
+  'This link is not formatted correctly': 'This link is not formatted correctly',
   'This query parameter is required': 'This query parameter is required',
 
   'Yes': 'Yes',

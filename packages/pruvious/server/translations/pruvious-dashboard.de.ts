@@ -41,6 +41,10 @@ export default defineTranslation({
   'Add nested block': 'Verschachtelten Block hinzufügen',
   'Add redirect': 'Weiterleitung hinzufügen',
   'Add top-level block': 'Block auf oberster Ebene hinzufügen',
+  'Added to the end of the URL after a `#` to scroll to a section on the target page.':
+    'Wird der URL nach einem `#` angehängt, um zu einem Abschnitt auf der Zielseite zu springen.',
+  'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.':
+    'Wird der URL nach einem `?` angehängt, zum Beispiel `page=2&sort=asc`.',
   'Administrator': 'Administrator',
   'After': 'Nach',
   'After or equal to': 'Nach oder gleich',
@@ -109,6 +113,7 @@ export default defineTranslation({
   'Bold': 'Fett',
   'Bookmark': 'Merkliste',
   'Bookmarks': 'Merklisten',
+  'Broken link': 'Defekter Link',
 
   'Calendar': 'Kalender',
   'Calendar (seconds precision)': 'Kalender (Sekunden-Präzision)',
@@ -217,6 +222,7 @@ export default defineTranslation({
   'dateFormat:LL': 'Lokalisiertes Datum, lang (z.B. 24. Februar 2025)',
   'dateFormat:ll': 'Lokalisiertes Datum, kurz (z.B. 24. Feb. 2025)',
   'dateFormat:[...]': 'Maskierte Zeichen (z.B. [Jahr])',
+  'Default': 'Standard',
   'Default settings': 'Standard-Einstellungen',
   'Delete': 'Löschen',
   'Delete $count $entries': createPattern(
@@ -268,6 +274,8 @@ export default defineTranslation({
   'Deselect': 'Abwählen',
   'Details': 'Details',
   'Determines the HTML tag to use for the list.': 'Bestimmt das HTML-Tag, das für die Liste verwendet werden soll.',
+  'Determines where the linked page opens. For example, `_blank` opens it in a new browser tab.':
+    'Legt fest, wo die verlinkte Seite geöffnet wird. Zum Beispiel öffnet `_blank` sie in einem neuen Browser-Tab.',
   'Dimensions': 'Abmessungen',
   'Disable': 'Deaktivieren',
   'Disable to use the exact route path.': 'Deaktivieren Sie dies, um den genauen Routenpfad zu verwenden.',
@@ -319,6 +327,7 @@ export default defineTranslation({
   'Execution time': 'Ausführungszeit',
   'Expand': 'Ausklappen',
   'Expand all': 'Alle ausklappen',
+  'External link': 'Externer Link',
 
   'Failed': 'Fehlgeschlagen',
   'False': 'Falsch',
@@ -367,6 +376,7 @@ export default defineTranslation({
   'Has at most': 'Hat höchstens',
   'Has more than': 'Hat mehr als',
   'Has less than': 'Hat weniger als',
+  'Hash': 'Hash',
   'Headers': 'Headers',
   'Heading $level': createPattern('Überschrift $level', { level: 'number' }),
   'Hidden': 'Versteckt',
@@ -427,6 +437,7 @@ export default defineTranslation({
   'Less than': 'Weniger als',
   'Less than or equal to': 'Weniger oder gleich',
   'Light mode': 'Heller Modus',
+  'Link options': 'Link-Optionen',
   'Live Preview': 'Live-Vorschau',
   'List': 'Liste',
   'List item': 'Listeneintrag',
@@ -584,6 +595,7 @@ export default defineTranslation({
     'Weiterleitungen haben Vorrang vor allen anderen Routing-Konfigurationen.',
   'Redo': 'Wiederherstellen',
   'Refresh': 'Refresh',
+  'Relationship (rel)': 'Beziehung (rel)',
   'Reload': 'Neu laden',
   'Remember me': 'Angemeldet bleiben',
   'Remove': 'Entfernen',
@@ -644,6 +656,8 @@ export default defineTranslation({
   ),
   'Session expired': 'Sitzung abgelaufen',
   'Set as default': 'Als Standard festlegen',
+  'Sets the `rel` attribute of the link. Separate multiple tokens with spaces, e.g. `noopener noreferrer`.':
+    'Legt das `rel`-Attribut des Links fest. Trennen Sie mehrere Werte mit Leerzeichen, z.B. `noopener noreferrer`.',
   'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.':
     'Legt fest, wann die Route veröffentlicht wird. Verwenden Sie das aktuelle Datum und die Uhrzeit für eine sofortige Veröffentlichung oder ein zukünftiges Datum, um sie zu planen.',
   'SEO': 'SEO',
@@ -697,6 +711,7 @@ export default defineTranslation({
   'Table overview': 'Tabellenübersicht',
   'Tag': 'Tag',
   'Tags': 'Tags',
+  'Target': 'Ziel',
   'Text': 'Text',
   'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).':
     'Text, der in Browsern vor oder nach dem regulären Seitentitel angezeigt wird (z. B. Seitentitel | Basistitel).',
@@ -825,6 +840,7 @@ export default defineTranslation({
     'Verwenden Sie einen relativen Pfad (ohne führenden Schrägstrich), um an den aktuellen Routenpfad anzuhängen.',
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Verwenden Sie Capture-Gruppen (z.B. `(.+)`), um Teile des gematchten Pfads für die Weiterleitungs-URL zu extrahieren.',
+  'Use external URL': 'Externe URL verwenden',
   'User': 'Benutzer',
   'user ID': 'Benutzer-ID',
   'Users': 'Benutzer',

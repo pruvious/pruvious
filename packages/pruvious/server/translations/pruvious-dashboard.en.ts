@@ -41,6 +41,10 @@ export default defineTranslation({
   'Add nested block': 'Add nested block',
   'Add redirect': 'Add redirect',
   'Add top-level block': 'Add top-level block',
+  'Added to the end of the URL after a `#` to scroll to a section on the target page.':
+    'Added to the end of the URL after a `#` to scroll to a section on the target page.',
+  'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.':
+    'Added to the end of the URL after a `?`, for example `page=2&sort=asc`.',
   'Administrator': 'Administrator',
   'After': 'After',
   'After or equal to': 'After or equal to',
@@ -108,6 +112,7 @@ export default defineTranslation({
   'Bold': 'Bold',
   'Bookmark': 'Bookmark',
   'Bookmarks': 'Bookmarks',
+  'Broken link': 'Broken link',
 
   'Calendar': 'Calendar',
   'Calendar (seconds precision)': 'Calendar (seconds precision)',
@@ -217,6 +222,7 @@ export default defineTranslation({
   'dateFormat:LL': 'Localized date, long (e.g. February 24, 2025)',
   'dateFormat:ll': 'Localized date, short (e.g. Feb 24, 2025)',
   'dateFormat:[...]': 'Escaped characters (e.g. [Year])',
+  'Default': 'Default',
   'Default settings': 'Default settings',
   'Delete': 'Delete',
   'Delete $count $entries': createPattern(
@@ -266,6 +272,8 @@ export default defineTranslation({
   'Deselect': 'Deselect',
   'Details': 'Details',
   'Determines the HTML tag to use for the list.': 'Determines the HTML tag to use for the list.',
+  'Determines where the linked page opens. For example, `_blank` opens it in a new browser tab.':
+    'Determines where the linked page opens. For example, `_blank` opens it in a new browser tab.',
   'Dimensions': 'Dimensions',
   'Disable': 'Disable',
   'Disable to use the exact route path.': 'Disable to use the exact route path.',
@@ -317,6 +325,7 @@ export default defineTranslation({
   'Execution time': 'Execution time',
   'Expand': 'Expand',
   'Expand all': 'Expand all',
+  'External link': 'External link',
 
   'Failed': 'Failed',
   'False': 'False',
@@ -361,10 +370,11 @@ export default defineTranslation({
   'Greater than': 'Greater than',
   'Greater than or equal to': 'Greater than or equal to',
 
-  'Has at least': 'Has less than',
-  'Has at most': 'Has less than',
-  'Has more than': 'Has less than',
+  'Has at least': 'Has at least',
+  'Has at most': 'Has at most',
+  'Has more than': 'Has more than',
   'Has less than': 'Has less than',
+  'Hash': 'Hash',
   'Headers': 'Headers',
   'Heading $level': createPattern('Heading $level', { level: 'number' }),
   'Hidden': 'Hidden',
@@ -425,6 +435,7 @@ export default defineTranslation({
   'Less than': 'Less than',
   'Less than or equal to': 'Less than or equal to',
   'Light mode': 'Light mode',
+  'Link options': 'Link options',
   'Live Preview': 'Live Preview',
   'List': 'List',
   'List item': 'List item',
@@ -582,6 +593,7 @@ export default defineTranslation({
     'Redirects take priority over all other routing configurations.',
   'Redo': 'Redo',
   'Refresh': 'Refresh',
+  'Relationship (rel)': 'Relationship (rel)',
   'Reload': 'Reload',
   'Remember me': 'Remember me',
   'Remove': 'Remove',
@@ -643,6 +655,8 @@ export default defineTranslation({
   'SEO': 'SEO',
   'Session expired': 'Session expired',
   'Set as default': 'Set as default',
+  'Sets the `rel` attribute of the link. Separate multiple tokens with spaces, e.g. `noopener noreferrer`.':
+    'Sets the `rel` attribute of the link. Separate multiple tokens with spaces, e.g. `noopener noreferrer`.',
   'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.':
     'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.',
   'Severity': 'Severity',
@@ -695,6 +709,7 @@ export default defineTranslation({
   'Table overview': 'Table overview',
   'Tag': 'Tag',
   'Tags': 'Tags',
+  'Target': 'Target',
   'Text': 'Text',
   'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).':
     'Text displayed in browsers before or after the regular page title (e.g., Page Title | Base Title).',
@@ -819,6 +834,7 @@ export default defineTranslation({
     'Use a relative path (without leading slash) to append to the current route path.',
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.',
+  'Use external URL': 'Use external URL',
   'User': 'User',
   'user ID': 'user ID',
   'Users': 'Users',

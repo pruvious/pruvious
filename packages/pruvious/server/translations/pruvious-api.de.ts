@@ -7,6 +7,8 @@ export default defineTranslation({
 
   'Directory': 'Ordner',
 
+  'External links are not allowed in this field': 'Externe Links sind in diesem Feld nicht erlaubt',
+
   'Failed to abort multipart upload': 'Das Abbrechen des mehrteiligen Uploads ist fehlgeschlagen',
   'Failed to create image variant': 'Das Erstellen der Bildvariante ist fehlgeschlagen',
   'Failed to create multipart upload': 'Das Erstellen des mehrteiligen Uploads ist fehlgeschlagen',
@@ -20,6 +22,8 @@ export default defineTranslation({
   'File': 'Datei',
   'File not found': 'Die Datei wurde nicht gefunden',
 
+  'Hash fragments are not allowed in this field': 'Hash-Fragmente sind in diesem Feld nicht erlaubt',
+
   'Image variant not found': 'Bildvariante nicht gefunden',
   'Incorrect credentials': 'Falsche Anmeldedaten',
   'Invalid `$param` value. Must be one of: $values': createPattern(
@@ -28,8 +32,15 @@ export default defineTranslation({
   ),
   'Invalid input': 'Ungültige Eingabe',
   'Invalid language code': 'Ungültiger Sprachcode',
+  'Invalid link target': 'Ungültiges Link-Ziel',
   'Invalid path': 'Ungültiger Pfad',
   'Invalid RegExp pattern': 'Ungültiges RegExp-Muster',
+
+  'Linking to `$reference` is not allowed in this field': createPattern(
+    'Das Verlinken zu `$reference` ist in diesem Feld nicht erlaubt',
+    { reference: 'string' },
+  ),
+  'Linking to drafts is not allowed in this field': 'Das Verlinken zu Entwürfen ist in diesem Feld nicht erlaubt',
 
   'Missing file parts: $parts': createPattern('Fehlende Dateiteile: $parts', { parts: 'string' }),
   'Missing image optimization parameters': 'Fehlende Bildoptimierungsparameter',
@@ -43,15 +54,19 @@ export default defineTranslation({
   'No file parts have been uploaded': 'Es wurden keine Dateiteile hochgeladen',
   'None': 'Keine',
 
+  'Only internal and external links are allowed': 'Es sind nur interne und externe Links erlaubt',
   'Only one file part can be uploaded at a time': 'Nur ein Dateiteil kann gleichzeitig hochgeladen werden',
 
   'Pruvious is already installed': 'Pruvious ist bereits installiert',
+
+  'Query strings are not allowed in this field': 'Query-Strings sind in diesem Feld nicht erlaubt',
 
   'Record does not exist': 'Der Datensatz existiert nicht',
   'Request content type must be `$type`': createPattern('Der Anforderungsinhaltstyp muss `$type` sein', {
     type: 'string',
   }),
   'Resource not found': 'Ressource nicht gefunden',
+  'Route is not available in the specified language': 'Die Route ist in der angegebenen Sprache nicht verfügbar',
   'Route reference not found': 'Routenreferenz nicht gefunden',
 
   'Singleton not found': 'Singleton nicht gefunden',
@@ -81,6 +96,10 @@ export default defineTranslation({
     { param: 'string', min: 'number', max: 'number' },
   ),
   'The $subject must be an image': createPattern('Das $subject muss ein Bild sein', { subject: 'string' }),
+  'The collection `$collection` cannot be linked to': createPattern(
+    'Auf die Collection `$collection` kann nicht verlinkt werden',
+    { collection: 'string' },
+  ),
   'The difference between the values must be greater than or equal to `$minRange`': createPattern(
     'Die Differenz zwischen den Werten muss größer oder gleich `$minRange` sein',
     { minRange: 'string' },
@@ -106,6 +125,10 @@ export default defineTranslation({
   'The language `$language` is not supported': createPattern('Die Sprache `$language` wird nicht unterstützt', {
     language: 'string',
   }),
+  'The linked record is not available in the language `$language`': createPattern(
+    'Der verlinkte Datensatz ist in der Sprache `$language` nicht verfügbar',
+    { language: 'string' },
+  ),
   'The new path cannot be a subdirectory of the current path':
     'Der neue Pfad darf kein Unterverzeichnis des aktuellen Pfads sein',
   'The new path cannot be the root directory': 'Der neue Pfad darf nicht das Stammverzeichnis sein',
@@ -161,6 +184,8 @@ export default defineTranslation({
   'This directory contains nested files or directories that cannot be moved':
     'Dieser Ordner enthält verschachtelte Dateien oder Ordner, die nicht verschoben werden können',
   'This field contains non-existent records': 'Dieses Feld enthält nicht existierende Datensätze',
+  'This is not a valid external URL': 'Dies ist keine gültige externe URL',
+  'This link is not formatted correctly': 'Dieser Link ist nicht korrekt formatiert',
   'This query parameter is required': 'Dieser Abfrageparameter ist erforderlich',
 
   'Yes': 'Ja',
