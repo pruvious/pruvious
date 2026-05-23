@@ -75,8 +75,14 @@
     />
 
     <div v-if="!urlError && resolvedDetail" class="p-resolved-path">
-      <NuxtLink :to="resolvedDetail ?? ''" target="_blank" class="p-resolved-path-link">
-        {{ resolvedDetail }}
+      <NuxtLink
+        :title="__('pruvious-dashboard', 'Open in new tab')"
+        :to="resolvedDetail ?? ''"
+        target="_blank"
+        class="p-resolved-path-link"
+      >
+        <span class="pui-truncate">{{ resolvedDetail }}</span>
+        <Icon mode="svg" name="tabler:external-link" class="pui-shrink-0" />
       </NuxtLink>
     </div>
     <PruviousFieldMessage v-else :error="urlError" :name="name" :options="options" />
@@ -475,10 +481,14 @@ function applyOptions(value: { target: string; rel: string; query: string; hash:
 <style scoped>
 .p-resolved-path {
   display: flex;
+  align-items: flex-start;
   margin-top: 0.46875rem;
 }
 
 .p-resolved-path-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   max-width: 100%;
   overflow: hidden;
   font-size: 0.8125rem;
@@ -492,5 +502,9 @@ function applyOptions(value: { target: string; rel: string; query: string; hash:
 .p-resolved-path-link:hover,
 .p-resolved-path-link:focus {
   color: hsl(var(--pui-foreground));
+}
+
+.p-resolved-path-link svg {
+  font-size: 0.875rem;
 }
 </style>

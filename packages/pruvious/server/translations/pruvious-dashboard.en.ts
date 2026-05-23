@@ -551,6 +551,7 @@ export default defineTranslation({
   'OK': 'OK',
   'On': 'On',
   'Open Graph': 'Open Graph',
+  'Open in new tab': 'Open in new tab',
   'Open user menu': 'Open user menu',
   'Operation': 'Operation',
   'or': 'or',

@@ -11,13 +11,31 @@
     :translatable="translatable"
     @commit="$emit('commit', $event)"
     @update:modelValue="$emit('update:modelValue', $event)"
-  />
+  >
+    <template v-if="resolvedPaths?.length" #below>
+      <div class="p-resolved-paths">
+        <NuxtLink
+          v-for="resolved in resolvedPaths"
+          :key="resolved.routeId"
+          :title="__('pruvious-dashboard', 'Open in new tab')"
+          :to="resolved.fullPath"
+          target="_blank"
+          class="p-resolved-path-link"
+        >
+          <span class="pui-truncate">{{ resolved.fullPath }}</span>
+          <Icon mode="svg" name="tabler:external-link" class="pui-shrink-0" />
+        </NuxtLink>
+      </div>
+    </template>
+  </PruviousDashboardPathField>
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage } from '#pruvious/app'
+import { __, primaryLanguage } from '#pruvious/app'
 import { usePruviousDashboard } from '#pruvious/dashboard'
 import type { Collections, SerializableFieldOptions, Singletons } from '#pruvious/server'
+import { isString } from '@pruvious/utils'
+import { computedAsync } from '@vueuse/core'
 
 const props = defineProps({
   /**
@@ -121,11 +139,70 @@ defineEmits<{
 
 const dashboard = usePruviousDashboard()
 const { prefixPrimaryLanguage } = useRuntimeConfig().public.pruvious
+const translatableCollection =
+  props.dataContainerType === 'collection' && !!dashboard.value?.collections[props.dataContainerName]?.translatable
+const recordLanguage = (translatableCollection ? props.data?.language : primaryLanguage) ?? primaryLanguage
 const prefix =
-  props.dataContainerType === 'collection' &&
-  dashboard.value?.collections[props.dataContainerName]?.translatable &&
-  props.data?.language &&
-  (props.data?.language !== primaryLanguage || prefixPrimaryLanguage)
+  translatableCollection && props.data?.language && (props.data.language !== primaryLanguage || prefixPrimaryLanguage)
     ? `/${props.data.language}/.../`
     : '/.../'
+
+interface ResolvedSubpath {
+  routeId: number
+  routePath: string
+  fullPath: string
+  isPublic: boolean
+}
+
+const resolvedPaths = computedAsync<ResolvedSubpath[]>(async () => {
+  if (props.dataContainerType !== 'collection' || !isString(props.modelValue)) {
+    return []
+  }
+
+  try {
+    const res = await $fetch<{ data: ResolvedSubpath[] }>('/api/pruvious/resolved-subpaths', {
+      query: {
+        collection: props.dataContainerName,
+        subpath: props.modelValue,
+        language: recordLanguage,
+      },
+    })
+    return res.data
+  } catch {
+    return []
+  }
+}, [])
 </script>
+
+<style scoped>
+.p-resolved-paths {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  margin-top: 0.46875rem;
+}
+
+.p-resolved-path-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1rem;
+  color: hsl(var(--pui-muted-foreground));
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p-resolved-path-link:hover,
+.p-resolved-path-link:focus {
+  color: hsl(var(--pui-foreground));
+}
+
+.p-resolved-path-link svg {
+  font-size: 0.875rem;
+}
+</style>

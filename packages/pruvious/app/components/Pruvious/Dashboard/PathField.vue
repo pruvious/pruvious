@@ -49,6 +49,8 @@
     </div>
 
     <PruviousFieldMessage :error="error" :name="name" :options="options" />
+
+    <slot name="below" />
   </PUIField>
 </template>
 

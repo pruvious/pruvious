@@ -1,4 +1,3 @@
-import { parseFields } from '../../fields/utils.client'
 import type {
   DashboardLanguageCode,
   GenericRouteReference,
@@ -9,6 +8,7 @@ import type {
 import { deepClone, omit } from '@pruvious/utils'
 import { useDebounceFn, useEventListener } from '@vueuse/core'
 import { hash } from 'ohash'
+import { parseFields } from '../../fields/utils.client'
 import { deserializeTranslatableStringCallbacks, usePruviousDashboard } from '../../pruvious/utils.client'
 import { usePruviousRoute } from '../../routes/composable'
 import { preloadTranslatableStrings } from '../../translations/utils.client'
@@ -270,13 +270,6 @@ function onDashboardDataUpdate(data: Extract<DashboardMessage, { name: 'dashboar
   historySize.value = data.historySize
 
   updateDataHash()
-
-  console.log({
-    blocksSelectionHistory: deepClone(blocksSelectionHistory.value),
-    editableFieldsSelectionHistory: deepClone(editableFieldsSelectionHistory.value),
-    focusBlock: data.focusBlock,
-    allowDashboardBlockSelection: allowDashboardBlockSelection.value,
-  })
 
   if (
     data.focusBlock &&
