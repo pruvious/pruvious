@@ -17,7 +17,7 @@
     :isSubmitting="isSubmitting"
     :label="label"
     :queryBuilder="queryBuilder"
-    @commit="history.push($event)"
+    @commit="onCommit($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
     dataContainerType="collection"
@@ -61,7 +61,7 @@
       :layout="fieldsLayout"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
-      @commit="history.push($event)"
+      @commit="onCommit($event)"
       @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
       @update:modelValue="(_, path) => queueConditionalLogicUpdate(path)"
       dataContainerType="collection"
@@ -122,6 +122,7 @@ import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import {
   blurActiveElement,
   castToNumber,
+  diff,
   isDefined,
   isEmpty,
   isString,
@@ -249,9 +250,52 @@ const fieldsLayout =
     : collection.definition.ui.createPage.fieldsLayout
 const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
 
-await loadFilters('dashboard:collections:new:footer:buttons')
+await loadFilters(
+  'dashboard:collections:new:footer:buttons',
+  'dashboard:collections:new:change',
+  'dashboard:collections:new:before-save',
+  'dashboard:collections:new:after-save',
+)
 const footerButtonsContext = { collection, data, conditionalLogicResolver, conditionalLogic, errors }
 const footerButtons = await applyFilters('dashboard:collections:new:footer:buttons', [], footerButtonsContext)
+
+let commitChain: Promise<void> = Promise.resolve()
+
+function onCommit(_next: Record<string, any>): Promise<void> {
+  commitChain = commitChain.then(async () => {
+    const next = data.value
+    const baseline = history.getCurrentState() ?? {}
+    const changes = diff(baseline, next)
+
+    if (!changes.length) {
+      return
+    }
+
+    let filtered: Record<string, any> = next
+
+    try {
+      filtered = await applyFilters('dashboard:collections:new:change', next, {
+        collection,
+        data,
+        changes,
+        conditionalLogicResolver,
+        conditionalLogic,
+        errors,
+      })
+    } catch (error) {
+      console.error('[pruvious] `dashboard:collections:new:change` filter threw:', error)
+      filtered = next
+    }
+
+    if (JSON.stringify(filtered) !== JSON.stringify(next)) {
+      data.value = filtered
+      queueConditionalLogicUpdate('$reset')
+    }
+
+    history.push(filtered)
+  })
+  return commitChain
+}
 
 onMounted(() => {
   contentLanguage.value = resolvedLanguage
@@ -307,6 +351,8 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
 }, 50)
 
 const saveData = lockAndLoad(isSubmitting, async () => {
+  await commitChain
+
   const preparedData = fillFieldData(
     prepareFieldData(data.value, collection.definition.fields, history.getOriginalState()),
     collection.definition.fields,
@@ -321,15 +367,45 @@ const saveData = lockAndLoad(isSubmitting, async () => {
     preparedData.author = data.value.author
   }
 
-  const query = await queryBuilder.insertInto(collection.name).values(preparedData).returningAll().run()
+  let filteredPreparedData: Record<string, any> = preparedData
+
+  try {
+    filteredPreparedData = await applyFilters('dashboard:collections:new:before-save', preparedData, {
+      collection,
+      data,
+      conditionalLogicResolver,
+      conditionalLogic,
+      errors,
+    })
+  } catch (error) {
+    console.error('[pruvious] `dashboard:collections:new:before-save` filter threw:', error)
+    filteredPreparedData = preparedData
+  }
+
+  const query = await queryBuilder.insertInto(collection.name).values(filteredPreparedData).returningAll().run()
 
   if (query.success) {
     if (!isEmpty(query.data)) {
-      data.value = query.data[0]!
+      const saved = query.data[0]!
+      let afterSave: Record<string, any> = saved
+      try {
+        afterSave = await applyFilters('dashboard:collections:new:after-save', saved, {
+          collection,
+          id: saved.id,
+          data,
+          conditionalLogicResolver,
+          conditionalLogic,
+          errors,
+        })
+      } catch (error) {
+        console.error('[pruvious] `dashboard:collections:new:after-save` filter threw:', error)
+        afterSave = saved
+      }
+      data.value = afterSave
       errors.value = {}
       history.push(data.value).setOriginalState(data.value)
       puiQueueToast(__('pruvious-dashboard', 'Created'), { type: 'success', showAfterRouteChange: true })
-      await navigateTo(dashboardBasePath + `collections/${route.params.collection}/${data.value.id}`)
+      await navigateTo(dashboardBasePath + `collections/${route.params.collection}/${saved.id}`)
     } else {
       puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
         type: 'error',

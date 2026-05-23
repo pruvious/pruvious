@@ -19,7 +19,13 @@ export default defineEventHandler(async (event) => {
   const seoByLanguage = await Promise.all(
     i18n.languages.map(async ({ code }) => ({
       code,
-      data: (await selectSingleton('SEO').language(code as LanguageCode).populate().get()).data ?? ({} as any),
+      data:
+        (
+          await selectSingleton('SEO')
+            .language(code as LanguageCode)
+            .populate()
+            .get()
+        ).data ?? ({} as any),
     })),
   )
 

@@ -17,7 +17,7 @@
     :layout="singleton.definition.ui.fieldsLayout"
     :singleton="singleton"
     :singletonLanguage="singletonLanguage"
-    @commit="history.push($event)"
+    @commit="onCommit($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
     dataContainerType="singleton"
@@ -40,7 +40,7 @@
       :layout="singleton.definition.ui.fieldsLayout"
       :syncedFields="singleton.definition.syncedFields"
       :translatable="singleton.definition.translatable"
-      @commit="history.push($event)"
+      @commit="onCommit($event)"
       @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
       @update:modelValue="(_, path) => queueConditionalLogicUpdate(path)"
       dataContainerType="singleton"
@@ -149,7 +149,17 @@ import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
-import { blurActiveElement, isDefined, isString, isUndefined, lockAndLoad, titleCase, toArray } from '@pruvious/utils'
+import {
+  blurActiveElement,
+  diff,
+  isDefined,
+  isObject,
+  isString,
+  isUndefined,
+  lockAndLoad,
+  titleCase,
+  toArray,
+} from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import { resolveSingletonLayout } from '../../../utils/pruvious/dashboard/layout'
 
@@ -203,9 +213,53 @@ const isSingletonMenuVisible = ref(false)
 const singletonMenuButton = useTemplateRef('singletonMenuButton')
 const isTranslationPopupVisible = ref(false)
 
-await loadFilters('dashboard:singletons:footer:buttons')
+await loadFilters(
+  'dashboard:singletons:footer:buttons',
+  'dashboard:singletons:change',
+  'dashboard:singletons:before-save',
+  'dashboard:singletons:after-save',
+)
 const footerButtonsContext = { singleton, data, singletonLanguage, conditionalLogicResolver, conditionalLogic, errors }
 const footerButtons = await applyFilters('dashboard:singletons:footer:buttons', [], footerButtonsContext)
+
+let commitChain: Promise<void> = Promise.resolve()
+
+function onCommit(_next: Record<string, any>): Promise<void> {
+  commitChain = commitChain.then(async () => {
+    const next = data.value ?? {}
+    const baseline = history.getCurrentState() ?? {}
+    const changes = diff(baseline, next)
+
+    if (!changes.length) {
+      return
+    }
+
+    let filtered: Record<string, any> = next
+
+    try {
+      filtered = await applyFilters('dashboard:singletons:change', next, {
+        singleton,
+        data,
+        singletonLanguage,
+        changes,
+        conditionalLogicResolver,
+        conditionalLogic,
+        errors,
+      })
+    } catch (error) {
+      console.error('[pruvious] `dashboard:singletons:change` filter threw:', error)
+      filtered = next
+    }
+
+    if (JSON.stringify(filtered) !== JSON.stringify(next)) {
+      data.value = filtered as typeof data.value
+      queueConditionalLogicUpdate('$reset')
+    }
+
+    history.push(filtered)
+  })
+  return commitChain
+}
 
 watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
   if (newContentLanguage !== singletonLanguage.value) {
@@ -278,7 +332,24 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
 }, 50)
 
 const saveData = lockAndLoad(isSubmitting, async () => {
-  const preparedData = prepareFieldData(data.value, singleton.definition.fields, history.getOriginalState())
+  await commitChain
+
+  const initialPreparedData = prepareFieldData(data.value, singleton.definition.fields, history.getOriginalState())
+  let preparedData: Record<string, any> = initialPreparedData
+
+  try {
+    preparedData = await applyFilters('dashboard:singletons:before-save', initialPreparedData, {
+      singleton,
+      data,
+      singletonLanguage,
+      conditionalLogicResolver,
+      conditionalLogic,
+      errors,
+    })
+  } catch (error) {
+    console.error('[pruvious] `dashboard:singletons:before-save` filter threw:', error)
+    preparedData = initialPreparedData
+  }
   const query = await new SingletonUpdateQueryBuilder(singleton.name, { fetcher: pruviousDashboardPatch })
     .set(preparedData)
     .language((singleton.definition.translatable ? contentLanguage.value : null) as never)
@@ -286,7 +357,23 @@ const saveData = lockAndLoad(isSubmitting, async () => {
     .run()
 
   if (query.success) {
-    data.value = query.data
+    let afterSave: Record<string, any> = query.data as Record<string, any>
+    try {
+      const filtered = await applyFilters('dashboard:singletons:after-save', query.data, {
+        singleton,
+        data,
+        singletonLanguage,
+        conditionalLogicResolver,
+        conditionalLogic,
+        errors,
+      })
+      if (filtered && isObject(filtered)) {
+        afterSave = filtered
+      }
+    } catch (error) {
+      console.error('[pruvious] `dashboard:singletons:after-save` filter threw:', error)
+    }
+    data.value = afterSave as typeof data.value
     errors.value = {}
     history.push(data.value).setOriginalState(data.value)
     puiQueueToast(__('pruvious-dashboard', 'Saved'), { type: 'success' })

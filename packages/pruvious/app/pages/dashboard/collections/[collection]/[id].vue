@@ -19,7 +19,7 @@
     :label="label"
     :queryBuilder="queryBuilder"
     :recordLanguage="recordLanguage"
-    @commit="history.push($event)"
+    @commit="onCommit($event)"
     @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
     @save="saveData()"
     dataContainerType="collection"
@@ -52,7 +52,7 @@
       :layout="fieldsLayout"
       :syncedFields="collection.definition.syncedFields"
       :translatable="collection.definition.translatable"
-      @commit="history.push($event)"
+      @commit="onCommit($event)"
       @queueConditionalLogicUpdate="queueConditionalLogicUpdate($event)"
       @update:modelValue="(_, path) => queueConditionalLogicUpdate(path)"
       dataContainerType="collection"
@@ -182,6 +182,7 @@ import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import {
   blurActiveElement,
   castToNumber,
+  diff,
   isDefined,
   isEmpty,
   isString,
@@ -292,9 +293,53 @@ const recordMenuButton = useTemplateRef('recordMenuButton')
 const isTranslationPopupVisible = ref(false)
 const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
 
-await loadFilters('dashboard:collections:edit:footer:buttons')
+await loadFilters(
+  'dashboard:collections:edit:footer:buttons',
+  'dashboard:collections:edit:change',
+  'dashboard:collections:edit:before-save',
+  'dashboard:collections:edit:after-save',
+)
 const footerButtonsContext = { collection, data, id, conditionalLogicResolver, conditionalLogic, errors }
 const footerButtons = await applyFilters('dashboard:collections:edit:footer:buttons', [], footerButtonsContext)
+
+let commitChain: Promise<void> = Promise.resolve()
+
+function onCommit(_next: Record<string, any>): Promise<void> {
+  commitChain = commitChain.then(async () => {
+    const next = data.value
+    const baseline = history.getCurrentState() ?? {}
+    const changes = diff(baseline, next)
+
+    if (!changes.length) {
+      return
+    }
+
+    let filtered: Record<string, any> = next
+
+    try {
+      filtered = await applyFilters('dashboard:collections:edit:change', next, {
+        collection,
+        id,
+        data,
+        changes,
+        conditionalLogicResolver,
+        conditionalLogic,
+        errors,
+      })
+    } catch (error) {
+      console.error('[pruvious] `dashboard:collections:edit:change` filter threw:', error)
+      filtered = next
+    }
+
+    if (JSON.stringify(filtered) !== JSON.stringify(next)) {
+      data.value = filtered
+      queueConditionalLogicUpdate('$reset')
+    }
+
+    history.push(filtered)
+  })
+  return commitChain
+}
 
 onMounted(() => {
   watch(contentLanguage, async (newContentLanguage, oldContentLanguage) => {
@@ -415,12 +460,44 @@ const updateConditionalLogicDebounced = useDebounceFn(() => {
 }, 50)
 
 const saveData = lockAndLoad(isSubmitting, async () => {
-  const preparedData = prepareFieldData(data.value, collection.definition.fields, history.getOriginalState())
+  await commitChain
+
+  const initialPreparedData = prepareFieldData(data.value, collection.definition.fields, history.getOriginalState())
+  let preparedData = initialPreparedData
+
+  try {
+    preparedData = await applyFilters('dashboard:collections:edit:before-save', initialPreparedData, {
+      collection,
+      id,
+      data,
+      conditionalLogicResolver,
+      conditionalLogic,
+      errors,
+    })
+  } catch (error) {
+    console.error('[pruvious] `dashboard:collections:edit:before-save` filter threw:', error)
+    preparedData = initialPreparedData
+  }
   const query = await queryBuilder.update(collection.name).set(preparedData).where('id', '=', id).returningAll().run()
 
   if (query.success) {
     if (!isEmpty(query.data)) {
-      data.value = query.data[0]!
+      const saved = query.data[0]!
+      let afterSave: Record<string, any> = saved
+      try {
+        afterSave = await applyFilters('dashboard:collections:edit:after-save', saved, {
+          collection,
+          id,
+          data,
+          conditionalLogicResolver,
+          conditionalLogic,
+          errors,
+        })
+      } catch (error) {
+        console.error('[pruvious] `dashboard:collections:edit:after-save` filter threw:', error)
+        afterSave = saved
+      }
+      data.value = afterSave
       errors.value = {}
       history.push(data.value).setOriginalState(data.value)
       puiQueueToast(__('pruvious-dashboard', 'Saved'), { type: 'success' })

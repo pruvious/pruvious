@@ -357,9 +357,7 @@ function toResolvedSharingImage(
  *
  * Sources are listed from lowest to highest priority - later entries win when they are not null.
  */
-function pickSharingImage(
-  ...sources: (PopulatedSharingImage | null | undefined)[]
-): PopulatedSharingImage | null {
+function pickSharingImage(...sources: (PopulatedSharingImage | null | undefined)[]): PopulatedSharingImage | null {
   let result: PopulatedSharingImage | null = null
   for (const src of sources) {
     if (src && src.path) {
@@ -873,7 +871,12 @@ export async function listRoutes(options?: ListRoutesOptions): Promise<ListRoute
     const map: Record<string, boolean> = {}
     await Promise.all(
       languages.map(async ({ code }) => {
-        const data = (await selectSingleton('SEO').language(code as LanguageCode).populate().get()).data
+        const data = (
+          await selectSingleton('SEO')
+            .language(code as LanguageCode)
+            .populate()
+            .get()
+        ).data
         map[code] = data?.isIndexable !== false
       }),
     )
