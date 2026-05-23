@@ -434,12 +434,14 @@ function open(event?: Event) {
     const rootBottom = parentHeight - rootTop
 
     let height = 0
+    let overflows = false
 
     for (let i = 1; i <= Math.min(items, 12); i++) {
       height += itemHeight
 
       if (height + 4 > parentHeight) {
         height = parentHeight - 6
+        overflows = true
         break
       }
     }
@@ -451,7 +453,12 @@ function open(event?: Event) {
     } else {
       choicesTopOffset.value = rootBottom - choicesHeight.value - 2
       choicesTopOffset.value += 4
-      choicesHeight.value -= 8
+
+      if (overflows) {
+        choicesHeight.value -= 8
+      } else {
+        choicesTopOffset.value -= 8
+      }
     }
 
     // Set highlighted choice and scroll to it
