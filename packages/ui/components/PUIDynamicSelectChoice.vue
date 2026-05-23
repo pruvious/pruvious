@@ -43,7 +43,10 @@
     }"
   >
     <span :title="choice.label ?? String(choice.value)" class="pui-dynamic-select-choice-content">
-      <span class="pui-dynamic-select-choice-label">{{ (choice.label ?? choice.value) || '-' }}</span>
+      <span class="pui-dynamic-select-choice-label-row">
+        <span class="pui-dynamic-select-choice-label">{{ (choice.label ?? choice.value) || '-' }}</span>
+        <span v-if="choice.badge" class="pui-dynamic-select-badge">{{ choice.badge }}</span>
+      </span>
       <span v-if="choice.detail !== undefined" class="pui-dynamic-select-choice-detail">
         {{ choice.detail || '-' }}
       </span>

@@ -63,6 +63,8 @@
         {{ placeholder }}
       </span>
 
+      <span v-if="selectedChoice?.badge" class="pui-dynamic-select-badge">{{ selectedChoice.badge }}</span>
+
       <Icon mode="svg" name="tabler:selector" size="1.125em" class="pui-dynamic-select-icon" />
 
       <div
@@ -115,7 +117,7 @@
 
 <script lang="ts" setup>
 import { blurActiveElement, deepCompare, isDefined, isNull, last, next, prev, type Primitive } from '@pruvious/utils'
-import { onClickOutside, useDebounceFn, useEventListener, useScrollLock } from '@vueuse/core'
+import { onClickOutside, useEventListener, useScrollLock } from '@vueuse/core'
 import { puiTrigger } from '../pui/trigger'
 import type PUIScrollable from './PUIScrollable.vue'
 
@@ -132,6 +134,11 @@ export interface PUIDynamicSelectChoiceModel {
    * It is displayed in a grayed out style below the label.
    */
   detail?: string
+
+  /**
+   * An optional badge label shown as a small chip next to the choice label.
+   */
+  badge?: string
 
   /**
    * The value of the choice in the select field.
@@ -277,6 +284,17 @@ const props = defineProps({
     type: String,
     default: 'No results found',
   },
+
+  /**
+   * An optional keyword used to pre-fill the search input each time the dropdown opens.
+   * Useful when the current value is free-form text the user may want to copy or edit.
+   *
+   * @default ''
+   */
+  initialKeyword: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits<{
@@ -293,7 +311,7 @@ const currentPage = ref(1)
 const lastPage = ref(1)
 const perPage = ref(10)
 const total = ref(0)
-const hasDetails = ref(false)
+const hasDetails = computed(() => isDefined(choices.value[0]?.detail))
 const selectedChoice = ref<PUIDynamicSelectChoiceModel | null>(await props.selectedChoiceResolver(props.modelValue))
 const highlightedChoice = ref<PUIDynamicSelectChoiceModel>()
 const choicesHeight = ref<number>()
@@ -314,6 +332,11 @@ let transitionDuration = 300
  * Timeout to unpause mouse events after a delay following mouse movement.
  */
 let unpauseMouseTimeout: ReturnType<typeof setInterval> | undefined
+
+/**
+ * Debounce timer for the keyword search.
+ */
+let searchTimer: ReturnType<typeof setTimeout> | undefined
 
 /**
  * Stops listening for focus events.
@@ -410,14 +433,24 @@ onMounted(() => {
  */
 async function open(event?: Event) {
   if (!isExpanded.value) {
+    event?.preventDefault()
+
+    // Pre-fill the search input so a free-form value can be copied or edited instead of retyped.
+    keyword.value = props.initialKeyword
+
     // Fetch choices
+    const fc = ++fetchCounter.value
     const paginatedChoices = await props.choicesResolver(1, keyword.value)
+
+    if (fc !== fetchCounter.value) {
+      return
+    }
+
     choices.value = paginatedChoices.choices
     currentPage.value = paginatedChoices.currentPage
     lastPage.value = paginatedChoices.lastPage
     perPage.value = paginatedChoices.perPage
     total.value = paginatedChoices.total
-    hasDetails.value = isDefined(paginatedChoices.choices[0]?.detail)
 
     // Expand
     isExpanded.value = true
@@ -438,11 +471,11 @@ async function open(event?: Event) {
     // Pause mouse events
     mousePaused.value = true
 
-    // Focus the keyword input
-    setTimeout(() => keywordInput.value?.focus(), transitionDuration)
-
-    // Prevent the default behavior of keydown events
-    event?.preventDefault()
+    // Focus the keyword input, selecting any pre-filled text so it can be copied or replaced
+    setTimeout(() => {
+      keywordInput.value?.focus()
+      keywordInput.value?.select()
+    }, transitionDuration)
   }
 }
 
@@ -478,7 +511,11 @@ function close(event?: Event) {
     perPage.value = 0
     total.value = 0
 
-    // Clear the keyword input
+    // Cancel any pending keyword search and clear the keyword input
+    if (searchTimer) {
+      clearTimeout(searchTimer)
+      searchTimer = undefined
+    }
     keyword.value = ''
 
     // Prevent the default behavior of keydown events
@@ -550,8 +587,10 @@ function selectHighlighted(event?: Event) {
 /**
  * Selects the highlighted choice and/or closes the choices list.
  */
-function selectHighlightedOrClose(event?: Event) {
+async function selectHighlightedOrClose(event?: Event) {
   if (isExpanded.value) {
+    await flushKeywordSearch()
+
     if (highlightedChoice.value) {
       selectHighlighted(event)
     } else {
@@ -653,23 +692,46 @@ function unpauseMouseDelayed() {
   }
 }
 
-const onKeywordInput = useDebounceFn(async () => {
-  if (isExpanded.value) {
-    highlightedChoice.value = undefined
-    const fc = ++fetchCounter.value
-    const paginatedChoices = await props.choicesResolver(1, keyword.value)
+async function searchChoices() {
+  highlightedChoice.value = undefined
+  const fc = ++fetchCounter.value
+  const paginatedChoices = await props.choicesResolver(1, keyword.value)
 
-    if (isExpanded.value && fc === fetchCounter.value && !deepCompare(paginatedChoices.choices, choices.value)) {
+  if (isExpanded.value && fc === fetchCounter.value) {
+    if (!deepCompare(paginatedChoices.choices, choices.value)) {
       choices.value = paginatedChoices.choices
       currentPage.value = paginatedChoices.currentPage
       lastPage.value = paginatedChoices.lastPage
       perPage.value = paginatedChoices.perPage
       total.value = paginatedChoices.total
       updateSizes()
-      focusFirst()
+    }
+    focusFirst()
+  }
+}
+
+function onKeywordInput() {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  searchTimer = setTimeout(() => {
+    searchTimer = undefined
+    if (isExpanded.value) {
+      searchChoices()
+    }
+  }, 250)
+}
+
+async function flushKeywordSearch() {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = undefined
+
+    if (isExpanded.value) {
+      await searchChoices()
     }
   }
-}, 250)
+}
 
 /**
  * Updates the height and offsets of the choices list.
@@ -682,6 +744,7 @@ function updateSizes() {
   const rootBottom = parentHeight - rootTop
 
   let height = itemHeight + 2
+  let overflows = false
 
   if (choices.value.length) {
     for (let i = 1; i <= Math.min(choices.value.length, 11); i++) {
@@ -689,6 +752,7 @@ function updateSizes() {
 
       if (height + 4 > parentHeight) {
         height = parentHeight - 6
+        overflows = true
         break
       }
     }
@@ -697,6 +761,7 @@ function updateSizes() {
 
     if (height + 4 > parentHeight) {
       height = parentHeight - 6
+      overflows = true
     }
   }
 
@@ -707,7 +772,12 @@ function updateSizes() {
   } else {
     choicesTopOffset.value = rootBottom - choicesHeight.value - 2
     choicesTopOffset.value += 4
-    choicesHeight.value -= 10
+
+    if (overflows) {
+      choicesHeight.value -= 10
+    } else {
+      choicesTopOffset.value -= 10
+    }
   }
 }
 </script>
@@ -840,6 +910,7 @@ function updateSizes() {
 .pui-dynamic-select-choice-content,
 .pui-dynamic-select-choice-label,
 .pui-dynamic-select-choice-detail {
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -851,9 +922,35 @@ function updateSizes() {
   text-align: left;
 }
 
+.pui-dynamic-select-choice-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375em;
+  overflow: hidden;
+}
+
 .pui-dynamic-select-choice-detail {
   color: hsl(var(--pui-muted-foreground));
   font-size: 0.875em;
+}
+
+.pui-dynamic-select-badge {
+  flex-shrink: 0;
+  padding: 0 0.375em;
+  border-radius: calc(var(--pui-radius) - 0.25rem);
+  background-color: hsl(var(--pui-accent));
+  color: hsl(var(--pui-accent-foreground));
+  font-size: 0.75em;
+  line-height: 1.5;
+}
+
+.pui-dynamic-select-choice-highlighted .pui-dynamic-select-badge {
+  background-color: hsl(var(--pui-foreground));
+  color: hsl(var(--pui-accent));
+}
+
+.pui-dynamic-select-selected-choice + .pui-dynamic-select-badge {
+  margin-left: -0.125em;
 }
 
 .pui-dynamic-select-keyword {
