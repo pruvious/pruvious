@@ -164,7 +164,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "packageManager": "pnpm@9.4.0",
+  "packageManager": "pnpm@11.1.3",
   "engines": {
     "node": ">=20"
   }
