@@ -42,11 +42,14 @@ export async function resolveLayouts(): Promise<{
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'layouts'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'layouts'), {
-        endsWith: '.vue',
-      })) {
-        errors += await resolveLayout(fullPath, relativePath, records, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'layouts')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath, relativePath } of walkDir(dir, {
+          endsWith: '.vue',
+        })) {
+          errors += await resolveLayout(fullPath, relativePath, records, true)
+        }
       }
     }
   }

@@ -41,12 +41,15 @@ export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: n
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'jobs'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'jobs'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveJob(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'jobs')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveJob(fullPath, records, false, true)
+        }
       }
     }
   }

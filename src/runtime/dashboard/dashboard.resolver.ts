@@ -33,12 +33,15 @@ export function resolveDashboardPages(): { records: Record<string, ResolvedDashb
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'dashboard'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'dashboard'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveDashboardPage(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'dashboard')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveDashboardPage(fullPath, records, false, true)
+        }
       }
     }
   }

@@ -34,12 +34,15 @@ export function resolveHooks(): { records: Record<string, ResolvedHook>; errors:
   }
 
   for (const layer of getModuleOption('layers').slice(1).reverse()) {
-    if (fs.existsSync(resolve(layer, 'hooks'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'hooks'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveHook(fullPath, records, false)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'hooks')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveHook(fullPath, records, false)
+        }
       }
     }
   }

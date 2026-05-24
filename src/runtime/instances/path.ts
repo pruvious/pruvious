@@ -46,10 +46,12 @@ export function resolveLayerPath(...path: string[]): string {
   const joined = join(...path)
 
   for (const layer of getModuleOption('layers')) {
-    const resolved = resolve(layer, joined)
+    for (const base of new Set([layer.src, layer.root])) {
+      const resolved = resolve(base, joined)
 
-    if (existsSync(resolved)) {
-      return resolved
+      if (existsSync(resolved)) {
+        return resolved
+      }
     }
   }
 

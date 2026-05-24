@@ -48,12 +48,15 @@ export function resolveFields(): { records: Record<string, ResolvedField>; error
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'fields'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'fields'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveField(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'fields')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveField(fullPath, records, false, true)
+        }
       }
     }
   }

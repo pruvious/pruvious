@@ -45,12 +45,15 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'translatable-strings'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'translatable-strings'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveTranslatableStringFile(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'translatable-strings')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveTranslatableStringFile(fullPath, records, false, true)
+        }
       }
     }
   }

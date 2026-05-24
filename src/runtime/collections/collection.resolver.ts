@@ -46,12 +46,15 @@ export function resolveCollections(): { records: Record<string, ResolvedCollecti
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'collections'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'collections'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveCollection(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'collections')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveCollection(fullPath, records, false, true)
+        }
       }
     }
   }

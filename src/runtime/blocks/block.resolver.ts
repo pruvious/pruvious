@@ -48,9 +48,12 @@ export async function resolveBlocks(
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'blocks'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'blocks'), { endsWith: '.vue' })) {
-        errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'blocks')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath, relativePath } of walkDir(dir, { endsWith: '.vue' })) {
+          errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
+        }
       }
     }
   }
