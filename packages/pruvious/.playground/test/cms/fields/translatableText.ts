@@ -10,26 +10,26 @@ describe('translatable text field', () => {
 
   test('create, filter, update', async () => {
     expect(await $postAsAdmin(translatableText, { translatableText: undefined })).toEqual([
-      { translatableText: { en: 'Default', de: 'Standard', bs: 'Zadano' } },
-    ])
-    expect(await $postAsAdmin(translatableText, { translatableText: { en: 'foo', de: '', bs: '' } })).toEqual([
-      { translatableText: { en: 'foo', de: '', bs: '' } },
+      { translatableText: { 'en': 'Default', 'de': 'Standard', 'de-AT': 'Standard (AT)', 'bs': 'Zadano' } },
     ])
     expect(
+      await $postAsAdmin(translatableText, { translatableText: { 'en': 'foo', 'de': '', 'de-AT': '', 'bs': '' } }),
+    ).toEqual([{ translatableText: { 'en': 'foo', 'de': '', 'de-AT': '', 'bs': '' } }])
+    expect(
       await $getAsAdmin(`/api/collections/fields?select=translatableText&where=translatableText[like][%"en":"foo"%]`),
-    ).toEqual($paginated([{ translatableText: { en: 'foo', de: '', bs: '' } }]))
+    ).toEqual($paginated([{ translatableText: { 'en': 'foo', 'de': '', 'de-AT': '', 'bs': '' } }]))
     expect(
       await $patchAsAdmin(
         `/api/collections/fields?returning=translatableText&where=translatableText[like][%"en":"foo"%]`,
-        { translatableText: { en: 'bar', de: '', bs: '' } },
+        { translatableText: { 'en': 'bar', 'de': '', 'de-AT': '', 'bs': '' } },
       ),
-    ).toEqual([{ translatableText: { en: 'bar', de: '', bs: '' } }])
+    ).toEqual([{ translatableText: { 'en': 'bar', 'de': '', 'de-AT': '', 'bs': '' } }])
   })
 
   test('sanitizers', async () => {
-    expect(await $postAsAdmin(translatableText, { translatableText: { en: 123, de: '', bs: '' } })).toEqual([
-      { translatableText: { en: '123', de: '', bs: '' } },
-    ])
+    expect(
+      await $postAsAdmin(translatableText, { translatableText: { 'en': 123, 'de': '', 'de-AT': '', 'bs': '' } }),
+    ).toEqual([{ translatableText: { 'en': '123', 'de': '', 'de-AT': '', 'bs': '' } }])
   })
 
   test('validators', async () => {
@@ -49,77 +49,86 @@ describe('translatable text field', () => {
           'translatableText.en': expect.any(String),
           'translatableText.de': expect.any(String),
           'translatableText.bs': expect.any(String),
+          'translatableText.de-AT': expect.any(String),
         },
       ]),
     )
-    expect(await $postAsAdmin(translatableText, { translatableText: { en: 1, de: true, bs: null } })).toEqual(
-      $422([{ 'translatableText.de': expect.any(String), 'translatableText.bs': expect.any(String) }]),
-    )
-    expect(await $postAsAdmin(translatableText, { translatableText: { de: '', bs: '' } })).toEqual(
+    expect(
+      await $postAsAdmin(translatableText, { translatableText: { 'en': 1, 'de': true, 'de-AT': '', 'bs': null } }),
+    ).toEqual($422([{ 'translatableText.de': expect.any(String), 'translatableText.bs': expect.any(String) }]))
+    expect(await $postAsAdmin(translatableText, { translatableText: { 'de': '', 'de-AT': '', 'bs': '' } })).toEqual(
       $422([{ 'translatableText.en': expect.any(String) }]),
     )
-    expect(await $postAsAdmin(translatableText, { translatableText: { en: '', de: '', bs: '', __: '' } })).toEqual(
-      $422([{ 'translatableText.__': expect.any(String) }]),
-    )
+    expect(
+      await $postAsAdmin(translatableText, {
+        translatableText: { 'en': '', 'de': '', 'de-AT': '', 'bs': '', '__': '' },
+      }),
+    ).toEqual($422([{ 'translatableText.__': expect.any(String) }]))
 
     // min/max
     expect(
       await $postAsAdmin(translatableTextMinMax, {
-        translatableTextMinMax: { en: 'foobar', de: 'foobar', bs: 'foobar' },
+        translatableTextMinMax: { 'en': 'foobar', 'de': 'foobar', 'de-AT': 'foobar', 'bs': 'foobar' },
       }),
-    ).toEqual([{ translatableTextMinMax: { en: 'foobar', de: 'foobar', bs: 'foobar' } }])
+    ).toEqual([{ translatableTextMinMax: { 'en': 'foobar', 'de': 'foobar', 'de-AT': 'foobar', 'bs': 'foobar' } }])
     expect(
       await $postAsAdmin(translatableTextMinMax, {
-        translatableTextMinMax: { en: 'foobarba', de: 'foobarba', bs: 'foobarba' },
+        translatableTextMinMax: { 'en': 'foobarba', 'de': 'foobarba', 'de-AT': 'foobarba', 'bs': 'foobarba' },
       }),
-    ).toEqual([{ translatableTextMinMax: { en: 'foobarba', de: 'foobarba', bs: 'foobarba' } }])
+    ).toEqual([
+      { translatableTextMinMax: { 'en': 'foobarba', 'de': 'foobarba', 'de-AT': 'foobarba', 'bs': 'foobarba' } },
+    ])
     expect(
       await $postAsAdmin(translatableTextMinMax, {
-        translatableTextMinMax: { en: 'fooba', de: 'foobar', bs: 'foobar' },
+        translatableTextMinMax: { 'en': 'fooba', 'de': 'foobar', 'de-AT': 'foobar', 'bs': 'foobar' },
       }),
     ).toEqual($422([{ 'translatableTextMinMax.en': expect.any(String) }]))
     expect(
       await $postAsAdmin(translatableTextMinMax, {
-        translatableTextMinMax: { en: 'foobarbaz', de: 'foobar', bs: 'foobar' },
+        translatableTextMinMax: { 'en': 'foobarbaz', 'de': 'foobar', 'de-AT': 'foobar', 'bs': 'foobar' },
       }),
     ).toEqual($422([{ 'translatableTextMinMax.en': expect.any(String) }]))
 
     // allowEmptyString
     expect(
       await $postAsAdmin(translatableTextAllowEmptyString, {
-        translatableTextAllowEmptyString: { en: '', de: '', bs: '' },
+        translatableTextAllowEmptyString: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' },
       }),
-    ).toEqual([{ translatableTextAllowEmptyString: { en: '', de: '', bs: '' } }])
+    ).toEqual([{ translatableTextAllowEmptyString: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' } }])
     expect(
       await $postAsAdmin(translatableTextAllowEmptyString, {
-        translatableTextAllowEmptyString: { en: ' ', de: '', bs: '' },
+        translatableTextAllowEmptyString: { 'en': ' ', 'de': '', 'de-AT': '', 'bs': '' },
       }),
-    ).toEqual([{ translatableTextAllowEmptyString: { en: '', de: '', bs: '' } }])
+    ).toEqual([{ translatableTextAllowEmptyString: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' } }])
     expect(
       await $postAsAdmin(translatableTextAllowEmptyString, { translatableTextAllowEmptyString: undefined }),
-    ).toEqual([{ translatableTextAllowEmptyString: { en: '', de: '', bs: '' } }])
+    ).toEqual([{ translatableTextAllowEmptyString: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' } }])
 
     // noTrim
     expect(
-      await $postAsAdmin(translatableTextNoTrim, { translatableTextNoTrim: { en: '  ', de: '', bs: '' } }),
-    ).toEqual([{ translatableTextNoTrim: { en: '  ', de: '', bs: '' } }])
+      await $postAsAdmin(translatableTextNoTrim, {
+        translatableTextNoTrim: { 'en': '  ', 'de': '', 'de-AT': '', 'bs': '' },
+      }),
+    ).toEqual([{ translatableTextNoTrim: { 'en': '  ', 'de': '', 'de-AT': '', 'bs': '' } }])
     expect(
-      await $postAsAdmin(translatableTextNoTrim, { translatableTextNoTrim: { en: '  foo  ', de: '', bs: '' } }),
-    ).toEqual([{ translatableTextNoTrim: { en: '  foo  ', de: '', bs: '' } }])
+      await $postAsAdmin(translatableTextNoTrim, {
+        translatableTextNoTrim: { 'en': '  foo  ', 'de': '', 'de-AT': '', 'bs': '' },
+      }),
+    ).toEqual([{ translatableTextNoTrim: { 'en': '  foo  ', 'de': '', 'de-AT': '', 'bs': '' } }])
     expect(await $postAsAdmin(translatableTextNoTrim, { translatableTextNoTrim: undefined })).toEqual([
-      { translatableTextNoTrim: { en: '', de: '', bs: '' } },
+      { translatableTextNoTrim: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' } },
     ])
 
     // disallowLineBreaks
     expect(
       await $postAsAdmin(translatableTextDisallowLineBreaks, {
-        translatableTextDisallowLineBreaks: { en: 'foo\nbar', de: '', bs: '' },
+        translatableTextDisallowLineBreaks: { 'en': 'foo\nbar', 'de': '', 'de-AT': '', 'bs': '' },
       }),
-    ).toEqual([{ translatableTextDisallowLineBreaks: { en: 'foo bar', de: '', bs: '' } }])
+    ).toEqual([{ translatableTextDisallowLineBreaks: { 'en': 'foo bar', 'de': '', 'de-AT': '', 'bs': '' } }])
     expect(
       await $postAsAdmin(translatableTextDisallowLineBreaks, {
-        translatableTextDisallowLineBreaks: { en: ' \n foo \n \n bar \n ', de: '', bs: '' },
+        translatableTextDisallowLineBreaks: { 'en': ' \n foo \n \n bar \n ', 'de': '', 'de-AT': '', 'bs': '' },
       }),
-    ).toEqual([{ translatableTextDisallowLineBreaks: { en: 'foo bar', de: '', bs: '' } }])
+    ).toEqual([{ translatableTextDisallowLineBreaks: { 'en': 'foo bar', 'de': '', 'de-AT': '', 'bs': '' } }])
   })
 })

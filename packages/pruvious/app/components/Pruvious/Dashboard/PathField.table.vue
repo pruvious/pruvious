@@ -32,10 +32,10 @@
 </template>
 
 <script lang="ts" setup>
-import { primaryLanguage } from '#pruvious/app'
+import { languages, primaryLanguage } from '#pruvious/app'
 import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isDefined, isNull, isString } from '@pruvious/utils'
+import { castToNumber, desuffixLang, isDefined, isNull, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -117,7 +117,7 @@ const prefix = computed(() => {
   if (props.prefix) {
     return props.prefix
   }
-  const language = props.name.replace('path', '').toLowerCase()
+  const language = desuffixLang(props.name.replace(/^(sub)?path/, ''), languages) ?? primaryLanguage
   return language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
 })
 const path = computed(() => {

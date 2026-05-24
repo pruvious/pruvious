@@ -309,6 +309,7 @@ import {
   isObject,
   isString,
   isUndefined,
+  langSuffix,
   omit,
   remap,
   titleCase,
@@ -339,7 +340,7 @@ const collectionWithoutSuffix = computed(() => ({
     fields: Object.fromEntries(
       Object.entries(collection.definition.fields)
         .map(([k, v]) => [removeSuffixFromColumns(k)!, v])
-        .filter(([k]) => !languages.some(({ code }) => k?.endsWith(code.toUpperCase()))),
+        .filter(([k]) => !languages.some(({ code }) => k?.endsWith(langSuffix(code)))),
     ),
   },
 }))
@@ -888,9 +889,8 @@ function addSuffixToColumns<T extends string | string[] | undefined>(columns: T)
   if (isUndefined(columns)) {
     return undefined as T
   }
-  const resolved = toArray(columns).map((column) =>
-    columnsWithSuffix.includes(column) ? column + contentLanguage.value.toUpperCase() : column,
-  )
+  const suffix = langSuffix(contentLanguage.value)
+  const resolved = toArray(columns).map((column) => (columnsWithSuffix.includes(column) ? column + suffix : column))
   return (isString(columns) ? resolved[0] : resolved) as T
 }
 
@@ -912,9 +912,14 @@ function removeSuffixFromColumns<T extends string | string[] | undefined>(column
   if (isUndefined(columns)) {
     return undefined as T
   }
-  const resolved = toArray(columns).map((column) =>
-    column.endsWith(contentLanguage.value.toUpperCase()) ? column.slice(0, -contentLanguage.value.length) : column,
-  )
+  const suffix = langSuffix(contentLanguage.value)
+  const resolved = toArray(columns).map((column) => {
+    if (!column.endsWith(suffix)) {
+      return column
+    }
+    const base = column.slice(0, -suffix.length)
+    return columnsWithSuffix.includes(base) ? base : column
+  })
   return (isString(columns) ? resolved[0] : resolved) as T
 }
 

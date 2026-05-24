@@ -1,3 +1,4 @@
+import { langSuffix } from '@pruvious/utils'
 import { useNuxt } from 'nuxt/kit'
 import { resolveCollectionFiles } from '../../collections/resolver'
 import { resolveSingletonFiles } from '../../singletons/resolver'
@@ -42,6 +43,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `  isNotNull,`,
     `  isNull,`,
     `  isString,`,
+    `  langSuffix,`,
     `  withLeadingSlash,`,
     `  withoutTrailingSlash,`,
     `} from '@pruvious/utils'`,
@@ -105,7 +107,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
   ]
 
   for (const { code } of pruviousOptions.i18n.languages) {
-    const suffix = code.toUpperCase()
+    const suffix = langSuffix(code)
     output.push(
       `    path${suffix}: nullableTextField({`,
       `      sanitizers: [`,
@@ -319,8 +321,8 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `  },`,
     `  indexes: [`,
     ...pruviousOptions.i18n.languages.flatMap(({ code }) => [
-      `    { fields: ['path${code.toUpperCase()}'], unique: true },`,
-      `    { fields: ['isPublic${code.toUpperCase()}'] },`,
+      `    { fields: ['path${langSuffix(code)}'], unique: true },`,
+      `    { fields: ['isPublic${langSuffix(code)}'] },`,
     ]),
     `  ],`,
     `  hooks: {`,
@@ -328,10 +330,10 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `      (({ operation, queryBuilder }) => {`,
     `        if (operation === 'update') {`,
     `          for (const { code } of languages) {`,
-    `            if (isNull(getSanitizedInput(queryBuilder!)[\`path\${code.toUpperCase()}\`])) {`,
+    `            if (isNull(getSanitizedInput(queryBuilder!)[\`path\${langSuffix(code)}\`])) {`,
     `              patchSanitizedInput(queryBuilder!, {`,
-    `                [\`isPublic\${code.toUpperCase()}\`]: false,`,
-    `                [\`scheduledAt\${code.toUpperCase()}\`]: null,`,
+    `                [\`isPublic\${langSuffix(code)}\`]: false,`,
+    `                [\`scheduledAt\${langSuffix(code)}\`]: null,`,
     `              })`,
     `            }`,
     `          }`,
@@ -348,10 +350,10 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `            const input = context.sanitizedInput ?? {}`,
     `            const relevant = ['referencedCollections', 'referencedSingleton', ${pruviousOptions.i18n.languages
       .flatMap(({ code }) => [
-        `'path${code.toUpperCase()}'`,
-        `'isPublic${code.toUpperCase()}'`,
-        `'seo${code.toUpperCase()}'`,
-        `'cacheRules${code.toUpperCase()}'`,
+        `'path${langSuffix(code)}'`,
+        `'isPublic${langSuffix(code)}'`,
+        `'seo${langSuffix(code)}'`,
+        `'cacheRules${langSuffix(code)}'`,
       ])
       .join(', ')}]`,
     `            if (!relevant.some((field) => isDefined(input[field]))) {`,
@@ -392,14 +394,14 @@ export function getServerDynamicRoutesCollectionFileContent() {
         `                    label: '${name}',`,
         `                    queryParam: { language: '${code}' },`,
         `                    fields: [`,
-        `                      'path${code.toUpperCase()}',`,
-        `                      'isPublic${code.toUpperCase()}',`,
-        `                      'scheduledAt${code.toUpperCase()}',`,
+        `                      'path${langSuffix(code)}',`,
+        `                      'isPublic${langSuffix(code)}',`,
+        `                      'scheduledAt${langSuffix(code)}',`,
         `                      {`,
         `                        tabs: [`,
-        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'Redirects'), fields: ['redirects${code.toUpperCase()}'] },`,
-        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'SEO'), fields: ['seo${code.toUpperCase()}'] },`,
-        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'Cache'), fields: ['cacheRules${code.toUpperCase()}'] },`,
+        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'Redirects'), fields: ['redirects${langSuffix(code)}'] },`,
+        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'SEO'), fields: ['seo${langSuffix(code)}'] },`,
+        `                          { label: ({ __ }: any) => __('pruvious-dashboard', 'Cache'), fields: ['cacheRules${langSuffix(code)}'] },`,
         `                        ],`,
         `                      },`,
         `                    ],`,
@@ -412,7 +414,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
       `        },`,
     )
   } else {
-    const suffix = pruviousOptions.i18n.primaryLanguage.toUpperCase()
+    const suffix = langSuffix(pruviousOptions.i18n.primaryLanguage)
     output.push(
       `        'path${suffix}',`,
       `        'isPublic${suffix}',`,

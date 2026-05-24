@@ -21,7 +21,7 @@
 
         <div class="p-row pui-justify-between">
           <div class="pui-row">
-            <div class="pui-uppercase pui-shrink-0">{{ code }}</div>
+            <div class="pui-shrink-0">{{ formatLanguageCode(code) }}</div>
             <span class="pui-muted pui-truncate">({{ name }})</span>
             <span v-if="code === contentLanguage" class="pui-row pui-muted pui-truncate">
               <span>-</span>
@@ -55,8 +55,8 @@
               v-if="singleton.definition.copyTranslation && code !== contentLanguage"
               v-pui-tooltip="
                 __('pruvious-dashboard', 'Copy $from to $to', {
-                  from: contentLanguage.toUpperCase(),
-                  to: code.toUpperCase(),
+                  from: formatLanguageCode(contentLanguage),
+                  to: formatLanguageCode(code),
                 })
               "
               :disabled="!canUpdate"
@@ -78,7 +78,7 @@ import { __, hasPermission, languages } from '#pruvious/app'
 import { pruviousDashboardGet, SingletonUpdateQueryBuilder, useDashboardContentLanguage } from '#pruvious/dashboard'
 import type { LanguageCode, Permission, SerializableSingleton, Singletons } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
-import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
+import { formatLanguageCode, isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
 
 const props = defineProps({
   /**

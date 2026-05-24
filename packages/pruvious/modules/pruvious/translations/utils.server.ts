@@ -5,7 +5,7 @@ import {
   type Pattern,
   type Replacement,
 } from '@pruvious/i18n'
-import { isDefined } from '@pruvious/utils'
+import { isBCP47LanguageCode, isDefined } from '@pruvious/utils'
 import parser from 'accept-language-parser'
 import type { PruviousModuleOptions, ResolvedI18nConfig } from '../PruviousModuleOptions'
 
@@ -121,6 +121,16 @@ export function resolveTranslationsConfig(i18n?: PruviousModuleOptions['i18n']):
   }
 
   if (i18n?.languages) {
+    for (const language of i18n.languages) {
+      if (!isBCP47LanguageCode(language.code)) {
+        throw new Error(
+          `Invalid language code in \`pruvious.i18n.languages\`: '${language.code}'. ` +
+            `Expected a BCP-47 code like 'en', 'de-AT', 'zh-Hant', or 'es-419' ` +
+            `(lowercase base, optional script in Title-case, optional region in UPPERCASE or 3-digit M.49).`,
+        )
+      }
+    }
+
     config.languages = i18n?.languages.map((language) => ({
       name: language.name,
       code: language.code,
@@ -156,6 +166,13 @@ export function resolveTranslationsConfig(i18n?: PruviousModuleOptions['i18n']):
 /**
  * Resolves the context language based on the `Accept-Language` header.
  * The language code is stored in `event.context.pruvious.language`.
+ *
+ * `accept-language-parser` `pick(loose: true)` already handles both directions:
+ *
+ * - header `de-AT` against supported `de` matches (region stripped from header)
+ * - header `de` against supported `de-AT` matches (region constraint relaxed via `loose`)
+ *
+ * Tie-breaker for multiple regional variants is the order in `pruvious.i18n.languages`.
  */
 export async function resolveContextLanguage() {
   const event = useEvent()

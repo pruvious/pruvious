@@ -19,14 +19,16 @@ export interface TranslatableStringsDefinition<
   domain: TDomain
 
   /**
-   * Lowercase language code for the translatable strings.
+   * Language code for the translatable strings, following BCP-47.
+   * The configured casing is preserved (lowercase base, optional Title-case script, optional UPPERCASE region).
    * The codes must be unique within a `domain`.
    *
    * @example
    * ```ts
    * 'en'
    * 'de'
-   * 'fr'
+   * 'de-AT'
+   * 'zh-Hant'
    * ```
    */
   language: TLanguage

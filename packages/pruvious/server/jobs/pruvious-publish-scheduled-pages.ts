@@ -1,4 +1,5 @@
 import { collections, defineJob, selectFrom, update, type Collections } from '#pruvious/server'
+import { langSuffix } from '@pruvious/utils'
 
 /**
  * Sweeps every routed collection on a fixed interval and flips drafts whose `scheduledAt` has elapsed
@@ -27,7 +28,7 @@ export default defineJob({
       }
 
       for (const code of languages) {
-        const suffix = code.toUpperCase()
+        const suffix = langSuffix(code)
         const isPublicField = `isPublic${suffix}`
         const scheduledAtField = `scheduledAt${suffix}`
         const pathField = `path${suffix}`

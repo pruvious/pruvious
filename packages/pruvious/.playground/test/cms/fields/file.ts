@@ -72,7 +72,12 @@ describe('file field', () => {
           id: txtFileId,
           path: expect.any(String),
           author: 1,
-          description: { en: expect.any(String), de: expect.any(String), bs: expect.any(String) },
+          description: {
+            'en': expect.any(String),
+            'de': expect.any(String),
+            'de-AT': expect.any(String),
+            'bs': expect.any(String),
+          },
           images: [],
           isLocked: false,
         },

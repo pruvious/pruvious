@@ -16,6 +16,7 @@ export default defineNuxtConfig({
       languages: [
         { code: 'en', name: 'English' },
         { code: 'de', name: 'Deutsch' },
+        { code: 'de-AT', name: 'Österreichisches Deutsch' },
         { code: 'bs', name: 'Bosanski' },
       ],
     },

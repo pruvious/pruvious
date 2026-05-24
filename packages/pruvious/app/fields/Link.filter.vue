@@ -40,7 +40,7 @@ import type {
   PUIDynamicSelectChoiceModel,
   PUIDynamicSelectPaginatedChoices,
 } from '@pruvious/ui/components/PUIDynamicSelect.vue'
-import { isArray, isNull, isRelURL, isString, parseRelURL } from '@pruvious/utils'
+import { formatLanguageCode, isArray, isNull, isRelURL, isString, parseRelURL } from '@pruvious/utils'
 
 interface LinkChoice {
   value: string
@@ -188,7 +188,7 @@ async function choicesResolver(page: number, keyword: string): Promise<PUIDynami
         return {
           value: choice.value,
           label: choice.label,
-          detail: tagLanguage ? `${code.toUpperCase()} · ${choice.detail}` : choice.detail,
+          detail: tagLanguage ? `${formatLanguageCode(code)} · ${choice.detail}` : choice.detail,
           badge: choice.isPublic ? undefined : __('pruvious-dashboard', 'Draft'),
         }
       }),

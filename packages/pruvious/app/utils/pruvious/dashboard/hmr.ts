@@ -18,6 +18,7 @@ export function usePruviousHMR() {
 
     clear((i18n() as any).definitions)
     clear((i18n() as any).cache)
+    ;(i18n() as any).warnedShapeCollisions?.clear?.()
 
     await Promise.all([refreshPruviousState(true), refreshAuthState(true), refreshPruviousDashboardState(true)])
     await navigateTo({ path: dashboardBasePath + '_redirect', query: { to } }, { replace: true })

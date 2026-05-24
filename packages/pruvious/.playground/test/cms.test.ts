@@ -73,4 +73,5 @@ describe('cms', async () => {
   await import('./cms/routes/api-routes')
   await import('./cms/routes/seo-sharing')
   await import('./cms/routes/sitemap-robots')
+  await import('./cms/routes/translations-api')
 })

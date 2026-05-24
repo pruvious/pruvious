@@ -45,7 +45,8 @@ export const useLanguage = () => useState<LanguageCode>('pruvious-language', () 
 export function extractLanguageCode(path: string): LanguageCode {
   const { languages, primaryLanguage } = useRuntimeConfig().public.pruvious
   const subpaths = path.split('/').filter(Boolean)
-  return languages.find((language) => subpaths[0] === language) ?? primaryLanguage
+  const segment = subpaths[0]?.toLowerCase()
+  return (languages.find((language) => language.toLowerCase() === segment) ?? primaryLanguage) as LanguageCode
 }
 
 /**

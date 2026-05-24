@@ -86,3 +86,46 @@ export function toJunction(tableA: string, fieldA: string, tableB: string, field
     columnOrderB: `${camelCase(tableB).slice(0, 57)}Order`,
   }
 }
+
+/**
+ * Converts a language `code` into the canonical column-name suffix used by per-language fields
+ * (e.g. `pathDEAT`, `isPublicEN`). Uppercases the code and strips hyphens so the result is a
+ * valid SQL identifier AND satisfies the camelCase convention used by Pruvious field names.
+ *
+ * @example
+ * ```ts
+ * langSuffix('en')         // 'EN'
+ * langSuffix('de-AT')      // 'DEAT'
+ * langSuffix('zh-Hant')    // 'ZHHANT'
+ * langSuffix('sr-Latn-RS') // 'SRLATNRS'
+ * ```
+ */
+export function langSuffix(code: string): string {
+  return code.toUpperCase().replace(/-/g, '')
+}
+
+/**
+ * Inverse of `langSuffix`. Given a sanitized column suffix and the configured languages,
+ * returns the original code preserving its registered casing. Returns `undefined` when the suffix
+ * does not match any configured code.
+ *
+ * Accepts either a `string[]` (e.g. `runtimeConfig.public.pruvious.languages`) or a
+ * `{ code: string }[]` (e.g. the server-side `languages` array) for ergonomic call sites.
+ *
+ * @example
+ * ```ts
+ * desuffixLang('DEAT', ['en', 'de-AT'])                       // 'de-AT'
+ * desuffixLang('EN',   [{ code: 'en' }, { code: 'de-AT' }])   // 'en'
+ * desuffixLang('FR',   ['en', 'de-AT'])                       // undefined
+ * ```
+ */
+export function desuffixLang(suffix: string, languages: readonly (string | { code: string })[]): string | undefined {
+  const target = suffix.toUpperCase()
+  for (const entry of languages) {
+    const code = typeof entry === 'string' ? entry : entry.code
+    if (langSuffix(code) === target) {
+      return code
+    }
+  }
+  return undefined
+}

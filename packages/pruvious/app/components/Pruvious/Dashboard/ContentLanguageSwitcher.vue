@@ -7,7 +7,7 @@
       ref="button"
       :class="{ 'p-button-disabled': disableContentLanguageSwitcher }"
     >
-      <span class="p-label pui-uppercase">{{ contentLanguage }}</span>
+      <span class="p-label">{{ formatLanguageCode(contentLanguage) }}</span>
       <Icon v-if="!disableContentLanguageSwitcher" mode="svg" name="tabler:chevron-down" class="p-icon" />
     </PUIButton>
     <PUIDropdown
@@ -34,7 +34,7 @@
 import { __, hasPermission, languages, useAuth } from '#pruvious/app'
 import { pruviousDashboardPatch, useDashboardContentLanguage } from '#pruvious/dashboard'
 import { puiQueueToast } from '@pruvious/ui/pui/toast'
-import { isUndefined } from '@pruvious/utils'
+import { formatLanguageCode, isUndefined } from '@pruvious/utils'
 
 const showContentLanguageSwitcher = inject('showContentLanguageSwitcher', false)
 const disableContentLanguageSwitcher = inject('disableContentLanguageSwitcher', false)
@@ -67,7 +67,7 @@ const stop = watch(
 
         puiQueueToast(
           __('pruvious-dashboard', 'Switched content language to `$language`', {
-            language: contentLanguage.toUpperCase(),
+            language: formatLanguageCode(contentLanguage),
           }),
         )
       }

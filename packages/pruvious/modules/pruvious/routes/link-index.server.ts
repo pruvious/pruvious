@@ -1,5 +1,15 @@
 import { collections, database, type Collections } from '#pruvious/server'
-import { isArray, isDefined, isNull, isNumber, isRelURL, isString, isUndefined, parseRelURL } from '@pruvious/utils'
+import {
+  isArray,
+  isDefined,
+  isNull,
+  isNumber,
+  isRelURL,
+  isString,
+  isUndefined,
+  langSuffix,
+  parseRelURL,
+} from '@pruvious/utils'
 import type { RawCacheRule } from '../cache/page.server'
 import { normalizeRoutePath } from './utils.server'
 
@@ -144,7 +154,7 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
     const redirects: Record<string, RawRouteRedirect[]> = {}
 
     for (const { code } of languages) {
-      const suffix = code.toUpperCase()
+      const suffix = langSuffix(code)
       path[code] = row[`path${suffix}`] ?? null
       isPublic[code] = row[`isPublic${suffix}`] === true
       const seo = row[`seo${suffix}`]

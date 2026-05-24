@@ -195,6 +195,9 @@ async function detectLanguage(path: string): Promise<{ language: LanguageCode; n
  * Returns `true` when the raw request path matches the canonical form (route case, record subpath
  * case, language prefix, and trailing-slash convention) so cached entries are not served for URLs
  * that `resolveRoute` would soft-redirect away from.
+ *
+ * Regional codes use their registered casing in the canonical prefix (`/de-AT/...`), so a
+ * `/de-at/...` request takes one soft-redirect roundtrip before hitting the cache.
  */
 function isCanonicalRequest(
   rawPath: string,

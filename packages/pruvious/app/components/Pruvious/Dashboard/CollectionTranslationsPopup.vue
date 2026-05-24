@@ -21,7 +21,7 @@
 
         <div class="p-row pui-justify-between">
           <div class="pui-row">
-            <div class="pui-uppercase pui-shrink-0">{{ code }}</div>
+            <div class="pui-shrink-0">{{ formatLanguageCode(code) }}</div>
             <span class="pui-muted pui-truncate">({{ name }})</span>
             <span v-if="permissions[code].id === id" class="pui-row pui-muted pui-truncate">
               <span>-</span>
@@ -78,8 +78,8 @@
               v-if="collection.definition.copyTranslation && (code !== contentLanguage || showEditCurrentButton)"
               v-pui-tooltip="
                 __('pruvious-dashboard', 'Copy $from to $to', {
-                  from: contentLanguage.toUpperCase(),
-                  to: code.toUpperCase(),
+                  from: formatLanguageCode(contentLanguage),
+                  to: formatLanguageCode(code),
                 })
               "
               :disabled="
@@ -118,7 +118,7 @@ import {
 } from '#pruvious/dashboard'
 import type { Collections, LanguageCode, SerializableCollection } from '#pruvious/server'
 import { puiToast } from '@pruvious/ui/pui/toast'
-import { isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
+import { formatLanguageCode, isEmpty, lockAndLoad, slugify } from '@pruvious/utils'
 
 const props = defineProps({
   /**

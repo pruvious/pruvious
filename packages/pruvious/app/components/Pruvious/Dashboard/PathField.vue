@@ -55,10 +55,10 @@
 </template>
 
 <script lang="ts" setup>
-import { __, primaryLanguage } from '#pruvious/app'
+import { __, languages, primaryLanguage } from '#pruvious/app'
 import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { isDefined, isString } from '@pruvious/utils'
+import { desuffixLang, isDefined, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -153,7 +153,7 @@ const onLabel = isDefined(props.options.ui.switch?.onLabel)
   ? maybeTranslate(props.options.ui.switch.onLabel)
   : __('pruvious-dashboard', 'On')
 const placeholder = maybeTranslate(props.options.ui.placeholder)
-const language = props.name.replace('path', '').toLowerCase()
+const language = desuffixLang(props.name.replace(/^(sub)?path/, ''), languages) ?? primaryLanguage
 const resolvedPrefix = props.prefix ?? (language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : '')
 const lastString = ref('')
 

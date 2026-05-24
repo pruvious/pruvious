@@ -1,4 +1,4 @@
-import { deepClone, isUndefined } from '@pruvious/utils'
+import { deepClone, isObject, isUndefined } from '@pruvious/utils'
 import { replacePlaceholders } from './placeholders'
 import type {
   ExtractDomains,
@@ -16,6 +16,7 @@ export class I18n<T = never[]> {
   protected definitions: TranslatableStringsDefinition[] = []
   protected fallbackLanguages: string[] = []
   protected cache: Record<string, Record<string, string>> = {}
+  protected warnedShapeCollisions: Set<string> = new Set()
 
   /**
    * Creates a copy of the current `I18n` instance.
@@ -26,6 +27,7 @@ export class I18n<T = never[]> {
     i18n.definitions = deep ? deepClone(this.definitions) : [...this.definitions]
     i18n.fallbackLanguages = [...this.fallbackLanguages]
     i18n.cache = deep ? deepClone(this.cache) : { ...this.cache }
+    i18n.warnedShapeCollisions = new Set(this.warnedShapeCollisions)
     return i18n as I18n<T>
   }
 
@@ -41,7 +43,46 @@ export class I18n<T = never[]> {
    * Returns `undefined` if no definition is found.
    */
   getDefinition(domain: string, language: string): TranslatableStringsDefinition | undefined {
-    return this.definitions.find((def) => def.domain === domain && def.language === language)
+    const own = this.definitions.find((def) => def.domain === domain && def.language === language)
+    if (!language.includes('-')) {
+      return own
+    }
+
+    const baseCode = language.split('-')[0]!
+    if (!baseCode) {
+      return own
+    }
+
+    const base = this.definitions.find((def) => def.domain === domain && def.language === baseCode)
+    if (!own && !base) {
+      return undefined
+    }
+
+    if (own && base) {
+      for (const handle of Object.keys(own.strings)) {
+        if (handle in base.strings) {
+          const baseIsPattern = isObject(base.strings[handle])
+          const ownIsPattern = isObject(own.strings[handle])
+          if (baseIsPattern !== ownIsPattern) {
+            const warnKey = `${domain}:${language}:${handle}`
+            if (!this.warnedShapeCollisions.has(warnKey)) {
+              this.warnedShapeCollisions.add(warnKey)
+              console.warn(
+                `[i18n] Translation shape mismatch for ${domain}.${language} handle '${handle}': ` +
+                  `base '${baseCode}' is a ${baseIsPattern ? 'Pattern' : 'string'} but regional override is a ${ownIsPattern ? 'Pattern' : 'string'}. ` +
+                  `Regional value wins, which may produce unexpected behavior.`,
+              )
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      domain,
+      language,
+      strings: { ...(base?.strings ?? {}), ...(own?.strings ?? {}) },
+    }
   }
 
   /**
@@ -102,6 +143,16 @@ export class I18n<T = never[]> {
 
     if (this.cache[`${definition.domain}:${definition.language}`]) {
       delete this.cache[`${definition.domain}:${definition.language}`]
+    }
+
+    // Defining a base bust regional caches whose merged result depends on it (`de` → `de-AT`).
+    if (!definition.language.includes('-')) {
+      const prefix = `${definition.domain}:${definition.language}-`
+      for (const key of Object.keys(this.cache)) {
+        if (key.startsWith(prefix)) {
+          delete this.cache[key]
+        }
+      }
     }
 
     return this as I18n<

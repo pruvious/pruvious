@@ -36,9 +36,11 @@ export function resolveTranslationFiles(): ResolvedTranslationFiles {
     })) {
       const baseNameParts = base.split('.')
       const domain = baseNameParts[1] ? kebabCase(baseNameParts[0]!) : 'default'
-      const language = kebabCase(baseNameParts[1] ?? baseNameParts[0]!)
+      const rawLanguage = baseNameParts[1] ?? baseNameParts[0]!
+      const registered = languages.find(({ code }) => code.toLowerCase() === rawLanguage.toLowerCase())
+      const language = registered?.code ?? rawLanguage
 
-      if (!domain.startsWith('pruvious-') && !languages.some(({ code }) => code === language)) {
+      if (!domain.startsWith('pruvious-') && !registered) {
         debug(`Skipping translation <${domain}.${language}> as the language is not defined in the Nuxt configuration`)
         continue
       }

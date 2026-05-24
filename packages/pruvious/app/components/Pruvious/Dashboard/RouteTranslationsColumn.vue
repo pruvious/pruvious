@@ -13,7 +13,7 @@
         color="secondary"
         class="p-language-code pui-truncate"
       >
-        {{ code }}
+        {{ formatLanguageCode(code) }}
       </PUIBadge>
     </template>
   </ul>
@@ -22,6 +22,7 @@
 <script lang="ts" setup>
 import { languages, primaryLanguage } from '#pruvious/app'
 import { useDashboardContentLanguage } from '#pruvious/dashboard'
+import { formatLanguageCode, langSuffix } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -38,7 +39,7 @@ const { prefixPrimaryLanguage } = useRuntimeConfig().public.pruvious
 const otherLanguages = languages
   .filter(({ code }) => code !== contentLanguage.value)
   .map(({ code }) => {
-    const suffix = code.toUpperCase()
+    const suffix = langSuffix(code)
     return { code, path: props.data![`path${suffix}`], isPublic: props.data![`isPublic${suffix}`] }
   })
 </script>
@@ -50,6 +51,5 @@ const otherLanguages = languages
 
 .p-language-code {
   flex-shrink: 1;
-  text-transform: uppercase;
 }
 </style>

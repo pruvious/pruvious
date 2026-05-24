@@ -6,6 +6,7 @@ import {
   selectSingleton,
   type Collections,
   type LanguageCode,
+  type LanguageSuffix,
   type RouteReferenceName,
   type RouteReferences,
   type Singletons,
@@ -21,6 +22,7 @@ import {
   isPositiveInteger,
   isRelURL,
   isString,
+  langSuffix,
   parseRelURL,
   pick,
   withLeadingSlash,
@@ -809,13 +811,13 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   const language = (languages.find(({ code }) => subpaths[0]?.toLowerCase() === code.toLowerCase())?.code ??
     primaryLanguage) as LanguageCode
   const languagePrefix = language !== primaryLanguage || prefixPrimaryLanguage ? `/${language}` : ''
-  const languageSuffix = language.toUpperCase() as Uppercase<LanguageCode>
+  const languageSuffix = langSuffix(language) as LanguageSuffix
   const normalizedRoutePath = normalizeRoutePath(
     subpaths[0]?.toLowerCase() === language.toLowerCase() ? subpaths.slice(1).join('/') : subpaths.join('/'),
     false,
   )
   const otherLanguages = languages.filter(({ code }) => code !== language)
-  const otherLanguageSuffixes = otherLanguages.map(({ code }) => code.toUpperCase() as Uppercase<LanguageCode>)
+  const otherLanguageSuffixes = otherLanguages.map(({ code }) => langSuffix(code) as LanguageSuffix)
   const tryPaths: string[] = ['/']
   const routeReferences = await getRouteReferences()
 
@@ -831,9 +833,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
   const routeCandidates = await Promise.all([
     selectSingleton('SEO').language(language).populate().get(),
     ...tryPaths.map(async (tryPath) => {
-      const query = selectFrom('Routes').where(`path${language.toUpperCase()}` as any, 'ilike', tryPath)
+      const query = selectFrom('Routes').where(`path${languageSuffix}` as any, 'ilike', tryPath)
       if (!hasPermission('preview-drafts')) {
-        query.where(`isPublic${language.toUpperCase()}` as any, '=', true)
+        query.where(`isPublic${languageSuffix}` as any, '=', true)
       }
       return query
         .populate()
@@ -947,15 +949,17 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         if (collection.meta.translatable) {
           query.where('language', '=', language)
 
-          const whereIsPublic = (code: string) =>
+          // SQL identifiers must not contain hyphens, so `langSuffix(code)` is used throughout.
+          const whereIsPublic = (suffix: string) =>
             collection.meta.routing.isPublic.enabled && !hasPermission('preview-drafts')
-              ? ` and "${collectionName}_${code}"."isPublic" = 1`
+              ? ` and "${collectionName}_${suffix}"."isPublic" = 1`
               : ''
 
           for (const { code } of languages) {
             if (code !== language) {
+              const otherSuffix = langSuffix(code)
               select.push(
-                `(select "subpath" from "${collectionName}" as "${collectionName}_${code}" where "${collectionName}_${code}"."translations" = "${collectionName}"."translations" and "language" = '${code}'${whereIsPublic(code)}) as "subpath_${code}"`,
+                `(select "subpath" from "${collectionName}" as "${collectionName}_${otherSuffix}" where "${collectionName}_${otherSuffix}"."translations" = "${collectionName}"."translations" and "language" = '${code}'${whereIsPublic(otherSuffix)}) as "subpath_${otherSuffix}"`,
               )
             }
           }
@@ -983,7 +987,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         otherLanguages.map(({ code }, i) => {
           const otherSuffix = otherLanguageSuffixes[i]!
           const otherBasePath = route[`path${otherSuffix}`]
-          const otherSubpath = data[`subpath_${code}`]
+          const otherSubpath = data[`subpath_${otherSuffix}`]
           const otherIsPublic = route[`isPublic${otherSuffix}`] || hasPermission('preview-drafts')
           return [
             code,

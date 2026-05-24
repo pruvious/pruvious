@@ -1,5 +1,5 @@
 import { validatorsMeta } from '@pruvious/orm'
-import { camelCase, kebabCase, pascalCase } from '@pruvious/utils'
+import { camelCase, kebabCase, langSuffix, pascalCase } from '@pruvious/utils'
 import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { isAbsolute, relative } from 'pathe'
@@ -303,10 +303,19 @@ export async function getServerFileContent() {
     ``,
     `/**`,
     ` * Type definition for language codes supported by the application.`,
-    ` * Represents ISO language codes like 'en', 'es', 'fr', etc.`,
+    ` * Supports BCP-47 codes like 'en', 'de-AT', 'zh-Hant', etc.`,
     ` */`,
     `export type LanguageCode = ${Object.values(pruviousOptions.i18n.languages)
       .map(({ code }) => `'${code}'`)
+      .join(' | ')}`,
+    ``,
+    `/**`,
+    ` * Sanitised column-name suffix derived from each configured \`LanguageCode\`.`,
+    ` * Uppercase with hyphens removed (e.g. \`'EN'\`, \`'DEAT'\`, \`'ZHHANT'\`).`,
+    ` * Use this instead of \`Uppercase<LanguageCode>\` since BCP-47 regional codes contain hyphens.`,
+    ` */`,
+    `export type LanguageSuffix = ${Object.values(pruviousOptions.i18n.languages)
+      .map(({ code }) => `'${langSuffix(code)}'`)
       .join(' | ')}`,
     ``,
     `/**`,
@@ -1783,6 +1792,7 @@ export function getServerTypeFileContent() {
     `export type PruviousContext = any`,
     `export type Permission = any`,
     `export type LanguageCode = any`,
+    `export type LanguageSuffix = any`,
     `export type PrimaryLanguageCode = any`,
     `export type DashboardLanguageCode = any`,
     `export type ImageVariant = any`,

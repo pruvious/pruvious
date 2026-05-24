@@ -637,7 +637,7 @@ export default defineCollection({
 
     // translatableText
     translatableText: translatableTextField({
-      default: { en: 'Default', de: 'Standard', bs: 'Zadano' },
+      default: { 'en': 'Default', 'de': 'Standard', 'de-AT': 'Standard (AT)', 'bs': 'Zadano' },
       ui: {
         placeholder: ({ __ }) => __('pruvious-dashboard', 'Enter text...'),
         description: ({ __ }) => __('pruvious-dashboard', 'Description'),
@@ -646,7 +646,7 @@ export default defineCollection({
     translatableTextMinMax: translatableTextField({
       minLength: 6,
       maxLength: 8,
-      default: { en: 'foobar', de: 'foobar', bs: 'foobar' },
+      default: { 'en': 'foobar', 'de': 'foobar', 'de-AT': 'foobar', 'bs': 'foobar' },
       ui: { label: 'Translatable text (min/max)' },
     }),
     translatableTextAllowEmptyString: translatableTextField({

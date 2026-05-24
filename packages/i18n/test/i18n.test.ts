@@ -87,3 +87,145 @@ test('i18n', () => {
 
   expect(i18n.__('complex', 'en', 'foo' as any)).toBe('foo')
 })
+
+test('regional code inherits from base via getDefinition synthesis', () => {
+  const i18n = new I18n()
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de',
+      strings: { Welcome: 'Willkommen', Bye: 'Tschüss' },
+    })
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de-AT',
+      strings: { Welcome: 'Servus' },
+    })
+
+  // Regional overrides base for shared handles.
+  expect(i18n.__$('default', 'de-AT', 'Welcome')).toBe('Servus')
+  // Missing regional handle falls back to base.
+  expect(i18n.__$('default', 'de-AT', 'Bye')).toBe('Tschüss')
+  // Base is untouched.
+  expect(i18n.__$('default', 'de', 'Welcome')).toBe('Willkommen')
+})
+
+test('regional code with no own file inherits everything from base', () => {
+  const i18n = new I18n().defineTranslatableStrings({
+    domain: 'default',
+    language: 'de',
+    strings: { Welcome: 'Willkommen' },
+  })
+
+  expect(i18n.hasDefinition('default', 'de-AT')).toBe(true)
+  expect(i18n.__$('default', 'de-AT', 'Welcome')).toBe('Willkommen')
+})
+
+test('regional code with neither own nor base returns the handle', () => {
+  const i18n = new I18n()
+  expect(i18n.hasDefinition('default', 'fr-CA')).toBe(false)
+  expect(i18n.__$('default', 'fr-CA', 'Welcome')).toBe('Welcome')
+})
+
+test('defining base after regional invalidates cached regional lookup', () => {
+  const i18n = new I18n().defineTranslatableStrings({
+    domain: 'default',
+    language: 'de-AT',
+    strings: { Welcome: 'Servus' },
+  })
+
+  // Warm regional cache with a handle only the base would supply.
+  expect(i18n.__$('default', 'de-AT', 'Bye')).toBe('Bye')
+
+  i18n.defineTranslatableStrings({
+    domain: 'default',
+    language: 'de',
+    strings: { Bye: 'Tschüss' },
+  })
+
+  // Cache was invalidated, so the second lookup now sees the base.
+  expect(i18n.__$('default', 'de-AT', 'Bye')).toBe('Tschüss')
+})
+
+test('definition order does not affect merge result', () => {
+  const a = new I18n()
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de',
+      strings: { Welcome: 'Willkommen', Bye: 'Tschüss' },
+    })
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de-AT',
+      strings: { Welcome: 'Servus' },
+    })
+
+  const b = new I18n()
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de-AT',
+      strings: { Welcome: 'Servus' },
+    })
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de',
+      strings: { Welcome: 'Willkommen', Bye: 'Tschüss' },
+    })
+
+  for (const i18n of [a, b]) {
+    expect(i18n.__$('default', 'de-AT', 'Welcome')).toBe('Servus')
+    expect(i18n.__$('default', 'de-AT', 'Bye')).toBe('Tschüss')
+  }
+})
+
+test('pattern vs string shape collision warns once', () => {
+  const warnings: string[] = []
+  const original = console.warn
+  console.warn = (...args: unknown[]) => {
+    warnings.push(args.join(' '))
+  }
+
+  try {
+    const i18n = new I18n()
+      .defineTranslatableStrings({
+        domain: 'default',
+        language: 'de',
+        strings: {
+          Count: createPattern('$count Stück', { count: 'number' }),
+        },
+      })
+      .defineTranslatableStrings({
+        domain: 'default',
+        language: 'de-AT',
+        strings: { Count: 'Stück' },
+      })
+
+    // Multiple lookups; warning should fire only once.
+    i18n.__$('default', 'de-AT', 'Count', { count: 1 })
+    i18n.__$('default', 'de-AT', 'Count', { count: 2 })
+    i18n.__$('default', 'de-AT', 'Count', { count: 3 })
+
+    const collisionWarnings = warnings.filter((w) => w.includes('shape mismatch'))
+    expect(collisionWarnings.length).toBe(1)
+  } finally {
+    console.warn = original
+  }
+})
+
+test('fallbackLanguages can contain a regional code that itself inherits from base', () => {
+  const i18n = new I18n()
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de',
+      strings: { Welcome: 'Willkommen', Bye: 'Tschüss' },
+    })
+    .defineTranslatableStrings({
+      domain: 'default',
+      language: 'de-AT',
+      strings: { Welcome: 'Servus' },
+    })
+    .setFallbackLanguages(['de-AT', 'de'])
+
+  // `fr` has no own definition; first fallback `de-AT` synthesises (Servus + Tschüss from base).
+  expect(i18n.__$('default', 'fr', 'Welcome')).toBe('Servus')
+  expect(i18n.__$('default', 'fr', 'Bye')).toBe('Tschüss')
+})

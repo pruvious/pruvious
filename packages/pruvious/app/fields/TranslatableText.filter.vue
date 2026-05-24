@@ -57,7 +57,7 @@
 import { __, languages, primaryLanguage } from '#pruvious/app'
 import { getValidFilterOperators, type WhereField } from '#pruvious/dashboard'
 import type { LanguageCode, SerializableFieldOptions } from '#pruvious/server'
-import { isString } from '@pruvious/utils'
+import { formatLanguageCode, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -94,7 +94,7 @@ const operatorChoices: Ref<ReturnType<typeof getValidFilterOperators>> = ref(
 const virtualOperator = ref<WhereField['operator']>('eq')
 const inputValue = ref('')
 const language = ref<LanguageCode>()
-const languageChoices = languages.map(({ code }) => ({ value: code, label: code.toUpperCase() }))
+const languageChoices = languages.map(({ code }) => ({ value: code, label: formatLanguageCode(code) }))
 const forcedDefault = `"${primaryLanguage}":""`
 
 watch(

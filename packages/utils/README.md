@@ -39,7 +39,9 @@ npm i @pruvious/utils
   - [isPrimitive](#isprimitive)
   - [isUndefined](#isundefined)
 - [Database](#database)
+  - [desuffixLang](#desuffixlang)
   - [isDatabaseIdentifier](#isdatabaseidentifier)
+  - [langSuffix](#langsuffix)
   - [toForeignKey](#toforeignkey)
   - [toIndex](#toindex)
   - [toJunction](#tojunction)
@@ -60,6 +62,8 @@ npm i @pruvious/utils
   - [buildRelURL](#buildrelurl)
   - [containsDangerousCss](#containsdangerouscss)
   - [deselectAll](#deselectall)
+  - [formatLanguageCode](#formatlanguagecode)
+  - [isBCP47LanguageCode](#isbcp47languagecode)
   - [isDescendant](#isdescendant)
   - [isRelURL](#isrelurl)
   - [isSafeUrl](#issafeurl)
@@ -70,6 +74,7 @@ npm i @pruvious/utils
   - [scrubAttributes](#scrubattributes)
   - [sleep](#sleep)
   - [stripHTML](#striphtml)
+  - [toOgLocale](#tooglocale)
   - [unquoteAttrValue](#unquoteattrvalue)
   - [withLeadingSlash](#withleadingslash)
   - [withoutLeadingSlash](#withoutleadingslash)
@@ -520,6 +525,23 @@ isObject(null)      // false
 
 ## <a id="database">Database</a>
 
+### <a id="desuffixlang">`desuffixLang(suffix, languages)`</a>
+
+Inverse of `langSuffix`. Given a sanitized column suffix and the configured languages,
+returns the original code preserving its registered casing. Returns `undefined` when the suffix
+does not match any configured code.
+
+Accepts either a `string[]` (e.g. `runtimeConfig.public.pruvious.languages`) or a
+`{ code: string }[]` (e.g. the server-side `languages` array) for ergonomic call sites.
+
+**Example:**
+
+```ts
+desuffixLang('DEAT', ['en', 'de-AT'])                       // 'de-AT'
+desuffixLang('EN',   [{ code: 'en' }, { code: 'de-AT' }])   // 'en'
+desuffixLang('FR',   ['en', 'de-AT'])                       // undefined
+```
+
 ### <a id="isdatabaseidentifier">`isDatabaseIdentifier(value)`</a>
 
 Checks if a `value` is a valid database table or column name.
@@ -533,6 +555,21 @@ isDatabaseIdentifier('Products')   // true
 isDatabaseIdentifier('updatedAt')  // true
 isDatabaseIdentifier('created-at') // false
 isDatabaseIdentifier('created at') // false
+```
+
+### <a id="langsuffix">`langSuffix(code)`</a>
+
+Converts a language `code` into the canonical column-name suffix used by per-language fields
+(e.g. `pathDEAT`, `isPublicEN`). Uppercases the code and strips hyphens so the result is a
+valid SQL identifier AND satisfies the camelCase convention used by Pruvious field names.
+
+**Example:**
+
+```ts
+langSuffix('en')         // 'EN'
+langSuffix('de-AT')      // 'DEAT'
+langSuffix('zh-Hant')    // 'ZHHANT'
+langSuffix('sr-Latn-RS') // 'SRLATNRS'
 ```
 
 ### <a id="toforeignkey">`toForeignKey(table, column)`</a>
@@ -795,6 +832,45 @@ buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, language: 'de' })
 
 Deselects all text on the page.
 
+### <a id="formatlanguagecode">`formatLanguageCode(code)`</a>
+
+Formats a BCP-47 language `code` for compact display in dashboard pills, badges, and toasts.
+Base codes are uppercased. Regional or script-tagged codes render the base, then the subtags
+uppercased inside parentheses.
+
+**Example:**
+
+```ts
+formatLanguageCode('en')         // 'EN'
+formatLanguageCode('de')         // 'DE'
+formatLanguageCode('de-AT')      // 'DE (AT)'
+formatLanguageCode('pt-BR')      // 'PT (BR)'
+formatLanguageCode('zh-Hant')    // 'ZH (HANT)'
+formatLanguageCode('sr-Latn-RS') // 'SR (LATN-RS)'
+formatLanguageCode('es-419')     // 'ES (419)'
+```
+
+### <a id="isbcp47languagecode">`isBCP47LanguageCode(code)`</a>
+
+Strict [BCP-47](https://www.rfc-editor.org/info/bcp47) subset accepted by the Pruvious CMS:
+
+- lowercase 2 or 3 letter language base (e.g. `en`, `de`, `fil`)
+- optional Title-case script subtag (e.g. `zh-Hant`, `sr-Latn`)
+- optional UPPERCASE region or 3-digit M.49 region (e.g. `de-AT`, `es-419`)
+
+**Example:**
+
+```ts
+isBCP47LanguageCode('en')         // true
+isBCP47LanguageCode('de-AT')      // true
+isBCP47LanguageCode('zh-Hant')    // true
+isBCP47LanguageCode('sr-Latn-RS') // true
+isBCP47LanguageCode('es-419')     // true
+isBCP47LanguageCode('EN')         // false (base must be lowercase)
+isBCP47LanguageCode('de_AT')      // false (separator must be hyphen)
+isBCP47LanguageCode('de-at')      // false (region must be uppercase)
+```
+
 ### <a id="isdescendant">`isDescendant(element, ancestor)`</a>
 
 Checks if an `element` is a descendant of an `ancestor`.
@@ -931,6 +1007,20 @@ Note: This function uses the DOM and should be run in a browser environment.
 
 ```ts
 stripHTML('<p>Hello, <strong>World</strong></p>') // 'Hello World'
+```
+
+### <a id="tooglocale">`toOgLocale(code)`</a>
+
+Converts a BCP-47 language `code` to the Open Graph `og:locale` form used by Facebook and other
+scrapers, which expect an underscore between language and region (e.g. `en_US`, not `en-US`).
+Bare codes are returned unchanged.
+
+**Example:**
+
+```ts
+toOgLocale('en')    // 'en'
+toOgLocale('de-AT') // 'de_AT'
+toOgLocale('pt-BR') // 'pt_BR'
 ```
 
 ### <a id="unquoteattrvalue">`unquoteAttrValue(raw)`</a>

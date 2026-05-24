@@ -11,7 +11,7 @@
         :to="dashboardBasePath + `collections/${collectionSlug}/${id}`"
         variant="outline"
       >
-        <span class="pui-uppercase">{{ language }}</span>
+        <span class="p-language-code">{{ formatLanguageCode(language) }}</span>
         <Icon v-if="canUpdate" mode="svg" name="tabler:pencil" />
         <Icon v-else mode="svg" name="tabler:list-search" />
       </PUIButton>
@@ -24,7 +24,7 @@
         :to="dashboardBasePath + `collections/${collectionSlug}/new?translationOf=${cell.row.id}&language=${language}`"
         variant="primary"
       >
-        <span class="pui-uppercase">{{ language }}</span>
+        <span class="p-language-code">{{ formatLanguageCode(language) }}</span>
         <Icon mode="svg" name="tabler:note" />
       </PUIButton>
     </template>
@@ -41,7 +41,7 @@ import {
 } from '#pruvious/dashboard'
 import type { Collections, SerializableCollection } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { filterObject, slugify } from '@pruvious/utils'
+import { filterObject, formatLanguageCode, slugify } from '@pruvious/utils'
 
 const props = defineProps({
   /**
@@ -75,7 +75,7 @@ const filteredPermissions = filterObject(
   flex-wrap: wrap;
 }
 
-.pui-uppercase {
+.p-language-code {
   font-size: 0.75rem;
 }
 </style>

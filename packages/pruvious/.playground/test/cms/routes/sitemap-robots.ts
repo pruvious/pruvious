@@ -49,7 +49,7 @@ describe('sitemap.xml and robots.txt', () => {
 
   test('GET /sitemap.xml returns an empty urlset when every language is hidden', async () => {
     await Promise.all(
-      ['en', 'de', 'bs'].map((language) =>
+      ['en', 'de', 'de-AT', 'bs'].map((language) =>
         $patchAsAdmin(`/api/singletons/seo?language=${language}`, { isIndexable: false }),
       ),
     )
@@ -61,7 +61,7 @@ describe('sitemap.xml and robots.txt', () => {
       expect(xml).not.toContain('<loc>')
     } finally {
       await Promise.all(
-        ['en', 'de', 'bs'].map((language) =>
+        ['en', 'de', 'de-AT', 'bs'].map((language) =>
           $patchAsAdmin(`/api/singletons/seo?language=${language}`, { isIndexable: true }),
         ),
       )
@@ -119,7 +119,7 @@ describe('sitemap.xml and robots.txt', () => {
 
   test('GET /robots.txt disallows crawling when every language is hidden', async () => {
     await Promise.all(
-      ['en', 'de', 'bs'].map((language) =>
+      ['en', 'de', 'de-AT', 'bs'].map((language) =>
         $patchAsAdmin(`/api/singletons/seo?language=${language}`, { isIndexable: false }),
       ),
     )
@@ -131,11 +131,28 @@ describe('sitemap.xml and robots.txt', () => {
       expect(txt).not.toContain('Allow: /')
     } finally {
       await Promise.all(
-        ['en', 'de', 'bs'].map((language) =>
+        ['en', 'de', 'de-AT', 'bs'].map((language) =>
           $patchAsAdmin(`/api/singletons/seo?language=${language}`, { isIndexable: true }),
         ),
       )
     }
+  })
+
+  test('regional language: sitemap includes /de-AT/ URLs preserving the hyphen', async () => {
+    const regional: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathDEAT: '/sitemap-regional-at',
+      referencedSingleton: 'Options',
+      isPublicDEAT: true,
+      seoDEAT: { isIndexable: true },
+    })
+    routeIds.push(regional[0].id)
+
+    const res = await $getRaw('/sitemap.xml')
+    expect(res.status).toBe(200)
+    const xml = String(res.data)
+    expect(xml).toContain('https://example.test/de-AT/sitemap-regional-at')
+    expect(xml).not.toContain('/de_at/')
+    expect(xml).not.toContain('/deat/')
   })
 
   test('sitemap emits <lastmod> for each url', async () => {
@@ -173,7 +190,7 @@ describe('sitemap.xml and robots.txt', () => {
       expect(await $deleteAsAdmin(`/api/collections/routes/${id}`)).toBe(1)
     }
     await Promise.all(
-      ['en', 'de', 'bs'].map((language) =>
+      ['en', 'de', 'de-AT', 'bs'].map((language) =>
         $patchAsAdmin(`/api/singletons/seo?language=${language}`, {
           baseURL: null,
           isIndexable: true,

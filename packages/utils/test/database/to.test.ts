@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { toForeignKey, toIndex, toJunction } from '../../src'
+import { desuffixLang, langSuffix, toForeignKey, toIndex, toJunction } from '../../src'
 
 test('generate index name', () => {
   expect(toIndex('Baz', ['foo'])).toBe('IX_Baz__foo')
@@ -37,4 +37,33 @@ test('generate junction table name', () => {
   expect(toJunction('A', 'a', 'B'.repeat(99)).tableName).toMatch(/^JN_A__a__B[0-9B_]{53}$/)
   expect(toJunction('A', 'a', 'B', 'b'.repeat(50)).tableName).toMatch(/^JN_A__a__B__b{50}$/)
   expect(toJunction('A', 'a', 'B', 'b'.repeat(99)).tableName).toMatch(/^JN_A__a__B__b[0-9b_]{50}$/)
+})
+
+test('langSuffix produces camelCase-compatible identifiers', () => {
+  expect(langSuffix('en')).toBe('EN')
+  expect(langSuffix('de')).toBe('DE')
+  expect(langSuffix('de-AT')).toBe('DEAT')
+  expect(langSuffix('pt-BR')).toBe('PTBR')
+  expect(langSuffix('zh-Hant')).toBe('ZHHANT')
+  expect(langSuffix('sr-Latn-RS')).toBe('SRLATNRS')
+  expect(langSuffix('es-419')).toBe('ES419')
+})
+
+test('desuffixLang reverses langSuffix back to the registered code', () => {
+  const languages = ['en', 'de-AT', 'zh-Hant']
+  expect(desuffixLang('EN', languages)).toBe('en')
+  expect(desuffixLang('DEAT', languages)).toBe('de-AT')
+  expect(desuffixLang('ZHHANT', languages)).toBe('zh-Hant')
+  expect(desuffixLang('deat', languages)).toBe('de-AT')
+  expect(desuffixLang('FR', languages)).toBeUndefined()
+  expect(desuffixLang('', languages)).toBeUndefined()
+})
+
+test('desuffixLang accepts the object-shape languages array', () => {
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'de-AT', name: 'Austrian German' },
+  ]
+  expect(desuffixLang('DEAT', languages)).toBe('de-AT')
+  expect(desuffixLang('EN', languages)).toBe('en')
 })

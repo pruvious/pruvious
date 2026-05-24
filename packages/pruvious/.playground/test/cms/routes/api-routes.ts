@@ -181,6 +181,22 @@ describe('routes API (auth-aware)', () => {
     expect((prev.data as any).code).toBe(301)
   })
 
+  test('regional language: pathDEAT column resolves via /api/routes/de-AT/...', async () => {
+    const id = await mkRoute({
+      pathDEAT: '/api-routes-at-home',
+      referencedSingleton: 'Options',
+      isPublicDEAT: true,
+    })
+    try {
+      const res = await $getRaw('/api/routes/de-AT/api-routes-at-home')
+      expect(res.status).toBe(200)
+      expect((res.data as any).language).toBe('de-AT')
+      expect((res.data as any).ref).toBe('Options')
+    } finally {
+      await $deleteAsAdmin(`/api/collections/routes/${id}`)
+    }
+  })
+
   test('cleanup: delete routes and articles', async () => {
     for (const id of [publicRouteId, draftRouteId, draftWithRedirectId, translatedRouteId, mixedCaseRouteId]) {
       expect(await $deleteAsAdmin(`/api/collections/routes/${id}`)).toBe(1)

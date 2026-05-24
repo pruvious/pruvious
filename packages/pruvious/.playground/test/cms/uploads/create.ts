@@ -17,7 +17,7 @@ describe('create uploads', () => {
           category: 'text',
           mime: 'text/plain',
           size: txtFile.size,
-          description: { en: '', de: '', bs: '' },
+          description: { 'en': '', 'de': '', 'de-AT': '', 'bs': '' },
           etag: expect.any(String),
           images: [],
           imageWidth: 0,

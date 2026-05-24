@@ -132,9 +132,26 @@ export function dayjsUTC(date?: PUIDateInput, format?: string, strict?: boolean)
   return getDayjs(true, date, format, strict)
 }
 
+/**
+ * Resolves a configured dashboard `language` to the closest registered dayjs locale,
+ * folding regional codes like `de-AT` to their base `de` when no regional locale is registered.
+ */
+function resolveDayjsLocale(language: string): string {
+  if (_dayjs.Ls[language]) {
+    return language
+  }
+  if (language.includes('-')) {
+    const base = language.split('-')[0]!
+    if (_dayjs.Ls[base]) {
+      return base
+    }
+  }
+  return language
+}
+
 function getDayjs(utc: boolean, date?: PUIDateInput, format?: string, strict?: boolean) {
   extend()
-  const language = getUser()?.dashboardLanguage ?? 'en'
+  const language = resolveDayjsLocale(getUser()?.dashboardLanguage ?? 'en')
   const timezone = dayjsResolveTimezone(getUser()?.timezone)
   return utc
     ? _dayjs.utc(date, format, strict).locale(language)
@@ -182,7 +199,7 @@ export function dayjsConfig(): {
 } {
   extend()
   const user = getUser()
-  const language = user?.dashboardLanguage ?? 'en'
+  const language = resolveDayjsLocale(user?.dashboardLanguage ?? 'en') as LanguageCode
   const timezone = dayjsResolveTimezone(user?.timezone)
   const dateFormat = user?.dateFormat ?? 'LL'
   const timeFormat = user?.timeFormat ?? 'LTS'

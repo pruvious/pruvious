@@ -674,19 +674,30 @@ export interface PruviousModuleOptions {
       name: string
 
       /**
-       * The ISO language code used in URLs and HTML lang attributes.
-       * Should follow [ISO 639-1](https://en.m.wikipedia.org/wiki/List_of_ISO_639_language_codes) format for best compatibility.
+       * The language code used in URLs and HTML lang attributes.
+       *
+       * Accepted format is a [BCP-47](https://www.rfc-editor.org/info/bcp47) subset matching
+       * `^[a-z]{2,3}(-[A-Z][a-z]{3})?(-([A-Z]{2}|\d{3}))?$`:
+       *
+       * - lowercase 2 or 3 letter language base (`en`, `de`, `fil`)
+       * - optional Title-case script subtag (`zh-Hant`, `sr-Latn`)
+       * - optional UPPERCASE region or 3-digit M.49 (`de-AT`, `es-419`, `sr-Latn-RS`)
+       *
+       * Renaming a code in this list is **destructive**: per-language column data on the `Routes`
+       * collection (and any other per-language fields) is dropped on the next sync. Plan
+       * separate down/up migrations if you need to preserve content across a rename.
        *
        * This code is used for:
        *
-       * - URL prefixes (e.g., `/de/page`).
+       * - URL prefixes (e.g., `/de-AT/page`).
        * - HTML lang attributes.
        * - API language identification.
        *
        * @example
        * 'en'
        * 'de'
-       * 'fr'
+       * 'de-AT'
+       * 'zh-Hant'
        */
       code: string
     }[]

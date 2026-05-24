@@ -233,6 +233,32 @@ describe('SEO sharing image and meta tags', () => {
     ])
   })
 
+  test('regional language: hreflang preserves the hyphen in alternates', async () => {
+    const route: any = await $postAsAdmin('/api/collections/routes?returning=id', {
+      pathEN: '/seo-share-regional',
+      pathDEAT: '/seo-share-regional-at',
+      referencedSingleton: 'Options',
+      isPublicEN: true,
+      isPublicDEAT: true,
+      seoEN: { title: 'Regional EN' },
+      seoDEAT: { title: 'Regional AT' },
+    })
+    routeIds.push(route[0].id)
+
+    const at: any = await $getRaw('/api/routes/de-AT/seo-share-regional-at')
+    expect(at.status).toBe(200)
+    expect(at.data.language).toBe('de-AT')
+
+    const alternates = at.data.seo.alternates as { hreflang: string; href: string }[]
+    const deAt = alternates.find((a) => a.hreflang === 'de-AT')
+    expect(deAt).toBeTruthy()
+    expect(deAt!.href).toBe('https://example.test/de-AT/seo-share-regional-at')
+    expect(deAt!.hreflang).not.toContain('_')
+
+    const webPage = (at.data.seo.jsonLd as any[]).find((entry) => entry['@type'] === 'WebPage')
+    expect(webPage.inLanguage).toBe('de-AT')
+  })
+
   test('exposes canonical url, hreflang alternates and inLanguage in JSON-LD', async () => {
     const en: any = await $getRaw('/api/routes/seo-share-bilingual')
     expect(en.status).toBe(200)
@@ -420,7 +446,7 @@ describe('SEO sharing image and meta tags', () => {
       }
     }
     await Promise.all(
-      ['en', 'de', 'bs'].map((language) =>
+      ['en', 'de', 'de-AT', 'bs'].map((language) =>
         $patchAsAdmin(`/api/singletons/seo?language=${language}`, {
           baseURL: null,
           isIndexable: true,

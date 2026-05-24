@@ -1,4 +1,4 @@
-import { __, assertParams, i18n } from '#pruvious/server'
+import { __, assertParams, i18n, isValidLanguageCode } from '#pruvious/server'
 import { isString } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
@@ -15,13 +15,18 @@ export default defineEventHandler(async (event) => {
       language: [
         { test: Boolean, message: __('pruvious-api', 'This query parameter is required') },
         { test: isString, message: __('pruvious-orm', 'The value must be a string') },
+        { test: isValidLanguageCode, message: __('pruvious-api', 'Invalid language code') },
       ],
     },
   )
 
-  for (const lang of [language, ...fallbackLanguages]) {
-    const definition = i18n.getDefinition(domain as string, lang as string)
+  const merged = i18n.getDefinition(domain as string, language as string)
+  if (merged) {
+    return merged.strings
+  }
 
+  for (const lang of fallbackLanguages) {
+    const definition = i18n.getDefinition(domain as string, lang)
     if (definition) {
       return definition.strings
     }

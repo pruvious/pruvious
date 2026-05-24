@@ -6,9 +6,8 @@
         v-pui-tooltip="modelValue?.[code]"
         :textColor="modelValue?.[code] ? undefined : 'inherit'"
         color="secondary"
-        class="pui-uppercase"
       >
-        {{ code }}
+        {{ formatLanguageCode(code) }}
       </PUIBadge>
     </PruviousDashboardEditableFieldCell>
 
@@ -30,7 +29,7 @@
 import { languages } from '#pruvious/app'
 import type { Collections, LanguageCode, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
-import { castToNumber, isString } from '@pruvious/utils'
+import { castToNumber, formatLanguageCode, isString } from '@pruvious/utils'
 
 const props = defineProps({
   /**

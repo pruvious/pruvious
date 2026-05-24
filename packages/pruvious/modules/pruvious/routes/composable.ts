@@ -1,5 +1,5 @@
 import type { ResolvedRoute, RouteRedirect, RouteReferenceName } from '#pruvious/server'
-import { withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
+import { toOgLocale, withoutTrailingSlash, withTrailingSlash } from '@pruvious/utils'
 import { stringifyQuery } from 'ufo'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
 import { pruviousFetchHeaders } from '../api/utils.client'
@@ -138,7 +138,7 @@ export async function resolvePruviousRoute(
         { attribute: 'property', key: 'og:url', content: seo.url },
         { attribute: 'property', key: 'og:type', content: seo.ogType },
         { attribute: 'property', key: 'og:site_name', content: seo.siteName },
-        { attribute: 'property', key: 'og:locale', content: response.language },
+        { attribute: 'property', key: 'og:locale', content: toOgLocale(response.language) },
         { attribute: 'name', key: 'twitter:title', content: seo.title },
         { attribute: 'name', key: 'twitter:description', content: seo.description },
         { attribute: 'name', key: 'twitter:card', content: sharingImage ? 'summary_large_image' : 'summary' },
@@ -147,7 +147,7 @@ export async function resolvePruviousRoute(
 
       for (const code of languages) {
         if (code !== response.language) {
-          baseline.push({ attribute: 'property', key: `og:locale:alternate:${code}`, content: code })
+          baseline.push({ attribute: 'property', key: `og:locale:alternate:${code}`, content: toOgLocale(code) })
         }
       }
 
