@@ -742,13 +742,15 @@ async function setUpPreview() {
 
 async function updatePreviewData() {
   const data = await getPopulatedPreviewData()
-  if (!isIframeFocused.value || hash(data._casted) !== lastPreviewDataHash) {
+  const newHash = hash(data._casted)
+  if (!isIframeFocused.value || newHash !== lastPreviewDataHash) {
     messagePreviewIframe('dashboard:data', {
       data,
       historyIndex: props.history.getCurrentIndex(),
       historySize: props.history.size.value,
       focusBlock: selectedBlocks.value.length === 1 ? selectedBlocks.value[0]!.source.$path : null,
     })
+    lastPreviewDataHash = newHash
   }
 }
 

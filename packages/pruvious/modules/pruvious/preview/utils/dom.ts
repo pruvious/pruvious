@@ -1,7 +1,7 @@
 import type { BlockName } from '#pruvious/server'
 import { castToNumber, clearArray, isNumber, last } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
-import { messageDashboard } from './messages'
+import { commitData, messageDashboard } from './messages'
 import { usePreviewState } from './state'
 
 export interface DOMBlock {
@@ -50,6 +50,7 @@ export function onFocus() {
 
 export function onBlur() {
   const { isFocused, highlightedBlocks } = usePreviewState()
+  commitData()
   isFocused.value = false
   highlightedBlocks.value = []
   messageDashboard('iframe:blur', {})
