@@ -56,12 +56,13 @@ export async function getServerFileContent() {
     'permissions',
     [
       'access-dashboard',
-      'update-own-account',
+      'clear-page-cache',
+      'delete-logs',
+      'logout-other-users',
+      'pause-logs',
       'preview-drafts',
       'read-logs',
-      'delete-logs',
-      'clear-page-cache',
-      'logout-other-users',
+      'update-own-account',
       ...collectionEntries
         .map(([name]) => kebabCase(name))
         .flatMap((name) =>
@@ -87,6 +88,7 @@ export async function getServerFileContent() {
       'auth/permissions',
       'auth/renew-token',
       'auth/state',
+      'cache/page/clear',
       'collections/:collection',
       'collections/:collection/:id',
       'collections/:collection/:id/copy-translation',
@@ -168,7 +170,7 @@ export async function getServerFileContent() {
     ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { I18n, type ExtractDomains, type ExtractHandlesByDomainAndLanguage, type ExtractInput, type ExtractTranslatableStringsDefinitions } from '@pruvious/i18n'`,
     `import { capitalize, isEmpty, isObject, pick, remap, retry } from '@pruvious/utils'`,
-    `import { Database, type GenericCollection, type GenericValidator, translatableStrings as _pruviousOrmEnTranslation, translatableStringsDe as _pruviousOrmDeTranslation } from '@pruvious/orm'`,
+    `import { Database, type DatabaseDriver, type GenericCollection, type GenericValidator, translatableStrings as _pruviousOrmEnTranslation, translatableStringsDe as _pruviousOrmDeTranslation } from '@pruvious/orm'`,
     `import { type PutResult, type GetResult, type StreamResult, type MoveResult, type DeleteResult, type MetaResult, Storage, type StorageFile } from '@pruvious/storage'`,
     `import { colorize } from 'consola/utils'`,
     `import type { $Fetch } from 'nitropack/types'`,
@@ -177,6 +179,7 @@ export async function getServerFileContent() {
     `import { applyCollectionDebugHooks, applySingletonDebugHooks } from '${resolvePruviousFile('debug/hooks')}'`,
     `import { collectionGuards } from '${resolvePruviousFile('collections/guards')}'`,
     `import { cacheCollection } from '${resolvePruviousFile('cache/collection')}'`,
+    `import { clearCache } from '${resolvePruviousFile('cache/utils.server')}'`,
     `import { queueCollection } from '${resolvePruviousFile('queue/collection')}'`,
     `import { queueUniqueJob } from '${resolvePruviousFile('queue/utils.server')}'`,
     `import { parseConditionalLogic } from '${resolvePruviousFile('fields/utils.server')}'`,
@@ -1223,6 +1226,11 @@ export async function getServerFileContent() {
     `      sync: runtimeConfig.pruvious.database.sync === false ? false : {`,
     `        dropNonCollectionTables: isObject(runtimeConfig.pruvious.database.sync) ? !!runtimeConfig.pruvious.database.sync.dropNonCollectionTables : false,`,
     `        dropNonFieldColumns: isObject(runtimeConfig.pruvious.database.sync) ? !!runtimeConfig.pruvious.database.sync.dropNonFieldColumns : false,`,
+    `        afterSync: async () => {`,
+    `          try {`,
+    `            await clearCache('page')`,
+    `          } catch {}`,
+    `        },`,
     `      },`,
     `    }) as any`,
     ``,
@@ -1248,7 +1256,7 @@ export async function getServerFileContent() {
     ``,
     `    if (['sqlite', 'postgres', 'd1'].includes(type)) {`,
     `      _cacheDatabase = new Database({`,
-    `        driver: runtimeConfig.pruvious.debug.logs.driver,`,
+    `        driver: runtimeConfig.pruvious.cache.driver as DatabaseDriver,`,
     ...(nuxt.options.nitro.preset?.startsWith('cloudflare') ? [] : [`      PGPool: pg.Pool,`]),
     `        collections: { Cache: cacheCollection },`,
     `        logger: log,`,
@@ -1265,7 +1273,12 @@ export async function getServerFileContent() {
     `        })`,
     `      }`,
     `    } else if (['redis', 'rediss'].includes(type)) {`,
-    `      // @todo`,
+    ...(nuxt.options.nitro.preset?.startsWith('cloudflare')
+      ? [`      throw new Error('Redis cache driver is not supported on Cloudflare Workers')`]
+      : [
+          `      _cacheDatabase = new Redis(runtimeConfig.pruvious.cache.driver)`,
+          `      ;(_cacheDatabase as Redis).on('error', (err) => log(\`Redis cache error: \${err.message}\`))`,
+        ]),
     `    } else if (type === 'mainDatabase') {`,
     `      _cacheDatabase = _mainDatabase as any`,
     `    } else {`,
@@ -1284,7 +1297,7 @@ export async function getServerFileContent() {
     ``,
     `    if (['sqlite', 'postgres', 'd1'].includes(type)) {`,
     `      _queueDatabase = new Database({`,
-    `        driver: runtimeConfig.pruvious.debug.logs.driver,`,
+    `        driver: runtimeConfig.pruvious.queue.driver as DatabaseDriver,`,
     ...(nuxt.options.nitro.preset?.startsWith('cloudflare') ? [] : [`      PGPool: pg.Pool,`]),
     `        collections: { Queue: queueCollection },`,
     `        logger: log,`,
@@ -1847,7 +1860,10 @@ function getReExports() {
     `export type { BlockGroupDefinition, BlockTagDefinition, SerializableBlock } from '${resolvePruviousFile('blocks/utils.server')}'`,
 
     // Cache
-    `export { setCache, appendCache, getCache, getCacheKeys, hasCache, deleteCache, clearCache, removeExpiredCacheEntries } from '${resolvePruviousFile('cache/utils.server')}'`,
+    `export {} from '${resolvePruviousFile('cache/page.handler')}'`,
+    `export { setCache, appendCache, getCache, getCacheKeys, hasCache, deleteCache, clearCache, removeExpiredCacheEntries, getPageCacheEntry, tryMarkPagePending, writePageCacheEntry } from '${resolvePruviousFile('cache/utils.server')}'`,
+    `export { clearPageCache, clearPageCachePaths, buildPageCacheKey, resolveCacheRule } from '${resolvePruviousFile('cache/page.server')}'`,
+    `export type { ResolvedCacheRule, RawCacheRule } from '${resolvePruviousFile('cache/page.server')}'`,
 
     // Collections
     `export { defineCollection, defineCollectionFromTemplate, type DefineCollectionOptions, type CollectionMetaOptions, type CollectionGuard, type OrderBy, type CollectionRoutingOptions, type CollectionUIOptions, type CollectionMeta, type GenericMetaCollection, type MetaContext } from '${resolvePruviousFile('collections/define')}'`,

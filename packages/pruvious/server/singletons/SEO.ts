@@ -225,4 +225,5 @@ export default defineSingleton({
     ],
   },
   copyTranslation: ({ source }) => source,
+  pageCacheClearTriggers: true,
 })

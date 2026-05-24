@@ -121,7 +121,7 @@ export async function resolvePruviousRoute(
         to,
         redirectCode: response.code,
         replace: true,
-        external: to.startsWith('http'),
+        external: true,
       }
     }
   } else {

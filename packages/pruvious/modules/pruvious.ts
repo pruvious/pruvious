@@ -71,6 +71,15 @@ export default defineNuxtModule<PruviousModuleOptions>({
     cache: {
       driver: 'mainDatabase',
       prefix: 'pruvious',
+      page: {
+        enabled: true,
+        default: 'cache',
+        defaultTTL: 300,
+        defaultDebounce: 250,
+        defaultTimeout: 1000,
+        defaultQueryString: 'separate',
+        headers: true,
+      },
     },
     queue: {
       driver: 'mainDatabase',
@@ -181,6 +190,15 @@ export default defineNuxtModule<PruviousModuleOptions>({
       cache: {
         driver: resolvedOptions.cache.driver!,
         prefix: resolvedOptions.cache.prefix!.replace(/:$/, ''),
+        page: {
+          enabled: resolvedOptions.cache.page!.enabled!,
+          default: resolvedOptions.cache.page!.default!,
+          defaultTTL: resolvedOptions.cache.page!.defaultTTL ?? null,
+          defaultDebounce: resolvedOptions.cache.page!.defaultDebounce!,
+          defaultTimeout: resolvedOptions.cache.page!.defaultTimeout!,
+          defaultQueryString: resolvedOptions.cache.page!.defaultQueryString!,
+          headers: resolvedOptions.cache.page!.headers!,
+        },
       },
       queue: {
         driver: resolvedOptions.queue.driver!,
@@ -333,6 +351,12 @@ export default defineNuxtModule<PruviousModuleOptions>({
         route: '/robots.txt',
         handler: resolve('./pruvious/routes/robots.handler.ts'),
         method: 'get',
+      })
+    }
+    if (nuxt.options.runtimeConfig.pruvious.cache.page.enabled) {
+      addServerHandler({
+        middleware: true,
+        handler: resolve('./pruvious/cache/page.handler.ts'),
       })
     }
 

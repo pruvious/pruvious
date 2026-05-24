@@ -1,5 +1,6 @@
 import { collections, database, type Collections } from '#pruvious/server'
 import { isArray, isDefined, isNull, isNumber, isRelURL, isString, isUndefined, parseRelURL } from '@pruvious/utils'
+import type { RawCacheRule } from '../cache/page.server'
 import { normalizeRoutePath } from './utils.server'
 
 /**
@@ -21,7 +22,20 @@ export interface LinkIndexRoute {
   isIndexable: Record<string, boolean>
   hasCanonicalOverride: Record<string, boolean>
   canonicalRef: Record<string, CanonicalRef | null>
+  cacheRules: Record<string, RawCacheRule[]>
+  redirects: Record<string, RawRouteRedirect[]>
   updatedAt: number | null
+}
+
+/**
+ * A single redirect rule as stored on a Routes record (per-language `redirects{LANG}` field).
+ *
+ * Only the `match` and `to` fields are needed to decide whether the page cache must defer to
+ * `resolveRoute` (so its redirect can be issued); the response code is irrelevant for cache routing.
+ */
+export interface RawRouteRedirect {
+  match: string | null
+  to: string | null
 }
 
 export interface LinkIndexRecord {
@@ -47,7 +61,7 @@ export interface LinkIndex {
   records: Record<string, LinkIndexRecord[]>
 }
 
-export const LINK_INDEX_VERSION = 1
+export const LINK_INDEX_VERSION = 3
 
 const LINK_INDEX_KEY = 'linkIndex'
 const LINK_INDEX_FLUSHED_AT_KEY = 'linkIndexFlushedAt'
@@ -126,6 +140,8 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
     const isIndexable: Record<string, boolean> = {}
     const hasCanonicalOverride: Record<string, boolean> = {}
     const canonicalRef: Record<string, CanonicalRef | null> = {}
+    const cacheRules: Record<string, RawCacheRule[]> = {}
+    const redirects: Record<string, RawRouteRedirect[]> = {}
 
     for (const { code } of languages) {
       const suffix = code.toUpperCase()
@@ -135,6 +151,13 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
       isIndexable[code] = !seo || seo.isIndexable !== false
       hasCanonicalOverride[code] = isString(seo?.canonicalURL?.url) && seo.canonicalURL.url.length > 0
       canonicalRef[code] = parseCanonicalRef(seo?.canonicalURL?.url, primaryLanguage)
+      cacheRules[code] = isArray(row[`cacheRules${suffix}`]) ? row[`cacheRules${suffix}`] : []
+      redirects[code] = isArray(row[`redirects${suffix}`])
+        ? (row[`redirects${suffix}`] as any[]).map((r) => ({
+            match: isString(r?.match) ? r.match : null,
+            to: isString(r?.to) ? r.to : null,
+          }))
+        : []
     }
 
     routes.push({
@@ -146,6 +169,8 @@ export async function buildLinkIndex(db: Db = database()): Promise<LinkIndex> {
       isIndexable,
       hasCanonicalOverride,
       canonicalRef,
+      cacheRules,
+      redirects,
       updatedAt: isNumber(row.updatedAt) ? row.updatedAt : null,
     })
   }

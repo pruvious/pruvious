@@ -1,5 +1,6 @@
-import { initAllDatabases, initStorage, loadActions, loadFilters } from '#pruvious/server'
-import { isObject } from '@pruvious/utils'
+import { initAllDatabases, initStorage, loadActions, loadFilters, writePageCacheEntry } from '#pruvious/server'
+import { isObject, isString } from '@pruvious/utils'
+import { getResponseHeader } from 'h3'
 import { isWorkerd } from 'std-env'
 import { setVerbose } from '../../modules/pruvious/debug/console'
 import { logResponseHandler } from '../../modules/pruvious/debug/logs'
@@ -43,5 +44,39 @@ export default defineNitroPlugin(async (nitro) => {
         errorMessage: error.message,
       }),
     )
+  }
+
+  // Page cache writer
+  if (runtimeConfig.pruvious.cache.page.enabled) {
+    nitro.hooks.hook('render:response', (response, { event }) => {
+      const meta = (event?.context as any)?.pruviousPageCache as
+        | { key: string; token: string; ttl: number | null }
+        | null
+        | undefined
+
+      if (!meta || !meta.key || !meta.token) {
+        return
+      }
+
+      if (!response || response.statusCode !== 200) {
+        return
+      }
+
+      if (!isString(response.body)) {
+        return
+      }
+
+      const contentType = response.headers?.['content-type']
+      if (!isString(contentType) || !contentType.toLowerCase().startsWith('text/html')) {
+        return
+      }
+
+      if (event && getResponseHeader(event, 'set-cookie')) {
+        return
+      }
+
+      const expiresAt = meta.ttl ? Date.now() + meta.ttl * 1000 : null
+      event!.waitUntil?.(writePageCacheEntry(meta.key, response.body, expiresAt, meta.token).catch(() => false))
+    })
   }
 })

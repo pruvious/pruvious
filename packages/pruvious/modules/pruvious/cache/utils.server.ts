@@ -1,5 +1,5 @@
 import { Database } from '@pruvious/orm'
-import { isDefined, isNull, toDate } from '@pruvious/utils'
+import { isDefined, isNull, randomIdentifier, toDate } from '@pruvious/utils'
 
 /**
  * Stores a string `value` in the cache with the given `key`.
@@ -267,7 +267,16 @@ export async function clearCache(prefix?: 'token' | 'page' | 'multipart' | (stri
       : await db.exec(`delete from "Cache"`)
     return result
   } else {
-    return await db.del(prefix ? `${prefix}:*` : '*')
+    const keys = await db.keys(prefix ? `${prefix}:*` : '*')
+    if (!keys.length) {
+      return 0
+    }
+    const BATCH = 500
+    let deleted = 0
+    for (let i = 0; i < keys.length; i += BATCH) {
+      deleted += await db.del(...keys.slice(i, i + BATCH))
+    }
+    return deleted
   }
 }
 
@@ -294,4 +303,181 @@ export async function removeExpiredCacheEntries(): Promise<number> {
   }
 
   return 0
+}
+
+/**
+ * Result of a page cache lookup.
+ */
+export interface PageCacheEntry {
+  /**
+   * The rendered HTML body stored in the cache.
+   */
+  value: string
+
+  /**
+   * The pending claim token (`{deadlineMs}:{nonce}`) when another worker is currently rendering this entry,
+   * or `null` when the entry is complete and freely serveable.
+   */
+  pending: string | null
+}
+
+/**
+ * Internal page-cache helper. Returns the cached HTML for the given key, or `null` when nothing usable is in cache.
+ *
+ * Pending entries past their deadline are treated as stale and not returned - the next caller is expected to
+ * re-render. Expired entries are not returned either.
+ *
+ * Use {@link tryMarkPagePending} and {@link writePageCacheEntry} for the writer path. The primary `pruvious.cache.prefix`
+ * is prepended automatically.
+ */
+export async function getPageCacheEntry(key: string): Promise<PageCacheEntry | null> {
+  const { getCacheDatabase } = await import('#pruvious/server')
+  const db = getCacheDatabase()
+  const { prefix } = useRuntimeConfig().pruvious.cache
+  const fullKey = prefix ? `${prefix}:${key}` : key
+  const now = Date.now()
+
+  if (db instanceof Database) {
+    const rows = await db.exec(
+      `select "value", "pending" from "Cache" where "key" = $key and ("expiresAt" is null or "expiresAt" >= $now)`,
+      { key: fullKey, now },
+    )
+    const row = rows[0]
+    if (!row) {
+      return null
+    }
+    const pendingDeadline = parsePendingDeadline(row.pending)
+    if (pendingDeadline !== null && pendingDeadline >= now) {
+      return null
+    }
+    return { value: row.value, pending: pendingDeadline === null ? row.pending : null }
+  } else {
+    const value = await db.get(fullKey)
+    if (!value) {
+      return null
+    }
+    const pendingToken = await db.get(pendingCompanionKey(key))
+    const pendingDeadline = parsePendingDeadline(pendingToken)
+    if (pendingDeadline !== null && pendingDeadline >= now) {
+      return null
+    }
+    return { value, pending: pendingDeadline === null ? pendingToken : null }
+  }
+}
+
+/**
+ * Internal page-cache helper. Attempts to atomically claim the right to render the page at `key`.
+ *
+ * Stores a uniqueness token (`{deadlineMs}:{nonce}`) in the `pending` column / Redis companion key.
+ * If another worker already holds an unexpired claim, this caller loses (returns `null`).
+ *
+ * @returns the claim token on success, `null` if another worker is currently rendering.
+ */
+export async function tryMarkPagePending(key: string, timeoutMs: number): Promise<string | null> {
+  const { getCacheDatabase } = await import('#pruvious/server')
+  const db = getCacheDatabase()
+  const { prefix } = useRuntimeConfig().pruvious.cache
+  const fullKey = prefix ? `${prefix}:${key}` : key
+  const now = Date.now()
+  const deadline = now + timeoutMs
+  const deadlineStr = String(deadline).padStart(PENDING_DEADLINE_WIDTH, '0')
+  const token = `${deadlineStr}:${randomIdentifier(8)}`
+
+  if (db instanceof Database) {
+    await db.exec(
+      `insert into "Cache" ("key", "value", "pending", "createdAt") values ($key, '', $token, $now)
+       on conflict ("key") do update set "pending" = $token, "createdAt" = $now
+       where "Cache"."pending" is null
+          or cast(substr("Cache"."pending", 1, ${PENDING_DEADLINE_WIDTH}) as integer) < $now`,
+      { key: fullKey, token, now },
+    )
+    const rows = await db.exec(`select "pending" from "Cache" where "key" = $key`, { key: fullKey })
+    return rows[0]?.pending === token ? token : null
+  } else {
+    const pendingKey = pendingCompanionKey(key)
+    const result = await db.set(pendingKey, token, 'PX', timeoutMs, 'NX')
+    return result === 'OK' ? token : null
+  }
+}
+
+/**
+ * Internal page-cache helper. Completes an in-flight render by writing the rendered HTML body
+ * and clearing the pending claim. Pass the token returned from {@link tryMarkPagePending} to ensure
+ * we only overwrite our own claim (defense against late writes by losers).
+ */
+export async function writePageCacheEntry(
+  key: string,
+  value: string,
+  expiresAt: number | null,
+  token: string,
+): Promise<boolean> {
+  const { getCacheDatabase } = await import('#pruvious/server')
+  const db = getCacheDatabase()
+  const { prefix } = useRuntimeConfig().pruvious.cache
+  const fullKey = prefix ? `${prefix}:${key}` : key
+  const now = Date.now()
+
+  if (expiresAt !== null && expiresAt - now <= 0) {
+    return false
+  }
+
+  if (db instanceof Database) {
+    const result = await db.exec(
+      `update "Cache" set "value" = $value, "pending" = null, "expiresAt" = $expiresAt, "createdAt" = $now where "key" = $key and "pending" = $token`,
+      { key: fullKey, value, expiresAt, now, token },
+    )
+    return result === 1
+  } else {
+    const pendingKey = pendingCompanionKey(key)
+    const ttl = isNull(expiresAt) ? null : expiresAt - now
+    const result = await db.eval(
+      WRITE_PAGE_CACHE_LUA,
+      2,
+      fullKey,
+      pendingKey,
+      token,
+      value,
+      ttl === null ? '' : String(ttl),
+    )
+    return result === 1
+  }
+}
+
+const WRITE_PAGE_CACHE_LUA = `
+if redis.call('GET', KEYS[2]) ~= ARGV[1] then
+  return 0
+end
+if ARGV[3] == '' then
+  redis.call('SET', KEYS[1], ARGV[2])
+else
+  redis.call('SET', KEYS[1], ARGV[2], 'PX', ARGV[3])
+end
+redis.call('DEL', KEYS[2])
+return 1
+`
+
+const PENDING_DEADLINE_WIDTH = 13
+
+/**
+ * Parses the deadline portion of a `{deadlineMs}:{nonce}` pending token.
+ * Returns `null` when the token is missing or malformed.
+ */
+function parsePendingDeadline(token: string | null | undefined): number | null {
+  if (!token || typeof token !== 'string') {
+    return null
+  }
+  const parsed = parseInt(token.slice(0, PENDING_DEADLINE_WIDTH), 10)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+/**
+ * Builds the Redis companion key for an in-flight render claim.
+ *
+ * Given a primary key of the form `page:{rest}`, returns `{primaryPrefix}:page:pending:{rest}`.
+ * The result lives under the `page:` namespace so `clearCache('page')` evicts it together with the value entry.
+ */
+function pendingCompanionKey(key: string): string {
+  const { prefix } = useRuntimeConfig().pruvious.cache
+  const withPendingNamespace = key.replace(/^page:/, 'page:pending:')
+  return prefix ? `${prefix}:${withPendingNamespace}` : withPendingNamespace
 }

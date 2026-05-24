@@ -25,6 +25,7 @@ import {
   camelCase,
   deepClone,
   defu,
+  isArray,
   isDefined,
   isObject,
   isString,
@@ -215,6 +216,44 @@ interface ISingleton {
    * @see https://pruvious.com/docs/routing (@todo set up this link)
    */
   routing: any
+
+  /**
+   * Controls when updates to this singleton invalidate the public page cache.
+   * Singletons can only be `update`d, so there is only one operation.
+   *
+   * ### Boolean shortcuts
+   *
+   * - `true` - whole-flush the page cache on every update. Equivalent to `{ update: [{}] }`.
+   * - `false` - never invalidate. Equivalent to `{ update: [] }`.
+   *
+   * Use these when you don't need any field- or path-scoping.
+   *
+   * ### Defaults applied when this option is omitted
+   *
+   * - Routable singletons (those with `routing.enabled = true`): every update whole-flushes the cache.
+   * - Non-routable singletons: no-op.
+   *
+   * ### Customizing per-operation
+   *
+   * Pass `update` to override the default. Each entry is a trigger; if any matches, the cache clears.
+   *
+   * - `{ update: [] }` - disable all cache invalidation for this singleton.
+   * - `{ update: [{ fields: ['title'] }] }` - whole-flush when `title` changes.
+   * - `{ update: [{ paths: ['/blog/**'] }] }` - clear only `/blog/**` on every update.
+   * - `{ update: [{ fields: ['title'], paths: ['/blog/**'] }] }` - both conditions combined.
+   *
+   * ### Trigger fields
+   *
+   * - `paths` - glob patterns of paths to clear. Defaults to `['**']` (whole cache).
+   * - `fields` - only fire when one of these fields is in `sanitizedInput`.
+   *
+   * @example
+   * ```ts
+   * // Non-routable settings singleton that affects every public page (e.g., site-wide SEO):
+   * pageCacheClearTriggers: true
+   * ```
+   */
+  pageCacheClearTriggers?: boolean | SingletonPageCacheClearTriggers<string>
 
   /**
    * Controls how the singleton is displayed in the dashboard user interface.
@@ -631,6 +670,46 @@ export interface DefineSingletonOptions<
   syncedFields?: (keyof MergeSingletonFields<TFields, TUpdatedAt> & string)[]
 
   /**
+   * Controls when updates to this singleton invalidate the public page cache.
+   * Singletons can only be `update`d, so there is only one operation.
+   *
+   * ### Boolean shortcuts
+   *
+   * - `true` - whole-flush the page cache on every update. Equivalent to `{ update: [{}] }`.
+   * - `false` - never invalidate. Equivalent to `{ update: [] }`.
+   *
+   * Use these when you don't need any field- or path-scoping.
+   *
+   * ### Defaults applied when this option is omitted
+   *
+   * - Routable singletons (those with `routing.enabled = true`): every update whole-flushes the cache.
+   * - Non-routable singletons: no-op.
+   *
+   * ### Customizing per-operation
+   *
+   * Pass `update` to override the default. Each entry is a trigger; if any matches, the cache clears.
+   *
+   * - `{ update: [] }` - disable all cache invalidation for this singleton.
+   * - `{ update: [{ fields: ['title'] }] }` - whole-flush when `title` changes.
+   * - `{ update: [{ paths: ['/blog/**'] }] }` - clear only `/blog/**` on every update.
+   * - `{ update: [{ fields: ['title'], paths: ['/blog/**'] }] }` - both conditions combined.
+   *
+   * ### Trigger fields
+   *
+   * - `paths` - glob patterns of paths to clear. Defaults to `['**']` (whole cache).
+   * - `fields` - only fire when one of these fields is in `sanitizedInput`.
+   *
+   * @example
+   * ```ts
+   * // Non-routable settings singleton that affects every public page (e.g., site-wide SEO):
+   * pageCacheClearTriggers: true
+   * ```
+   */
+  pageCacheClearTriggers?:
+    | boolean
+    | SingletonPageCacheClearTriggers<keyof MergeSingletonFields<TFields, TUpdatedAt> & string>
+
+  /**
    * @example
    * ```ts
    * {
@@ -885,6 +964,35 @@ type PublicRoutingFieldNames<
   | (DefaultTrue<TTranslatable> extends true ? 'translations' | 'language' : never)
   | (DefaultTrue<TUpdatedAt> extends false ? never : 'updatedAt')
 
+/**
+ * Update-only variant of `PageCacheClearTriggers` used by singletons (which have no insert/delete).
+ */
+export interface SingletonPageCacheClearTriggers<TFieldNames extends string = string> {
+  /**
+   * Triggers evaluated after the singleton is updated.
+   *
+   * Each trigger fires when its `fields` filter matches the `sanitizedInput` (or always, when
+   * `fields` is omitted) and clears the cache per its `paths`. Multiple matching triggers each
+   * run; results are idempotent.
+   *
+   * Defaults to `[{}]` (whole-flush) for routable singletons; `[]` for non-routable singletons.
+   * Pass `[]` to disable, or a list of triggers to customize.
+   */
+  update?: {
+    /**
+     * Glob patterns of paths to clear. `['**']` clears the whole cache (default).
+     * Use specific patterns like `['/blog/**']` to scope invalidation.
+     */
+    paths?: string[]
+
+    /**
+     * Restricts the trigger to updates that touch at least one of these fields.
+     * Compared against `sanitizedInput`, so it only matches what the writer actually changed.
+     */
+    fields?: TFieldNames[]
+  }[]
+}
+
 export type SingletonRoutingOptions<TFieldNames extends string = string> = {
   /**
    * Specifies which fields will be exposed in the `$data` property.
@@ -1050,6 +1158,37 @@ export function defineSingleton<
               ),
           )
         }
+      })
+    }
+
+    const triggers = (options as any).pageCacheClearTriggers as boolean | SingletonPageCacheClearTriggers | undefined
+    const updateTriggers =
+      triggers === true ? [{}] : triggers === false ? [] : (triggers?.update ?? (routing.enabled ? [{}] : []))
+
+    if (updateTriggers.length) {
+      hooks.afterQueryExecution.push(async (context, { result }) => {
+        try {
+          if (!result.success || context.operation !== 'update') {
+            return
+          }
+          for (const trigger of updateTriggers) {
+            if (
+              isArray(trigger.fields) &&
+              trigger.fields.length &&
+              !trigger.fields.some((field: string) => isDefined(context.sanitizedInput?.[field]))
+            ) {
+              continue
+            }
+            const paths = isArray(trigger.paths) && trigger.paths.length ? trigger.paths : ['**']
+            if (paths.includes('**')) {
+              const { clearCache } = await import('#pruvious/server')
+              await clearCache('page')
+            } else {
+              const { clearPageCachePaths } = await import('#pruvious/server')
+              await clearPageCachePaths(paths)
+            }
+          }
+        } catch {}
       })
     }
 

@@ -28,8 +28,14 @@
 
 <script lang="ts" setup>
 import { __, applyFilters, hasPermission, loadFilters } from '#pruvious/app'
-import { dashboardBasePath, prepareDashboardMenu, type DashboardMenuItem } from '#pruvious/dashboard'
+import {
+  dashboardBasePath,
+  prepareDashboardMenu,
+  pruviousDashboardPost,
+  type DashboardMenuItem,
+} from '#pruvious/dashboard'
 import type { PUIColorMode } from '@pruvious/ui/components/PUIColorMode.vue'
+import { puiQueueToast } from '@pruvious/ui/pui/toast'
 import { computedAsync } from '@vueuse/core'
 
 await loadFilters('dashboard:menu:header:dropdown')
@@ -48,6 +54,15 @@ const groups = computedAsync<Omit<DashboardMenuItem, 'active' | 'submenu'>[][]>(
           _colorMode.value === 'light' ? __('pruvious-dashboard', 'Dark mode') : __('pruvious-dashboard', 'Light mode'),
         icon: _colorMode.value === 'light' ? 'moon' : 'sun',
       },
+      ...(hasPermission('clear-page-cache')
+        ? [
+            {
+              action: clearPageCache,
+              label: __('pruvious-dashboard', 'Clear page cache'),
+              icon: 'database-cog',
+            } as const,
+          ]
+        : []),
     ],
     [
       ...(hasPermission('update-own-account')
@@ -92,5 +107,15 @@ function changeColorMode(mode: PUIColorMode) {
   document.body.classList.add('pui-no-transition')
   colorMode.preference = mode
   setTimeout(() => document.body.classList.remove('pui-no-transition'), 150)
+}
+
+async function clearPageCache() {
+  const { success } = await pruviousDashboardPost('cache/page/clear', { body: {} })
+
+  if (success) {
+    puiQueueToast(__('pruvious-dashboard', 'Page cache cleared'), { type: 'success' })
+  } else {
+    puiQueueToast(__('pruvious-dashboard', 'Failed to clear page cache'), { type: 'error' })
+  }
 }
 </script>

@@ -782,6 +782,65 @@ export interface CollectionMetaOptions<
   routing?: TRouting
 
   /**
+   * Controls when mutations on this collection invalidate the public page cache.
+   *
+   * Each operation (`insert`, `update`, `delete`) holds a list of triggers. A trigger fires if
+   * its conditions match, and clears the page cache (whole or path-scoped).
+   *
+   * ### Boolean shortcuts
+   *
+   * - `true` - whole-flush on every operation. Equivalent to `{ insert: [{}], update: [{}], delete: [{}] }`.
+   * - `false` - disable all cache invalidation. Equivalent to `{ insert: [], update: [], delete: [] }`.
+   *
+   * Use these when you don't need any per-operation customization.
+   *
+   * ### Defaults applied when this option is omitted
+   *
+   * - Hidden collections (`Cache`, `Queue`, logs, etc.): no-op on every operation.
+   * - `Users` and `Roles`: no-op on `insert` and `update`, whole-flush on `delete`
+   *   (any page that depended on the deleted account or role must be rebuilt).
+   * - Every other collection: whole-flush on `insert`, `update`, and `delete`.
+   *
+   * ### Customizing per-operation
+   *
+   * Pass any operation explicitly to override just that one. The others keep their defaults.
+   *
+   * - `{ update: [] }` - disable cache invalidation on update only.
+   * - `{ update: [{ fields: ['title'] }] }` - clear whole cache on update only when `title` changes.
+   * - `{ update: [{ paths: ['/blog/**'] }] }` - clear only `/blog/**` on update.
+   * - `{}` - no overrides; identical to omitting this option (uses the defaults above).
+   *
+   * ### Trigger fields
+   *
+   * - `paths` - glob patterns of paths to clear. Defaults to `['**']` (whole cache).
+   * - `fields` - (update only) only fire when one of these fields is in `sanitizedInput`.
+   *
+   * @example
+   * ```ts
+   * pageCacheClearTriggers: {
+   *   update: [{ fields: ['title', 'subpath'], paths: ['/blog/**'] }],
+   * }
+   * ```
+   */
+  pageCacheClearTriggers?:
+    | boolean
+    | PageCacheClearTriggers<
+        keyof MergeCollectionFields<
+          TFields,
+          TTranslatable,
+          TCreatedAt,
+          TUpdatedAt,
+          TAuthor,
+          TEditors,
+          TIsPublic,
+          TScheduledAt,
+          TSEO,
+          TRouting
+        > &
+          string
+      >
+
+  /**
    * Controls how the collection is displayed in the dashboard user interface.
    *
    * @default
@@ -832,6 +891,70 @@ export type CollectionGuard = (
    */
   context: MetaContext,
 ) => any
+
+/**
+ * A page-cache invalidation trigger.
+ *
+ * Empty (`{}`) means: fire on every matching operation and clear the whole cache.
+ */
+export interface PageCacheTrigger<TFieldNames extends string = string> {
+  /**
+   * Glob patterns of paths to clear. `['**']` clears the whole cache (default).
+   * Use specific patterns like `['/blog/**']` to scope invalidation.
+   */
+  paths?: string[]
+
+  /**
+   * Restricts the trigger to updates that touch at least one of these fields.
+   * Compared against `sanitizedInput`, so it only matches what the writer actually changed.
+   * Ignored on `insert` and `delete` triggers.
+   *
+   * Field names are typed against the collection's full field set (including auto-presets
+   * such as `subpath`, `isPublic`, `seo`, etc.).
+   */
+  fields?: TFieldNames[]
+}
+
+/**
+ * Per-operation map of {@link PageCacheTrigger}s. Field-name autocomplete is scoped to the
+ * collection's field set when used on `defineCollection`.
+ *
+ * Each operation key is optional; omitted keys fall back to the collection's default behavior.
+ * Pass an empty array (`[]`) to disable a single operation, or a list of triggers to customize.
+ */
+export interface PageCacheClearTriggers<TFieldNames extends string = string> {
+  /**
+   * Triggers evaluated after a record is inserted.
+   *
+   * Each trigger fires independently and clears the cache per its `paths`. The `fields` option
+   * is ignored for inserts (a new record can't "change" a field).
+   *
+   * Defaults to `[{}]` (whole-flush) for non-hidden, non-Users/Roles collections; `[]` otherwise.
+   */
+  insert?: PageCacheTrigger<TFieldNames>[]
+
+  /**
+   * Triggers evaluated after a record is updated.
+   *
+   * Each trigger fires when its `fields` filter matches the `sanitizedInput` (or always, when
+   * `fields` is omitted) and clears the cache per its `paths`. Multiple matching triggers each
+   * run; results are idempotent.
+   *
+   * Defaults to `[{}]` (whole-flush) for non-hidden, non-Users/Roles collections; `[]` otherwise.
+   */
+  update?: PageCacheTrigger<TFieldNames>[]
+
+  /**
+   * Triggers evaluated after a record is deleted.
+   *
+   * Each trigger fires unconditionally and clears the cache per its `paths`. The `fields` option
+   * is ignored for deletes.
+   *
+   * Defaults to `[{}]` (whole-flush) for non-hidden collections (including `Users` and `Roles`,
+   * so pages depending on the deleted account or role get rebuilt); `[]` for hidden collections.
+   */
+  delete?: PageCacheTrigger<TFieldNames>[]
+}
 
 type CollectionCopyTranslationFunction<
   TFields extends Record<string, GenericField>,
@@ -2146,6 +2269,66 @@ export function defineCollection<
             }
           }
           await flushLinkIndex()
+        } catch {}
+      })
+    }
+
+    if (!ui?.hidden) {
+      const triggers = options.pageCacheClearTriggers
+      const hasUserTriggers = isDefined(triggers)
+      const expanded =
+        triggers === true
+          ? { insert: [{}], update: [{}], delete: [{}] }
+          : triggers === false
+            ? { insert: [], update: [], delete: [] }
+            : (triggers ?? {})
+      const insertTriggers = expanded.insert ?? [{}]
+      const updateTriggers = expanded.update ?? [{}]
+      const deleteTriggers = expanded.delete ?? [{}]
+
+      hooks.afterQueryExecution.push(async (context, { result }) => {
+        try {
+          if (!result.success || context.operation === 'select') {
+            return
+          }
+          if (!hasUserTriggers && (context.collectionName === 'Users' || context.collectionName === 'Roles')) {
+            if (context.operation === 'delete') {
+              const { clearCache } = await import('#pruvious/server')
+              await clearCache('page')
+            }
+            return
+          }
+
+          const list =
+            context.operation === 'insert'
+              ? insertTriggers
+              : context.operation === 'update'
+                ? updateTriggers
+                : context.operation === 'delete'
+                  ? deleteTriggers
+                  : []
+          if (!list.length) {
+            return
+          }
+
+          for (const trigger of list) {
+            if (
+              context.operation === 'update' &&
+              isArray(trigger.fields) &&
+              trigger.fields.length &&
+              !trigger.fields.some((field: string) => isDefined(context.sanitizedInput?.[field]))
+            ) {
+              continue
+            }
+            const paths = isArray(trigger.paths) && trigger.paths.length ? trigger.paths : ['**']
+            if (paths.includes('**')) {
+              const { clearCache } = await import('#pruvious/server')
+              await clearCache('page')
+            } else {
+              const { clearPageCachePaths } = await import('#pruvious/server')
+              await clearPageCachePaths(paths)
+            }
+          }
         } catch {}
       })
     }

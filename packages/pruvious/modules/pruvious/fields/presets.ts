@@ -569,6 +569,7 @@ export function seoFieldPreset(options: SEOFieldPresetOptions) {
               'pruvious-dashboard',
               "Override this page's canonical URL. When set, the page advertises itself as a duplicate of the target and is excluded from the sitemap and `hreflang` alternates. Leave empty to canonicalize to this page's own URL.",
             ),
+          placeholder: ({ __ }) => __('pruvious-dashboard', 'None'),
           showTarget: false,
           showRel: false,
         },

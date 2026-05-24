@@ -19,8 +19,12 @@ export const cacheCollection = new Collection({
       model: numberFieldModel(),
       options: {},
     }),
+    pending: new Field({
+      model: textFieldModel(),
+      options: {},
+    }),
     createdAt: createdAtField(),
   },
-  indexes: [{ fields: ['key'], unique: true }, { fields: ['key', 'expiresAt'] }],
+  indexes: [{ fields: ['key'], unique: true }, { fields: ['key', 'expiresAt'] }, { fields: ['key', 'pending'] }],
   meta: privateCollectionMeta,
 })

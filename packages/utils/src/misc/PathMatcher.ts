@@ -102,12 +102,16 @@ export class PathMatcher {
   test(path: string): boolean {
     const normalizedPath = withoutTrailingSlash(path)
 
-    if (!this.matchesCache.has(normalizedPath)) {
+    if (this.include.length && !this.matchesCache.has(normalizedPath)) {
+      let included = false
       for (const glob of this.include) {
-        if (!this.regexp(glob).test(normalizedPath)) {
-          this.matchesCache.set(normalizedPath, false)
+        if (this.regexp(glob).test(normalizedPath)) {
+          included = true
           break
         }
+      }
+      if (!included) {
+        this.matchesCache.set(normalizedPath, false)
       }
     }
 

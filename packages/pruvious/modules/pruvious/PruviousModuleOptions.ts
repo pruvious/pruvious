@@ -284,6 +284,83 @@ export interface PruviousModuleOptions {
      * @default 'pruvious'
      */
     prefix?: string
+
+    /**
+     * HTML page-cache configuration.
+     *
+     * When enabled (default), anonymous GET responses for public pages are stored in the cache table
+     * and served directly on subsequent requests without running SSR. Requests carrying any auth token
+     * bypass the cache automatically; logged-in editors always see fresh content.
+     *
+     * Per-route overrides are configured via the `cacheRules{LANG}` field on each Route record.
+     * Per-collection invalidation rules are configured via `pageCacheClearTriggers` on `defineCollection`
+     * and `defineSingleton`.
+     *
+     * **Required for editor preview:** `auth.tokenStorage.storage` must be `'cookies'` for editors with
+     * the `preview-drafts` permission to see drafts on the initial HTML navigation. With `localStorage`,
+     * the server cannot detect the token on first paint and serves the cached anonymous response.
+     */
+    page?: {
+      /**
+       * Whether page caching is enabled at all. Set to `false` to disable the middleware entirely
+       * (every request runs full SSR).
+       *
+       * @default true
+       */
+      enabled?: boolean
+
+      /**
+       * The default action when no `cacheRules{LANG}` rule on the matched Route matches the path.
+       *
+       * - `'cache'` - Cache all public pages by default; users opt routes out via `action: 'bypass'` rules.
+       * - `'bypass'` - Skip caching by default; users opt in via `action: 'cache'` rules.
+       *
+       * @default 'cache'
+       */
+      default?: 'cache' | 'bypass'
+
+      /**
+       * Default time-to-live for cached entries in seconds. `null` disables expiry.
+       *
+       * @default 300
+       */
+      defaultTTL?: number | null
+
+      /**
+       * Default milliseconds a concurrent request waits for an in-flight render before falling
+       * through to its own render. Prevents thundering herd on cold cache.
+       *
+       * @default 250
+       */
+      defaultDebounce?: number
+
+      /**
+       * Default milliseconds before an in-flight render claim is considered stuck and a new
+       * render is allowed to take over.
+       *
+       * @default 1000
+       */
+      defaultTimeout?: number
+
+      /**
+       * Default query-string handling mode.
+       *
+       * - `'separate'` - Different query strings produce different cache entries (sorted/deduplicated).
+       * - `'ignore'` - All query strings collapse into one entry.
+       * - `'baseOnly'` - Only requests without query strings are cached.
+       *
+       * @default 'separate'
+       */
+      defaultQueryString?: 'separate' | 'ignore' | 'baseOnly'
+
+      /**
+       * Whether to emit the `X-Pruvious-Cache` response header indicating HIT / MISS / BYPASS state.
+       * Useful for debugging and CDN cache rules.
+       *
+       * @default true
+       */
+      headers?: boolean
+    }
   }
 
   /**
@@ -1481,8 +1558,13 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     pruvious: Pick<
       DeepRequired<PruviousModuleOptions>,
-      'database' | 'api' | 'uploads' | 'cache' | 'queue' | 'dashboard' | 'dir' | 'blocksPrefix'
+      'database' | 'api' | 'uploads' | 'queue' | 'dashboard' | 'dir' | 'blocksPrefix'
     > & {
+      cache: Omit<DeepRequired<PruviousModuleOptions['cache']>, 'page'> & {
+        page: Omit<DeepRequired<NonNullable<PruviousModuleOptions['cache']['page']>>, 'defaultTTL'> & {
+          defaultTTL: number | null
+        }
+      }
       auth: Pick<DeepRequired<PruviousModuleOptions['auth']>, 'jwt' | 'hash'> & {
         tokenResolution: DeepRequired<ServerTokenSource>[]
         tokenStorage: DeepRequired<ClientTokenStorage>
