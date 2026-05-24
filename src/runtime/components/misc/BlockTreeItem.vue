@@ -33,7 +33,7 @@
 
       <span
         v-if="tree.blocks[blockKey].errorCount && !tree.blocks[blockKey].errorMessage"
-        v-pruvious-tooltip.highlight-apostrophes="
+        v-pruvious-tooltip.highlightApostrophes="
           __('pruvious-dashboard', '$count $errors found', { count: tree.blocks[blockKey].errorCount })
         "
         class="errors"
@@ -43,7 +43,7 @@
 
       <strong
         v-if="tree.blocks[blockKey].errorMessage"
-        v-pruvious-tooltip.highlight-apostrophes="tree.blocks[blockKey].errorMessage"
+        v-pruvious-tooltip.highlightApostrophes="tree.blocks[blockKey].errorMessage"
         class="errors"
       >
         !
