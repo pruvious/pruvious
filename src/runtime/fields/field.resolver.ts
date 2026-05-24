@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluate, evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { uniqueArray } from '../utils/array'
 import { isDefined, isUndefined } from '../utils/common'
@@ -27,7 +27,6 @@ const cachedStandardFields: Record<string, ResolvedFieldDefinition> = {}
 export function resolveFields(): { records: Record<string, ResolvedField>; errors: number } {
   const records: Record<string, ResolvedField> = {}
   const fromModule = resolveModulePath('./runtime/fields/standard')
-  const fromApp = resolveAppPath('./fields')
   const registeredStandardFields: Record<string, boolean> = getModuleOption('standardFields')
 
   let errors = 0
@@ -38,9 +37,13 @@ export function resolveFields(): { records: Record<string, ResolvedField>; error
     }
   }
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveField(fullPath, records, false)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('fields')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveField(fullPath, records, false, !firstDir)
+      }
+      firstDir = false
     }
   }
 

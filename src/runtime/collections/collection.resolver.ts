@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { uniqueArray } from '../utils/array'
 import { isUndefined } from '../utils/common'
@@ -25,7 +25,6 @@ const cachedCollections: Record<string, any> = {}
 export function resolveCollections(): { records: Record<string, ResolvedCollection>; errors: number } {
   const records: Record<string, ResolvedCollection> = {}
   const fromModule = resolveModulePath('./runtime/collections/standard')
-  const fromApp = resolveAppPath('./collections')
   const registeredStandardCollections: Record<string, boolean> = getModuleOption('standardCollections')
 
   let errors = 0
@@ -36,9 +35,13 @@ export function resolveCollections(): { records: Record<string, ResolvedCollecti
     }
   }
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveCollection(fullPath, records, false)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('collections')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveCollection(fullPath, records, false, !firstDir)
+      }
+      firstDir = false
     }
   }
 

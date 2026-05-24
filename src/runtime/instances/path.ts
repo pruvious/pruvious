@@ -31,6 +31,17 @@ export function resolveUserDirs(name: string): string[] {
   return fromSrc === fromRoot ? [fromSrc] : [fromSrc, fromRoot]
 }
 
+/**
+ * Pick the canonical location for a user-content directory. If the dir already
+ * exists at any candidate location (srcDir/rootDir), return that one — never
+ * shadow existing user content. Otherwise return the first candidate, which is
+ * srcDir on Nuxt 4 (matching the `app/` convention) and rootDir on Nuxt 3.
+ */
+export function resolvePreferredUserDir(name: string): string {
+  const dirs = resolveUserDirs(name)
+  return dirs.find((dir) => existsSync(dir)) ?? dirs[0]
+}
+
 export function resolveLayerPath(...path: string[]): string {
   const joined = join(...path)
 
