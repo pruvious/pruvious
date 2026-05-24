@@ -114,11 +114,13 @@ export async function addPruviousModuleToNuxtConfig(cwd?: string) {
 }
 
 export function replaceAppVue(cwd?: string) {
-  const appVuePath = path.resolve(cwd ?? process.cwd(), 'app.vue')
+  const base = cwd ?? process.cwd()
+  const appDir = path.resolve(base, 'app')
+  const target = fs.existsSync(appDir) ? path.resolve(appDir, 'app.vue') : path.resolve(base, 'app.vue')
+  const content = ['<template>', '  <NuxtPage />', '</template>', ''].join('\n')
 
-  if (fs.existsSync(appVuePath)) {
-    fs.writeFileSync(appVuePath, ['<template>', '  <NuxtPage />', '</template>', ''].join('\n'))
-  }
+  fs.ensureDirSync(path.dirname(target))
+  fs.writeFileSync(target, content)
 }
 
 export function replacePackageJsonDevScript(cwd?: string) {
@@ -176,12 +178,13 @@ export async function patchGitignore(cwd?: string) {
 }
 
 export function addDefaultLayout(cwd?: string) {
-  const layoutsPath = path.resolve(cwd ?? process.cwd(), 'layouts')
+  const base = cwd ?? process.cwd()
+  const layoutsPath = fs.existsSync(path.resolve(base, 'app'))
+    ? path.resolve(base, 'app', 'layouts')
+    : path.resolve(base, 'layouts')
   const defaultLayoutPath = path.resolve(layoutsPath, 'default.vue')
 
-  if (!fs.existsSync(layoutsPath)) {
-    fs.mkdirSync(layoutsPath)
-  }
+  fs.ensureDirSync(layoutsPath)
 
   if (!fs.existsSync(defaultLayoutPath)) {
     fs.writeFileSync(defaultLayoutPath, [`<template>`, `  <slot />`, `</template>`, ``].join('\n'))
