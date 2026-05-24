@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    paths-ignore:
+      - '*.md'
+    branches:
+      - main
+  pull_request:
+    paths-ignore:
+      - '*.md'
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build module
+        run: pnpm prepack
+
+      - name: Publish on pkg.pr.new
+        run: pnpm dlx pkg-pr-new publish
