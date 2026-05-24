@@ -5,6 +5,7 @@ import { getModuleOption } from './state'
 
 let moduleResolver: Resolver | undefined
 let rootDir: string = ''
+let srcDir: string = ''
 
 export function resolveAppPath(...path: string[]): string {
   return resolve(rootDir, ...path)
@@ -13,6 +14,21 @@ export function resolveAppPath(...path: string[]): string {
 export function resolveRelativeAppPath(...path: string[]): string {
   const relativePath = relative(process.cwd(), resolveAppPath(...path))
   return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+}
+
+export function resolveSrcPath(...path: string[]): string {
+  return resolve(srcDir || rootDir, ...path)
+}
+
+/**
+ * Returns paths to user-content directories to scan. In Nuxt 4 (srcDir = `<rootDir>/app`)
+ * this returns both the srcDir and rootDir locations so projects can keep the dir at
+ * either location. In Nuxt 3 (srcDir == rootDir) it returns a single path.
+ */
+export function resolveUserDirs(name: string): string[] {
+  const fromSrc = resolveSrcPath(`./${name}`)
+  const fromRoot = resolveAppPath(`./${name}`)
+  return fromSrc === fromRoot ? [fromSrc] : [fromSrc, fromRoot]
 }
 
 export function resolveLayerPath(...path: string[]): string {
@@ -48,6 +64,10 @@ export function initModulePathResolver(resolver: Resolver) {
 
 export function initRootDir(dir: string) {
   rootDir = dir
+}
+
+export function initSrcDir(dir: string) {
+  srcDir = dir
 }
 
 export function appPathExists(...path: string[]): boolean {

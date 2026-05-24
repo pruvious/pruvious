@@ -8,18 +8,16 @@
   },
   "author": "Muris Ceman <hello@pruvious.com>",
   "license": "MIT",
-  "main": "./dist/module.cjs",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/types.d.ts",
+      "types": "./dist/types.d.mts",
       "import": "./dist/module.mjs"
     },
     "./config": {
       "import": "./config/index.ts"
     }
   },
-  "types": "./dist/types.d.ts",
   "files": [
     "bin",
     "config",

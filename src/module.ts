@@ -15,6 +15,7 @@ import { warn } from './runtime/instances/logger'
 import {
   initModulePathResolver,
   initRootDir,
+  initSrcDir,
   resolveAppPath,
   resolveLayerPath,
   resolveModulePath,
@@ -232,6 +233,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     initModulePathResolver(createResolver(import.meta.url))
     initRootDir(nuxt.options.rootDir)
+    initSrcDir(nuxt.options.srcDir)
     cacheLayerPaths(nuxt.options._layers.map(({ cwd, config }) => path.resolve(cwd, config.rootDir)))
     fs.emptyDirSync(resolveAppPath('./.pruvious'))
 
@@ -513,7 +515,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (moduleOptions.uploads) {
       nuxt.hook('nitro:init', (nitro) => {
-        nitro.hooks.addHooks({ 'dev:reload': () => require('sharp') })
+        nitro.hooks.addHooks({ 'dev:reload': () => import('sharp') })
       })
     }
 
