@@ -21,6 +21,10 @@ export default defineTranslation({
     { id: 'number', collection: 'string' },
   ),
   'File': 'File',
+  'File content does not match the file extension ($expected vs $detected)': createPattern(
+    'File content does not match the file extension ($expected vs $detected)',
+    { expected: 'string', detected: 'string' },
+  ),
   'File not found': 'File not found',
 
   'Hash fragments are not allowed in this field': 'Hash fragments are not allowed in this field',
@@ -68,6 +72,8 @@ export default defineTranslation({
   'Route is not available in the specified language': 'Route is not available in the specified language',
   'Route reference not found': 'Route reference not found',
 
+  'SVG files cannot be uploaded via multipart; use a regular upload so the file can be sanitized':
+    'SVG files cannot be uploaded via multipart; use a regular upload so the file can be sanitized',
   'Singleton not found': 'Singleton not found',
 
   'The `$param` parameter is invalid': createPattern('The `$param` parameter is invalid', { param: 'string' }),

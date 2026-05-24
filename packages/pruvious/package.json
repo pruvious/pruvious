@@ -48,6 +48,7 @@
     "consola": "3.4.2",
     "dayjs": "1.11.20",
     "exifr": "7.1.3",
+    "file-type": "22.0.1",
     "focus-trap": "8.0.1",
     "image-size": "2.0.2",
     "ioredis": "5.10.1",

@@ -58,13 +58,19 @@ npm i @pruvious/utils
 - [Misc](#misc)
   - [blurActiveElement](#bluractiveelement)
   - [buildRelURL](#buildrelurl)
+  - [containsDangerousCss](#containsdangerouscss)
   - [deselectAll](#deselectall)
   - [isDescendant](#isdescendant)
   - [isRelURL](#isrelurl)
+  - [isSafeUrl](#issafeurl)
+  - [isSvgBuffer](#issvgbuffer)
   - [parseRelURL](#parserelurl)
   - [resolveRelativeDotNotation](#resolverelativedotnotation)
+  - [sanitizeSvg](#sanitizesvg)
+  - [scrubAttributes](#scrubattributes)
   - [sleep](#sleep)
   - [stripHTML](#striphtml)
+  - [unquoteAttrValue](#unquoteattrvalue)
   - [withLeadingSlash](#withleadingslash)
   - [withoutLeadingSlash](#withoutleadingslash)
   - [withoutTrailingSlash](#withouttrailingslash)
@@ -781,6 +787,10 @@ buildRelURL({ routeId: 1, collection: 'Articles', recordId: 5, language: 'de' })
 // 'rel://Routes:1/Articles:5@de'
 ```
 
+### <a id="containsdangerouscss">`containsDangerousCss(css)`</a>
+
+
+
 ### <a id="deselectall">`deselectAll`</a>
 
 Deselects all text on the page.
@@ -801,6 +811,18 @@ isDescendant(button, header) // `true` if the button is inside the header
 ### <a id="isrelurl">`isRelURL(url)`</a>
 
 Checks whether a URL string uses the `rel://` protocol.
+
+### <a id="issafeurl">`isSafeUrl(value)`</a>
+
+Allows empty values, in-document fragments (`#id`), and `data:image/...`
+URIs except nested SVGs (which would re-introduce the attack surface).
+
+### <a id="issvgbuffer">`isSvgBuffer(input)`</a>
+
+Detects whether a `Buffer` or string looks like an SVG document.
+
+Reads up to 16 KiB so SVGs with long XML prologues, DOCTYPE blocks, or
+leading comments are still recognized. Avoids parsing huge binary blobs.
 
 ### <a id="parserelurl">`parseRelURL(url, primaryLanguage)`</a>
 
@@ -849,6 +871,46 @@ resolveRelativeDotNotation('foo.0.baz', '../1.bar') // 'foo.1.bar'
 resolveRelativeDotNotation('foo', '../bar')         // 'bar'
 ```
 
+### <a id="sanitizesvg">`sanitizeSvg(input)`</a>
+
+Sanitizes an SVG string by removing constructs that can lead to XSS or
+data exfiltration when the SVG is served from the same origin.
+
+The sanitizer is intentionally aggressive - it strips anything that has ever
+been used as an SVG attack vector even if a particular renderer would not
+execute it, on the assumption that user-uploaded SVGs do not need scripting,
+animations that fire events, or references to remote resources.
+
+Removed:
+- `<script>`, `<foreignObject>`, `<handler>`, `<listener>`, SMIL animation
+elements that can carry event handlers.
+- All `on*` event handler attributes (`onload`, `onclick`, ...).
+- URL attributes (`href`, `xlink:href`, `src`, ...) using `javascript:`,
+`vbscript:`, `data:` (except `data:image/...`), `blob:`, `file:`, `jar:`,
+or external `http(s)://` targets.
+- `<style>` elements and `style="..."` attributes containing `expression(`,
+`behavior:`, `-moz-binding:`, `@import`, or `url(...)` references that
+resolve outside the document.
+- XML processing instructions (`<?xml-stylesheet ...?>`) and `<!DOCTYPE ...>`
+declarations (entity expansion / XXE surface).
+- HTML/XML comments (defence against comment-smuggled markup).
+
+- `input` - - The raw SVG markup as a string, `Buffer`, or `Uint8Array`.
+
+**Returns** The sanitized SVG and a list of removed construct names.
+
+**Example:**
+
+```ts
+const { svg, removed } = sanitizeSvg(`<svg onload="alert(1)"><script>x</script></svg>`)
+// svg     = '<svg></svg>'
+// removed = ['script', 'on*']
+```
+
+### <a id="scrubattributes">`scrubAttributes(attrs, removed)`</a>
+
+
+
 ### <a id="sleep">`sleep(milliseconds)`</a>
 
 Pauses execution for the specified `milliseconds`.
@@ -870,6 +932,11 @@ Note: This function uses the DOM and should be run in a browser environment.
 ```ts
 stripHTML('<p>Hello, <strong>World</strong></p>') // 'Hello World'
 ```
+
+### <a id="unquoteattrvalue">`unquoteAttrValue(raw)`</a>
+
+Decodes HTML entities so obfuscated schemes (e.g. `&#106;avascript:`) still
+trip the dangerous-scheme check.
 
 ### <a id="withleadingslash">`withLeadingSlash(path)`</a>
 

@@ -15,17 +15,20 @@ import {
   isNumber,
   isPositiveInteger,
   isString,
+  isSvgBuffer,
   isUndefined,
   LimitedSizeObject,
   omit,
   pick,
   randomString,
+  sanitizeSvg,
   sleep,
   toArray,
   withoutTrailingSlash,
   type NonEmptyArray,
 } from '@pruvious/utils'
 import type { H3Event } from 'h3'
+import { fileTypeFromBuffer } from 'file-type'
 import mime from 'mime'
 import { mediaCategories } from './utils.shared'
 // @ts-expect-error
@@ -509,6 +512,23 @@ export async function putUpload<
   const { __, collections, deleteFile, deleteFrom, guardedInsertInto, insertInto, putFile, update } =
     await import('#pruvious/server')
   const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString(), 'file') : undefined
+
+  if (normalizedPath) {
+    const mismatch = await verifyUploadMime(file, normalizedPath)
+    if (mismatch) {
+      return {
+        success: false,
+        data: undefined,
+        inputErrors: undefined,
+        runtimeError: __('pruvious-api', 'File content does not match the file extension ($expected vs $detected)', {
+          expected: mismatch.expected,
+          detected: mismatch.detected,
+        }),
+        details: { path: normalizedPath, type: 'file' },
+      } as PutUploadResult<TReturningFields, TPopulateFields>
+    }
+  }
+
   const returning =
     isUndefined(options?.returning) || toArray(options?.returning).includes('*' as any)
       ? ([...Object.keys(collections.Uploads.fields), 'id'] as any)
@@ -537,7 +557,8 @@ export async function putUpload<
   }
 
   const { id, path, category } = insertQuery.data[0]!
-  const putResult = await putFile(file, path)
+  const fileToStore = isSvgBuffer(file) ? Buffer.from(sanitizeSvg(file).svg, 'utf-8') : file
+  const putResult = await putFile(fileToStore, path)
 
   if (!putResult.success) {
     await deleteFrom('Uploads').where('id', '=', id).withCustomContextData({ _allowUploadsQueries: true }).run()
@@ -557,7 +578,7 @@ export async function putUpload<
       size: putResult.data.size,
       etag: putResult.data.etag,
       isLocked: false,
-      ...(category === 'image' ? await getImageDimensions(file) : {}),
+      ...(category === 'image' ? await getImageDimensions(fileToStore) : {}),
     })
     .returning(returning)
 
@@ -1298,6 +1319,17 @@ export async function createMultipartUpload(
 
   const { __, deleteFrom, guardedInsertInto, insertInto, storage, update } = await import('#pruvious/server')
   const normalizedPath = isDefined(input.path) ? tryNormalizePath(input.path.toString(), 'file') : undefined
+
+  if (normalizedPath && mime.getType(extname(normalizedPath)) === 'image/svg+xml') {
+    return {
+      success: false,
+      error: __(
+        'pruvious-api',
+        'SVG files cannot be uploaded via multipart; use a regular upload so the file can be sanitized',
+      ),
+    }
+  }
+
   const overwrite = !!options?.overwrite
   const insertQueryBuilder = guarded ? guardedInsertInto('Uploads') : insertInto('Uploads')
   const insertQuery = await insertQueryBuilder
@@ -2104,7 +2136,7 @@ export async function getImageDimensions(input: Buffer | string): Promise<{ imag
     }
   }
 
-  if (buffer?.subarray(0, 1024).toString('utf-8').includes('<svg')) {
+  if (buffer && isSvgBuffer(buffer)) {
     const svgString = buffer.toString('utf-8')
     const widthMatch = svgString.match(/<svg[^>]*\swidth=["']?([\d.]+)(px)?["']?[^>]*>/i)
     const heightMatch = svgString.match(/<svg[^>]*\sheight=["']?([\d.]+)(px)?["']?[^>]*>/i)
@@ -2151,6 +2183,94 @@ export async function streamToBuffer(stream: ReadStream | ReadableStream<any>): 
   }
 
   return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
+}
+
+/**
+ * Extension-derived MIME maps to a set of magic-byte MIMEs that should be
+ * accepted as equivalent. Anything outside the set is treated as a mismatch.
+ */
+const COMPATIBLE_MIME_GROUPS: Record<string, ReadonlySet<string>> = {
+  'image/jpeg': new Set(['image/jpeg', 'image/jpg', 'image/pjpeg']),
+  'image/heic': new Set(['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence']),
+  'image/heif': new Set(['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence']),
+  'audio/mpeg': new Set(['audio/mpeg', 'audio/mp3']),
+  'video/mp4': new Set(['video/mp4', 'video/x-m4v', 'video/quicktime']),
+  'video/quicktime': new Set(['video/quicktime', 'video/mp4']),
+}
+
+/**
+ * Returns `null` if the file matches its extension; otherwise an object
+ * describing the conflict. Text formats (SVG, JSON, CSS, ...) aren't
+ * detectable by `file-type`, so the extension is trusted for those.
+ */
+async function verifyUploadMime(
+  file: Buffer,
+  normalizedPath: string,
+): Promise<{ expected: string; detected: string } | null> {
+  const ext = extname(normalizedPath)
+  const expected = mime.getType(ext)
+
+  if (!expected) {
+    return null
+  }
+
+  if (expected === 'image/svg+xml') {
+    return isSvgBuffer(file) ? null : { expected, detected: 'unknown/non-svg' }
+  }
+
+  const detected = await fileTypeFromBuffer(file).catch(() => undefined)
+  if (!detected) {
+    return null
+  }
+
+  const detectedMime = detected.mime
+  if (detectedMime === expected) {
+    return null
+  }
+
+  const compatible = COMPATIBLE_MIME_GROUPS[expected]
+  if (compatible?.has(detectedMime)) {
+    return null
+  }
+
+  return { expected, detected: detectedMime }
+}
+
+/**
+ * Served as attachments rather than inline so they cannot run at the upload
+ * origin even if the extension was spoofed.
+ */
+const ACTIVE_CONTENT_TYPES = new Set([
+  'text/html',
+  'application/xhtml+xml',
+  'application/xml',
+  'text/xml',
+  'application/xslt+xml',
+  'text/xsl',
+  'application/javascript',
+  'text/javascript',
+  'application/ecmascript',
+  'text/ecmascript',
+  'application/x-javascript',
+  'application/mathml+xml',
+  'text/mathml',
+  'application/rss+xml',
+  'application/atom+xml',
+])
+
+/**
+ * SVG stays inline (users need to view it) but gets a strict CSP as
+ * defense-in-depth in case sanitization ever misses something. Other
+ * script-capable types are forced to download.
+ */
+function applyUploadSecurityHeaders(event: H3Event, contentType: string): void {
+  setHeader(event, 'X-Content-Type-Options', 'nosniff')
+
+  if (contentType === 'image/svg+xml') {
+    setHeader(event, 'Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+  } else if (ACTIVE_CONTENT_TYPES.has(contentType)) {
+    setHeader(event, 'Content-Disposition', 'attachment')
+  }
 }
 
 /**
@@ -2253,8 +2373,10 @@ export async function uploadEventHandler(event: H3Event) {
     })
   }
 
-  setHeader(event, 'Content-Type', mime.getType(ext) || 'application/octet-stream')
+  const contentType = mime.getType(ext) || 'application/octet-stream'
+  setHeader(event, 'Content-Type', contentType)
   setHeader(event, 'ETag', streamResult.data.etag)
+  applyUploadSecurityHeaders(event, contentType)
 
   if (isDefined(streamResult.data.start) && isDefined(streamResult.data.end)) {
     setHeader(event, 'Accept-Ranges', 'bytes')

@@ -186,6 +186,20 @@ export interface PruviousModuleOptions {
      * @default '/uploads/'
      */
     basePath?: string
+
+    /**
+     * Maximum size, in bytes, accepted for a single uploaded file.
+     *
+     * Enforced at the upload endpoints (regular and multipart parts) before the
+     * request body is fully buffered: requests advertising a larger
+     * `Content-Length` are rejected with `413 Payload Too Large`, and any file
+     * that slips through is rejected after parsing.
+     *
+     * Set to `0` to disable the limit (not recommended).
+     *
+     * @default 134217728 // 128 MB
+     */
+    maxFileSize?: number
   }
 
   /**

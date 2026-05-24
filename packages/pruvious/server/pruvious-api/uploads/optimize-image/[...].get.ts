@@ -103,6 +103,7 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Content-Type', mime.getType(ext) || 'application/octet-stream')
   setHeader(event, 'ETag', streamResult.data.etag)
   setHeader(event, 'Content-Length', streamResult.data.size)
+  setHeader(event, 'X-Content-Type-Options', 'nosniff')
 
   return streamResult.data.stream
 })

@@ -62,6 +62,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
     uploads: {
       driver: 'fs://.uploads',
       basePath: '/uploads/',
+      maxFileSize: 128 * 1024 * 1024,
     },
     images: {
       variants: {
@@ -168,6 +169,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       uploads: {
         driver: resolvedOptions.uploads.driver as any,
         basePath: withLeadingSlash(withTrailingSlash(resolvedOptions.uploads.basePath!)),
+        maxFileSize: resolvedOptions.uploads.maxFileSize ?? 128 * 1024 * 1024,
       },
       images: {
         variants: {

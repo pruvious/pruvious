@@ -1,6 +1,6 @@
 import { __, type Permission } from '#pruvious/server'
 import type { QueryBuilderResult, ValidationResult } from '@pruvious/orm'
-import { isArray, isFunction, isObject, isString } from '@pruvious/utils'
+import { formatBytes, isArray, isFunction, isObject, isPositiveInteger, isRealNumber, isString } from '@pruvious/utils'
 import type { H3Event } from 'h3'
 import { isDevelopment } from 'std-env'
 
@@ -244,6 +244,7 @@ export async function parseBody<T extends 'object' | 'array' | 'mixed' = 'mixed'
           input = body
         }
       } else if (contentType.includes('multipart/form-data')) {
+        assertRequestUnderUploadLimit(event)
         const formData = await readMultipartFormData(event)
 
         if (formData) {
@@ -252,6 +253,7 @@ export async function parseBody<T extends 'object' | 'array' | 'mixed' = 'mixed'
             formData.reduce(
               (acc, item) => {
                 if (item.filename) {
+                  assertFileUnderUploadLimit(event, item.data)
                   files[item.name ? `${item.name}/${item.filename}` : item.filename] = item.data
                 } else if (item.name) {
                   acc[item.name] = item.data.toString()
@@ -293,6 +295,53 @@ export async function parseBody<T extends 'object' | 'array' | 'mixed' = 'mixed'
   }
 
   return { input, files: event.context.pruvious.files } as any
+}
+
+/**
+ * Returns 0 to disable the limit when the config value is missing or invalid.
+ */
+function getUploadFileSizeLimit(): number {
+  const limit = useRuntimeConfig().pruvious.uploads.maxFileSize
+  return isPositiveInteger(limit) ? limit : 0
+}
+
+/**
+ * Rejects oversized requests up-front based on `Content-Length` so we don't
+ * buffer the whole body just to throw it away. A missing or non-numeric
+ * `Content-Length` (e.g. `Transfer-Encoding: chunked`) is also rejected,
+ * since otherwise an attacker could stream unbounded bytes past the cap.
+ */
+function assertRequestUnderUploadLimit(event: H3Event): void {
+  const limit = getUploadFileSizeLimit()
+  if (!limit) return
+
+  const declared = Number(getRequestHeader(event, 'Content-Length'))
+  if (!isRealNumber(declared) || declared > limit) {
+    throw pruviousError(event, {
+      statusCode: 413,
+      message: __('pruvious-api', 'The file exceeds the maximum allowed size of $size', {
+        size: formatBytes(limit) ?? `${limit} B`,
+      }),
+    })
+  }
+}
+
+/**
+ * Second-chance check after parsing, in case `Content-Length` was missing or
+ * under-reported.
+ */
+function assertFileUnderUploadLimit(event: H3Event, data: Buffer): void {
+  const limit = getUploadFileSizeLimit()
+  if (!limit) return
+
+  if (data.byteLength > limit) {
+    throw pruviousError(event, {
+      statusCode: 413,
+      message: __('pruvious-api', 'The file exceeds the maximum allowed size of $size', {
+        size: formatBytes(limit) ?? `${limit} B`,
+      }),
+    })
+  }
 }
 
 /**
