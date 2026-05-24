@@ -96,6 +96,24 @@
               <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
             </PUIDropdownItem>
 
+            <PUIDropdownItem :title="__('pruvious-dashboard', 'Copy')" @click="copySingleton()">
+              <Icon mode="svg" name="tabler:clipboard" />
+              <span>{{ __('pruvious-dashboard', 'Copy') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="
+                canUpdate &&
+                clipboardData?.pruviousClipboardDataType === 'singleton' &&
+                clipboardData.data?.$singleton === singleton.name
+              "
+              :title="__('pruvious-dashboard', 'Paste')"
+              @click="pasteSingleton()"
+            >
+              <Icon mode="svg" name="tabler:clipboard-plus" />
+              <span>{{ __('pruvious-dashboard', 'Paste') }}</span>
+            </PUIDropdownItem>
+
             <PUIDropdownItem
               v-if="canUpdate"
               :title="__('pruvious-dashboard', 'Restore defaults')"
@@ -127,6 +145,8 @@
 <script lang="ts" setup>
 import { __, applyFilters, hasPermission, languages, loadFilters } from '#pruvious/app'
 import {
+  applyClipboardFieldValues,
+  buildClipboardFieldValues,
   dashboardBasePath,
   dashboardMiddleware,
   fillFieldData,
@@ -141,13 +161,15 @@ import {
   SingletonUpdateQueryBuilder,
   unsavedChanges,
   useDashboardContentLanguage,
+  usePruviousClipboard,
+  usePruviousClipboardData,
 } from '#pruvious/dashboard'
 import type { Permission } from '#pruvious/server'
 import { ConditionalLogicResolver } from '@pruvious/orm/conditional-logic-resolver'
 import { usePUIHotkeys } from '@pruvious/ui/pui/hotkeys'
 import { puiHTMLInit } from '@pruvious/ui/pui/html'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
-import { puiQueueToast } from '@pruvious/ui/pui/toast'
+import { puiQueueToast, puiToast } from '@pruvious/ui/pui/toast'
 import { puiTooltipInit } from '@pruvious/ui/pui/tooltip'
 import {
   blurActiveElement,
@@ -212,6 +234,8 @@ const overlayCounter = usePUIOverlayCounter()
 const isSingletonMenuVisible = ref(false)
 const singletonMenuButton = useTemplateRef('singletonMenuButton')
 const isTranslationPopupVisible = ref(false)
+const clipboard = usePruviousClipboard()
+const clipboardData = usePruviousClipboardData()
 
 await loadFilters(
   'dashboard:singletons:footer:buttons',
@@ -281,6 +305,34 @@ listen('save', () => {
     setTimeout(saveData)
   }
 })
+
+function copySingleton() {
+  clipboard.copy({
+    pruviousClipboardDataType: 'singleton',
+    data: {
+      $singleton: singleton.name,
+      ...buildClipboardFieldValues(data.value ?? {}, singleton.definition.fields),
+    },
+  })
+  puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+}
+
+function pasteSingleton() {
+  const cd = clipboardData.value
+  if (cd?.pruviousClipboardDataType !== 'singleton' || cd.data?.$singleton !== singleton.name) {
+    return
+  }
+  const { merged, skipped } = applyClipboardFieldValues(data.value ?? {}, cd.data, singleton.definition.fields)
+  data.value = merged as typeof data.value
+  errors.value = {}
+  history.push(merged)
+  queueConditionalLogicUpdate('$reset')
+  if (skipped.length > 0) {
+    puiToast(__('pruvious-dashboard', 'Pasted, $count $fields skipped', { count: skipped.length }), { type: 'warning' })
+  } else {
+    puiToast(__('pruvious-dashboard', 'Pasted'), { type: 'success' })
+  }
+}
 
 async function readData() {
   return new SingletonSelectQueryBuilder(singleton.name, { fetcher: pruviousDashboardGet })

@@ -119,6 +119,24 @@
               <span>{{ __('pruvious-dashboard', 'Translate') }}</span>
             </PUIDropdownItem>
 
+            <PUIDropdownItem :title="__('pruvious-dashboard', 'Copy')" @click="copyRecord()">
+              <Icon mode="svg" name="tabler:clipboard" />
+              <span>{{ __('pruvious-dashboard', 'Copy') }}</span>
+            </PUIDropdownItem>
+
+            <PUIDropdownItem
+              v-if="
+                canUpdate &&
+                clipboardData?.pruviousClipboardDataType === 'record' &&
+                clipboardData.data?.$collection === collection.name
+              "
+              :title="__('pruvious-dashboard', 'Paste')"
+              @click="pasteRecord()"
+            >
+              <Icon mode="svg" name="tabler:clipboard-plus" />
+              <span>{{ __('pruvious-dashboard', 'Paste') }}</span>
+            </PUIDropdownItem>
+
             <PUIDropdownItem
               v-if="collection.definition.duplicate && canCreate"
               :title="__('pruvious-dashboard', 'Duplicate')"
@@ -155,6 +173,8 @@
 <script lang="ts" setup>
 import { __, applyFilters, hasPermission, isValidLanguageCode, languages, loadFilters, useAuth } from '#pruvious/app'
 import {
+  applyClipboardFieldValues,
+  buildClipboardFieldValues,
   dashboardBasePath,
   dashboardMiddleware,
   getCollectionBySlug,
@@ -169,6 +189,8 @@ import {
   resolveTranslatableCollectionRecordPermissions,
   unsavedChanges,
   useDashboardContentLanguage,
+  usePruviousClipboard,
+  usePruviousClipboardData,
 } from '#pruvious/dashboard'
 import type { Permission } from '#pruvious/server'
 import type { QueryBuilderResult } from '@pruvious/orm'
@@ -292,6 +314,8 @@ const isRecordMenuVisible = ref(false)
 const recordMenuButton = useTemplateRef('recordMenuButton')
 const isTranslationPopupVisible = ref(false)
 const allItemsLink = dashboardBasePath + collectionsToMenuItems({ [collection.name]: collection.definition })[0]?.to
+const clipboard = usePruviousClipboard()
+const clipboardData = usePruviousClipboardData()
 
 await loadFilters(
   'dashboard:collections:edit:footer:buttons',
@@ -516,6 +540,44 @@ const saveData = lockAndLoad(isSubmitting, async () => {
     })
   }
 })
+
+const clipboardSkipFieldNames = [
+  collection.definition.authorField ? 'author' : null,
+  collection.definition.editorsField ? 'editors' : null,
+].filter((name): name is string => !!name)
+
+function copyRecord() {
+  clipboard.copy({
+    pruviousClipboardDataType: 'record',
+    data: {
+      $collection: collection.name,
+      ...buildClipboardFieldValues(data.value ?? {}, collection.definition.fields, clipboardSkipFieldNames),
+    },
+  })
+  puiToast(__('pruvious-dashboard', 'Copied'), { type: 'success' })
+}
+
+function pasteRecord() {
+  const cd = clipboardData.value
+  if (cd?.pruviousClipboardDataType !== 'record' || cd.data?.$collection !== collection.name) {
+    return
+  }
+  const { merged, skipped } = applyClipboardFieldValues(
+    data.value ?? {},
+    cd.data,
+    collection.definition.fields,
+    clipboardSkipFieldNames,
+  )
+  data.value = merged
+  errors.value = {}
+  history.push(merged)
+  queueConditionalLogicUpdate('$reset')
+  if (skipped.length > 0) {
+    puiToast(__('pruvious-dashboard', 'Pasted, $count $fields skipped', { count: skipped.length }), { type: 'warning' })
+  } else {
+    puiToast(__('pruvious-dashboard', 'Pasted'), { type: 'success' })
+  }
+}
 
 async function duplicateRecord() {
   const resolvedPermissions = await resolveTranslatableCollectionRecordPermissions(id, collection)
