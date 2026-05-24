@@ -5,7 +5,7 @@ import type {
   ResolvedRoute,
   SerializableBlock,
 } from '#pruvious/server'
-import { deepClone, omit } from '@pruvious/utils'
+import { deepClone, getProperty, isDefined, omit, setProperty } from '@pruvious/utils'
 import { useDebounceFn, useEventListener } from '@vueuse/core'
 import { hash } from 'ohash'
 import { parseFields } from '../../fields/utils.client'
@@ -45,7 +45,12 @@ export interface IframeMessageToast {
 
 export interface IframeMessageData {
   name: 'iframe:data'
-  data: Omit<ResolvedRoute['data'], '_casted'>
+  /**
+   * Public fields of the route in their casted form (populator paths restored from `_casted`).
+   * The dashboard's source of truth holds casted values (e.g., image as ID), so the iframe sends
+   * casted values back to avoid corrupting that state with populated objects.
+   */
+  data: NonNullable<ResolvedRoute['data']['_casted']>
 }
 
 export interface IframeMessageFocus {
@@ -162,12 +167,39 @@ export function messageDashboard<TName extends IframeMessage['name']>(
   window.parent.postMessage({ name, ...data }, window.location.origin)
 }
 
+/**
+ * Returns a clone of the route's populated `data` with populator paths reverted to their casted values
+ * (from `_casted`) and the `_casted` property stripped.
+ *
+ * The iframe receives populated values (e.g., an image object) for rendering, but the dashboard's
+ * source of truth keeps these as casted values (e.g., the image ID). Sending populated values back
+ * would corrupt the dashboard state, so populator fields are restored before transmission.
+ */
+export function restorePopulatorPathsToCasted(
+  routeData: Record<string, any>,
+  parsedFields: Record<string, { _hasPopulator: boolean }>,
+): Record<string, any> {
+  const casted = routeData._casted ?? {}
+  const data = omit(deepClone(routeData), ['_casted'])
+
+  for (const [path, { _hasPopulator }] of Object.entries(parsedFields)) {
+    if (_hasPopulator) {
+      const castedValue = getProperty(casted, path)
+      if (isDefined(castedValue)) {
+        setProperty(data, path, deepClone(castedValue))
+      }
+    }
+  }
+
+  return data
+}
+
 export function commitData() {
   const proute = usePruviousRoute()
-  const { historyIndex, historySize, isCommitting, dataHash } = usePreviewState()
+  const { historyIndex, historySize, isCommitting, dataHash, parsedFields } = usePreviewState()
 
   if (proute.value) {
-    const data = omit(deepClone(proute.value.data), ['_casted'])
+    const data = restorePopulatorPathsToCasted(proute.value.data, parsedFields.value)
     const newDataHash = hash(data)
 
     if (newDataHash !== dataHash.value) {

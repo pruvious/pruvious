@@ -1,8 +1,8 @@
-import { castToNumber, isNumber, last, omit } from '@pruvious/utils'
+import { castToNumber, isNumber, last } from '@pruvious/utils'
 import { hash } from 'ohash'
 import { usePruviousRoute } from '../../routes/composable'
 import type { UsePreview } from '../utils.client'
-import { messageDashboard } from './messages'
+import { messageDashboard, restorePopulatorPathsToCasted } from './messages'
 
 export function usePreviewState() {
   const isEditable = useState<UsePreview['isEditable']['value']>('pruvious-preview-is-editable', () => false)
@@ -73,10 +73,10 @@ export function usePreviewState() {
 
 export function updateDataHash() {
   const proute = usePruviousRoute()
-  const { dataHash } = usePreviewState()
+  const { dataHash, parsedFields } = usePreviewState()
 
   if (proute.value) {
-    dataHash.value = hash(omit(proute.value.data, ['_casted']))
+    dataHash.value = hash(restorePopulatorPathsToCasted(proute.value.data, parsedFields.value))
   }
 }
 

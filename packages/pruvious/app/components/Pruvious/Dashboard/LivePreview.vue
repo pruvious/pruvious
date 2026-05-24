@@ -587,14 +587,12 @@ useEventListener('message', (event: MessageEvent<IframeMessage>) => {
       if (undoState) {
         emit('update:data', undoState)
         emit('update:errors', {})
-        lastPreviewDataHash = hash(undoState)
       }
     } else if (event.data.name === 'iframe:redo') {
       const redoState = props.history.redo()
       if (redoState) {
         emit('update:data', redoState)
         emit('update:errors', {})
-        lastPreviewDataHash = hash(redoState)
       }
     } else if (event.data.name === 'iframe:addBlock') {
       if (event.data.blockPath) {
@@ -688,7 +686,7 @@ async function setUpPreview() {
   )
   const data = await getPopulatedPreviewData()
 
-  lastPreviewDataHash = hash(data)
+  lastPreviewDataHash = hash(data._casted)
 
   messagePreviewIframe(
     'dashboard:setup',
@@ -744,7 +742,7 @@ async function setUpPreview() {
 
 async function updatePreviewData() {
   const data = await getPopulatedPreviewData()
-  if (!isIframeFocused.value || hash(omit(data, ['_casted'])) !== lastPreviewDataHash) {
+  if (!isIframeFocused.value || hash(data._casted) !== lastPreviewDataHash) {
     messagePreviewIframe('dashboard:data', {
       data,
       historyIndex: props.history.getCurrentIndex(),
