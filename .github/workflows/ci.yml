@@ -37,7 +37,7 @@ jobs:
         run: pnpm exec nuxt-module-build prepare
 
       - name: Build module
-        run: pnpm prepack
+        run: pnpm build
 
       - name: Publish on pkg.pr.new
         run: pnpm dlx pkg-pr-new publish
