@@ -1750,8 +1750,8 @@ export type CollectionRoutingOptions<
 
   /**
    * Controls if the collection includes a `scheduledAt` boolean field.
-   * When enabled with `isPublic` set to `true`, allows content to be published automatically at a specified date and time.
-   * When `isPublic` is `false`, this field has no special behavior and can be used like any standard date-time field.
+   * Requires `routing.isPublic` to also be enabled - scheduled publishing has nothing to flip without it,
+   * so enabling `scheduledAt` on its own logs a warning and disables the field.
    *
    * Available options:
    *
@@ -2240,8 +2240,25 @@ export function defineCollection<
         }
       }
 
+      if (routing.scheduledAt.enabled && !routing.isPublic.enabled) {
+        warnWithContext(
+          `The routing option ${colorize('yellow', 'scheduledAt')} requires ${colorize('yellow', 'isPublic')} to be enabled.`,
+          [
+            `Scheduled publishing has nothing to flip without an \`isPublic\` field, so the \`scheduledAt\` field has been disabled.`,
+            `Enable \`routing.isPublic\` to use scheduled publishing.`,
+            `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
+          ],
+        )
+        routing.scheduledAt.enabled = false
+      }
+
       if (routing.scheduledAt.enabled) {
-        routingFields.scheduledAt = scheduledAtFieldPreset(omit(routing.scheduledAt, ['enabled']) as any)
+        const scheduledAtOptions = omit(routing.scheduledAt, ['enabled']) as any
+        const draftGuard = { isPublic: { '=': false } }
+        scheduledAtOptions.conditionalLogic = scheduledAtOptions.conditionalLogic
+          ? [scheduledAtOptions.conditionalLogic, draftGuard]
+          : draftGuard
+        routingFields.scheduledAt = scheduledAtFieldPreset(scheduledAtOptions)
       }
 
       if (routing.seo.enabled) {

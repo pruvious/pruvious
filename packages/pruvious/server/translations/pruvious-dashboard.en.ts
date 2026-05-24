@@ -506,6 +506,7 @@ export default defineTranslation({
   'No uploads were moved': 'No uploads were moved',
   'Node': 'Node',
   'None': 'None',
+  'Not scheduled': 'Not scheduled',
   'Numeric': 'Numeric',
   'Numeric (milliseconds precision)': 'Numeric (milliseconds precision)',
   'OK': 'OK',

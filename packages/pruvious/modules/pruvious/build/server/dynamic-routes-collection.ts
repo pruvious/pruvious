@@ -133,7 +133,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
       `      conditionalLogic: { path${suffix}: { '!=': null } },`,
       `    }),`,
       `    scheduledAt${suffix}: scheduledAtFieldPreset({`,
-      `      conditionalLogic: { path${suffix}: { '!=': null } },`,
+      `      conditionalLogic: { path${suffix}: { '!=': null }, isPublic${suffix}: { '=': false } },`,
       `    }),`,
       `    redirects${suffix}: repeaterField({`,
       `      subfields: {`,

@@ -508,6 +508,7 @@ export default defineTranslation({
   'No uploads were moved': 'Es wurden keine Uploads verschoben',
   'Node': 'Node',
   'None': 'Keine',
+  'Not scheduled': 'Nicht geplant',
   'Numeric': 'Numerisch',
   'Numeric (milliseconds precision)': 'Numerisch (Millisekunden-Präzision)',
   'OK': 'OK',

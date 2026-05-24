@@ -177,6 +177,7 @@ export type ScheduledAtFieldPresetOptions = Parameters<typeof dateTimeField>[0] 
    * {
    *   label: ({ __ }) => __('pruvious-dashboard', 'Publish date'),
    *   description: ({ __ }) => __('pruvious-dashboard', 'Sets when this content will be published. Use current date and time for immediate publication or a future date to schedule it.'),
+   *   placeholder: ({ __ }) => __('pruvious-dashboard', 'Not scheduled'),
    * }
    */
   ui?: OmitUndefined<FieldUIOptions<true, true, true, true, true, true, true, true, true>>
@@ -414,6 +415,7 @@ export function scheduledAtFieldPreset(options: ScheduledAtFieldPresetOptions) {
           'pruvious-dashboard',
           'Sets when the route will be published. Use current date and time for immediate publication or a future date to schedule it.',
         ),
+      placeholder: ({ __ }: TranslatableStringCallbackContext) => __('pruvious-dashboard', 'Not scheduled'),
     } satisfies ScheduledAtFieldPresetOptions['ui']),
   })
 }
