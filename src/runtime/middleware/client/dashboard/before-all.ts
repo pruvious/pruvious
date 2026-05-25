@@ -8,7 +8,6 @@ import {
   dashboardMediaComponentImport,
   dashboardPageComponentImports,
 } from '#pruvious/dashboard'
-import { isDevelopment, isProduction } from 'std-env'
 import { useAuth } from '../../../composables/auth'
 import {
   navigateToPruviousDashboardPath,
@@ -31,8 +30,6 @@ import('./installed-guard')
 import('./root-guard')
 import('./read-uploads-guard')
 
-let unwantedStylesRemoved = false
-
 export default addRouteMiddleware('pruvious-dashboard-before-all', async (to) => {
   const auth = useAuth()
   const nuxtApp = useNuxtApp()
@@ -40,26 +37,6 @@ export default addRouteMiddleware('pruvious-dashboard-before-all', async (to) =>
   const runtimeConfig = useRuntimeConfig()
   const dashboard = usePruviousDashboard()
   const user = useUser()
-
-  if (runtimeConfig.public.pruvious.dashboardRemoveSiteStyles && !unwantedStylesRemoved) {
-    for (const styleSheet of document.styleSheets) {
-      const devId = (styleSheet.ownerNode as HTMLElement)?.dataset?.viteDevId
-
-      if (isProduction || !devId?.includes('node_modules')) {
-        styleSheet.ownerNode?.remove()
-      }
-    }
-
-    if (isDevelopment) {
-      for (const styleElement of document.querySelectorAll<HTMLStyleElement>('style[data-vite-dev-id]')) {
-        if (!styleElement.dataset.viteDevId?.match(/[\/\\]pruvious[\/\\]dist[\/\\]/)) {
-          styleElement.remove()
-        }
-      }
-    }
-
-    unwantedStylesRemoved = true
-  }
 
   if (auth.value.isLoggedIn && !user.value) {
     const response = await pruviousFetch('profile.get')

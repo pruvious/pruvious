@@ -1,4 +1,5 @@
 import {
+  addPlugin,
   addRouteMiddleware,
   addServerHandler,
   addServerPlugin,
@@ -312,6 +313,13 @@ export default defineNuxtModule<ModuleOptions>({
         },
         { override: true },
       )
+    }
+
+    if (moduleOptions.dashboard.enabled && moduleOptions.dashboard.removeSiteStyles) {
+      addPlugin({
+        src: resolveModulePath('./runtime/plugins/dashboard-style-guard'),
+        mode: 'client',
+      })
     }
 
     /*
