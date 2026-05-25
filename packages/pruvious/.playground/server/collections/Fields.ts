@@ -456,6 +456,40 @@ export default defineCollection({
       trim: false,
       ui: { label: 'Rich text (no normalize)' },
     }),
+    richTextNoLinks: richTextField({
+      marks: commonMarks,
+      links: false,
+      ui: { label: 'Rich text (no links)' },
+    }),
+    richTextLinks: richTextField({
+      marks: commonMarks,
+      ui: { label: 'Rich text (links enabled)' },
+    }),
+    richTextLinksInternalOnly: richTextField({
+      marks: commonMarks,
+      links: { allowExternal: false },
+      ui: { label: 'Rich text (internal links only)' },
+    }),
+    richTextLinksAllowedReferences: richTextField({
+      marks: commonMarks,
+      links: { allowedReferences: ['Articles'] },
+      ui: { label: 'Rich text (Articles links only)' },
+    }),
+    richTextLinksNoDrafts: richTextField({
+      marks: commonMarks,
+      links: { allowDrafts: false },
+      ui: { label: 'Rich text (no draft links)' },
+    }),
+    richTextLinksNoHash: richTextField({
+      marks: commonMarks,
+      links: { allowHash: false },
+      ui: { label: 'Rich text (no hash in links)' },
+    }),
+    richTextLinksNoQuery: richTextField({
+      marks: commonMarks,
+      links: { allowQuery: false },
+      ui: { label: 'Rich text (no query in links)' },
+    }),
 
     // select
     select: selectField({
@@ -784,6 +818,13 @@ export default defineCollection({
                 'richTextToolbarGroups',
                 'richTextToolbarFalse',
                 'richTextNoNormalize',
+                'richTextNoLinks',
+                'richTextLinks',
+                'richTextLinksInternalOnly',
+                'richTextLinksAllowedReferences',
+                'richTextLinksNoDrafts',
+                'richTextLinksNoHash',
+                'richTextLinksNoQuery',
               ],
             },
             {

@@ -29,6 +29,7 @@ import {
   getAncestorDOMBlocks,
   getDOMBlock,
   onBlur,
+  onClick,
   onFocus,
   onFocusIn,
   onMouseDown,
@@ -502,6 +503,7 @@ export function initializePreview() {
     useEventListener(document, 'focusin', onFocusIn)
     useEventListener('mousedown', onMouseDown)
     useEventListener('touchstart', onMouseDown)
+    useEventListener('click', onClick)
     useEventListener('mouseover', onMouseOver)
     useEventListener('mouseout', onMouseOut)
     useEventListener('keydown', onKeyDown)

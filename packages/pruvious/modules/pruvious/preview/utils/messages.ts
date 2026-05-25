@@ -8,6 +8,7 @@ import type {
 import { deepClone, getProperty, isDefined, omit, setProperty } from '@pruvious/utils'
 import { useDebounceFn, useEventListener } from '@vueuse/core'
 import { hash } from 'ohash'
+import type { LinksOptions } from '../../../../server/fields/richText'
 import { parseFields } from '../../fields/utils.client'
 import { deserializeTranslatableStringCallbacks, usePruviousDashboard } from '../../pruvious/utils.client'
 import { usePruviousRoute } from '../../routes/composable'
@@ -31,6 +32,7 @@ export type IframeMessage =
   | IframeCopyBlock
   | IframeCutBlock
   | IframePasteBlocks
+  | IframeOpenLinkPicker
 
 export interface IframeMessageReady {
   name: 'iframe:ready'
@@ -99,6 +101,15 @@ export interface IframePasteBlocks {
   blockPath: string | null
 }
 
+export interface IframeOpenLinkPicker {
+  name: 'iframe:openLinkPicker'
+  fieldPath: string
+  href: string
+  target: string
+  rel: string
+  options: LinksOptions
+}
+
 export type DashboardMessage =
   | DashboardMessageSetup
   | DashboardMessageData
@@ -108,6 +119,7 @@ export type DashboardMessage =
   | DashboardFocusBlock
   | DashboardRestoreFocus
   | DashboardAllowBlockSelection
+  | DashboardApplyLink
 
 export interface DashboardMessageSetup {
   name: 'dashboard:setup'
@@ -158,6 +170,27 @@ export interface DashboardRestoreFocus {
 export interface DashboardAllowBlockSelection {
   name: 'dashboard:allowBlockSelection'
   focustFirstEditableField?: boolean
+}
+
+export interface DashboardApplyLink {
+  name: 'dashboard:applyLink'
+  fieldPath: string
+  href: string
+  target: string
+  rel: string
+}
+
+const linkPickerHandlers = new Map<string, (value: { href: string; target: string; rel: string }) => void>()
+
+export function registerLinkPickerHandler(
+  fieldPath: string,
+  handler: (value: { href: string; target: string; rel: string }) => void,
+): void {
+  linkPickerHandlers.set(fieldPath, handler)
+}
+
+export function unregisterLinkPickerHandler(fieldPath: string): void {
+  linkPickerHandlers.delete(fieldPath)
 }
 
 export function messageDashboard<TName extends IframeMessage['name']>(
@@ -241,6 +274,11 @@ export function onDashboardMessage(event: MessageEvent<DashboardMessage>) {
       onDashboardRestoreFocus()
     } else if (event.data.name === 'dashboard:allowBlockSelection') {
       onAllowBlockSelection(event.data.focustFirstEditableField)
+    } else if (event.data.name === 'dashboard:applyLink') {
+      const handler = linkPickerHandlers.get(event.data.fieldPath)
+      if (handler) {
+        handler({ href: event.data.href, target: event.data.target, rel: event.data.rel })
+      }
     }
   }
 }

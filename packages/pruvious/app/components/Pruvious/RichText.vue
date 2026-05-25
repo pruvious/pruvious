@@ -37,6 +37,7 @@
             @mousedown.prevent.stop="onStandardAction(item.action)"
             type="button"
             class="p-rich-text-toolbar-btn"
+            :class="{ 'p-rich-text-toolbar-btn-active': item.action === 'link' && activeMarks.has('link') }"
           >
             <Icon :name="`tabler:${item.icon}`" mode="svg" />
           </button>
@@ -61,7 +62,11 @@
                 @mousedown.prevent.stop="onGroupItemClick(subItem)"
                 type="button"
                 class="p-rich-text-toolbar-group-item"
-                :class="{ 'p-rich-text-toolbar-btn-active': subItem.type === 'mark' && activeMarks.has(subItem.name) }"
+                :class="{
+                  'p-rich-text-toolbar-btn-active':
+                    (subItem.type === 'mark' && activeMarks.has(subItem.name)) ||
+                    (subItem.type === 'standard' && subItem.action === 'link' && activeMarks.has('link')),
+                }"
               >
                 <Icon v-if="subItem.icon" :name="`tabler:${subItem.icon}`" mode="svg" />
                 <span>{{ subItem.label || ('name' in subItem ? subItem.name : subItem.action) }}</span>
@@ -71,6 +76,19 @@
         </template>
       </div>
     </Teleport>
+
+    <Teleport to="body">
+      <PruviousDashboardRichTextLinkPopup
+        v-if="dashboard && linkPopupVisible"
+        :disabled="disabled"
+        :href="linkPopupAttrs.href"
+        :options="linksOptions"
+        :rel="linkPopupAttrs.rel"
+        :target="linkPopupAttrs.target"
+        @close="$event().then(() => (linkPopupVisible = false))"
+        @save="applyLink"
+      />
+    </Teleport>
   </component>
 </template>
 
@@ -79,13 +97,18 @@ import { puiIsMac } from '@pruvious/ui/pui/hotkeys'
 import { isObject, isString, kebabCase, normalizeWhitespace } from '@pruvious/utils'
 import { refDebounced, useDebounceFn } from '@vueuse/core'
 import { chainCommands, exitCode, toggleMark } from 'prosemirror-commands'
-import { history, undo, redo } from 'prosemirror-history'
+import { history, redo, undo } from 'prosemirror-history'
 import { keymap } from 'prosemirror-keymap'
 import { DOMParser, DOMSerializer, Schema, type MarkSpec, type MarkType, type NodeSpec } from 'prosemirror-model'
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import type { EditableTextNextFocus } from '../../../modules/pruvious/preview/utils/rich-text'
-import type { Mark as MarkDef, RichTextCustomOptions, StandardToolbarItem } from '../../../server/fields/richText'
+import type {
+  LinksOptions,
+  Mark as MarkDef,
+  RichTextCustomOptions,
+  StandardToolbarItem,
+} from '../../../server/fields/richText'
 import { createPlaceholderPlugin } from '../../utils/pruvious/dashboard/rich-text/placeholder'
 import { ToolbarPluginView } from '../../utils/pruvious/dashboard/rich-text/toolbar'
 
@@ -197,6 +220,7 @@ type ResolvedToolbarItem = ResolvedMarkToolbarItem | ResolvedStandardToolbarItem
 
 const standardToolbarItems: Record<string, { icon: string; label: string }> = {
   clearFormatting: { icon: 'clear-formatting', label: 'Clear formatting' },
+  link: { icon: 'link', label: 'Link' },
   undo: { icon: 'arrow-back-up', label: 'Undo' },
   redo: { icon: 'arrow-forward-up', label: 'Redo' },
 }
@@ -237,13 +261,14 @@ function resolveToolbarItems(
       : never
     : never,
   marks: Record<string, MarkDef>,
+  linksEnabled: boolean,
   translate: (value: any) => string | undefined,
 ): ResolvedToolbarItem[] {
   if (toolbar === false) return []
 
   const entries: (string | { icon?: string; tooltip?: string | Function; items: string[] })[] =
     toolbar === 'auto' || toolbar === undefined
-      ? [...Object.keys(marks).map((name) => `mark:${name}`), 'clearFormatting']
+      ? [...Object.keys(marks).map((name) => `mark:${name}`), ...(linksEnabled ? ['link'] : []), 'clearFormatting']
       : (toolbar as any[])
 
   const items: ResolvedToolbarItem[] = []
@@ -278,6 +303,40 @@ function resolveToolbarItems(
   }
 
   return items
+}
+
+function buildLinkMarkSpec(): MarkSpec {
+  return {
+    attrs: {
+      href: { default: '' },
+      target: { default: '' },
+      rel: { default: '' },
+    },
+    inclusive: false,
+    parseDOM: [
+      {
+        tag: 'a[href]',
+        getAttrs(node) {
+          const el = node as HTMLElement
+          return {
+            href: el.getAttribute('href') ?? '',
+            target: el.getAttribute('target') ?? '',
+            rel: el.getAttribute('rel') ?? '',
+          }
+        },
+      },
+    ],
+    toDOM(mark) {
+      const attrs: Record<string, string> = { href: mark.attrs.href }
+      if (mark.attrs.target) {
+        attrs.target = mark.attrs.target
+      }
+      if (mark.attrs.rel) {
+        attrs.rel = mark.attrs.rel
+      }
+      return ['a', attrs, 0]
+    },
+  }
 }
 
 function buildMarksSpec(marks: Record<string, MarkDef>, dashboard: boolean): Record<string, MarkSpec> {
@@ -392,6 +451,19 @@ const props = defineProps({
   },
 
   /**
+   * Controls whether hyperlinks (`<a>` tags) are allowed inside the rich text content.
+   *
+   * - `false` (default) - Links are disabled.
+   * - `true` or an object - Links are enabled, optionally with restrictions.
+   *
+   * @default false
+   */
+  links: {
+    type: [Boolean, Object] as PropType<boolean | LinksOptions>,
+    default: false,
+  },
+
+  /**
    * The toolbar configuration for the rich text editor.
    * You can set the following values:
    *
@@ -490,12 +562,19 @@ const emit = defineEmits<{
   'moveUp': []
   'moveDown': []
   'paste': [text: string]
+  'linkPickerOpen': [attrs: { href: string; target: string; rel: string }, options: LinksOptions]
+  'linkApplied': [html: string, text: string]
 }>()
 
 const root = useTemplateRef<HTMLElement>('root')
 const isFocused = ref(false)
 const isReady = refDebounced(isFocused, 100)
-const resolvedMarks = buildMarksSpec(props.marks, props.dashboard)
+const linksEnabled = computed(() => !!props.links)
+const linksOptions = computed<LinksOptions>(() => (isObject(props.links) ? props.links : {}))
+const resolvedMarks: Record<string, MarkSpec> = {
+  ...(linksEnabled.value ? { link: buildLinkMarkSpec() } : {}),
+  ...buildMarksSpec(props.marks, props.dashboard),
+}
 const schema = new Schema({
   nodes: {
     text: {
@@ -543,6 +622,14 @@ const hardBreak = chainCommands(exitCode, (state, dispatch) => {
 })
 const keymapPlugin = keymap({
   ...markShortcuts,
+  ...(linksEnabled.value
+    ? {
+        'Mod-k': () => {
+          openLinkPicker()
+          return true
+        },
+      }
+    : {}),
   'Mod-Enter': () => onModeEnter('after'),
   'Mod-Shift-Enter': () => onModeEnter('before'),
   ...(props.allowLineBreaks ? { 'Shift-Enter': hardBreak } : {}),
@@ -583,9 +670,11 @@ const focusPlugin = new Plugin({
       blur: (view) => {
         isFocused.value = false
         openGroupIndex.value = null
-        const html = getNormalizedHTML(view.state)
-        const newState = createState(html)
-        view.updateState(newState)
+        const normalized = getNormalizedHTML(view.state)
+        if (normalized !== getHTML(view.state)) {
+          const newState = createState(normalized)
+          view.updateState(newState)
+        }
         emit('blur')
       },
     },
@@ -608,7 +697,7 @@ const toolbarEl = useTemplateRef<HTMLElement>('toolbarEl')
 const toolbarPosition = ref({ top: 0, left: 0 })
 const toolbarVisible = ref(false)
 const activeMarks = ref(new Set<string>())
-const resolvedToolbarItems = resolveToolbarItems(props.toolbar, props.marks, props.maybeTranslate)
+const resolvedToolbarItems = resolveToolbarItems(props.toolbar, props.marks, linksEnabled.value, props.maybeTranslate)
 const toolbarBuffer = 4
 const toolbarStyle = computed(() => {
   const el = toolbarEl.value
@@ -658,7 +747,7 @@ const toolbarPlugin = new Plugin({
       toolbarPosition,
       toolbarVisible,
       activeMarks,
-      Object.keys(props.marks),
+      [...Object.keys(props.marks), ...(linksEnabled.value ? ['link'] : [])],
       openGroupIndex,
     ),
 })
@@ -674,7 +763,11 @@ function toggleGroup(index: number) {
 }
 
 function isGroupActive(item: ResolvedGroupToolbarItem): boolean {
-  return item.items.some((sub) => sub.type === 'mark' && activeMarks.value.has(sub.name))
+  return item.items.some(
+    (sub) =>
+      (sub.type === 'mark' && activeMarks.value.has(sub.name)) ||
+      (sub.type === 'standard' && sub.action === 'link' && activeMarks.value.has('link')),
+  )
 }
 
 function onGroupItemClick(subItem: ResolvedMarkToolbarItem | ResolvedStandardToolbarItem) {
@@ -713,6 +806,8 @@ function onStandardAction(action: StandardToolbarItem) {
 
         view.dispatch(tr)
       }
+    } else if (action === 'link') {
+      openLinkPicker()
     } else if (action === 'undo') {
       emit('undo')
     } else if (action === 'redo') {
@@ -721,7 +816,171 @@ function onStandardAction(action: StandardToolbarItem) {
   }
 }
 
-defineExpose({ getSelection, setSelection })
+const linkPopupVisible = ref(false)
+const linkPopupAttrs = ref<{ href: string; target: string; rel: string }>({ href: '', target: '', rel: '' })
+let savedLinkRange: { from: number; to: number; isExistingLink: boolean } | null = null
+
+function getLinkRangeAndAttrs(): { from: number; to: number; attrs: Record<string, string> } | null {
+  if (!view || !linksEnabled.value) {
+    return null
+  }
+
+  const linkType = view.state.schema.marks.link
+  if (!linkType) {
+    return null
+  }
+
+  const { $from, from, to, empty } = view.state.selection
+
+  if (!empty) {
+    const node = $from.nodeAfter ?? $from.nodeBefore
+    const mark = node?.marks.find((m) => m.type === linkType)
+    return { from, to, attrs: mark ? { ...mark.attrs } : { href: '', target: '', rel: '' } }
+  }
+
+  const parent = $from.parent
+  const offset = $from.parentOffset
+  const start = $from.start()
+  let markFrom = -1
+  let markTo = -1
+  let attrs: Record<string, string> | null = null
+
+  parent.content.forEach((child, childOffset) => {
+    const mark = child.marks.find((m) => m.type === linkType)
+    if (mark && childOffset <= offset && offset <= childOffset + child.nodeSize) {
+      markFrom = start + childOffset
+      markTo = start + childOffset + child.nodeSize
+      attrs = { ...mark.attrs }
+    }
+  })
+
+  if (markFrom !== -1) {
+    return { from: markFrom, to: markTo, attrs: attrs! }
+  }
+
+  return null
+}
+
+function openLinkPicker() {
+  if (!view || !linksEnabled.value) {
+    return
+  }
+
+  const existing = getLinkRangeAndAttrs()
+  const { empty, from, to } = view.state.selection
+
+  if (existing) {
+    savedLinkRange = { from: existing.from, to: existing.to, isExistingLink: true }
+    linkPopupAttrs.value = {
+      href: existing.attrs.href || '',
+      target: existing.attrs.target || '',
+      rel: existing.attrs.rel || '',
+    }
+  } else if (!empty) {
+    savedLinkRange = { from, to, isExistingLink: false }
+    linkPopupAttrs.value = { href: '', target: '', rel: '' }
+  } else {
+    savedLinkRange = null
+    linkPopupAttrs.value = { href: '', target: '', rel: '' }
+  }
+
+  if (props.dashboard) {
+    linkPopupVisible.value = true
+  } else {
+    emit('linkPickerOpen', { ...linkPopupAttrs.value }, isObject(props.links) ? props.links : {})
+  }
+}
+
+function findLinkRangeAt(approxFrom: number, approxTo: number): { from: number; to: number } | null {
+  if (!view) {
+    return null
+  }
+
+  const linkType = view.state.schema.marks.link
+  if (!linkType) {
+    return null
+  }
+
+  const { doc } = view.state
+  let foundFrom = -1
+  let foundTo = -1
+
+  doc.nodesBetween(Math.max(0, approxFrom - 1), Math.min(doc.content.size, approxTo + 1), (node, pos) => {
+    if (foundFrom !== -1) {
+      return false
+    }
+    if (!node.isText || !node.marks.some((m) => m.type === linkType)) {
+      return undefined
+    }
+
+    const parentPos = doc.resolve(pos)
+    const parent = parentPos.parent
+    const parentStart = pos - parentPos.parentOffset
+    let extentFrom = pos
+    let extentTo = pos + node.nodeSize
+
+    parent.content.forEach((child, childOffset) => {
+      if (!child.marks.some((m) => m.type === linkType)) {
+        return
+      }
+      const childFrom = parentStart + childOffset
+      const childTo = childFrom + child.nodeSize
+      if (childFrom <= extentTo && childTo >= extentFrom) {
+        extentFrom = Math.min(extentFrom, childFrom)
+        extentTo = Math.max(extentTo, childTo)
+      }
+    })
+
+    foundFrom = extentFrom
+    foundTo = extentTo
+    return false
+  })
+
+  return foundFrom === -1 ? null : { from: foundFrom, to: foundTo }
+}
+
+function applyLink(value: { href: string; target: string; rel: string }) {
+  if (!view) {
+    return
+  }
+
+  const linkType = view.state.schema.marks.link
+  if (!linkType) {
+    return
+  }
+
+  const href = (value.href ?? '').trim()
+  const saved = savedLinkRange
+  let dispatched = false
+
+  if (!href) {
+    if (saved && saved.isExistingLink) {
+      const range = findLinkRangeAt(saved.from, saved.to) ?? saved
+      view.dispatch(view.state.tr.removeMark(range.from, range.to, linkType))
+      dispatched = true
+    }
+  } else {
+    const mark = linkType.create({ href, target: value.target ?? '', rel: value.rel ?? '' })
+
+    if (saved) {
+      const range = saved.isExistingLink ? (findLinkRangeAt(saved.from, saved.to) ?? saved) : saved
+      const tr = view.state.tr.removeMark(range.from, range.to, linkType).addMark(range.from, range.to, mark)
+      view.dispatch(tr)
+    } else {
+      const text = view.state.schema.text(href, [mark])
+      view.dispatch(view.state.tr.replaceSelectionWith(text, false))
+    }
+    dispatched = true
+  }
+
+  savedLinkRange = null
+
+  if (dispatched) {
+    emit('linkApplied', currentValue, currentText)
+  }
+}
+
+defineExpose({ getSelection, setSelection, applyLink })
 
 let view: EditorView | undefined
 let currentValue = ''

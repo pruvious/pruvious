@@ -169,6 +169,31 @@ describe('link field', () => {
     )
   })
 
+  // Validators - rel subfield
+  test('reject rel with quote characters', async () => {
+    expect(
+      await $postAsAdmin(link, { link: { url: 'https://example.com', rel: 'noopener" onmouseover=alert(1) x="' } }),
+    ).toEqual($422([{ 'link.rel': 'The `rel` value contains invalid characters' }]))
+  })
+
+  test('reject rel with angle brackets', async () => {
+    expect(await $postAsAdmin(link, { link: { url: 'https://example.com', rel: 'noopener<script>' } })).toEqual(
+      $422([{ 'link.rel': 'The `rel` value contains invalid characters' }]),
+    )
+  })
+
+  test('reject rel with newline', async () => {
+    expect(await $postAsAdmin(link, { link: { url: 'https://example.com', rel: 'noopener\nnoreferrer' } })).toEqual(
+      $422([{ 'link.rel': 'The `rel` value contains invalid characters' }]),
+    )
+  })
+
+  test('accept space-separated rel tokens', async () => {
+    expect(
+      await $postAsAdmin(link, { link: { url: 'https://example.com', rel: 'nofollow noopener noreferrer' } }),
+    ).toEqual([{ link: { url: 'https://example.com', target: '', rel: 'nofollow noopener noreferrer' } }])
+  })
+
   // allowExternal: false
   test('linkInternalOnly: reject external URL', async () => {
     expect(await $postAsAdmin(linkInternalOnly, { linkInternalOnly: { url: 'https://example.com' } })).toEqual(

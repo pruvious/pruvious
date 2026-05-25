@@ -4,7 +4,9 @@ import {
   defineField,
   type DynamicBlockFieldTypes,
   type GenericDatabase,
+  type LanguageCode,
   type ResolveFieldUIOptions,
+  type RouteCollectionReferenceName,
   type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import type { icons } from '@iconify-json/tabler/icons.json'
@@ -15,7 +17,7 @@ import {
   textFieldModel,
   type TextFieldModelOptions,
 } from '@pruvious/orm'
-import { isString, normalizeWhitespace } from '@pruvious/utils'
+import { isNull, isObject, isRelURL, isString, normalizeWhitespace } from '@pruvious/utils'
 import type { CSSProperties, PropType } from 'vue'
 
 export interface RichTextCustomOptions<TMark extends string = never> {
@@ -64,6 +66,34 @@ export interface RichTextCustomOptions<TMark extends string = never> {
    * ```
    */
   marks?: Record<TMark, Mark>
+
+  /**
+   * Controls whether hyperlinks (`<a>` tags) are allowed inside the rich text content.
+   *
+   * - `true` (default) - Links are enabled with default options. The toolbar's `auto` mode includes a link button and `Mod-k` opens the picker.
+   * - An object - Links are enabled with the specified restrictions.
+   * - `false` - Links are disabled. The link mark is removed from the schema and the toolbar.
+   *
+   * Internal links use the `rel://` protocol (e.g. `rel://Routes:1/Articles:5@en`) and are resolved
+   * to real URL paths when the field value is populated.
+   *
+   * @default true
+   *
+   * @example
+   * ```ts
+   * // Disable links entirely
+   * richTextField({ links: false })
+   *
+   * // Restrict to specific kinds of internal links and disallow external URLs
+   * richTextField({
+   *   links: {
+   *     allowExternal: false,
+   *     allowedReferences: ['Articles', 'Pages'],
+   *   },
+   * })
+   * ```
+   */
+  links?: boolean | LinksOptions
 
   ui?: {
     /**
@@ -410,7 +440,73 @@ export interface Mark {
   dashboardStyle?: CSSProperties
 }
 
-export type StandardToolbarItem = 'clearFormatting'
+export type StandardToolbarItem = 'clearFormatting' | 'link'
+
+export interface LinksOptions {
+  /**
+   * Whether to allow linking to drafts (non-public routes and records).
+   *
+   * When `false`, links to drafts are rejected. Affects `rel://` URLs only.
+   *
+   * @default true
+   */
+  allowDrafts?: boolean
+
+  /**
+   * Restrict the kinds of internal links this field accepts. Affects `rel://` URLs only;
+   * external URLs are gated separately via `allowExternal`.
+   *
+   * - `'*'` (default) - all routable collections and bare-route links are allowed.
+   * - A collection name (e.g. `'Articles'`) - only `rel://Routes:{id}/{Collection}:{recordId}` links to that collection.
+   * - `'Routes'` - only bare `rel://Routes:{id}` links (singletons, redirects, reference-less routes).
+   * - An array - any of the listed kinds is allowed.
+   *
+   * @default '*'
+   */
+  allowedReferences?: '*' | RouteCollectionReferenceName | 'Routes' | (RouteCollectionReferenceName | 'Routes')[]
+
+  /**
+   * Whether to allow external URLs (`http://` and `https://`).
+   *
+   * @default true
+   */
+  allowExternal?: boolean
+
+  /**
+   * Whether to allow hash fragments in the URL.
+   *
+   * @default true
+   */
+  allowHash?: boolean
+
+  /**
+   * Whether to allow query strings in the URL.
+   *
+   * @default true
+   */
+  allowQuery?: boolean
+
+  /**
+   * Specifies which languages to show when selecting internal links.
+   *
+   * @default 'current'
+   */
+  languages?: 'all' | 'current' | LanguageCode[]
+
+  /**
+   * Whether to show the `target` attribute field in the link picker.
+   *
+   * @default true
+   */
+  showTarget?: boolean
+
+  /**
+   * Whether to show the `rel` attribute field in the link picker.
+   *
+   * @default true
+   */
+  showRel?: boolean
+}
 
 export type RichTextFormatter = (context: {
   newHTML: string
@@ -419,9 +515,7 @@ export type RichTextFormatter = (context: {
   oldText: string
 }) => (Partial<DynamicBlockFieldTypes['Casted'][BlockName]> & { $key: BlockName }) | undefined
 
-// @todo allowLinks?: boolean
 // @todo richTextValidator() -> export from validators (parse HTML and validate marks)
-//       - validate links if allowLinks is enabled
 //       - mby validator is not needed, just parser helper fns + do the whole thing in one validator (to not parse HTML multiple times)
 // @todo editorValidator() -> export from validators (parse HTML and validate tags and marks)
 //       - use EditorEmitter.vue instead of RichTextEmitter.vue for better handling
@@ -451,6 +545,7 @@ const customOptions: RichTextCustomOptions<string> = {
   allowLineBreaks: true,
   normalizeWhitespace: true,
   marks: {},
+  links: true,
   ui: {
     dataTable: {
       hyphenate: true,
@@ -506,6 +601,56 @@ export default {
       model: textFieldModel(),
       customOptions,
       uiOptions: { placeholder: true },
+      populator: async (value, { definition }) => {
+        if (!definition.options.links || !isString(value) || !value || !value.includes('rel://')) {
+          return value
+        }
+
+        const { populateRelURL } = await import('#pruvious/server')
+        const tagRegex = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi
+        const matches: { start: number; end: number; attrs: string; inner: string }[] = []
+        let match: RegExpExecArray | null
+
+        while ((match = tagRegex.exec(value)) !== null) {
+          matches.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            attrs: match[1] ?? '',
+            inner: match[2] ?? '',
+          })
+        }
+
+        let result = value
+
+        for (let i = matches.length - 1; i >= 0; i--) {
+          const { start, end, attrs, inner } = matches[i]!
+          const hrefMatch = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(attrs)
+
+          if (!hrefMatch) {
+            continue
+          }
+
+          const href = hrefMatch[1] ?? hrefMatch[2] ?? ''
+
+          if (!isRelURL(href)) {
+            continue
+          }
+
+          const resolved = await populateRelURL(href)
+
+          if (isNull(resolved)) {
+            result = result.slice(0, start) + inner + result.slice(end)
+          } else {
+            const escaped = resolved
+              .replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/gi, '&amp;')
+              .replace(/"/g, '&quot;')
+            const newAttrs = attrs.replace(/\bhref\s*=\s*(?:"[^"]*"|'[^']*')/i, `href="${escaped}"`)
+            result = result.slice(0, start) + `<a${newAttrs}>${inner}</a>` + result.slice(end)
+          }
+        }
+
+        return result
+      },
       sanitizers: [
         (value, { definition }) =>
           isString(value) && definition.options.normalizeWhitespace ? normalizeWhitespace(value) : value,
@@ -514,6 +659,50 @@ export default {
         async (value, sanitizedContextField, errors) => {
           const { richTextValidator } = await import('#pruvious/server')
           await richTextValidator()(value, sanitizedContextField, errors)
+        },
+        async (value, sanitizedContextField) => {
+          const { context, definition } = sanitizedContextField
+          const linksOption = definition.options.links
+
+          if (!linksOption || !isString(value) || !value) {
+            return
+          }
+
+          const linkOptions: LinksOptions = isObject(linksOption) ? linksOption : {}
+          const { validateLinkUrl, isValidRelValue, VALID_LINK_TARGETS } = await import('./link')
+          const anchorRegex = /<a\b([^>]*)>/gi
+          const attrRegex = /([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>"']+))/g
+          let match: RegExpExecArray | null
+
+          while ((match = anchorRegex.exec(value)) !== null) {
+            const attrsStr = match[1] ?? ''
+            const attrs: Record<string, string> = {}
+            let attrMatch: RegExpExecArray | null
+
+            while ((attrMatch = attrRegex.exec(attrsStr)) !== null) {
+              attrs[attrMatch[1]!.toLowerCase()] = attrMatch[2] ?? attrMatch[3] ?? attrMatch[4] ?? ''
+            }
+
+            const href = (attrs.href ?? '').trim()
+
+            if (!href) {
+              throw new Error(context.__('pruvious-api' as any, 'This link is not formatted correctly' as any))
+            }
+
+            const hrefError = await validateLinkUrl(href, linkOptions, context)
+
+            if (hrefError) {
+              throw new Error(hrefError)
+            }
+
+            if (attrs.target && !VALID_LINK_TARGETS.includes(attrs.target)) {
+              throw new Error(context.__('pruvious-api' as any, 'Invalid link target' as any))
+            }
+
+            if (attrs.rel && !isValidRelValue(attrs.rel)) {
+              throw new Error(context.__('pruvious-api' as any, 'The `rel` value contains invalid characters' as any))
+            }
+          }
         },
       ],
     }).serverFn.bind(this)

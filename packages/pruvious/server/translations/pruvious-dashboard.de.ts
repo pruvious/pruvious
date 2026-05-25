@@ -68,6 +68,7 @@ export default defineTranslation({
   'An unknown error occurred': 'Es ist ein unbekannter Fehler aufgetreten',
   'Appearance': 'Darstellung',
   'Apply': 'Anwenden',
+  'Apply `nofollow noopener noreferrer`': '`nofollow noopener noreferrer` anwenden',
   'Are you sure you want to Sign out from all other devices? Your current session will remain active.':
     'Sind Sie sicher, dass Sie sich von allen anderen Geräten abmelden möchten? Ihre aktuelle Sitzung bleibt aktiv.',
   'Are you sure you want to delete $count $entries?': createPattern(
@@ -276,6 +277,7 @@ export default defineTranslation({
   'Each block in this field must be unique': 'Jeder Block in diesem Feld muss eindeutig sein',
   'Edit': 'Bearbeiten',
   'Edit field value': 'Feldwert bearbeiten',
+  'Edit link': 'Link bearbeiten',
   'Edit translation': 'Übersetzung bearbeiten',
   'Editors': 'Editoren',
   'Email': 'E-Mail',
@@ -391,6 +393,7 @@ export default defineTranslation({
   'Includes any': 'Enthält mindestens eines',
   'Indicates whether this route is publicly accessible.': 'Gibt an, ob diese Route öffentlich zugänglich ist.',
   'Insert': 'Einfügen',
+  'Insert link': 'Link einfügen',
   'Installation': 'Installation',
   'Invalid `$param` parameter': createPattern('Parameter `$param` ist ungültig', { param: 'string' }),
   'It matches the URL portion after the current route path.': 'Es matcht den URL-Teil nach dem aktuellen Routenpfad.',
@@ -620,6 +623,7 @@ export default defineTranslation({
   'Search files': 'Dateien suchen',
   'Search...': 'Suchen...',
   'Select': 'Auswählen',
+  'Select a page or enter a URL': 'Seite auswählen oder URL eingeben',
   'Select a routable collection to create child routes from its records.':
     'Wählen Sie eine routingfähige Collection aus, um aus deren Datensätzen untergeordnete Routen zu erstellen.',
   'Select a routable singleton to use its data for this specific route.':

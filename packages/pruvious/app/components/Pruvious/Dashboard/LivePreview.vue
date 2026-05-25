@@ -275,6 +275,17 @@
         </div>
       </div>
     </div>
+
+    <PruviousDashboardRichTextLinkPopup
+      v-if="linkPopupRequest"
+      :disabled="disabled"
+      :href="linkPopupRequest.href"
+      :options="linkPopupRequest.options"
+      :rel="linkPopupRequest.rel"
+      :target="linkPopupRequest.target"
+      @close="$event().then(() => (linkPopupRequest = null))"
+      @save="onLinkPopupSave"
+    />
   </NuxtLayout>
 </template>
 
@@ -331,6 +342,7 @@ import {
 import { useDebounceFn, useElementSize, useEventListener, useStorage, useWindowSize } from '@vueuse/core'
 import { hash } from 'ohash'
 import { usePruviousDashboardSerialized } from '../../../../modules/pruvious/pruvious/utils.client'
+import type { LinksOptions } from '../../../../server/fields/richText'
 import type { ExtendedBlockValue } from './BlocksTree.vue'
 
 const props = defineProps({
@@ -655,9 +667,38 @@ useEventListener('message', (event: MessageEvent<IframeMessage>) => {
           }
         }
       }
+    } else if (event.data.name === 'iframe:openLinkPicker') {
+      linkPopupRequest.value = {
+        fieldPath: event.data.fieldPath,
+        href: event.data.href,
+        target: event.data.target,
+        rel: event.data.rel,
+        options: event.data.options,
+      }
     }
   }
 })
+
+const linkPopupRequest = ref<{
+  fieldPath: string
+  href: string
+  target: string
+  rel: string
+  options: LinksOptions
+} | null>(null)
+
+function onLinkPopupSave(value: { href: string; target: string; rel: string }) {
+  if (!linkPopupRequest.value) {
+    return
+  }
+
+  messagePreviewIframe('dashboard:applyLink', {
+    fieldPath: linkPopupRequest.value.fieldPath,
+    href: value.href,
+    target: value.target,
+    rel: value.rel,
+  })
+}
 
 useEventListener('resize', () => {
   nextTick(() => {

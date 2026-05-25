@@ -103,6 +103,7 @@ export default defineTranslation({
     { param: 'string', min: 'number', max: 'number' },
   ),
   'The $subject must be an image': createPattern('Das $subject muss ein Bild sein', { subject: 'string' }),
+  'The `rel` value contains invalid characters': 'Der `rel`-Wert enthält ungültige Zeichen',
   'The collection `$collection` cannot be linked to': createPattern(
     'Auf die Collection `$collection` kann nicht verlinkt werden',
     { collection: 'string' },

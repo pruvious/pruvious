@@ -5,6 +5,7 @@
     :data-is-editable="isEditable"
     :disabled="!isEditable"
     :key="key"
+    :links="links"
     :marks="marks"
     :maybeTranslate="maybeTranslate"
     :modelValue="html"
@@ -18,6 +19,8 @@
     @duplicate="onDuplicate()"
     @enterKey="onEnterKey"
     @focus="onFocus()"
+    @linkApplied="onLinkApplied"
+    @linkPickerOpen="onLinkPickerOpen"
     @moveDown="onMove(1)"
     @moveUp="onMove(-1)"
     @onInsert="onInsert"
@@ -53,9 +56,13 @@ import {
   blocksFieldCanHaveMoreChildren,
   type ResolvedParentBlocksFieldInfo,
 } from '../../../modules/pruvious/preview/utils/blocks-field'
+import {
+  registerLinkPickerHandler,
+  unregisterLinkPickerHandler,
+} from '../../../modules/pruvious/preview/utils/messages'
 import type { EditableTextNextFocus } from '../../../modules/pruvious/preview/utils/rich-text'
 import { usePreviewState } from '../../../modules/pruvious/preview/utils/state'
-import type { RichTextFormatter } from '../../../server/fields/richText'
+import type { LinksOptions, RichTextFormatter } from '../../../server/fields/richText'
 
 const props = defineProps({
   /**
@@ -134,6 +141,9 @@ const allowLineBreaks = computed(
   () => fieldOptions.value?._fieldType === 'richText' && !!fieldOptions.value.allowLineBreaks,
 )
 const marks = computed(() => (fieldOptions.value?._fieldType === 'richText' ? fieldOptions.value.marks : {}))
+const links = computed(() =>
+  fieldOptions.value?._fieldType === 'richText' ? (fieldOptions.value.links ?? false) : false,
+)
 const normalizeWhitespace = computed(
   () => fieldOptions.value?._fieldType === 'richText' && !!fieldOptions.value.normalizeWhitespace,
 )
@@ -269,6 +279,30 @@ function onInsert(position: 'before' | 'after') {
     messageDashboard('iframe:addBlock', { blockPath: blockPath.value, position })
   }
 }
+
+function onLinkPickerOpen(attrs: { href: string; target: string; rel: string }, options: LinksOptions) {
+  messageDashboard('iframe:openLinkPicker', {
+    fieldPath: props.fieldPath,
+    href: attrs.href,
+    target: attrs.target,
+    rel: attrs.rel,
+    options,
+  })
+}
+
+function onLinkApplied() {
+  commitData()
+}
+
+onMounted(() => {
+  registerLinkPickerHandler(props.fieldPath, (value) => {
+    root.value?.applyLink(value)
+  })
+})
+
+onBeforeUnmount(() => {
+  unregisterLinkPickerHandler(props.fieldPath)
+})
 
 function onEnterKey(valueBefore: string, valueAfter: string) {
   if (blockPath?.value) {

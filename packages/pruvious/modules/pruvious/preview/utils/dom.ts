@@ -64,9 +64,12 @@ export function onFocusIn(event: FocusEvent) {
 
 export function onMouseDown(event: Event) {
   const { focusedBlocks } = usePreviewState()
-  preventLinkNavigation(event)
   resolveFocusedBlocks(event.target)
   messageDashboard('iframe:selectBlock', { blockPath: last(focusedBlocks.value)?.path ?? null })
+}
+
+export function onClick(event: Event) {
+  preventLinkNavigation(event)
 }
 
 export function onMouseOver(event: MouseEvent) {

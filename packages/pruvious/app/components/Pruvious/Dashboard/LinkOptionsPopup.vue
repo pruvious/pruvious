@@ -41,7 +41,19 @@
         @update:modelValue="draftRel = $event"
         autocomplete="off"
         placeholder="noopener noreferrer"
-      />
+      >
+        <template #suffix>
+          <PUIButton
+            v-if="!draftRel && !disabled"
+            v-pui-tooltip="__('pruvious-dashboard', 'Apply `nofollow noopener noreferrer`')"
+            @click="draftRel = 'nofollow noopener noreferrer'"
+            tabindex="-1"
+            variant="ghost"
+          >
+            <Icon mode="svg" name="tabler:wand" />
+          </PUIButton>
+        </template>
+      </PUIInput>
       <PruviousFieldMessage :options="relOptions" name="rel" />
     </PUIField>
 

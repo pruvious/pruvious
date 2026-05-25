@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { $422, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
+import { $422, $deleteAsAdmin, $getAsAdmin, $paginated, $patchAsAdmin, $postAsAdmin } from '../utils'
 
 describe('richText field', () => {
   const richText = '/api/collections/fields?returning=richText'
@@ -293,5 +293,309 @@ describe('richText field', () => {
     expect(await $postAsAdmin(richText, { richText: true })).toEqual($422([{ richText: expect.any(String) }]))
     expect(await $postAsAdmin(richText, { richText: [] })).toEqual($422([{ richText: expect.any(String) }]))
     expect(await $postAsAdmin(richText, { richText: {} })).toEqual($422([{ richText: expect.any(String) }]))
+  })
+
+  describe('links', () => {
+    const richTextLinks = '/api/collections/fields?returning=richTextLinks'
+    const richTextNoLinks = '/api/collections/fields?returning=richTextNoLinks'
+    const richTextLinksInternalOnly = '/api/collections/fields?returning=richTextLinksInternalOnly'
+    const richTextLinksAllowedReferences = '/api/collections/fields?returning=richTextLinksAllowedReferences'
+    const richTextLinksNoDrafts = '/api/collections/fields?returning=richTextLinksNoDrafts'
+    const richTextLinksNoHash = '/api/collections/fields?returning=richTextLinksNoHash'
+    const richTextLinksNoQuery = '/api/collections/fields?returning=richTextLinksNoQuery'
+
+    let routeId: number
+    let articleId: number
+    let draftRouteId: number
+
+    test('setup: create route and article', async () => {
+      const route = (await $postAsAdmin('/api/collections/routes?returning=id', {
+        pathEN: '/rich-blog',
+        referencedCollections: ['Articles'],
+        isPublicEN: true,
+      })) as [{ id: number }]
+      routeId = route[0].id
+
+      const article = (await $postAsAdmin('/api/collections/articles?returning=id', {
+        name: 'Rich Article',
+        price: 1,
+        subpath: 'rich-article',
+        isPublic: true,
+        language: 'en',
+      })) as [{ id: number }]
+      articleId = article[0].id
+
+      const draft = (await $postAsAdmin('/api/collections/routes?returning=id', {
+        pathEN: '/rich-draft',
+        referencedSingleton: 'Options',
+        isPublicEN: false,
+      })) as [{ id: number }]
+      draftRouteId = draft[0].id
+    })
+
+    test('accepts external link', async () => {
+      const html = '<a href="https://example.com">click</a>'
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual([{ richTextLinks: html }])
+    })
+
+    test('accepts external link with target and rel attributes', async () => {
+      const html = '<a href="https://example.com" target="_blank" rel="noopener noreferrer">click</a>'
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual([{ richTextLinks: html }])
+    })
+
+    test('accepts rel:// link to a route', async () => {
+      const html = `<a href="rel://Routes:${routeId}">route</a>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual([{ richTextLinks: html }])
+    })
+
+    test('accepts rel:// link to a collection record', async () => {
+      const html = `<a href="rel://Routes:${routeId}/Articles:${articleId}">article</a>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual([{ richTextLinks: html }])
+    })
+
+    test('accepts link nested inside other marks', async () => {
+      const html = `<a href="rel://Routes:${routeId}/Articles:${articleId}"><strong>bold link</strong></a>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual([{ richTextLinks: html }])
+    })
+
+    test('rejects link with empty href', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="">x</a>' })).toEqual(
+        $422([{ richTextLinks: expect.any(String) }]),
+      )
+    })
+
+    test('rejects link with disallowed attribute', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="/x" onclick="alert(1)">x</a>' })).toEqual(
+        $422([{ richTextLinks: expect.any(String) }]),
+      )
+    })
+
+    test('rejects malformed rel:// link', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="rel://invalid">x</a>' })).toEqual(
+        $422([{ richTextLinks: 'This link is not formatted correctly' }]),
+      )
+    })
+
+    test('rejects rel:// link to non-existent route', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="rel://Routes:99999">x</a>' })).toEqual(
+        $422([{ richTextLinks: 'Record does not exist' }]),
+      )
+    })
+
+    test('rejects rel:// link to non-existent record', async () => {
+      const html = `<a href="rel://Routes:${routeId}/Articles:99999">x</a>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: html })).toEqual(
+        $422([{ richTextLinks: 'Record does not exist' }]),
+      )
+    })
+
+    test('rejects relative/non-protocol href', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="/relative">x</a>' })).toEqual(
+        $422([{ richTextLinks: 'Only internal and external links are allowed' }]),
+      )
+    })
+
+    test('populates internal rel:// link to resolved path', async () => {
+      const result = await $postAsAdmin(`${richTextLinks},id&populate=t`, {
+        richTextLinks: `<a href="rel://Routes:${routeId}/Articles:${articleId}">article</a>`,
+      })
+      expect(result).toEqual([
+        {
+          richTextLinks: '<a href="/rich-blog/rich-article">article</a>',
+          id: expect.any(Number),
+        },
+      ])
+    })
+
+    test('preserves query and hash on populated rel:// link', async () => {
+      const result = await $postAsAdmin(`${richTextLinks}&populate=t`, {
+        richTextLinks: `<a href="rel://Routes:${routeId}/Articles:${articleId}?page=2#section">article</a>`,
+      })
+      expect(result).toEqual([{ richTextLinks: '<a href="/rich-blog/rich-article?page=2#section">article</a>' }])
+    })
+
+    test('passes external URL through unchanged on populate', async () => {
+      const html = '<a href="https://example.com/x" target="_blank" rel="noopener">x</a>'
+      const result = await $postAsAdmin(`${richTextLinks}&populate=t`, { richTextLinks: html })
+      expect(result).toEqual([{ richTextLinks: html }])
+    })
+
+    test('populates multiple links in the same value', async () => {
+      const html =
+        `before <a href="rel://Routes:${routeId}/Articles:${articleId}">article</a>` +
+        ` and <a href="https://example.com">ext</a> end`
+      const result = await $postAsAdmin(`${richTextLinks}&populate=t`, { richTextLinks: html })
+      expect(result).toEqual([
+        {
+          richTextLinks:
+            'before <a href="/rich-blog/rich-article">article</a> and <a href="https://example.com">ext</a> end',
+        },
+      ])
+    })
+
+    test('unwraps broken rel:// links on populate (keeps inner text)', async () => {
+      const created = await $postAsAdmin(`${richTextLinks},id`, {
+        richTextLinks: `<a href="rel://Routes:${routeId}/Articles:${articleId}">article</a>`,
+      })
+      const recordId = (created as any)[0].id
+
+      await $deleteAsAdmin(`/api/collections/articles/${articleId}`)
+
+      const populated = await $getAsAdmin(`/api/collections/fields/${recordId}?select=richTextLinks&populate=t`)
+      expect(populated).toEqual({ richTextLinks: 'article' })
+
+      const reinstated = (await $postAsAdmin('/api/collections/articles?returning=id', {
+        name: 'Rich Article',
+        price: 1,
+        subpath: 'rich-article',
+        isPublic: true,
+        language: 'en',
+      })) as [{ id: number }]
+      articleId = reinstated[0].id
+    })
+
+    test('richTextNoLinks: rejects `<a>` tag', async () => {
+      expect(await $postAsAdmin(richTextNoLinks, { richTextNoLinks: '<a href="https://example.com">x</a>' })).toEqual(
+        $422([{ richTextNoLinks: expect.any(String) }]),
+      )
+    })
+
+    test('richTextLinksInternalOnly: rejects external href', async () => {
+      expect(
+        await $postAsAdmin(richTextLinksInternalOnly, {
+          richTextLinksInternalOnly: '<a href="https://example.com">x</a>',
+        }),
+      ).toEqual($422([{ richTextLinksInternalOnly: 'External links are not allowed in this field' }]))
+    })
+
+    test('richTextLinksInternalOnly: accepts rel:// href', async () => {
+      const html = `<a href="rel://Routes:${routeId}">x</a>`
+      expect(await $postAsAdmin(richTextLinksInternalOnly, { richTextLinksInternalOnly: html })).toEqual([
+        { richTextLinksInternalOnly: html },
+      ])
+    })
+
+    test('richTextLinksAllowedReferences: rejects bare route', async () => {
+      expect(
+        await $postAsAdmin(richTextLinksAllowedReferences, {
+          richTextLinksAllowedReferences: `<a href="rel://Routes:${routeId}">x</a>`,
+        }),
+      ).toEqual($422([{ richTextLinksAllowedReferences: 'Linking to `Routes` is not allowed in this field' }]))
+    })
+
+    test('richTextLinksAllowedReferences: accepts Articles link', async () => {
+      const html = `<a href="rel://Routes:${routeId}/Articles:${articleId}">x</a>`
+      expect(await $postAsAdmin(richTextLinksAllowedReferences, { richTextLinksAllowedReferences: html })).toEqual([
+        { richTextLinksAllowedReferences: html },
+      ])
+    })
+
+    test('richTextLinksNoDrafts: rejects link to a draft route', async () => {
+      expect(
+        await $postAsAdmin(richTextLinksNoDrafts, {
+          richTextLinksNoDrafts: `<a href="rel://Routes:${draftRouteId}">x</a>`,
+        }),
+      ).toEqual($422([{ richTextLinksNoDrafts: 'Linking to drafts is not allowed in this field' }]))
+    })
+
+    test('richTextLinksNoHash: rejects link with hash fragment', async () => {
+      expect(
+        await $postAsAdmin(richTextLinksNoHash, {
+          richTextLinksNoHash: `<a href="rel://Routes:${routeId}#section">x</a>`,
+        }),
+      ).toEqual($422([{ richTextLinksNoHash: 'Hash fragments are not allowed in this field' }]))
+    })
+
+    test('richTextLinksNoQuery: rejects link with query string', async () => {
+      expect(
+        await $postAsAdmin(richTextLinksNoQuery, {
+          richTextLinksNoQuery: `<a href="rel://Routes:${routeId}?foo=bar">x</a>`,
+        }),
+      ).toEqual($422([{ richTextLinksNoQuery: 'Query strings are not allowed in this field' }]))
+    })
+
+    test('rejects unquoted disallowed attribute on `<a>`', async () => {
+      expect(
+        await $postAsAdmin(richTextLinks, {
+          richTextLinks: `<a href="rel://Routes:${routeId}" onclick=alert(1)>x</a>`,
+        }),
+      ).toEqual($422([{ richTextLinks: expect.any(String) }]))
+    })
+
+    test('rejects unquoted disallowed attribute on `<span>` mark', async () => {
+      expect(
+        await $postAsAdmin(richTextCustomMarks, {
+          richTextCustomMarks: '<span class="highlight" onmouseover=alert(1)>x</span>',
+        }),
+      ).toEqual($422([{ richTextCustomMarks: expect.any(String) }]))
+    })
+
+    test('rejects `javascript:` href', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: '<a href="javascript:alert(1)">x</a>' })).toEqual(
+        $422([{ richTextLinks: 'Only internal and external links are allowed' }]),
+      )
+    })
+
+    test('accepts uppercase `<A HREF>` and single-quoted href', async () => {
+      const upper = `<A HREF="rel://Routes:${routeId}">x</A>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: upper })).toEqual([{ richTextLinks: upper }])
+      const single = `<a href='rel://Routes:${routeId}'>x</a>`
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: single })).toEqual([{ richTextLinks: single }])
+    })
+
+    test('rejects nested `<a>` elements', async () => {
+      expect(
+        await $postAsAdmin(richTextLinks, {
+          richTextLinks: `<a href="rel://Routes:${routeId}"><a href="https://example.com">x</a></a>`,
+        }),
+      ).toEqual($422([{ richTextLinks: 'The `<a>` element is malformed' }]))
+    })
+
+    test('rejects self-closing `<a/>` element', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: `<a href="rel://Routes:${routeId}"/>` })).toEqual(
+        $422([{ richTextLinks: 'The `<a>` element is malformed' }]),
+      )
+    })
+
+    test('rejects unclosed `<a>` element', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: `<a href="rel://Routes:${routeId}">x` })).toEqual(
+        $422([{ richTextLinks: 'The `<a>` element is malformed' }]),
+      )
+    })
+
+    test('rejects stray closing `</a>` without opener', async () => {
+      expect(await $postAsAdmin(richTextLinks, { richTextLinks: 'x</a>' })).toEqual(
+        $422([{ richTextLinks: 'The `<a>` element is malformed' }]),
+      )
+    })
+
+    test('rejects `<a>` with invalid target value', async () => {
+      expect(
+        await $postAsAdmin(richTextLinks, {
+          richTextLinks: '<a href="https://example.com" target="javascript:alert(1)">x</a>',
+        }),
+      ).toEqual($422([{ richTextLinks: 'Invalid link target' }]))
+    })
+
+    test('rejects `<a>` with rel value containing invalid characters', async () => {
+      expect(
+        await $postAsAdmin(richTextLinks, {
+          richTextLinks: '<a href="https://example.com" rel="noopener\nnoreferrer">x</a>',
+        }),
+      ).toEqual($422([{ richTextLinks: 'The `rel` value contains invalid characters' }]))
+    })
+
+    test('preserves entity-encoded query when populating rel:// href', async () => {
+      const result = await $postAsAdmin(`${richTextLinks}&populate=t`, {
+        richTextLinks: `<a href="rel://Routes:${routeId}/Articles:${articleId}?a=1&amp;b=2">x</a>`,
+      })
+      expect(result).toEqual([{ richTextLinks: '<a href="/rich-blog/rich-article?a=1&amp;b=2">x</a>' }])
+    })
+
+    test('cleanup: delete routes and article', async () => {
+      await $deleteAsAdmin(`/api/collections/articles/${articleId}`)
+      await $deleteAsAdmin(`/api/collections/routes/${routeId}`)
+      await $deleteAsAdmin(`/api/collections/routes/${draftRouteId}`)
+    })
   })
 })

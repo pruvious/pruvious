@@ -13,6 +13,7 @@
       <PruviousRichText
         :allowLineBreaks="options.allowLineBreaks"
         :disabled="disabled"
+        :links="options.links ?? false"
         :marks="options.marks ?? {}"
         :maybeTranslate="maybeTranslate"
         :modelValue="modelValue"
@@ -21,6 +22,7 @@
         :toolbar="options.ui?.liveEditor?.toolbar ?? 'auto'"
         @blur="onBlur"
         @focus="isFocused = true"
+        @linkApplied="onLinkApplied"
         @update:modelValue="onUpdate"
         dashboard
         enterInsertsLineBreak
@@ -134,6 +136,10 @@ function onUpdate(html: string) {
 function onBlur() {
   isFocused.value = false
   emit('commit', props.modelValue)
+}
+
+function onLinkApplied(html: string) {
+  emit('commit', html)
 }
 </script>
 

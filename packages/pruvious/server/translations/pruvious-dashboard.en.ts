@@ -68,6 +68,7 @@ export default defineTranslation({
   'An unknown error occurred': 'An unknown error occurred',
   'Appearance': 'Appearance',
   'Apply': 'Apply',
+  'Apply `nofollow noopener noreferrer`': 'Apply `nofollow noopener noreferrer`',
   'Are you sure you want to Sign out from all other devices? Your current session will remain active.':
     'Are you sure you want to Sign out from all other devices? Your current session will remain active.',
   'Are you sure you want to delete $count $entries?': createPattern(
@@ -275,6 +276,7 @@ export default defineTranslation({
   'Each block in this field must be unique': 'Each block in this field must be unique',
   'Edit': 'Edit',
   'Edit field value': 'Edit field value',
+  'Edit link': 'Edit link',
   'Edit translation': 'Edit translation',
   'Editors': 'Editors',
   'Email': 'Email',
@@ -388,6 +390,7 @@ export default defineTranslation({
   'Includes any': 'Includes any',
   'Indicates whether this route is publicly accessible.': 'Indicates whether this route is publicly accessible.',
   'Insert': 'Insert',
+  'Insert link': 'Insert link',
   'Installation': 'Installation',
   'Invalid `$param` parameter': createPattern('Invalid `$param` parameter', { param: 'string' }),
   'It matches the URL portion after the current route path.':
@@ -617,6 +620,7 @@ export default defineTranslation({
   'Search files': 'Search files',
   'Search...': 'Search...',
   'Select': 'Select',
+  'Select a page or enter a URL': 'Select a page or enter a URL',
   'Select a routable collection to create child routes from its records.':
     'Select a routable collection to create child routes from its records.',
   'Select a routable singleton to use its data for this specific route.':

@@ -14,6 +14,7 @@ defineBlock({
 
 defineProps({
   text: richTextField({
+    links: true,
     marks: {
       ...commonMarks,
       customMark: {
@@ -50,6 +51,7 @@ defineProps({
           'mark:customMark',
           'mark:customMark2',
           'mark:bold',
+          'link',
           'clearFormatting',
         ],
       },

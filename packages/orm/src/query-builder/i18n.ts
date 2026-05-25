@@ -80,7 +80,20 @@ export const translatableStrings = {
     { operator: 'string', field: 'string' },
   ),
 
+  'The `<a>` attribute `$attr` is not allowed': createPattern('The `<a>` attribute `$attr` is not allowed', {
+    attr: 'string',
+  }),
+  'The `<a>` element is malformed': 'The `<a>` element is malformed',
+  'The `<a>` element is missing the `href` attribute': 'The `<a>` element is missing the `href` attribute',
+  'The `<span>` element has disallowed attributes': 'The `<span>` element has disallowed attributes',
+
+  'The HTML tag `<$tag>` cannot have attributes': createPattern('The HTML tag `<$tag>` cannot have attributes', {
+    tag: 'string',
+  }),
+  'The HTML tag `<$tag>` is not allowed': createPattern('The HTML tag `<$tag>` is not allowed', { tag: 'string' }),
+
   'The rich text content contains disallowed HTML': 'The rich text content contains disallowed HTML',
+  'The rich text content must be a string': 'The rich text content must be a string',
 
   'The search field `$field` must be of type `text`': createPattern(
     'The search field `$field` must be of type `text`',
@@ -252,7 +265,20 @@ export const translatableStringsDe = {
     { operator: 'string', field: 'string' },
   ),
 
+  'The `<a>` attribute `$attr` is not allowed': createPattern('Das `<a>`-Attribut `$attr` ist nicht erlaubt', {
+    attr: 'string',
+  }),
+  'The `<a>` element is malformed': 'Das `<a>`-Element ist fehlerhaft',
+  'The `<a>` element is missing the `href` attribute': 'Beim `<a>`-Element fehlt das `href`-Attribut',
+  'The `<span>` element has disallowed attributes': 'Das `<span>`-Element enthält nicht erlaubte Attribute',
+
+  'The HTML tag `<$tag>` cannot have attributes': createPattern('Das HTML-Tag `<$tag>` darf keine Attribute haben', {
+    tag: 'string',
+  }),
+  'The HTML tag `<$tag>` is not allowed': createPattern('Das HTML-Tag `<$tag>` ist nicht erlaubt', { tag: 'string' }),
+
   'The rich text content contains disallowed HTML': 'Der Rich-Text-Inhalt enthält nicht erlaubtes HTML',
+  'The rich text content must be a string': 'Der Rich-Text-Inhalt muss eine Zeichenkette sein',
 
   'The search field `$field` must be of type `text`': createPattern('Das Suchfeld `$field` muss vom Typ `text` sein', {
     field: 'string',
