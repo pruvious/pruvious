@@ -1,0 +1,9 @@
+allowBuilds:
+  '@parcel/watcher': true
+  argon2: true
+  cpu-features: true
+  esbuild: true
+  sharp: true
+  sqlite3: true
+  ssh2: true
+  vue-demi: true

@@ -5,7 +5,7 @@ import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
 import type { ResolvedField } from '../fields/field.resolver'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveAppPath, resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { uniqueArray } from '../utils/array'
 import { CodeGenerator } from '../utils/code-generator'
@@ -34,20 +34,26 @@ export async function resolveBlocks(
   errors: number
 }> {
   const records: Record<string, ResolvedBlock> = {}
-  const fromApp = resolveAppPath('./blocks')
 
   let errors = 0
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath, relativePath } of walkDir(fromApp, { endsWith: '.vue' })) {
-      errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'])
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('blocks')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath, relativePath } of walkDir(fromApp, { endsWith: '.vue' })) {
+        errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], !firstDir)
+      }
+      firstDir = false
     }
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'blocks'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'blocks'), { endsWith: '.vue' })) {
-        errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'blocks')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath, relativePath } of walkDir(dir, { endsWith: '.vue' })) {
+          errors += await resolveBlock(fullPath, relativePath, records, fields, ['Preset'], true)
+        }
       }
     }
   }

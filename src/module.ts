@@ -1,4 +1,5 @@
 import {
+  addPlugin,
   addRouteMiddleware,
   addServerHandler,
   addServerPlugin,
@@ -15,11 +16,13 @@ import { warn } from './runtime/instances/logger'
 import {
   initModulePathResolver,
   initRootDir,
+  initSrcDir,
   resolveAppPath,
   resolveLayerPath,
   resolveModulePath,
   resolveRelativeAppPath,
   resolveRelativeModulePath,
+  resolveUserDirs,
 } from './runtime/instances/path'
 import { cacheLayerPaths, cacheModuleOptions, getModuleOption, getModuleOptions } from './runtime/instances/state'
 import { boot, createComponentDirectories, validateLanguageOptions, watchPruviousFiles } from './runtime/main'
@@ -224,15 +227,21 @@ export default defineNuxtModule<ModuleOptions>({
     |--------------------------------------------------------------------------
     |
     */
-    if (!semver.satisfies(nuxt._version, '3.15')) {
+    if (!semver.satisfies(nuxt._version, '>=3.15.0 <5.0.0')) {
       warn(
-        `This version of Pruvious is compatible with Nuxt $c{{ 3.15.x }}. You are currently using Nuxt $y{{ ${nuxt._version} }}.`,
+        `This version of Pruvious is compatible with Nuxt $c{{ 3.x and 4.x }}. You are currently using Nuxt $y{{ ${nuxt._version} }}.`,
       )
     }
 
     initModulePathResolver(createResolver(import.meta.url))
     initRootDir(nuxt.options.rootDir)
-    cacheLayerPaths(nuxt.options._layers.map(({ cwd, config }) => path.resolve(cwd, config.rootDir)))
+    initSrcDir(nuxt.options.srcDir)
+    cacheLayerPaths(
+      nuxt.options._layers.map(({ cwd, config }) => ({
+        root: path.resolve(cwd, config.rootDir ?? cwd),
+        src: path.resolve(cwd, config.srcDir ?? config.rootDir ?? cwd),
+      })),
+    )
     fs.emptyDirSync(resolveAppPath('./.pruvious'))
 
     for (const [name, componentPath] of Object.entries(options.dashboard.baseComponents!)) {
@@ -304,6 +313,13 @@ export default defineNuxtModule<ModuleOptions>({
         },
         { override: true },
       )
+    }
+
+    if (moduleOptions.dashboard.enabled && moduleOptions.dashboard.removeSiteStyles) {
+      addPlugin({
+        src: resolveModulePath('./runtime/plugins/dashboard-style-guard'),
+        mode: 'client',
+      })
     }
 
     /*
@@ -482,18 +498,26 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.hook('builder:watch', watchPruviousFiles)
     nuxt.hook('components:dirs', (dirs) => {
       if (options.standardFields.icon) {
-        dirs.unshift({ path: resolveAppPath('./icons'), prefix: 'Icon' })
+        for (const iconsPath of resolveUserDirs('icons')) {
+          dirs.unshift({ path: iconsPath, prefix: 'Icon' })
+        }
       }
 
       dirs.unshift(
         { path: resolveModulePath('./runtime/components/icons'), prefix: 'PruviousIcon' },
         { path: resolveModulePath('./runtime/components/misc'), prefix: 'Pruvious' },
-        { path: resolveAppPath('./blocks') },
       )
 
+      for (const blocksPath of resolveUserDirs('blocks')) {
+        dirs.unshift({ path: blocksPath })
+      }
+
       for (const layer of moduleOptions.layers) {
-        if (fs.existsSync(path.resolve(layer, 'blocks'))) {
-          dirs.unshift({ path: path.resolve(layer, 'blocks') })
+        for (const base of new Set([layer.src, layer.root])) {
+          const blocksPath = path.resolve(base, 'blocks')
+          if (fs.existsSync(blocksPath)) {
+            dirs.unshift({ path: blocksPath })
+          }
         }
       }
     })
@@ -513,7 +537,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (moduleOptions.uploads) {
       nuxt.hook('nitro:init', (nitro) => {
-        nitro.hooks.addHooks({ 'dev:reload': () => require('sharp') })
+        nitro.hooks.addHooks({ 'dev:reload': () => import('sharp') })
       })
     }
 
@@ -530,6 +554,23 @@ export default defineNuxtModule<ModuleOptions>({
       $server: { build: { rollupOptions: { output: { preserveModules: true } } } },
     })
 
+    if (nuxt.options.srcDir !== nuxt.options.rootDir) {
+      nuxt.options.watch ||= []
+      for (const name of [
+        'blocks',
+        'collections',
+        'dashboard',
+        'fields',
+        'hooks',
+        'icons',
+        'jobs',
+        'layouts',
+        'translatable-strings',
+      ]) {
+        nuxt.options.watch.push(path.join(nuxt.options.rootDir, name))
+      }
+    }
+
     const dbInfo = getDatabaseInfo()
 
     if (dbInfo.dialect === 'sqlite') {
@@ -539,13 +580,9 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (moduleOptions.uploads.drive.type === 'local') {
       const uploadsDir = getModuleOption('uploadsDir')
-      const symDir = path.join(
-        nuxt.options.rootDir,
-        nuxt.options.dir.public,
-        moduleOptions.uploads.drive.urlPrefix ?? 'uploads',
-      )
-      const isDevelopment = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
-      const isTest = process.env.NODE_ENV === 'test' || (process.env.TEST ? process.env.TEST !== 'false' : false)
+      const symDir = path.join(nuxt.options.dir.public, moduleOptions.uploads.drive.urlPrefix ?? 'uploads')
+      const isDevelopment = nuxt.options.dev
+      const isTest = nuxt.options.test
       fs.ensureDirSync(uploadsDir)
       fs.removeSync(symDir)
 

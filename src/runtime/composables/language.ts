@@ -18,7 +18,7 @@ export function getLanguage(): SupportedLanguage {
     language.value = resolveLanguage()
   }
 
-  if (process.client && localStorage.getItem(runtimeConfig.public.pruvious.language.localStorageKey)) {
+  if (import.meta.client && localStorage.getItem(runtimeConfig.public.pruvious.language.localStorageKey)) {
     localStorage.setItem(runtimeConfig.public.pruvious.language.localStorageKey, language.value!)
   }
 
@@ -54,7 +54,7 @@ export async function setLanguage(
     const language = useLanguage()
     language.value = languageCode
 
-    if (process.server) {
+    if (import.meta.server) {
       const nuxtApp = useNuxtApp()
       nuxtApp.ssrContext!.event.context.language = language.value
     } else {
@@ -85,7 +85,7 @@ export function resolveLanguage(): SupportedLanguage {
   const options = runtimeConfig.public.pruvious.language
   const primaryLanguage = options.primary as SupportedLanguage
 
-  if (process.server) {
+  if (import.meta.server) {
     return nuxtApp.ssrContext!.event.context.language || runtimeConfig.public.pruvious.language.primary
   } else {
     const language = localStorage.getItem(options.localStorageKey) || navigator.language

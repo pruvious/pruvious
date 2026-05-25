@@ -1,6 +1,6 @@
 import type { AuthUser, CollectionName, SupportedLanguage } from '#pruvious'
 import type { ExtractKeywordsContext, ResolvedCollectionDefinition } from '../collections/collection.definition'
-import { query } from '../collections/query'
+import type { query } from '../collections/query'
 import type { QueryBuilderInstance } from '../utility-types'
 import { isNull } from '../utils/common'
 import { matchesConditionalLogic } from '../utils/conditional-logic'

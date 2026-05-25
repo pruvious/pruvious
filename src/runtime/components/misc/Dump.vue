@@ -7,5 +7,5 @@
 <script lang="ts" setup>
 import { ref } from '#imports'
 
-const visible = ref(process.client ? !!localStorage.getItem('dump') : false)
+const visible = ref(import.meta.client ? !!localStorage.getItem('dump') : false)
 </script>

@@ -220,7 +220,7 @@ export async function pruviousFetch<Data>(
   const data = await $fetch<Data>(resolvedPath, {
     headers,
     onRequest() {
-      if (process.client && dispatchEvents) {
+      if (import.meta.client && dispatchEvents) {
         window.dispatchEvent(new CustomEvent('pruvious-fetch-start'))
       }
     },
@@ -233,12 +233,12 @@ export async function pruviousFetch<Data>(
         // navigateToPruviousDashboardPath('login')
         // @todo show login popup instead (more friendly and prevents content editors from losing data)
         // ^ don't load anything dashboard related here, rather fire an event (client only)
-        if (process.client && dispatchEvents) {
+        if (import.meta.client && dispatchEvents) {
           window.dispatchEvent(new CustomEvent('pruvious-fetch-unauthorized'))
         }
       }
 
-      if (process.client && dispatchEvents) {
+      if (import.meta.client && dispatchEvents) {
         window.dispatchEvent(new CustomEvent('pruvious-fetch-error', { detail: response._data || response.statusText }))
       }
     },
@@ -247,7 +247,7 @@ export async function pruviousFetch<Data>(
   })
     .catch((e) => (error = e))
     .finally(() => {
-      if (process.client && dispatchEvents) {
+      if (import.meta.client && dispatchEvents) {
         window.dispatchEvent(new CustomEvent('pruvious-fetch-end'))
       }
     })

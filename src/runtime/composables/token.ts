@@ -34,7 +34,7 @@ export const useToken: () => Ref<PruviousToken | null> = () => useState('pruviou
  * Read the raw JSON Web Token from the local storage.
  */
 export function getRawToken(): string | null {
-  if (process.client) {
+  if (import.meta.client) {
     const runtimeConfig = useRuntimeConfig()
     return localStorage.getItem(runtimeConfig.public.pruvious.jwtLocalStorageKey)
   }
@@ -46,7 +46,7 @@ export function getRawToken(): string | null {
  * Read the JSON Web Token from the local storage.
  */
 export function getToken(): PruviousToken | null {
-  if (process.client) {
+  if (import.meta.client) {
     const storedToken = useToken()
 
     let tmpToken: PruviousToken | null = storedToken.value
@@ -86,7 +86,7 @@ export function getToken(): PruviousToken | null {
  * Delete the JSON Web Token from the local storage.
  */
 export function removeToken() {
-  if (process.client) {
+  if (import.meta.client) {
     const runtimeConfig = useRuntimeConfig()
     const storedToken = useToken()
 
@@ -99,7 +99,7 @@ export function removeToken() {
  * Store the JSON Web Token in local storage.
  */
 export function setToken(token: string) {
-  if (process.client) {
+  if (import.meta.client) {
     const runtimeConfig = useRuntimeConfig()
     const storedToken = useToken()
 

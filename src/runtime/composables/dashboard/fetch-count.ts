@@ -5,7 +5,7 @@ import { useState, type Ref } from '#imports'
  */
 export const useFetchCount: () => Ref<number> = () => useState('pruvious-fetch-count', () => 0)
 
-if (process.client) {
+if (import.meta.client) {
   window.addEventListener('pruvious-fetch-start', () => {
     useFetchCount().value++
   })

@@ -315,9 +315,8 @@ export function titleCase(value: any, capitalizeAll = true): string {
     return ''
   }
 
-  return kebabCase(value)
+  return kebabCase(value.trim().replace(/\s+/g, '-'))
     .split('-')
-    .map((word) => word.trim())
     .filter(Boolean)
     .map((word, i) => (i === 0 || capitalizeAll ? capitalize(word) : word))
     .join(' ')

@@ -20,10 +20,10 @@ To start a new project, use the `pruvious init` command. This command will insta
 
 ```shell
 # pnpm
-pnpm dlx pruvious@latest init <dir>
+pnpm dlx pruvious@3 init <dir>
 
 # npm
-npx pruvious@latest init <dir>
+npx pruvious@3 init <dir>
 ```
 
 Replace `<dir>` with the path (relative or absolute) to an empty directory where you want to initialize the project.

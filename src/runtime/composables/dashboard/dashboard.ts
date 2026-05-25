@@ -159,7 +159,7 @@ export async function updatePruviousDashboard(route: RouteLocationNormalized) {
       }
     }
 
-    if (process.client) {
+    if (import.meta.client) {
       setInterval(async () => {
         if (auth.value.isLoggedIn) {
           const renewTokenResponse = await pruviousFetch('renew-token.post')

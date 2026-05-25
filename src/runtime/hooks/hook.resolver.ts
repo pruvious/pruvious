@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import { resolve, sep } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { isUndefined } from '../utils/common'
 import { walkDir } from '../utils/fs'
@@ -21,7 +21,6 @@ const cachedHooks: Record<string, any> = {}
 export function resolveHooks(): { records: Record<string, ResolvedHook>; errors: number } {
   const records: Record<string, ResolvedHook> = {}
   const fromModule = resolveModulePath('./runtime/hooks/standard')
-  const fromApp = resolveAppPath('./hooks')
   const registeredStandardHooks: Record<string, boolean> = getModuleOption('standardHooks')
 
   let errors = 0
@@ -35,19 +34,24 @@ export function resolveHooks(): { records: Record<string, ResolvedHook>; errors:
   }
 
   for (const layer of getModuleOption('layers').slice(1).reverse()) {
-    if (fs.existsSync(resolve(layer, 'hooks'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'hooks'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveHook(fullPath, records, false)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'hooks')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveHook(fullPath, records, false)
+        }
       }
     }
   }
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveHook(fullPath, records, false)
+  for (const fromApp of resolveUserDirs('hooks')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveHook(fullPath, records, false)
+      }
     }
   }
 

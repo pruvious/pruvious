@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath } from '../instances/path'
+import { resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { isUndefined } from '../utils/common'
 import { walkDir } from '../utils/fs'
@@ -19,23 +19,29 @@ const cachedDashboardPages: Record<string, any> = {}
 
 export function resolveDashboardPages(): { records: Record<string, ResolvedDashboardPage>; errors: number } {
   const records: Record<string, ResolvedDashboardPage> = {}
-  const fromApp = resolveAppPath('./dashboard')
 
   let errors = 0
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveDashboardPage(fullPath, records, false)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('dashboard')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveDashboardPage(fullPath, records, false, !firstDir)
+      }
+      firstDir = false
     }
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'dashboard'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'dashboard'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveDashboardPage(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'dashboard')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveDashboardPage(fullPath, records, false, true)
+        }
       }
     }
   }

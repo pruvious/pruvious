@@ -10,11 +10,11 @@ fs.emptyDirSync('bin')
 fs.emptyDirSync('config')
 fs.copyFileSync('src/cli/config/define.ts', 'config/index.ts')
 
-esbuild.build({
+await esbuild.build({
   entryPoints: ['src/cli/**/*.ts'],
   outdir: 'bin',
   platform: 'node',
   external: [],
 })
 
-execa('nuxt-module-build build', { ...execaOptions })
+await execa('nuxt-module-build build', { ...execaOptions })
