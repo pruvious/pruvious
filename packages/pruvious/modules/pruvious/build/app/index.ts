@@ -1,20 +1,37 @@
 import { validatorsMeta } from '@pruvious/orm'
+import { remap } from '@pruvious/utils'
 import { createResolver, useNuxt } from 'nuxt/kit'
 import { resolveFieldDefinitionFiles } from '../../fields/resolver'
+import { stringifyImageTransformOptions } from '../../uploads/images.shared'
 import { resolvePruviousFile } from '../utils'
 
 /**
  * Generates the `#pruvious/app` file content.
  */
 export function getAppFileContent() {
-  return [getReExports()].join('\n')
+  const nuxt = useNuxt()
+
+  return [
+    ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
+    `import type { ImageVariant } from '../server'`,
+    `import type { ImageVariantOptions } from '${resolvePruviousFile('uploads/images.shared')}'`,
+    ``,
+    `/**`,
+    ` * Key-value object describing image variants configured via \`pruvious.images.variants\`.`,
+    ` * Each value also exposes a precomputed URL \`suffix\` that can be appended to`,
+    ` * an upload path to reference its optimized version.`,
+    ` */`,
+    `export const imageVariants: Record<ImageVariant, Required<ImageVariantOptions> & { suffix: string }> = ${JSON.stringify(remap(nuxt.options.runtimeConfig.pruvious.images.variants, (key, options) => [key, { ...options, suffix: stringifyImageTransformOptions({ ...options, originalExtension: '' }) }]))}`,
+    ``,
+    getReExports(),
+  ].join('\n')
 }
 
 /**
  * Generates the `#pruvious/app` type file content.
  */
 export function getAppTypeFileContent() {
-  return [getReExports()].join('\n')
+  return [`export const imageVariants: any`, getReExports()].join('\n')
 }
 
 function getReExports() {
@@ -60,6 +77,12 @@ function getReExports() {
 
     // Translations
     `export { useLanguage, extractLanguageCode, preloadTranslatableStrings, preloadTranslatableStringsForPath } from '${resolvePruviousFile('translations/utils.client')}'`,
+
+    // Uploads
+    `export { resolveUploadPath, resolveThumbnailPath, resolveImageVariantPath } from '${resolvePruviousFile('uploads/utils.app')}'`,
+    `export { type ImageVariantOptions, type ImageTransformOptions, stringifyImageTransformOptions, parseImageTransformOptions, normalizeImageTransformOptions, normalizeImageVariantOptions, resolveImageVariantDimensions, generateOptimizedImagePath, normalizeOptimizedImagePath } from '${resolvePruviousFile('uploads/images.shared')}'`,
+    `export { type OptimizableImageType, displayableImageTypes, optimizableImageTypes } from '${resolvePruviousFile('uploads/utils.shared')}'`,
+    `export type { ImageVariant } from '../server'`,
 
     // Validators
     ...validatorsMeta.map(({ name }) => `export { ${name}Validator } from './validators'`),

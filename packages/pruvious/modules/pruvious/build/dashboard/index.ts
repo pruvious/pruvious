@@ -1,8 +1,6 @@
-import { remap } from '@pruvious/utils'
 import { useNuxt } from 'nuxt/kit'
 import { resolveDashboardPageFiles } from '../../dashboard-pages/resolver'
 import { resolveFieldComponentFiles } from '../../fields/resolver'
-import { stringifyImageTransformOptions } from '../../uploads/images'
 import { resolvePruviousFile, resolvePruviousUtilsFile } from '../utils'
 
 /**
@@ -10,7 +8,6 @@ import { resolvePruviousFile, resolvePruviousUtilsFile } from '../utils'
  */
 export function getDashboardFileContent() {
   const nuxt = useNuxt()
-  const pruviousOptions = nuxt.options.runtimeConfig.pruvious
 
   const fieldComponentFiles = resolveFieldComponentFiles()
   const fieldComponentEntries = Object.entries(fieldComponentFiles)
@@ -20,8 +17,6 @@ export function getDashboardFileContent() {
   return [
     ...(nuxt.options.runtimeConfig._tsCheckPruvious ? [] : [`// @ts-nocheck`]),
     `import { type Component, defineAsyncComponent } from 'vue'`,
-    `import type { ImageVariant } from '../server'`,
-    `import type { ImageVariantOptions } from '${resolvePruviousFile('uploads/images')}'`,
     ``,
     `/**`,
     ` * Key-value object mapping field names to their corresponding Vue components.`,
@@ -94,11 +89,7 @@ export function getDashboardFileContent() {
     `}`,
     ``,
     `export { filterStylesheets } from './base'`,
-    ``,
-    `/**`,
-    ` * Key-value object defining image variants for uploaded images in the CMS.`,
-    ` */`,
-    `export const imageVariants: Record<ImageVariant, Required<ImageVariantOptions> & { suffix: string }> = ${JSON.stringify(remap(nuxt.options.runtimeConfig.pruvious.images.variants, (key, options) => [key, { ...options, suffix: stringifyImageTransformOptions({ ...options, originalExtension: '' }) }]))}`,
+    `export { imageVariants } from '../app'`,
     ``,
     getReExports(),
   ].join('\n')
@@ -113,7 +104,7 @@ export function getDashboardTypeFileContent() {
     `export const tableFieldComponents: any`,
     `export const filterFieldComponents: any`,
     `export { filterStylesheets } from './base'`,
-    `export const imageVariants: any`,
+    `export { imageVariants } from '../app'`,
     getReExports(),
   ].join('\n')
 }
@@ -162,7 +153,8 @@ function getReExports() {
     `export { serializeTranslatableStringCallbacks } from '${resolvePruviousFile('translations/utils.shared')}'`,
 
     // Uploads
-    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath, resolveThumbnailPath, resolveImageVariantPath } from '${resolvePruviousFile('uploads/utils.client')}'`,
+    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks } from '${resolvePruviousFile('uploads/utils.client')}'`,
+    `export { resolveUploadPath, resolveThumbnailPath, resolveImageVariantPath } from '${resolvePruviousFile('uploads/utils.app')}'`,
     `export { type OptimizableImageType, mediaCategories, displayableImageTypes, optimizableImageTypes, playableVideoTypes } from '${resolvePruviousFile('uploads/utils.shared')}'`,
 
     // Various dashboard utils

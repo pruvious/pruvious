@@ -184,7 +184,7 @@ describe('blocks field', () => {
             spacing: 'md',
             blocks: [
               { $key: 'Button', label: 'Foo' },
-              { $key: 'Gallery', blocks: [{ $key: 'Image' }] },
+              { $key: 'Gallery', blocks: [{ $key: 'Image', image: null, caption: '' }] },
             ],
           },
         ],

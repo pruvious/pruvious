@@ -12,6 +12,13 @@ export default defineNuxtConfig({
     uploads: {
       driver: isTest ? 'fs://packages/pruvious/.playground/test/tmp/.uploads' : 'fs://.playground/.uploads',
     },
+    images: {
+      variants: {
+        mobile: { format: 'webp', width: 768 },
+        desktop: { format: 'webp', width: 1920 },
+        square: { format: 'webp', width: 640, height: 640, fit: 'contain' },
+      },
+    },
     i18n: {
       languages: [
         { code: 'en', name: 'English' },
