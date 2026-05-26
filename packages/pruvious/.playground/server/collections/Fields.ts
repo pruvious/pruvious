@@ -9,6 +9,7 @@ import {
   dateTimeField,
   dateTimeRangeField,
   defineCollection,
+  editorField,
   linkField,
   nullableObjectField,
   nullableSelectField,
@@ -491,6 +492,136 @@ export default defineCollection({
       ui: { label: 'Rich text (no query in links)' },
     }),
 
+    // editor
+    editor: editorField({
+      marks: commonMarks,
+      ui: { label: 'Editor', placeholder: 'Start typing...', description: 'Description' },
+    }),
+    editorLimitedBlocks: editorField({
+      marks: commonMarks,
+      blocks: ['paragraph', 'h2', 'h3', 'bulletList', 'blockquote'],
+      ui: { label: 'Editor (limited blocks)' },
+    }),
+    editorNoLinks: editorField({
+      marks: commonMarks,
+      links: false,
+      ui: { label: 'Editor (no links)' },
+    }),
+    editorNoMarks: editorField({
+      ui: { label: 'Editor (no marks)' },
+    }),
+    editorMinimal: editorField({
+      blocks: ['paragraph'],
+      links: false,
+      ui: { label: 'Editor (paragraph only)' },
+    }),
+    editorCustomMarks: editorField({
+      marks: {
+        bold: commonMarks.bold,
+        italic: commonMarks.italic,
+        highlight: {
+          tag: 'span',
+          attrs: { class: 'highlight' },
+          icon: 'highlight',
+          label: 'Highlight',
+        },
+      },
+      ui: { label: 'Editor (custom marks)' },
+    }),
+    editorCustomToolbar: editorField({
+      marks: commonMarks,
+      ui: {
+        label: 'Editor (custom toolbar)',
+        toolbar: [
+          'blockType',
+          '|',
+          'mark:bold',
+          'mark:italic',
+          'mark:underline',
+          '|',
+          'link',
+          '|',
+          'clearFormatting',
+          '|',
+          'undo',
+          'redo',
+        ],
+      },
+    }),
+    editorToolbarFalse: editorField({
+      marks: commonMarks,
+      ui: {
+        label: 'Editor (no toolbar)',
+        toolbar: false,
+      },
+    }),
+    editorNoNormalize: editorField({
+      marks: commonMarks,
+      normalizeWhitespace: false,
+      trim: false,
+      ui: { label: 'Editor (no normalize)' },
+    }),
+    editorLinksInternalOnly: editorField({
+      marks: commonMarks,
+      links: { allowExternal: false },
+      ui: { label: 'Editor (internal links only)' },
+    }),
+    editorLinksAllowedReferences: editorField({
+      marks: commonMarks,
+      links: { allowedReferences: ['Articles'] },
+      ui: { label: 'Editor (Articles links only)' },
+    }),
+    editorLinksNoDrafts: editorField({
+      marks: commonMarks,
+      links: { allowDrafts: false },
+      ui: { label: 'Editor (no draft links)' },
+    }),
+    editorStyledMarksAndGroup: editorField({
+      marks: {
+        ...commonMarks,
+        customMark: {
+          tag: 'span',
+          attrs: { class: 'custom-mark' },
+          shortcut: 'Mod-Shift-m',
+          icon: 'star-half-filled',
+          label: 'Custom mark (with label)',
+          dashboardStyle: { 'background-color': 'black', 'color': 'cyan' },
+        },
+        customMark2: {
+          tag: 'span',
+          attrs: { class: 'custom-mark-2' },
+          shortcut: 'Mod-Shift-n',
+          icon: 'star-filled',
+          dashboardStyle: {
+            backgroundColor: 'hsl(var(--pui-accent))',
+            color: 'hsl(var(--pui-accent-foreground))',
+            padding: '0.125rem 0.25rem',
+            borderRadius: '0.25rem',
+          },
+        },
+      },
+      ui: {
+        label: 'Editor (styled marks + group)',
+        toolbar: [
+          'blockType',
+          '|',
+          'mark:bold',
+          'mark:italic',
+          {
+            icon: 'star',
+            tooltip: ({ __ }) => __('pruvious-dashboard', 'My bookmarks'),
+            items: ['mark:customMark', 'mark:customMark2'],
+          },
+          '|',
+          'link',
+          'clearFormatting',
+          '|',
+          'undo',
+          'redo',
+        ],
+      },
+    }),
+
     // select
     select: selectField({
       choices: [
@@ -768,6 +899,24 @@ export default defineCollection({
                 'dateTimeRangeNewYork',
                 'dateTimeRangeBerlinMinMax',
                 'dateTimeRangeBerlinBounded',
+              ],
+            },
+            {
+              label: 'Editor',
+              fields: [
+                'editor',
+                'editorLimitedBlocks',
+                'editorNoLinks',
+                'editorNoMarks',
+                'editorMinimal',
+                'editorCustomMarks',
+                'editorCustomToolbar',
+                'editorToolbarFalse',
+                'editorNoNormalize',
+                'editorLinksInternalOnly',
+                'editorLinksAllowedReferences',
+                'editorLinksNoDrafts',
+                'editorStyledMarksAndGroup',
               ],
             },
             {

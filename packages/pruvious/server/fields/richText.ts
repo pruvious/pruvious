@@ -30,7 +30,8 @@ export interface RichTextCustomOptions<TMark extends string = never> {
 
   /**
    * Controls whether to normalize whitespace in the HTML content.
-   * When enabled, consecutive whitespace characters will be collapsed into a single space, and leading/trailing whitespace will be trimmed.
+   * When enabled, consecutive whitespace characters will be collapsed into a single space,
+   * and leading/trailing whitespace will be trimmed.
    *
    * @default true
    *
@@ -70,7 +71,8 @@ export interface RichTextCustomOptions<TMark extends string = never> {
   /**
    * Controls whether hyperlinks (`<a>` tags) are allowed inside the rich text content.
    *
-   * - `true` (default) - Links are enabled with default options. The toolbar's `auto` mode includes a link button and `Mod-k` opens the picker.
+   * - `true` (default) - Links are enabled with default options.
+   *   The toolbar's `auto` mode includes a link button and `Mod-k` opens the picker.
    * - An object - Links are enabled with the specified restrictions.
    * - `false` - Links are disabled. The link mark is removed from the schema and the toolbar.
    *
@@ -99,7 +101,7 @@ export interface RichTextCustomOptions<TMark extends string = never> {
     /**
      * @default
      * {
-     *   hyphenate: false,
+     *   hyphenate: true,
      *   truncate: { lines: 1 },
      * }
      */
@@ -108,7 +110,7 @@ export interface RichTextCustomOptions<TMark extends string = never> {
        * Controls whether long words should be hyphenated to fit in the cell.
        * When `true`, long words will be broken with hyphens to prevent overflow.
        *
-       * @default false
+       * @default true
        */
       hyphenate?: boolean
 
@@ -192,7 +194,8 @@ export interface RichTextCustomOptions<TMark extends string = never> {
       /**
        * Opens the block picker when pressing `/` in the editor.
        *
-       * When enabled, you can press the forward slash key to open a popup that lets you replace the current block with another block.
+       * When enabled, you can press the forward slash key to open a popup that
+       * lets you replace the current block with another block.
        * Works only if there are at least 2 allowed blocks for the current block.
        *
        * @default true
@@ -216,7 +219,8 @@ export interface RichTextCustomOptions<TMark extends string = never> {
        * The toolbar configuration for the rich text editor.
        * You can set the following values:
        *
-       * - `'auto'` (default) - The toolbar will automatically show available marks based on the field's `marks` option and standard items.
+       * - `'auto'` (default) - The toolbar will automatically show available marks
+       *   based on the field's `marks` option and standard items.
        * - `false` - The toolbar will be hidden and no formatting options will be available.
        * - An array of mark identifiers, standard toolbar items, or custom groups to show in the toolbar.
        *
@@ -228,10 +232,10 @@ export interface RichTextCustomOptions<TMark extends string = never> {
        *   // Mark identifier (e.g. 'mark:bold' for the mark with the key 'bold')
        *   'mark:myCustomMark',
        *
-       *   // Group with custom icon, label, and items (displayed as a dropdown in the toolbar)
+       *   // Group with custom icon, tooltip, and items (displayed as a dropdown in the toolbar)
        *   {
        *     icon: 'typography',
-       *     label: ({ __ }) => __('pruvious-dashboard', 'Formats'),
+       *     tooltip: ({ __ }) => __('pruvious-dashboard', 'Formats'),
        *     items: ['mark:bold', 'mark:italic', 'mark:underline'],
        *   },
        *
@@ -246,50 +250,7 @@ export interface RichTextCustomOptions<TMark extends string = never> {
         | (
             | NoInfer<`mark:${TMark}`>
             | StandardToolbarItem
-            | {
-                /**
-                 * The icon to show for this toolbar group.
-                 * Must be a valid Tabler icon name.
-                 *
-                 * @see https://tabler-icons.io for available icons
-                 *
-                 * @default 'paint'
-                 */
-                icon?: keyof typeof icons
-
-                /**
-                 * Text shown when hovering over the toolbar group button.
-                 *
-                 * You can either provide a string or a function that returns a string.
-                 * The function receives an object with `_` and `__` properties to access the translation functions.
-                 *
-                 * Important: When using a function, only use simple anonymous functions without context binding,
-                 * since the option needs to be serialized for client-side use.
-                 *
-                 * @default undefined
-                 *
-                 * @example
-                 * ```ts
-                 * // String (non-translatable)
-                 * tooltip: 'Formats'
-                 *
-                 * // Function (translatable)
-                 * tooltip: ({ __ }) => __('pruvious-dashboard', 'Formats')
-                 * ```
-                 */
-                tooltip?: string | ((context: TranslatableStringCallbackContext) => string)
-
-                /**
-                 * The items to show in this toolbar group.
-                 * Can be any combination of mark identifiers (e.g. `mark:bold`) or standard toolbar items (e.g. `clearFormatting`).
-                 *
-                 * @example
-                 * ```ts
-                 * items: ['mark:bold', 'mark:italic', 'clearFormatting']
-                 * ```
-                 */
-                items: (NoInfer<`mark:${TMark}`> | StandardToolbarItem)[]
-              }
+            | ToolbarGroup<NoInfer<`mark:${TMark}`> | StandardToolbarItem>
           )[]
     }
   }
@@ -317,8 +278,10 @@ export interface Mark {
    * Attributes to add to the mark's HTML element.
    *
    * This can be used to add classes, styles, or any other attributes to the mark's element.
-   * For example, you could use `{ class: 'my-mark' }` to add a class to the mark's element, or `{ style: { color: 'red' } }` to add inline styles.
-   * You can also use a simple object with string values for attributes that don't fit into `class` or `style`, like `{ 'data-foo': 'bar' }`.
+   * For example, you could use `{ class: 'my-mark' }` to add a class to the mark's element,
+   * or `{ style: { color: 'red' } }` to add inline styles.
+   * You can also use a simple object with string values for attributes that don't fit into
+   * `class` or `style`, like `{ 'data-foo': 'bar' }`.
    *
    * @default undefined
    */
@@ -442,6 +405,73 @@ export interface Mark {
 
 export type StandardToolbarItem = 'clearFormatting' | 'link'
 
+/**
+ * A group of toolbar items rendered as a single button that opens a dropdown.
+ *
+ * `TItem` is the union of items the group's `items` array can contain - typically
+ * `mark:<name>` identifiers plus the field-specific standard items.
+ *
+ * @example
+ * ```ts
+ * toolbar: [
+ *   {
+ *     icon: 'typography',
+ *     tooltip: ({ __ }) => __('pruvious-dashboard', 'Formats'),
+ *     items: ['mark:bold', 'mark:italic', 'mark:underline'],
+ *   },
+ * ]
+ * ```
+ */
+export interface ToolbarGroup<TItem extends string = string> {
+  /**
+   * The icon to show for this toolbar group.
+   * Must be a valid Tabler icon name.
+   *
+   * @see https://tabler-icons.io for available icons
+   *
+   * @default 'paint'
+   *
+   * @example
+   * ```ts
+   * icon: 'typography'
+   * ```
+   */
+  icon?: keyof typeof icons
+
+  /**
+   * Text shown when hovering over the toolbar group button.
+   *
+   * You can either provide a string or a function that returns a string.
+   * The function receives an object with `_` and `__` properties to access the translation functions.
+   *
+   * Important: When using a function, only use simple anonymous functions without context binding,
+   * since the option needs to be serialized for client-side use.
+   *
+   * @default undefined
+   *
+   * @example
+   * ```ts
+   * // String (non-translatable)
+   * tooltip: 'Formats'
+   *
+   * // Function (translatable)
+   * tooltip: ({ __ }) => __('pruvious-dashboard', 'Formats')
+   * ```
+   */
+  tooltip?: string | ((context: TranslatableStringCallbackContext) => string)
+
+  /**
+   * The items to show in this toolbar group's dropdown.
+   * Can be any combination of mark identifiers (e.g. `mark:bold`) or standard toolbar items (e.g. `clearFormatting`).
+   *
+   * @example
+   * ```ts
+   * items: ['mark:bold', 'mark:italic', 'clearFormatting']
+   * ```
+   */
+  items: TItem[]
+}
+
 export interface LinksOptions {
   /**
    * Whether to allow linking to drafts (non-public routes and records).
@@ -514,32 +544,6 @@ export type RichTextFormatter = (context: {
   newText: string
   oldText: string
 }) => (Partial<DynamicBlockFieldTypes['Casted'][BlockName]> & { $key: BlockName }) | undefined
-
-// @todo richTextValidator() -> export from validators (parse HTML and validate marks)
-//       - mby validator is not needed, just parser helper fns + do the whole thing in one validator (to not parse HTML multiple times)
-// @todo editorValidator() -> export from validators (parse HTML and validate tags and marks)
-//       - use EditorEmitter.vue instead of RichTextEmitter.vue for better handling
-//       - use Editor.vue instead of RichText.vue for better handling
-// @todo editor field additional options:
-//       - rootTags?: TRootTag[] // when 'ul' or 'ol', automatically allow 'li' + special handling (document this in code comments)
-//         - TRootTag extends 'p' | 'h1' | ... | string & {} | { tag: 'p' | ...; dashboardStyle?: CSSDeclaration (like { [property | string & {}]: string }) }
-//         - generate unique id and nest dashboardStyle under that id to avoid style conflicts
-//       - rootVariants?: Record<TRootTag, Attrs>
-//       - marks?: Record<TMark, Mark & { allowedIn?: TRootTag[]; disallowedIn?: TRootTag[], dashboardStyle?: CSSDeclaration }>
-//         - only show allowed marks when hovering over a root tag
-//       - alignments?: { left: boolean | Attrs, justify: ... } | false // when boolean, it will use  { style: { textAlign: 'left' } } etc.
-//       - ui.toolbar?: ... // extend ToolbarItem with 'rootVariants' (dropdown)
-// @todo always puiSanitize when showing in data table (or just strip HTML?)
-// @todo use <EditableText /> in block components
-// @todo create ProseList.vue and ProseListItem.vue block (stub)
-//       - enable ProseList.vue in Prose.vue block
-//       - that brings more complexity for inserting and cloning blocks
-// @todo resolve allowedBlocks in RichTextEmitter.vue (from blocks root to the current field)
-//       - onEnter before/after always change tag to 'paragraph' if allowed
-//       - again, only for 'Prose' block to reduce issues with custom blocks
-// @todo try pasting content from clipboard in RichText (handle allowed line breaks, lists, marks, etc.)
-//       - again, only for 'Prose' block to reduce issues with custom blocks
-//       - try same with Editor.vue
 
 const customOptions: RichTextCustomOptions<string> = {
   allowLineBreaks: true,
