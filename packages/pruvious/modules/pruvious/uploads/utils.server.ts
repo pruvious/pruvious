@@ -1481,7 +1481,9 @@ export async function getMultipartUpload(
   const mpu = selectQuery.data?.find((upload) => upload.multipart!.key === key)
 
   if (!mpu) {
-    setResponseStatus(event, 404, httpStatusCodeMessages[404])
+    if (guarded) {
+      setResponseStatus(event, 404, httpStatusCodeMessages[404])
+    }
     return {
       success: false,
       error: __('pruvious-api', 'Resource not found'),
