@@ -115,15 +115,29 @@ export function getDOMBlock(blockPath: string): DOMBlock | null {
     return { path: blockPath, name: blockEl.dataset.blockName as BlockName, el: blockEl }
   }
 
+  const aliasEl = document.querySelector<HTMLElement>(`[data-block-path-alias="${blockPath}"]`)
+  if (aliasEl && aliasEl.dataset.blockNameAlias) {
+    return { path: blockPath, name: aliasEl.dataset.blockNameAlias as BlockName, el: aliasEl }
+  }
+
   return null
 }
 
 export function getAllDOMBlocks(): DOMBlock[] {
   const blockEls = document.querySelectorAll<HTMLElement>('[data-block-path]')
   const domBlocks: DOMBlock[] = []
+  const seenAliases = new Set<string>()
 
   blockEls.forEach((blockEl) => {
-    if (blockEl.dataset.blockName && blockEl.dataset.blockPath) {
+    const aliasPath = blockEl.dataset.blockPathAlias
+    const aliasName = blockEl.dataset.blockNameAlias
+
+    if (aliasPath && aliasName) {
+      if (!seenAliases.has(aliasPath)) {
+        seenAliases.add(aliasPath)
+        domBlocks.push({ path: aliasPath, name: aliasName as BlockName, el: blockEl })
+      }
+    } else if (blockEl.dataset.blockName && blockEl.dataset.blockPath) {
       domBlocks.push({ path: blockEl.dataset.blockPath, name: blockEl.dataset.blockName as BlockName, el: blockEl })
     }
   })
@@ -136,9 +150,18 @@ export function getAncestorDOMBlocks(target: Element | EventTarget | null): DOMB
 
   if (target instanceof HTMLElement) {
     let parent: HTMLElement | null = target
+    let pushedAlias: string | null = null
 
     while (parent && parent !== document.body) {
-      if (parent.dataset.blockPath && parent.dataset.blockName) {
+      const aliasPath = parent.dataset.blockPathAlias
+      const aliasName = parent.dataset.blockNameAlias
+
+      if (aliasPath && aliasName) {
+        if (pushedAlias !== aliasPath) {
+          domBlocks.unshift({ path: aliasPath, name: aliasName as BlockName, el: parent })
+          pushedAlias = aliasPath
+        }
+      } else if (parent.dataset.blockPath && parent.dataset.blockName) {
         domBlocks.unshift({
           path: parent.dataset.blockPath,
           name: parent.dataset.blockName as BlockName,

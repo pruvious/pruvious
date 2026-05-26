@@ -213,8 +213,6 @@ defineExpose({ textArea })
   font-size: 1em;
   line-height: 1.5;
   color: hsl(var(--pui-foreground));
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .pui-text-area-control::-webkit-scrollbar {

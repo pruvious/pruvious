@@ -4,6 +4,7 @@ import {
   filesField,
   imageField,
   imagesField,
+  linkedBlocksField,
   recordField,
   recordsField,
   repeaterField,
@@ -449,6 +450,27 @@ export default defineCollection({
       },
       ui: { label: 'Records (in repeater, populate)' },
     }),
+
+    // linkedBlocks
+    linkedBlocks: linkedBlocksField({
+      collection: 'Patterns',
+      ui: {
+        label: 'Linked blocks',
+        displayFields: ['title', 'description'],
+        searchFields: ['title', 'description'],
+        languages: 'all',
+      },
+    }),
+    linkedBlocksCascade: linkedBlocksField({
+      collection: 'Patterns',
+      foreignKey: 'cascade',
+      ui: {
+        label: 'Linked blocks (cascade)',
+        displayFields: 'title',
+        searchFields: 'title',
+        languages: 'all',
+      },
+    }),
   },
   translatable: false,
   createdAt: false,
@@ -550,6 +572,10 @@ export default defineCollection({
                 'recordsRepeaterMinMax',
                 'recordsRepeaterPopulate',
               ],
+            },
+            {
+              label: 'Linked blocks',
+              fields: ['linkedBlocks', 'linkedBlocksCascade'],
             },
           ],
         },

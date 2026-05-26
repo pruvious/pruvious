@@ -1797,9 +1797,7 @@ export type CollectionRoutingOptions<
    * ```vue
    * <template>
    *   <NuxtLayout :name="proute?.layout">
-   *     <Header />
    *     <PruviousBlocks field="blocks" />
-   *     <Footer />
    *     <PruviousWidgets />
    *   </NuxtLayout>
    * </template>

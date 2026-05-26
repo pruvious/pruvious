@@ -23,6 +23,7 @@ describe('cms', async () => {
   await import('./cms/collections/users')
   await import('./cms/collections/public')
   await import('./cms/collections/uploads')
+  await import('./cms/collections/patterns')
 
   // Uploads
   await import('./cms/uploads/create')
@@ -47,6 +48,7 @@ describe('cms', async () => {
   await import('./cms/fields/images')
   await import('./cms/fields/language-translations')
   await import('./cms/fields/link')
+  await import('./cms/fields/linkedBlocks')
   await import('./cms/fields/nullableObject')
   await import('./cms/fields/nullableSelect')
   await import('./cms/fields/nullableText')

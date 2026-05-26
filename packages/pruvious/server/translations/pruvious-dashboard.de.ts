@@ -19,6 +19,8 @@ export default defineTranslation({
   '/example/path': '/beispiel/pfad',
   'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.':
     'Eine kurze Beschreibung des Seiteninhalts, die normalerweise in den Suchergebnissen angezeigt wird. Suchmaschinen zeigen normalerweise etwa 150-160 Zeichen dieses Textes an.',
+  'A reusable group of blocks selected from the Patterns collection.':
+    'Eine wiederverwendbare Gruppe von Blöcken aus der Muster-Sammlung.',
   'A translation for language `$language` already exists': createPattern(
     'Eine Übersetzung für die Sprache `$language` existiert bereits',
     { language: 'string' },
@@ -530,6 +532,8 @@ export default defineTranslation({
   'Operation': 'Operation',
   'Optional glob pattern that overrides matches from `include`.':
     'Optionales Glob-Muster, das Treffer aus `include` überschreibt.',
+  'Optional notes that help editors understand when to use this pattern.':
+    'Optionale Hinweise, die Redakteuren helfen zu verstehen, wann dieses Muster verwendet werden soll.',
   'Ordered': 'Geordnet',
   'Ordered list': 'Nummerierte Liste',
   'Other': 'Andere',
@@ -563,6 +567,8 @@ export default defineTranslation({
     { fields: [{ conditions: [{ count: 1 }], output: 'Feld' }, 'Felder'] },
   ),
   'Path': 'Pfad',
+  'Pattern': 'Muster',
+  'Patterns': 'Muster',
   'Payload': 'Payload',
   'Pending': 'Ausstehend',
   'Predefined': 'Vordefiniert',
@@ -803,6 +809,7 @@ export default defineTranslation({
   'Time zone': 'Zeitzone',
   'Time zone used for date and time display.': 'Zeitzone, die für die Anzeige von Datum und Uhrzeit verwendet wird.',
   'Timeout (ms)': 'Zeitlimit (ms)',
+  'Title': 'Titel',
   'Title separator': 'Titel-Trennzeichen',
   'To': 'Bis',
   'Toggle menu': 'Menü umschalten',
@@ -843,6 +850,8 @@ export default defineTranslation({
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Verwenden Sie Capture-Gruppen (z.B. `(.+)`), um Teile des gematchten Pfads für die Weiterleitungs-URL zu extrahieren.',
   'Use external URL': 'Externe URL verwenden',
+  'Used to identify this pattern in the dashboard and the Pattern block picker.':
+    'Wird verwendet, um dieses Muster im Dashboard und in der Muster-Block-Auswahl zu identifizieren.',
   'User': 'Benutzer',
   'Users': 'Benutzer',
   'Utilities': 'Werkzeuge',

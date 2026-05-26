@@ -2,8 +2,8 @@
   <PruviousRichText
     :allowLineBreaks="allowLineBreaks"
     :data-field-path="fieldPath"
-    :data-is-editable="isEditable"
-    :disabled="!isEditable"
+    :data-is-editable="isLocallyEditable"
+    :disabled="!isLocallyEditable"
     :key="key"
     :links="links"
     :marks="marks"
@@ -36,7 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { blockPathInjection, proseListItemBlockPathInjection, usePruviousRoute } from '#pruvious/app'
+import {
+  blockPathInjection,
+  inLinkedBlocksInjection,
+  proseListItemBlockPathInjection,
+  usePruviousRoute,
+} from '#pruvious/app'
 import { usePreview, type PruviousClipboardData } from '#pruvious/dashboard'
 import type { BlockName } from '#pruvious/server'
 import {
@@ -154,6 +159,8 @@ const placeholder = computed(() =>
   isObject(fieldOptions.value?.ui) ? maybeTranslate(fieldOptions.value.ui.placeholder) : undefined,
 )
 const blockPath = inject(blockPathInjection)
+const inLinkedBlocks = inject(inLinkedBlocksInjection, false)
+const isLocallyEditable = computed(() => isEditable.value && !inLinkedBlocks)
 const parentBlocksFields = computed(() => (blockPath?.value ? resolveAllParentBlocksFields(blockPath.value) : []))
 const proseListItemBlockPath = inject(proseListItemBlockPathInjection, undefined)
 const listInfo = computed(() => getListInfo(proseListItemBlockPath?.value))

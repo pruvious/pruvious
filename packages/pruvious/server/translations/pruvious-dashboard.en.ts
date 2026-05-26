@@ -19,6 +19,8 @@ export default defineTranslation({
   '/example/path': '/example/path',
   'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.':
     'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.',
+  'A reusable group of blocks selected from the Patterns collection.':
+    'A reusable group of blocks selected from the Patterns collection.',
   'A translation for language `$language` already exists': createPattern(
     'A translation for language `$language` already exists',
     { language: 'string' },
@@ -528,6 +530,8 @@ export default defineTranslation({
   'Operation': 'Operation',
   'Optional glob pattern that overrides matches from `include`.':
     'Optional glob pattern that overrides matches from `include`.',
+  'Optional notes that help editors understand when to use this pattern.':
+    'Optional notes that help editors understand when to use this pattern.',
   'Ordered': 'Ordered',
   'Ordered list': 'Ordered list',
   'Other': 'Other',
@@ -561,6 +565,8 @@ export default defineTranslation({
     { fields: [{ conditions: [{ count: 1 }], output: 'field' }, 'fields'] },
   ),
   'Path': 'Path',
+  'Pattern': 'Pattern',
+  'Patterns': 'Patterns',
   'Payload': 'Payload',
   'Pending': 'Pending',
   'Predefined': 'Predefined',
@@ -796,6 +802,7 @@ export default defineTranslation({
   'Time zone': 'Time zone',
   'Time zone used for date and time display.': 'Time zone used for date and time display.',
   'Timeout (ms)': 'Timeout (ms)',
+  'Title': 'Title',
   'Title separator': 'Title separator',
   'To': 'To',
   'Toggle menu': 'Toggle menu',
@@ -836,6 +843,8 @@ export default defineTranslation({
   'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.':
     'Use capture groups (e.g. `(.+)`) to extract parts of the matched path for use in the redirect URL.',
   'Use external URL': 'Use external URL',
+  'Used to identify this pattern in the dashboard and the Pattern block picker.':
+    'Used to identify this pattern in the dashboard and the Pattern block picker.',
   'User': 'User',
   'Users': 'Users',
   'Utilities': 'Utilities',

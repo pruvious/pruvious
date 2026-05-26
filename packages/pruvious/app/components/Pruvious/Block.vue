@@ -2,13 +2,22 @@
   <component
     v-bind="dynamicProps"
     :data-block-name="dataAttrs || preview ? block.$key : undefined"
+    :data-block-name-alias="aliasName"
     :data-block-path="dataAttrs || preview ? fieldPath : undefined"
+    :data-block-path-alias="aliasPath"
     :is="component"
   />
 </template>
 
 <script lang="ts" setup>
-import { blockComponents, blockDataInjection, blockNameInjection, blockPathInjection, isPreview } from '#pruvious/app'
+import {
+  blockComponents,
+  blockDataInjection,
+  blockNameInjection,
+  blockPathInjection,
+  isPreview,
+  linkedBlocksRootInjection,
+} from '#pruvious/app'
 import type { BlockName, DynamicBlockFieldTypes } from '#pruvious/server'
 import { omit } from '@pruvious/utils'
 
@@ -73,6 +82,13 @@ const props = defineProps({
 
 const preview = isPreview()
 const component = shallowRef<Component | string>()
+const linkedBlocksRoot = inject(linkedBlocksRootInjection, undefined)
+const aliasPath = computed(() =>
+  (props.dataAttrs || preview) && linkedBlocksRoot?.value?.path ? linkedBlocksRoot.value.path : undefined,
+)
+const aliasName = computed(() =>
+  (props.dataAttrs || preview) && linkedBlocksRoot?.value?.name ? linkedBlocksRoot.value.name : undefined,
+)
 const dynamicProps = computed(() => ({
   ...omit(props.block, ['$key'] as any),
   _blockName: props.block?.$key,
