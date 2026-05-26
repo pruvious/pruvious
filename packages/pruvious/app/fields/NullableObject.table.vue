@@ -1,7 +1,20 @@
 <template>
   <div>
-    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
-      <code v-pui-tooltip="'```\n' + JSON.stringify(modelValue, null, 2) + '\n```'" class="pui-truncate">
+    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :force="!!subfieldName" :name="name">
+      <PruviousDynamicTableField
+        v-if="subfieldName && subfieldOptions"
+        :cell="cell"
+        :collection="collection"
+        :data="data"
+        :editable="editable"
+        :modelValue="modelValue?.[subfieldName] ?? null"
+        :name="`${name}.${subfieldName}`"
+        :options="subfieldOptions"
+        :refresh="refresh"
+        :type="subfieldOptions._fieldType"
+      />
+
+      <code v-else v-pui-tooltip="'```\n' + JSON.stringify(modelValue, null, 2) + '\n```'" class="pui-truncate">
         {{ stringifiedValue }}
       </code>
     </PruviousDashboardEditableFieldCell>
@@ -21,7 +34,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { Collections, SerializableCollection, SerializableFieldOptions } from '#pruvious/server'
+import type {
+  Collections,
+  GenericSerializableFieldOptions,
+  SerializableCollection,
+  SerializableFieldOptions,
+} from '#pruvious/server'
 import type { PUICell, PUIColumns } from '@pruvious/ui/pui/table'
 import { castToNumber, isString } from '@pruvious/utils'
 
@@ -66,6 +84,14 @@ const props = defineProps({
   },
 
   /**
+   * The current record data from a collection.
+   * Forwarded to the subfield's table component when `ui.dataTable.subfield` is set.
+   */
+  data: {
+    type: Object as PropType<Record<string, any>>,
+  },
+
+  /**
    * Triggers a data refresh operation by executing the callback function with the current URL query parameters.
    *
    * The operation is skipped if the URL query parameters have not changed since the last refresh.
@@ -92,6 +118,18 @@ const props = defineProps({
 const route = useRoute()
 const stringifiedValue = computed(() => (props.modelValue ? JSON.stringify(props.modelValue) : '-'))
 const isEditPopupVisible = ref(false)
+
+const subfieldName = computed(() => props.options.ui?.dataTable?.subfield)
+const subfieldOptions = computed<GenericSerializableFieldOptions | undefined>(() => {
+  const name = subfieldName.value
+  if (!name) {
+    return undefined
+  }
+  const subfields = props.options.subfields as Record<string, GenericSerializableFieldOptions> | undefined
+  return subfields?.[name]
+})
+
+provide('hideEditableFieldCellActions', true)
 
 watch(
   () => route.query,

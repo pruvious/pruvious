@@ -382,7 +382,12 @@
 
 <script lang="ts" setup>
 import { __ } from '#pruvious/app'
-import { dashboardBasePath, maybeTranslate, useSelectQueryBuilderParams } from '#pruvious/dashboard'
+import {
+  dashboardBasePath,
+  maybeTranslate,
+  resolveTableColumnLabel,
+  useSelectQueryBuilderParams,
+} from '#pruvious/dashboard'
 import { dayjsFormatDateTime, dayjsRelative } from '#pruvious/dashboard/dayjs'
 import type { CollectionUIOptions, LogsDatabase, SerializableCollection } from '#pruvious/server'
 import type { Paginated } from '@pruvious/orm'
@@ -602,10 +607,7 @@ function resolveColumns(
       props.logCollectionDefinition.createdAtField ? 4 : 5,
     )) {
       columns[fieldName] = puiColumn({
-        label:
-          'ui' in options && isDefined(options.ui?.label)
-            ? maybeTranslate(options.ui.label)
-            : __('pruvious-dashboard', titleCase(fieldName, false) as any),
+        label: resolveTableColumnLabel(fieldName, options),
         sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
         minWidth: '16rem',
       })
@@ -614,10 +616,7 @@ function resolveColumns(
     if (props.logCollectionDefinition.createdAtField) {
       const options = props.logCollectionDefinition.fields.createdAt!
       columns.createdAt = puiColumn({
-        label:
-          'ui' in options && isDefined(options.ui?.label)
-            ? maybeTranslate(options.ui.label)
-            : __('pruvious-dashboard', 'Created at'),
+        label: resolveTableColumnLabel('createdAt', options),
         sortable: 'numeric',
         minWidth: '16rem',
       })
@@ -632,10 +631,7 @@ function resolveColumns(
 
           if (options) {
             columns[field] = puiColumn({
-              label:
-                'ui' in options && isDefined(options.ui?.label)
-                  ? maybeTranslate(options.ui.label)
-                  : __('pruvious-dashboard', titleCase(field, false) as any),
+              label: resolveTableColumnLabel(field, options),
               sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
               width,
               minWidth: minWidth ?? (isUndefined(width) ? '16rem' : undefined),
@@ -652,11 +648,7 @@ function resolveColumns(
 
         if (options) {
           columns[column.field] = puiColumn({
-            label: isDefined(column.label)
-              ? maybeTranslate(column.label)
-              : 'ui' in options && isDefined(options.ui?.label)
-                ? maybeTranslate(options.ui.label)
-                : __('pruvious-dashboard', titleCase(column.field, false) as any),
+            label: resolveTableColumnLabel(column.field, options, column.label),
             sortable: options._dataType === 'text' ? 'text' : options._dataType !== 'junction' ? 'numeric' : false,
             width: column.width,
             minWidth: column.minWidth ?? (isUndefined(column.width) ? '16rem' : undefined),

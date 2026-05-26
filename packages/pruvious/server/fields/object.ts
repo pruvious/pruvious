@@ -6,6 +6,7 @@ import {
   type FieldsLayout,
   type GenericDatabase,
   type ResolveFieldUIOptions,
+  type TranslatableStringCallbackContext,
 } from '#pruvious/server'
 import {
   Field,
@@ -118,6 +119,62 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
      * ```
      */
     subfieldsLayout?: FieldsLayout<keyof TSubfields & string> | undefined
+
+    /**
+     * Controls how this field is rendered in the dashboard data table column.
+     *
+     * @default undefined
+     */
+    dataTable?: {
+      /**
+       * Name of a top-level subfield to render in the data table column.
+       * When set, the subfield's value is shown instead of the stringified object.
+       *
+       * Clicking the cell still opens the edit popup for the whole object.
+       * When unset (or pointing to a missing subfield), the full object is
+       * shown as JSON, which is the default behavior.
+       *
+       * @default undefined
+       *
+       * @example
+       * ```ts
+       * objectField({
+       *   subfields: {
+       *     title: textField({}),
+       *     description: textAreaField({}),
+       *   },
+       *   ui: {
+       *     dataTable: {
+       *       subfield: 'title',
+       *       label: ({ __ }) => __('pruvious-dashboard', 'Title'),
+       *     },
+       *   },
+       * })
+       * ```
+       */
+      subfield?: (keyof TSubfields & string) | undefined
+
+      /**
+       * Overrides the column header label in the data table.
+       * Useful when `subfield` is set, so the header reflects the subfield
+       * (e.g. `Title`) instead of the parent object field's label (e.g. `SEO`).
+       *
+       * The column-level `label` in `dataTable.columns` (if provided) takes
+       * precedence over this option.
+       *
+       * @default undefined
+       *
+       * @example
+       * ```ts
+       * // String (non-translatable)
+       * label: 'Title'
+       *
+       * // Function (translatable)
+       * label: ({ __ }) => __('pruvious-dashboard', 'Title')
+       * ```
+       */
+      label?: string | ((context: TranslatableStringCallbackContext) => string) | undefined
+    }
   }
 }
 
@@ -129,6 +186,7 @@ const customOptions: CustomOptions<Record<string, GenericField>> = {
   subfields: {},
   ui: {
     subfieldsLayout: undefined,
+    dataTable: undefined,
   },
 }
 

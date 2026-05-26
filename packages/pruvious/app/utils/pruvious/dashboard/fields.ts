@@ -122,6 +122,38 @@ export function resolveFieldLabel(label: GenericFieldUIOptions['label'], fieldNa
 }
 
 /**
+ * Resolves the column header label for a field in a dashboard data table.
+ *
+ * The priority is:
+ *
+ * 1. The column-level `label` (when explicitly set on the column entry).
+ * 2. The field's `ui.dataTable.label` (data-table-specific override; currently
+ *    supported on `object` and `nullableObject` fields).
+ * 3. The field's `ui.label`.
+ * 4. The field name converted to Title Case as the fallback.
+ */
+export function resolveTableColumnLabel(
+  fieldName: string,
+  fieldOptions: GenericSerializableFieldOptions | undefined,
+  columnLabel?: GenericFieldUIOptions['label'],
+): string {
+  if (isDefined(columnLabel)) {
+    return maybeTranslate(columnLabel)
+  }
+
+  const ui = fieldOptions?.ui as
+    | (GenericFieldUIOptions & { dataTable?: { label?: GenericFieldUIOptions['label'] } })
+    | undefined
+  const dataTableLabel = isObject(ui?.dataTable) ? ui.dataTable.label : undefined
+
+  if (isDefined(dataTableLabel)) {
+    return maybeTranslate(dataTableLabel)
+  }
+
+  return resolveFieldLabel(ui?.label, fieldName)
+}
+
+/**
  * Processes and converts the `ui.description` field option into a formatted HTML string.
  */
 export function resolveFieldDescription(

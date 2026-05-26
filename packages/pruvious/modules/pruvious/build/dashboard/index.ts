@@ -162,13 +162,13 @@ function getReExports() {
     `export { serializeTranslatableStringCallbacks } from '${resolvePruviousFile('translations/utils.shared')}'`,
 
     // Uploads
-    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath, resolveThumbnailPath } from '${resolvePruviousFile('uploads/utils.client')}'`,
+    `export { type PruviousFile, type UseUploadResult, useUploadSpeed, upload, useUpload, createUploadDirectory, moveUpload, updateUpload, deleteUpload, uploadExists, splitFileIntoChunks, resolveUploadPath, resolveThumbnailPath, resolveImageVariantPath } from '${resolvePruviousFile('uploads/utils.client')}'`,
     `export { type OptimizableImageType, mediaCategories, displayableImageTypes, optimizableImageTypes, playableVideoTypes } from '${resolvePruviousFile('uploads/utils.shared')}'`,
 
     // Various dashboard utils
     `export { dashboardBasePath } from './base'`,
     `export { type PruviousClipboardData, usePruviousClipboardData, usePruviousClipboard, isClipboardSkippedField, buildClipboardFieldValues, applyClipboardFieldValues } from '${resolvePruviousUtilsFile('dashboard/clipboard')}'`,
-    `export { type WhereField, type FilterOperator, useSanitizedFieldValueLabels, filterOperatorsMap, resolveFieldLabel, resolveFieldDescription, getValidFilterOperators } from '${resolvePruviousUtilsFile('dashboard/fields')}'`,
+    `export { type WhereField, type FilterOperator, useSanitizedFieldValueLabels, filterOperatorsMap, resolveFieldLabel, resolveTableColumnLabel, resolveFieldDescription, getValidFilterOperators } from '${resolvePruviousUtilsFile('dashboard/fields')}'`,
     `export { type HistoryOptions, unsavedChanges, History } from '${resolvePruviousUtilsFile('dashboard/history')}'`,
     `export { usePruviousHMR } from '${resolvePruviousUtilsFile('dashboard/hmr')}'`,
     `export { maybeTranslate } from '${resolvePruviousUtilsFile('dashboard/i18n')}'`,
