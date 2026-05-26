@@ -120,7 +120,36 @@
           </div>
 
           <div class="p-lp-panel-middle-footer">
+            <div v-if="blockBreadcrumbs.length" class="p-lp-block-breadcrumbs">
+              <template v-for="(item, index) in blockBreadcrumbs" :key="item.path">
+                <span v-if="index > 0" class="p-lp-block-breadcrumb-separator pui-shrink-0">/</span>
+                <span
+                  v-if="index === blockBreadcrumbs.length - 1"
+                  :title="item.label"
+                  class="p-lp-block-breadcrumb p-lp-block-breadcrumb-active pui-truncate"
+                >
+                  {{ item.label }}
+                </span>
+                <button
+                  v-else
+                  :title="item.label"
+                  @click="selectBlockByPath(item.path)"
+                  type="button"
+                  class="p-lp-block-breadcrumb pui-raw pui-truncate"
+                >
+                  {{ item.label }}
+                </button>
+              </template>
+            </div>
+
             <div class="pui-row pui-ml-auto">
+              <span
+                v-if="iframeWidth && iframeHeight"
+                v-pui-tooltip="__('pruvious-dashboard', 'Dimensions')"
+                class="p-lp-iframe-dimensions"
+              >
+                {{ Math.round(iframeWidth) }} &times; {{ Math.round(iframeHeight) }}
+              </span>
               <Teleport :disabled="!footerBeforeSlot || width > 1024" :to="footerBeforeSlot">
                 <PUIButton
                   v-pui-tooltip="__('pruvious-dashboard', 'Reload')"
@@ -499,6 +528,7 @@ const activeTab = ref<1 | 2 | 3>(
       : 2,
 )
 const livePanelSize = useElementSize(livePanel)
+const { width: iframeWidth, height: iframeHeight } = useElementSize(iframe)
 const leftPanelMaxWidth = computed(() =>
   Math.max(320, state.value.leftPanelWidth + (livePanelSize.width.value || 320) - 320),
 )
@@ -526,12 +556,12 @@ const selectedBlockFieldErrors = computed(() =>
       )
     : {},
 )
-const selectedBlockIcon = computed(() => {
-  const block = dashboard.value!.blocks[selectedBlocks.value[0]!.source.$key]
+function resolveBlockIcon(source: ExtendedBlockValue) {
+  const block = dashboard.value!.blocks[source.$key]
   if (isString(block?.ui.icon)) {
     return block.ui.icon
   } else if (isObject(block?.ui.icon)) {
-    const fieldValue = getProperty(props.data, `${selectedBlocks.value[0]!.source.$path}.${block.ui.icon.fieldName}`)
+    const fieldValue = getProperty(props.data, `${source.$path}.${block.ui.icon.fieldName}`)
     if (isString(fieldValue) && block.ui.icon.iconMap[fieldValue]) {
       return block.ui.icon.iconMap[fieldValue]
     } else if (block.ui.icon.defaultIcon) {
@@ -539,6 +569,30 @@ const selectedBlockIcon = computed(() => {
     }
   }
   return 'cube'
+}
+
+function resolveBlockLabel(source: ExtendedBlockValue) {
+  const block = dashboard.value!.blocks[source.$key]
+  return block && isDefined(block.ui.label)
+    ? maybeTranslate(block.ui.label)
+    : __('pruvious-dashboard', titleCase(source.$key, false) as any)
+}
+
+const selectedBlockIcon = computed(() => resolveBlockIcon(selectedBlocks.value[0]!.source))
+
+const blockBreadcrumbs = computed(() => {
+  if (selectedBlocks.value.length !== 1) {
+    return []
+  }
+  const chain: { path: string; label: string }[] = []
+  let current: ExtendedBlockValue | null = selectedBlocks.value[0]!.source
+  while (current) {
+    if (!current.$virtualSlotName) {
+      chain.unshift({ path: current.$path, label: resolveBlockLabel(current) })
+    }
+    current = current.$parent
+  }
+  return chain
 })
 const routeReferences = getRouteReferences()
 const populatedDataCache: Record<string, any> = {}
@@ -971,6 +1025,15 @@ const onIframeSelectionDebounced = useDebounceFn((blockPath: string | null, refr
     }
   }
 }, 50)
+
+function selectBlockByPath(path: string) {
+  const { block, treeRef } = getBlockTreeItemByPath(path)
+  if (block) {
+    selectedBlocks.value = [block]
+    updateFocusedBlocksInPreview([block])
+    nextTick(() => treeRef.scrollToSelection('smooth'))
+  }
+}
 </script>
 
 <style scoped>
@@ -1097,6 +1160,64 @@ const onIframeSelectionDebounced = useDebounceFn((blockPath: string | null, refr
   gap: 0.5rem;
   padding: 0.75rem;
   border-top-width: 1px;
+}
+
+.p-lp-panel-middle-footer {
+  align-items: center;
+}
+
+.p-lp-block-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.p-lp-block-breadcrumb {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.p-lp-block-breadcrumb-active {
+  flex-shrink: 0;
+  max-width: 50%;
+  cursor: default;
+}
+
+.p-lp-block-breadcrumb:not(.p-lp-block-breadcrumb-active) {
+  color: hsl(var(--pui-muted-foreground));
+}
+
+.p-lp-block-breadcrumb:not(.p-lp-block-breadcrumb-active):hover,
+.p-lp-block-breadcrumb:not(.p-lp-block-breadcrumb-active):focus-visible {
+  color: hsl(var(--pui-foreground));
+}
+
+.p-lp-block-breadcrumb-separator {
+  color: hsl(var(--pui-muted-foreground));
+}
+
+.p-lp-iframe-dimensions {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.25rem;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--pui-muted-foreground));
+  white-space: nowrap;
 }
 
 .p-lp-panel-right-footer :deep(.p-history-buttons),
