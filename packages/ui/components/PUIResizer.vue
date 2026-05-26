@@ -105,6 +105,7 @@ function handler(event: MouseEvent | TouchEvent) {
   }
 
   isActive.value = true
+  document.body.classList.add('pui-resizing')
 
   let prev = direction === 'horizontal' ? clientX : clientY
   let multiplier = 1
@@ -138,6 +139,7 @@ function handler(event: MouseEvent | TouchEvent) {
 function stopDragging() {
   dragEventListeners.forEach((stop) => stop())
   isActive.value = false
+  document.body.classList.remove('pui-resizing')
   clearArray(dragEventListeners)
   emit('commit', tmp)
 }
@@ -149,6 +151,14 @@ function stopDragging() {
   z-index: var(--pui-z, 1);
   background-color: transparent;
   font-size: calc(1rem + var(--pui-size) * 0.125rem);
+}
+
+body.pui-resizing {
+  user-select: none;
+}
+
+body.pui-resizing iframe {
+  pointer-events: none;
 }
 
 .pui-resizer-top,
