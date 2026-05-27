@@ -169,6 +169,7 @@ function getReExports() {
     `export { useDragImageLabel, useIsMoving, startMoving, stopMoving } from '${resolvePruviousUtilsFile('dashboard/move')}'`,
     `export { useLoginPopup } from '${resolvePruviousUtilsFile('dashboard/login')}'`,
     `export { type DashboardMenuItem, type OrderedDashboardMenuItem, useDashboardMenuExpanded, prepareDashboardMenu } from '${resolvePruviousUtilsFile('dashboard/menu')}'`,
+    `export { type UseOverviewSearch, useOverviewSearch } from '${resolvePruviousUtilsFile('dashboard/overview-search')}'`,
     `export { type ResolvedCollectionRecordPermissions, type ResolvedTranslatableCollectionRecordPermissions, type CollectionRecordPermissionsResolver, resolveCollectionRecordPermissions, resolveTranslatableCollectionRecordPermissions, useCollectionRecordPermissions } from '${resolvePruviousUtilsFile('dashboard/permissions')}'`,
     `export { getCollectionBySlug, getSingletonBySlug } from '${resolvePruviousUtilsFile('dashboard/slugs')}'`,
     `export { type DashboardUploadNotification, type DashboardUploadNotificationWidget, usePruviousDashboardUploadNotifications, usePruviousDashboardUploadNotificationsWidget } from '${resolvePruviousUtilsFile('dashboard/upload-notifications')}'`,
