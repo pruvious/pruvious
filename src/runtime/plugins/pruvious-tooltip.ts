@@ -13,7 +13,7 @@ type TooltipDirective = Directive<CustomElement, Partial<Props> | string>
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.directive('pruvious-tooltip', <TooltipDirective>{
     mounted: (el, binding: DirectiveBinding<Partial<Props> | string>) => {
-      initTooltip(el, binding)
+      initTooltip(el, binding, isObject(binding.value) && binding.value.showOnCreate, !!binding.modifiers.highlightApostrophes)
     },
     updated: (el, binding) => {
       if (JSON.stringify(binding.value) !== el._pruviousTooltipSettings) {
@@ -21,8 +21,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         initTooltip(
           el,
           binding,
-          !!binding.modifiers['show-on-update'] || (isObject(binding.value) && binding.value.showOnCreate),
-          !!binding.modifiers['highlight-apostrophes'],
+          !!binding.modifiers.showOnUpdate || (isObject(binding.value) && binding.value.showOnCreate),
+          !!binding.modifiers.highlightApostrophes,
         )
       }
     },
@@ -62,10 +62,6 @@ function initTooltip(
     )
 
   if (highlightApostrophes) {
-    content = content.replace(/'(.*?)'/g, '<strong class="text-primary-200">$1</strong>')
-  }
-
-  if (binding.modifiers['highlight-apostrophes']) {
     content = content.replace(/'(.*?)'/g, '<strong class="text-primary-200">$1</strong>')
   }
 

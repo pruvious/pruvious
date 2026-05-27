@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import { dirname, resolve, sep } from 'path'
 import { compileScript, parse, walkIdentifiers } from 'vue/compiler-sfc'
 import { queueError } from '../instances/logger'
-import { resolveAppPath } from '../instances/path'
+import { resolveAppPath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { uniqueArray } from '../utils/array'
 import { CodeGenerator } from '../utils/code-generator'
@@ -28,22 +28,28 @@ export async function resolveLayouts(): Promise<{
   errors: number
 }> {
   const records: Record<string, ResolvedLayout> = {}
-  const fromApp = resolveAppPath('./layouts')
 
   let errors = 0
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath, relativePath } of walkDir(fromApp, { endsWith: '.vue' })) {
-      errors += await resolveLayout(fullPath, relativePath, records)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('layouts')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath, relativePath } of walkDir(fromApp, { endsWith: '.vue' })) {
+        errors += await resolveLayout(fullPath, relativePath, records, !firstDir)
+      }
+      firstDir = false
     }
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'layouts'))) {
-      for (const { fullPath, relativePath } of walkDir(resolve(layer, 'layouts'), {
-        endsWith: '.vue',
-      })) {
-        errors += await resolveLayout(fullPath, relativePath, records, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'layouts')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath, relativePath } of walkDir(dir, {
+          endsWith: '.vue',
+        })) {
+          errors += await resolveLayout(fullPath, relativePath, records, true)
+        }
       }
     }
   }

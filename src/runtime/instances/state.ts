@@ -26,7 +26,7 @@ type OptionName = Pick<
   | 'uploads'
 > & {
   baseUrl: string
-  layers: string[]
+  layers: { root: string; src: string }[]
   uploadsDir: string
 }
 
@@ -101,7 +101,7 @@ export function cacheModuleOptions(runtimeConfig: RuntimeConfig) {
   }
 }
 
-export function cacheLayerPaths(layers: string[]) {
+export function cacheLayerPaths(layers: { root: string; src: string }[]) {
   moduleOptions.layers = layers
 }
 

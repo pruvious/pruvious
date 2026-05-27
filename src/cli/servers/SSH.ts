@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid'
 import { NodeSSH } from 'node-ssh'
 import path from 'path'
 import pgConnectionString from 'pg-connection-string'
-import tar from 'tar'
+import * as tar from 'tar'
 import { parse } from '../bytes.js'
 import type { PruviousServer, PruviousSite } from '../config/define'
 import { execaOptions } from '../default.js'
@@ -257,7 +257,7 @@ export class SSH {
       stdout: 'pipe',
     })
     fs.removeSync('site.tar.gz')
-    tar.c(
+    await tar.c(
       { gzip: true, file: 'site.tar.gz' },
       filesOut.stdout.split('\n').filter((v) => v && fs.existsSync(v)),
     )

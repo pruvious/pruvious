@@ -44,7 +44,7 @@ const visible = ref(false)
 
 await loadTranslatableStrings('pruvious-dashboard')
 
-if (process.client) {
+if (import.meta.client) {
   visible.value = window.top !== window.self
 
   if (visible.value) {

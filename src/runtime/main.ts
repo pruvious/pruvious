@@ -16,7 +16,7 @@ import { generateIcons } from './icons/icon.generator'
 import { rebuildDatabase } from './instances/database'
 import { clearAppEvalCache, clearEvalCache } from './instances/evaluator'
 import { applyFormats, clearLogQueue, error, info, logger, processLogQueue, success } from './instances/logger'
-import { resolveAppPath, resolveModulePath } from './instances/path'
+import { resolveAppPath, resolveModulePath, resolvePreferredUserDir } from './instances/path'
 import { bootingFinished, getModuleOption } from './instances/state'
 import { generateJobs } from './jobs/job.generator'
 import { clearCachedJob, resolveJobs } from './jobs/job.resolver'
@@ -434,9 +434,9 @@ export function validateLanguageOptions() {
  * Create the `blocks` and `icons` directory in the Nuxt app if absent.
  */
 export function createComponentDirectories() {
-  fs.ensureDirSync(resolveAppPath('./blocks'))
+  fs.ensureDirSync(resolvePreferredUserDir('blocks'))
 
   if (getModuleOption('standardFields').icon) {
-    fs.ensureDirSync(resolveAppPath('./icons'))
+    fs.ensureDirSync(resolvePreferredUserDir('icons'))
   }
 }
