@@ -114,6 +114,9 @@ export default defineCommand({
         Object.entries(packageJson.dependencies).sort(([a], [b]) => a.localeCompare(b)),
       )
 
+      // Pin the package manager so corepack uses a pnpm version that understands `pnpm-workspace.yaml` settings
+      packageJson.packageManager = 'pnpm@11.1.3'
+
       fs.writeJsonSync(join(template.dir, 'package.json'), packageJson, { spaces: 2 })
     } catch (err) {
       if (process.env.DEBUG) {
