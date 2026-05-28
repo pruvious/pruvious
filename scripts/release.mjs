@@ -210,7 +210,10 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
 
-    if (arg === '--alpha') {
+    if (arg === '--') {
+      // pnpm forwards the `--` separator to the script; ignore it.
+      continue
+    } else if (arg === '--alpha') {
       result.preid = 'alpha'
     } else if (arg === '--no-bump') {
       result.noBump = true
