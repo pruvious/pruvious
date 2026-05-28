@@ -31,7 +31,7 @@
     "@pruvious/utils": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "unbuild": "3.6.1"
   }
 }

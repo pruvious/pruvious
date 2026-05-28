@@ -28,17 +28,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1024.0",
+    "@aws-sdk/client-s3": "3.1056.0",
     "@pruvious/utils": "workspace:*",
     "mime": "4.1.0",
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260405.1",
-    "@types/node": "25.5.2",
+    "@cloudflare/workers-types": "4.20260528.1",
+    "@types/node": "25.9.1",
     "get-port-please": "3.2.0",
-    "miniflare": "4.20260401.0",
-    "typescript": "6.0.2",
+    "miniflare": "4.20260526.0",
+    "typescript": "6.0.3",
     "unbuild": "3.6.1"
   }
 }

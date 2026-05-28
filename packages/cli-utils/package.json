@@ -31,13 +31,13 @@
     "@clack/prompts": "1.0.0-alpha.9",
     "consola": "3.4.2",
     "pathe": "2.0.3",
-    "semver": "7.7.4"
+    "semver": "7.8.1"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
+    "@types/node": "25.9.1",
     "@types/semver": "7.7.1",
     "citty": "0.2.2",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "unbuild": "3.6.1"
   }
 }

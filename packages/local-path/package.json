@@ -29,10 +29,10 @@
     "@pruvious/orm": "workspace:*",
     "@pruvious/plugin": "workspace:*",
     "@pruvious/utils": "workspace:*",
-    "nuxt": "4.4.2",
+    "nuxt": "4.4.6",
     "pruvious": "workspace:*",
-    "typescript": "6.0.2",
-    "vue-tsc": "3.2.6",
-    "vue": "3.5.32"
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.2",
+    "vue": "3.5.35"
   }
 }

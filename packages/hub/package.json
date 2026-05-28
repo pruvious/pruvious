@@ -28,12 +28,12 @@
     "execa": "9.6.1",
     "get-port-please": "3.2.0",
     "mlly": "1.8.2",
-    "nypm": "0.6.5",
+    "nypm": "0.6.6",
     "pathe": "2.0.3"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
-    "typescript": "6.0.2",
+    "@types/node": "25.9.1",
+    "typescript": "6.0.3",
     "unbuild": "3.6.1"
   }
 }

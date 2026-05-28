@@ -22,12 +22,12 @@
     "typecheck": "pnpm dev:prepare && nuxt typecheck"
   },
   "dependencies": {
-    "@iconify-json/tabler": "1.2.33",
+    "@iconify-json/tabler": "1.2.35",
     "@pruvious/local-path": "workspace:*",
-    "nuxt": "4.4.2",
+    "nuxt": "4.4.6",
     "pruvious": "workspace:*",
-    "vue": "3.5.32",
-    "vue-router": "5.0.4"
+    "vue": "3.5.35",
+    "vue-router": "5.1.0"
   },
   "devDependencies": {
     "@pruvious/cli-utils": "workspace:*",
