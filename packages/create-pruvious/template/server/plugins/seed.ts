@@ -43,6 +43,7 @@ async function seedHomepage(): Promise<void> {
       language: primaryLanguage,
       subpath: '',
       isPublic: true,
+      seo: { title: 'Homepage' },
       blocks: [
         {
           $key: 'Prose',
