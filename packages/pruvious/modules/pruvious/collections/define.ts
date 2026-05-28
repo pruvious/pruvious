@@ -1691,6 +1691,9 @@ export type CollectionRoutingOptions<
    * - An array mixing field names and literal strings, concatenated into one string.
    *   Field-name segments resolve to the record's value; any other string is used verbatim.
    *
+   * Field-name segments may use dot notation to reach into an object field's value
+   * (e.g. `'seo.title'`); the segment's root must be a field of the collection.
+   *
    * When the resolved label is empty, the picker falls back to `#<id>`.
    *
    * @default 'subpath'
@@ -1698,6 +1701,7 @@ export type CollectionRoutingOptions<
    * @example
    * 'title'
    * ['firstName', ' ', 'lastName']
+   * ['seo.title']
    */
   labelField?: TFieldNames | (TFieldNames | (string & {}))[]
 

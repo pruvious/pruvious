@@ -1,5 +1,6 @@
 import { collections, database, type Collections } from '#pruvious/server'
 import {
+  getProperty,
   isArray,
   isDefined,
   isNull,
@@ -85,9 +86,13 @@ export function labelSegments(labelField: string | string[]): string[] {
   return isArray(labelField) ? labelField : [labelField]
 }
 
-/** A segment is a field name when it is `id` or a key of the field map. */
+/**
+ * A segment is a field reference when its root (the part before the first dot) is `id` or a key of
+ * the field map. Dotted segments like `seo.title` reach into the value of an object field.
+ */
 export function isFieldSegment(fields: Record<string, any>, segment: string): boolean {
-  return segment === 'id' || segment in fields
+  const root = segment.split('.', 1)[0]!
+  return root === 'id' || root in fields
 }
 
 /** Resolves a `labelField` against a record into a display string. */
@@ -101,16 +106,22 @@ export function resolveRecordLabel(
       if (!isFieldSegment(fields, segment)) {
         return segment
       }
-      const value = record[segment]
+      const value = getProperty(record, segment)
       return isNull(value) || isUndefined(value) ? '' : String(value)
     })
     .join('')
     .trim()
 }
 
-/** The field-name segments of a `labelField` that must be selected to resolve the label. */
+/** The top-level field columns that must be selected to resolve the label. */
 export function labelSelectFields(fields: Record<string, any>, labelField: string | string[]): string[] {
-  return [...new Set(labelSegments(labelField).filter((segment) => isFieldSegment(fields, segment)))]
+  return [
+    ...new Set(
+      labelSegments(labelField)
+        .filter((segment) => isFieldSegment(fields, segment))
+        .map((segment) => segment.split('.', 1)[0]!),
+    ),
+  ]
 }
 
 /**

@@ -8,6 +8,7 @@ export default defineTemplate(() => ({
   },
   routing: {
     publicFields: ['blocks', 'seo', 'createdAt', 'updatedAt'],
+    labelField: ['seo.title'],
     subpath: { allowEmptyString: true },
     isPublic: true,
     scheduledAt: true,
