@@ -148,16 +148,18 @@ async function seedHomepage(): Promise<void> {
     return
   }
 
-  // `pathEN` / `isPublicEN` are the per-language columns of the `Routes`
-  // collection for the primary language (`en` by default). Adjust the `EN`
-  // suffix if you change `pruvious.i18n.primaryLanguage`.
+  // `Routes` stores one set of columns per language, each suffixed with the
+  // uppercased, hyphen-stripped language code (e.g. `pathEN`, `pathDEAT`).
+  // Deriving the suffix from `primaryLanguage` keeps this seed aligned with the
+  // configured `pruvious.i18n` languages instead of assuming English.
+  const suffix = primaryLanguage.toUpperCase().replace(/-/g, '')
   const insertRoute = queryBuilder.insertInto('Routes')
   insertRoute.parseConditionalLogic = parseConditionalLogic
 
   await insertRoute
     .values({
-      pathEN: '/',
-      isPublicEN: true,
+      [`path${suffix}`]: '/',
+      [`isPublic${suffix}`]: true,
       referencedCollections: ['Pages'],
     })
     .run()

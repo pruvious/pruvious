@@ -17,11 +17,18 @@ import { installDependencies } from 'nypm'
 import { basename, relative } from 'pathe'
 import packageJSON from '../package.json' with { type: 'json' }
 import { detectPackageManager, installCommand, runScriptCommand, type PackageManagerName } from './utils/pm'
-import { copyTemplate, patchPackageJSON, toPackageName } from './utils/template'
+import { copyTemplate, patchNuxtConfig, patchPackageJSON, toPackageName } from './utils/template'
 
 const pkgPrNewBase = 'https://pkg.pr.new/pruvious/pruvious/pruvious'
 const templateDir = fileURLToPath(new URL('../template', import.meta.url))
 const pnpmVersion = '11.4.0'
+
+/**
+ * BCP-47 subset accepted by Pruvious for language codes: a lowercase 2-3 letter
+ * base, an optional Title-case script subtag, and an optional UPPERCASE region or
+ * 3-digit M.49 code (e.g. `en`, `de-AT`, `zh-Hant`, `es-419`).
+ */
+const languageCodePattern = /^[a-z]{2,3}(-[A-Z][a-z]{3})?(-([A-Z]{2}|\d{3}))?$/
 
 const main = defineCommand({
   meta: {
@@ -47,6 +54,12 @@ const main = defineCommand({
       type: 'string',
       description: 'Package manager to use (npm, pnpm, yarn, bun).',
       valueHint: 'name',
+      default: '',
+    },
+    lang: {
+      type: 'string',
+      description: 'Default language code for the site (BCP-47, e.g. en, de, de-AT).',
+      valueHint: 'code',
       default: '',
     },
     install: {
@@ -77,6 +90,7 @@ const main = defineCommand({
     const projectName = toPackageName(basename(targetDir))
     const pruviousSpec = resolvePruviousSpec(ctx.args.pruvious)
     const packageManager = await resolvePackageManager(ctx.args.pm)
+    const language = await resolveLanguage(ctx.args.lang)
 
     let install = ctx.args.install
     if (install && process.stdin.isTTY) {
@@ -97,6 +111,7 @@ const main = defineCommand({
       pruviousSpec,
       packageManager === 'pnpm' ? `pnpm@${pnpmVersion}` : undefined,
     )
+    patchNuxtConfig(targetDir, language)
     scaffoldSpinner.stop('Project scaffolded.')
 
     if (git) {
@@ -250,6 +265,55 @@ async function resolvePackageManager(flag: string): Promise<PackageManagerName> 
       })),
     }),
   )
+}
+
+/**
+ * Resolves the site's default language as a `{ code, name }` pair from the
+ * explicit flag or an interactive prompt (placeholder `en`). The display name is
+ * derived from the code so the scaffolded `pruvious.i18n.languages` entry ships a
+ * readable label.
+ */
+async function resolveLanguage(flag: string): Promise<{ code: string; name: string }> {
+  if (flag && languageCodePattern.test(flag)) {
+    return { code: flag, name: languageName(flag) }
+  }
+
+  if (!process.stdin.isTTY) {
+    return { code: 'en', name: languageName('en') }
+  }
+
+  const code =
+    guard(
+      await text({
+        message: 'What is the default language for your site?',
+        placeholder: 'en',
+        defaultValue: 'en',
+        validate: (value) => {
+          if (value && !languageCodePattern.test(value)) {
+            return 'Use a BCP-47 code such as en, de, de-AT, or zh-Hant.'
+          }
+        },
+      }),
+    ) || 'en'
+
+  return { code, name: languageName(code) }
+}
+
+/**
+ * Derives a human-readable language name from a BCP-47 code in its native form
+ * (e.g. `de` -> `Deutsch`), capitalizing the first letter. Falls back to the raw
+ * code when the runtime cannot resolve a display name.
+ */
+function languageName(code: string): string {
+  try {
+    const display = new Intl.DisplayNames([code], { type: 'language' }).of(code)
+
+    if (display && display.toLowerCase() !== code.toLowerCase()) {
+      return display.charAt(0).toUpperCase() + display.slice(1)
+    }
+  } catch {}
+
+  return code
 }
 
 /**

@@ -54,6 +54,28 @@ export function patchPackageJSON(
 }
 
 /**
+ * Activates the commented-out `pruvious` block in the scaffolded
+ * `nuxt.config.ts` with an `i18n.languages` entry for the chosen default
+ * language, so a fresh project starts in that language and the seeded homepage
+ * and route follow it.
+ */
+export function patchNuxtConfig(targetDir: string, language: { code: string; name: string }): void {
+  const path = join(targetDir, 'nuxt.config.ts')
+  const source = fs.readFileSync(path, 'utf-8')
+
+  const block = [
+    '  pruvious: {',
+    '    i18n: {',
+    '      // The first language is the primary one. Add more entries to support extra locales.',
+    `      languages: [{ name: '${language.name}', code: '${language.code}' }],`,
+    '    },',
+    '  },',
+  ].join('\n')
+
+  fs.writeFileSync(path, source.replace('  // pruvious: {},', block))
+}
+
+/**
  * Converts arbitrary input into a valid npm package name, falling back to
  * `pruvious-app` when the result would be empty.
  */
