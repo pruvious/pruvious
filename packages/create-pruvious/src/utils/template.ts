@@ -77,6 +77,29 @@ export function patchNuxtConfig(targetDir: string, language: { code: string; nam
 }
 
 /**
+ * pnpm (v10+) refuses to run a dependency's build scripts unless approved, and
+ * fails the whole install when any are left unaddressed. Pruvious needs
+ * `better-sqlite3` and `sharp` built (they ship native binaries), so they are
+ * allow-listed here; `strictDepBuilds: false` keeps the install from failing
+ * over the remaining build scripts (esbuild and friends), which run fine without
+ * being built. These settings live in `pnpm-workspace.yaml` because pnpm no
+ * longer reads them from `package.json`.
+ */
+export function writePnpmWorkspace(targetDir: string): void {
+  const content = [
+    '# pnpm blocks dependency build scripts by default. Allow the native ones',
+    '# Pruvious needs, and let the rest stay unbuilt without failing the install.',
+    'strictDepBuilds: false',
+    'allowBuilds:',
+    '  better-sqlite3: true',
+    '  sharp: true',
+    '',
+  ].join('\n')
+
+  fs.writeFileSync(join(targetDir, 'pnpm-workspace.yaml'), content)
+}
+
+/**
  * Converts arbitrary input into a valid npm package name, falling back to
  * `pruvious-app` when the result would be empty.
  */

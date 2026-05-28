@@ -17,7 +17,7 @@ import { installDependencies } from 'nypm'
 import { basename, relative } from 'pathe'
 import packageJSON from '../package.json' with { type: 'json' }
 import { detectPackageManager, installCommand, runScriptCommand, type PackageManagerName } from './utils/pm'
-import { copyTemplate, patchNuxtConfig, patchPackageJSON, toPackageName } from './utils/template'
+import { copyTemplate, patchNuxtConfig, patchPackageJSON, toPackageName, writePnpmWorkspace } from './utils/template'
 
 const pkgPrNewBase = 'https://pkg.pr.new/pruvious/pruvious/pruvious'
 const templateDir = fileURLToPath(new URL('../template', import.meta.url))
@@ -112,6 +112,9 @@ const main = defineCommand({
       packageManager === 'pnpm' ? `pnpm@${pnpmVersion}` : undefined,
     )
     patchNuxtConfig(targetDir, language)
+    if (packageManager === 'pnpm') {
+      writePnpmWorkspace(targetDir)
+    }
     scaffoldSpinner.stop('Project scaffolded.')
 
     if (git) {
