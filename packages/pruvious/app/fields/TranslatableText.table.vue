@@ -1,14 +1,24 @@
 <template>
   <div>
-    <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name" editButtonPosition="auto" wrap>
-      <PUIBadge
-        v-for="{ code } of languages"
-        v-pui-tooltip="modelValue?.[code]"
-        :textColor="modelValue?.[code] ? undefined : 'inherit'"
-        color="secondary"
-      >
-        {{ formatLanguageCode(code) }}
-      </PUIBadge>
+    <PruviousDashboardEditableFieldCell
+      :cell="cell"
+      :editable="editable"
+      :editButtonPosition="isSingleLanguage ? 'relative' : 'auto'"
+      :name="name"
+      :wrap="!isSingleLanguage"
+    >
+      <span v-if="isSingleLanguage" :title="singleValue" class="pui-truncate">{{ singleValue || '-' }}</span>
+
+      <template v-else>
+        <PUIBadge
+          v-for="{ code } of languages"
+          v-pui-tooltip="modelValue?.[code]"
+          :textColor="modelValue?.[code] ? undefined : 'inherit'"
+          color="secondary"
+        >
+          {{ formatLanguageCode(code) }}
+        </PUIBadge>
+      </template>
     </PruviousDashboardEditableFieldCell>
 
     <PruviousDashboardEditTableFieldPopup
@@ -97,6 +107,10 @@ const props = defineProps({
 
 const route = useRoute()
 const isEditPopupVisible = ref(false)
+
+const isSingleLanguage = (languages.length as number) === 1
+const singleLanguageCode = languages[0].code
+const singleValue = computed(() => props.modelValue?.[singleLanguageCode] ?? '')
 
 watch(
   () => route.query,

@@ -1,6 +1,27 @@
 <template>
   <PUIField v-if="!options.ui.hidden">
-    <PUICard :class="{ 'p-object-has-error': objectErrors }">
+    <PruviousFieldLabel
+      v-if="isSingleLanguage"
+      :id="`${id}--${singleLanguageCode}`"
+      :name="name"
+      :options="options"
+      :synced="synced"
+      :translatable="translatable"
+    />
+
+    <PUITextArea
+      v-if="isSingleLanguage"
+      :disabled="disabled"
+      :error="!!singleError"
+      :id="`${id}--${singleLanguageCode}`"
+      :modelValue="modelValue[singleLanguageCode] || ''"
+      :name="`${path}--${singleLanguageCode}`"
+      :placeholder="placeholder"
+      @blur="(_, value) => $emit('commit', { ...modelValue, [singleLanguageCode]: value })"
+      @update:modelValue="$emit('update:modelValue', { ...modelValue, [singleLanguageCode]: $event })"
+    />
+
+    <PUICard v-else :class="{ 'p-object-has-error': objectErrors }">
       <template v-if="label" #header>
         <span class="pui-block pui-medium pui-truncate">{{ label }}</span>
       </template>
@@ -33,7 +54,7 @@
       </PUIField>
     </PUICard>
 
-    <PruviousFieldMessage :error="objectErrors" :name="name" :options="options" />
+    <PruviousFieldMessage :error="isSingleLanguage ? singleError : objectErrors" :name="name" :options="options" />
   </PUIField>
 </template>
 
@@ -126,6 +147,10 @@ const objectErrors = computed(() => (isObject(props.error) ? props.error[props.n
 const subfieldErrors = computed<Record<string, string | string[] | undefined> | undefined>(() =>
   isObject(props.error) ? omit(props.error, [props.name] as any) : undefined,
 )
+
+const isSingleLanguage = (languages.length as number) === 1
+const singleLanguageCode = languages[0].code
+const singleError = computed(() => subfieldErrors.value?.[singleLanguageCode] ?? objectErrors.value)
 
 watch(
   () => props.modelValue,

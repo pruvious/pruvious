@@ -24,7 +24,7 @@
 
       <div class="p-group-value pui-row">
         <PUISelect
-          v-if="language"
+          v-if="language && !isSingleLanguage"
           :choices="languageChoices"
           :id="`${id}--language`"
           :modelValue="language"
@@ -83,6 +83,7 @@ const emit = defineEmits<{
 }>()
 
 const id = useId()
+const isSingleLanguage = (languages.length as number) === 1
 const virtualOperatorChoices: Ref<ReturnType<typeof getValidFilterOperators>> = ref(
   getValidFilterOperators({ _dataType: 'text' } as any),
 )
@@ -129,6 +130,9 @@ watch(
     }
 
     inputValue.value = ''
+    language.value = ['eq', 'eqi', 'ne'].includes(virtualOperator.value)
+      ? (language.value ?? primaryLanguage)
+      : undefined
   },
   { immediate: true, deep: true },
 )
