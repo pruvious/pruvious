@@ -66,8 +66,9 @@ export function patchNuxtConfig(targetDir: string, language: { code: string; nam
   const block = [
     '  pruvious: {',
     '    i18n: {',
-    '      // The first language is the primary one. Add more entries to support extra locales.',
+    '      // Add more entries to enable extra locales; keep `primaryLanguage` in sync with one of the codes.',
     `      languages: [{ name: '${language.name}', code: '${language.code}' }],`,
+    `      primaryLanguage: '${language.code}',`,
     '    },',
     '  },',
   ].join('\n')
