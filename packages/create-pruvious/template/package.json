@@ -15,6 +15,9 @@
     "vue": "^3.5.35",
     "vue-router": "^5.0.7"
   },
+  "devDependencies": {
+    "@iconify-json/tabler": "1.2.33"
+  },
   "trustedDependencies": [
     "better-sqlite3",
     "sharp"

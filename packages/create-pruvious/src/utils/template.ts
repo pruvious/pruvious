@@ -29,16 +29,26 @@ export function copyTemplate(templateDir: string, targetDir: string): void {
 }
 
 /**
- * Patches the scaffolded `package.json` with the project name and the
- * resolved Pruvious dependency specifier.
+ * Patches the scaffolded `package.json` with the project name, the resolved
+ * Pruvious dependency specifier, and (optionally) a `packageManager` field so
+ * corepack uses one consistent version for install and later commands.
  */
-export function patchPackageJSON(targetDir: string, name: string, pruviousSpec: string): void {
+export function patchPackageJSON(
+  targetDir: string,
+  name: string,
+  pruviousSpec: string,
+  packageManagerSpec?: string,
+): void {
   const path = join(targetDir, 'package.json')
   const pkg = JSON.parse(fs.readFileSync(path, 'utf-8'))
 
   pkg.name = name
   pkg.dependencies ??= {}
   pkg.dependencies.pruvious = pruviousSpec
+
+  if (packageManagerSpec) {
+    pkg.packageManager = packageManagerSpec
+  }
 
   fs.writeFileSync(path, `${JSON.stringify(pkg, null, 2)}\n`)
 }

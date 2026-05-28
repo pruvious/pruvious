@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cancel, confirm, intro, isCancel, note, outro, select, spinner, text } from '@clack/prompts'
+import { cancel, confirm, intro, isCancel, log, outro, select, spinner, text } from '@clack/prompts'
 import {
   checkEngines,
   colors,
@@ -21,6 +21,7 @@ import { copyTemplate, patchPackageJSON, toPackageName } from './utils/template'
 
 const pkgPrNewBase = 'https://pkg.pr.new/pruvious/pruvious/pruvious'
 const templateDir = fileURLToPath(new URL('../template', import.meta.url))
+const pnpmVersion = '11.4.0'
 
 const main = defineCommand({
   meta: {
@@ -90,7 +91,12 @@ const main = defineCommand({
     const scaffoldSpinner = spinner()
     scaffoldSpinner.start('Scaffolding project')
     copyTemplate(templateDir, targetDir)
-    patchPackageJSON(targetDir, projectName, pruviousSpec)
+    patchPackageJSON(
+      targetDir,
+      projectName,
+      pruviousSpec,
+      packageManager === 'pnpm' ? `pnpm@${pnpmVersion}` : undefined,
+    )
     scaffoldSpinner.stop('Project scaffolded.')
 
     if (git) {
@@ -247,7 +253,7 @@ async function resolvePackageManager(flag: string): Promise<PackageManagerName> 
 }
 
 /**
- * Prints the closing "Next steps" note with the commands the user should run.
+ * Prints the closing "Next steps" message with the commands the user should run.
  */
 function showNextSteps(options: {
   targetDir: string
@@ -269,14 +275,16 @@ function showNextSteps(options: {
 
   steps.push(colors.cyan(runScriptCommand(packageManager, 'dev')))
 
-  const content = [
-    ...steps,
-    '',
-    `Then open ${colors.cyan('http://localhost:3000/dashboard')}`,
-    'to create your first admin user.',
-  ].join('\n')
-
-  note(content, 'Next steps')
+  log.message(
+    [
+      colors.bold('Next steps'),
+      '',
+      ...steps,
+      '',
+      `Then open ${colors.cyan('http://localhost:3000/dashboard')}`,
+      'to create your first admin user.',
+    ].join('\n'),
+  )
 }
 
 /**
