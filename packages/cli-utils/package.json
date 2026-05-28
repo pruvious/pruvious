@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@clack/prompts": "1.0.0-alpha.9",
+    "consola": "3.4.2",
     "pathe": "2.0.3",
     "semver": "7.7.4"
   },
