@@ -1,0 +1,23 @@
+# Nuxt
+.nuxt
+.output
+.data
+dist
+
+# Node
+node_modules
+*.log*
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Pruvious
+.pruvious
+.uploads
+*.sqlite
+*.sqlite-*
+
+# Misc
+.DS_Store

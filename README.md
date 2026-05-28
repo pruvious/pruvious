@@ -7,6 +7,18 @@ Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](ht
 
 ## Installation
 
+The recommended way to start a new project is the `create-pruvious` scaffolder. Since v4 is in alpha, scaffold from the `@alpha` channel:
+
+```sh
+npm create pruvious@alpha
+```
+
+It copies a ready-to-run Nuxt + Pruvious starter, lets you pick a package manager, installs dependencies, and seeds a homepage. Then start the dev server and visit http://localhost:3000/dashboard to complete the CMS installation.
+
+### Manual installation
+
+To add Pruvious to an existing Nuxt project. These steps install the [pkg.pr.new](https://pkg.pr.new) continuous build directly, rather than the npm alpha channel used by the scaffolder:
+
 1. Create a new Nuxt project:
 
    ```sh

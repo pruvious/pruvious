@@ -1,0 +1,84 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.dist.outputs.publish }}
+      tag: ${{ steps.dist.outputs.tag }}
+    steps:
+      - name: Validate tag, gate on major >= 4, and derive npm dist-tag
+        id: dist
+        run: |
+          TAG_NAME="$GITHUB_REF_NAME"
+          if [[ ! "$TAG_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-z]+(\.[0-9]+)?)?$ ]]; then
+            echo "Refusing to publish: '$TAG_NAME' is not a valid release tag (expected vX.Y.Z or vX.Y.Z-pre.N)." >&2
+            exit 1
+          fi
+          MAJOR="${BASH_REMATCH[1]}"
+          if (( MAJOR < 4 )); then
+            echo "Tag '$TAG_NAME' is a v$MAJOR release; this workflow only publishes v4 and newer. Skipping."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$TAG_NAME" == *-* ]]; then
+            PRE="${TAG_NAME#*-}"
+            PRE="${PRE%%.*}"
+          else
+            PRE="latest"
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$PRE" >> "$GITHUB_OUTPUT"
+          echo "Publishing v$MAJOR under dist-tag: $PRE"
+
+  publish:
+    needs: check
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Bootstrap monorepo
+        run: pnpm bootstrap
+
+      - name: Install dependencies (runs the build via postinstall)
+        run: pnpm install --frozen-lockfile
+
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish packages
+        env:
+          DIST_TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          set -e
+          for dir in utils i18n orm storage ui cli-utils pruvious create-pruvious; do
+            name=$(node -p "require('./packages/$dir/package.json').name")
+            version=$(node -p "require('./packages/$dir/package.json').version")
+            echo "::group::$name@$version"
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "$name@$version is already published, skipping."
+            else
+              (cd "packages/$dir" && pnpm publish --tag "$DIST_TAG" --access public --no-git-checks)
+            fi
+            echo "::endgroup::"
+          done

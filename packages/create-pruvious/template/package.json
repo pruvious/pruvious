@@ -1,0 +1,22 @@
+{
+  "name": "pruvious-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.4.6",
+    "pruvious": "alpha",
+    "vue": "^3.5.35",
+    "vue-router": "^5.0.7"
+  },
+  "trustedDependencies": [
+    "better-sqlite3",
+    "sharp"
+  ]
+}

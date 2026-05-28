@@ -7,29 +7,25 @@ Pruvious is a free and open-source CMS for [Nuxt](https://nuxt.com). It plugs in
 
 ## Quick start
 
+Scaffold a new project with the `create-pruvious` CLI:
+
 ```sh
-npm create nuxt
-npm i https://pkg.pr.new/pruvious/pruvious/pruvious@v4
+npm create pruvious@alpha
 ```
 
-Add Pruvious as a layer in `nuxt.config.ts` and delete the generated `app.vue`:
+It copies a ready-to-run Nuxt + Pruvious starter, installs dependencies, and seeds a homepage. Start the dev server and visit [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to finish the install.
 
-```ts
-export default defineNuxtConfig({
-  extends: ['pruvious'],
-})
-```
+> [!NOTE]
+> v4 is in alpha, so the command uses the `@alpha` channel. It becomes `npm create pruvious` once v4 is stable.
 
-Start the dev server and visit [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to finish the install.
-
-See the [installation guide](./guide/installation.md) for the full walkthrough.
+Prefer to add Pruvious to an existing Nuxt project? See the [manual installation](./guide/installation.md#manual-installation) steps.
 
 ## Documentation
 
 ### Guide
 
 - [Introduction](./guide/introduction.md) - What Pruvious is and how it thinks.
-- [Installation](./guide/installation.md) - Set up a fresh project in seven steps.
+- [Installation](./guide/installation.md) - Scaffold a project with `npm create pruvious@alpha`, or install manually.
 - [Project structure](./guide/project-structure.md) - Where collections, fields, blocks, and hooks live.
 
 ### Essentials

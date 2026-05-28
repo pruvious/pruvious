@@ -1,0 +1,39 @@
+{
+  "name": "create-pruvious",
+  "description": "Scaffold a new Nuxt project with Pruvious.",
+  "version": "1.0.0",
+  "homepage": "https://pruvious.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pruvious/pruvious.git",
+    "directory": "packages/create-pruvious"
+  },
+  "author": "Muris Ceman <hello@pruvious.com>",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "template"
+  ],
+  "bin": "./dist/index.mjs",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.0.0-alpha.9",
+    "@pruvious/cli-utils": "workspace:*",
+    "citty": "0.2.2",
+    "execa": "9.6.1",
+    "nypm": "0.6.5",
+    "pathe": "2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.2",
+    "typescript": "6.0.2",
+    "unbuild": "3.6.1"
+  }
+}
