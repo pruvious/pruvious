@@ -88,7 +88,7 @@ const main = defineCommand({
 
     const targetDir = await resolveTargetDir(ctx.args.dir, ctx.args.force)
     const projectName = toPackageName(basename(targetDir))
-    const pruviousSpec = resolvePruviousSpec(ctx.args.pruvious)
+    const pruviousSpec = await resolvePruviousSpec(ctx.args.pruvious)
     const packageManager = await resolvePackageManager(ctx.args.pm)
     const language = await resolveLanguage(ctx.args.lang)
 
@@ -219,15 +219,21 @@ async function resolveTargetDir(input: string, force: boolean): Promise<string> 
 }
 
 /**
- * Turns a Pruvious version argument into an installable dependency specifier.
+ * Turns the `--pruvious` argument into an installable dependency specifier.
  * Full URLs and `npm:`/`file:` specifiers pass through unchanged, a bare commit
  * hash installs the matching pkg.pr.new continuous build, and anything else is
  * treated as an npm dist-tag or version (e.g. `alpha`, `4.0.0-alpha.0`).
  *
+ * A dist-tag is resolved to the concrete version it currently points to (see
+ * `resolveDistTag`) so the scaffolded `package.json` pins an exact version
+ * rather than a floating tag. Writing the tag verbatim would let the install
+ * step re-resolve it against npm's local metadata cache, which can lag behind a
+ * freshly published tag and quietly install a stale version.
+ *
  * The commit-hash test requires at least one digit so that all-letter hex words
  * (e.g. a `deadbeef` dist-tag) are still treated as npm specifiers.
  */
-function resolvePruviousSpec(version: string): string {
+async function resolvePruviousSpec(version: string): Promise<string> {
   if (version.includes('://') || version.startsWith('npm:') || version.startsWith('file:')) {
     return version
   }
@@ -236,7 +242,33 @@ function resolvePruviousSpec(version: string): string {
     return `${pkgPrNewBase}@${version}`
   }
 
-  return version
+  return (await resolveDistTag('pruvious', version)) ?? version
+}
+
+/**
+ * Resolves an npm dist-tag to the concrete version it points to by querying the
+ * registry directly, bypassing npm's local metadata cache so a freshly
+ * published tag is picked up immediately. A concrete version (or unknown tag)
+ * is not listed under `dist-tags`, so the lookup misses and the caller falls
+ * back to the original input. Network or registry errors resolve to `null` for
+ * the same fallback, preserving the previous tag-passthrough behavior offline.
+ */
+async function resolveDistTag(name: string, tag: string): Promise<string | null> {
+  try {
+    const response = await fetch(`https://registry.npmjs.org/${name}`, {
+      headers: { accept: 'application/vnd.npm.install-v1+json' },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const packument = (await response.json()) as { 'dist-tags'?: Record<string, string> }
+
+    return packument['dist-tags']?.[tag] ?? null
+  } catch {
+    return null
+  }
 }
 
 /**
