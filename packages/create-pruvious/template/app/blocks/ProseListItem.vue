@@ -11,6 +11,7 @@ defineBlock({
   ui: {
     icon: 'text-wrap-disabled',
     label: ({ __ }) => __('pruvious-dashboard', 'List item'),
+    description: ({ __ }) => __('pruvious-dashboard', 'A single entry within a list, holding text or nested lists.'),
   },
 })
 

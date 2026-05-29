@@ -21,10 +21,14 @@ export default defineTranslation({
     total: 'number',
   }),
   '/example/path': '/example/path',
+  'A block of rich text with paragraphs, headings, and lists.':
+    'A block of rich text with paragraphs, headings, and lists.',
   'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.':
     'A brief description of the page content, typically displayed in search results. Search engines usually show about 150-160 characters of this text.',
   'A reusable group of blocks selected from the Patterns collection.':
     'A reusable group of blocks selected from the Patterns collection.',
+  'A single entry within a list, holding text or nested lists.':
+    'A single entry within a list, holding text or nested lists.',
   'A translation for language `$language` already exists': createPattern(
     'A translation for language `$language` already exists',
     { language: 'string' },
@@ -72,6 +76,8 @@ export default defineTranslation({
   'An error occurred while copying the translation': 'An error occurred while copying the translation',
   'An error occurred while creating the folder': 'An error occurred while creating the folder',
   'An error occurred while renaming the upload': 'An error occurred while renaming the upload',
+  'An ordered or unordered list containing one or more items.':
+    'An ordered or unordered list containing one or more items.',
   'An unknown error occurred': 'An unknown error occurred',
   'Appearance': 'Appearance',
   'Apply': 'Apply',

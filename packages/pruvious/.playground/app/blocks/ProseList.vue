@@ -18,6 +18,7 @@ defineBlock({
       defaultIcon: 'list',
     },
     label: ({ __ }) => __('pruvious-dashboard', 'List'),
+    description: ({ __ }) => __('pruvious-dashboard', 'An ordered or unordered list containing one or more items.'),
     itemLabelConfiguration: { fieldValue: 'type' },
   },
 })

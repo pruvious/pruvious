@@ -11,6 +11,7 @@ defineBlock({
   ui: {
     icon: 'text-wrap',
     label: ({ __ }) => __('pruvious-dashboard', 'Prose'),
+    description: ({ __ }) => __('pruvious-dashboard', 'A block of rich text with paragraphs, headings, and lists.'),
   },
 })
 
