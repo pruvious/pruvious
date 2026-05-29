@@ -1,468 +1,76 @@
 # Pruvious
 
-Pruvious is a free and open-source Content Management System (CMS) for [Nuxt](https://nuxt.com).
+Pruvious is a free and open-source CMS for [Nuxt](https://nuxt.com). It plugs into your Nuxt project as a layer and gives you a typed schema, an admin dashboard, and a full HTTP API out of the box - so you can focus on building the site.
 
-> [!IMPORTANT]  
-> Version 4 is currently under development. Please don't use it in production environments yet.
+> [!WARNING]
+> Version 4 is under active development. Do not use it in production yet.
 
-## Installation
+## Quick start
 
-The recommended way to start a new project is the `create-pruvious` scaffolder. Since v4 is in alpha, scaffold from the `@alpha` channel:
+Scaffold a new project with the `create-pruvious` CLI:
 
 ```sh
 npm create pruvious@alpha
 ```
 
-It copies a ready-to-run Nuxt + Pruvious starter, lets you pick a package manager, installs dependencies, and seeds a homepage. Then start the dev server and visit http://localhost:3000/dashboard to complete the CMS installation.
+It copies a ready-to-run Nuxt + Pruvious starter, installs dependencies, and seeds a homepage. Start the dev server and visit [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to finish the install.
 
-### Manual installation
+> [!NOTE]
+> v4 is in alpha, so the command uses the `@alpha` channel. It becomes `npm create pruvious` once v4 is stable.
 
-To add Pruvious to an existing Nuxt project. These steps install the [pkg.pr.new](https://pkg.pr.new) continuous build directly, rather than the npm alpha channel used by the scaffolder:
+Prefer to add Pruvious to an existing Nuxt project? See the [manual installation](./docs/guide/installation.md#manual-installation) steps.
 
-1. Create a new Nuxt project:
+## What you get
 
-   ```sh
-   npm create nuxt
-   ```
-
-2. Install Pruvious 4:
-
-   ```sh
-   npm i https://pkg.pr.new/pruvious/pruvious/pruvious@v4
-   ```
-
-   You can also use specific git commits instead of `@v4`. For example: `https://pkg.pr.new/pruvious/pruvious/pruvious@b2cbc6afe7f2c2e8a80a1366ee20629e3583bc21`
-
-3. Add the Pruvious layer to your `nuxt.config.ts`:
-
-   ```ts
-   export default defineNuxtConfig({
-     extends: ['pruvious'],
-   })
-   ```
-
-4. Add the following lines to your `.gitignore` file:
-
-   ```text
-   .pruvious
-   .uploads
-   *.sqlite
-   *.sqlite-*
-   ```
-
-5. Remove the `app.vue` file from your project.
-
-6. Start the development server:
-
-   ```sh
-   npm run dev
-   ```
-
-   Visit http://localhost:3000/dashboard to complete the CMS installation.
-
-### Tips
-
-The documentation for version 4 is currently under development. In the meantime, please refer to the inline code comments, which contain examples and explanations for most features.
-
-#### Creating Collections
-
-To define a new collection, create a file in the `server/collections` folder of your project:
+You write content models as TypeScript files, and Pruvious turns them into a working backend:
 
 ```ts
-// server/collections/YourCollection.ts
+// server/collections/Posts.ts
 import { defineCollection, textField } from '#pruvious/server'
 
 export default defineCollection({
   fields: {
-    test: textField({}),
+    title: textField({}),
   },
 })
 ```
 
-#### Creating Singletons
+That single file gives you a `Posts` table, CRUD endpoints under `/api/collections/posts`, a typed query builder on both server and client, and a list view and editor in the dashboard.
 
-Singletons (previously called single-entry collections in v3) can be defined by creating a file in the `server/singletons` folder:
+## Documentation
 
-```ts
-// server/singletons/YourSingleton.ts
-import { defineSingleton, textField } from '#pruvious/server'
+The full documentation lives in [`./docs`](./docs/README.md). A few good places to start:
 
-export default defineSingleton({
-  fields: {
-    test: textField({}),
-  },
-})
-```
-
-#### Import Paths
-
-- Use `#pruvious/app` imports for client-side code used in your application.
-- Use `#pruvious/dashboard` imports for client-side code used in the dashboard.
-- Use `#pruvious/server` imports for server-side code.
-
-You can find detailed documentation for each export in their code comments.
+- [Introduction](./docs/guide/introduction.md) - What Pruvious is and how it thinks.
+- [Installation](./docs/guide/installation.md) - Scaffold a project, or install manually.
+- [Collections](./docs/essentials/collections.md) - Define your content models.
+- [Fields](./docs/fields/index.md) - Browse all built-in field types.
+- [Query builder](./docs/essentials/query-builder.md) - Typed, chainable queries.
+- [Configuration](./docs/reference/configuration.md) - Every option in the `pruvious` module config.
 
 ## Packages
 
-- ✅ [i18n](#package-i18n)
-- ✅ [orm](#package-orm)
-- 🚧 [pruvious](#package-pruvious)
-- ✅ [storage](#package-storage)
-- 🚧 [ui](#package-ui)
-- ✅ [utils](#package-utils)
+This repository is a monorepo. The published packages are:
 
-### Icon Status Guide
+| Package | Description |
+|:---|:---|
+| [`pruvious`](packages/pruvious) | The Nuxt module: collections, singletons, fields, API, and dashboard. |
+| [`@pruvious/orm`](packages/orm) | The ORM under the hood (SQLite, PostgreSQL, and D1 drivers). |
+| [`@pruvious/i18n`](packages/i18n) | Translation primitives and message patterns. |
+| [`@pruvious/storage`](packages/storage) | File storage drivers (filesystem, S3, R2). |
+| [`@pruvious/ui`](packages/ui) | The dashboard component library. |
+| [`@pruvious/utils`](packages/utils) | Shared utilities used across the project. |
 
-- ✅ **Completed**: Feature is fully implemented and ready to use.
-- 🚧 **In Progress**: Development has started but the feature is not yet finished.
-- 👻 **Planned**: Feature is on the roadmap but development hasn't begun.
+## Development
 
-### 📦 <a id="package-i18n">i18n</a>
+Pruvious uses [pnpm](https://pnpm.io) workspaces and targets the Node version in [`.nvmrc`](.nvmrc).
 
-Package: <a href="packages/i18n">@pruvious/i18n</a>
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Patterns |
-| ✅ | Placeholders |
-| ✅ | TypeScript types |
-| ✅ | Tests |
-| ✅ | Documentation |
-
-### 📦 <a id="package-orm">orm</a>
-
-Package: <a href="packages/orm">@pruvious/orm</a>
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | SQLite database driver |
-| ✅ | PostgreSQL database driver |
-| ✅ | D1 database driver |
-| ✅ | Automatic schema migration |
-| ✅ | Normalized SQL queries |
-| ✅ | Normalized error handling |
-| ✅ | Indexes |
-| ✅ | Foreign keys |
-| ✅ | Collections (table abstraction) |
-| ✅ | Collections hooks |
-| ✅ | Field models (general column abstraction) |
-| ✅ | Fields (table column abstraction) |
-| ✅ | Field sanitizers |
-| ✅ | Field validators |
-| ✅ | Field populators |
-| ✅ | Field properties (required, nullable, etc.) |
-| ✅ | Field conditional logic |
-| ✅ | Field input filters |
-| ✅ | Query builder |
-| ✅ | Translatable error messages |
-| ✅ | TypeScript types |
-| ✅ | Tests |
-| ✅ | Documentation |
-
-### 📦 <a id="package-pruvious">pruvious</a>
-
-Package: <a href="packages/pruvious">pruvious</a>
-
-#### 🚧 API
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Authentication |
-| ✅ | Middleware |
-| ✅ | Translations |
-| ✅ | Logging |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Collections
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Extended ORM implementation |
-| ✅ | API |
-| ✅ | Guards |
-| ✅ | Translatable collections |
-| ✅ | Synced fields |
-| ✅ | Translation copying |
-| ✅ | Record duplication |
-| ✅ | Logging |
-| ✅ | UI customization |
-| ✅ | Reusable collection templates |
-| 👻 | Page-like collections |
-| ✅ | Resolvers |
-| 👻 | Search structures |
-| 👻 | Soft-deletion (trash) |
-| 👻 | Revisions |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Fields
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Extended ORM implementation |
-| ✅ | Guards |
-| ✅ | Custom fields |
-| ✅ | UI customization |
-| ✅ | Resolvers |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Field types
-
-| Status | Feature |
-|:---:|:---|
-| 🚧 | Button group field |
-| ✅ | Checkbox field |
-| 👻 | Checkboxes field |
-| 🚧 | Chips field |
-| ✅ | Date field |
-| ✅ | Date range field |
-| ✅ | Date-time field |
-| ✅ | Date-time range field |
-| 👻 | Editor field |
-| 👻 | File field |
-| 👻 | Gallery field |
-| 👻 | Icon field |
-| 👻 | Image field |
-| 👻 | Link field |
-| ✅ | Number field |
-| 👻 | Range field |
-| 🚧 | Record field |
-| 🚧 | Records field |
-| 🚧 | Repeater field |
-| ✅ | Select field |
-| 👻 | Size field |
-| 👻 | Slider field |
-| 👻 | Slider range field |
-| ✅ | Switch field |
-| ✅ | Text field |
-| 👻 | Text area field |
-| ✅ | Time field |
-| ✅ | Time range field |
-| ✅ | Timestamp field |
-| ✅ | True-false field |
-
-#### 🚧 Field presets
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Created at |
-| ✅ | Updated at |
-| ✅ | Author |
-| ✅ | Editors |
-| 🚧 | Language |
-| 🚧 | Translations |
-
-#### 🚧 Validator presets
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Email |
-| ✅ | Timestamp |
-| ✅ | Unique |
-| ✅ | Upload path |
-| ✅ | URL |
-| 🚧 | More presets |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Singletons
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Extended ORM implementation |
-| ✅ | API |
-| ✅ | Guards |
-| ✅ | Translatable singletons |
-| ✅ | Synced fields |
-| ✅ | Translation copying |
-| ✅ | Logging |
-| ✅ | UI customization |
-| ✅ | Resolvers |
-| 👻 | Revisions |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Query builder
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Collections (client-side) |
-| ✅ | Collections (server-side) |
-| ✅ | Singletons (client-side) |
-| ✅ | Singletons (server-side) |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Hooks
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Actions (client-side) |
-| ✅ | Actions (server-side) |
-| ✅ | Filters (client-side) |
-| ✅ | Filters (server-side) |
-| ✅ | Resolvers |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Uploads
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | API |
-| ✅ | Image optimization |
-| 👻 | UI |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Caching
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | API |
-| ✅ | SQLite driver |
-| ✅ | PostgreSQL driver |
-| ✅ | D1 driver |
-| ✅ | Redis driver |
-| 👻 | Cloudflare CDN |
-| 🚧 | Page caching |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Queue (jobs)
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | API |
-| ✅ | SQLite driver |
-| ✅ | PostgreSQL driver |
-| ✅ | D1 driver |
-| ✅ | TypeScript types |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Standard collections
-
-| Status | Feature |
-|:---:|:---|
-| 👻 | Pages |
-| 👻 | Presets |
-| 🚧 | Users |
-| 🚧 | Roles |
-| ✅ | Uploads |
-| ✅ | Cache |
-| ✅ | Queue |
-| ✅ | Logs |
-| 🚧 | Tests |
-| 🚧 | Documentation |
-
-#### 🚧 Pages
-
-| Status | Feature |
-|:---:|:---|
-| 👻 | API |
-| 👻 | Blocks |
-| 🚧 | SEO |
-| 🚧 | Documentation |
-
-#### 🚧 Dashboard
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Authentication |
-| ✅ | Custom components |
-| ✅ | Edit profile |
-| ✅ | Menus |
-| ✅ | Responsive design |
-| 🚧 | Custom dashboard page helper |
-| 🚧 | Field components |
-| 👻 | Developer menu |
-| 👻 | Deployment tools |
-| 👻 | Finder |
-| 🚧 | Data table |
-| 👻 | Media library |
-| 🚧 | Documentation |
-
-### 📦 <a id="package-storage">storage</a>
-
-Package: <a href="packages/storage">@pruvious/storage</a>
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Filesystem driver |
-| ✅ | S3 driver |
-| ✅ | R2 driver |
-| ✅ | Read |
-| ✅ | Stream |
-| ✅ | Upload |
-| ✅ | Multipart upload |
-| ✅ | Move |
-| ✅ | Delete |
-| ✅ | TypeScript types |
-| ✅ | Tests |
-| ✅ | Documentation |
-
-### 📦 <a id="package-ui">ui</a>
-
-Package: <a href="packages/ui">@pruvious/ui</a>
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Alert |
-| ✅ | Badge |
-| ✅ | Base |
-| ✅ | Button |
-| ✅ | Button group |
-| ✅ | Card |
-| ✅ | Checkbox |
-| ✅ | Code |
-| ✅ | Color mode |
-| ✅ | Context menu |
-| ✅ | Dialog |
-| ✅ | Dropdown |
-| ✅ | Dropdown item |
-| ✅ | Field |
-| ✅ | Field label |
-| ✅ | Field message |
-| ✅ | Icon group |
-| ✅ | Input |
-| ✅ | Number |
-| ✅ | Pagination |
-| ✅ | Popup |
-| ✅ | Prose |
-| ✅ | Scrollable |
-| ✅ | Select |
-| ✅ | Select choice |
-| ✅ | Switch |
-| ✅ | Tab |
-| ✅ | Tabs |
-| ✅ | Toaster |
-| ✅ | Tree |
-| ✅ | Tree item |
-| ✅ | Vertical menu |
-| ✅ | Vertical menu item |
-| 🚧 | More components |
-
-### 📦 <a id="package-utils">utils</a>
-
-Package: <a href="packages/utils">@pruvious/utils</a>
-
-| Status | Feature |
-|:---:|:---|
-| ✅ | Utility functions |
-| ✅ | TypeScript types |
-| ✅ | Tests |
-| ✅ | Documentation |
+```sh
+pnpm install   # install dependencies and build all packages
+pnpm build     # build every package
+pnpm play      # run the playground app
+pnpm test      # run the test suite
+```
 
 ## License
 
