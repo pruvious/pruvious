@@ -96,6 +96,10 @@
   line-clamp: var(--pui-clamp, 1);
 }
 
+.pui-whitespace-pre-line {
+  white-space: pre-line;
+}
+
 .pui-hyphenate {
   hyphens: auto;
 }

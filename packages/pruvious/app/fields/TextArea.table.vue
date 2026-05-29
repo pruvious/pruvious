@@ -3,9 +3,10 @@
     <PruviousDashboardEditableFieldCell :cell="cell" :editable="editable" :name="name">
       <span
         :title="modelValue"
+        class="pui-whitespace-pre-line"
         :class="{
           'pui-truncate': truncate.lines === 1,
-          'pui-clamp': truncate.lines && truncate.lines > 1,
+          'pui-clamp': truncate.lines,
           'pui-hyphenate': options.ui.dataTable?.hyphenate,
         }"
         :style="{ '--pui-clamp': truncate.lines, 'white-space': truncate.lines === 1 ? undefined : 'pre-line' }"
