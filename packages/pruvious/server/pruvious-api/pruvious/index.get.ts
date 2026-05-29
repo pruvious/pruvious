@@ -5,6 +5,5 @@ export default defineEventHandler(async () => {
 
   return {
     installed: usersCountQuery.success && usersCountQuery.data > 0,
-    version: '@todo',
   } satisfies PruviousState
 })

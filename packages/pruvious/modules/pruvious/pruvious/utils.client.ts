@@ -10,11 +10,6 @@ export interface PruviousState {
    * Indicates whether the Pruvious CMS is installed.
    */
   installed: boolean
-
-  /**
-   * The current version of the Pruvious CMS.
-   */
-  version: string
 }
 
 export interface PruviousDashboardState {
