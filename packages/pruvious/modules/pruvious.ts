@@ -30,7 +30,7 @@ import { resetFieldsResolver } from './pruvious/fields/resolver'
 import { resetHooksResolver } from './pruvious/hooks/resolver'
 import { pruviousWatchHandler, watchPruviousServerFiles } from './pruvious/nuxt-hooks/builder-watch'
 import { optimizeServerTsConfig } from './pruvious/nuxt-hooks/nitro-build-before'
-import { disableDashboardSSR } from './pruvious/nuxt-hooks/nitro-config'
+import { disableDashboardSSR, stubNativeModulesOnCloudflare } from './pruvious/nuxt-hooks/nitro-config'
 import { optimizeTsConfig } from './pruvious/nuxt-hooks/prepare-types'
 import { clearClientViteServers, onViteServerCreated } from './pruvious/nuxt-hooks/vite-server'
 import type { PruviousModuleOptions } from './pruvious/PruviousModuleOptions'
@@ -384,6 +384,9 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     // Exclude dashboard routes from SSR
     nuxt.hook('nitro:config', disableDashboardSSR)
+
+    // Stub native addons (`sharp`, `better-sqlite3`) on Cloudflare presets
+    nuxt.hook('nitro:config', stubNativeModulesOnCloudflare)
 
     // Enable async context
     nuxt.options.experimental.asyncContext = true
