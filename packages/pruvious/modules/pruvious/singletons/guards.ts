@@ -41,7 +41,7 @@ export function singletonPermissionGuard({ singleton, singletonName, operation }
  * Runs singleton guards prior to query builder execution methods like `get()`, `run()`, and `validate()`.
  * Additionally, it sets a `_guarded` flag on the context to enable field guards and other singleton-specific filters.
  *
- * @see https://pruvious.com/docs/singletons/guards (@todo set up this link)
+ * @see https://pruvious.com/docs/singletons/guards
  */
 export function singletonGuards(): SingletonQueryBuilderPrepareCallback {
   return async (context) => {

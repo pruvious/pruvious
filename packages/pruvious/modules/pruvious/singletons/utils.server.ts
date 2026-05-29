@@ -10,7 +10,7 @@ let singletonSlugMap: Record<string, { name: keyof Singletons; definition: Gener
 /**
  * Creates a `SingletonSelectQueryBuilder` for a specific `singleton`.
  *
- * @see https://pruvious.com/docs/query-builder#select-singleton (@todo set up this link)
+ * @see https://pruvious.com/docs/query-builder#select-singleton
  *
  * @example
  * ```ts
@@ -54,7 +54,7 @@ export function selectSingleton<const TSingletonName extends SingletonAPI['any']
  * Creates a `SingletonSelectQueryBuilder` for a specific `singleton` that includes permission checks.
  * Applies singleton and field guards to ensure that only authorized users can select data from the database.
  *
- * @see https://pruvious.com/docs/query-builder#guarded-select-singleton (@todo set up this link)
+ * @see https://pruvious.com/docs/query-builder#guarded-select-singleton
  *
  * @example
  * ```ts
@@ -97,7 +97,7 @@ export function guardedSelectSingleton<const TSingletonName extends SingletonAPI
 /**
  * Creates a `SingletonUpdateQueryBuilder` for a specific `singleton`.
  *
- * @see https://pruvious.com/docs/query-builder#update-singleton (@todo set up this link)
+ * @see https://pruvious.com/docs/query-builder#update-singleton
  *
  * @example
  * ```ts
@@ -145,7 +145,7 @@ export function updateSingleton<const TSingletonName extends SingletonAPI['any']
  * Creates a `SingletonUpdateQueryBuilder` for a specific `singleton` that includes permission checks.
  * Applies singleton and field guards to ensure that only authorized users can update data in the database.
  *
- * @see https://pruvious.com/docs/query-builder#guarded-update-singleton (@todo set up this link)
+ * @see https://pruvious.com/docs/query-builder#guarded-update-singleton
  *
  * @example
  * ```ts

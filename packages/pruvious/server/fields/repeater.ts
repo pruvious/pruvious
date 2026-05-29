@@ -38,10 +38,10 @@ interface CustomOptions<TSubfields extends Record<string, GenericField>> {
    *   link: linkField({}),
    * }
    *
-   * // Example value:
+   * // Example value (populated):
    * [
-   *   { label: 'Home', link: '/' },       // @todo update `link` value to be a `Link` instance
-   *   { label: 'About', link: '/about' }, // @todo update `link` value to be a `Link` instance
+   *   { label: 'Home', link: { url: '/', target: '', rel: '' } },
+   *   { label: 'About', link: { url: '/about', target: '', rel: '' } },
    *   // ...
    * ]
    * ```

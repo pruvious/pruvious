@@ -7,7 +7,6 @@ export default defineTemplate(() => ({
       unique: true,
     }),
     permissions: chipsField({
-      // @todo hide `collection:{slug}:manage` permissions from the UI for collections that have disabled the `author` and `editors` fields
       choices: permissions.map((value) => ({ value })),
       enforceUniqueItems: true,
     }),

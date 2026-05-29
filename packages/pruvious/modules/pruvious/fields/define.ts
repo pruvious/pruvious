@@ -64,7 +64,7 @@ export interface DefineFieldOptions<
    * The value must be an instance of `FieldModel`.
    * It defines the field's core configuration, including data type, default value, serializers, sanitizers, validators, and more.
    *
-   * @see https://pruvious.com/docs/field-models (@todo set up this link)
+   * @see https://pruvious.com/docs/field-models
    *
    * @example
    * ```ts
@@ -767,14 +767,6 @@ export interface FieldUIOptions<
    * - Finally, it attempts to render the component `<srcDir>/<pruvious.dir.fields.components>/<fieldType>.vue`.
    *   - For example, if the field type is `text`, it will try to render the component `app/fields/text.vue`.
    *
-   * Field components receive the following props:
-   *
-   * - @todo
-   *
-   * Field components can emit the following events:
-   *
-   * - @todo
-   *
    * @example
    * ```ts
    * import { resolvePruviousComponent } from '#pruvious/server'
@@ -825,10 +817,6 @@ export interface FieldUIOptions<
    * - Finally, it attempts to render the component `<srcDir>/<pruvious.dir.fields.components>/<fieldType>.table.vue`.
    *   - For example, if the field type is `text`, it will try to render the component `app/fields/text.table.vue`.
    *
-   * Custom table components receive the following props:
-   *
-   * - @todo
-   *
    * @example
    * ```ts
    * import { resolvePruviousComponent } from '#pruvious/server'
@@ -878,10 +866,6 @@ export interface FieldUIOptions<
    * - It then tries to render the `customFilterComponent` specified in this field's options.
    * - Finally, it attempts to render the component `<srcDir>/<pruvious.dir.fields.components>/<fieldType>.filter.vue`.
    *   - For example, if the field type is `text`, it will try to render the component `app/fields/text.filter.vue`.
-   *
-   * Custom filter components receive the following props:
-   *
-   * - @todo
    *
    * @example
    * ```ts
@@ -1035,7 +1019,23 @@ export type CombinedFieldOptions<
      *
      * @example
      * ```ts
-     * // @todo
+     * // server/collections/Secrets.ts
+     * import { defineCollection, textField } from '#pruvious/server'
+     *
+     * export default defineCollection({
+     *   fields: {
+     *     apiKey: textField({
+     *       guards: [
+     *         (value, { context }) => {
+     *           const { auth } = useEvent().context.pruvious
+     *           if (!auth.isLoggedIn || !auth.user.isAdmin) {
+     *             throw new Error(context.__('pruvious-api', 'Only administrators can modify API keys'))
+     *           }
+     *         },
+     *       ],
+     *     }),
+     *   },
+     * })
      * ```
      */
     guards?: FieldGuard<
@@ -1108,7 +1108,7 @@ const warned: string[] = []
  * - For filter components, add `.filter` to the filename (e.g., `app/fields/gallery.filter.vue`).
  * - For regular view components, use no suffix or add `.regular` (e.g., `app/fields/gallery.vue` or `app/fields/gallery.regular.vue`).
  *
- * @see https://pruvious.com/docs/custom-fields (@todo set up this link)
+ * @see https://pruvious.com/docs/custom-fields
  *
  * @example
  * ```ts

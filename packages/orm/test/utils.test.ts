@@ -203,6 +203,4 @@ test('parse conditional logic', () => {
     'structureNested.0.nested.1.repeater.0.text': { type: { '=': 'text' } },
     'structureNested.0.nested.1.repeater.0.number': { type: { '=': 'number' } },
   })
-
-  // @todo objectFieldModel test
 })

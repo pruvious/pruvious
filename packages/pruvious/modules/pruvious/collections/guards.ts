@@ -44,7 +44,7 @@ export function collectionPermissionGuard({ collection, collectionName, operatio
  * Runs collection guards prior to query builder execution methods like `first()`, `run()`, `validate()` and others.
  * Additionally, it sets a `_guarded` flag on the context to enable field guards and other collection-specific filters.
  *
- * @see https://pruvious.com/docs/collections/guards (@todo set up this link)
+ * @see https://pruvious.com/docs/collections/guards
  */
 export function collectionGuards(): QueryBuilderPrepareCallback {
   return async (context) => {

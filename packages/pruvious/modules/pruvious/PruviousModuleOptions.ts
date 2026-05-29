@@ -474,7 +474,7 @@ export interface PruviousModuleOptions {
        * - Changing this value will invalidate all existing tokens.
        * - If not provided, a random key will be automatically generated as the secret key.
        *
-       * @see https://pruvious.com/generate-jwt-secret (@todo set up this link)
+       * @see https://pruvious.com/generate-jwt-secret
        */
       secret?: string
 

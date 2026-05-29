@@ -1,6 +1,6 @@
 {
   "name": "@pruvious/storage",
-  "description": "@todo",
+  "description": "Unified storage driver for local filesystem, Cloudflare R2, and S3-compatible backends.",
   "version": "1.0.0-alpha.5",
   "homepage": "https://pruvious.com",
   "repository": {

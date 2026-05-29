@@ -290,14 +290,6 @@ export interface FieldsLayoutComponentItem {
    *   - A path for an npm module.
    * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
    *
-   * The custom component receives the following props:
-   *
-   * - @todo
-   *
-   * The custom component can emit the following events:
-   *
-   * - @todo
-   *
    * @example
    * ```ts
    * import { resolvePruviousComponent } from '#pruvious/server'

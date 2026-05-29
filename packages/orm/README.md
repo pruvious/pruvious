@@ -15,10 +15,18 @@ npm install @pruvious/orm
   - [SQLite3](#sqlite)
   - [PostgreSQL](#postgresql)
   - [Cloudflare D1](#cloudflare-d1)
+- [Database options](#database-options)
 - [Collections](#collections)
+  - [Hooks](#hooks)
+  - [Junctions (many-to-many)](#junctions)
   - [The `Options` table](#options-table)
+  - [Locks](#locks)
 - [Fields](#fields)
   - [Field models](#field-models)
+  - [Conditional logic](#conditional-logic)
+  - [Input filters](#input-filters)
+- [Validators](#validators)
+- [Field presets](#field-presets)
 - [Sync (migrations)](#sync)
 - [Schema methods](#schema-methods)
 - [Raw queries](#raw-queries)
@@ -26,6 +34,15 @@ npm install @pruvious/orm
 - [Query builder](#query-builder)
   - [INSERT](#insert)
   - [SELECT](#select)
+    - [`where`](#where)
+    - [`search`](#search)
+    - [`groupBy`, `orderBy`, `limit`, `offset`](#order-group-limit-offset)
+    - [`paged` and `paginate`](#pagination)
+    - [Aggregations](#aggregations)
+    - [`populate`](#populate)
+    - [Raw injections](#raw-injections)
+    - [Caching](#caching)
+    - [Query strings](#query-strings)
   - [UPDATE](#update)
   - [DELETE](#delete)
 - [Testing](#testing)
@@ -72,27 +89,29 @@ const db = new Database({
 
 await db.connect() // This will also sync the collections and fields schema
 
-const tables = await sqlite.listTables()
+const tables = await db.listTables()
 console.log(tables) // ['Options', 'Roles', 'Users']
 
-const usersColumns = await sqlite.listColumns('Users')
+const usersColumns = await db.listColumns('Users')
 console.log(usersColumns) // ['id', 'email', 'role']
 
-const usersIndexes = await sqlite.listIndexes('Users')
+const usersIndexes = await db.listIndexes('Users')
 console.log(usersIndexes) // ['UX_Users__email']
 
-const usersForeignKeys = await sqlite.listForeignKeys('Users')
+const usersForeignKeys = await db.listForeignKeys('Users')
 console.log(usersForeignKeys) // ['FK_Users__role']
 
-const rolesColumns = await sqlite.listColumns('Roles')
+const rolesColumns = await db.listColumns('Roles')
 console.log(rolesColumns) // ['id', 'name']
 
-const rolesIndexes = await sqlite.listIndexes('Roles')
+const rolesIndexes = await db.listIndexes('Roles')
 console.log(rolesIndexes) // ['UX_Roles__name']
 
-const rolesForeignKeys = await sqlite.listForeignKeys('Roles')
+const rolesForeignKeys = await db.listForeignKeys('Roles')
 console.log(rolesForeignKeys) // []
 ```
+
+Once connected, use [`db.queryBuilder()`](#query-builder) to build type-safe queries, or [`db.exec()`](#raw-queries) for raw SQL.
 
 ## <a id="drivers">Drivers</a>
 
@@ -113,7 +132,7 @@ import SQLite from 'better-sqlite3'
 
 const db = new Database({
   driver: new SQLite('../tmp/pruvious.sqlite'),
-  // Same as `driver: 'sqlite//../tmp/pruvious.sqlite'`
+  // Same as `driver: 'sqlite://../tmp/pruvious.sqlite'`
 })
 ```
 
@@ -158,6 +177,18 @@ export default {
 
 Alternatively, you can connect using the format `d1://DB_BINDING`, where `DB_BINDING` represents your D1 database binding name (usually just `DB`).
 
+## <a id="database-options">Database options</a>
+
+The `Database` constructor accepts the following options:
+
+- `driver` - See [Drivers](#drivers). Defaults to `'sqlite://database.sqlite'`.
+- `PGPool` - The `pg.Pool` constructor from the [`pg`](https://www.npmjs.com/package/pg) package. Required when using PostgreSQL with a connection string.
+- `collections` - A key-value object of `Collection` instances (see [Collections](#collections)).
+- `sync` - Controls automatic schema synchronization (see [Sync](#sync)).
+- `verbose` - `true` enables full logging, `false` disables it (default), `'exec'` logs only executed SQL statements, `'sync'` logs only sync operations.
+- `logger` - Custom logger function. Defaults to `console.log`.
+- `i18n` - An `I18n` instance from `@pruvious/i18n` for translating error messages. If omitted, the built-in `pruvious-orm` translation strings are used.
+
 ## <a id="collections">Collections</a>
 
 A `Collection` is an abstraction representing a database table. It must be defined with the property:
@@ -169,7 +200,10 @@ Optional properties:
 - `key` - A unique identifier used for automatic schema synchronization (database migration). This key must remain unchanged when modifying the collection schema. It defaults to the collection name if not specified.
 - `indexes` - An array of database indexes to enhance query performance.
 - `foreignKeys` - An array of foreign key constraints for defining relationships between collections.
-- `hooks` - An array of functions that execute at specific points in the collection's query lifecycle.
+- `hooks` - Functions that execute at specific points in the query lifecycle (see [Hooks](#hooks)).
+- `meta` - Arbitrary metadata to attach to the collection. Available on the `Collection` instance at runtime.
+
+Note: Many-to-many relationships are declared on the field itself using the [`junctionFieldModel`](#junctions) - they are not part of `foreignKeys`.
 
 Example:
 
@@ -203,7 +237,73 @@ typeof Users.TDataTypes.name       // 'text'
 
 typeof Users.TCastedTypes.email    // string
 typeof Users.TCastedTypes.name     // string | null
+
+typeof Users.TInputTypes.email     // string | number
+typeof Users.TInputTypes.name      // string | number | null
+
+typeof Users.TPopulatedTypes.email // string
+typeof Users.TPopulatedTypes.name  // string | null
 ```
+
+### <a id="hooks">Hooks</a>
+
+Hooks run at specific points in the query lifecycle for a collection. Each hook is an array of callbacks:
+
+- `beforeQueryPreparation` - Runs before the SQL query is generated from the current query builder context. Useful for injecting WHERE conditions or modifying the builder.
+- `beforeQueryExecution` - Runs after the SQL is generated but before it hits the database. Receives the context and the prepared `{ query: { operation, sql, params } }`.
+- `afterQueryExecution` - Runs after the database call returns and before the query builder yields its result. Receives the context plus `{ query, queryExecutionTime, rawResult, result }`.
+
+Throwing inside `beforeQueryPreparation` or `beforeQueryExecution` aborts the query and surfaces the error as a `runtimeError` on the `QueryBuilderResult`. Avoid throwing in `afterQueryExecution` - the result has already been produced.
+
+```ts
+new Collection({
+  fields: { ... },
+  hooks: {
+    beforeQueryPreparation: [
+      ({ operation, queryBuilder }) => {
+        if (operation !== 'insert') {
+          queryBuilder.where('authorId', '=', currentUserId)
+        }
+      },
+    ],
+  },
+})
+```
+
+### <a id="junctions">Junctions (many-to-many)</a>
+
+Many-to-many relationships are defined by using the `junctionFieldModel` on a field. No column is added to the owning collection - instead, the ORM creates and maintains a junction table named `JN_{table}__{column}__{referencedTable}` automatically during [sync](#sync).
+
+```ts
+import { Collection, Field, junctionFieldModel, textFieldModel } from '@pruvious/orm'
+
+{
+  Events: new Collection({
+    fields: {
+      title: new Field({ model: textFieldModel(), required: true, options: {} }),
+      // One-directional junction
+      categories: new Field({ model: junctionFieldModel('Categories'), options: {} }),
+      // Bi-directional junction (matches the `events` field on Users below)
+      attendees: new Field({ model: junctionFieldModel('Users', 'events'), options: {} }),
+    },
+  }),
+  Categories: new Collection({
+    fields: {
+      name: new Field({ model: textFieldModel(), required: true, options: {} }),
+    },
+    indexes: [{ fields: ['name'], unique: true }],
+  }),
+  Users: new Collection({
+    fields: {
+      email: new Field({ model: textFieldModel(), required: true, options: {} }),
+      events: new Field({ model: junctionFieldModel('Events', 'attendees'), options: {} }),
+    },
+    indexes: [{ fields: ['email'], unique: true }],
+  }),
+}
+```
+
+Junction field values are arrays of related record IDs. The `junctionFieldModel` supports `minItems`, `maxItems`, `allowEmptyArray`, and a custom `populator`.
 
 ### <a id="options-table">The `Options` table</a>
 
@@ -228,13 +328,25 @@ await db.getAllOptions()                // { mySettings: { foo: 'BAR' }, myTitle
 await db.deleteOption('mySettings')     // true
 await db.deleteOptions(['nonExisting']) // 0 (no options deleted)
 await db.deleteAllOptions()             // 1 (deleted 'myTitle' option)
-
-await lock('foo')                       // true (if successful)
-await isLocked('foo')                   // true
-await listLocks()                       // ['foo']
-await unlock('foo')                     // true (if successful)
-await unlockAll()                       // 0 (no locks to release)
 ```
+
+Note: Option keys are validated identifiers. Keys starting with `_` are reserved for internal use (e.g. `_schemaMap`, `_lock:*`) and are filtered out of `getAllOptions()` and `deleteAllOptions()`.
+
+### <a id="locks">Locks</a>
+
+The `Options` table also backs a simple lock primitive. Locks are advisory - acquiring one inserts a `_lock:<key>` row, releasing it deletes that row.
+
+```ts
+await db.lock('foo')         // true once the lock is acquired
+await db.isLocked('foo')     // true
+await db.listLocks()         // ['foo']
+await db.unlock('foo')       // true on success
+await db.unlockAll()         // number of locks released
+```
+
+`lock(key, timeout = 30000, interval = 25)` retries on the given interval until the timeout is reached. Pass `timeout = 0` to wait indefinitely. On Cloudflare D1, `timeout` is not supported - the method returns `false` immediately if the lock cannot be acquired.
+
+Locks held by a connected `Database` instance are automatically released when `close()` is called.
 
 ## <a id="fields">Fields</a>
 
@@ -249,11 +361,12 @@ Optional properties:
 - `nullable` - Determines if the field can accept `null` values (defaults to `true`).
 - `required` - Specifies whether the field value is mandatory when creating a collection record (defaults to `false`).
 - `immutable` - Determines if the field value cannot be changed after initial creation (defaults to `false`).
-- `autoGenerated` - Indicates if the field value is automatically generated.
+- `autoGenerated` - Indicates if the field value is automatically generated. When `true`, the field is hidden in input data types.
 - `default` - The default value for the field. If not specified, it's automatically derived from the `defaultValue` in the field's `model`.
-- `conditionalLogic` - Defines conditional logic for this field and determines whether the input for this field stays `required`.
-- `validators` - An array of callback functions that validate an input value for this field.
-- `inputFilters` - Functions that set or modify the field's input value at specific stages during INSERT or UPDATE queries.
+- `conditionalLogic` - Determines whether the field's value is required based on the values of other fields (see [Conditional logic](#conditional-logic)).
+- `dependencies` - An array of relative field paths that become required inputs whenever this field is present.
+- `validators` - An array of callback functions that validate an input value for this field (see [Validators](#validators)).
+- `inputFilters` - Functions that set or modify the field's input value at specific stages during INSERT or UPDATE queries (see [Input filters](#input-filters)).
 
 ```ts
 import { Field, textFieldModel } from '@pruvious/orm'
@@ -275,12 +388,127 @@ This package provides several built-in field models:
 - `arrayFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of primitives in JavaScript.
 - `bigIntFieldModel` - Stores field values as `bigint` in the database and deserializes them as `number` in JavaScript.
 - `booleanFieldModel` - Stores and deserializes field values as `boolean` both in the database and application.
+- `junctionFieldModel` - Virtual top-level field that drives a many-to-many junction table (see [Junctions](#junctions)). No column is added to the owning table; values are arrays of related record IDs.
+- `matrixFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of primitives. Distinguished from `arrayFieldModel` by its `matrix` data type, which marks the column as participating in matrix-style query operators.
 - `numberFieldModel` - Stores field values as `numeric` in the database and deserializes them as `number` in JavaScript.
 - `objectFieldModel` - Stores field values as `text` in the database and deserializes them as `object` in JavaScript.
 - `repeaterFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of objects (subfields) in JavaScript.
-- `structureFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of keyed objects (subfields) in JavaScript.
-- `structuredObjectFieldModel` - Stores field values as `text` in the database and deserializes them as `object` in JavaScript.
+- `structureFieldModel` - Stores field values as `text` in the database and deserializes them as `Array` of keyed objects (each item has a `$key` indicating which structure item it represents).
+- `structuredObjectFieldModel` - Stores field values as `text` in the database and deserializes them as `object` with structured subfields.
 - `textFieldModel` - Stores field values as `text` in the database and deserializes them as `string` in JavaScript.
+
+Each model accepts its own options (e.g. `minLength`/`maxLength` on text, `min`/`max` on number, `minItems`/`maxItems` on arrays). Refer to the JSDoc on the function itself for the full option list.
+
+### <a id="conditional-logic">Conditional logic</a>
+
+A field's `conditionalLogic` option determines whether its value is treated as `required` based on other fields in the same input. Paths in the condition are relative to the current field:
+
+- Use a plain field name or `./<field>` for a sibling.
+- Use `<field>.<subfield>` for nested fields.
+- Use `..` to walk up the hierarchy.
+- Use `/<field>` to reference a field from the root level.
+
+```ts
+// Sibling field check
+{ size: { '=': 'sm' } }
+
+// Nested field check
+{ 'address.city': { '=': 'London' } }
+
+// Parent array length check
+{ '..': { '>': 1 } }
+
+// Root-level field check
+{ '/layout': { '!=': 'default' } }
+
+// Multiple AND conditions
+{
+  size: { '=': 'sm' },
+  '../color': { regexp: '^(?:[a-z]+-)?blue$' },
+}
+
+// OR group
+{
+  orGroup: [
+    { size: { '=': 'sm' } },
+    { '../color': { regexp: '^red$' } },
+  ],
+}
+```
+
+Supported operators are `=`, `!=`, `>`, `>=`, `<`, `<=`, and `regexp`. The `regexp` value can be a string pattern or `{ pattern, flags }`.
+
+The standalone `ConditionalLogicResolver` (importable via `@pruvious/orm/conditional-logic-resolver`) lets you evaluate the same rules outside the query builder, for example in a UI.
+
+### <a id="input-filters">Input filters</a>
+
+Input filters set or modify a field's value during INSERT or UPDATE queries, regardless of whether an input was provided. Three stages are available:
+
+- `beforeInputSanitization` - Receives the raw input value.
+- `beforeInputValidation` - Receives the sanitized value.
+- `beforeQueryExecution` - Receives the sanitized value, runs immediately before the SQL is executed.
+
+Each filter can be a plain function or an object with `{ order, callback }` (lower `order` runs first; default is `10`). Returning `undefined` removes the field from the input.
+
+```ts
+new Field({
+  model: numberFieldModel(),
+  options: {},
+  inputFilters: {
+    beforeQueryExecution: {
+      order: 0,
+      callback: (value, { context }) => (context.operation === 'insert' ? Date.now() : value),
+    },
+  },
+})
+```
+
+## <a id="validators">Validators</a>
+
+`@pruvious/orm` ships with a set of reusable validators for the `validators` array on a `Field`. Each is a factory that returns a `Validator` and accepts an optional custom error message (string, or a function receiving `{ _, __ }` translation helpers).
+
+- `emailValidator()` - Requires a valid email address. Skipped when value is `null`.
+- `nonEmptyValidator()` - Rejects `null`, empty string, empty array, or empty object.
+- `pathValidator()` - Requires a valid URL path. Skipped on `null`.
+- `richTextValidator()` - Validates that only allowed HTML marks are present (reads `marks`, `allowLineBreaks`, `links` from the field's model options).
+- `timeValidator()` - Requires an integer between `0` and `86399000` (milliseconds within a day).
+- `timestampValidator()` - Requires a valid JavaScript timestamp.
+- `uniqueValidator(options?)` - Ensures uniqueness within a collection (or within a subfields array). Supports a `fields` array for composite uniqueness and a `caseSensitive` flag (`true` by default for `=`, `false` switches to `ilike`).
+- `urlValidator()` - Requires a valid URL.
+
+```ts
+import { Field, emailValidator, textFieldModel, uniqueValidator } from '@pruvious/orm'
+
+new Field({
+  model: textFieldModel(),
+  required: true,
+  options: {},
+  validators: [emailValidator(), uniqueValidator()],
+})
+```
+
+Custom validators are regular callbacks `(value, sanitizedContextField, errors) => any`. They run after the field model's built-in validators. Throw an error or assign to `errors[path]` to flag a problem.
+
+## <a id="field-presets">Field presets</a>
+
+Field presets are convenience helpers that return a ready-to-use `Field`:
+
+- `createdAtField()` - Auto-generated, immutable, non-nullable `numeric` field that stores the millisecond timestamp when a record is inserted.
+- `updatedAtField()` - Auto-generated, non-nullable `numeric` field that updates to the current timestamp on every INSERT and UPDATE.
+
+Both share an internal `_tmp._timestamp` cache key so that paired `createdAt`/`updatedAt` columns receive the same value when used together.
+
+```ts
+import { Collection, createdAtField, Field, textFieldModel, updatedAtField } from '@pruvious/orm'
+
+new Collection({
+  fields: {
+    name: new Field({ model: textFieldModel(), required: true, options: {} }),
+    createdAt: createdAtField(),
+    updatedAt: updatedAtField(),
+  },
+})
+```
 
 ## <a id="sync">Sync (migrations)</a>
 
@@ -297,11 +525,12 @@ The schema synchronization occurs by default during the initial database connect
 9. Attempts to alter column type, if possible, without data loss.
 10. Creates columns that don't exist.
 11. Rebuilds indexes and foreign keys.
-12. Stores new identifiers in `_schemaMap`.
+12. Creates or reuses junction tables for `junctionFieldModel` fields and removes orphaned junction tables (when `dropNonCollectionTables` is enabled).
+13. Stores new identifiers in `_schemaMap`.
 
 Migration runs as a database transaction and rolls back on errors. This is supported for SQLite and PostgreSQL, but not for Cloudflare D1 databases. For D1, errors may result in data loss, so backup before syncing.
 
-You can fully or partially disable sync. Example:
+You can fully or partially disable sync, and you can hook into the lifecycle:
 
 ```ts
 import { Database } from '@pruvious/orm'
@@ -314,6 +543,12 @@ new Database({
   sync: {                           // Sync remains active
     dropNonCollectionTables: false, // Default is `true`
     dropNonFieldColumns: false,     // Default is `true`
+    beforeSync: async (db) => {
+      // Runs after the sync lock is acquired and before any schema changes
+    },
+    afterSync: async (db) => {
+      // Runs once the new `_schemaMap` has been written
+    },
   },
 })
 ```
@@ -334,20 +569,24 @@ await db.listIndexes(tableName)
 await db.listForeignKeys(tableName)
 await db.tableExists(tableName)
 await db.columnExists(tableName, columnName)
-await db.indexExists(tableName, columnName)
-await db.foreignKeyExists(tableName, columnName)
+await db.indexExists(tableName, indexName)
+await db.foreignKeyExists(tableName, constraintName)
 await db.createTable(tableName)
 await db.createColumn(tableName, columnName, type, nullable)
 await db.createIndex(tableName, columnNames, unique)
 await db.createForeignKey(tableName, columnName, referencedTable, referencedColumn, action, transaction)
+await db.createJunctionTable(tableName, columnName, referencedTable, inverseColumnName)
 await db.renameTable(tableName, newTableName)
 await db.renameColumn(tableName, columnName, newColumnName)
 await db.changeColumnType(tableName, columnName, type, nullable)
+await db.changeColumnNullable(tableName, columnName, type, nullable)
 await db.dropTable(tableName)
 await db.dropColumn(tableName, columnName)
 await db.dropIndex(indexName)
 await db.dropForeignKey(tableName, constraintName, transaction)
 ```
+
+These methods are intentionally low level and do **not** sanitize the table/column names passed in - validate them yourself before calling.
 
 ## <a id="raw-queries">Raw queries</a>
 
@@ -413,7 +652,27 @@ await db.listTables() // ['Options']
 
 ## <a id="query-builder">Query builder</a>
 
-The `Database` class offers a `queryBuilder()` method that generates a fully-typed `QueryBuilder` instance. This instance inherits schema of the defined database, enabling seamless and enjoyable data manipulation. Here are some examples demonstrating how to interact with the database:
+The `Database` class offers a `queryBuilder()` method that generates a fully-typed `QueryBuilder` instance. This instance inherits schema of the defined database, enabling seamless and enjoyable data manipulation.
+
+```ts
+const qb = db.queryBuilder({ contextLanguage: 'en' })
+```
+
+`queryBuilder()` accepts an optional `contextLanguage` (defaults to `'en'`) used for translating error messages through the configured `i18n` instance.
+
+Every query method returns a `QueryBuilderResult` with the following shape:
+
+```ts
+type QueryBuilderResult<TData, TInputErrors> =
+  | { success: true;  data: TData;       runtimeError: undefined; inputErrors: undefined }
+  | { success: false; data: undefined;   runtimeError: string;    inputErrors: undefined }
+  | { success: false; data: undefined;   runtimeError: undefined; inputErrors: TInputErrors }
+```
+
+- `runtimeError` is set when the database call fails or a hook throws.
+- `inputErrors` is set when validation rejects the input. For INSERT it's an array of `Record<string, string>` (one entry per input row, `undefined` for the ones that succeeded), for UPDATE it's a single `Record<string, string>`.
+
+Here are some examples demonstrating how to interact with the database:
 
 ### <a id="insert">INSERT</a>
 
@@ -559,6 +818,121 @@ console.log(failedSelect)
 // }
 ```
 
+`SelectQueryBuilder` exposes `.all()` to fetch every matching row and `.first()` to fetch the first one (returns `null` data on no match).
+
+#### <a id="where">`where`</a>
+
+`where(field, operator, value)` adds a filter to the query. The set of valid operators is constrained by the field's data type:
+
+- `text` - `=`, `!=`, `in`, `notIn`, `like`, `notLike`, `ilike`, `notIlike`
+- `boolean` - `=`, `!=`
+- `bigint`, `numeric` (and `id`) - `=`, `!=`, `<`, `<=`, `>`, `>=`, `in`, `notIn`, `between`, `notBetween`
+- `junction`, `matrix` - `<`, `<=`, `>`, `>=`, `includes`, `includesAny`, `excludes`, `excludesAny`
+
+Use `whereRaw(sql, params)` for arbitrary SQL fragments and `orGroup([cb1, cb2])` for OR combinations:
+
+```ts
+await qb.selectFrom('Students')
+  .where('house', '=', 1)
+  .orGroup([
+    (eb) => eb.where('firstName', '=', 'Harry'),
+    (eb) => eb.where('firstName', '=', 'Hermione'),
+  ])
+  .all()
+```
+
+Use `clearWhere()` to drop all conditions.
+
+#### <a id="search">`search`</a>
+
+`search(keywords, fields, orderByRelevance?)` adds a case-insensitive multi-keyword match across one or more `text` fields. By default results are ordered by relevance (`'high'`). Multiple `search()` calls combine with AND logic.
+
+```ts
+await qb.selectFrom('Students')
+  .search('er h', ['firstName', 'lastName'])
+  .all()
+```
+
+The `maxSearchKeywords` property on the builder (default `5`) caps how many keywords are processed.
+
+#### <a id="order-group-limit-offset">`groupBy`, `orderBy`, `limit`, `offset`</a>
+
+```ts
+await qb.selectFrom('Students')
+  .selectRaw('"house", cast(count(*) as text) as "students"')
+  .groupBy('house')
+  .orderBy('house', 'asc', 'nullsLast')
+  .limit(10)
+  .offset(0)
+  .all()
+```
+
+`orderBy(field, direction = 'asc', nulls = 'nullsAuto')` is chainable. `orderByRaw(sql, params)` is available for custom expressions.
+
+#### <a id="pagination">`paged` and `paginate`</a>
+
+`paged(page, perPage)` is shorthand for `.limit(perPage).offset((page - 1) * perPage)`. To get pagination metadata along with the rows, use `paginate()`:
+
+```ts
+const result = await qb.selectFrom('Students')
+  .paged(2, 20)
+  .paginate()
+
+// result.data: { records, currentPage, perPage, lastPage, total }
+```
+
+#### <a id="aggregations">Aggregations</a>
+
+The select builder exposes `count()`, `min(field)`, `max(field)`, `sum(field)`, and `avg(field)`. `min`/`max`/`sum`/`avg` only accept `bigint` or `numeric` fields (or `'id'`).
+
+```ts
+const studentCount = await qb.selectFrom('Students').where('house', '=', 1).count()
+const avgPoints   = await qb.selectFrom('Houses').avg('points')
+```
+
+#### <a id="populate">`populate`</a>
+
+Call `.populate()` to run the configured field populators on the result. Populators are defined on the field model (or via the `populator` option on built-in models) and can be used to resolve relations, format values, or perform any other async transformation.
+
+```ts
+await qb.selectFrom('Students')
+  .select(['id', 'house'])
+  .populate()
+  .first()
+```
+
+#### <a id="raw-injections">Raw injections</a>
+
+For situations where the builder doesn't cover a SQL clause, use `injectRaw(position, sql, params)`. Positions on `SelectQueryBuilder` are `afterSelectClause`, `afterFromClause`, `afterWhereClause`, `afterGroupByClause`, `afterOrderByClause`, and `afterOffsetClause`. Equivalents exist on the INSERT, UPDATE, and DELETE builders.
+
+```ts
+await qb.selectFrom('Students')
+  .select(['firstName', 'lastName'])
+  .injectRaw('afterSelectClause', ', "Houses"."name" as "houseName"')
+  .injectRaw('afterFromClause', 'join "Houses" on "Students"."house" = "Houses"."id"')
+  .all()
+```
+
+`selectRaw`, `whereRaw`, and `orderByRaw` cover the most common cases.
+
+#### <a id="caching">Caching</a>
+
+`useCache(cache)` shares a cache object across query executions so hooks and repeated `.all()`/`.first()`/`.count()` calls don't redo work. The cache is also passed into hooks via `context.cache`. Use `clearCache()` to reset it.
+
+The reserved `_tmp` key is wiped before `afterQueryExecution` hooks fire - it's a safe place to stash short-lived state shared between fields (this is what `createdAtField` and `updatedAtField` use to synchronize their timestamps).
+
+#### <a id="query-strings">Query strings</a>
+
+Every query builder can be serialized to and from a URL-style query string via `toQueryString()` and `fromQueryString()`. The supported parameters depend on the builder, but for `SelectQueryBuilder` they include `select`, `where`, `search`, `groupBy`, `orderBy`, `orderByRelevance`, `limit`, `offset`, `page`, `perPage`, and `populate`.
+
+```ts
+const students = await qb.selectFrom('Students')
+  .fromQueryString('select=firstName,lastName&where=house[=][1]')
+  .all()
+```
+
+The standalone helpers (`queryStringToSelectQueryBuilderParams`, `selectQueryBuilderParamsToQueryString`, and their INSERT/UPDATE/DELETE counterparts) live under the `@pruvious/orm/query-string` entry point so they can be used without pulling in the full query builder.
+
 ### <a id="update">UPDATE</a>
 
 ```ts
@@ -649,7 +1023,7 @@ const deletedBookCount = await qb.deleteFrom('Books')
 console.log(deletedBookCount) // 7
 
 const failedDelete = await qb.deleteFrom('Houses')
-  .where('name', 'Slytherin')
+  .where('name', '=', 'Slytherin')
   .returning(['name'])
   .run()
 

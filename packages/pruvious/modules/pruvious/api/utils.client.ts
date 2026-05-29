@@ -243,20 +243,20 @@ export function pruviousGet<TRoute extends PruviousGetRoute>(
  * <script lang="ts" setup>
  * import { pruviousPatch } from '#pruvious/app'
  *
- * const body = ref({ email: '', password: '', remember: false })
+ * const body = ref({ firstName: 'Jane' })
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
  *
- * const { success, data, error } = await pruviousPatch('@todo', {
+ * const { success, data, error } = await pruviousPatch('me', {
  *   body,
  *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
  * if (success) {
- *   console.log('@todo')
+ *   console.log('Updated user:', data)
  * } else {
- *   console.error('Login failed:', error)
+ *   console.error('Update failed:', error)
  * }
  * </script>
  * ```
@@ -287,15 +287,15 @@ export function pruviousPatch<TRoute extends PruviousPatchRoute>(
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
  *
- * const { success, data, error } = await pruviousDelete('@todo', {
+ * const { success, data, error } = await pruviousDelete('collections/Articles/1', {
  *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
  * if (success) {
- *   console.log('@todo')
+ *   console.log('Deleted article:', data)
  * } else {
- *   console.error('Login failed:', error)
+ *   console.error('Delete failed:', error)
  * }
  * </script>
  * ```

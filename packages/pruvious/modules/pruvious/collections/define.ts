@@ -313,7 +313,7 @@ export interface CollectionMetaOptions<
          *
          * Only users with `collection:{slug}:create` permission can access these endpoints.
          *
-         * @see https://pruvious.com/docs/collections/api#create (@todo set up this link)
+         * @see https://pruvious.com/docs/collections/api#create
          *
          * @default true
          */
@@ -353,7 +353,7 @@ export interface CollectionMetaOptions<
          *
          * Only users with `collection:{slug}:read` permission can access these endpoints.
          *
-         * @see https://pruvious.com/docs/collections/api#read (@todo set up this link)
+         * @see https://pruvious.com/docs/collections/api#read
          *
          * @default true
          */
@@ -387,7 +387,7 @@ export interface CollectionMetaOptions<
          *
          * Only users with `collection:{slug}:update` permission can access these endpoints.
          *
-         * @see https://pruvious.com/docs/collections/api#update (@todo set up this link)
+         * @see https://pruvious.com/docs/collections/api#update
          *
          * @default true
          */
@@ -414,7 +414,7 @@ export interface CollectionMetaOptions<
          *
          * Only users with `collection:{slug}:delete` permission can access these endpoints.
          *
-         * @see https://pruvious.com/docs/collections/api#delete (@todo set up this link)
+         * @see https://pruvious.com/docs/collections/api#delete
          *
          * @default true
          */
@@ -451,7 +451,7 @@ export interface CollectionMetaOptions<
    *
    * This guard only takes effect when the `authGuard` option is enabled.
    *
-   * @see https://pruvious.com/docs/collections/guards (@todo set up this link)
+   * @see https://pruvious.com/docs/collections/guards
    *
    * @example
    * ```ts
@@ -760,7 +760,7 @@ export interface CollectionMetaOptions<
    * - `{...}` - Configures custom routing options.
    * - `false` - Disables routing completely.
    *
-   * @see https://pruvious.com/docs/routing (@todo set up this link)
+   * @see https://pruvious.com/docs/routing
    *
    * @default false
    *
@@ -1154,10 +1154,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *   - The import path must be a literal string, not a variable.
      *   - The import path can be an absolute or relative to the definition file.
      *
-     * The custom component receives the following props:
-     *
-     * - @todo
-     *
      * @default 'standard'
      */
     dashboardLayout: 'standard' | (string & {})
@@ -1214,10 +1210,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
                      *   - An absolute path to a `.vue` component.
                      *   - A path for an npm module.
                      * - When working within the `<sharedDir>` directory, always use `resolveNamedPruviousComponent()` instead of `resolvePruviousComponent()`.
-                     *
-                     * The custom component receives the following props:
-                     *
-                     * - @todo
                      *
                      * @example
                      * ```ts
@@ -1366,14 +1358,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *   - The import path must be a literal string, not a variable.
      *   - The import path can be an absolute or relative to the definition file.
      *
-     * The custom component receives the following props:
-     *
-     * - @todo
-     *
-     * The custom component can emit the following events:
-     *
-     * - @todo
-     *
      * @default 'auto'
      */
     dashboardLayout: 'auto' | 'standard' | 'live-preview' | (string & {})
@@ -1481,14 +1465,6 @@ export interface CollectionUIOptions<TFieldNames extends string = string> {
      *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
      *   - The import path must be a literal string, not a variable.
      *   - The import path can be an absolute or relative to the definition file.
-     *
-     * The custom component receives the following props:
-     *
-     * - @todo
-     *
-     * The custom component can emit the following events:
-     *
-     * - @todo
      *
      * @default 'auto'
      */
@@ -1961,17 +1937,30 @@ export type MergeCollectionFields<
  * @example
  * ```ts
  * // server/collections/Products.ts
- * import { defineCollection } from '#pruvious/server'
+ * import { defineCollection, numberField, recordField, textField } from '#pruvious/server'
  *
  * export default defineCollection({
+ *   translatable: true,
  *   fields: {
- *     // @todo
- *     // ...
+ *     name: textField({ required: true }),
+ *     price: numberField({ required: true, min: 0, decimalPlaces: 2 }),
+ *     category: recordField({ collection: 'ProductCategories' }),
  *   },
  *   foreignKeys: [
- *     // @todo
+ *     { field: 'category', referencedCollection: 'ProductCategories', action: 'set null' },
  *   ],
- *   // @todo dashboard and API options
+ *   routing: {
+ *     publicFields: ['name', 'price'],
+ *     labelField: ['name'],
+ *     seo: true,
+ *   },
+ *   ui: {
+ *     indexPage: {
+ *       dataTable: {
+ *         columns: ['name', 'price', 'category', 'updatedAt'],
+ *       },
+ *     },
+ *   },
  * })
  * ```
  */
@@ -2173,7 +2162,6 @@ export function defineCollection<
           `You can disable this behavior by setting the \`routing.seo\` option to \`false\` in your collection definition.`,
           `Source: ${colorize('dim', resolveContext.location.file.relative)}`,
         ])
-        // @todo check for other reserved field names (deletedAt, ...)
       } else if (camelCase(fieldName) !== fieldName || fieldName.length > 63) {
         warnWithContext(`The field name ${colorize('yellow', fieldName)} is invalid.`, [
           `Field names must be in camelCase format and maximum 63 characters long.`,
@@ -2629,7 +2617,7 @@ export function defineCollection<
  *
  * @returns a `Promise` that resolves to the defined collection instance.
  *
- * @see https://pruvious.com/docs/collection-templates (@todo set up this link)
+ * @see https://pruvious.com/docs/collection-templates
  *
  * @example
  * ```ts

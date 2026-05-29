@@ -266,7 +266,6 @@ export function junctionFieldModel<
           }
         }
       },
-      // @todo add existence validator
     ],
     populator: (value, contextField) => {
       if (contextField.definition.options.populator) {

@@ -28,7 +28,7 @@ import {
  * Use this as the default export in a file within the `server/templates/` directory.
  * The filename determines the template name, which should be in PascalCase (e.g. 'Articles.ts', 'ArticleCategories.ts', etc.).
  *
- * @see https://pruvious.com/docs/collection-templates (@todo set up this link)
+ * @see https://pruvious.com/docs/collection-templates
  *
  * @example
  * ```ts

@@ -85,7 +85,10 @@ export class SingletonBaseQueryBuilder {
    *   .get()
    *
    * // Executing query (anonymized)
-   * // > select @todo
+   * // > select value from "Options" where key = $key
+   * // > {
+   * // >   "key": "string"
+   * // > }
    * // Output (anonymized)
    * // > {
    * // >   "logo": "number",

@@ -89,13 +89,13 @@ export function pruviousDashboardPost<TRoute extends PruviousPostRoute>(
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
  *
- * const { success, data } = await pruviousDashboardGet('@todo', {
+ * const { success, data } = await pruviousDashboardGet('me', {
  *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
  * if (success) {
- *   console.log('@todo')
+ *   console.log('Current user:', data)
  * } else {
  *   // No need to handle errors here, the utility will display a toast message
  * }
@@ -127,18 +127,18 @@ export function pruviousDashboardGet<TRoute extends PruviousGetRoute>(
  * <script lang="ts" setup>
  * import { pruviousDashboardPatch } from '#pruvious/dashboard'
  *
- * const body = ref('@todo')
+ * const body = ref({ firstName: 'Jane' })
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
  *
- * const { success, data } = await pruviousDashboardPatch('@todo', {
+ * const { success, data } = await pruviousDashboardPatch('me', {
  *   body,
  *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
  * if (success) {
- *   console.log('@todo')
+ *   console.log('Updated user:', data)
  * } else {
  *   // No need to handle errors here, the utility will display a toast message
  * }
@@ -173,13 +173,13 @@ export function pruviousDashboardPatch<TRoute extends PruviousPatchRoute>(
  * const isFormDisabled = ref(false)
  * const inputErrors = ref<Record<string, string>>({})
  *
- * const { success, data } = await pruviousDashboardDelete('@todo', {
+ * const { success, data } = await pruviousDashboardDelete('collections/Articles/1', {
  *   isDisabledRef: isFormDisabled,
  *   inputErrors,
  * })
  *
  * if (success) {
- *   console.log('@todo')
+ *   console.log('Deleted article:', data)
  * } else {
  *   // No need to handle errors here, the utility will display a toast message
  * }

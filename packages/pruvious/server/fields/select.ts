@@ -108,8 +108,6 @@ export default {
    *
    * This function is intended for server-side use in collection definitions.
    * For client-side usage, import the equivalent function from `#pruvious/app`.
-   *
-   * @todo filter component
    */
   serverFn: function <
     const TRequired extends boolean | undefined,

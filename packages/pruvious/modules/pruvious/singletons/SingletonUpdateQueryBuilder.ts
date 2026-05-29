@@ -425,7 +425,13 @@ export class SingletonUpdateQueryBuilder<
    * //   success: true,
    * //   data: {
    * //     logo: {
-   * //       // @todo populated image data
+   * //       id: 456,
+   * //       path: 'branding/logo.svg',
+   * //       mime: 'image/svg+xml',
+   * //       size: 1842,
+   * //       description: 'Company logo',
+   * //       imageWidth: 240,
+   * //       imageHeight: 64,
    * //     },
    * //     copyrightText: '© 2025 Example Inc.',
    * //   },

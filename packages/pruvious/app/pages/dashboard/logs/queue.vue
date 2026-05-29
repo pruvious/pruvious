@@ -81,7 +81,6 @@
               </div>
             </div>
             <div v-if="details.request.user" class="p-details-field">
-              <!-- @todo instead record and record.table fields use just integers with edit button since they dont log new requests... -->
               {{ details.request.user }}
             </div>
             <div class="p-details-field">

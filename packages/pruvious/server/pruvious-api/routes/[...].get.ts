@@ -32,7 +32,7 @@ export async function resolveRouteEventHandler(event: H3Event, path: string): Pr
     event.context.pruvious.auth = { isLoggedIn: false, user: null, permissions: [] }
   }
 
-  event.waitUntil(logRequest()) // @todo replace with analytics
+  event.waitUntil(logRequest())
 
   if (
     subpaths[0] === runtimeConfig.pruvious.i18n.primaryLanguage &&

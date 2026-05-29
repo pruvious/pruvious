@@ -12,7 +12,7 @@ import type { FieldGuard } from './define'
  * - `guardedUpdate(collection)`
  * - `guardedDeleteFrom(collection)`
  *
- * @see https://pruvious.com/docs/fields/guards (@todo set up this link)
+ * @see https://pruvious.com/docs/fields/guards
  */
 export function transformFieldGuardsToValidators(
   guards: FieldGuard<

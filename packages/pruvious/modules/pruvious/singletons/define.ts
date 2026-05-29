@@ -134,7 +134,7 @@ interface ISingleton {
    *
    * This guard only takes effect when the `authGuard` option is enabled.
    *
-   * @see https://pruvious.com/docs/singletons/guards (@todo set up this link)
+   * @see https://pruvious.com/docs/singletons/guards
    */
   guards: any
 
@@ -213,7 +213,7 @@ interface ISingleton {
    * - `{...}` - Configures custom routing options.
    * - `false` - Disables routing completely.
    *
-   * @see https://pruvious.com/docs/routing (@todo set up this link)
+   * @see https://pruvious.com/docs/routing
    */
   routing: any
 
@@ -282,7 +282,7 @@ interface SingletonAPIOptions {
    *
    * Only users with `singleton:{slug}:read` permission can access this endpoint.
    *
-   * @see https://pruvious.com/docs/singletons/api#read (@todo set up this link)
+   * @see https://pruvious.com/docs/singletons/api#read
    */
   read: boolean
 
@@ -304,7 +304,7 @@ interface SingletonAPIOptions {
    *
    * Only users with `singleton:{slug}:update` permission can access this endpoints.
    *
-   * @see https://pruvious.com/docs/singletons/api#update (@todo set up this link)
+   * @see https://pruvious.com/docs/singletons/api#update
    */
   update: boolean
 }
@@ -475,14 +475,6 @@ export interface SingletonUIOptions<TFieldNames extends string = string> {
    *   - The component must be resolved using `resolvePruviousComponent()` or `resolveNamedPruviousComponent()`.
    *   - The import path must be a literal string, not a variable.
    *   - The import path can be an absolute or relative to the definition file.
-   *
-   * The custom component receives the following props:
-   *
-   * - @todo
-   *
-   * The custom component can emit the following events:
-   *
-   * - @todo
    *
    * @default 'auto'
    */

@@ -46,8 +46,6 @@ import { httpStatusCodeMessages } from '../api/utils.server'
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function removeWhere(
   fields: string[] | string,
@@ -124,8 +122,6 @@ export function removeWhere(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function denyWhere(
   fields: string[] | string,
@@ -200,8 +196,6 @@ export function denyWhere(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function removeOrderBy(
   fields: string[] | string,
@@ -262,8 +256,6 @@ export function removeOrderBy(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function denyOrderBy(
   fields: string[] | string,
@@ -325,8 +317,6 @@ export function denyOrderBy(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function removeGroupBy(
   fields: string[] | string,
@@ -387,8 +377,6 @@ export function removeGroupBy(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function denyGroupBy(
   fields: string[] | string,
@@ -450,8 +438,6 @@ export function denyGroupBy(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function excludeFields(
   fields: string[] | string,
@@ -537,8 +523,6 @@ export function excludeFields(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function maskFields(
   fields: string[] | string,
@@ -617,8 +601,6 @@ export function maskFields(
  *   },
  * })
  * ```
- *
- * @todo test
  */
 export function resetFields(
   fields: string[] | string,
