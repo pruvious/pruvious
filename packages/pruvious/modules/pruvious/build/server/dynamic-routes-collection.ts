@@ -61,7 +61,7 @@ export function getServerDynamicRoutesCollectionFileContent() {
     `            let hasErrors = false`,
     `            const { getRouteReferences } = await import('#pruvious/server')`,
     `            const collectionNames = Object.values(await getRouteReferences())`,
-    `              .filter(({ dataContainerType }) => dataContainerType === 'collection')`,
+    `              .filter(({ dataContainerType, referenceable }) => dataContainerType === 'collection' && referenceable !== false)`,
     `              .map(({ dataContainerName }) => dataContainerName)`,
     `            for (const [i, item] of value.entries()) {`,
     `              if (!collectionNames.includes(item)) {`,

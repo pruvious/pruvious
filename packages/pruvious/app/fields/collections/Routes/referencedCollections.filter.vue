@@ -49,8 +49,8 @@ const dashboard = usePruviousDashboard()
 const routeReferences = getRouteReferences()
 const choices: (PUISelectChoiceModel | PUISelectChoiceGroupModel)[] = Object.values(routeReferences)
   .filter(
-    ({ dataContainerType, dataContainerName }) =>
-      dataContainerType === 'collection' && dashboard.value?.collections[dataContainerName],
+    ({ dataContainerType, dataContainerName, referenceable }) =>
+      dataContainerType === 'collection' && referenceable !== false && dashboard.value?.collections[dataContainerName],
   )
   .map(({ dataContainerName }) => ({
     label: isDefined(dashboard.value!.collections[dataContainerName]!.ui.label)

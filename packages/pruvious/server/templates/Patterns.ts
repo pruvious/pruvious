@@ -24,6 +24,7 @@ export default defineTemplate(() => ({
     }),
   },
   routing: {
+    referenceable: false,
     publicFields: ['title', 'description', 'blocks'],
     subpath: { allowEmptyString: true },
     isPublic: {

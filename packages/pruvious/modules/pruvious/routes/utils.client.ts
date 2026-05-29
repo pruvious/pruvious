@@ -54,6 +54,7 @@ export function getRouteReferences(): Record<
       publicFields: pick(fields, routing.publicFields),
       dataContainerType,
       dataContainerName,
+      referenceable: routing.referenceable,
       layout: routing.layout,
     },
   ])

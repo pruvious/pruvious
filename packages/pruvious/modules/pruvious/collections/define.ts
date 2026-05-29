@@ -1820,6 +1820,17 @@ export type CollectionRoutingOptions<
    * @default undefined
    */
   layout?: LayoutKey
+
+  /**
+   * Controls whether the collection can be referenced by a `Routes` record.
+   *
+   * When `false`, the collection still supports routing features such as live preview,
+   * but it is hidden from the route's reference picker and rejected as a route reference.
+   * This is useful for collections that are routable purely for preview purposes (e.g. patterns).
+   *
+   * @default true
+   */
+  referenceable?: boolean
 }
 
 interface ResolveContext {
@@ -1836,6 +1847,7 @@ interface ResolveContext {
 
 interface CollectionRoutingMeta {
   enabled: boolean
+  referenceable: boolean
   publicFields: string[]
   labelField: string | string[]
   subpath: SubpathFieldPresetOptions & Required<BaseSubpathFieldOptions>
@@ -2063,6 +2075,7 @@ export function defineCollection<
           }
         : {},
       {
+        referenceable: true,
         publicFields: [
           'id',
           ...Object.keys(options.fields),

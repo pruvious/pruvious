@@ -75,6 +75,11 @@ export interface SerializableCollection extends Pick<CollectionMeta, 'translatab
     enabled: boolean
 
     /**
+     * Indicates whether the collection can be referenced by a `Routes` record.
+     */
+    referenceable: boolean
+
+    /**
      * Indicates whether the `isPublic` field is enabled in the collection.
      */
     isPublicField: boolean

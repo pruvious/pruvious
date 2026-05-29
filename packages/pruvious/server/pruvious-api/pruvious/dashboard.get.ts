@@ -45,6 +45,7 @@ export default defineEventHandler(async () => {
           editorsField: collection.meta.editors.enabled,
           routing: {
             enabled: collection.meta.routing.enabled,
+            referenceable: collection.meta.routing.referenceable,
             publicFields: collection.meta.routing.enabled ? collection.meta.routing.publicFields : [],
             isPublicField: collection.meta.routing.isPublic.enabled,
             scheduledAtField: collection.meta.routing.scheduledAt.enabled,

@@ -51,6 +51,13 @@ export interface GenericRouteReference {
   publicFields: Record<string, GenericField>
 
   /**
+   * Indicates whether the collection or singleton can be referenced by a `Routes` record.
+   * Containers that opt out (e.g. patterns) still support live preview but are hidden from the
+   * route's reference picker. Singletons are always referenceable.
+   */
+  referenceable?: boolean
+
+  /**
    * The layout key used to render the collection's route.
    * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
    */

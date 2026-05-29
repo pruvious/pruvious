@@ -1209,6 +1209,7 @@ export async function getServerFileContent() {
     `      publicFields: pick(fields, routing.publicFields),`,
     `      dataContainerType,`,
     `      dataContainerName,`,
+    `      referenceable: routing.referenceable,`,
     `      layout: routing.layout,`,
     `    },`,
     `  ]) as any`,
