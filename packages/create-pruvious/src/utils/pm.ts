@@ -1,13 +1,13 @@
 import process from 'node:process'
 
-export type PackageManagerName = 'npm' | 'pnpm' | 'yarn' | 'bun'
+export type PackageManagerName = 'npm' | 'pnpm'
 
-const supported: PackageManagerName[] = ['npm', 'pnpm', 'yarn', 'bun']
+const supported: PackageManagerName[] = ['npm', 'pnpm']
 
 /**
  * Detects which package manager invoked the CLI by reading the
- * `npm_config_user_agent` environment variable that `npm create`,
- * `pnpm create`, `yarn create`, and `bun create` all set.
+ * `npm_config_user_agent` environment variable that `npm create` and
+ * `pnpm create` both set.
  * Returns `null` when the invoking manager cannot be determined (for example
  * when the CLI is run directly via `node`).
  */
@@ -31,16 +31,8 @@ export function installCommand(pm: PackageManagerName): string {
 
 /**
  * Returns the command that runs a package.json script for a package manager
- * (e.g. `npm run dev`, `pnpm dev`, `yarn dev`, `bun run dev`).
+ * (e.g. `npm run dev`, `pnpm dev`).
  */
 export function runScriptCommand(pm: PackageManagerName, script: string): string {
-  switch (pm) {
-    case 'pnpm':
-    case 'yarn':
-      return `${pm} ${script}`
-    case 'bun':
-      return `bun run ${script}`
-    default:
-      return `npm run ${script}`
-  }
+  return pm === 'pnpm' ? `pnpm ${script}` : `npm run ${script}`
 }

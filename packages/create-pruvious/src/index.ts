@@ -52,7 +52,7 @@ const main = defineCommand({
     },
     pm: {
       type: 'string',
-      description: 'Package manager to use (npm, pnpm, yarn, bun).',
+      description: 'Package manager to use (npm, pnpm).',
       valueHint: 'name',
       default: '',
     },
@@ -277,7 +277,7 @@ async function resolveDistTag(name: string, tag: string): Promise<string | null>
  * non-interactive shell.
  */
 async function resolvePackageManager(flag: string): Promise<PackageManagerName> {
-  const supported: PackageManagerName[] = ['npm', 'pnpm', 'yarn', 'bun']
+  const supported: PackageManagerName[] = ['npm', 'pnpm']
 
   if (flag && supported.includes(flag as PackageManagerName)) {
     return flag as PackageManagerName
