@@ -72,6 +72,8 @@ pnpm play      # run the playground app
 pnpm test      # run the test suite
 ```
 
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full setup, including the required `pnpm bootstrap` step, test service configuration, and code style.
+
 ## License
 
 This repository is licensed under the [MIT License](./LICENSE).
