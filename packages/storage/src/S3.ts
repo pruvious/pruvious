@@ -5,11 +5,13 @@ import {
   CreateMultipartUploadCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
   UploadPartCommand,
   type CompleteMultipartUploadCommandOutput,
   type GetObjectCommandOutput,
+  type HeadObjectCommandOutput,
   type UploadPartCommandOutput,
 } from '@aws-sdk/client-s3'
 import { castToBoolean, isInteger, randomString } from '@pruvious/utils'
@@ -217,11 +219,11 @@ export class S3 implements Instance {
   async meta(path: string): Promise<MetaResult> {
     try {
       const parsed = parsePath(path)
-      let output: GetObjectCommandOutput
+      let output: HeadObjectCommandOutput
 
       try {
         output = await this.client.send(
-          new GetObjectCommand({
+          new HeadObjectCommand({
             Bucket: this.bucket,
             Key: parsed.path.slice(1),
           }),
@@ -356,7 +358,7 @@ export class S3 implements Instance {
   }
 
   protected handleS3Error(error: any): { success: false; error: string } {
-    if (error.name === 'NoSuchKey') {
+    if (error.name === 'NoSuchKey' || error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
       return { success: false, error: 'File not found' }
     }
 
