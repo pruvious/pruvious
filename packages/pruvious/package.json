@@ -23,6 +23,7 @@
     }
   },
   "main": "./dist/nuxt.config.ts",
+  "bin": "./dist/bin/index.mjs",
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "nuxt dev .playground",

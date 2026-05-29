@@ -7,7 +7,7 @@ const args = process.argv.slice(2)
 const url = new URL(import.meta.url)
 const rootDir = resolve(dirname(fileURLToPath(url)), '..')
 const distDir = join(rootDir, 'dist')
-const sources = ['app', 'modules', 'public', 'server', 'shared', 'file://nuxt.config.ts']
+const sources = ['app', 'bin', 'modules', 'public', 'server', 'shared', 'file://nuxt.config.ts']
 
 if (args.includes('--add')) {
   writeFile(args[args.indexOf('--add') + 1])
