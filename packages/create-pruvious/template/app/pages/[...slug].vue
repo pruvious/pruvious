@@ -1,6 +1,7 @@
 <template>
   <NuxtLayout :name="proute?.layout">
     <PruviousBlocks field="blocks" />
+    <PruviousWidgets />
   </NuxtLayout>
 </template>
 
