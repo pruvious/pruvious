@@ -4,7 +4,6 @@ import { $400, $422, $get, $post, setAdminToken } from './utils'
 test('installation', async () => {
   expect(await $get('/api/pruvious')).toEqual({
     installed: false,
-    version: expect.any(String),
   })
 
   expect(await $post('/api/pruvious/install')).toEqual(
@@ -42,6 +41,5 @@ test('installation', async () => {
 
   expect(await $get('/api/pruvious')).toEqual({
     installed: true,
-    version: expect.any(String),
   })
 })
