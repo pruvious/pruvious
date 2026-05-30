@@ -36,7 +36,7 @@
 import { getOverlayTransitionDuration, useDashboardLayout } from '#pruvious/dashboard'
 import { puiIsEditingText } from '@pruvious/ui/pui/hotkeys'
 import { usePUIOverlayCounter } from '@pruvious/ui/pui/overlay'
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useMediaQuery, useSwipe } from '@vueuse/core'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 
 defineProps({
@@ -61,6 +61,7 @@ defineProps({
   },
 })
 
+const slots = useSlots()
 const dashboardLayout = useDashboardLayout()
 const header = useTemplateRef('header')
 const sidebar = useTemplateRef('sidebar')
@@ -74,8 +75,29 @@ const { activate: activateFocusTrap, deactivate: deactivateFocusTrap } = useFocu
   initialFocus: false,
   returnFocusOnDeactivate: false,
 })
+const isOverlayViewport = useMediaQuery('(max-width: 1024px)')
+const edgeZonePx = 24
 
 let transitionTimeout: NodeJS.Timeout | undefined
+let swipeStartX = 0
+
+useSwipe(() => (import.meta.client ? document.body : null), {
+  threshold: 50,
+  onSwipeStart: (e) => {
+    swipeStartX = e.touches[0]?.clientX ?? 0
+  },
+  onSwipeEnd: (_e, direction) => {
+    if (!slots.sidebar || !isOverlayViewport.value || transition.value) {
+      return
+    }
+    const expanded = dashboardLayout.value.sidebarExpanded
+    if (!expanded && direction === 'right' && swipeStartX <= edgeZonePx) {
+      toggleSidebar()
+    } else if (expanded && direction === 'left') {
+      toggleSidebar()
+    }
+  },
+})
 
 defineExpose({ sidebar, toggleSidebar })
 
