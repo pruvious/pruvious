@@ -1,3 +1,9 @@
 {
-  "extends": "./src/.playground/.nuxt/tsconfig.json"
+  "files": [],
+  "references": [
+    { "path": "./src/.playground/.nuxt/tsconfig.app.json" },
+    { "path": "./src/.playground/.nuxt/tsconfig.server.json" },
+    { "path": "./src/.playground/.nuxt/tsconfig.shared.json" },
+    { "path": "./src/.playground/.nuxt/tsconfig.node.json" }
+  ]
 }
