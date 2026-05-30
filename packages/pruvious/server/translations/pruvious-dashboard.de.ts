@@ -210,6 +210,7 @@ export default defineTranslation({
   'Custom': 'Benutzerdefiniert',
   'Cut': 'Ausschneiden',
   'Dark mode': 'Dunkler Modus',
+  'Dashboard': 'Dashboard',
   'Dashboard language': 'Dashboard-Sprache',
   'Date': 'Datum',
   'Date format': 'Datumsformat',

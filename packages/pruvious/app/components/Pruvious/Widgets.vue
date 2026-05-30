@@ -1,13 +1,17 @@
 <template>
   <ClientOnly>
-    <LazyPruviousPreviewRect v-if="preview" />
-    <!-- @todo <LazyPruviousDashboardWidget v-if="isLoggedIn && canAccessDashboard" /> -->
-    <slot v-if="preview" name="preview" />
+    <template v-if="preview">
+      <LazyPruviousPreviewRect />
+      <slot name="preview" />
+    </template>
+    <LazyPruviousDashboardWidget v-else-if="showWidget" />
   </ClientOnly>
 </template>
 
 <script lang="ts" setup>
-import { isPreview } from '#pruvious/app'
+import { hasPermission, isPreview, useAuth } from '#pruvious/app'
 
 const preview = isPreview()
+const auth = useAuth()
+const showWidget = computed(() => auth.value.isLoggedIn && hasPermission('access-dashboard'))
 </script>

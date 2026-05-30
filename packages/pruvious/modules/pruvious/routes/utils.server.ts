@@ -283,6 +283,12 @@ export type ResolvedRoute<TRef extends RouteReferenceName = RouteReferenceName> 
   }
 
   /**
+   * The id of the referenced collection record.
+   * Only set when `ref` points to a collection; singletons leave this `undefined`.
+   */
+  recordId?: number
+
+  /**
    * The layout key used to render the collection's route.
    * Defines which Vue component will be used in `<NuxtLayout>` when displaying this collection.
    */
@@ -891,6 +897,18 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       )
 
       if (singletonReference) {
+        const singletonData = (
+          await selectSingleton(exactRoute.referencedSingleton)
+            .select(Object.keys(singletonReference[1].publicFields) as any)
+            .language(language)
+            .populate()
+            .get()
+        ).data
+
+        if (!singletonData) {
+          return null
+        }
+
         const routeSEO = exactRoute[`seo${languageSuffix}`]
         const realPath = normalizeRoutePath(languagePrefix + exactRoute[`path${languageSuffix}`])
         const translations = Object.fromEntries(
@@ -917,10 +935,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
             uploadsBasePath,
           }),
           ref: singletonReference[0] as TRef,
-          data: (await selectSingleton(exactRoute.referencedSingleton)
-            .select(Object.keys(singletonReference[1].publicFields) as any)
-            .language(language)
-            .get()) as any,
+          data: singletonData as any,
           layout: singletonReference[1].layout,
           softRedirect: realPath !== withLeadingSlash(path) ? realPath! : undefined,
         }
@@ -983,6 +998,8 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
     }),
   )
 
+  const linkIndex = await getLinkIndex()
+
   for (const record of collectionRecords) {
     if (record?.data) {
       const { ref, collection, data, route } = record
@@ -990,6 +1007,9 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
       const realPath = normalizeRoutePath(`${languagePrefix}/${basePath}/${data.subpath}`)
       const recordSEO = collection.meta.routing.seo.enabled ? data.seo : {}
       const routeSEO = route[`seo${languageSuffix}`]
+      const recordId = (linkIndex.records[ref] ?? []).find(
+        (r) => r.subpath === data.subpath && (!collection.meta.translatable || r.language === language),
+      )?.id
       const translations = Object.fromEntries(
         otherLanguages.map(({ code }, i) => {
           const otherSuffix = otherLanguageSuffixes[i]!
@@ -1021,6 +1041,7 @@ export async function resolveRoute<TRef extends RouteReferenceName>(
         }),
         ref,
         data: pick(data, collection.meta.routing.publicFields) as any,
+        recordId,
         layout: collection.meta.routing.layout,
         softRedirect: realPath !== withLeadingSlash(path) ? realPath : undefined,
       }
