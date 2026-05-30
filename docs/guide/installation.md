@@ -5,7 +5,7 @@ The fastest way to start a new Pruvious project is the `create-pruvious` scaffol
 ## Prerequisites
 
 - **Node.js 24** or newer (see `.nvmrc`)
-- **npm**, **pnpm**, **yarn**, or **bun**
+- **npm** or **pnpm**
 - A terminal
 
 > [!TIP]
@@ -21,8 +21,6 @@ npm create pruvious@alpha
 
 ```sh
 pnpm create pruvious@alpha
-yarn create pruvious@alpha
-bun create pruvious@alpha
 ```
 
 You can pass the target directory directly:
