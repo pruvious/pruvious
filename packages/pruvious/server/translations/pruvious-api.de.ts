@@ -29,12 +29,15 @@ export default defineTranslation({
 
   'Hash fragments are not allowed in this field': 'Hash-Fragmente sind in diesem Feld nicht erlaubt',
 
+  'Icon not found': 'Symbol nicht gefunden',
   'Image variant not found': 'Bildvariante nicht gefunden',
   'Incorrect credentials': 'Falsche Anmeldedaten',
   'Invalid `$param` value. Must be one of: $values': createPattern(
     'Ungültiger Wert für `$param`. Muss einer der folgenden sein: $values',
     { param: 'string', values: 'string' },
   ),
+  'Invalid icon directory': 'Ungültiges Symbolverzeichnis',
+  'Invalid icon name': 'Ungültiger Symbolname',
   'Invalid input': 'Ungültige Eingabe',
   'Invalid language code': 'Ungültiger Sprachcode',
   'Invalid link target': 'Ungültiges Link-Ziel',

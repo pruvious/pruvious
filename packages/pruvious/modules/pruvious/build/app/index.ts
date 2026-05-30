@@ -68,6 +68,9 @@ function getReExports() {
     `export { defineAction, defineFilter } from '${resolvePruviousFile('hooks/define.client')}'`,
     `export { addAction, doActions, addFilter, applyFilters } from '${resolvePruviousFile('hooks/utils.client')}'`,
 
+    // Icons
+    `export { buildIconUrl } from '${resolvePruviousFile('icons/utils.app')}'`,
+
     // I18n
     `export { i18n, _, __, languages, primaryLanguage, isValidLanguageCode } from './i18n'`,
 

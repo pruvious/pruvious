@@ -1356,6 +1356,68 @@ export interface PruviousModuleOptions {
     }
 
     /**
+     * Directory path(s) where SVG icons used by the `iconField` are stored. Each path is
+     * relative to the project's `<srcDir>` (which in Nuxt 4 is `app/`), so the default
+     * `'icons'` resolves to `<rootDir>/app/icons/`.
+     *
+     * Pass a string to use a single directory, an array of strings for multiple
+     * directories, or objects of the form `{ dir, prefix }` to assign an explicit
+     * prefix (useful when two directories share a basename). The first entry is the
+     * default - icon fields without an explicit `dir` use it. Every entry is mounted
+     * publicly: the first at `/_pruvious/icons/`, subsequent ones at
+     * `/_pruvious/icons/<prefix>/`. Prefixes must be unique.
+     *
+     * @default 'icons'
+     *
+     * @example
+     * ```ts
+     * // Single directory at `<srcDir>/icons/`
+     * 'icons'
+     * ```
+     *
+     * @example
+     * ```ts
+     * // Multiple directories - prefixes default to each basename (`icons`, `brand-icons`)
+     * ['icons', 'brand-icons']
+     * ```
+     *
+     * @example
+     * ```ts
+     * // Custom prefix to disambiguate two directories that share a basename
+     * [
+     *   'icons',
+     *   { dir: 'vendor/icons', prefix: 'vendor' },
+     * ]
+     * ```
+     */
+    icons?:
+      | string
+      | (
+          | string
+          | {
+              /**
+               * Path to the icon directory, relative to the project's `<srcDir>`.
+               *
+               * @example 'icons'
+               * @example 'app/brand-icons'
+               */
+              dir: string
+
+              /**
+               * Public prefix used when mounting this directory at `/_pruvious/icons/<prefix>/`
+               * and when referencing icons from the `iconField` (`{ dir: '<prefix>', name }`).
+               *
+               * Defaults to the basename of `dir`. Provide an explicit value to disambiguate
+               * when two directories share the same basename. Prefixes must be unique across
+               * all configured icon directories.
+               *
+               * @default basename(dir)
+               */
+              prefix?: string
+            }
+        )[]
+
+    /**
      * Directory path where job definitions are stored.
      * This path is relative to the project's `<serverDir>` directory.
      *
@@ -1583,8 +1645,17 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     pruvious: Pick<
       DeepRequired<PruviousModuleOptions>,
-      'database' | 'api' | 'uploads' | 'queue' | 'dashboard' | 'dir' | 'blocksPrefix'
+      'database' | 'api' | 'uploads' | 'queue' | 'dashboard' | 'blocksPrefix'
     > & {
+      dir: Omit<DeepRequired<NonNullable<PruviousModuleOptions['dir']>>, 'icons'> & {
+        /**
+         * Configured icon directories grouped by prefix. The first entry is the default.
+         * `dirs` lists the absolute paths contributed by each Nuxt layer (root first), so
+         * the closer layer overrides icons of the same basename. `prefix` is the URL path
+         * segment and the value accepted by the field's `dir` option.
+         */
+        icons: { dirs: string[]; prefix: string }[]
+      }
       cache: Omit<DeepRequired<PruviousModuleOptions['cache']>, 'page'> & {
         page: Omit<DeepRequired<NonNullable<PruviousModuleOptions['cache']['page']>>, 'defaultTTL'> & {
           defaultTTL: number | null
@@ -1627,6 +1698,16 @@ declare module 'nuxt/schema' {
        * This setting is derived from the Nuxt config `pruvious.dashboard.basePath`.
        */
       dashboardBasePath: string
+
+      /**
+       * Configured icon directories. The first entry is the default. `prefix` is the
+       * URL path segment and the value accepted by the field's `dir` option. `relative`
+       * is the root-layer directory path relative to the project's `rootDir`, intended
+       * for display in the dashboard.
+       *
+       * This setting is derived from the Nuxt config `pruvious.dir.icons`.
+       */
+      iconsDirs: { prefix: string; relative: string }[]
 
       /**
        * List of supported languages in the CMS.

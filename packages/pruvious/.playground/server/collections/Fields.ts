@@ -10,6 +10,7 @@ import {
   dateTimeRangeField,
   defineCollection,
   editorField,
+  iconField,
   linkField,
   nullableObjectField,
   nullableSelectField,
@@ -622,6 +623,35 @@ export default defineCollection({
       },
     }),
 
+    // icon
+    icon: iconField({
+      ui: {
+        label: 'Icon',
+        background: 'light',
+        description: 'Pick an SVG from `app/icons`',
+        placeholder: 'Pick an icon',
+      },
+    }),
+    iconCustomDir: iconField({
+      dir: 'brand-icons',
+      ui: { label: 'Icon (custom dir)', placeholder: 'Pick a brand icon' },
+    }),
+    iconWithDefault: iconField({
+      default: 'home',
+      ui: { label: 'Icon (with default)' },
+    }),
+    iconMissingDir: iconField({
+      dir: 'missing-icons' as any,
+      ui: { label: 'Icon (missing dir)' },
+    }),
+    iconTraversal: iconField({
+      dir: '../secrets' as any,
+      ui: { label: 'Icon (path traversal)' },
+    }),
+    iconColumns: iconField({
+      ui: { label: 'Icon (4 columns)', columns: 4 },
+    }),
+
     // select
     select: selectField({
       choices: [
@@ -918,6 +948,10 @@ export default defineCollection({
                 'editorLinksNoDrafts',
                 'editorStyledMarksAndGroup',
               ],
+            },
+            {
+              label: 'Icon',
+              fields: ['icon', 'iconCustomDir', 'iconWithDefault', 'iconMissingDir', 'iconTraversal', 'iconColumns'],
             },
             {
               label: 'Link',

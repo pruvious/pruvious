@@ -51,6 +51,13 @@ export interface BuildFilters {
   'iconNames': { TValue: string[]; TContext: {} }
 
   /**
+   * Allows modification of the icon names auto-resolved from the configured Pruvious icon
+   * directories. Keys are directory basenames. Affects the `PruviousIconNames` type and
+   * the `pruviousIconNames` constant.
+   */
+  'pruviousIconNames': { TValue: Record<string, string[]>; TContext: {} }
+
+  /**
    * Allows modification of the resolved collection files.
    * Affects the `Collections` type, the `collections` constant, and every collection-derived export.
    */

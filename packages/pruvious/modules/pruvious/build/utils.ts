@@ -1,8 +1,10 @@
 import { validatorsMeta } from '@pruvious/orm'
-import { isArray } from '@pruvious/utils'
+import { isArray, isDefined, isEmpty, sanitizeSvg } from '@pruvious/utils'
 import fs from 'node:fs'
 import { createResolver, useNuxt } from 'nuxt/kit'
-import { basename, extname, join, resolve } from 'pathe'
+import { basename, extname, join, normalize, resolve } from 'pathe'
+import { warnWithContext } from '../debug/console'
+import { ICON_NAME_PATTERN } from '../icons/utils.server'
 
 export interface SimpleValidatorMeta {
   name: string
@@ -82,4 +84,98 @@ export function getIconNames() {
   }
 
   return iconNames
+}
+
+export interface ResolvedIcon {
+  name: string
+  absolutePath: string
+  svg: string
+}
+
+const iconCache = new Map<string, ResolvedIcon[]>()
+
+/**
+ * Resolves SVG icon files from the given absolute directories (one per layer that
+ * contributes to a prefix, root-first), deduped by basename so the closer layer
+ * wins. Sanitizes each SVG and caches results until the watcher calls
+ * `resetIconsResolver()`.
+ */
+export function resolveIconFiles(absDirs: string[]): ResolvedIcon[] {
+  const cacheKey = absDirs.map((d) => normalize(d)).join('\0')
+  const cached = iconCache.get(cacheKey)
+  if (isDefined(cached)) {
+    return cached
+  }
+
+  const icons: ResolvedIcon[] = []
+  const seen = new Set<string>()
+  const skippedNames: string[] = []
+  const skippedSanitization: string[] = []
+
+  for (const absDir of absDirs) {
+    let entries: string[]
+    try {
+      entries = fs.readdirSync(absDir)
+    } catch {
+      continue
+    }
+
+    for (const entry of entries) {
+      if (extname(entry).toLowerCase() !== '.svg') {
+        continue
+      }
+
+      const name = basename(entry, extname(entry))
+      if (!ICON_NAME_PATTERN.test(name)) {
+        skippedNames.push(join(absDir, entry))
+        continue
+      }
+      if (seen.has(name)) {
+        continue
+      }
+
+      const absolutePath = join(absDir, entry)
+      let raw: string
+      try {
+        raw = fs.readFileSync(absolutePath, 'utf-8')
+      } catch {
+        continue
+      }
+
+      const { svg } = sanitizeSvg(raw)
+      if (isEmpty(svg)) {
+        skippedSanitization.push(absolutePath)
+        continue
+      }
+
+      seen.add(name)
+      icons.push({ name, absolutePath, svg })
+    }
+  }
+
+  if (useNuxt().options.runtimeConfig.pruvious.debug.warnings === 'all') {
+    if (skippedNames.length) {
+      warnWithContext(
+        'Skipped icon files with unsupported names. Use only letters, digits, `_` and `-`.',
+        skippedNames,
+      )
+    }
+    if (skippedSanitization.length) {
+      warnWithContext(
+        'Skipped icon files that produced empty output after SVG sanitization.',
+        skippedSanitization,
+      )
+    }
+  }
+
+  icons.sort((a, b) => a.name.localeCompare(b.name))
+  iconCache.set(cacheKey, icons)
+  return icons
+}
+
+/**
+ * Drops the `resolveIconFiles` cache.
+ */
+export function resetIconsResolver() {
+  iconCache.clear()
 }

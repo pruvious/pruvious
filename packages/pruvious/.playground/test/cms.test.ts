@@ -44,6 +44,7 @@ describe('cms', async () => {
   await import('./cms/fields/editor')
   await import('./cms/fields/file')
   await import('./cms/fields/files')
+  await import('./cms/fields/icon')
   await import('./cms/fields/image')
   await import('./cms/fields/images')
   await import('./cms/fields/language-translations')

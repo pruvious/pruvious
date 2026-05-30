@@ -12,7 +12,7 @@ import {
 import { colorize } from 'consola/utils'
 import fs from 'node:fs'
 import { addServerHandler, createResolver, defineNuxtModule } from 'nuxt/kit'
-import { join } from 'pathe'
+import { join, relative } from 'pathe'
 import { resetServerHandlersResolver, resolveServerHandlers } from './pruvious/api/resolver'
 import { resolveAuthTokenResolutionConfig, resolveAuthTokenStorageConfig } from './pruvious/auth/utils.server'
 import { resetBlocksResolver } from './pruvious/blocks/resolver'
@@ -28,6 +28,7 @@ import { debug, getErrorCount, info, resetErrorCount, setVerbose, success } from
 import { resolveDebugLogsConfig } from './pruvious/debug/logs'
 import { resetFieldsResolver } from './pruvious/fields/resolver'
 import { resetHooksResolver } from './pruvious/hooks/resolver'
+import { resolveIconDirsAcrossLayers } from './pruvious/icons/utils.server'
 import { pruviousWatchHandler, watchPruviousServerFiles } from './pruvious/nuxt-hooks/builder-watch'
 import { optimizeServerTsConfig } from './pruvious/nuxt-hooks/nitro-build-before'
 import { disableDashboardSSR, stubNativeModulesOnCloudflare } from './pruvious/nuxt-hooks/nitro-config'
@@ -132,6 +133,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
       fields: { components: 'fields', definitions: 'fields' },
       filters: { client: 'filters', server: 'filters' },
       hooks: { client: 'hooks', server: 'hooks' },
+      icons: 'icons',
       jobs: 'jobs',
       singletons: 'singletons',
       templates: 'templates',
@@ -273,6 +275,7 @@ export default defineNuxtModule<PruviousModuleOptions>({
           client: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.hooks!.client!)),
           server: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.hooks!.server!)),
         },
+        icons: resolveIconDirsAcrossLayers(nuxt),
         jobs: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.jobs!)),
         singletons: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.singletons!)),
         translations: withoutTrailingSlash(join(nuxt.options.serverDir, resolvedOptions.dir.translations!)),
@@ -284,6 +287,10 @@ export default defineNuxtModule<PruviousModuleOptions>({
     nuxt.options.runtimeConfig.public.pruvious = {
       apiBasePath: nuxt.options.runtimeConfig.pruvious.api.basePath,
       dashboardBasePath: nuxt.options.runtimeConfig.pruvious.dashboard.basePath,
+      iconsDirs: nuxt.options.runtimeConfig.pruvious.dir.icons.map(({ prefix, dirs }) => ({
+        prefix,
+        relative: relative(nuxt.options.rootDir, dirs[0]!),
+      })),
       languages: nuxt.options.runtimeConfig.pruvious.i18n.languages.map(({ code }) => code) as LanguageCode[],
       primaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.primaryLanguage as LanguageCode,
       prefixPrimaryLanguage: nuxt.options.runtimeConfig.pruvious.i18n.prefixPrimaryLanguage,
@@ -387,6 +394,26 @@ export default defineNuxtModule<PruviousModuleOptions>({
 
     // Stub native addons (`sharp`, `better-sqlite3`) on Cloudflare presets
     nuxt.hook('nitro:config', stubNativeModulesOnCloudflare)
+
+    // Serve icons
+    nuxt.hook('nitro:config', (nitroConfig) => {
+      const dirs = nuxt.options.runtimeConfig.pruvious.dir.icons
+      nitroConfig.serverAssets ??= []
+      for (const { dirs: layerDirs, prefix } of dirs) {
+        for (const [i, dir] of layerDirs.entries()) {
+          nitroConfig.serverAssets.push({
+            baseName: `pruvious-icons-${prefix}-${i}`,
+            dir,
+          })
+        }
+      }
+    })
+
+    addServerHandler({
+      route: '/_pruvious/icons/**',
+      handler: resolve('./pruvious/icons/handler.ts'),
+      method: 'get',
+    })
 
     // Enable async context
     nuxt.options.experimental.asyncContext = true

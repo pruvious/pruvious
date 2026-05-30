@@ -27,6 +27,9 @@ export default defineNuxtConfig({
         { code: 'bs', name: 'Bosanski' },
       ],
     },
+    dir: {
+      icons: ['icons', { dir: 'brand-icons' }],
+    },
     debug: {
       logs: {
         driver: isTest

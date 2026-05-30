@@ -11,7 +11,13 @@ import { resolveTemplateFiles } from '../../templates/resolver'
 import { resolveTranslationFiles } from '../../translations/resolver'
 import type { ResolveFromLayersResult } from '../../utils/resolve'
 import { applyBuildFilters, doBuildActions } from '../kit'
-import { getIconNames, getSimpleValidatorsMeta, resolvePruviousFile, type SimpleValidatorMeta } from '../utils'
+import {
+  getIconNames,
+  getSimpleValidatorsMeta,
+  resolveIconFiles,
+  resolvePruviousFile,
+  type SimpleValidatorMeta,
+} from '../utils'
 
 export interface ServerFileContext {
   templateFiles: Record<string, ResolveFromLayersResult>
@@ -26,6 +32,8 @@ export interface ServerFileContext {
   dashboardLanguages: { code: string; name: string }[]
   simpleValidatorsMeta: SimpleValidatorMeta[]
   iconNames: string[]
+  pruviousIconDirs: { relative: string; prefix: string }[]
+  pruviousIconNames: Record<string, string[]>
   permissions: string[]
   standardRoutes: string[]
 }
@@ -58,6 +66,20 @@ export async function getServerFileContent() {
   const imageVariants = await applyBuildFilters('imageVariants', pruviousOptions.images.variants, {})
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
   const iconNames = await applyBuildFilters('iconNames', getIconNames(), {})
+  const pruviousIconDirs = pruviousOptions.dir.icons.map(({ dirs, prefix }) => ({
+    relative: relative(nuxt.options.srcDir, dirs[0]!),
+    prefix,
+  }))
+  const pruviousIconNames = await applyBuildFilters(
+    'pruviousIconNames',
+    Object.fromEntries(
+      pruviousOptions.dir.icons.map(({ dirs, prefix }) => [
+        prefix,
+        resolveIconFiles(dirs).map(({ name }) => name),
+      ]),
+    ) as Record<string, string[]>,
+    {},
+  )
   const permissions = await applyBuildFilters(
     'permissions',
     [
@@ -136,6 +158,8 @@ export async function getServerFileContent() {
       'process-queue',
       'pruvious',
       'pruvious/dashboard',
+      'pruvious/icons',
+      'pruvious/icons/:name',
       'pruvious/install',
       'routes',
       'routes/**',
@@ -168,6 +192,8 @@ export async function getServerFileContent() {
     dashboardLanguages,
     simpleValidatorsMeta,
     iconNames,
+    pruviousIconDirs,
+    pruviousIconNames,
     permissions,
     standardRoutes,
   }
@@ -417,6 +443,20 @@ export async function getServerFileContent() {
     `export type IconName = ${iconNames.map((name) => `'${name}'`).join(' | ') || 'never'}`,
     ``,
     `/**`,
+    ` * Literal union of configured icon directory prefixes. The first entry is the default.`,
+    ` */`,
+    `export type PruviousIconDir = ${pruviousIconDirs.map(({ prefix }) => `'${prefix}'`).join(' | ') || 'string'}`,
+    ``,
+    `/**`,
+    ` * Map of icon basenames available in each configured icon directory.`,
+    ` */`,
+    `export type PruviousIconNames = {`,
+    ...Object.entries(pruviousIconNames).map(
+      ([dir, names]) => `  ${JSON.stringify(dir)}: (${names.map((n) => `'${n}'`).join(' | ') || 'string'})[],`,
+    ),
+    `}`,
+    ``,
+    `/**`,
     ` * Array of all available user permissions in the system.`,
     ` */`,
     `export const permissions: Permission[] = [${permissions.map((p) => `'${p}'`).join(', ')}]`,
@@ -465,6 +505,20 @@ export async function getServerFileContent() {
     ` * @see https://github.com/nuxt/icon`,
     ` */`,
     `export const iconNames: IconName[] = [${iconNames.map((name) => `'${name}'`).join(', ')}]`,
+    ``,
+    `/**`,
+    ` * Ordered list of icon directory prefixes. The first entry is the default.`,
+    ` */`,
+    `export const pruviousIconDirs: PruviousIconDir[] = [${pruviousIconDirs.map(({ prefix }) => `'${prefix}'`).join(', ')}]`,
+    ``,
+    `/**`,
+    ` * Icon basenames available in each configured icon directory.`,
+    ` */`,
+    `export const pruviousIconNames: PruviousIconNames = {`,
+    ...Object.entries(pruviousIconNames).map(
+      ([dir, names]) => `  ${JSON.stringify(dir)}: [${names.map((n) => `'${n}'`).join(', ')}],`,
+    ),
+    `}`,
     ``,
     `/**`,
     ` * Retrieves the \`DefineCollectionOptions\` for a collection \`template\`.`,

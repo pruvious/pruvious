@@ -1,4 +1,4 @@
-import { isDefined, remove } from '@pruvious/utils'
+import { isArray, isDefined, remove } from '@pruvious/utils'
 import { useDebounceFn } from '@vueuse/core'
 import fs from 'node:fs'
 import { access, readdir, stat } from 'node:fs/promises'
@@ -10,6 +10,7 @@ import { resetBlocksResolver, resolveBlockDefinition, resolveBlockFiles } from '
 import { generateAppFiles } from '../build/app'
 import { generateDashboardFiles } from '../build/dashboard'
 import { generateServerFiles } from '../build/server'
+import { resetIconsResolver } from '../build/utils'
 import { resetCollectionsResolver } from '../collections/resolver'
 import { resolveCustomComponentsInFile } from '../components/resolver'
 import {
@@ -33,6 +34,7 @@ type PruviousFileType =
   | 'block-component'
   | 'field-definition'
   | 'field-component'
+  | 'icon-asset'
   | 'job-definition'
   | 'template-definition'
   | 'translation-definition'
@@ -48,6 +50,12 @@ type PruviousFileType =
   | 'dashboard-page'
 
 const skipped: string[] = []
+
+function resolveLayerIconRelDirs(input: string | (string | { dir: string; prefix?: string })[] | undefined): string[] {
+  if (!isDefined(input)) return ['icons']
+  const list = isArray(input) ? input : [input]
+  return list.map((entry) => (isDefined((entry as any)?.dir) ? (entry as { dir: string }).dir : (entry as string)))
+}
 
 /**
  * Adds Pruvious server files to the Nuxt watcher.
@@ -78,6 +86,17 @@ export async function watchPruviousServerFiles() {
 
         if (!nuxt.options.watch.includes(dirPath)) {
           nuxt.options.watch.push(dirPath)
+        }
+      }
+    }
+
+    if (isDefined(layer.config.srcDir)) {
+      for (const relDir of resolveLayerIconRelDirs((layer.config.pruvious || undefined)?.dir?.icons)) {
+        const iconsDirPath = join(layer.config.srcDir, relDir)
+        dirPaths.push(iconsDirPath)
+
+        if (!nuxt.options.watch.includes(iconsDirPath)) {
+          nuxt.options.watch.push(iconsDirPath)
         }
       }
     }
@@ -211,6 +230,17 @@ export async function pruviousWatchHandler(event: WatchEvent, path: string) {
       reloadOnNitroCompiled(event, path)
     }
 
+    return
+  }
+
+  if (type === 'icon-asset') {
+    resetIconsResolver()
+
+    if (event === 'add' || event === 'unlink') {
+      await generateServerFiles()
+    }
+
+    reloadOnNitroCompiled(event, path)
     return
   }
 
@@ -363,6 +393,15 @@ function resolvePruviousFile(
       )
     ) {
       return { type: 'field-component', layer }
+    }
+
+    // Icon assets
+    if (path.toLowerCase().endsWith('.svg')) {
+      for (const relDir of resolveLayerIconRelDirs((layer.config.pruvious || undefined)?.dir?.icons)) {
+        if (path.startsWith(join(layer.config.srcDir, relDir) + '/')) {
+          return { type: 'icon-asset', layer }
+        }
+      }
     }
 
     // Job definitions

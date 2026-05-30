@@ -13,7 +13,7 @@ All fields are imported from `#pruvious/server` for collection and singleton def
 | [Booleans](#booleans) | `switchField`, `checkboxField`, `trueFalseField` |
 | [Choices](#choices) | `selectField`, `nullableSelectField`, `buttonGroupField`, `chipsField` |
 | [Date and time](#date-and-time) | `dateField`, `dateRangeField`, `dateTimeField`, `dateTimeRangeField`, `timeField`, `timeRangeField`, `timestampField` |
-| [Media](#media) | `imageField`, `imagesField`, `fileField`, `filesField` |
+| [Media](#media) | `imageField`, `imagesField`, `fileField`, `filesField`, `iconField` |
 | [Relations](#relations) | `recordField`, `recordsField`, `linkField`, `linkedBlocksField`, `blocksField` |
 | [Structure](#structure) | `objectField`, `nullableObjectField`, `repeaterField`, `structureField` |
 | [Routing and i18n](#routing-and-i18n) | `subpathField`, `languageField`, `translationsField` |
@@ -481,6 +481,21 @@ filesField({
 ```
 
 **Specific options:** `allowedTypes`, `minSize`, `maxSize`, `minItems`, `maxItems`.
+
+### iconField
+
+A nullable string referencing an `.svg` file in one of the directories configured via `pruvious.dir.icons` (defaults to `'icons'`). Render values on the frontend with `<PruviousIcon name="..." />` (or `<PruviousIconImage>` for an `<img>` tag).
+
+```ts
+import { iconField } from '#pruvious/server'
+
+iconField({
+  dir: 'brand-icons',
+  ui: { columns: 8, background: 'auto' },
+})
+```
+
+**Specific options:** `dir`, `ui.columns`, `ui.background` (`'light' | 'dark' | 'auto'`).
 
 ## Relations
 
