@@ -33,6 +33,7 @@ export default defineTemplate(() => ({
   duplicate: duplicateDefault,
   copyTranslation: copyTranslationDefault,
   ui: {
+    icon: 'files',
     indexPage: {
       dataTable: {
         columns: [
