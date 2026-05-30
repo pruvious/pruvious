@@ -1760,7 +1760,7 @@ export async function getServerFileContent() {
     `   */`,
     `  perLanguage?: boolean,`,
     `}): GenericValidator {`,
-    `  return (value, sanitizedContextField, errors) => {`,
+    `  const validator: GenericValidator = (value, sanitizedContextField, errors) => {`,
     `    const perLanguage = options?.perLanguage && sanitizedContextField.context.collection?.meta.translatable && !sanitizedContextField.isSubfield`,
     `    const cacheKey = JSON.stringify({ collection: sanitizedContextField.context.collectionName ?? \`singleton:\${(sanitizedContextField.context as any).singletonName}\`, field: sanitizedContextField.path, value, perLanguage, caseSensitive: options?.caseSensitive !== false })`,
     `    sanitizedContextField.context.customData._uniqueValidatorCache = sanitizedContextField.context.customData._uniqueValidatorCache ?? []`,
@@ -1775,6 +1775,8 @@ export async function getServerFileContent() {
     `      return _uniqueValidator(options)(value, sanitizedContextField, errors)`,
     `    }`,
     `  }`,
+    `  ;(validator as any).__pruviousUnique = { perLanguage: !!options?.perLanguage }`,
+    `  return validator`,
     `}`,
     ``,
     getReExports(),
@@ -1882,6 +1884,7 @@ function getReExports() {
     `export { removeWhere, denyWhere, removeOrderBy, denyOrderBy, removeGroupBy, denyGroupBy, excludeFields, maskFields, resetFields } from '${resolvePruviousFile('collections/hooks')}'`,
     `export type { SerializableCollection } from '${resolvePruviousFile('collections/utils.client')}'`,
     `export { getCollectionBySlug, getCollectionFromEvent, getSanitizedInput, patchSanitizedInput } from '${resolvePruviousFile('collections/utils.server')}'`,
+    `export { duplicateDefault, copyTranslationDefault, copyTranslationDefaultSingleton } from '${resolvePruviousFile('collections/duplicate-defaults.server')}'`,
 
     // Custom components
     `export { type ResolveCustomComponentPathOptions, resolvePruviousComponent, resolveNamedPruviousComponent, resolveCustomComponentPath } from '${resolvePruviousFile('components/utils.server')}'`,

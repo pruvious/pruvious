@@ -1,4 +1,10 @@
-import { blocksField, defineTemplate, type SEOFieldPresetOptions } from '#pruvious/server'
+import {
+  blocksField,
+  copyTranslationDefault,
+  defineTemplate,
+  duplicateDefault,
+  type SEOFieldPresetOptions,
+} from '#pruvious/server'
 
 export default defineTemplate(() => ({
   fields: {
@@ -24,6 +30,8 @@ export default defineTemplate(() => ({
   },
   author: true,
   editors: true,
+  duplicate: duplicateDefault,
+  copyTranslation: copyTranslationDefault,
   ui: {
     indexPage: {
       dataTable: {
