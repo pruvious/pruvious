@@ -148,8 +148,8 @@ export function getAllDOMBlocks(): DOMBlock[] {
 export function getAncestorDOMBlocks(target: Element | EventTarget | null): DOMBlock[] {
   const domBlocks: DOMBlock[] = []
 
-  if (target instanceof HTMLElement) {
-    let parent: HTMLElement | null = target
+  if (target instanceof HTMLElement || target instanceof SVGElement) {
+    let parent: HTMLElement | SVGElement | null = target
     let pushedAlias: string | null = null
 
     while (parent && parent !== document.body) {
@@ -158,14 +158,14 @@ export function getAncestorDOMBlocks(target: Element | EventTarget | null): DOMB
 
       if (aliasPath && aliasName) {
         if (pushedAlias !== aliasPath) {
-          domBlocks.unshift({ path: aliasPath, name: aliasName as BlockName, el: parent })
+          domBlocks.unshift({ path: aliasPath, name: aliasName as BlockName, el: parent as HTMLElement })
           pushedAlias = aliasPath
         }
       } else if (parent.dataset.blockPath && parent.dataset.blockName) {
         domBlocks.unshift({
           path: parent.dataset.blockPath,
           name: parent.dataset.blockName as BlockName,
-          el: parent,
+          el: parent as HTMLElement,
         })
       }
       parent = parent.parentElement
