@@ -58,7 +58,7 @@ defineProps({
   /**
    * Defines the type of button behavior.
    *
-   * - When component `is` rendered as a `button`, defaults to `button`.
+   * - When component `is` rendered as a `button`, defaults to `'button'`.
    * - When rendered as another element, defaults to `undefined`.
    */
   type: {

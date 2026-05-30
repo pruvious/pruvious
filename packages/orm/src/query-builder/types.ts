@@ -538,9 +538,9 @@ export interface SelectQueryBuilderParams<
     /**
      * The order of null values.
      *
-     * - `nullsAuto` - Null values are ordered based on the specified direction (`nullsFirst` for `asc`, `nullsLast` for `desc`).
-     * - `nullsFirst` - Null values are ordered first.
-     * - `nullsLast` - Null values are ordered last.
+     * - `'nullsAuto'` - Null values are ordered based on the specified direction (`'nullsFirst'` for `'asc'`, `'nullsLast'` for `'desc'`).
+     * - `'nullsFirst'` - Null values are ordered first.
+     * - `'nullsLast'` - Null values are ordered last.
      *
      * @default 'nullsAuto'
      */

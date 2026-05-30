@@ -34,7 +34,7 @@ export interface TimestampFieldOptions {
   ui?: {
     /**
      * Options for the calendar component.
-     * This is only available when the `picker` option is set to `calendar` or `combo`.
+     * This is only available when the `picker` option is set to `'calendar'` or `'combo'`.
      */
     calendar?: {
       /**
@@ -83,7 +83,7 @@ export interface TimestampFieldOptions {
 
       /**
        * The time zone identifier for displaying date values in the calendar.
-       * The value must be a valid IANA time zone name or `local`.
+       * The value must be a valid IANA time zone name or `'local'`.
        *
        * Note: Data table timestamps are always shown in the user's preferred timezone.
        *
@@ -106,9 +106,9 @@ export interface TimestampFieldOptions {
     /**
      * Specifies the component used to input the timestamp.
      *
-     * - `calendar` - A calendar component for selecting dates (second precision).
-     * - `combo` - A toggleable component that allows both calendar and numeric input.
-     * - `numeric` - A numeric input field for entering the timestamp directly (in milliseconds).
+     * - `'calendar'` - A calendar component for selecting dates (second precision).
+     * - `'combo'` - A toggleable component that allows both calendar and numeric input.
+     * - `'numeric'` - A numeric input field for entering the timestamp directly (in milliseconds).
      *
      * @default 'combo'
      */

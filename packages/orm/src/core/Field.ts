@@ -74,8 +74,8 @@ interface IField {
    * When set to `true`, the following rules are enforced:
    *
    * - A value must be provided for the field; it cannot be `undefined`.
-   * - For `text` data types, an empty string or array is not allowed.
-   * - For `boolean` data types, `false` is not allowed.
+   * - For `'text'` data types, an empty string or array is not allowed.
+   * - For `'boolean'` data types, `false` is not allowed.
    * - For arrays, an empty array is not allowed unless the field model permits it.
    * - `null` is permitted if the field is `nullable`.
    *

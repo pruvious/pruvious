@@ -241,9 +241,9 @@ export async function deleteCache(key: string): Promise<boolean> {
  *
  * The following secondary prefixes are reserved for internal use:
  *
- * - `token` - Used for invalidating access tokens.
- * - `page` - Used for caching page content.
- * - `multipart` - Used for handling multipart uploads.
+ * - `'token'` - Used for invalidating access tokens.
+ * - `'page'` - Used for caching page content.
+ * - `'multipart'` - Used for handling multipart uploads.
  *
  * The primary prefix is configurable in the `pruvious.cache.prefix` option in `nuxt.config.ts`.
  * It is automatically prepended to the provided secondary `prefix`.

@@ -35,7 +35,7 @@ export interface LocalPathFile {
   path: string
 
   /**
-   * The type of the item, either `directory` or `file`.
+   * The type of the item, either `'directory'` or `'file'`.
    */
   type: 'directory' | 'file'
 }

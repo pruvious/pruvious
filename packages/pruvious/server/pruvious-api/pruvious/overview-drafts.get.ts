@@ -30,7 +30,7 @@ const LIMIT = 20
 
 /**
  * Lists the most recently updated draft (non-public) records the user can read.
- * Requires the `preview-drafts` permission - returns `available: false` otherwise so the dashboard
+ * Requires the `'preview-drafts'` permission - returns `available: false` otherwise so the dashboard
  * can hide the card entirely.
  *
  * Sourced from the link index, so only routable collections with `isPublic` are considered.

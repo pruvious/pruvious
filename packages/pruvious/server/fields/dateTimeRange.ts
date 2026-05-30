@@ -197,7 +197,7 @@ const customOptions: {
 
     /**
      * The time zone identifier for displaying date values in the calendar.
-     * The value must be a valid IANA time zone name or `local`.
+     * The value must be a valid IANA time zone name or `'local'`.
      *
      * This setting affects both calendar display and dates in the data table.
      *

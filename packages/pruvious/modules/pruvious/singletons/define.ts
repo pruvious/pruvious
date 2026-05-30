@@ -183,7 +183,7 @@ interface ISingleton {
 
   /**
    * Query logging configuration for this singleton.
-   * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+   * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
    * Requires `pruvious.debug.logs.queries` to be enabled in `nuxt.config.ts`.
    */
   logs: any
@@ -219,7 +219,7 @@ interface ISingleton {
 
   /**
    * Controls when updates to this singleton invalidate the public page cache.
-   * Singletons can only be `update`d, so there is only one operation.
+   * Singletons can only be `'update'`d, so there is only one operation.
    *
    * ### Boolean shortcuts
    *
@@ -235,7 +235,7 @@ interface ISingleton {
    *
    * ### Customizing per-operation
    *
-   * Pass `update` to override the default. Each entry is a trigger; if any matches, the cache clears.
+   * Pass `'update'` to override the default. Each entry is a trigger; if any matches, the cache clears.
    *
    * - `{ update: [] }` - disable all cache invalidation for this singleton.
    * - `{ update: [{ fields: ['title'] }] }` - whole-flush when `title` changes.
@@ -663,7 +663,7 @@ export interface DefineSingletonOptions<
 
   /**
    * Controls when updates to this singleton invalidate the public page cache.
-   * Singletons can only be `update`d, so there is only one operation.
+   * Singletons can only be `'update'`d, so there is only one operation.
    *
    * ### Boolean shortcuts
    *
@@ -679,7 +679,7 @@ export interface DefineSingletonOptions<
    *
    * ### Customizing per-operation
    *
-   * Pass `update` to override the default. Each entry is a trigger; if any matches, the cache clears.
+   * Pass `'update'` to override the default. Each entry is a trigger; if any matches, the cache clears.
    *
    * - `{ update: [] }` - disable all cache invalidation for this singleton.
    * - `{ update: [{ fields: ['title'] }] }` - whole-flush when `title` changes.
@@ -773,7 +773,7 @@ export interface DefineSingletonOptions<
 
   /**
    * Controls whether to log queries executed on this singleton.
-   * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+   * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
    * Requires `pruvious.debug.logs.queries` to be enabled in `nuxt.config.ts`.
    *
    * Use `true` or `false` to enable/disable query logging with default settings.

@@ -72,7 +72,7 @@ export interface RichTextCustomOptions<TMark extends string = never> {
    * Controls whether hyperlinks (`<a>` tags) are allowed inside the rich text content.
    *
    * - `true` (default) - Links are enabled with default options.
-   *   The toolbar's `auto` mode includes a link button and `Mod-k` opens the picker.
+   *   The toolbar's `'auto'` mode includes a link button and `Mod-k` opens the picker.
    * - An object - Links are enabled with the specified restrictions.
    * - `false` - Links are disabled. The link mark is removed from the schema and the toolbar.
    *

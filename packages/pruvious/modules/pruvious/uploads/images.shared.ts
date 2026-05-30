@@ -14,17 +14,17 @@ export interface ImageVariantOptions {
   /**
    * The output format for the transformed image.
    *
-   * - `webp` - Modern, efficient web image format with good compression and quality.
-   * - `jpeg` - Standard lossy compression format, good for photographs.
-   * - `png` - Lossless format supporting transparency, ideal for graphics.
-   * - `avif` - Next-gen format with superior compression and quality.
-   * - `gif` - Animated image format with basic color palette.
+   * - `'webp'` - Modern, efficient web image format with good compression and quality.
+   * - `'jpeg'` - Standard lossy compression format, good for photographs.
+   * - `'png'` - Lossless format supporting transparency, ideal for graphics.
+   * - `'avif'` - Next-gen format with superior compression and quality.
+   * - `'gif'` - Animated image format with basic color palette.
    */
   format: 'webp' | 'jpeg' | 'png' | 'avif' | 'gif'
 
   /**
    * Specifies the width of the image in pixels.
-   * Set to `auto` to preserve aspect ratio when a `height` value exists.
+   * Set to `'auto'` to preserve aspect ratio when a `height` value exists.
    *
    * @default 'auto'
    */
@@ -32,7 +32,7 @@ export interface ImageVariantOptions {
 
   /**
    * Specifies the height of the image in pixels.
-   * Set to `auto` to preserve aspect ratio when a `width` value exists.
+   * Set to `'auto'` to preserve aspect ratio when a `width` value exists.
    *
    * @default 'auto'
    */
@@ -41,8 +41,8 @@ export interface ImageVariantOptions {
   /**
    * Controls how the image is resized when both `width` and `height` values are provided.
    *
-   * - `cover`   - Maintains aspect ratio and crops the image to fill exact dimensions.
-   * - `contain` - Maintains original aspect ratio while fitting the image inside the target dimensions.
+   * - `'cover'`   - Maintains aspect ratio and crops the image to fill exact dimensions.
+   * - `'contain'` - Maintains original aspect ratio while fitting the image inside the target dimensions.
    *               No cropping occurs. If target dimensions have a different aspect ratio than the source image,
    *               the resulting image may have smaller dimensions than requested to avoid distortion.
    *
@@ -52,7 +52,7 @@ export interface ImageVariantOptions {
 
   /**
    * The quality of the image after compression (`0` is worst, `100` is best).
-   * Only applies to `webp`, `jpeg`, `png`, and `avif` formats.
+   * Only applies to `'webp'`, `'jpeg'`, `'png'`, and `'avif'` formats.
    *
    * @default 80
    */

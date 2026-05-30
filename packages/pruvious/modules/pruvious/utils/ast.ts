@@ -13,7 +13,7 @@ interface Context {
 
   /**
    * Indicates the programming language of the source code.
-   * Use `ts` for TypeScript or `js` for JavaScript.
+   * Use `'ts'` for TypeScript or `'js'` for JavaScript.
    */
   mode: 'js' | 'ts'
 

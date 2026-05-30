@@ -27,7 +27,7 @@ interface ResolvedSubpath {
 
   /**
    * Whether the parent route is publicly accessible in the requested language.
-   * Drafts are only included when the caller has the `preview-drafts` permission.
+   * Drafts are only included when the caller has the `'preview-drafts'` permission.
    */
   isPublic: boolean
 }

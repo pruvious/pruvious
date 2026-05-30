@@ -589,11 +589,11 @@ export class SelectQueryBuilder<
   /**
    * Specifies the order in which query results should be returned.
    *
-   * - The `direction` parameter can be used to specify the order direction (default: `asc`).
-   * - The `nulls` parameter can be used to specify the order of null values (default: `nullsAuto`).
-   *   - `nullsAuto` - Null values are ordered based on the specified direction (`nullsFirst` for `asc`, `nullsLast` for `desc`).
-   *   - `nullsFirst` - Null values are ordered first.
-   *   - `nullsLast` - Null values are ordered last.
+   * - The `direction` parameter can be used to specify the order direction (default: `'asc'`).
+   * - The `nulls` parameter can be used to specify the order of null values (default: `'nullsAuto'`).
+   *   - `'nullsAuto'` - Null values are ordered based on the specified direction (`'nullsFirst'` for `'asc'`, `'nullsLast'` for `'desc'`).
+   *   - `'nullsFirst'` - Null values are ordered first.
+   *   - `'nullsLast'` - Null values are ordered last.
    *
    * This method is chainable and can be used repeatedly to specify multiple orderings.
    *

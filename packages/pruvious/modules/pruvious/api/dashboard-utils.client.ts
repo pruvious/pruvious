@@ -34,8 +34,8 @@ import {
  *
  * - `Accept-Language` header based on the `dashboardLanguage` of the current user.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - Common error responses by displaying a toast message.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
@@ -76,8 +76,8 @@ export function pruviousDashboardPost<TRoute extends PruviousPostRoute>(
  *
  * - `Accept-Language` header based on the `dashboardLanguage` of the current user.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - Common error responses by displaying a toast message.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
@@ -117,8 +117,8 @@ export function pruviousDashboardGet<TRoute extends PruviousGetRoute>(
  *
  * - `Accept-Language` header based on the `dashboardLanguage` of the current user.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - Common error responses by displaying a toast message.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
@@ -160,8 +160,8 @@ export function pruviousDashboardPatch<TRoute extends PruviousPatchRoute>(
  *
  * - `Accept-Language` header based on the `dashboardLanguage` of the current user.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - Common error responses by displaying a toast message.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
@@ -235,8 +235,8 @@ function _pruviousDashboardFetch(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - Common error responses by displaying a toast message.
  *
  * Use this utility for making custom authenticated API requests from the dashboard.

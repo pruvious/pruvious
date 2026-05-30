@@ -154,8 +154,8 @@ export type PruviousFetchError = (
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
  * @example
@@ -195,8 +195,8 @@ export function pruviousPost<TRoute extends PruviousPostRoute>(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
  * @example
@@ -234,8 +234,8 @@ export function pruviousGet<TRoute extends PruviousGetRoute>(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
  * @example
@@ -275,8 +275,8 @@ export function pruviousPatch<TRoute extends PruviousPatchRoute>(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  * - API base path from the `pruvious.api.basePath` option in the Nuxt config.
  *
  * @example
@@ -314,8 +314,8 @@ export function pruviousDelete<TRoute extends PruviousDeleteRoute>(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  *
  * @example
  * ```vue
@@ -417,8 +417,8 @@ async function _pruviousFetch(
  *
  * - `Accept-Language` header based on the current page language.
  * - `Authorization` header based on the current user's token.
- *   - This only applies if `pruvious.auth.tokenStorage` is set to `localStorage` in the Nuxt config.
- *   - If `pruvious.auth.tokenStorage` is set to `cookies`, no `Authorization` header will be sent.
+ *   - This only applies if `pruvious.auth.tokenStorage` is set to `'localStorage'` in the Nuxt config.
+ *   - If `pruvious.auth.tokenStorage` is set to `'cookies'`, no `Authorization` header will be sent.
  *
  * Use this utility for custom API requests requiring authentication and language headers.
  * For standard Pruvious API routes, prefer using:

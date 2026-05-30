@@ -310,7 +310,7 @@ export async function processQueue<TJobName extends keyof Jobs>(
  * Makes a POST request to `/api/process-queue` to start queue processing.
  *
  * By default, this is executed automatically after each HTTP request via `pruvious.api.middleware`.
- * To switch to manual triggering, set `pruvious.queue.mode` to `manual` in `nuxt.config.ts`.
+ * To switch to manual triggering, set `pruvious.queue.mode` to `'manual'` in `nuxt.config.ts`.
  */
 export async function triggerQueueProcessing(): Promise<{ success: true }> {
   const runtimeConfig = useRuntimeConfig()

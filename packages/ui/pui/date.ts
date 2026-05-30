@@ -175,7 +175,7 @@ export function puiTimestampToSpanObject(timestamp: number): {
 
 /**
  * Resolves the `timezone` identifier.
- * It must be a valid IANA time zone name or `local`.
+ * It must be a valid IANA time zone name or `'local'`.
  * If not specified, returns the local timezone.
  */
 export function puiResolveTimezone(timezone?: PUITimezone | 'local'): PUITimezone {

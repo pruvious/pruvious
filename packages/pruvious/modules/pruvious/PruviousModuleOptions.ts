@@ -311,7 +311,7 @@ export interface PruviousModuleOptions {
      * and `defineSingleton`.
      *
      * **Required for editor preview:** `auth.tokenStorage.storage` must be `'cookies'` for editors with
-     * the `preview-drafts` permission to see drafts on the initial HTML navigation. With `localStorage`,
+     * the `'preview-drafts'` permission to see drafts on the initial HTML navigation. With `'localStorage'`,
      * the server cannot detect the token on first paint and serves the cached anonymous response.
      */
     page?: {
@@ -420,7 +420,7 @@ export interface PruviousModuleOptions {
     /**
      * Determines how the queue processing is triggered.
      *
-     * When set to `auto` (default):
+     * When set to `'auto'` (default):
      *
      * - A non-blocking POST request to `/api/process-queue` is sent after each HTTP request.
      *   - Uses `event.waitUntil()` for request handling.
@@ -429,7 +429,7 @@ export interface PruviousModuleOptions {
      * - The `/api/process-queue` endpoint is excluded from `api.middleware` (and logging).
      * - Each job's logging is controlled by its individual `log` setting.
      *
-     * When set to `manual`:
+     * When set to `'manual'`:
      *
      * - Queue processing must be triggered externally (e.g., via cron job).
      * - No automatic processing occurs after HTTP requests.
@@ -956,7 +956,7 @@ export interface PruviousModuleOptions {
 
     /**
      * Controls the logging of API requests, responses, and database operations into a dedicated logging database.
-     * These logs can be accessed and reviewed through the Pruvious dashboard by administrators and users with the `read-logs` permission.
+     * These logs can be accessed and reviewed through the Pruvious dashboard by administrators and users with the `'read-logs'` permission.
      *
      * By default, logging functionality is disabled.
      * Set to `true` to activate logging with standard configuration settings.
@@ -1063,7 +1063,7 @@ export interface PruviousModuleOptions {
 
           /**
            * Controls whether to log queries from the main database.
-           * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+           * Logged queries can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
            *
            * Use `true` or `false` to enable/disable query logging with default settings.
            * For granular control, use the `logs` option when defining individual collections.
@@ -1122,7 +1122,7 @@ export interface PruviousModuleOptions {
 
           /**
            * Controls whether to log job processing events.
-           * These logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+           * These logs can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
            *
            * Use `true` or `false` to enable/disable job logging with default settings.
            * For granular control, use the `logs` option when defining individual jobs.
@@ -1133,7 +1133,7 @@ export interface PruviousModuleOptions {
 
           /**
            * Controls whether to log server-side errors.
-           * These error logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+           * These error logs can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
            *
            * @default true
            */
@@ -1141,7 +1141,7 @@ export interface PruviousModuleOptions {
 
           /**
            * Controls whether to enable custom logs on the server side using the `customLog()` function.
-           * These logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+           * These logs can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
            *
            * @default true
            *

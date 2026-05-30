@@ -155,8 +155,8 @@ export interface DatabaseOptions<TCollections extends Record<string, object>, TI
    *
    * - `true` - Enables full logging of all operations.
    * - `false` - Disables all logging output.
-   * - `exec` - Logs only executed SQL query statements.
-   * - `sync` - Logs only database schema synchronization operations.
+   * - `'exec'` - Logs only executed SQL query statements.
+   * - `'sync'` - Logs only database schema synchronization operations.
    *
    * @default false
    */

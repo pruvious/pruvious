@@ -105,8 +105,8 @@ const props = defineProps({
 
   /**
    * The type of CSS position property to use for the floating element.
-   * The `fixed` value is recommended for most cases.
-   * The `absolute` value is useful when the picker is inside a scrolling container.
+   * The `'fixed'` value is recommended for most cases.
+   * The `'absolute'` value is useful when the picker is inside a scrolling container.
    * You can also `provide('floatingStrategy', 'absolute')` from a parent component to change the default value.
    *
    * @default 'fixed'

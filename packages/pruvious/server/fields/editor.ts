@@ -19,13 +19,13 @@ import type { LinksOptions, Mark, ToolbarGroup } from './richText'
 /**
  * Built-in block types supported by the editor field.
  *
- * - `paragraph` - `<p>` block.
- * - `h1`..`h6` - heading levels.
- * - `bulletList` - `<ul>` with `<li>` items.
- * - `orderedList` - `<ol>` with `<li>` items.
- * - `blockquote` - `<blockquote>` block.
- * - `codeBlock` - `<pre><code>` block.
- * - `hr` - `<hr>` divider.
+ * - `'paragraph'` - `<p>` block.
+ * - `'h1'`..`'h6'` - heading levels.
+ * - `'bulletList'` - `<ul>` with `<li>` items.
+ * - `'orderedList'` - `<ol>` with `<li>` items.
+ * - `'blockquote'` - `<blockquote>` block.
+ * - `'codeBlock'` - `<pre><code>` block.
+ * - `'hr'` - `<hr>` divider.
  */
 export type EditorBlockKey =
   | 'paragraph'
@@ -138,7 +138,7 @@ export interface EditorCustomOptions<TMark extends string = never> {
    * Controls whether hyperlinks (`<a>` tags) are allowed inside the editor content.
    *
    * - `true` (default) - Links are enabled with default options.
-   *   The toolbar's `auto` mode includes a link button and `Mod-k` opens the picker.
+   *   The toolbar's `'auto'` mode includes a link button and `Mod-k` opens the picker.
    * - An object - Links are enabled with the specified restrictions.
    * - `false` - Links are disabled. The link mark is removed from the schema and the toolbar.
    *

@@ -370,15 +370,15 @@ const imageOptimizationCache = new LimitedSizeObject<{ date: number; promise: Pr
  *
  * Returns an object with the following properties:
  *
- * - `type` - Either `directories` or `files`.
+ * - `type` - Either `'directories'` or `'files'`.
  *   - If the `files` object is empty, the input is assumed to be for a directory.
  * - `items` - An array of objects representing the input items for the `Uploads` collection.
  *
  * The `items` array contains objects with the following properties:
  *
- * - `file` - The file buffer (only when `type` is `files`).
+ * - `file` - The file buffer (only when `type` is `'files'`).
  * - `path` - The normalized path of the file or directory.
- * - `type` - Either `directory` or `file`.
+ * - `type` - Either `'directory'` or `'file'`.
  * - `author` - The user ID of the author (optional).
  * - `editors` - An array of user IDs with edit permissions (optional).
  *

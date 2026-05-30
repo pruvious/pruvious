@@ -58,7 +58,7 @@ export interface ErrorLogOptions {
 
 /**
  * Stores a custom log entry in the logs database.
- * Custom logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+ * Custom logs can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
  *
  * @returns a `Promise` containing a `QueryBuilderResult` object.
  * @throws an error if the logs database is not connected.
@@ -105,7 +105,7 @@ export async function customLog(
 
 /**
  * Stores a error log entry in the logs database.
- * Error logs can be viewed in the Pruvious dashboard by admins and users with the `read-logs` permission.
+ * Error logs can be viewed in the Pruvious dashboard by admins and users with the `'read-logs'` permission.
  *
  * @returns a `Promise` containing a `QueryBuilderResult` object.
  * @throws an error if the logs database is not connected.

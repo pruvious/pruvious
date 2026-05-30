@@ -52,9 +52,9 @@ const props = defineProps({
   /**
    * Controls how the edit button is positioned within its container.
    *
-   * - `relative` - The button is positioned relative to its container.
-   * - `absolute` - The button is positioned absolutely within its container (bottom right).
-   * - `auto` - The button is positioned automatically based on available space (default).
+   * - `'relative'` - The button is positioned relative to its container.
+   * - `'absolute'` - The button is positioned absolutely within its container (bottom right).
+   * - `'auto'` - The button is positioned automatically based on available space (default).
    *
    * @default 'relative'
    */

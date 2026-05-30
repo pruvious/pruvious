@@ -2,7 +2,7 @@ import { dashboardBasePath } from '#pruvious/dashboard/base'
 import { useAuth } from '../auth/utils.client'
 import type { RouteLocationNormalized } from 'vue-router'
 /**
- * Pruvious client middleware that guards against non-logged-in users and users without the `access-dashboard` permission.
+ * Pruvious client middleware that guards against non-logged-in users and users without the `'access-dashboard'` permission.
  * It is intended for use in the dashboard.
  */
 export const dashboardAuthGuard = (to: RouteLocationNormalized) => {

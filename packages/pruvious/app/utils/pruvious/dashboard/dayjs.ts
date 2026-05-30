@@ -246,8 +246,8 @@ export function dayjsRelative(date?: PUIDateInput): string {
 
 /**
  * Resolves the `timezone` identifier.
- * It must be a valid IANA time zone name or `local`.
- * If not specified or set to `local`, returns the user's preferred timezone
+ * It must be a valid IANA time zone name or `'local'`.
+ * If not specified or set to `'local'`, returns the user's preferred timezone
  */
 export function dayjsResolveTimezone(timezone?: PUITimezone | 'local'): PUITimezone {
   if (isEmpty(timezone) || timezone === 'local') {

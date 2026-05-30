@@ -78,7 +78,7 @@ interface OverviewRoutesResult {
  * Entries include reference info so the dashboard can link directly to the underlying
  * collection record or singleton.
  *
- * Drafts are only included when the caller has the `preview-drafts` permission.
+ * Drafts are only included when the caller has the `'preview-drafts'` permission.
  */
 export default defineEventHandler(async (event): Promise<OverviewRoutesResult> => {
   assertUserPermissions(event, ['access-dashboard'])

@@ -99,7 +99,7 @@ export function getAuthTokenExpiresIn(): number | null {
 
 /**
  * Stores the auth token in `localStorage`.
- * Only executes when the `pruvious.auth.tokenStorage` is set to `localStorage`.
+ * Only executes when the `pruvious.auth.tokenStorage` is set to `'localStorage'`.
  * For cookie-based storage, token management is handled server-side.
  *
  * Use this function only in client-side code.

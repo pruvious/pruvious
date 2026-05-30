@@ -402,7 +402,7 @@ const props = defineProps({
 
   /**
    * The time zone identifier for displaying date values in the calendar.
-   * The value must be a valid IANA time zone name or `local`.
+   * The value must be a valid IANA time zone name or `'local'`.
    *
    * @default 'UTC'
    *
@@ -603,8 +603,8 @@ const props = defineProps({
 
   /**
    * The type of CSS position property to use for the picker.
-   * The `fixed` value is recommended for most cases.
-   * The `absolute` value is useful when the picker is inside a scrolling container.
+   * The `'fixed'` value is recommended for most cases.
+   * The `'absolute'` value is useful when the picker is inside a scrolling container.
    * You can also `provide('floatingStrategy', 'absolute')` from a parent component to change the default value.
    *
    * @default 'fixed'

@@ -217,7 +217,7 @@ const props = defineProps({
 
   /**
    * The position of the decorator that connects the two inputs.
-   * It can be `left`, `right`, or `hidden`.
+   * It can be `'left'`, `'right'`, or `'hidden'`.
    *
    * @default 'left'
    */
