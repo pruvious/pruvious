@@ -145,6 +145,7 @@
 
 <script lang="ts" setup>
 import { __, languages, primaryLanguage } from '#pruvious/app'
+import { useDashboardContentLanguage } from '#pruvious/dashboard'
 import type {
   PUIDynamicSelectChoiceModel,
   PUIDynamicSelectPaginatedChoices,
@@ -227,6 +228,8 @@ const relId = useId()
 const queryId = useId()
 const hashId = useId()
 
+const contentLanguage = useDashboardContentLanguage()
+
 const allowExternal = computed(() => props.options.allowExternal !== false)
 const allowHash = computed(() => props.options.allowHash !== false)
 const allowQuery = computed(() => props.options.allowQuery !== false)
@@ -243,7 +246,7 @@ const uiLanguages = computed<string[]>(() => {
   if (isArray(option)) {
     return option as string[]
   }
-  return [primaryLanguage]
+  return [contentLanguage.value]
 })
 
 const initialHref = props.href
