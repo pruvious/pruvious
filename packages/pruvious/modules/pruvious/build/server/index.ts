@@ -37,21 +37,27 @@ export async function getServerFileContent() {
   const nuxt = useNuxt()
   const pruviousOptions = nuxt.options.runtimeConfig.pruvious
 
-  const templateFiles = resolveTemplateFiles()
+  const templateFiles = await applyBuildFilters('templates', resolveTemplateFiles(), {})
   const templateEntries = Object.entries(templateFiles)
-  const collectionFiles = resolveCollectionFiles()
+  const collectionFiles = await applyBuildFilters('collections', resolveCollectionFiles(), {})
   const collectionEntries = Object.entries(collectionFiles)
-  const singletonFiles = resolveSingletonFiles()
+  const singletonFiles = await applyBuildFilters('singletons', resolveSingletonFiles(), {})
   const singletonEntries = Object.entries(singletonFiles)
-  const jobFiles = resolveJobFiles()
+  const jobFiles = await applyBuildFilters('jobs', resolveJobFiles(), {})
   const jobEntries = Object.entries(jobFiles)
   const translationFiles = resolveTranslationFiles()
-  const dashboardLanguages = Object.keys(translationFiles['pruvious-dashboard'] ?? {}).map((code) => ({
-    code,
-    name: new Intl.DisplayNames([code, 'en'], { type: 'language' }).of(code) ?? code,
-  }))
+  const dashboardLanguages = await applyBuildFilters(
+    'dashboardLanguages',
+    Object.keys(translationFiles['pruvious-dashboard'] ?? {}).map((code) => ({
+      code,
+      name: new Intl.DisplayNames([code, 'en'], { type: 'language' }).of(code) ?? code,
+    })),
+    {},
+  )
+  const languages = await applyBuildFilters('languages', pruviousOptions.i18n.languages, {})
+  const imageVariants = await applyBuildFilters('imageVariants', pruviousOptions.images.variants, {})
   const simpleValidatorsMeta = getSimpleValidatorsMeta()
-  const iconNames = getIconNames()
+  const iconNames = await applyBuildFilters('iconNames', getIconNames(), {})
   const permissions = await applyBuildFilters(
     'permissions',
     [
@@ -305,18 +311,14 @@ export async function getServerFileContent() {
     ` * Type definition for language codes supported by the application.`,
     ` * Supports BCP-47 codes like 'en', 'de-AT', 'zh-Hant', etc.`,
     ` */`,
-    `export type LanguageCode = ${Object.values(pruviousOptions.i18n.languages)
-      .map(({ code }) => `'${code}'`)
-      .join(' | ')}`,
+    `export type LanguageCode = ${languages.map(({ code }) => `'${code}'`).join(' | ')}`,
     ``,
     `/**`,
     ` * Sanitised column-name suffix derived from each configured \`LanguageCode\`.`,
     ` * Uppercase with hyphens removed (e.g. \`'EN'\`, \`'DEAT'\`, \`'ZHHANT'\`).`,
     ` * Use this instead of \`Uppercase<LanguageCode>\` since BCP-47 regional codes contain hyphens.`,
     ` */`,
-    `export type LanguageSuffix = ${Object.values(pruviousOptions.i18n.languages)
-      .map(({ code }) => `'${langSuffix(code)}'`)
-      .join(' | ')}`,
+    `export type LanguageSuffix = ${languages.map(({ code }) => `'${langSuffix(code)}'`).join(' | ')}`,
     ``,
     `/**`,
     ` * Type representing the the primary language code.`,
@@ -334,7 +336,7 @@ export async function getServerFileContent() {
     `/**`,
     ` * Type representing all defined variants for image processing.`,
     ` */`,
-    `export type ImageVariant = ${Object.keys(pruviousOptions.images.variants)
+    `export type ImageVariant = ${Object.keys(imageVariants)
       .map((key) => `'${key}'`)
       .join(' | ')}`,
     ``,
@@ -423,7 +425,7 @@ export async function getServerFileContent() {
     ` * Array of all registered content languages in the CMS.`,
     ` */`,
     `export const languages = [`,
-    ...Object.values(pruviousOptions.i18n.languages).map(({ code, name }) => `  { code: '${code}', name: '${name}' },`),
+    ...languages.map(({ code, name }) => `  { code: '${code}', name: '${name}' },`),
     `] as const`,
     ``,
     `/**`,

@@ -1,4 +1,6 @@
 import type { Permission } from '#pruvious/server'
+import type { ImageVariantOptions } from '../uploads/images.shared'
+import type { ResolveFromLayersResult } from '../utils/resolve'
 import type { ServerFileContext } from './server/index'
 
 export interface BuildActions {
@@ -25,13 +27,75 @@ export interface BuildFilters {
   'standardRoutes': { TValue: string[]; TContext: {} }
 
   /**
+   * Allows modification of the registered content languages.
+   * Affects the `LanguageCode`, `LanguageSuffix`, and `PrimaryLanguageCode` types and the `languages` constant.
+   */
+  'languages': { TValue: { code: string; name: string }[]; TContext: {} }
+
+  /**
+   * Allows modification of the supported dashboard languages.
+   * Affects the `DashboardLanguageCode` type and the `dashboardLanguages` constant.
+   */
+  'dashboardLanguages': { TValue: { code: string; name: string }[]; TContext: {} }
+
+  /**
+   * Allows modification of the configured image variants.
+   * Affects the `ImageVariant` type.
+   */
+  'imageVariants': { TValue: Record<string, Required<ImageVariantOptions>>; TContext: {} }
+
+  /**
+   * Allows modification of the available custom icon names.
+   * Affects the `IconName` type and the `iconNames` constant.
+   */
+  'iconNames': { TValue: string[]; TContext: {} }
+
+  /**
+   * Allows modification of the resolved collection files.
+   * Affects the `Collections` type, the `collections` constant, and every collection-derived export.
+   */
+  'collections': { TValue: Record<string, ResolveFromLayersResult>; TContext: {} }
+
+  /**
+   * Allows modification of the resolved singleton files.
+   * Affects the `Singletons` type, the `singletons` constant, and every singleton-derived export.
+   */
+  'singletons': { TValue: Record<string, ResolveFromLayersResult>; TContext: {} }
+
+  /**
+   * Allows modification of the resolved collection template files.
+   * Affects the `Templates` type and the `getTemplate` switch.
+   */
+  'templates': { TValue: Record<string, ResolveFromLayersResult>; TContext: {} }
+
+  /**
+   * Allows modification of the resolved job files.
+   * Affects the `Jobs` type and the `jobs` constant.
+   */
+  'jobs': { TValue: Record<string, ResolveFromLayersResult>; TContext: {} }
+
+  /**
    * Allows modification of the `#pruvious/server` file content before it is written.
    */
   '#pruvious/server': { TValue: string[]; TContext: ServerFileContext }
 }
 
-const buildActions: Record<string, { callback: Function; priority: number }[]> = {}
-const buildFilters: Record<string, { callback: Function; priority: number }[]> = {}
+/**
+ * The kit module can be loaded under multiple specifiers (e.g. `pruvious/kit` and a relative `../kit`)
+ * which the runtime may evaluate as separate module instances. Storing the registries on `globalThis`
+ * via a registered symbol ensures `addBuildFilter` / `applyBuildFilters` (and the action counterparts)
+ * read and write the same map regardless of which copy of this file invoked them.
+ */
+const REGISTRY_KEY = Symbol.for('pruvious.build-hooks-registry')
+const _globalThis = globalThis as typeof globalThis & {
+  [REGISTRY_KEY]?: {
+    actions: Record<string, { callback: Function; priority: number }[]>
+    filters: Record<string, { callback: Function; priority: number }[]>
+  }
+}
+_globalThis[REGISTRY_KEY] ??= { actions: {}, filters: {} }
+const buildActions = _globalThis[REGISTRY_KEY]!.actions
+const buildFilters = _globalThis[REGISTRY_KEY]!.filters
 
 /**
  * Registers a new build action function for a given action `name`.
