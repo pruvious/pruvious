@@ -1,0 +1,344 @@
+import {
+  type CombinedFieldOptions,
+  defineField,
+  type GenericDatabase,
+  type ResolveFieldUIOptions,
+  type TranslatableStringCallback,
+} from '#pruvious/server'
+import {
+  type ConditionalLogic,
+  type Field,
+  type FieldModel,
+  textFieldModel,
+  type TextFieldModelOptions,
+} from '@pruvious/orm'
+import { isArray, isBoolean, isNull, isNumber, isObject, isString, isUndefined } from '@pruvious/utils'
+import type { PropType } from 'vue'
+
+export interface ColorChoice {
+  /**
+   * An optional label to display in the UI for this color.
+   * If not provided, the `value` is shown instead.
+   *
+   * You can provide either a string or a callback function that returns a string.
+   *
+   * @example
+   * ```ts
+   * // Using a string
+   * label: 'Brand red'
+   *
+   * // Using a callback
+   * label: ({ __ }) => __('pruvious-dashboard', 'Brand red')
+   * ```
+   */
+  label?: string | TranslatableStringCallback
+
+  /**
+   * The casted value stored in the database.
+   * Must be a valid CSS color string (hex, `rgb()`, `hsl()`, named color, etc.) including any alpha component.
+   */
+  value: string
+
+  /**
+   * An optional value that explicitly overrides the casted value when the field is populated.
+   * Can be anything that survives JSON serialization (string, number, object, array).
+   *
+   * The populated value is not validated at runtime; it is type-checked in the query builder
+   * via the field's inferred populated type.
+   *
+   * @default undefined
+   *
+   * @example
+   * ```ts
+   * populate: { name: 'red', rgb: [255, 0, 0] }
+   * ```
+   */
+  populate?: unknown
+}
+
+export interface ColorChoiceGroup {
+  /**
+   * Translatable label for a group of colors. Rendered above the group's swatches in the UI.
+   *
+   * @example
+   * ```ts
+   * // Using a string
+   * group: 'Brand'
+   *
+   * // Using a callback
+   * group: ({ __ }) => __('pruvious-dashboard', 'Brand')
+   * ```
+   */
+  group: string | TranslatableStringCallback
+
+  /**
+   * Colors that belong to this group.
+   * Each entry can be either a CSS color string or a `ColorChoice` object.
+   * Each `value` must be unique across all groups and top-level colors.
+   */
+  colors: (string | ColorChoice)[]
+}
+
+type Normalized<T> = T extends string ? { value: T } : T
+
+export type ExtractColorCastedValues<T extends readonly (string | ColorChoice | ColorChoiceGroup)[]> =
+  T[number] extends infer Item
+    ? Item extends string
+      ? Item
+      : Item extends ColorChoiceGroup
+        ? ExtractColorCastedValues<Item['colors']>
+        : Item extends { value: infer V }
+          ? V
+          : never
+    : never
+
+export type ExtractColorPopulatedValues<T extends readonly (string | ColorChoice | ColorChoiceGroup)[]> =
+  T[number] extends infer Item
+    ? Item extends string
+      ? Item
+      : Item extends ColorChoiceGroup
+        ? ExtractColorPopulatedValues<Item['colors']>
+        : Item extends { value: infer V; populate: infer P }
+          ? P
+          : Item extends { value: infer V }
+            ? V
+            : never
+    : never
+
+interface CustomOptions<TColors extends (string | ColorChoice | ColorChoiceGroup)[]> {
+  /**
+   * The colors available for this field. Each entry can be:
+   *
+   * - A CSS color string (e.g. `'#ff0000'`, `'rgb(255 0 0 / 0.5)'`, `'tomato'`).
+   * - A `ColorChoice` object with an optional `label`, the casted `value`, and an optional `populate` override.
+   * - A `ColorChoiceGroup` object with a translatable `group` label and a list of colors.
+   *
+   * Every `value` must be a valid CSS color and must be unique across all groups and top-level colors.
+   *
+   * @example
+   * ```ts
+   * colors: [
+   *   '#ff0000',
+   *   { label: 'Brand green', value: '#00ff00' },
+   *   {
+   *     group: ({ __ }) => __('pruvious-dashboard', 'Brand'),
+   *     colors: [
+   *       { value: '#0000ff', populate: { name: 'blue', rgb: [0, 0, 255] } },
+   *     ],
+   *   },
+   * ]
+   * ```
+   */
+  colors: TColors
+}
+
+/**
+ * Flattens the configured `colors` array into a flat list of `ColorChoice` entries, normalizing
+ * string shortcuts to `{ value }` objects and unwrapping groups.
+ */
+export function flattenColorChoices(
+  colors: (string | ColorChoice | ColorChoiceGroup)[],
+): { label?: string | TranslatableStringCallback; value: string; populate?: unknown }[] {
+  return colors.flatMap((entry) => {
+    if (isString(entry)) {
+      return [{ value: entry }]
+    }
+    if ('colors' in entry) {
+      return entry.colors.map((c) => (isString(c) ? { value: c } : c))
+    }
+    return [entry]
+  })
+}
+
+const customOptions: CustomOptions<(string | ColorChoice | ColorChoiceGroup)[]> = {
+  colors: [],
+}
+
+export default {
+  /**
+   * Creates a new `Field` instance.
+   *
+   * This function is intended for server-side use in collection definitions.
+   * For client-side usage, import the equivalent function from `#pruvious/app`.
+   */
+  serverFn: function <
+    const TRequired extends boolean | undefined,
+    const TImmutable extends boolean | undefined,
+    const TAutoGenerated extends boolean | undefined,
+    TConditionalLogic extends ConditionalLogic | undefined,
+    const TColors extends (string | ColorChoice | ColorChoiceGroup)[],
+    const TCasted extends ExtractColorCastedValues<TColors> = ExtractColorCastedValues<TColors>,
+    const TPopulated = ExtractColorPopulatedValues<TColors>,
+  >(
+    options: Omit<
+      CombinedFieldOptions<
+        FieldModel<
+          TextFieldModelOptions<TCasted, TPopulated>,
+          'text',
+          NoInfer<TCasted>,
+          TPopulated,
+          TCasted,
+          undefined,
+          undefined
+        >,
+        TextFieldModelOptions<TCasted, TPopulated> & CustomOptions<TColors> & ResolveFieldUIOptions<undefined>,
+        false,
+        TRequired,
+        TImmutable,
+        TAutoGenerated,
+        TConditionalLogic,
+        GenericDatabase
+      >,
+      'allowEmptyString' | 'maxLength' | 'minLength' | 'trim'
+    >,
+  ): Field<
+    FieldModel<TextFieldModelOptions<TCasted, TPopulated>, 'text', TCasted, TPopulated, TCasted, undefined, undefined>,
+    TextFieldModelOptions<TCasted, TPopulated> & CustomOptions<TColors> & ResolveFieldUIOptions<undefined>,
+    false,
+    TRequired,
+    TImmutable,
+    TAutoGenerated,
+    TConditionalLogic,
+    GenericDatabase
+  > {
+    const flattened = flattenColorChoices(options.colors)
+
+    const bound = defineField({
+      model: textFieldModel(),
+      default: flattened[0]?.value,
+      validators: [
+        (value, { context }) => {
+          if (!flattened.some((choice) => choice.value === value)) {
+            throw new Error(context.__('pruvious-orm', 'Invalid value'))
+          }
+        },
+      ],
+      populator: (value, { definition }) => {
+        const colors = (definition.options as any).colors as (string | ColorChoice | ColorChoiceGroup)[]
+        const choice = flattenColorChoices(colors).find((c) => c.value === value)
+        return (choice && 'populate' in choice ? choice.populate : value) as any
+      },
+      customOptions: { ...customOptions, trim: false },
+      omitOptions: ['allowEmptyString', 'maxLength', 'minLength', 'trim'],
+      castedTypeFn: ({ field }) =>
+        flattenColorChoices(field.options.colors)
+          .map((choice) => JSON.stringify(choice.value))
+          .join(' | ') || 'string',
+      populatedTypeFn: ({ field }) => {
+        const choices = flattenColorChoices(field.options.colors)
+        const parts = choices.map((choice) =>
+          'populate' in choice ? serializePopulatedType(choice.populate) : JSON.stringify(choice.value),
+        )
+        return parts.join(' | ') || 'string'
+      },
+      inputTypeFn: ({ field }) =>
+        flattenColorChoices(field.options.colors)
+          .map((choice) => JSON.stringify(choice.value))
+          .join(' | ') || 'string',
+    }).serverFn.bind(this)
+    return bound(options as any) as any
+  },
+
+  /**
+   * Creates a new `Field` instance.
+   *
+   * This function is intended for client-side use in Vue components.
+   * For server-side usage, import the equivalent function from `#pruvious/server`.
+   */
+  clientFn: function <
+    const TRequired extends boolean | undefined,
+    const TImmutable extends boolean | undefined,
+    const TAutoGenerated extends boolean | undefined,
+    TConditionalLogic extends ConditionalLogic | undefined,
+    const TColors extends (string | ColorChoice | ColorChoiceGroup)[],
+    const TCasted extends ExtractColorCastedValues<TColors> = ExtractColorCastedValues<TColors>,
+    const TPopulated = ExtractColorPopulatedValues<TColors>,
+  >(
+    options: Omit<
+      CombinedFieldOptions<
+        FieldModel<
+          TextFieldModelOptions<TCasted, TPopulated>,
+          'text',
+          NoInfer<TCasted>,
+          TPopulated,
+          TCasted,
+          undefined,
+          undefined
+        >,
+        TextFieldModelOptions<TCasted, TPopulated> & CustomOptions<TColors> & ResolveFieldUIOptions<undefined>,
+        false,
+        TRequired,
+        TImmutable,
+        TAutoGenerated,
+        TConditionalLogic,
+        GenericDatabase
+      >,
+      'allowEmptyString' | 'maxLength' | 'minLength' | 'trim'
+    >,
+  ): { type: PropType<TPopulated>; required: true } & {
+    field: Field<
+      FieldModel<
+        TextFieldModelOptions<TCasted, TPopulated>,
+        'text',
+        TCasted,
+        TPopulated,
+        TCasted,
+        undefined,
+        undefined
+      >,
+      TextFieldModelOptions<TCasted, TPopulated> & CustomOptions<TColors> & ResolveFieldUIOptions<undefined>,
+      false,
+      TRequired,
+      TImmutable,
+      TAutoGenerated,
+      TConditionalLogic,
+      GenericDatabase
+    >
+  } {
+    return null as any
+  },
+
+  /**
+   * Represents the type structure for this field's configuration options.
+   *
+   * Note: This is a TypeScript type assertion and does not involve any runtime logic or data.
+   */
+  TOptions: undefined as unknown as Omit<
+    CombinedFieldOptions<
+      FieldModel<TextFieldModelOptions<string, unknown>, 'text', string, unknown, string, undefined, undefined>,
+      TextFieldModelOptions<string, unknown> &
+        CustomOptions<(string | ColorChoice | ColorChoiceGroup)[]> &
+        ResolveFieldUIOptions<undefined>,
+      false,
+      boolean,
+      boolean,
+      boolean,
+      ConditionalLogic | undefined,
+      GenericDatabase
+    >,
+    'allowEmptyString' | 'maxLength' | 'minLength' | 'trim'
+  >,
+}
+
+function serializePopulatedType(value: unknown): string {
+  if (isUndefined(value)) {
+    return 'undefined'
+  }
+  if (isNull(value)) {
+    return 'null'
+  }
+  if (isString(value)) {
+    return JSON.stringify(value)
+  }
+  if (isNumber(value) || isBoolean(value)) {
+    return String(value)
+  }
+  if (isArray(value)) {
+    return `[${value.map(serializePopulatedType).join(', ')}]`
+  }
+  if (isObject(value)) {
+    const parts = Object.entries(value).map(([k, v]) => `${JSON.stringify(k)}: ${serializePopulatedType(v)}`)
+    return `{ ${parts.join('; ')} }`
+  }
+  return 'unknown'
+}

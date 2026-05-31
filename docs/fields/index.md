@@ -11,7 +11,7 @@ All fields are imported from `#pruvious/server` for collection and singleton def
 | [Text](#text) | `textField`, `textAreaField`, `nullableTextField`, `translatableTextField`, `editorField`, `richTextField` |
 | [Numbers](#numbers) | `numberField` |
 | [Booleans](#booleans) | `switchField`, `checkboxField`, `trueFalseField` |
-| [Choices](#choices) | `selectField`, `nullableSelectField`, `buttonGroupField`, `chipsField` |
+| [Choices](#choices) | `selectField`, `nullableSelectField`, `buttonGroupField`, `chipsField`, `colorField` |
 | [Date and time](#date-and-time) | `dateField`, `dateRangeField`, `dateTimeField`, `dateTimeRangeField`, `timeField`, `timeRangeField`, `timestampField` |
 | [Media](#media) | `imageField`, `imagesField`, `fileField`, `filesField`, `iconField` |
 | [Relations](#relations) | `recordField`, `recordsField`, `linkField`, `linkedBlocksField`, `blocksField` |
@@ -290,6 +290,28 @@ chipsField({
 ```
 
 **Specific options:** `choices`, `enforceUniqueItems`, `trim`, `ui.variant`.
+
+### colorField
+
+A swatch picker over a configured CSS color palette. Each choice is a CSS color string or `{ value, label?, populate? }`; choices can be grouped under translatable group labels. Casted value is one of the configured strings; populated value is the choice's `populate` if set, otherwise the casted value.
+
+```ts
+import { colorField } from '#pruvious/server'
+
+colorField({
+  colors: [
+    '#ff0000',
+    { label: 'Brand green', value: '#00ff00' },
+    { value: '#0000ff', populate: { name: 'blue', rgb: [0, 0, 255] } },
+    {
+      group: ({ __ }) => __('pruvious-dashboard', 'Brand'),
+      colors: ['#e11d48', '#2563eb'],
+    },
+  ],
+})
+```
+
+**Specific options:** `colors`.
 
 ## Date and time
 

@@ -37,6 +37,7 @@ describe('cms', async () => {
   await import('./cms/fields/buttonGroup')
   await import('./cms/fields/checkbox')
   await import('./cms/fields/chips')
+  await import('./cms/fields/color')
   await import('./cms/fields/date')
   await import('./cms/fields/dateRange')
   await import('./cms/fields/dateTime')

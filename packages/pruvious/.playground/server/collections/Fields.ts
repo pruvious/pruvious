@@ -3,6 +3,7 @@ import {
   buttonGroupField,
   checkboxField,
   chipsField,
+  colorField,
   commonMarks,
   dateField,
   dateRangeField,
@@ -123,6 +124,46 @@ export default defineCollection({
     chipsDeduplicate: chipsField({
       deduplicateItems: true,
       ui: { label: 'Chips (deduplicate items)' },
+    }),
+
+    // color
+    color: colorField({
+      colors: ['#ff0000', '#00ff00', '#0000ff'],
+      ui: { label: 'Color', description: 'Pick a primary color' },
+    }),
+    colorObjects: colorField({
+      colors: [
+        { label: 'Red', value: '#ff0000' },
+        { label: 'Green', value: '#00ff00' },
+        { value: '#0000ff', populate: { name: 'blue', rgb: [0, 0, 255] } },
+      ],
+      ui: { label: 'Color (objects)' },
+    }),
+    colorGroups: colorField({
+      colors: [
+        'transparent',
+        {
+          group: 'Brand',
+          colors: [
+            { label: 'Brand red', value: '#e11d48' },
+            { label: 'Brand blue', value: '#2563eb' },
+          ],
+        },
+        {
+          group: 'Greys',
+          colors: ['#000000', '#555555', '#aaaaaa', '#ffffff'],
+        },
+      ],
+      ui: { label: 'Color (groups)' },
+    }),
+    colorWithAlpha: colorField({
+      colors: ['rgb(255 0 0 / 0.25)', 'rgba(0, 255, 0, 0.5)', 'hsl(240 100% 50% / 0.75)'],
+      ui: { label: 'Color (alpha)' },
+    }),
+    colorWithDefault: colorField({
+      colors: ['#ff0000', '#00ff00', '#0000ff'],
+      default: '#0000ff',
+      ui: { label: 'Color (with default)' },
     }),
 
     // date
@@ -907,6 +948,10 @@ export default defineCollection({
                 'chipsChoicesAllowDuplicates',
                 'chipsDeduplicate',
               ],
+            },
+            {
+              label: 'Color',
+              fields: ['color', 'colorObjects', 'colorGroups', 'colorWithAlpha', 'colorWithDefault'],
             },
             {
               label: 'Date',

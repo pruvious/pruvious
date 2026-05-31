@@ -63,6 +63,7 @@ npm i @pruvious/utils
   - [containsDangerousCss](#containsdangerouscss)
   - [deselectAll](#deselectall)
   - [formatLanguageCode](#formatlanguagecode)
+  - [hasAlphaChannel](#hasalphachannel)
   - [isBCP47LanguageCode](#isbcp47languagecode)
   - [isDescendant](#isdescendant)
   - [isRelURL](#isrelurl)
@@ -848,6 +849,31 @@ formatLanguageCode('pt-BR')      // 'PT (BR)'
 formatLanguageCode('zh-Hant')    // 'ZH (HANT)'
 formatLanguageCode('sr-Latn-RS') // 'SR (LATN-RS)'
 formatLanguageCode('es-419')     // 'ES (419)'
+```
+
+### <a id="hasalphachannel">`hasAlphaChannel(color)`</a>
+
+Checks whether a CSS `color` string carries an alpha channel that can produce a
+less-than-opaque pixel. Recognized forms:
+
+- The literal `'transparent'` keyword.
+- 4 or 8 digit hex (`#RGBA`, `#RRGGBBAA`).
+- `rgba(...)` and `hsla(...)` functions.
+- Modern slash syntax inside any color function (e.g. `rgb(255 0 0 / 0.5)`,
+`hsl(0 0% 0% / 0.5)`, `hwb(...)`, `lab(...)`, `lch(...)`, `oklab(...)`,
+`oklch(...)`, `color(...)`).
+
+Named colors, 3 or 6 digit hex, plain `rgb()`/`hsl()`, `currentColor` and
+anything else are reported as opaque.
+
+**Example:**
+
+```ts
+hasAlphaChannel('#ff0000')          // false
+hasAlphaChannel('#ff000080')        // true
+hasAlphaChannel('transparent')        // true
+hasAlphaChannel('rgba(0, 0, 0, 0)') // true
+hasAlphaChannel('rgb(0 0 0 / 0.5)')   // true
 ```
 
 ### <a id="isbcp47languagecode">`isBCP47LanguageCode(code)`</a>

@@ -521,6 +521,7 @@ export default defineTranslation({
   'No blocks added': 'Keine Blöcke hinzugefügt',
   'No blocks can be added here': 'Hier können keine Blöcke hinzugefügt werden',
   'No blocks match your search criteria': 'Keine Blöcke entsprechen Ihren Suchkriterien',
+  'No colors configured': 'Keine Farben konfiguriert',
   'No conditions set': 'Keine Bedingungen festgelegt',
   'No data available': 'Keine Daten verfügbar',
   'No description': 'Keine Beschreibung',

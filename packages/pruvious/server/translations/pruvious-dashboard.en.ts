@@ -519,6 +519,7 @@ export default defineTranslation({
   'No blocks added': 'No blocks added',
   'No blocks can be added here': 'No blocks can be added here',
   'No blocks match your search criteria': 'No blocks match your search criteria',
+  'No colors configured': 'No colors configured',
   'No conditions set': 'No conditions set',
   'No data available': 'No data available',
   'No description': 'No description',
