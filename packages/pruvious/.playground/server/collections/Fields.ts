@@ -13,6 +13,7 @@ import {
   editorField,
   iconField,
   linkField,
+  nullableColorField,
   nullableObjectField,
   nullableSelectField,
   nullableTextField,
@@ -247,6 +248,38 @@ export default defineCollection({
     }),
     linkAllLanguages: linkField({
       ui: { label: 'Link (all languages)', languages: 'all' },
+    }),
+
+    // nullableColor
+    nullableColor: nullableColorField({
+      colors: ['#ff0000', '#00ff00', '#0000ff'],
+      ui: { label: 'Nullable color', description: 'Defaults to null' },
+    }),
+    nullableColorObjects: nullableColorField({
+      colors: [
+        { label: 'Red', value: '#ff0000' },
+        { label: 'Green', value: '#00ff00' },
+        { value: '#0000ff', populate: { name: 'blue', rgb: [0, 0, 255] } },
+      ],
+      ui: { label: 'Nullable color (objects)' },
+    }),
+    nullableColorWithDefault: nullableColorField({
+      colors: ['#ff0000', '#00ff00', '#0000ff'],
+      default: '#00ff00',
+      ui: { label: 'Nullable color (with default)' },
+    }),
+    nullableColorGroups: nullableColorField({
+      colors: [
+        'transparent',
+        {
+          group: 'Brand',
+          colors: [
+            { label: 'Brand red', value: '#e11d48' },
+            { label: 'Brand blue', value: '#2563eb' },
+          ],
+        },
+      ],
+      ui: { label: 'Nullable color (groups)' },
     }),
 
     // nullableObject
@@ -1011,6 +1044,10 @@ export default defineCollection({
                 'linkNoDrafts',
                 'linkAllLanguages',
               ],
+            },
+            {
+              label: 'Nullable color',
+              fields: ['nullableColor', 'nullableColorObjects', 'nullableColorWithDefault', 'nullableColorGroups'],
             },
             {
               label: 'Nullable object',

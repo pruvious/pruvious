@@ -38,6 +38,17 @@
           >
             <span class="p-color-swatch-fill" :style="{ 'background-color': choice.value }"></span>
           </button>
+
+          <PUIButton
+            v-if="sectionIndex === sections.length - 1 && !isNull(modelValue)"
+            v-pui-tooltip="__('pruvious-dashboard', 'Clear selection')"
+            :disabled="disabled"
+            :size="-1"
+            @click="clear"
+            variant="outline"
+          >
+            <NuxtIcon mode="svg" name="tabler:x" />
+          </PUIButton>
         </div>
       </div>
     </div>
@@ -49,10 +60,11 @@
 </template>
 
 <script lang="ts" setup>
+import { Icon as NuxtIcon } from '#components'
 import { __ } from '#pruvious/app'
 import { maybeTranslate } from '#pruvious/dashboard'
 import type { SerializableFieldOptions } from '#pruvious/server'
-import { hasAlphaChannel, isString } from '@pruvious/utils'
+import { hasAlphaChannel, isNull, isString } from '@pruvious/utils'
 
 interface DisplayChoice {
   label: string | undefined
@@ -69,8 +81,8 @@ const props = defineProps({
    * The casted field value.
    */
   modelValue: {
-    type: String,
-    required: true,
+    type: String as PropType<string | null>,
+    default: null,
   },
 
   /**
@@ -85,7 +97,7 @@ const props = defineProps({
    * The combined field options defined in a collection, singleton, or block.
    */
   options: {
-    type: Object as PropType<SerializableFieldOptions<'color'>>,
+    type: Object as PropType<SerializableFieldOptions<'nullableColor'>>,
     required: true,
   },
 
@@ -136,8 +148,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  'commit': [value: string]
-  'update:modelValue': [value: string]
+  'commit': [value: string | null]
+  'update:modelValue': [value: string | null]
 }>()
 
 const id = useId()
@@ -180,6 +192,14 @@ function select(value: string) {
   }
   emit('update:modelValue', value)
   emit('commit', value)
+}
+
+function clear() {
+  if (props.disabled || isNull(props.modelValue)) {
+    return
+  }
+  emit('update:modelValue', null)
+  emit('commit', null)
 }
 </script>
 

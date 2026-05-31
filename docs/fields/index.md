@@ -11,7 +11,7 @@ All fields are imported from `#pruvious/server` for collection and singleton def
 | [Text](#text) | `textField`, `textAreaField`, `nullableTextField`, `translatableTextField`, `editorField`, `richTextField` |
 | [Numbers](#numbers) | `numberField` |
 | [Booleans](#booleans) | `switchField`, `checkboxField`, `trueFalseField` |
-| [Choices](#choices) | `selectField`, `nullableSelectField`, `buttonGroupField`, `chipsField`, `colorField` |
+| [Choices](#choices) | `selectField`, `nullableSelectField`, `buttonGroupField`, `chipsField`, `colorField`, `nullableColorField` |
 | [Date and time](#date-and-time) | `dateField`, `dateRangeField`, `dateTimeField`, `dateTimeRangeField`, `timeField`, `timeRangeField`, `timestampField` |
 | [Media](#media) | `imageField`, `imagesField`, `fileField`, `filesField`, `iconField` |
 | [Relations](#relations) | `recordField`, `recordsField`, `linkField`, `linkedBlocksField`, `blocksField` |
@@ -308,6 +308,21 @@ colorField({
       colors: ['#e11d48', '#2563eb'],
     },
   ],
+})
+```
+
+**Specific options:** `colors`.
+
+### nullableColorField
+
+Same as `colorField` but the value can be cleared back to `null`. The dashboard renders a Clear button next to the swatches whenever a value is selected.
+
+```ts
+import { nullableColorField } from '#pruvious/server'
+
+nullableColorField({
+  colors: ['#ff0000', '#00ff00', '#0000ff'],
+  default: null,
 })
 ```
 
