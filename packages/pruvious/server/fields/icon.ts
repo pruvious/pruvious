@@ -57,7 +57,8 @@ export default defineField({
         throw new Error(context.__('pruvious-api', 'Invalid icon directory'))
       }
 
-      if (!pruviousIconNames[resolved.prefix]?.includes(value)) {
+      const names: readonly string[] = pruviousIconNames[resolved.prefix as PruviousIconDir] ?? []
+      if (!names.includes(value)) {
         throw new Error(context.__('pruvious-api', 'Icon not found'))
       }
     },

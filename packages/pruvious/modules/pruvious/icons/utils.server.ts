@@ -122,4 +122,3 @@ export function resolveIconDir(dir: string | undefined | null): ResolvedIconDir 
 
   return { kind: 'resolved', abs: match.dirs, prefix: match.prefix }
 }
-

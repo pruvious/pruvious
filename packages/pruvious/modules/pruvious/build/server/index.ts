@@ -73,10 +73,7 @@ export async function getServerFileContent() {
   const pruviousIconNames = await applyBuildFilters(
     'pruviousIconNames',
     Object.fromEntries(
-      pruviousOptions.dir.icons.map(({ dirs, prefix }) => [
-        prefix,
-        resolveIconFiles(dirs).map(({ name }) => name),
-      ]),
+      pruviousOptions.dir.icons.map(({ dirs, prefix }) => [prefix, resolveIconFiles(dirs).map(({ name }) => name)]),
     ) as Record<string, string[]>,
     {},
   )

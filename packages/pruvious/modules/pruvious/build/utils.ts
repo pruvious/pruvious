@@ -155,16 +155,10 @@ export function resolveIconFiles(absDirs: string[]): ResolvedIcon[] {
 
   if (useNuxt().options.runtimeConfig.pruvious.debug.warnings === 'all') {
     if (skippedNames.length) {
-      warnWithContext(
-        'Skipped icon files with unsupported names. Use only letters, digits, `_` and `-`.',
-        skippedNames,
-      )
+      warnWithContext('Skipped icon files with unsupported names. Use only letters, digits, `_` and `-`.', skippedNames)
     }
     if (skippedSanitization.length) {
-      warnWithContext(
-        'Skipped icon files that produced empty output after SVG sanitization.',
-        skippedSanitization,
-      )
+      warnWithContext('Skipped icon files that produced empty output after SVG sanitization.', skippedSanitization)
     }
   }
 

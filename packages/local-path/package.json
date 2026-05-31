@@ -19,7 +19,7 @@
     "build": "plugin build",
     "dev": "nuxt dev src/.playground",
     "dev:prepare": "nuxt prepare src/.playground",
-    "typecheck": "pnpm dev:prepare && nuxt typecheck src"
+    "typecheck": "pnpm dev:prepare && nuxt typecheck src/.playground"
   },
   "dependencies": {
     "@vueuse/core": "^14.1.0",

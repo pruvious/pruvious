@@ -1,4 +1,4 @@
-import { __, assertUserPermissions, pruviousError, pruviousIconNames } from '#pruvious/server'
+import { __, assertUserPermissions, pruviousError, pruviousIconNames, type PruviousIconDir } from '#pruvious/server'
 import { isEmpty, isString, sanitizeSvg } from '@pruvious/utils'
 import fs from 'node:fs'
 import { join } from 'pathe'
@@ -27,7 +27,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!pruviousIconNames[resolved.prefix]?.includes(name)) {
+  const names: readonly string[] = pruviousIconNames[resolved.prefix as PruviousIconDir] ?? []
+  if (!names.includes(name)) {
     throw pruviousError(event, {
       statusCode: 404,
       message: __('pruvious-api', 'Icon not found'),

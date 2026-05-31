@@ -10,7 +10,7 @@ import {
   translateRelURL,
 } from '#pruvious/server'
 import type { GenericField } from '@pruvious/orm'
-import { isArray, isNull, isObject, isRelURL, isString } from '@pruvious/utils'
+import { isArray, isDefined, isNull, isObject, isRelURL, isString, isUndefined } from '@pruvious/utils'
 
 /**
  * Default implementation for a collection `duplicate` function.
@@ -390,7 +390,7 @@ function classifyField(field: GenericField, value: any): FieldKind {
     return { kind: 'records', collection: options.collection }
   }
 
-  if (dataType === 'text' && options.allowedReferences !== undefined && isObject(model?.subfields)) {
+  if (dataType === 'text' && isDefined(options.allowedReferences) && isObject(model?.subfields)) {
     return { kind: 'link' }
   }
 
@@ -398,7 +398,7 @@ function classifyField(field: GenericField, value: any): FieldKind {
     return { kind: 'structure', structure: model.structure }
   }
 
-  if (dataType === 'text' && options.allowRootBlocks !== undefined) {
+  if (dataType === 'text' && isDefined(options.allowRootBlocks)) {
     return { kind: 'blocks' }
   }
 
@@ -418,8 +418,8 @@ function classifyLeaf(field: GenericField): 'text' | 'other' {
     model?.dataType === 'text' &&
     !isObject(model?.subfields) &&
     !isObject(model?.structure) &&
-    options.allowRootBlocks === undefined &&
-    options.allowedReferences === undefined
+    isUndefined(options.allowRootBlocks) &&
+    isUndefined(options.allowedReferences)
   ) {
     return 'text'
   }
@@ -468,11 +468,11 @@ function stripCopySuffix(value: string): string {
     return ''
   }
   const spaced = value.match(/^(.*) \(copy(?:\s+\d+)?\)$/)
-  if (spaced) {
+  if (isDefined(spaced?.[1])) {
     return spaced[1]
   }
   const slugged = value.match(/^(.*)-copy(?:-\d+)?$/)
-  if (slugged) {
+  if (isDefined(slugged?.[1])) {
     return slugged[1]
   }
   return value

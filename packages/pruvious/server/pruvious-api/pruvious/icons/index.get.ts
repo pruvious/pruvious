@@ -1,4 +1,4 @@
-import { __, assertUserPermissions, pruviousError, pruviousIconNames } from '#pruvious/server'
+import { __, assertUserPermissions, pruviousError, pruviousIconNames, type PruviousIconDir } from '#pruvious/server'
 import { isString } from '@pruvious/utils'
 import { resolveIconDir } from '../../../../modules/pruvious/icons/utils.server'
 
@@ -27,5 +27,5 @@ export default defineEventHandler(async (event): Promise<IconsListResult> => {
     return { dir: resolved.prefix, names: [] }
   }
 
-  return { dir: resolved.prefix, names: pruviousIconNames[resolved.prefix] ?? [] }
+  return { dir: resolved.prefix, names: pruviousIconNames[resolved.prefix as PruviousIconDir] ?? [] }
 })
