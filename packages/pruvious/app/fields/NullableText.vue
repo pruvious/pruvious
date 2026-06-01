@@ -14,6 +14,7 @@
           { value: false, label: offLabel },
           { value: true, label: onLabel },
         ]"
+        :disabled="disabled"
         :id="`${id}--switch`"
         :modelValue="modelValue !== null"
         :name="`${path}--switch`"
