@@ -8,7 +8,11 @@ export default function (to: RouteLocationNormalizedGeneric) {
     const collection = getCollectionBySlug(to.params.collection)
     const id = castToNumber(to.params.id)
 
-    if (!collection || !collection.definition.api.update || collection.definition.ui.hidden) {
+    if (
+      !collection ||
+      (!collection.definition.api.update && !collection.definition.api.read) ||
+      collection.definition.ui.hidden
+    ) {
       puiQueueToast(__('pruvious-dashboard', 'Redirected'), {
         type: 'error',
         description: __('pruvious-dashboard', 'Page not found'),

@@ -61,9 +61,12 @@ export async function resolveCollectionRecordPermissions(
 ): Promise<ResolvedCollectionRecordPermissions> {
   const isManaged = collection.definition.authorField || collection.definition.editorsField
   const canManage = hasPermission(`collection:${kebabCase(collection.name)}:manage` as Permission)
-  const canCreate = hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
-  const canUpdate = hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
-  const canDelete = hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
+  const canCreate =
+    collection.definition.api.create && hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
+  const canUpdate =
+    collection.definition.api.update && hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
+  const canDelete =
+    collection.definition.api.delete && hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
   const results: ResolvedCollectionRecordPermissions = {
     id,
     canCreate,
@@ -151,9 +154,12 @@ export async function resolveTranslatableCollectionRecordPermissions(
   const results = {} as ResolvedTranslatableCollectionRecordPermissions
   const isManaged = collection.definition.authorField || collection.definition.editorsField
   const canManage = hasPermission(`collection:${kebabCase(collection.name)}:manage` as Permission)
-  const canCreate = hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
-  const canUpdate = hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
-  const canDelete = hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
+  const canCreate =
+    collection.definition.api.create && hasPermission(`collection:${kebabCase(collection.name)}:create` as Permission)
+  const canUpdate =
+    collection.definition.api.update && hasPermission(`collection:${kebabCase(collection.name)}:update` as Permission)
+  const canDelete =
+    collection.definition.api.delete && hasPermission(`collection:${kebabCase(collection.name)}:delete` as Permission)
 
   if (collection.definition.translatable) {
     const q1 = await selectFrom(collection.name)

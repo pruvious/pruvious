@@ -218,7 +218,11 @@
               </template>
             </PUIButton>
 
-            <PUIButton :to="dashboardBasePath + `collections/${route.params.collection}/new`" variant="primary">
+            <PUIButton
+              v-if="canCreate"
+              :to="dashboardBasePath + `collections/${route.params.collection}/new`"
+              variant="primary"
+            >
               <span>{{ __('pruvious-dashboard', 'New') }}</span>
               <Icon mode="svg" name="tabler:note" />
             </PUIButton>

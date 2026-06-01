@@ -66,7 +66,7 @@
         <div class="pui-row pui-ml-auto">
           <component v-for="button in footerButtons" v-bind="footerButtonsContext" :is="button" />
 
-          <PUIButton :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
+          <PUIButton v-if="canUpdate" :variant="history.isDirty.value ? 'primary' : 'outline'" @click="saveData()">
             <span>{{ __('pruvious-dashboard', 'Save') }}</span>
             <Icon mode="svg" name="tabler:device-floppy" />
           </PUIButton>

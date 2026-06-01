@@ -61,7 +61,11 @@
 
     <PruviousDashboardHistoryScrollState />
 
-    <template v-if="canCreate || canUpdate || canDelete" #footer class="pui-row pui-ml-auto">
+    <template
+      v-if="canCreate || canUpdate || canDelete || (collection.definition.translatable && languages.length > 1)"
+      #footer
+      class="pui-row pui-ml-auto"
+    >
       <div class="pui-justify-between pui-w-full">
         <PruviousDashboardHistoryButtons
           v-if="canUpdate && data"
@@ -84,7 +88,7 @@
           </PUIButton>
 
           <PUIButton
-            v-if="canCreate || canDelete"
+            v-if="canCreate || canDelete || (collection.definition.translatable && languages.length > 1)"
             :title="__('pruvious-dashboard', 'More actions')"
             :variant="isRecordMenuVisible ? 'primary' : 'outline'"
             @click="isRecordMenuVisible = true"
