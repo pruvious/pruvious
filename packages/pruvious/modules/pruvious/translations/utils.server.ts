@@ -172,19 +172,16 @@ export function resolveTranslationsConfig(i18n?: PruviousModuleOptions['i18n']):
  * - header `de-AT` against supported `de` matches (region stripped from header)
  * - header `de` against supported `de-AT` matches (region constraint relaxed via `loose`)
  *
- * Tie-breaker for multiple regional variants is the order in `pruvious.i18n.languages`.
+ * Tie-breaker for multiple regional variants is the order in `i18n.getLanguages()`.
  */
 export async function resolveContextLanguage() {
   const event = useEvent()
-  const { languages, primaryLanguage } = await import('#pruvious/server')
+  const { i18n, primaryLanguage } = await import('#pruvious/server')
 
   event.context.pruvious ??= {} as any
   event.context.pruvious.language =
-    parser.pick(
-      languages.map(({ code }) => code),
-      getHeader(event, 'Accept-Language') ?? '',
-      { loose: true },
-    ) || primaryLanguage
+    (parser.pick(i18n.getLanguages(), getHeader(event, 'Accept-Language') ?? '', { loose: true }) as LanguageCode) ??
+    primaryLanguage
 
   return event.context.pruvious.language
 }

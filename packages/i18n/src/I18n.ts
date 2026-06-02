@@ -1,4 +1,4 @@
-import { deepClone, isObject, isUndefined } from '@pruvious/utils'
+import { deepClone, isObject, isUndefined, uniqueArray } from '@pruvious/utils'
 import { replacePlaceholders } from './placeholders'
 import type {
   ExtractDomains,
@@ -36,6 +36,14 @@ export class I18n<T = never[]> {
    */
   hasDefinition(domain: string, language: string) {
     return !!this.getDefinition(domain, language)
+  }
+
+  /**
+   * Returns the de-duplicated list of language codes that have at least one translation
+   * definition registered (across any domain).
+   */
+  getLanguages(): string[] {
+    return uniqueArray(this.definitions.map((def) => def.language))
   }
 
   /**

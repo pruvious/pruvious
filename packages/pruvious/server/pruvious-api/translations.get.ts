@@ -1,5 +1,5 @@
-import { __, assertParams, i18n, isValidLanguageCode } from '#pruvious/server'
-import { isString } from '@pruvious/utils'
+import { __, assertParams, i18n, languages } from '#pruvious/server'
+import { isBCP47LanguageCode, isString } from '@pruvious/utils'
 
 export default defineEventHandler(async (event) => {
   const { domain, language } = getQuery(event)
@@ -15,7 +15,19 @@ export default defineEventHandler(async (event) => {
       language: [
         { test: Boolean, message: __('pruvious-api', 'This query parameter is required') },
         { test: isString, message: __('pruvious-orm', 'The value must be a string') },
-        { test: isValidLanguageCode, message: __('pruvious-api', 'Invalid language code') },
+        {
+          test: (value: string) => {
+            if (!isBCP47LanguageCode(value)) {
+              return false
+            }
+            if (languages.some((lang) => lang.code === value)) {
+              return true
+            }
+            const registered = i18n.getLanguages()
+            return registered.includes(value) || registered.includes(value.split('-')[0]!)
+          },
+          message: __('pruvious-api', 'Invalid language code'),
+        },
       ],
     },
   )
