@@ -23,7 +23,7 @@
         :id="id"
         :modelValue="(modelValue as any).value"
         :name="id"
-        :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
+        :noResultsLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
         :searchLabel="__('pruvious-dashboard', 'Search...')"
         :selectedChoiceResolver="selectedChoiceResolver"

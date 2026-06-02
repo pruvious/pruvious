@@ -52,7 +52,7 @@
         :minItems="options.minItems"
         :modelValue="typeof (modelValue as any).value === 'object' ? (modelValue as any).value : []"
         :name="id"
-        :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
+        :noResultsLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
         :removeItemLabel="__('pruvious-dashboard', 'Remove')"
         :selectedChoicesResolver="selectedChoicesResolver"

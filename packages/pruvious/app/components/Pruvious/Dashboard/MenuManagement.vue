@@ -1,8 +1,8 @@
 <template>
   <PUIVerticalMenu
     v-if="items?.length"
-    :ariaLabelCollapse="__('pruvious-dashboard', 'Collapse')"
-    :ariaLabelExpand="__('pruvious-dashboard', 'Expand')"
+    :ariaCollapseLabel="__('pruvious-dashboard', 'Collapse')"
+    :ariaExpandLabel="__('pruvious-dashboard', 'Expand')"
     :items="items"
     :title="title"
   />

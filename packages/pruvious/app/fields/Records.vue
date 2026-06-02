@@ -29,7 +29,7 @@
         :minItems="options.minItems"
         :modelValue="modelValue"
         :name="path"
-        :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
+        :noResultsLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
         :removeItemLabel="__('pruvious-dashboard', 'Remove')"
         :selectedChoicesResolver="selectedChoicesResolver"

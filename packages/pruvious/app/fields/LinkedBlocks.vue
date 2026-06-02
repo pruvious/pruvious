@@ -19,7 +19,7 @@
         :id="id"
         :modelValue="modelValue"
         :name="path"
-        :noResultsFoundLabel="__('pruvious-dashboard', 'No results found')"
+        :noResultsLabel="__('pruvious-dashboard', 'No results found')"
         :placeholder="placeholder"
         :searchLabel="__('pruvious-dashboard', 'Search...')"
         :selectedChoiceResolver="selectedChoiceResolver"
