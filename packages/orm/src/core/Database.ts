@@ -751,6 +751,12 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       throw new Error('Could not acquire database sync lock')
     }
 
+    // Store current client instance
+    const _exec = this.exec
+
+    // Disable FK enforcement
+    const togglesForeignKeys = this.dialect === 'sqlite' || this.dialect === 'd1'
+
     try {
       // Get current schema map from the `Options` table
       const schemaMapOptions = await this.exec(`select value from "Options" where key = '_schemaMap'`)
@@ -763,8 +769,9 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
         return false
       }
 
-      // Store current client instance
-      const _exec = this.exec
+      if (togglesForeignKeys) {
+        await this.exec(';pragma foreign_keys = off')
+      }
 
       await this.transaction(async (exec) => {
         // Ensure that the transaction uses the same client instance
@@ -1007,10 +1014,22 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
             }
           }
         }
+
+        // Verify referential integrity before committing
+        if (togglesForeignKeys) {
+          const violations = await exec(`pragma foreign_key_check` as 'select ')
+          if (violations.length) {
+            throw new Error(`Foreign key violations after schema sync: ${JSON.stringify(violations)}`)
+          }
+        }
       })
 
       // Restore client instance
       this.exec = _exec
+
+      if (togglesForeignKeys) {
+        await this.exec(';pragma foreign_keys = on')
+      }
 
       // Store new schema map
       await this.exec(
@@ -1026,6 +1045,10 @@ export class Database<TCollections extends Record<string, object> = {}, TI18n ex
       await this.unlock('sync')
       return true
     } catch (error) {
+      this.exec = _exec
+      if (togglesForeignKeys) {
+        await this.exec(';pragma foreign_keys = on').catch(() => {})
+      }
       await this.unlock('sync')
       throw error
     }
