@@ -5,6 +5,7 @@
         <div class="pui-justify-between">
           <span class="pui-block pui-medium pui-truncate">{{ label }}</span>
           <PUISwitch
+            :disabled="disabled"
             :modelValue="!!modelValue"
             :title="modelValue ? __('pruvious-dashboard', 'Disable') : __('pruvious-dashboard', 'Enable')"
             @update:modelValue="
