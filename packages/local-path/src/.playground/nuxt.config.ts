@@ -10,7 +10,6 @@ export default defineNuxtConfig({
       driver: isTest
         ? 'sqlite://packages/local-path/src/.playground/test/tmp/database.sqlite'
         : 'sqlite://src/.playground/database.sqlite',
-      sync: { dropNonCollectionTables: true, dropNonFieldColumns: true },
     },
     uploads: {
       driver: isTest ? 'fs://packages/local-path/src/.playground/test/tmp/.uploads' : 'fs://src/.playground/.uploads',

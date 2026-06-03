@@ -85,17 +85,17 @@ pruvious: {
     sync: {
       // Drop tables that are not in your collection definitions.
       dropNonCollectionTables: true,
-      // Drop columns that are not in your field definitions.
-      dropNonFieldColumns: true,
+      // Keep columns that are not in your field definitions.
+      dropNonFieldColumns: false,
     },
   },
 }
 ```
 
-Both `dropNonCollectionTables` and `dropNonFieldColumns` default to `false`, so Pruvious preserves anything you put into the database manually.
+`dropNonCollectionTables` defaults to `false`, so Pruvious preserves tables you manage outside of the collection schema. `dropNonFieldColumns` defaults to `true`, so columns not declared by your fields are removed to keep tables aligned with the schema.
 
 > [!WARNING]
-> Setting `dropNonCollectionTables: true` or `dropNonFieldColumns: true` is destructive. Use them only when you are sure that no other application shares the database, and always back up production data before deploying.
+> `dropNonCollectionTables: true` and the default `dropNonFieldColumns: true` are destructive: tables or columns not declared in your collections will be removed on sync. Disable them if another application writes those tables or columns, and always back up production data before deploying.
 
 For deeper detail on the sync algorithm, see [`@pruvious/orm`](../packages/orm.md#sync-migrations).
 

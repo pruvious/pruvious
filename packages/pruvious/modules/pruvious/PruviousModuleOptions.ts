@@ -9,7 +9,8 @@ export interface PruviousModuleOptions {
    *
    * - Uses SQLite with a `database.sqlite` file in the current working directory.
    * - Automatically syncs the collection schema.
-   * - Preserves database tables and columns not defined in the collection schema.
+   * - Preserves database tables not defined in the collection schema.
+   * - Drops database columns not defined in the field models of the collections.
    */
   database: {
     /**
@@ -32,7 +33,7 @@ export interface PruviousModuleOptions {
      * Additionally:
      *
      * - Existing tables not defined in the collection models are preserved.
-     * - Existing columns not defined in the field models are preserved.
+     * - Existing columns not defined in the field models are dropped.
      *
      * Provide an object to customize the sync behavior or set to `false` to disable the sync feature.
      *
@@ -50,7 +51,7 @@ export interface PruviousModuleOptions {
           /**
            * Indicates whether to drop existing columns not defined in the field models of the collections.
            *
-           * @default false
+           * @default true
            */
           dropNonFieldColumns?: boolean
         }

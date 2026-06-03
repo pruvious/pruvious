@@ -20,9 +20,9 @@ This page lists every option in `PruviousModuleOptions`, grouped by top-level ke
 ## `database`
 
 **Type:** `{ driver, sync }`
-**Default:** `{ driver: 'sqlite://database.sqlite', sync: { dropNonCollectionTables: false, dropNonFieldColumns: false } }`
+**Default:** `{ driver: 'sqlite://database.sqlite', sync: { dropNonCollectionTables: false, dropNonFieldColumns: true } }`
 
-Configuration for the main database connection. By default Pruvious uses SQLite, auto-syncs the schema, and preserves any tables or columns it does not own.
+Configuration for the main database connection. By default Pruvious uses SQLite, auto-syncs the schema, preserves tables it does not own, and drops columns that are not declared on a field.
 
 ### `database.driver`
 
@@ -46,17 +46,17 @@ pruvious: {
 ### `database.sync`
 
 **Type:** `boolean | { dropNonCollectionTables?: boolean; dropNonFieldColumns?: boolean }`
-**Default:** `{ dropNonCollectionTables: false, dropNonFieldColumns: false }`
+**Default:** `{ dropNonCollectionTables: false, dropNonFieldColumns: true }`
 
 Controls automatic schema synchronization on connect. Pass `false` to disable, an object to customise.
 
 - `dropNonCollectionTables` (default `false`) - drop tables that are not defined as collections.
-- `dropNonFieldColumns` (default `false`) - drop columns that are not defined as fields.
+- `dropNonFieldColumns` (default `true`) - drop columns that are not defined as fields.
 
 ```ts
 pruvious: {
   database: {
-    sync: { dropNonCollectionTables: true, dropNonFieldColumns: true },
+    sync: { dropNonCollectionTables: true, dropNonFieldColumns: false },
   },
 }
 ```

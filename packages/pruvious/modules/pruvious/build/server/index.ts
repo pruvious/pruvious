@@ -1288,7 +1288,7 @@ export async function getServerFileContent() {
     `      i18n,`,
     `      sync: runtimeConfig.pruvious.database.sync === false ? false : {`,
     `        dropNonCollectionTables: isObject(runtimeConfig.pruvious.database.sync) ? !!runtimeConfig.pruvious.database.sync.dropNonCollectionTables : false,`,
-    `        dropNonFieldColumns: isObject(runtimeConfig.pruvious.database.sync) ? !!runtimeConfig.pruvious.database.sync.dropNonFieldColumns : false,`,
+    `        dropNonFieldColumns: isObject(runtimeConfig.pruvious.database.sync) ? runtimeConfig.pruvious.database.sync.dropNonFieldColumns !== false : true,`,
     `        afterSync: async () => {`,
     `          try {`,
     `            await clearCache('page')`,

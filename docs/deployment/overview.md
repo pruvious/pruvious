@@ -43,7 +43,7 @@ See the [configuration reference](../reference/configuration.md) for the full op
 
 Pruvious auto-syncs the schema when the database connects. In development this is exactly what you want. In production, you have two choices:
 
-1. **Keep sync on (default).** The schema is updated on the first request after deploy. Use `dropNonCollectionTables: false` and `dropNonFieldColumns: false` (the defaults) so unexpected differences do not destroy data.
+1. **Keep sync on (default).** The schema is updated on the first request after deploy. By default Pruvious preserves tables not declared in your collection schema (`dropNonCollectionTables: false`) but drops columns not declared in your field models (`dropNonFieldColumns: true`). If another application writes columns to your collection tables, set `dropNonFieldColumns: false` so unexpected differences do not destroy data.
 2. **Turn sync off.** Set `pruvious.database.sync = false` and run a separate sync step from a build pipeline or a one-shot job. Useful for zero-downtime deploys behind a load balancer.
 
 See [Schema sync](../database/overview.md#schema-sync-auto-migrations) for the algorithm.
