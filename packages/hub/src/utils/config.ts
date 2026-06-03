@@ -7,6 +7,7 @@ interface Config {
   apps: {
     path: string
     secret: string
+    masterKey: string
   }[]
 }
 

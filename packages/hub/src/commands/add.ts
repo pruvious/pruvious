@@ -69,7 +69,11 @@ export default defineCommand({
       process.exit(0)
     }
 
-    config.apps.push({ path: dir, secret: generateSecureRandomString() })
+    config.apps.push({
+      path: dir,
+      secret: generateSecureRandomString(),
+      masterKey: generateSecureRandomString(64),
+    })
     writeConfigFile(config)
     logger.success(`Successfully registered the app at ${colors.greenBright(dir)}.`)
   },

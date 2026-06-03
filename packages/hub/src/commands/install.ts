@@ -144,7 +144,11 @@ export default defineCommand({
     installSpinner.stop('Dependencies installed.')
 
     if (!config.apps.some((app) => app.path === dir)) {
-      config.apps.push({ path: dir, secret: generateSecureRandomString() })
+      config.apps.push({
+        path: dir,
+        secret: generateSecureRandomString(),
+        masterKey: generateSecureRandomString(64),
+      })
       writeConfigFile(config)
     }
 

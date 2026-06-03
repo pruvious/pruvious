@@ -3,6 +3,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   extends: ['pruvious', '@pruvious/local-path'],
   pruvious: {
+    cache: {
+      page: {
+        enabled: false,
+      },
+    },
     dashboard: {
       basePath: '/',
     },

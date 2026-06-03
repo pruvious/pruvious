@@ -24,15 +24,18 @@
   "dependencies": {
     "@iconify-json/tabler": "1.2.35",
     "@pruvious/local-path": "workspace:*",
+    "@pruvious/ui": "workspace:*",
+    "execa": "9.6.1",
     "nuxt": "4.4.6",
+    "pathe": "2.0.3",
     "pruvious": "workspace:*",
-    "vue": "3.5.35",
-    "vue-router": "5.1.0"
+    "shell-quote": "1.8.3",
+    "vue-router": "5.1.0",
+    "vue": "3.5.35"
   },
   "devDependencies": {
     "@pruvious/cli-utils": "workspace:*",
-    "execa": "9.6.1",
-    "pathe": "2.0.3",
+    "@types/shell-quote": "1.7.5",
     "typescript": "6.0.3",
     "vue-tsc": "3.3.2"
   }

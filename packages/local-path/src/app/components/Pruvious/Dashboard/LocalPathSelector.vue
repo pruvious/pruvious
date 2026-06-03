@@ -311,6 +311,10 @@ function closeFinderPopup() {
   gap: 0.5rem;
 }
 
+.p-local-path-selector-group:empty {
+  display: none;
+}
+
 .p-local-path-selector-item-button {
   flex-grow: 1;
   justify-content: flex-start;

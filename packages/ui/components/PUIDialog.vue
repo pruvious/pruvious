@@ -5,8 +5,11 @@
     :width="dialog.width"
     @close="
       (close) => {
-        dialog?.dismiss()
-        close().then(() => (dialog = null))
+        const dismiss = dialog?.dismiss
+        close().then(() => {
+          dialog = null
+          dismiss?.()
+        })
       }
     "
     ref="popup"
@@ -18,8 +21,10 @@
         :variant="variant"
         @click="
           () => {
-            resolve()
-            popup?.close().then(() => (dialog = null))
+            popup?.close().then(() => {
+              dialog = null
+              resolve()
+            })
           }
         "
       >

@@ -92,6 +92,7 @@ export default defineCommand({
       env: {
         PORT: availablePort.toString(),
         NUXT_PRUVIOUS_AUTH_JWT_SECRET: app.secret,
+        PRUVIOUS_HUB_MASTER_KEY: app.masterKey,
         NODE_ENV: 'production',
       },
       stdout: 'pipe',

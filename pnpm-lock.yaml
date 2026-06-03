@@ -161,12 +161,24 @@ importers:
       '@pruvious/local-path':
         specifier: workspace:*
         version: link:../local-path
+      '@pruvious/ui':
+        specifier: workspace:*
+        version: link:../ui
+      execa:
+        specifier: 9.6.1
+        version: 9.6.1
       nuxt:
         specifier: 4.4.6
         version: 4.4.6(@babel/plugin-syntax-jsx@7.27.1(@babel/core@7.29.0))(@babel/plugin-syntax-typescript@7.28.6(@babel/core@7.29.0))(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.6)(@types/node@25.9.1)(@vue/compiler-sfc@3.5.35)(better-sqlite3@12.10.0)(cac@6.7.14)(db0@0.3.4(better-sqlite3@12.10.0))(ioredis@5.11.0)(magicast@0.5.2)(rollup-plugin-visualizer@7.0.1(rollup@4.60.4))(rollup@4.60.4)(terser@5.34.1)(typescript@6.0.3)(vite@7.3.3(@types/node@25.9.1)(jiti@2.7.0)(terser@5.34.1)(yaml@2.9.0))(vue-tsc@3.3.2(typescript@6.0.3))(yaml@2.9.0)
+      pathe:
+        specifier: 2.0.3
+        version: 2.0.3
       pruvious:
         specifier: workspace:*
         version: link:../pruvious
+      shell-quote:
+        specifier: 1.8.3
+        version: 1.8.3
       vue:
         specifier: 3.5.35
         version: 3.5.35(typescript@6.0.3)
@@ -177,12 +189,9 @@ importers:
       '@pruvious/cli-utils':
         specifier: workspace:*
         version: link:../cli-utils
-      execa:
-        specifier: 9.6.1
-        version: 9.6.1
-      pathe:
-        specifier: 2.0.3
-        version: 2.0.3
+      '@types/shell-quote':
+        specifier: 1.7.5
+        version: 1.7.5
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -2942,6 +2951,9 @@ packages:
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
+
+  '@types/shell-quote@1.7.5':
+    resolution: {integrity: sha512-+UE8GAGRPbJVQDdxi16dgadcBfQ+KG2vgZhV1+3A1XmHbmwcdwhCUwIdy+d3pAGrbvgRoVSjeI9vOWyq376Yzw==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -8599,6 +8611,8 @@ snapshots:
   '@types/resolve@1.20.2': {}
 
   '@types/semver@7.7.1': {}
+
+  '@types/shell-quote@1.7.5': {}
 
   '@types/trusted-types@2.0.7':
     optional: true

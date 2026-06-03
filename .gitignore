@@ -12,6 +12,10 @@ node_modules
 # Misc
 .claude
 .DS_Store
+.hub-backup-artifacts
+.hub-backups
+.hub-deploys
+.hub-restores
 .uploads
 *.sqlite
 *.sqlite-*
