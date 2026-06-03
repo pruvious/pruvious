@@ -140,6 +140,21 @@
             <span>{{ __('pruvious-dashboard', 'Delete') }}</span>
           </PUIDropdownItem>
 
+          <hr v-if="hasVisibleRowActions(row)" />
+
+          <template v-for="action in rowActions" :key="action.key">
+            <PUIDropdownItem
+              v-if="!action.visible || action.visible(row)"
+              :destructive="action.destructive"
+              :title="resolveActionLabel(action, row)"
+              :to="action.to ? action.to(row) : undefined"
+              @click="action.onClick?.(row, { refresh })"
+            >
+              <Icon :name="action.icon" mode="svg" />
+              <span>{{ resolveActionLabel(action, row) }}</span>
+            </PUIDropdownItem>
+          </template>
+
           <hr />
 
           <PUIDropdownItem
@@ -278,7 +293,7 @@
 </template>
 
 <script lang="ts" setup>
-import { __, hasPermission, languages } from '#pruvious/app'
+import { __, applyFilters, hasPermission, languages, loadFilters } from '#pruvious/app'
 import {
   customComponents,
   dashboardBasePath,
@@ -318,6 +333,7 @@ import {
   toArray,
 } from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
+import type { DashboardCollectionRowAction } from '../../../../hooks/filters/dashboard/collections/index/row/actions'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
 
 definePageMeta({
@@ -380,6 +396,19 @@ const defaultColumns = resolveColumns(collection.definition.ui.indexPage.dataTab
 const columnsDirty = ref(false)
 const { columns, data, sort } = puiTable({ columns: resolveColumns() })
 const refreshing = ref(false)
+
+await loadFilters('dashboard:collections:index:row:actions')
+const rowActions = await applyFilters('dashboard:collections:index:row:actions', [] as DashboardCollectionRowAction[], {
+  collection,
+})
+
+function resolveActionLabel(action: DashboardCollectionRowAction, row: Record<string, any>): string {
+  return typeof action.label === 'function' ? action.label(row) : action.label
+}
+
+function hasVisibleRowActions(row: Record<string, any>): boolean {
+  return rowActions.some((action) => !action.visible || action.visible(row))
+}
 const defaultOrderBy = resolveOrderBy()
 const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   watch: ['columns'],
