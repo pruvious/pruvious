@@ -15,7 +15,16 @@
     "dist",
     "template"
   ],
-  "bin": "./dist/index.mjs",
+  "bin": "./dist/bin.mjs",
+  "main": "./dist/lib/index.mjs",
+  "types": "./dist/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib/index.d.ts",
+      "import": "./dist/lib/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
   "engines": {
     "node": ">=24"
   },

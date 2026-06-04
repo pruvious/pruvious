@@ -10,25 +10,14 @@ import {
   sharedArgs,
 } from '@pruvious/cli-utils'
 import { defineCommand, runMain } from 'citty'
-import { execa } from 'execa'
 import fs from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { installDependencies } from 'nypm'
 import { basename, relative } from 'pathe'
 import packageJSON from '../package.json' with { type: 'json' }
+import { languageCodePattern, languageName, resolvePruviousSpec } from './lib/resolvers'
+import { scaffoldProject } from './lib/scaffold'
+import { templateDir } from './lib/index'
 import { detectPackageManager, installCommand, runScriptCommand, type PackageManagerName } from './utils/pm'
-import { copyTemplate, patchNuxtConfig, patchPackageJSON, toPackageName, writePnpmWorkspace } from './utils/template'
-
-const pkgPrNewBase = 'https://pkg.pr.new/pruvious/pruvious/pruvious'
-const templateDir = fileURLToPath(new URL('../template', import.meta.url))
-const pnpmVersion = '11.4.0'
-
-/**
- * BCP-47 subset accepted by Pruvious for language codes: a lowercase 2-3 letter
- * base, an optional Title-case script subtag, and an optional UPPERCASE region or
- * 3-digit M.49 code (e.g. `en`, `de-AT`, `zh-Hant`, `es-419`).
- */
-const languageCodePattern = /^[a-z]{2,3}(-[A-Z][a-z]{3})?(-([A-Z]{2}|\d{3}))?$/
+import { toPackageName } from './utils/template'
 
 const main = defineCommand({
   meta: {
@@ -104,44 +93,31 @@ const main = defineCommand({
 
     const scaffoldSpinner = spinner()
     scaffoldSpinner.start('Scaffolding project')
-    copyTemplate(templateDir, targetDir)
-    patchPackageJSON(
-      targetDir,
-      projectName,
-      pruviousSpec,
-      packageManager === 'pnpm' ? `pnpm@${pnpmVersion}` : undefined,
+    let activeSpinnerMessage = 'Scaffolding project'
+
+    const result = await scaffoldProject(
+      {
+        targetDir,
+        projectName,
+        pruviousSpec,
+        packageManager,
+        language,
+        install,
+        git,
+        force: ctx.args.force,
+        templateDir,
+      },
+      {
+        onLog: (line) => {
+          activeSpinnerMessage = line
+          scaffoldSpinner.message(line)
+        },
+      },
     )
-    patchNuxtConfig(targetDir, language)
-    if (packageManager === 'pnpm') {
-      writePnpmWorkspace(targetDir)
-    }
-    scaffoldSpinner.stop('Project scaffolded.')
 
-    if (git) {
-      const gitSpinner = spinner()
-      gitSpinner.start('Initializing git repository')
-      try {
-        await execa('git', ['init'], { cwd: targetDir })
-        gitSpinner.stop('Git repository initialized.')
-      } catch {
-        gitSpinner.stop('Skipped git initialization (git is not available).')
-      }
-    }
+    scaffoldSpinner.stop(activeSpinnerMessage)
 
-    let installFailed = false
-    if (install) {
-      const installSpinner = spinner()
-      installSpinner.start(`Installing dependencies with ${packageManager}`)
-      try {
-        await installDependencies({ cwd: targetDir, packageManager, silent: true })
-        installSpinner.stop('Dependencies installed.')
-      } catch {
-        installFailed = true
-        installSpinner.stop('Could not install dependencies automatically.')
-      }
-    }
-
-    showNextSteps({ targetDir, packageManager, install, installFailed })
+    showNextSteps({ targetDir: result.targetDir, packageManager: result.packageManager, install, installFailed: result.installFailed })
     outro('Your Pruvious project is ready.')
   },
 })
@@ -209,65 +185,10 @@ async function resolveTargetDir(input: string, force: boolean): Promise<string> 
             process.exit(1)
           }
         }
-
-        fs.rmSync(resolved, { recursive: true, force: true })
       }
     }
 
     return resolved
-  }
-}
-
-/**
- * Turns the `--pruvious` argument into an installable dependency specifier.
- * Full URLs and `npm:`/`file:` specifiers pass through unchanged, a bare commit
- * hash installs the matching pkg.pr.new continuous build, and anything else is
- * treated as an npm dist-tag or version (e.g. `alpha`, `4.0.0-alpha.0`).
- *
- * A dist-tag is resolved to the concrete version it currently points to (see
- * `resolveDistTag`) so the scaffolded `package.json` pins an exact version
- * rather than a floating tag. Writing the tag verbatim would let the install
- * step re-resolve it against npm's local metadata cache, which can lag behind a
- * freshly published tag and quietly install a stale version.
- *
- * The commit-hash test requires at least one digit so that all-letter hex words
- * (e.g. a `deadbeef` dist-tag) are still treated as npm specifiers.
- */
-async function resolvePruviousSpec(version: string): Promise<string> {
-  if (version.includes('://') || version.startsWith('npm:') || version.startsWith('file:')) {
-    return version
-  }
-
-  if (/^(?=.*[0-9])[0-9a-f]{7,40}$/i.test(version)) {
-    return `${pkgPrNewBase}@${version}`
-  }
-
-  return (await resolveDistTag('pruvious', version)) ?? version
-}
-
-/**
- * Resolves an npm dist-tag to the concrete version it points to by querying the
- * registry directly, bypassing npm's local metadata cache so a freshly
- * published tag is picked up immediately. A concrete version (or unknown tag)
- * is not listed under `dist-tags`, so the lookup misses and the caller falls
- * back to the original input. Network or registry errors resolve to `null` for
- * the same fallback, preserving the previous tag-passthrough behavior offline.
- */
-async function resolveDistTag(name: string, tag: string): Promise<string | null> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/${name}`, {
-      headers: { accept: 'application/vnd.npm.install-v1+json' },
-    })
-
-    if (!response.ok) {
-      return null
-    }
-
-    const packument = (await response.json()) as { 'dist-tags'?: Record<string, string> }
-
-    return packument['dist-tags']?.[tag] ?? null
-  } catch {
-    return null
   }
 }
 
@@ -332,23 +253,6 @@ async function resolveLanguage(flag: string): Promise<{ code: string; name: stri
     ) || 'en'
 
   return { code, name: languageName(code) }
-}
-
-/**
- * Derives a human-readable language name from a BCP-47 code in its native form
- * (e.g. `de` -> `Deutsch`), capitalizing the first letter. Falls back to the raw
- * code when the runtime cannot resolve a display name.
- */
-function languageName(code: string): string {
-  try {
-    const display = new Intl.DisplayNames([code], { type: 'language' }).of(code)
-
-    if (display && display.toLowerCase() !== code.toLowerCase()) {
-      return display.charAt(0).toUpperCase() + display.slice(1)
-    }
-  } catch {}
-
-  return code
 }
 
 /**
