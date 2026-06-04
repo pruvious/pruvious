@@ -3,6 +3,7 @@ import { copyFile, mkdir, stat } from 'node:fs/promises'
 import { basename, join } from 'pathe'
 import { resolveArtifactDir } from '../utils/backupArtifact'
 import { deployToCloudflare } from '../utils/deployers/cloudflare'
+import { deployToVps } from '../utils/deployers/vps'
 import { decryptSecret } from '../utils/vault'
 import { relativeDeployLogPath, writeDeployLog } from '../utils/deployLog'
 import { checkoutBranch } from '../utils/git'
@@ -151,6 +152,32 @@ export default defineJob({
               triggeredBy: deployment.triggeredBy as number | null,
               snapshot,
             }),
+          hooks: {
+            postBuild: async () => {
+              await runShellCommand(
+                deploymentId,
+                '[hub] post-build (project)',
+                project.postBuildCommand as string | null,
+                { cwd: projectPath, env: hookEnv },
+              )
+              await runShellCommand(
+                deploymentId,
+                '[hub] post-build (target)',
+                target.postBuildCommand as string | null,
+                { cwd: projectPath, env: hookEnv },
+              )
+            },
+          },
+        })
+      } else if (target.type === 'vps') {
+        result = await deployToVps({
+          deploymentId,
+          projectPath,
+          vpsConfig: target.vpsConfig as any,
+          envVars,
+          buildCommand: resolveBuildCommand(projectPath, project.buildCommand as string | null),
+          targetId: target.id as number,
+          targetName: target.name as string,
           hooks: {
             postBuild: async () => {
               await runShellCommand(

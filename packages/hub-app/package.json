@@ -31,12 +31,14 @@
     "pathe": "2.0.3",
     "pruvious": "workspace:*",
     "shell-quote": "1.8.3",
-    "vue-router": "5.1.0",
-    "vue": "3.5.35"
+    "ssh2": "1.17.0",
+    "vue": "3.5.35",
+    "vue-router": "5.1.0"
   },
   "devDependencies": {
     "@pruvious/cli-utils": "workspace:*",
     "@types/shell-quote": "1.7.5",
+    "@types/ssh2": "1.15.5",
     "typescript": "6.0.3",
     "vue-tsc": "3.3.2"
   }

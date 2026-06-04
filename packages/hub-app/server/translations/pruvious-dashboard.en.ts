@@ -8,6 +8,7 @@ export default defineTranslation({
   'Acquired at': 'Acquired at',
   "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.":
     "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.",
+  'Allocated port': 'Allocated port',
   'Allowed deployers': 'Allowed deployers',
   'API token': 'API token',
   'Auto': 'Auto',
@@ -162,7 +163,10 @@ export default defineTranslation({
   'Size': 'Size',
   'Source directory': 'Source directory',
   'SSH key': 'SSH key',
+  'SSH login user. Must have passwordless sudo so the deployer can install nginx, certbot, Node.js, PM2, and (optionally) PostgreSQL.':
+    'SSH login user. Must have passwordless sudo so the deployer can install nginx, certbot, Node.js, PM2, and (optionally) PostgreSQL.',
   'SSH port. Default 22.': 'SSH port. Default 22.',
+  'SSH user': 'SSH user',
   'Started at': 'Started at',
   'Storage path': 'Storage path',
   'Stored encrypted at rest. Synced to the worker as a secret on each deploy.':

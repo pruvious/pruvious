@@ -1,12 +1,12 @@
 import { isNumber } from '@pruvious/utils'
-import { execa, type ResultPromise } from 'execa'
 import { existsSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'pathe'
-import { appendDeployLogChunk, writeDeployLog } from '../deployLog'
+import { writeDeployLog } from '../deployLog'
 import { getDecryptedSecret } from '../getDecryptedSecret'
 import { readGitCommit } from '../git'
 import { runHubSideSync } from './cloudflare-sync'
+import { runStreamed } from './streamedExec'
 
 export type CloudflareSyncMode = 'in-worker' | 'hub-side'
 
@@ -307,34 +307,4 @@ function tomlString(value: string): string {
     .replace(/\x08/g, '\\b')
     .replace(/\f/g, '\\f')
   return `"${escaped}"`
-}
-
-interface RunOptions {
-  cwd: string
-  env?: NodeJS.ProcessEnv
-  input?: string
-}
-
-async function runStreamed(deploymentId: number, command: string, args: string[], options: RunOptions): Promise<void> {
-  const child: ResultPromise = execa(command, args, {
-    cwd: options.cwd,
-    env: options.env,
-    input: options.input,
-    stdout: 'pipe',
-    stderr: 'pipe',
-    reject: false,
-  })
-
-  child.stdout?.on('data', (data) => {
-    void appendDeployLogChunk(deploymentId, data.toString('utf8'))
-  })
-  child.stderr?.on('data', (data) => {
-    void appendDeployLogChunk(deploymentId, data.toString('utf8'))
-  })
-
-  const result = await child
-
-  if (result.failed || result.exitCode !== 0) {
-    throw new Error(`Command \`${command} ${args.join(' ')}\` exited with code ${result.exitCode}`)
-  }
 }

@@ -8,6 +8,7 @@ export default defineTranslation({
   'Acquired at': 'Erworben am',
   "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.":
     'Absoluter Pfad auf diesem Rechner zum bestehenden Pruvious-Projekt. Wähle das **Stammverzeichnis** des Projekts - das Verzeichnis, das `nuxt.config.ts` und eine `package.json` mit `pruvious` in den Abhängigkeiten enthält. Der Deployer liest die Quellen von hier und führt den Build darin aus.',
+  'Allocated port': 'Zugewiesener Port',
   'Allowed deployers': 'Berechtigte Deployer',
   'API token': 'API-Token',
   'Auto': 'Auto',
@@ -163,7 +164,10 @@ export default defineTranslation({
     'Site-Konfiguration → Allgemein → Site-ID im Netlify-Dashboard.',
   'Source directory': 'Quellverzeichnis',
   'SSH key': 'SSH-Schlüssel',
+  'SSH login user. Must have passwordless sudo so the deployer can install nginx, certbot, Node.js, PM2, and (optionally) PostgreSQL.':
+    'SSH-Benutzer für die Anmeldung. Muss passwortloses sudo besitzen, damit der Deployer nginx, certbot, Node.js, PM2 und (optional) PostgreSQL installieren kann.',
   'SSH port. Default 22.': 'SSH-Port. Standard 22.',
+  'SSH user': 'SSH-Benutzer',
   'Started at': 'Gestartet am',
   'Storage path': 'Speicherpfad',
   'Stored encrypted at rest. Synced to the worker as a secret on each deploy.':

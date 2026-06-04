@@ -372,6 +372,19 @@ export default defineCollection({
             description: ({ __ }) => __('pruvious-dashboard', 'Hostname or IP of the Ubuntu server to deploy to.'),
           },
         }),
+        sshUser: textField({
+          required: true,
+          default: 'root',
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'SSH user'),
+            placeholder: 'root',
+            description: ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'SSH login user. Must have passwordless sudo so the deployer can install nginx, certbot, Node.js, PM2, and (optionally) PostgreSQL.',
+              ),
+          },
+        }),
         port: numberField({
           default: 22,
           ui: {
@@ -416,6 +429,14 @@ export default defineCollection({
                 'pruvious-dashboard',
                 'Private SSH key with access to this server. Store it as a Secret of type `ssh-key`.',
               ),
+          },
+        }),
+        // `0` means "not yet allocated"; the deployer assigns a real port on first deploy.
+        allocatedPort: numberField({
+          default: 0,
+          ui: {
+            hidden: true,
+            label: ({ __ }) => __('pruvious-dashboard', 'Allocated port'),
           },
         }),
       },
