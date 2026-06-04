@@ -25,6 +25,7 @@
     "@iconify-json/tabler": "1.2.35",
     "@pruvious/local-path": "workspace:*",
     "@pruvious/ui": "workspace:*",
+    "create-pruvious": "workspace:*",
     "execa": "9.6.1",
     "nuxt": "4.4.6",
     "pathe": "2.0.3",

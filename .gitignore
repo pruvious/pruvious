@@ -16,6 +16,7 @@ node_modules
 .hub-backups
 .hub-deploys
 .hub-restores
+.hub-scaffolds
 .uploads
 *.sqlite
 *.sqlite-*

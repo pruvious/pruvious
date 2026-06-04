@@ -50,7 +50,9 @@ export default defineTranslation({
   'Failed to load backup': 'Backup konnte nicht geladen werden',
   'Failed to load deployment': 'Bereitstellung konnte nicht geladen werden',
   'Failed to load restore': 'Wiederherstellung konnte nicht geladen werden',
+  'Failed to load scaffold': 'Scaffold konnte nicht geladen werden',
   'Failed to load targets': 'Ziele konnten nicht geladen werden',
+  'Failed to start scaffold': 'Scaffold konnte nicht gestartet werden',
   'Finished at': 'Abgeschlossen am',
   'Full': 'Vollständig',
 
@@ -193,6 +195,42 @@ export default defineTranslation({
     'Gegen welche Datenbank die App auf diesem Server laufen soll.',
   'Worker name': 'Worker-Name',
   'Workspace': 'Workspace',
+
+  'Absolute path on this hub machine. The project is created in `<parent>/<slugified-name>`.':
+    'Absoluter Pfad auf diesem Hub-Rechner. Das Projekt wird in `<parent>/<slugified-name>` erstellt.',
+  'Add existing': 'Bestehendes hinzufügen',
+
+  'BCP-47, e.g. `en`, `de-AT`.': 'BCP-47, z. B. `en`, `de-AT`.',
+
+  'Cancel': 'Abbrechen',
+
+  'Install dependencies after scaffolding': 'Abhängigkeiten nach dem Scaffolding installieren',
+
+  'Language code': 'Sprachcode',
+  'Language name': 'Sprachname',
+
+  'my-pruvious-app': 'my-pruvious-app',
+
+  'Overwrite if target exists': 'Überschreiben, falls das Ziel existiert',
+
+  'Package manager': 'Paketmanager',
+  'Parent directory': 'Übergeordnetes Verzeichnis',
+  'Pruvious version or dist-tag': 'Pruvious-Version oder Dist-Tag',
+
+  'Retry': 'Wiederholen',
+  'Run the scaffold again with the same settings (overwrites the partial directory)':
+    'Scaffold mit denselben Einstellungen erneut ausführen (überschreibt das unvollständige Verzeichnis)',
+
+  'Scaffold': 'Scaffold',
+  'Scaffold new project': 'Neues Projekt anlegen',
+  'Scaffolding': 'Scaffolding',
+  'Scaffolds': 'Scaffolds',
+  'Select parent directory': 'Übergeordnetes Verzeichnis auswählen',
+
+  'Target directory': 'Zielverzeichnis',
+
+  'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.':
+    'Wird als npm-`name` in der `package.json` des neuen Projekts und als Dashboard-Bezeichnung verwendet.',
 
   '••••••  blank = keep': '••••••  leer = behalten',
 })

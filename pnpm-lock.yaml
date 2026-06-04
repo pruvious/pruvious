@@ -164,6 +164,9 @@ importers:
       '@pruvious/ui':
         specifier: workspace:*
         version: link:../ui
+      create-pruvious:
+        specifier: workspace:*
+        version: link:../create-pruvious
       execa:
         specifier: 9.6.1
         version: 9.6.1

@@ -50,7 +50,9 @@ export default defineTranslation({
   'Failed to load backup': 'Failed to load backup',
   'Failed to load deployment': 'Failed to load deployment',
   'Failed to load restore': 'Failed to load restore',
+  'Failed to load scaffold': 'Failed to load scaffold',
   'Failed to load targets': 'Failed to load targets',
+  'Failed to start scaffold': 'Failed to start scaffold',
   'Finished at': 'Finished at',
   'Full': 'Full',
 
@@ -191,6 +193,42 @@ export default defineTranslation({
   'Which database the app will run against on this server.': 'Which database the app will run against on this server.',
   'Worker name': 'Worker name',
   'Workspace': 'Workspace',
+
+  'Absolute path on this hub machine. The project is created in `<parent>/<slugified-name>`.':
+    'Absolute path on this hub machine. The project is created in `<parent>/<slugified-name>`.',
+  'Add existing': 'Add existing',
+
+  'BCP-47, e.g. `en`, `de-AT`.': 'BCP-47, e.g. `en`, `de-AT`.',
+
+  'Cancel': 'Cancel',
+
+  'Install dependencies after scaffolding': 'Install dependencies after scaffolding',
+
+  'Language code': 'Language code',
+  'Language name': 'Language name',
+
+  'my-pruvious-app': 'my-pruvious-app',
+
+  'Overwrite if target exists': 'Overwrite if target exists',
+
+  'Package manager': 'Package manager',
+  'Parent directory': 'Parent directory',
+  'Pruvious version or dist-tag': 'Pruvious version or dist-tag',
+
+  'Retry': 'Retry',
+  'Run the scaffold again with the same settings (overwrites the partial directory)':
+    'Run the scaffold again with the same settings (overwrites the partial directory)',
+
+  'Scaffold': 'Scaffold',
+  'Scaffold new project': 'Scaffold new project',
+  'Scaffolding': 'Scaffolding',
+  'Scaffolds': 'Scaffolds',
+  'Select parent directory': 'Select parent directory',
+
+  'Target directory': 'Target directory',
+
+  'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.':
+    'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.',
 
   '••••••  blank = keep': '••••••  blank = keep',
 })
