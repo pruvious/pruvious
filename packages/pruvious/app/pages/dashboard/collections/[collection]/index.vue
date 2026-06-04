@@ -233,13 +233,19 @@
               </template>
             </PUIButton>
 
-            <PUIButton
-              v-if="canCreate"
-              :to="dashboardBasePath + `collections/${route.params.collection}/new`"
-              variant="primary"
-            >
-              <span>{{ __('pruvious-dashboard', 'New') }}</span>
-              <Icon mode="svg" name="tabler:note" />
+            <component
+              v-for="(FooterButton, i) in footerButtons"
+              :key="i"
+              :collection="collection"
+              :is="FooterButton"
+              :paginated="paginated"
+              :params="params"
+              :refresh="refresh"
+            />
+
+            <PUIButton v-if="canCreate" :to="newButton.to" variant="primary">
+              <span>{{ newButton.label }}</span>
+              <Icon mode="svg" :name="newButton.icon" />
             </PUIButton>
           </div>
         </div>
@@ -333,6 +339,7 @@ import {
   toArray,
 } from '@pruvious/utils'
 import { onKeyStroke } from '@vueuse/core'
+import type { DashboardCollectionNewButton } from '../../../../hooks/filters/dashboard/collections/index/new-button'
 import type { DashboardCollectionRowAction } from '../../../../hooks/filters/dashboard/collections/index/row/actions'
 import { resolveCollectionLayout } from '../../../../utils/pruvious/dashboard/layout'
 
@@ -402,6 +409,19 @@ const rowActions = await applyFilters('dashboard:collections:index:row:actions',
   collection,
 })
 
+await loadFilters('dashboard:collections:index:footer:buttons')
+
+await loadFilters('dashboard:collections:index:new-button')
+const newButton = await applyFilters(
+  'dashboard:collections:index:new-button',
+  {
+    label: __('pruvious-dashboard', 'New'),
+    icon: 'tabler:note',
+    to: dashboardBasePath + `collections/${route.params.collection}/new`,
+  } satisfies DashboardCollectionNewButton,
+  { collection },
+)
+
 function resolveActionLabel(action: DashboardCollectionRowAction, row: Record<string, any>): string {
   return typeof action.label === 'function' ? action.label(row) : action.label
 }
@@ -463,6 +483,12 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   },
   checkDirty: ['where'],
 })
+
+const footerButtons = await applyFilters(
+  'dashboard:collections:index:footer:buttons',
+  [] as Component[],
+  { collection, params, paginated, refresh },
+)
 
 let scrollTop = false
 watch(params, () => (scrollTop = true))
