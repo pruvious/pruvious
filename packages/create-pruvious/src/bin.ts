@@ -117,7 +117,12 @@ const main = defineCommand({
 
     scaffoldSpinner.stop(activeSpinnerMessage)
 
-    showNextSteps({ targetDir: result.targetDir, packageManager: result.packageManager, install, installFailed: result.installFailed })
+    showNextSteps({
+      targetDir: result.targetDir,
+      packageManager: result.packageManager,
+      install,
+      installFailed: result.installFailed,
+    })
     outro('Your Pruvious project is ready.')
   },
 })

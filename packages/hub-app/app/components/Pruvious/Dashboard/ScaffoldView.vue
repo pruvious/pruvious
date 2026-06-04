@@ -30,7 +30,10 @@
         <div v-if="canRetry" class="p-scaffold-view-actions">
           <PUIButton
             v-pui-tooltip="
-              __('pruvious-dashboard', 'Run the scaffold again with the same settings (overwrites the partial directory)')
+              __(
+                'pruvious-dashboard',
+                'Run the scaffold again with the same settings (overwrites the partial directory)',
+              )
             "
             :disabled="retrying"
             :size="-1"

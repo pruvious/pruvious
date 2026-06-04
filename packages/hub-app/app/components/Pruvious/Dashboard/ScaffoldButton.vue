@@ -1,9 +1,5 @@
 <template>
-  <PUIButton
-    v-pui-tooltip="__('pruvious-dashboard', 'Scaffold new project')"
-    @click="open = true"
-    variant="outline"
-  >
+  <PUIButton v-pui-tooltip="__('pruvious-dashboard', 'Scaffold new project')" @click="open = true" variant="outline">
     <Icon mode="svg" name="tabler:wand" />
   </PUIButton>
 

@@ -277,9 +277,7 @@ const visibleFiles = computed(() => {
   if (!response.value?.success) {
     return []
   }
-  return props.showHiddenFiles
-    ? response.value.data
-    : response.value.data.filter((file) => !file.name.startsWith('.'))
+  return props.showHiddenFiles ? response.value.data : response.value.data.filter((file) => !file.name.startsWith('.'))
 })
 const resolvedSelectLabel = computed(() => {
   if (props.selectLabel) {

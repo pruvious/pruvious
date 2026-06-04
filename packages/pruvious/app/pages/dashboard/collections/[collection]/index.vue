@@ -235,9 +235,9 @@
 
             <component
               v-for="(FooterButton, i) in footerButtons"
-              :key="i"
               :collection="collection"
               :is="FooterButton"
+              :key="i"
               :paginated="paginated"
               :params="params"
               :refresh="refresh"
@@ -245,7 +245,7 @@
 
             <PUIButton v-if="canCreate" :to="newButton.to" variant="primary">
               <span>{{ newButton.label }}</span>
-              <Icon mode="svg" :name="newButton.icon" />
+              <Icon :name="newButton.icon" mode="svg" />
             </PUIButton>
           </div>
         </div>
@@ -484,11 +484,12 @@ const { params, push, refresh, isDirty } = useSelectQueryBuilderParams({
   checkDirty: ['where'],
 })
 
-const footerButtons = await applyFilters(
-  'dashboard:collections:index:footer:buttons',
-  [] as Component[],
-  { collection, params, paginated, refresh },
-)
+const footerButtons = await applyFilters('dashboard:collections:index:footer:buttons', [] as Component[], {
+  collection,
+  params,
+  paginated,
+  refresh,
+})
 
 let scrollTop = false
 watch(params, () => (scrollTop = true))

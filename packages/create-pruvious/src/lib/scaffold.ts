@@ -95,10 +95,7 @@ export interface ScaffoldResult {
  * `hooks.onLog`. Throws if `targetDir` already exists and is not empty unless
  * `options.force` is set.
  */
-export async function scaffoldProject(
-  options: ScaffoldOptions,
-  hooks: ScaffoldHooks = {},
-): Promise<ScaffoldResult> {
+export async function scaffoldProject(options: ScaffoldOptions, hooks: ScaffoldHooks = {}): Promise<ScaffoldResult> {
   const log = async (line: string): Promise<void> => {
     if (hooks.onLog) {
       await hooks.onLog(line)

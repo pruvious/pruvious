@@ -96,8 +96,5 @@ export default defineJob({
 })
 
 async function markFailed(scaffoldId: number, error: string): Promise<void> {
-  await update('Scaffolds')
-    .set({ status: 'failed', finishedAt: Date.now(), error })
-    .where('id', '=', scaffoldId)
-    .run()
+  await update('Scaffolds').set({ status: 'failed', finishedAt: Date.now(), error }).where('id', '=', scaffoldId).run()
 }
