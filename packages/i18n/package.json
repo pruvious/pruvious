@@ -1,7 +1,7 @@
 {
   "name": "@pruvious/i18n",
   "description": "Tools for managing translatable strings in multilingual applications.",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "homepage": "https://pruvious.com",
   "repository": {
     "type": "git",
