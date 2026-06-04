@@ -183,7 +183,7 @@ importers:
         specifier: 1.8.3
         version: 1.8.3
       ssh2:
-        specifier: ^1.17.0
+        specifier: 1.17.0
         version: 1.17.0
       vue:
         specifier: 3.5.35
@@ -199,7 +199,7 @@ importers:
         specifier: 1.7.5
         version: 1.7.5
       '@types/ssh2':
-        specifier: ^1.15.5
+        specifier: 1.15.5
         version: 1.15.5
       typescript:
         specifier: 6.0.3
