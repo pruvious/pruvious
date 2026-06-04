@@ -26,6 +26,14 @@ const customOptions: {
    */
   selectionType?: 'any' | 'file' | 'directory'
 
+  /**
+   * Whether to list dotfiles (entries whose name starts with `.`, such as `.git`
+   * or `.env`) in the finder popup.
+   *
+   * @default false
+   */
+  showHiddenFiles?: boolean
+
   ui?: {
     /**
      * The label for the select button.
@@ -56,6 +64,7 @@ const customOptions: {
 } = {
   initialDirectory: undefined,
   selectionType: 'any',
+  showHiddenFiles: false,
   ui: {},
 }
 
@@ -65,20 +74,22 @@ export default defineField({
   validators: [
     (value, { definition, context }) => {
       if (!isEmpty(value)) {
+        let stats: fs.Stats
+
         try {
-          const stats = fs.statSync(value)
-
-          if (definition.options.selectionType === 'file' && !stats.isFile()) {
-            throw new Error(context.__('pruvious-api', 'The path `$path` must be a file', { path: value }))
-          }
-
-          if (definition.options.selectionType === 'directory' && !stats.isDirectory()) {
-            throw new Error(context.__('pruvious-api', 'The path `$path` must be a directory', { path: value }))
-          }
-        } catch (error) {
+          stats = fs.statSync(value)
+        } catch {
           throw new Error(
             context.__('pruvious-api', 'The path `$path` does not exist or is not accessible', { path: value }),
           )
+        }
+
+        if (definition.options.selectionType === 'file' && !stats.isFile()) {
+          throw new Error(context.__('pruvious-api', 'The path `$path` must be a file', { path: value }))
+        }
+
+        if (definition.options.selectionType === 'directory' && !stats.isDirectory()) {
+          throw new Error(context.__('pruvious-api', 'The path `$path` must be a directory', { path: value }))
         }
       }
     },

@@ -44,16 +44,27 @@
     >
       <template #header>
         <div class="pui-row">
-          <span class="pui-medium">
+          <span class="pui-medium pui-truncate">
             {{ resolvedSelectLabel }}
           </span>
+
+          <PUIButton
+            v-if="canCreateDirectory && resolvedDir"
+            v-pui-tooltip="__('pruvious-dashboard', 'New folder')"
+            :size="-2"
+            @click="isCreateDirectoryPopupVisible = true"
+            variant="ghost"
+            class="pui-ml-auto"
+          >
+            <Icon mode="svg" name="tabler:folder-plus" />
+          </PUIButton>
 
           <PUIButton
             :size="-2"
             :title="__('pruvious-dashboard', 'Close')"
             @click="closeFinderPopup()"
             variant="ghost"
-            class="pui-ml-auto"
+            :class="{ 'pui-ml-auto': !canCreateDirectory || !resolvedDir }"
           >
             <Icon mode="svg" name="tabler:x" />
           </PUIButton>
@@ -89,7 +100,7 @@
             <span>..</span>
           </PUIButton>
 
-          <div v-for="file in response.data" class="p-local-path-selector-group">
+          <div v-for="file in visibleFiles" class="p-local-path-selector-group">
             <PUIButton
               v-if="file.type === 'directory' || selectionType !== 'directory'"
               :tabindex="file.type === 'file' ? -1 : 0"
@@ -138,6 +149,13 @@
         </div>
       </template>
     </PUIPopup>
+
+    <PruviousDashboardCreateLocalDirectoryPopup
+      v-if="canCreateDirectory && isCreateDirectoryPopupVisible && resolvedDir"
+      :parentDir="resolvedDir"
+      @close="$event().then(() => (isCreateDirectoryPopupVisible = false))"
+      @created="onDirectoryCreated"
+    />
   </div>
 </template>
 
@@ -205,6 +223,28 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+
+  /**
+   * When `true`, the finder popup gets a "New folder" button that opens a popup
+   * to create a directory inside the currently displayed parent.
+   *
+   * @default false
+   */
+  canCreateDirectory: {
+    type: Boolean,
+    default: false,
+  },
+
+  /**
+   * Whether to list dotfiles (entries whose name starts with `.`, such as `.git`
+   * or `.env`) in the finder popup.
+   *
+   * @default false
+   */
+  showHiddenFiles: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
@@ -213,6 +253,7 @@ const emit = defineEmits<{
 
 const finderPopup = useTemplateRef('finderPopup')
 const isFinderPopupVisible = ref(false)
+const isCreateDirectoryPopupVisible = ref(false)
 const dir = ref(props.initialDirectory)
 const resolvedDir = computed(() => {
   if (response.value?.success && response.value.data.length) {
@@ -232,6 +273,14 @@ const parentDir = computed(() => {
 })
 const dirName = computed(() => (resolvedDir.value ? basename(resolvedDir.value) : ''))
 const response = ref<{ success: true; data: LocalPathFile[] } | { success: false; error: string }>()
+const visibleFiles = computed(() => {
+  if (!response.value?.success) {
+    return []
+  }
+  return props.showHiddenFiles
+    ? response.value.data
+    : response.value.data.filter((file) => !file.name.startsWith('.'))
+})
 const resolvedSelectLabel = computed(() => {
   if (props.selectLabel) {
     return props.selectLabel
@@ -278,6 +327,10 @@ async function openFinderPopup() {
 
 function closeFinderPopup() {
   finderPopup.value?.close().then(() => (isFinderPopupVisible.value = false))
+}
+
+async function onDirectoryCreated(_path: string) {
+  await refreshData()
 }
 </script>
 

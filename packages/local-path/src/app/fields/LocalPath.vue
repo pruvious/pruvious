@@ -8,6 +8,7 @@
       :modelValue="modelValue"
       :selectionType="options.selectionType"
       :selectLabel="selectLabel"
+      :showHiddenFiles="options.showHiddenFiles ?? false"
       @update:modelValue="
         (value) => {
           emit('update:modelValue', value)
