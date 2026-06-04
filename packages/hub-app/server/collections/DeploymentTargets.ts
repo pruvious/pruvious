@@ -44,8 +44,8 @@ export default defineCollection({
       default: 'cloudflare',
       choices: [
         { value: 'cloudflare', label: ({ __ }) => __('pruvious-dashboard', 'Cloudflare Workers') },
-        { value: 'netlify', label: ({ __ }) => __('pruvious-dashboard', 'Netlify') },
-        { value: 'vercel', label: ({ __ }) => __('pruvious-dashboard', 'Vercel') },
+        // { value: 'netlify', label: ({ __ }) => __('pruvious-dashboard', 'Netlify') },
+        // { value: 'vercel', label: ({ __ }) => __('pruvious-dashboard', 'Vercel') },
         { value: 'vps', label: ({ __ }) => __('pruvious-dashboard', 'VPS') },
       ],
       ui: {
