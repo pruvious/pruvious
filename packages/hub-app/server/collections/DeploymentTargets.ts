@@ -52,6 +52,29 @@ export default defineCollection({
         label: ({ __ }) => __('pruvious-dashboard', 'Target type'),
       },
     }),
+    syncLock: nullableObjectField({
+      subfields: {
+        deploymentId: numberField({
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Deployment'),
+          },
+        }),
+        acquiredAt: timestampField({
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Acquired at'),
+          },
+        }),
+        expiresAt: timestampField({
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Expires at'),
+          },
+        }),
+      },
+      ui: {
+        hidden: true,
+        label: ({ __ }) => __('pruvious-dashboard', 'Deploy lock'),
+      },
+    }),
     branch: nullableTextField({
       ui: {
         label: ({ __ }) => __('pruvious-dashboard', 'Branch'),
@@ -231,6 +254,22 @@ export default defineCollection({
               __(
                 'pruvious-dashboard',
                 'KV namespace UUID. Find with `npx wrangler kv namespace list` or in the dashboard under Workers KV.',
+              ),
+          },
+        }),
+        syncMode: selectField({
+          required: true,
+          default: 'in-worker',
+          choices: [
+            { value: 'in-worker', label: ({ __ }) => __('pruvious-dashboard', 'In worker (default)') },
+            { value: 'hub-side', label: ({ __ }) => __('pruvious-dashboard', 'Hub-side') },
+          ],
+          ui: {
+            label: ({ __ }) => __('pruvious-dashboard', 'Schema sync mode'),
+            description: ({ __ }) =>
+              __(
+                'pruvious-dashboard',
+                'Where the database schema sync runs. `In worker` runs sync on the deployed worker at first request (default, matches existing behaviour). `Hub-side` runs sync in the hub between build and deploy by pulling D1 to a local SQLite file, syncing, then pushing back - use this when in-worker sync exceeds Cloudflare timeouts.',
               ),
           },
         }),

@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const targetQuery = await selectFrom('DeploymentTargets')
-    .select(['id', 'lastDeploymentStatus'])
+    .select(['id', 'lastDeploymentStatus', 'syncLock'])
     .where('id', '=', targetId)
     .first()
 
@@ -38,7 +38,31 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const lock = targetQuery.data.syncLock as
+    | { deploymentId: number; acquiredAt: number; expiresAt: number }
+    | null
+    | undefined
+
+  let lockOwnerStatus: string | null = null
+  if (lock) {
+    const ownerQuery = await selectFrom('Deployments')
+      .select(['id', 'status'])
+      .where('id', '=', lock.deploymentId)
+      .first()
+    if (ownerQuery.success && ownerQuery.data) {
+      lockOwnerStatus = ownerQuery.data.status as string
+    }
+  }
+
   return {
     lastDeploymentStatus: targetQuery.data.lastDeploymentStatus,
+    syncLock: lock
+      ? {
+          deploymentId: lock.deploymentId,
+          acquiredAt: lock.acquiredAt,
+          expiresAt: lock.expiresAt,
+          ownerStatus: lockOwnerStatus,
+        }
+      : null,
   }
 })

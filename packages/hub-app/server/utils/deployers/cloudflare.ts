@@ -6,6 +6,9 @@ import { join } from 'pathe'
 import { appendDeployLogChunk, writeDeployLog } from '../deployLog'
 import { getDecryptedSecret } from '../getDecryptedSecret'
 import { readGitCommit } from '../git'
+import { runHubSideSync } from './cloudflare-sync'
+
+export type CloudflareSyncMode = 'in-worker' | 'hub-side'
 
 export interface CloudflareDeployInput {
   deploymentId: number
@@ -23,11 +26,16 @@ export interface CloudflareDeployInput {
   }
   envVars: { key: string; value: string; isSecret: boolean }[]
   buildCommand: { cmd: string; args: string[] }
+  syncMode?: CloudflareSyncMode
+  /** Required when `syncMode === 'hub-side'`. */
+  targetId?: number
+  syncLockTtlMs?: number
+  onSyncSnapshot?: (snapshot: {
+    kind: 'pre-sync' | 'post-sync'
+    sqlPath: string
+    sizeBytes: number
+  }) => Promise<{ backupId?: number } | void>
   hooks?: {
-    /**
-     * Called after the build command succeeds and before `wrangler deploy` runs.
-     * Throwing aborts the deploy.
-     */
     postBuild?: () => Promise<void>
   }
 }
@@ -44,7 +52,18 @@ export interface CloudflareDeployResult {
  * is left alone).
  */
 export async function deployToCloudflare(input: CloudflareDeployInput): Promise<CloudflareDeployResult> {
-  const { deploymentId, projectPath, cloudflareConfig, envVars, buildCommand, hooks } = input
+  const {
+    deploymentId,
+    projectPath,
+    cloudflareConfig,
+    envVars,
+    buildCommand,
+    hooks,
+    syncMode = 'in-worker',
+    targetId,
+    syncLockTtlMs = 15 * 60_000,
+    onSyncSnapshot,
+  } = input
 
   if (!existsSync(projectPath)) {
     return { commit: null, success: false, error: `Project path does not exist: ${projectPath}` }
@@ -80,6 +99,24 @@ export async function deployToCloudflare(input: CloudflareDeployInput): Promise<
       buildEnv[key] = value
     }
 
+    if (syncMode === 'hub-side') {
+      if (targetId === undefined) {
+        throw new Error('Hub-side sync requires a `targetId` so the deploy lock can be heartbeat-extended.')
+      }
+      await writeDeployLog(deploymentId, '[hub] running hub-side schema sync (syncMode=hub-side)')
+      await runHubSideSync({
+        deploymentId,
+        targetId,
+        projectPath,
+        cloudflareConfig,
+        apiToken,
+        envVars: envVars.map(({ key, value }) => ({ key, value })),
+        buildCommand,
+        syncLockTtlMs,
+        onSnapshot: onSyncSnapshot,
+      })
+    }
+
     await writeDeployLog(deploymentId, `[hub] running build: ${buildCommand.cmd} ${buildCommand.args.join(' ')}`)
     await runStreamed(deploymentId, buildCommand.cmd, buildCommand.args, { cwd: projectPath, env: buildEnv })
 
@@ -88,7 +125,7 @@ export async function deployToCloudflare(input: CloudflareDeployInput): Promise<
     }
 
     const configPath = join(projectPath, '.output', 'wrangler.hub.toml')
-    await writeHubWranglerConfig(configPath, cloudflareConfig, plainVars)
+    await writeHubWranglerConfig(configPath, cloudflareConfig, plainVars, syncMode === 'hub-side')
     await writeDeployLog(deploymentId, '[hub] wrote .output/wrangler.hub.toml')
 
     await writeDeployLog(deploymentId, '[hub] running wrangler deploy')
@@ -162,6 +199,7 @@ async function writeHubWranglerConfig(
   configPath: string,
   cf: CloudflareDeployInput['cloudflareConfig'],
   plainVars: { key: string; value: string }[],
+  skipBootSync: boolean,
 ): Promise<void> {
   const lines: string[] = [
     `name = "${cf.workerName}"`,
@@ -201,10 +239,13 @@ async function writeHubWranglerConfig(
     lines.push(`[[kv_namespaces]]`, `binding = "KV"`, `id = "${cf.kvNamespace}"`, ``)
   }
 
-  if (plainVars.length > 0) {
+  if (plainVars.length > 0 || skipBootSync) {
     lines.push(`[vars]`)
     for (const { key, value } of plainVars) {
       lines.push(`${key} = ${tomlString(value)}`)
+    }
+    if (skipBootSync) {
+      lines.push(`PRUVIOUS_SKIP_BOOT_SYNC = ${tomlString('1')}`)
     }
     lines.push(``)
   }

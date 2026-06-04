@@ -3,6 +3,9 @@ import { createPattern, defineTranslation } from '#pruvious/server'
 export default defineTranslation({
   'A deployment is already queued or running for this target':
     'Eine Bereitstellung für dieses Ziel ist bereits in der Warteschlange oder läuft',
+  'A previous deployment left a stale sync lock on this target. Click to release it before the TTL expires.':
+    'Eine vorherige Bereitstellung hat ein veraltetes Sync-Lock auf diesem Ziel hinterlassen. Klicken Sie, um es vor Ablauf der TTL freizugeben.',
+  'Acquired at': 'Erworben am',
   "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.":
     'Absoluter Pfad auf diesem Rechner zum bestehenden Pruvious-Projekt. Wähle das **Stammverzeichnis** des Projekts - das Verzeichnis, das `nuxt.config.ts` und eine `package.json` mit `pruvious` in den Abhängigkeiten enthält. Der Deployer liest die Quellen von hier und führt den Build darin aus.',
   'Allowed deployers': 'Berechtigte Deployer',
@@ -38,6 +41,8 @@ export default defineTranslation({
   'Database driver': 'Datenbanktreiber',
   'Deploy': 'Bereitstellen',
   'Deploy failed': 'Bereitstellung fehlgeschlagen',
+  'Deploy lock': 'Bereitstellungssperre',
+  'Deployment': 'Bereitstellung',
   'Deployment target': 'Bereitstellungsziel',
   'Deployment targets': 'Bereitstellungsziele',
   'Deployments': 'Bereitstellungen',
@@ -60,9 +65,11 @@ export default defineTranslation({
 
   'Hostname or IP of the Ubuntu server to deploy to.':
     'Hostname oder IP des Ubuntu-Servers, auf dem bereitgestellt werden soll.',
+  'Hub-side': 'Auf dem Hub',
 
   'If empty, deploys whatever branch is currently checked out locally. Otherwise, the deployer runs `git checkout` + `git pull --ff-only` before building.':
     'Wenn leer, wird der aktuell lokal ausgecheckte Branch bereitgestellt. Andernfalls führt der Deployer `git checkout` + `git pull --ff-only` vor dem Build aus.',
+  'In worker (default)': 'Im Worker (Standard)',
   'Is secret': 'Ist geheim',
 
   'KV namespace ID': 'KV-Namespace-ID',
@@ -129,6 +136,7 @@ export default defineTranslation({
     'Rechte Seitenleiste jeder Seite im [Cloudflare-Dashboard](https://dash.cloudflare.com) oder `npx wrangler whoami` ausführen.',
   'Running': 'Läuft',
 
+  'Schema sync mode': 'Schema-Sync-Modus',
   'Secret name': 'Geheimnisname',
   'Secret type': 'Geheimnistyp',
   'Secret value (write-only, stored encrypted)': 'Geheimnis-Wert (nur schreibbar, verschlüsselt gespeichert)',
@@ -191,6 +199,8 @@ export default defineTranslation({
 
   'When the provider supports it, secrets sync as encrypted, non-retrievable bindings (Cloudflare `wrangler secret put`, Vercel/Netlify sensitive env vars). Non-secrets sync as plain variables visible in the provider dashboard (Cloudflare `[vars]` block). On VPS this only affects log masking.':
     'Sofern vom Provider unterstützt, werden Geheimnisse als verschlüsselte, nicht abrufbare Bindings synchronisiert (Cloudflare `wrangler secret put`, sensible Vercel-/Netlify-Variablen). Nicht-Geheimnisse werden als einfache, im Provider-Dashboard sichtbare Variablen synchronisiert (Cloudflare `[vars]`-Block). Auf VPS beeinflusst dies nur die Log-Maskierung.',
+  'Where the database schema sync runs. `In worker` runs sync on the deployed worker at first request (default, matches existing behaviour). `Hub-side` runs sync in the hub between build and deploy by pulling D1 to a local SQLite file, syncing, then pushing back - use this when in-worker sync exceeds Cloudflare timeouts.':
+    'Wo das Datenbank-Schema-Sync läuft. `Im Worker` führt das Sync beim ersten Request des bereitgestellten Workers aus (Standard, entspricht dem bisherigen Verhalten). `Auf dem Hub` führt das Sync im Hub zwischen Build und Deploy aus: D1 wird in eine lokale SQLite-Datei gezogen, synchronisiert und zurückgeschrieben - nutze diese Option, wenn das In-Worker-Sync die Cloudflare-Timeouts überschreitet.',
   'Which database the app will run against on this server.':
     'Gegen welche Datenbank die App auf diesem Server laufen soll.',
   'Worker name': 'Worker-Name',
@@ -229,7 +239,7 @@ export default defineTranslation({
 
   'Target directory': 'Zielverzeichnis',
 
-  'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.':
+  "Used as the npm `name` in the new project's `package.json` and as the dashboard label.":
     'Wird als npm-`name` in der `package.json` des neuen Projekts und als Dashboard-Bezeichnung verwendet.',
 
   '••••••  blank = keep': '••••••  leer = behalten',

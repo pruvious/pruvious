@@ -1,10 +1,16 @@
-import { defineJob, selectFrom, update } from '#pruvious/server'
+import { defineJob, insertInto, selectFrom, update } from '#pruvious/server'
+import { copyFile, mkdir, stat } from 'node:fs/promises'
+import { basename, join } from 'pathe'
+import { resolveArtifactDir } from '../utils/backupArtifact'
 import { deployToCloudflare } from '../utils/deployers/cloudflare'
 import { decryptSecret } from '../utils/vault'
 import { relativeDeployLogPath, writeDeployLog } from '../utils/deployLog'
 import { checkoutBranch } from '../utils/git'
 import { resolveBuildCommand } from '../utils/resolveBuildCommand'
 import { runShellCommand } from '../utils/runShellCommand'
+import { acquireSyncLock, releaseSyncLock } from '../utils/syncLock'
+
+const SYNC_LOCK_TTL_MS = 15 * 60_000
 
 interface Payload {
   deploymentId: number
@@ -91,7 +97,28 @@ export default defineJob({
       target,
     })
 
+    const cloudflareConfig = (target.cloudflareConfig as { syncMode?: 'in-worker' | 'hub-side' } | null) ?? null
+    const syncMode = cloudflareConfig?.syncMode ?? 'in-worker'
+    let lockAcquired = false
+
     try {
+      if (target.type === 'cloudflare' && syncMode === 'hub-side') {
+        const lock = await acquireSyncLock(target.id as number, deploymentId, SYNC_LOCK_TTL_MS)
+        if (!lock.acquired) {
+          const heldBy = lock.heldBy
+            ? `deployment #${lock.heldBy.deploymentId} (expires ${new Date(lock.heldBy.expiresAt).toISOString()})`
+            : 'another deployment'
+          const message = `Sync lock for this target is held by ${heldBy}`
+          await writeDeployLog(deploymentId, `[hub] ${message}`)
+          // Lock contention is not a "real" deploy failure: don't fire user
+          // post-deploy hooks (would send false alarms) and don't overwrite
+          // the holding deployment's target.lastDeploymentStatus.
+          await markFailed(deploymentId, message)
+          return { deploymentId, success: false, error: message }
+        }
+        lockAcquired = true
+      }
+
       if (branch) {
         await checkoutBranch(deploymentId, projectPath, branch)
       }
@@ -114,6 +141,16 @@ export default defineJob({
           cloudflareConfig: target.cloudflareConfig as any,
           envVars,
           buildCommand: resolveBuildCommand(projectPath, project.buildCommand as string | null),
+          syncMode,
+          targetId: target.id as number,
+          syncLockTtlMs: SYNC_LOCK_TTL_MS,
+          onSyncSnapshot: (snapshot) =>
+            recordSyncSnapshot({
+              deploymentId,
+              targetId: target.id as number,
+              triggeredBy: deployment.triggeredBy as number | null,
+              snapshot,
+            }),
           hooks: {
             postBuild: async () => {
               await runShellCommand(
@@ -170,6 +207,10 @@ export default defineJob({
         error: message,
       })
       throw error
+    } finally {
+      if (lockAcquired) {
+        await releaseSyncLock(target.id as number, deploymentId).catch(() => {})
+      }
     }
   },
   defaultPriority: 10,
@@ -181,6 +222,68 @@ async function markFailed(deploymentId: number, error: string): Promise<void> {
     .set({ status: 'failed', finishedAt: Date.now(), error })
     .where('id', '=', deploymentId)
     .run()
+}
+
+async function recordSyncSnapshot(args: {
+  deploymentId: number
+  targetId: number
+  triggeredBy: number | null
+  snapshot: { kind: 'pre-sync' | 'post-sync'; sqlPath: string; sizeBytes: number }
+}): Promise<{ backupId?: number }> {
+  // Insert as `running` first so we never expose a `success` row whose file
+  // didn't make it to disk. Promote to `success` after the copy, or mark
+  // `failed` if the copy throws.
+  const startedAt = Date.now()
+  const insertResult = await insertInto('Backups')
+    .values({
+      target: args.targetId,
+      type: 'db',
+      triggeredBy: args.triggeredBy ?? undefined,
+      status: 'running',
+      startedAt,
+      sizeBytes: args.snapshot.sizeBytes,
+    })
+    .returning(['id'])
+    .run()
+
+  if (!insertResult.success || !insertResult.data?.[0]?.id) {
+    await writeDeployLog(
+      args.deploymentId,
+      `[hub] warning: could not record ${args.snapshot.kind} backup row: ${insertResult.runtimeError ?? 'unknown error'}`,
+    )
+    return {}
+  }
+
+  const backupId = insertResult.data[0].id as number
+  const artifactDir = resolveArtifactDir(backupId)
+  const filename = args.snapshot.kind === 'pre-sync' ? 'pre-sync.sql' : 'post-sync.sql'
+  const dest = join(artifactDir, filename)
+
+  try {
+    await mkdir(artifactDir, { recursive: true })
+    await copyFile(args.snapshot.sqlPath, dest)
+    const sizeBytes = (await stat(dest).catch(() => null))?.size ?? args.snapshot.sizeBytes
+    await update('Backups')
+      .set({
+        status: 'success',
+        storagePath: join(basename(artifactDir), filename),
+        sizeBytes,
+        finishedAt: Date.now(),
+      })
+      .where('id', '=', backupId)
+      .run()
+    return { backupId }
+  } catch (error: any) {
+    await writeDeployLog(
+      args.deploymentId,
+      `[hub] warning: could not copy ${args.snapshot.kind} snapshot to backups: ${error?.message ?? error}`,
+    )
+    await update('Backups')
+      .set({ status: 'failed', error: String(error?.message ?? error), finishedAt: Date.now() })
+      .where('id', '=', backupId)
+      .run()
+    return {}
+  }
 }
 
 function buildHookEnv(args: {

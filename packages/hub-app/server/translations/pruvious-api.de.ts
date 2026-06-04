@@ -1,4 +1,4 @@
-import { defineTranslation } from '#pruvious/server'
+import { createPattern, defineTranslation } from '#pruvious/server'
 
 /**
  * Hub-app extension of the framework's `pruvious-api` namespace.
@@ -18,6 +18,11 @@ export default defineTranslation({
     'Backup kann erst nach erfolgreichem Abschluss wiederhergestellt werden',
   'Backup not found': 'Backup nicht gefunden',
 
+  'Cannot release the lock: deployment #$id is still active': createPattern(
+    'Die Sperre kann nicht freigegeben werden: Bereitstellung #$id ist noch aktiv',
+    { id: 'string' },
+  ),
+
   'Deployment not found': 'Bereitstellung nicht gefunden',
   'Deployment target not found': 'Bereitstellungsziel nicht gefunden',
 
@@ -27,8 +32,7 @@ export default defineTranslation({
   'Failed to create scaffold': 'Scaffold konnte nicht erstellt werden',
 
   'Hub-app restarted while this deploy was in progress': 'Hub-App wurde während dieser Bereitstellung neu gestartet',
-  'Hub-app restarted while this scaffold was in progress':
-    'Hub-App wurde während dieses Scaffolds neu gestartet',
+  'Hub-app restarted while this scaffold was in progress': 'Hub-App wurde während dieses Scaffolds neu gestartet',
 
   'Invalid backup type': 'Ungültiger Backup-Typ',
   'Invalid language code': 'Ungültiger Sprachcode',

@@ -27,12 +27,55 @@ export default defineNitroPlugin((nitro) => {
       const hasDeployOrphans = deployOrphans.success && deployOrphans.data.length > 0
       const hasScaffoldOrphans = scaffoldOrphans.success && scaffoldOrphans.data.length > 0
 
+      // Sync-lock recovery: any lock whose owning deployment is no longer
+      // queued/running (or whose TTL has expired) is stale. This catches both
+      // current orphans AND pre-crash stale locks that the next deploy might
+      // not exercise (e.g. an in-worker deploy after a hub-side crash).
+      const allTargets = await qb().selectFrom('DeploymentTargets').select(['id', 'syncLock']).all()
+      const now = Date.now()
+
+      if (allTargets.success) {
+        for (const row of allTargets.data) {
+          const lock = row.syncLock as { deploymentId?: number; expiresAt?: number } | null | undefined
+          if (!lock) {
+            continue
+          }
+
+          if (typeof lock.expiresAt === 'number' && lock.expiresAt <= now) {
+            await qb()
+              .update('DeploymentTargets')
+              .set({ syncLock: null })
+              .where('id', '=', row.id as number)
+              .run()
+            continue
+          }
+
+          const ownerId = Number(lock.deploymentId)
+          if (!Number.isFinite(ownerId)) {
+            await qb()
+              .update('DeploymentTargets')
+              .set({ syncLock: null })
+              .where('id', '=', row.id as number)
+              .run()
+            continue
+          }
+
+          const owner = await qb().selectFrom('Deployments').select(['id', 'status']).where('id', '=', ownerId).first()
+          const status = owner.success && owner.data ? (owner.data.status as string) : null
+          if (status !== 'running' && status !== 'queued') {
+            await qb()
+              .update('DeploymentTargets')
+              .set({ syncLock: null })
+              .where('id', '=', row.id as number)
+              .run()
+          }
+        }
+      }
+
       if (!hasDeployOrphans && !hasScaffoldOrphans) {
         nitro.hooks.removeHook('request', onRequest)
         return
       }
-
-      const now = Date.now()
 
       if (hasDeployOrphans) {
         const error = i18n.__$('pruvious-api', primaryLanguage, 'Hub-app restarted while this deploy was in progress')

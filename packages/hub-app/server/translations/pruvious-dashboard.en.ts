@@ -3,6 +3,9 @@ import { createPattern, defineTranslation } from '#pruvious/server'
 export default defineTranslation({
   'A deployment is already queued or running for this target':
     'A deployment is already queued or running for this target',
+  'A previous deployment left a stale sync lock on this target. Click to release it before the TTL expires.':
+    'A previous deployment left a stale sync lock on this target. Click to release it before the TTL expires.',
+  'Acquired at': 'Acquired at',
   "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.":
     "Absolute path on this machine to the existing Pruvious project. Pick the project's **root directory** - the one that contains `nuxt.config.ts` and a `package.json` listing `pruvious` in its dependencies. The deployer reads source from here and runs the build inside it.",
   'Allowed deployers': 'Allowed deployers',
@@ -38,6 +41,8 @@ export default defineTranslation({
   'Database driver': 'Database driver',
   'Deploy': 'Deploy',
   'Deploy failed': 'Deploy failed',
+  'Deploy lock': 'Deploy lock',
+  'Deployment': 'Deployment',
   'Deployment target': 'Deployment target',
   'Deployment targets': 'Deployment targets',
   'Deployments': 'Deployments',
@@ -59,9 +64,11 @@ export default defineTranslation({
   'Generic': 'Generic',
 
   'Hostname or IP of the Ubuntu server to deploy to.': 'Hostname or IP of the Ubuntu server to deploy to.',
+  'Hub-side': 'Hub-side',
 
   'If empty, deploys whatever branch is currently checked out locally. Otherwise, the deployer runs `git checkout` + `git pull --ff-only` before building.':
     'If empty, deploys whatever branch is currently checked out locally. Otherwise, the deployer runs `git checkout` + `git pull --ff-only` before building.',
+  'In worker (default)': 'In worker (default)',
   'Is secret': 'Is secret',
 
   'KV namespace ID': 'KV namespace ID',
@@ -128,6 +135,7 @@ export default defineTranslation({
     'Right sidebar of any page in the [Cloudflare dashboard](https://dash.cloudflare.com), or run `npx wrangler whoami`.',
   'Running': 'Running',
 
+  'Schema sync mode': 'Schema sync mode',
   'Secret name': 'Secret name',
   'Secret type': 'Secret type',
   'Secret value (write-only, stored encrypted)': 'Secret value (write-only, stored encrypted)',
@@ -190,6 +198,8 @@ export default defineTranslation({
 
   'When the provider supports it, secrets sync as encrypted, non-retrievable bindings (Cloudflare `wrangler secret put`, Vercel/Netlify sensitive env vars). Non-secrets sync as plain variables visible in the provider dashboard (Cloudflare `[vars]` block). On VPS this only affects log masking.':
     'When the provider supports it, secrets sync as encrypted, non-retrievable bindings (Cloudflare `wrangler secret put`, Vercel/Netlify sensitive env vars). Non-secrets sync as plain variables visible in the provider dashboard (Cloudflare `[vars]` block). On VPS this only affects log masking.',
+  'Where the database schema sync runs. `In worker` runs sync on the deployed worker at first request (default, matches existing behaviour). `Hub-side` runs sync in the hub between build and deploy by pulling D1 to a local SQLite file, syncing, then pushing back - use this when in-worker sync exceeds Cloudflare timeouts.':
+    'Where the database schema sync runs. `In worker` runs sync on the deployed worker at first request (default, matches existing behaviour). `Hub-side` runs sync in the hub between build and deploy by pulling D1 to a local SQLite file, syncing, then pushing back - use this when in-worker sync exceeds Cloudflare timeouts.',
   'Which database the app will run against on this server.': 'Which database the app will run against on this server.',
   'Worker name': 'Worker name',
   'Workspace': 'Workspace',
@@ -227,8 +237,8 @@ export default defineTranslation({
 
   'Target directory': 'Target directory',
 
-  'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.':
-    'Used as the npm `name` in the new project\'s `package.json` and as the dashboard label.',
+  "Used as the npm `name` in the new project's `package.json` and as the dashboard label.":
+    "Used as the npm `name` in the new project's `package.json` and as the dashboard label.",
 
   '••••••  blank = keep': '••••••  blank = keep',
 })
