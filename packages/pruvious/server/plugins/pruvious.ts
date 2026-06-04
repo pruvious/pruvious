@@ -31,6 +31,21 @@ export default defineNitroPlugin(async (nitro) => {
       await initAllDatabases()
     })
   } else {
+    const isHubSyncEntry = isString(process.env.PRUVIOUS_SYNC_DB) && process.env.PRUVIOUS_SYNC_DB.trim() !== ''
+
+    if (isHubSyncEntry) {
+      // Hub-side sync entry: only run sync, then exit before Nitro binds the
+      // port. Either branch must exit so the spawned process doesn't hang.
+      try {
+        initStorage()
+        await initAllDatabases()
+        process.exit(0)
+      } catch (error: any) {
+        console.error('[pruvious] hub-side sync failed:', error?.stack ?? error)
+        process.exit(1)
+      }
+    }
+
     initStorage()
     await initAllDatabases()
   }
