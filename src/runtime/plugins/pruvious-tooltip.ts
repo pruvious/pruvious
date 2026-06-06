@@ -13,7 +13,12 @@ type TooltipDirective = Directive<CustomElement, Partial<Props> | string>
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.directive('pruvious-tooltip', <TooltipDirective>{
     mounted: (el, binding: DirectiveBinding<Partial<Props> | string>) => {
-      initTooltip(el, binding, isObject(binding.value) && binding.value.showOnCreate, !!binding.modifiers.highlightApostrophes)
+      initTooltip(
+        el,
+        binding,
+        isObject(binding.value) && binding.value.showOnCreate,
+        !!binding.modifiers.highlightApostrophes,
+      )
     },
     updated: (el, binding) => {
       if (JSON.stringify(binding.value) !== el._pruviousTooltipSettings) {

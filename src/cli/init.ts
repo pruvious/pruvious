@@ -107,7 +107,7 @@ export default defineCommand({
       packageJson.dependencies['vue-router'] = '^4.5.0'
 
       // Add pruvious
-      packageJson.dependencies.pruvious = '^3.15.6'
+      packageJson.dependencies.pruvious = '^3.16.0'
 
       // Sort
       packageJson.dependencies = Object.fromEntries(
@@ -234,7 +234,7 @@ export function replaceReadme(cwd?: string) {
     path.resolve(cwd ?? process.cwd(), 'README.md'),
     [
       '# Project',
-      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.15.6.',
+      'This project was generated with [Pruvious](https://pruvious.com) CLI version 3.16.0.',
       '',
       'Documentation: [https://pruvious.com/docs](https://pruvious.com/docs)',
       '',
