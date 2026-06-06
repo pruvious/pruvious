@@ -1,17 +1,21 @@
 import { addRouteMiddleware, defineNuxtPlugin, useRuntimeConfig } from '#imports'
+import { isDevelopment } from 'std-env'
 
 export default defineNuxtPlugin(() => {
+  if (!isDevelopment) return
   const dashboardPrefix = useRuntimeConfig().public.pruvious.dashboardPrefix
   if (!dashboardPrefix) return
 
   let installed = false
 
+  const pruviousPathRe = /[\/\\]pruvious(?:-[\w.]+)?[\/\\](?:dist|src)[\/\\]runtime[\/\\]/
+
   function isPruviousStyleNode(node: HTMLElement): boolean {
     const devId = (node as HTMLStyleElement).dataset?.viteDevId
-    if (devId && /[\/\\]pruvious[\/\\]dist[\/\\]/.test(devId)) return true
+    if (devId && pruviousPathRe.test(devId)) return true
     if (node.tagName === 'LINK') {
       const href = node.getAttribute('href') || ''
-      if (/[\/\\]pruvious[\/\\]/.test(href)) return true
+      if (pruviousPathRe.test(href)) return true
     }
     if (node.dataset.pruvious === 'true') return true
     return false
@@ -30,7 +34,7 @@ export default defineNuxtPlugin(() => {
     if (installed) return
     installed = true
     apply()
-    new MutationObserver(apply).observe(document.head, { childList: true, subtree: true, attributes: true })
+    new MutationObserver(apply).observe(document.head, { childList: true, subtree: true })
   }
 
   addRouteMiddleware(
