@@ -1,6 +1,8 @@
 import { addRouteMiddleware, defineNuxtPlugin, useRuntimeConfig } from '#imports'
+import { isDevelopment } from 'std-env'
 
 export default defineNuxtPlugin(() => {
+  if (!isDevelopment) return
   const dashboardPrefix = useRuntimeConfig().public.pruvious.dashboardPrefix
   if (!dashboardPrefix) return
 
