@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { isUndefined } from '../utils/common'
 import { walkDir } from '../utils/fs'
@@ -24,7 +24,6 @@ const cachedTranslatableStrings: Record<string, any> = {}
 export function resolveTranslatableStrings(): { records: Record<string, ResolvedTranslatableStrings>; errors: number } {
   const records: Record<string, ResolvedTranslatableStrings> = {}
   const fromModule = resolveModulePath('./runtime/translatable-strings/standard')
-  const fromApp = resolveAppPath('./translatable-strings')
   const registeredStandardTranslatableStrings: Record<string, boolean> = getModuleOption('standardTranslatableStrings')
 
   let errors = 0
@@ -35,19 +34,26 @@ export function resolveTranslatableStrings(): { records: Record<string, Resolved
     }
   }
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveTranslatableStringFile(fullPath, records, false)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('translatable-strings')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveTranslatableStringFile(fullPath, records, false, !firstDir)
+      }
+      firstDir = false
     }
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'translatable-strings'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'translatable-strings'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveTranslatableStringFile(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'translatable-strings')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveTranslatableStringFile(fullPath, records, false, true)
+        }
       }
     }
   }

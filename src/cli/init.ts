@@ -17,7 +17,7 @@ import {
 import { sortArgs } from './shared.js'
 
 const DEFAULT_REGISTRY = 'https://raw.githubusercontent.com/nuxt/starter/templates/templates'
-const DEFAULT_TEMPLATE_NAME = 'v3'
+const DEFAULT_TEMPLATE_NAME = 'v4'
 
 export default defineCommand({
   meta: {
@@ -102,7 +102,7 @@ export default defineCommand({
 
       // Specify versions of nuxt, vue and vue-router
       packageJson.dependencies ??= {}
-      packageJson.dependencies.nuxt = '~3.15.4'
+      packageJson.dependencies.nuxt = '^4.4.6'
       packageJson.dependencies.vue = '^3.5.13'
       packageJson.dependencies['vue-router'] = '^4.5.0'
 
@@ -113,6 +113,9 @@ export default defineCommand({
       packageJson.dependencies = Object.fromEntries(
         Object.entries(packageJson.dependencies).sort(([a], [b]) => a.localeCompare(b)),
       )
+
+      // Pin the package manager so corepack uses a pnpm version that understands `pnpm-workspace.yaml` settings
+      packageJson.packageManager = 'pnpm@11.1.3'
 
       fs.writeJsonSync(join(template.dir, 'package.json'), packageJson, { spaces: 2 })
     } catch (err) {
@@ -137,9 +140,23 @@ export default defineCommand({
       process.exit(0)
     }
 
-    // Write `.npmrc` with `shamefully-hoist=true` for pnpm
     if (selectedPackageManager === 'pnpm') {
-      fs.writeFileSync(join(template.dir, '.npmrc'), 'shamefully-hoist=true')
+      fs.writeFileSync(join(template.dir, '.npmrc'), 'node-linker=hoisted\n')
+      fs.writeFileSync(
+        join(template.dir, 'pnpm-workspace.yaml'),
+        [
+          'allowBuilds:',
+          "  '@parcel/watcher': true",
+          '  argon2: true',
+          '  cpu-features: true',
+          '  esbuild: true',
+          '  sharp: true',
+          '  sqlite3: true',
+          '  ssh2: true',
+          '  vue-demi: true',
+          '',
+        ].join('\n'),
+      )
     }
 
     // Install project dependencies

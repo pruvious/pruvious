@@ -130,7 +130,7 @@ export async function getPage(path?: string): Promise<{ to: string; code: 301 | 
   } else {
     page.value = null
 
-    if (process.server) {
+    if (import.meta.server) {
       throw createError({ statusCode: 404 })
     } else {
       showError({ statusCode: 404 })

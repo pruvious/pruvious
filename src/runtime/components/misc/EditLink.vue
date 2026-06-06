@@ -31,7 +31,7 @@ const user = useUser()
 const capabilities = ref<Partial<Record<UserCapability, true>>>({})
 const visible = ref(false)
 
-if (process.client && window.top === window.self) {
+if (import.meta.client && window.top === window.self) {
   if (auth.value.isLoggedIn && !user.value) {
     const response = await pruviousFetch('profile.get')
 

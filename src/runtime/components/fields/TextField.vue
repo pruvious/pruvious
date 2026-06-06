@@ -97,7 +97,7 @@
 
           <button
             v-if="options.type === 'password' && !spinner"
-            v-pruvious-tooltip.show-on-update="
+            v-pruvious-tooltip.showOnUpdate="
               passwordVisible ? __('pruvious-dashboard', 'Hide password') : __('pruvious-dashboard', 'Show password')
             "
             @click="passwordVisible = !passwordVisible"

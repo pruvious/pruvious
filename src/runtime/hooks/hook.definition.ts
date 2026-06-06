@@ -1,5 +1,5 @@
 import type { AuthUser, CastedFieldType, CollectionName, MultiCollectionName, PopulatedFieldType } from '#pruvious'
-import { query } from '../collections/query'
+import type { query } from '../collections/query'
 import type { QueryBuilderInstance } from '../utility-types'
 
 export interface HookDefinition {

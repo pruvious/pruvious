@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import { resolve } from 'path'
 import { evaluateModule } from '../instances/evaluator'
 import { queueError } from '../instances/logger'
-import { resolveAppPath, resolveModulePath } from '../instances/path'
+import { resolveModulePath, resolveUserDirs } from '../instances/path'
 import { getModuleOption } from '../instances/state'
 import { isUndefined } from '../utils/common'
 import { walkDir } from '../utils/fs'
@@ -20,7 +20,6 @@ const cachedJobs: Record<string, any> = {}
 export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: number } {
   const records: Record<string, ResolvedJob> = {}
   const fromModule = resolveModulePath('./runtime/jobs/standard')
-  const fromApp = resolveAppPath('./jobs')
   const registeredStandardJobs: Record<string, boolean> = getModuleOption('standardJobs')
 
   let errors = 0
@@ -31,19 +30,26 @@ export function resolveJobs(): { records: Record<string, ResolvedJob>; errors: n
     }
   }
 
-  if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
-    for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
-      errors += resolveJob(fullPath, records, false)
+  let firstDir = true
+  for (const fromApp of resolveUserDirs('jobs')) {
+    if (fs.existsSync(fromApp) && fs.lstatSync(fromApp).isDirectory()) {
+      for (const { fullPath } of walkDir(fromApp, { endsWith: '.ts', endsWithout: '.d.ts' })) {
+        errors += resolveJob(fullPath, records, false, !firstDir)
+      }
+      firstDir = false
     }
   }
 
   for (const layer of getModuleOption('layers').slice(1)) {
-    if (fs.existsSync(resolve(layer, 'jobs'))) {
-      for (const { fullPath } of walkDir(resolve(layer, 'jobs'), {
-        endsWith: ['.ts'],
-        endsWithout: '.d.ts',
-      })) {
-        errors += resolveJob(fullPath, records, false, true)
+    for (const base of new Set([layer.src, layer.root])) {
+      const dir = resolve(base, 'jobs')
+      if (fs.existsSync(dir)) {
+        for (const { fullPath } of walkDir(dir, {
+          endsWith: ['.ts'],
+          endsWithout: '.d.ts',
+        })) {
+          errors += resolveJob(fullPath, records, false, true)
+        }
       }
     }
   }
