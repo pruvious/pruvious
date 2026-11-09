@@ -1,5 +1,8 @@
 # Pruvious
 
+> [!IMPORTANT]
+> Pruvious is now [ohne](https://ohne.dev), a zero-dependency TypeScript framework for the web. Read the [announcement](https://pruvious.com/blog/pruvious-is-now-ohne).
+
 Pruvious is a free and open-source CMS for [Nuxt](https://nuxt.com). It plugs into your Nuxt project as a layer and gives you a typed schema, an admin dashboard, and a full HTTP API out of the box - so you can focus on building the site.
 
 > [!WARNING]
