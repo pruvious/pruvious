@@ -7,6 +7,9 @@
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/pruvious/pruvious.svg?style=flat&colorA=030712&colorB=0652dd" alt="License"></a>
 </p>
 
+> [!IMPORTANT]
+> Pruvious is now [ohne](https://ohne.dev), a zero-dependency TypeScript framework for the web. Read the [announcement](https://pruvious.com/blog/pruvious-is-now-ohne).
+
 **Website:** [https://pruvious.com](https://pruvious.com/)\
 **Documentation:** [https://pruvious.com/docs](https://pruvious.com/docs)
 
