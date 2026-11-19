@@ -67,7 +67,7 @@ export function patchModuleOptions(runtimeConfig: RuntimeConfig) {
   ;(runtimeConfig.public.pruvious as any).uploadsBase =
     runtimeConfig.pruvious.uploads?.drive?.type === 's3'
       ? (runtimeConfig.pruvious.uploads.drive as any).baseUrl
-      : joinRouteParts(runtimeConfig.app.baseURL, runtimeConfig.pruvious.uploads.drive.urlPrefix ?? 'uploads') + '/'
+      : joinRouteParts(runtimeConfig.app.baseURL, runtimeConfig.pruvious.uploads?.drive?.urlPrefix ?? 'uploads') + '/'
 
   if (isString(runtimeConfig.pruvious.uploads?.maxFileSize)) {
     ;(runtimeConfig.pruvious.uploads as any).maxFileSize = parse(runtimeConfig.pruvious.uploads.maxFileSize as string)!
