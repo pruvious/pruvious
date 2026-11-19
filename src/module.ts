@@ -578,7 +578,7 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt.options.ignore.push('**/' + `${path.basename(dbInfo.storage)}-journal`)
     }
 
-    if (moduleOptions.uploads.drive.type === 'local') {
+    if (moduleOptions.uploads && moduleOptions.uploads.drive.type === 'local') {
       const uploadsDir = getModuleOption('uploadsDir')
       const symDir = path.join(nuxt.options.dir.public, moduleOptions.uploads.drive.urlPrefix ?? 'uploads')
       const isDevelopment = nuxt.options.dev
